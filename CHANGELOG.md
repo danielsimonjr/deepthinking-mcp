@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.3.2] - 2026-08-03
+
+### ⚠️ Correction to the [9.3.0] and [9.3.1] entries
+
+Both claimed the legacy `deepthinking` tool was "bounded to the same limits" as the focused tools.
+**That was false for arrays, and it is corrected here.** `CLAUDE.md` carried the same wrong claim.
+What was true: every scalar `z.string()` in the legacy schema got a `.max()`. What was not: the
+outer arrays never did.
+
+The error is instructive — a grep cannot tell these apart. A `.max()` on an *inner* field is
+textually identical to one on the *outer* array, so a scan reports "bounded" either way. Only a
+parse distinguishes them, and the empirical test that settles it is now committed.
+
+### Security
+
+- **Record bounds reached only the hidden legacy tool, not the live ones.** [9.3.1] added
+  `boundedRecord()` but wired it solely into `src/tools/thinking.ts`. **Six `z.record()` sites in
+  the *active* mode schemas stayed unbounded** — `probabilistic.ts` (`massFunction`,
+  `beliefFunction`, `plausibilityFunction`), `strategic.ts` (`solution.variables`),
+  `engineering.ts` (`tradeStudy.weights`) and `temporal.ts` (`TemporalEventSchema.properties`).
+  These are reachable through the 13 listed tools every real caller uses, so the more exposed
+  surface was the one left open. All six now bounded.
+- **Legacy structured arrays were never length-bounded.** Roughly two dozen `z.array(z.object(…))`
+  fields (`hypotheses`, `evidence`, `causalGraph.nodes/edges`, `interventions`, `payoffMatrix`,
+  `logicalProof.steps`, `truthTable.rows`, …) had no outer `.max()`, so a 200,000-element
+  `hypotheses` array parsed cleanly through a tool that remains callable by name. **33 array caps
+  added** (the first automated pass missed exactly these: it searched for the literal `z.array(`,
+  while the object-array sites use the chained `z\n  .array(` style — the pass reported success
+  having silently skipped every field that mattered).
+
+### Added
+
+- Empirical bound tests that a grep cannot fake: an oversized structured array against the legacy
+  schema, and an oversized record against an **active** mode schema. Both failed before these fixes
+  and pass after.
+
 ## [9.3.1] - 2026-08-03
 
 Findings from a four-agent code + security review **of the v9.3.0 release diff itself**. Three real

@@ -6,7 +6,7 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { ConfidenceSchema, IdSchema, NameSchema, TextSchema, IdArraySchema } from "../shared.js";
+import { ConfidenceSchema, IdSchema, NameSchema, TextSchema, IdArraySchema , boundedRecord} from "../shared.js";
 import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 const PlayerSchema = z.object({
@@ -48,7 +48,7 @@ const PayoffMatrixSchema = z.object({
  */
 const SolutionSchema = z.object({
   value: TextSchema,
-  variables: z.record(IdSchema, z.number()).optional(),
+  variables: boundedRecord(IdSchema, z.number()).optional(),
 });
 
 /**

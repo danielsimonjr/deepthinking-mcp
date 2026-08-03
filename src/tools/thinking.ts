@@ -119,7 +119,7 @@ export const ThinkingToolSchema = z.object({
           description: z.string().max(MAX_LENGTHS.DESCRIPTION),
           confidence: z.number().min(0).max(1),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
     ])
     .optional(),
   hypotheses: z
@@ -137,7 +137,7 @@ export const ThinkingToolSchema = z.object({
         mutuallyExclusive: z.boolean().optional(),
         subsets: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   evaluationCriteria: z
     .object({
@@ -163,7 +163,7 @@ export const ThinkingToolSchema = z.object({
         supports: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
         contradicts: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   bestExplanation: z
     .object({
@@ -184,7 +184,7 @@ export const ThinkingToolSchema = z.object({
           type: z.enum(["cause", "effect", "mediator", "confounder"]),
           description: z.string().max(MAX_LENGTHS.DESCRIPTION),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
       edges: z.array(
         z.object({
           from: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -192,7 +192,7 @@ export const ThinkingToolSchema = z.object({
           strength: z.number(),
           confidence: z.number().min(0).max(1),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
     })
     .optional(),
   interventions: z
@@ -206,9 +206,9 @@ export const ThinkingToolSchema = z.object({
             expectedChange: z.string().max(MAX_LENGTHS.DESCRIPTION),
             confidence: z.number(),
           }),
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   mechanisms: z
     .array(
@@ -218,7 +218,7 @@ export const ThinkingToolSchema = z.object({
         description: z.string().max(MAX_LENGTHS.DESCRIPTION),
         type: z.enum(["direct", "indirect", "feedback"]),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   confounders: z
     .array(
@@ -227,7 +227,7 @@ export const ThinkingToolSchema = z.object({
         affects: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
         description: z.string().max(MAX_LENGTHS.DESCRIPTION),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   // Bayesian reasoning properties (v2.0)
   hypothesis: z
@@ -266,14 +266,14 @@ export const ThinkingToolSchema = z.object({
           factor: z.string().max(MAX_LENGTHS.DESCRIPTION),
           value: z.string().max(MAX_LENGTHS.DESCRIPTION),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
       outcomes: z.array(
         z.object({
           description: z.string().max(MAX_LENGTHS.DESCRIPTION),
           impact: z.enum(["positive", "negative", "neutral"]),
           magnitude: z.number().optional(),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
     })
     .optional(),
   counterfactuals: z
@@ -287,16 +287,16 @@ export const ThinkingToolSchema = z.object({
             factor: z.string().max(MAX_LENGTHS.DESCRIPTION),
             value: z.string().max(MAX_LENGTHS.DESCRIPTION),
           }),
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
         outcomes: z.array(
           z.object({
             description: z.string().max(MAX_LENGTHS.DESCRIPTION),
             impact: z.enum(["positive", "negative", "neutral"]),
             magnitude: z.number().optional(),
           }),
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   comparison: z
     .object({
@@ -307,7 +307,7 @@ export const ThinkingToolSchema = z.object({
           counterfactual: z.string().max(MAX_LENGTHS.DESCRIPTION),
           significance: z.enum(["high", "medium", "low"]),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
       insights: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
       lessons: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
     })
@@ -325,7 +325,7 @@ export const ThinkingToolSchema = z.object({
         steps: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
         finalOutcome: z.string().max(MAX_LENGTHS.DESCRIPTION),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   // Analogical reasoning properties (v2.0)
   sourceDomain: z
@@ -339,7 +339,7 @@ export const ThinkingToolSchema = z.object({
           name: z.string().max(MAX_LENGTHS.DESCRIPTION),
           type: z.string().max(MAX_LENGTHS.DESCRIPTION),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
       relations: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -347,7 +347,7 @@ export const ThinkingToolSchema = z.object({
           from: z.string().max(MAX_LENGTHS.DESCRIPTION),
           to: z.string().max(MAX_LENGTHS.DESCRIPTION),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
     })
     .optional(),
   targetDomain: z
@@ -361,7 +361,7 @@ export const ThinkingToolSchema = z.object({
           name: z.string().max(MAX_LENGTHS.DESCRIPTION),
           type: z.string().max(MAX_LENGTHS.DESCRIPTION),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
       relations: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -369,7 +369,7 @@ export const ThinkingToolSchema = z.object({
           from: z.string().max(MAX_LENGTHS.DESCRIPTION),
           to: z.string().max(MAX_LENGTHS.DESCRIPTION),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
     })
     .optional(),
   mapping: z
@@ -380,7 +380,7 @@ export const ThinkingToolSchema = z.object({
         justification: z.string().max(MAX_LENGTHS.DESCRIPTION),
         confidence: z.number().min(0).max(1),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   insights: z
     .array(
@@ -389,7 +389,7 @@ export const ThinkingToolSchema = z.object({
         sourceEvidence: z.string().max(MAX_LENGTHS.DESCRIPTION),
         targetApplication: z.string().max(MAX_LENGTHS.DESCRIPTION),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   inferences: z
     .array(
@@ -399,7 +399,7 @@ export const ThinkingToolSchema = z.object({
         confidence: z.number().min(0).max(1),
         needsVerification: z.boolean(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   limitations: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
   analogyStrength: z.number().min(0).max(1).optional(),
@@ -433,7 +433,7 @@ export const ThinkingToolSchema = z.object({
         type: z.enum(["instant", "interval"]),
         properties: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.any()),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   intervals: z
     .array(
@@ -445,7 +445,7 @@ export const ThinkingToolSchema = z.object({
         overlaps: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
         contains: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   constraints: z
     .array(
@@ -465,7 +465,7 @@ export const ThinkingToolSchema = z.object({
         object: z.string().max(MAX_LENGTHS.DESCRIPTION),
         confidence: z.number().min(0).max(1),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   relations: z
     .array(
@@ -483,7 +483,7 @@ export const ThinkingToolSchema = z.object({
         strength: z.number().min(0).max(1),
         delay: z.number().optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   // Game theory properties (Phase 3, v2.2)
   game: z
@@ -511,7 +511,7 @@ export const ThinkingToolSchema = z.object({
         isRational: z.boolean(),
         availableStrategies: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   strategies: z
     .array(
@@ -523,18 +523,18 @@ export const ThinkingToolSchema = z.object({
         isPure: z.boolean(),
         probability: z.number().min(0).max(1).optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   payoffMatrix: z
     .object({
       players: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
-      dimensions: z.array(z.number()),
+      dimensions: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS),
       payoffs: z.array(
         z.object({
           strategyProfile: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
           payoffs: z.array(z.number()),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
     })
     .optional(),
   nashEquilibria: z
@@ -542,12 +542,12 @@ export const ThinkingToolSchema = z.object({
       z.object({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
         strategyProfile: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
-        payoffs: z.array(z.number()),
+        payoffs: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS),
         type: z.enum(["pure", "mixed"]),
         isStrict: z.boolean(),
         stability: z.number().min(0).max(1),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   dominantStrategies: z
     .array(
@@ -558,7 +558,7 @@ export const ThinkingToolSchema = z.object({
         dominatesStrategies: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
         justification: z.string().max(MAX_LENGTHS.DESCRIPTION),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   gameTree: z
     .object({
@@ -574,7 +574,7 @@ export const ThinkingToolSchema = z.object({
           probability: z.number().min(0).max(1).optional(),
           payoffs: z.array(z.number()).optional(),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
       informationSets: z
         .array(
           z.object({
@@ -583,7 +583,7 @@ export const ThinkingToolSchema = z.object({
             nodes: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
             availableActions: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
           }),
-        )
+        ).max(MAX_LENGTHS.ARRAY_ITEMS)
         .optional(),
     })
     .optional(),
@@ -601,10 +601,10 @@ export const ThinkingToolSchema = z.object({
             mass: z.number().min(0).max(1),
             justification: z.string().max(MAX_LENGTHS.DESCRIPTION),
           }),
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
         conflictMass: z.number().optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   combinedBelief: z
     .object({
@@ -616,7 +616,7 @@ export const ThinkingToolSchema = z.object({
           mass: z.number().min(0).max(1),
           justification: z.string().max(MAX_LENGTHS.DESCRIPTION),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
       conflictMass: z.number().optional(),
     })
     .optional(),
@@ -630,7 +630,7 @@ export const ThinkingToolSchema = z.object({
           belief: z.number().min(0).max(1),
           uncertaintyInterval: z.tuple([z.number(), z.number()]),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
     })
     .optional(),
   decisions: z
@@ -647,9 +647,9 @@ export const ThinkingToolSchema = z.object({
             expectedUtility: z.number(),
             risk: z.number(),
           }),
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   // First-Principles properties (Phase 3, v3.1.0)
   question: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
@@ -669,7 +669,7 @@ export const ThinkingToolSchema = z.object({
         dependsOn: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
         confidence: z.number().min(0).max(1).optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   derivationSteps: z
     .array(
@@ -680,7 +680,7 @@ export const ThinkingToolSchema = z.object({
         logicalForm: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
         confidence: z.number().min(0).max(1),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   conclusion: z
     .union([
@@ -688,7 +688,7 @@ export const ThinkingToolSchema = z.object({
       z.object({
         // For first-principles reasoning - structured conclusion
         statement: z.string().max(MAX_LENGTHS.DESCRIPTION),
-        derivationChain: z.array(z.number()),
+        derivationChain: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS),
         certainty: z.number().min(0).max(1),
         limitations: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       }),
@@ -719,7 +719,7 @@ export const ThinkingToolSchema = z.object({
         formula: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
         influencedBy: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   feedbackLoops: z
     .array(
@@ -734,7 +734,7 @@ export const ThinkingToolSchema = z.object({
         delay: z.number().optional(),
         dominance: z.enum(["early", "middle", "late"]).optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   leveragePoints: z
     .array(
@@ -754,7 +754,7 @@ export const ThinkingToolSchema = z.object({
         ]),
         interventionExamples: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   behaviors: z
     .array(
@@ -774,7 +774,7 @@ export const ThinkingToolSchema = z.object({
         timeframe: z.string().max(MAX_LENGTHS.DESCRIPTION),
         unintendedConsequences: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
 
   // Scientific Method properties (Phase 4, v3.2.0)
@@ -803,7 +803,7 @@ export const ThinkingToolSchema = z.object({
         testable: z.boolean(),
         falsifiable: z.boolean(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   experiment: z
     .object({
@@ -854,7 +854,7 @@ export const ThinkingToolSchema = z.object({
           result: z.enum(["reject_null", "fail_to_reject_null"]),
           interpretation: z.string().max(MAX_LENGTHS.DESCRIPTION),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
       summary: z.string().max(MAX_LENGTHS.DESCRIPTION),
       effectSize: z
         .object({
@@ -918,7 +918,7 @@ export const ThinkingToolSchema = z.object({
         unit: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
         semantics: z.string().max(MAX_LENGTHS.DESCRIPTION),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   optimizationConstraints: z
     .array(
@@ -933,7 +933,7 @@ export const ThinkingToolSchema = z.object({
         rationale: z.string().max(MAX_LENGTHS.DESCRIPTION),
         priority: z.number().optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   objectives: z
     .array(
@@ -949,7 +949,7 @@ export const ThinkingToolSchema = z.object({
         idealValue: z.number().optional(),
         acceptableRange: z.tuple([z.number(), z.number()]).optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   solution: z
     .object({
@@ -991,7 +991,7 @@ export const ThinkingToolSchema = z.object({
         type: z.enum(["atomic", "compound"]),
         formula: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   logicalInferences: z
     .array(
@@ -1014,7 +1014,7 @@ export const ThinkingToolSchema = z.object({
         justification: z.string().max(MAX_LENGTHS.DESCRIPTION),
         valid: z.boolean(),
       }),
-    )
+    ).max(MAX_LENGTHS.ARRAY_ITEMS)
     .optional(),
   logicalProof: z
     .object({
@@ -1054,7 +1054,7 @@ export const ThinkingToolSchema = z.object({
           isAssumption: z.boolean().optional(),
           dischargesAssumption: z.number().optional(),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
       conclusion: z.string().max(MAX_LENGTHS.DESCRIPTION),
       valid: z.boolean(),
       completeness: z.number().min(0).max(1),
@@ -1072,7 +1072,7 @@ export const ThinkingToolSchema = z.object({
           assignments: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.boolean()),
           result: z.boolean(),
         }),
-      ),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS),
       isTautology: z.boolean(),
       isContradiction: z.boolean(),
       isContingent: z.boolean(),

@@ -543,7 +543,7 @@ var init_thinking = __esm({
             description: z.string().max(MAX_LENGTHS.DESCRIPTION),
             confidence: z.number().min(0).max(1)
           })
-        )
+        ).max(MAX_LENGTHS.ARRAY_ITEMS)
       ]).optional(),
       hypotheses: z.array(
         z.object({
@@ -559,7 +559,7 @@ var init_thinking = __esm({
           mutuallyExclusive: z.boolean().optional(),
           subsets: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       evaluationCriteria: z.object({
         parsimony: z.number(),
         explanatoryPower: z.number(),
@@ -581,7 +581,7 @@ var init_thinking = __esm({
           supports: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
           contradicts: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       bestExplanation: z.object({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
         explanation: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -598,7 +598,7 @@ var init_thinking = __esm({
             type: z.enum(["cause", "effect", "mediator", "confounder"]),
             description: z.string().max(MAX_LENGTHS.DESCRIPTION)
           })
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
         edges: z.array(
           z.object({
             from: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -606,7 +606,7 @@ var init_thinking = __esm({
             strength: z.number(),
             confidence: z.number().min(0).max(1)
           })
-        )
+        ).max(MAX_LENGTHS.ARRAY_ITEMS)
       }).optional(),
       interventions: z.array(
         z.object({
@@ -618,9 +618,9 @@ var init_thinking = __esm({
               expectedChange: z.string().max(MAX_LENGTHS.DESCRIPTION),
               confidence: z.number()
             })
-          )
+          ).max(MAX_LENGTHS.ARRAY_ITEMS)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       mechanisms: z.array(
         z.object({
           from: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -628,14 +628,14 @@ var init_thinking = __esm({
           description: z.string().max(MAX_LENGTHS.DESCRIPTION),
           type: z.enum(["direct", "indirect", "feedback"])
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       confounders: z.array(
         z.object({
           nodeId: z.string().max(MAX_LENGTHS.DESCRIPTION),
           affects: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
           description: z.string().max(MAX_LENGTHS.DESCRIPTION)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       // Bayesian reasoning properties (v2.0)
       hypothesis: z.object({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -664,14 +664,14 @@ var init_thinking = __esm({
             factor: z.string().max(MAX_LENGTHS.DESCRIPTION),
             value: z.string().max(MAX_LENGTHS.DESCRIPTION)
           })
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
         outcomes: z.array(
           z.object({
             description: z.string().max(MAX_LENGTHS.DESCRIPTION),
             impact: z.enum(["positive", "negative", "neutral"]),
             magnitude: z.number().optional()
           })
-        )
+        ).max(MAX_LENGTHS.ARRAY_ITEMS)
       }).optional(),
       counterfactuals: z.array(
         z.object({
@@ -683,16 +683,16 @@ var init_thinking = __esm({
               factor: z.string().max(MAX_LENGTHS.DESCRIPTION),
               value: z.string().max(MAX_LENGTHS.DESCRIPTION)
             })
-          ),
+          ).max(MAX_LENGTHS.ARRAY_ITEMS),
           outcomes: z.array(
             z.object({
               description: z.string().max(MAX_LENGTHS.DESCRIPTION),
               impact: z.enum(["positive", "negative", "neutral"]),
               magnitude: z.number().optional()
             })
-          )
+          ).max(MAX_LENGTHS.ARRAY_ITEMS)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       comparison: z.object({
         differences: z.array(
           z.object({
@@ -701,7 +701,7 @@ var init_thinking = __esm({
             counterfactual: z.string().max(MAX_LENGTHS.DESCRIPTION),
             significance: z.enum(["high", "medium", "low"])
           })
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
         insights: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
         lessons: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS)
       }).optional(),
@@ -715,7 +715,7 @@ var init_thinking = __esm({
           steps: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
           finalOutcome: z.string().max(MAX_LENGTHS.DESCRIPTION)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       // Analogical reasoning properties (v2.0)
       sourceDomain: z.object({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -727,7 +727,7 @@ var init_thinking = __esm({
             name: z.string().max(MAX_LENGTHS.DESCRIPTION),
             type: z.string().max(MAX_LENGTHS.DESCRIPTION)
           })
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
         relations: z.array(
           z.object({
             id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -735,7 +735,7 @@ var init_thinking = __esm({
             from: z.string().max(MAX_LENGTHS.DESCRIPTION),
             to: z.string().max(MAX_LENGTHS.DESCRIPTION)
           })
-        )
+        ).max(MAX_LENGTHS.ARRAY_ITEMS)
       }).optional(),
       targetDomain: z.object({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -747,7 +747,7 @@ var init_thinking = __esm({
             name: z.string().max(MAX_LENGTHS.DESCRIPTION),
             type: z.string().max(MAX_LENGTHS.DESCRIPTION)
           })
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
         relations: z.array(
           z.object({
             id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -755,7 +755,7 @@ var init_thinking = __esm({
             from: z.string().max(MAX_LENGTHS.DESCRIPTION),
             to: z.string().max(MAX_LENGTHS.DESCRIPTION)
           })
-        )
+        ).max(MAX_LENGTHS.ARRAY_ITEMS)
       }).optional(),
       mapping: z.array(
         z.object({
@@ -764,14 +764,14 @@ var init_thinking = __esm({
           justification: z.string().max(MAX_LENGTHS.DESCRIPTION),
           confidence: z.number().min(0).max(1)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       insights: z.array(
         z.object({
           description: z.string().max(MAX_LENGTHS.DESCRIPTION),
           sourceEvidence: z.string().max(MAX_LENGTHS.DESCRIPTION),
           targetApplication: z.string().max(MAX_LENGTHS.DESCRIPTION)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       inferences: z.array(
         z.object({
           sourcePattern: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -779,7 +779,7 @@ var init_thinking = __esm({
           confidence: z.number().min(0).max(1),
           needsVerification: z.boolean()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       limitations: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       analogyStrength: z.number().min(0).max(1).optional(),
       // Temporal reasoning properties (Phase 3, v2.1)
@@ -809,7 +809,7 @@ var init_thinking = __esm({
           type: z.enum(["instant", "interval"]),
           properties: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.any())
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       intervals: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -819,7 +819,7 @@ var init_thinking = __esm({
           overlaps: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
           contains: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       constraints: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -837,7 +837,7 @@ var init_thinking = __esm({
           object: z.string().max(MAX_LENGTHS.DESCRIPTION),
           confidence: z.number().min(0).max(1)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       relations: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -853,7 +853,7 @@ var init_thinking = __esm({
           strength: z.number().min(0).max(1),
           delay: z.number().optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       // Game theory properties (Phase 3, v2.2)
       game: z.object({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -877,7 +877,7 @@ var init_thinking = __esm({
           isRational: z.boolean(),
           availableStrategies: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       strategies: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -887,27 +887,27 @@ var init_thinking = __esm({
           isPure: z.boolean(),
           probability: z.number().min(0).max(1).optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       payoffMatrix: z.object({
         players: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
-        dimensions: z.array(z.number()),
+        dimensions: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS),
         payoffs: z.array(
           z.object({
             strategyProfile: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
             payoffs: z.array(z.number())
           })
-        )
+        ).max(MAX_LENGTHS.ARRAY_ITEMS)
       }).optional(),
       nashEquilibria: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
           strategyProfile: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
-          payoffs: z.array(z.number()),
+          payoffs: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS),
           type: z.enum(["pure", "mixed"]),
           isStrict: z.boolean(),
           stability: z.number().min(0).max(1)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       dominantStrategies: z.array(
         z.object({
           playerId: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -916,7 +916,7 @@ var init_thinking = __esm({
           dominatesStrategies: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
           justification: z.string().max(MAX_LENGTHS.DESCRIPTION)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       gameTree: z.object({
         rootNode: z.string().max(MAX_LENGTHS.DESCRIPTION),
         nodes: z.array(
@@ -930,7 +930,7 @@ var init_thinking = __esm({
             probability: z.number().min(0).max(1).optional(),
             payoffs: z.array(z.number()).optional()
           })
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
         informationSets: z.array(
           z.object({
             id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -938,7 +938,7 @@ var init_thinking = __esm({
             nodes: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
             availableActions: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS)
           })
-        ).optional()
+        ).max(MAX_LENGTHS.ARRAY_ITEMS).optional()
       }).optional(),
       // Evidential properties (Phase 3, v2.3)
       frameOfDiscernment: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
@@ -952,10 +952,10 @@ var init_thinking = __esm({
               mass: z.number().min(0).max(1),
               justification: z.string().max(MAX_LENGTHS.DESCRIPTION)
             })
-          ),
+          ).max(MAX_LENGTHS.ARRAY_ITEMS),
           conflictMass: z.number().optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       combinedBelief: z.object({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
         source: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -965,7 +965,7 @@ var init_thinking = __esm({
             mass: z.number().min(0).max(1),
             justification: z.string().max(MAX_LENGTHS.DESCRIPTION)
           })
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
         conflictMass: z.number().optional()
       }).optional(),
       plausibility: z.object({
@@ -977,7 +977,7 @@ var init_thinking = __esm({
             belief: z.number().min(0).max(1),
             uncertaintyInterval: z.tuple([z.number(), z.number()])
           })
-        )
+        ).max(MAX_LENGTHS.ARRAY_ITEMS)
       }).optional(),
       decisions: z.array(
         z.object({
@@ -992,9 +992,9 @@ var init_thinking = __esm({
               expectedUtility: z.number(),
               risk: z.number()
             })
-          )
+          ).max(MAX_LENGTHS.ARRAY_ITEMS)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       // First-Principles properties (Phase 3, v3.1.0)
       question: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
       principles: z.array(
@@ -1012,7 +1012,7 @@ var init_thinking = __esm({
           dependsOn: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
           confidence: z.number().min(0).max(1).optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       derivationSteps: z.array(
         z.object({
           stepNumber: z.number().int().positive(),
@@ -1021,14 +1021,14 @@ var init_thinking = __esm({
           logicalForm: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
           confidence: z.number().min(0).max(1)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       conclusion: z.union([
         z.string().max(MAX_LENGTHS.DESCRIPTION),
         // For deductive reasoning - simple conclusion
         z.object({
           // For first-principles reasoning - structured conclusion
           statement: z.string().max(MAX_LENGTHS.DESCRIPTION),
-          derivationChain: z.array(z.number()),
+          derivationChain: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS),
           certainty: z.number().min(0).max(1),
           limitations: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional()
         })
@@ -1054,7 +1054,7 @@ var init_thinking = __esm({
           formula: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
           influencedBy: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       feedbackLoops: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -1067,7 +1067,7 @@ var init_thinking = __esm({
           delay: z.number().optional(),
           dominance: z.enum(["early", "middle", "late"]).optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       leveragePoints: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -1085,7 +1085,7 @@ var init_thinking = __esm({
           ]),
           interventionExamples: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       behaviors: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -1103,7 +1103,7 @@ var init_thinking = __esm({
           timeframe: z.string().max(MAX_LENGTHS.DESCRIPTION),
           unintendedConsequences: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS).optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       // Scientific Method properties (Phase 4, v3.2.0)
       researchQuestion: z.object({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -1127,7 +1127,7 @@ var init_thinking = __esm({
           testable: z.boolean(),
           falsifiable: z.boolean()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       experiment: z.object({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
         type: z.enum([
@@ -1172,7 +1172,7 @@ var init_thinking = __esm({
             result: z.enum(["reject_null", "fail_to_reject_null"]),
             interpretation: z.string().max(MAX_LENGTHS.DESCRIPTION)
           })
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
         summary: z.string().max(MAX_LENGTHS.DESCRIPTION),
         effectSize: z.object({
           type: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -1223,7 +1223,7 @@ var init_thinking = __esm({
           unit: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
           semantics: z.string().max(MAX_LENGTHS.DESCRIPTION)
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       optimizationConstraints: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -1236,7 +1236,7 @@ var init_thinking = __esm({
           rationale: z.string().max(MAX_LENGTHS.DESCRIPTION),
           priority: z.number().optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       objectives: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -1250,7 +1250,7 @@ var init_thinking = __esm({
           idealValue: z.number().optional(),
           acceptableRange: z.tuple([z.number(), z.number()]).optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       solution: z.object({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
         type: z.enum([
@@ -1285,7 +1285,7 @@ var init_thinking = __esm({
           type: z.enum(["atomic", "compound"]),
           formula: z.string().max(MAX_LENGTHS.DESCRIPTION).optional()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       logicalInferences: z.array(
         z.object({
           id: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -1306,7 +1306,7 @@ var init_thinking = __esm({
           justification: z.string().max(MAX_LENGTHS.DESCRIPTION),
           valid: z.boolean()
         })
-      ).optional(),
+      ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
       logicalProof: z.object({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
         theorem: z.string().max(MAX_LENGTHS.DESCRIPTION),
@@ -1342,7 +1342,7 @@ var init_thinking = __esm({
             isAssumption: z.boolean().optional(),
             dischargesAssumption: z.number().optional()
           })
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
         conclusion: z.string().max(MAX_LENGTHS.DESCRIPTION),
         valid: z.boolean(),
         completeness: z.number().min(0).max(1),
@@ -1358,7 +1358,7 @@ var init_thinking = __esm({
             assignments: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.boolean()),
             result: z.boolean()
           })
-        ),
+        ).max(MAX_LENGTHS.ARRAY_ITEMS),
         isTautology: z.boolean(),
         isContradiction: z.boolean(),
         isContingent: z.boolean()
@@ -51081,7 +51081,7 @@ var TemporalEventSchema = z.object({
   timestamp: z.number(),
   type: EventTypeEnum,
   duration: z.number().optional(),
-  properties: z.record(IdSchema, z.unknown()).optional()
+  properties: boundedRecord(IdSchema, z.unknown()).optional()
 });
 var TemporalConstraintSchema = z.object({
   id: IdSchema,
@@ -51149,9 +51149,9 @@ var ProbabilisticSchema = BaseThoughtSchema.extend({
   // Evidential (Dempster-Shafer) reasoning
   frameOfDiscernment: IdArraySchema.optional(),
   beliefMasses: z.array(BeliefMassSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  massFunction: z.record(IdSchema, ConfidenceSchema).optional(),
-  beliefFunction: z.record(IdSchema, ConfidenceSchema).optional(),
-  plausibilityFunction: z.record(IdSchema, ConfidenceSchema).optional()
+  massFunction: boundedRecord(IdSchema, ConfidenceSchema).optional(),
+  beliefFunction: boundedRecord(IdSchema, ConfidenceSchema).optional(),
+  plausibilityFunction: boundedRecord(IdSchema, ConfidenceSchema).optional()
 });
 
 // src/tools/schemas/modes/causal.ts
@@ -51234,7 +51234,7 @@ var PayoffMatrixSchema = z.object({
 });
 var SolutionSchema = z.object({
   value: TextSchema,
-  variables: z.record(IdSchema, z.number()).optional()
+  variables: boundedRecord(IdSchema, z.number()).optional()
 });
 var StrategicSchema = BaseThoughtSchema.extend({
   mode: z.enum(["gametheory", "optimization"]),
@@ -51324,7 +51324,7 @@ init_shared();
 var TradeStudySchema = z.object({
   options: IdArraySchema,
   criteria: IdArraySchema,
-  weights: z.record(IdSchema, z.number()).optional()
+  weights: boundedRecord(IdSchema, z.number()).optional()
 });
 var FmeaEntrySchema = z.object({
   failureMode: TextSchema,

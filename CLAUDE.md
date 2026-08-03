@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types + 4 advanced runtime) with taxonomy-based classification (69 implemented reasoning types across 12 categories), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 9.3.1 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
+**Version**: 9.3.2 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
 
 ## Project Metrics
 
@@ -210,8 +210,7 @@ The server lists **13** tools. A live `tools/list` handshake returns exactly the
 The legacy `deepthinking` tool is **hidden from `tools/list`** as of the 2026-08-03 audit (L-2) — it
 advertised itself as deprecated to every client on every session — but its `CallToolRequestSchema`
 handler is retained, so callers that already hardcode the name keep working and still receive the
-deprecation warning. Its input schema (`src/tools/thinking.ts`) is bounded to the same limits as the
-focused tools; leaving it unbounded would have let a caller bypass the H-2 input caps entirely via
+deprecation warning. Its input schema (`src/tools/thinking.ts`) is bounded to the same limits as the focused tools -- strings, arrays AND record entry counts (arrays were missed until 9.3.2); leaving it unbounded would have let a caller bypass the H-2 input caps entirely via
 the old tool name.
 
 | Tool | Modes/Functions |

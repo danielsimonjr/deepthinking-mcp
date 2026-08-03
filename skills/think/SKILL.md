@@ -25,7 +25,7 @@ This skill routes a reasoning task to the appropriate category skill containing 
 3. **Apply the method.** Once the category skill is loaded, follow its instructions to produce structured output matching the mode's JSON schema.
 4. **Emit the structured output.** Every reasoning output MUST be a valid JSON object matching the schema in `reference/output-formats/<mode>.md`.
 
-## Available Modes (v9.3.1)
+## Available Modes (v9.3.2)
 
 | Mode | Category skill | Use when |
 |---|---|---|

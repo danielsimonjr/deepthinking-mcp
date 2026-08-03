@@ -376,3 +376,51 @@ describe('record entry-count bounds (regression)', () => {
     expect(result.success).toBe(false);
   });
 });
+
+/**
+ * Empirical check of ARRAY-OF-OBJECT length bounds.
+ *
+ * Grep cannot answer this: a `.max()` on an inner field is textually identical
+ * to one on the outer array, so a scan reports "bounded" either way. Only a
+ * parse tells the truth. Review of v9.3.1 claimed ~22 array-of-object sites in
+ * the legacy schema lack an outer `.max()`; these tests pin the real answer.
+ */
+describe('array-of-object length bounds (empirical)', () => {
+  const base = {
+    action: 'add_thought' as const,
+    thought: 'x',
+    thoughtNumber: 1,
+    totalThoughts: 1,
+    nextThoughtNeeded: false,
+  };
+
+  const oversized = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({ id: `h${i}`, description: 'x' }));
+
+  it('bounds structured arrays on the legacy schema', () => {
+    const result = ThinkingToolSchema.safeParse({
+      ...base,
+      mode: 'evidential',
+      hypotheses: oversized(MAX_LENGTHS.ARRAY_ITEMS + 1),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('bounds records on the ACTIVE mode schemas, not just the legacy one', () => {
+    // The v9.3.1 boundedRecord fix initially reached only the hidden legacy
+    // tool; these six record sites live in the 13 listed tools every real
+    // caller uses, which is the more exposed surface.
+    const tooMany: Record<string, number> = {};
+    for (let i = 0; i < MAX_LENGTHS.ARRAY_ITEMS + 1; i++) tooMany[`k${i}`] = 0.5;
+
+    const result = ProbabilisticSchema.safeParse({
+      thought: 'x',
+      thoughtNumber: 1,
+      totalThoughts: 1,
+      nextThoughtNeeded: false,
+      mode: 'evidential',
+      massFunction: tooMany,
+    });
+    expect(result.success).toBe(false);
+  });
+});

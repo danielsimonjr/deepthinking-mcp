@@ -6,7 +6,7 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { IdSchema, NameSchema, TextSchema, IdArraySchema } from "../shared.js";
+import { IdSchema, NameSchema, TextSchema, IdArraySchema , boundedRecord} from "../shared.js";
 
 /**
  * Trade study schema
@@ -14,7 +14,7 @@ import { IdSchema, NameSchema, TextSchema, IdArraySchema } from "../shared.js";
 const TradeStudySchema = z.object({
   options: IdArraySchema,
   criteria: IdArraySchema,
-  weights: z.record(IdSchema, z.number()).optional(),
+  weights: boundedRecord(IdSchema, z.number()).optional(),
 });
 
 /**

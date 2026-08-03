@@ -6,7 +6,7 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { ConfidenceSchema, IdSchema, TextSchema, IdArraySchema } from "../shared.js";
+import { ConfidenceSchema, IdSchema, TextSchema, IdArraySchema , boundedRecord} from "../shared.js";
 import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 /**
@@ -43,9 +43,9 @@ export const ProbabilisticSchema = BaseThoughtSchema.extend({
   // Evidential (Dempster-Shafer) reasoning
   frameOfDiscernment: IdArraySchema.optional(),
   beliefMasses: z.array(BeliefMassSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  massFunction: z.record(IdSchema, ConfidenceSchema).optional(),
-  beliefFunction: z.record(IdSchema, ConfidenceSchema).optional(),
-  plausibilityFunction: z.record(IdSchema, ConfidenceSchema).optional(),
+  massFunction: boundedRecord(IdSchema, ConfidenceSchema).optional(),
+  beliefFunction: boundedRecord(IdSchema, ConfidenceSchema).optional(),
+  plausibilityFunction: boundedRecord(IdSchema, ConfidenceSchema).optional(),
 });
 
 export type ProbabilisticInput = z.infer<typeof ProbabilisticSchema>;
