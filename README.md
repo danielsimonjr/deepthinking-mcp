@@ -1,22 +1,17 @@
 # DeepThinking MCP
 
-[![DEPRECATED](https://img.shields.io/badge/STATUS-DEPRECATED-red.svg?style=for-the-badge)](DEPRECATED.md)
-[![Successor](https://img.shields.io/badge/Replaced%20by-deepthinking--plugin-brightgreen.svg?style=for-the-badge)](https://github.com/danielsimonjr/deepthinking-plugin)
+[![Status](https://img.shields.io/badge/STATUS-ACTIVE-brightgreen.svg?style=for-the-badge)](CHANGELOG.md)
 
-> ## ⚠️ DEPRECATED as of 2026-04-12
+> ### The 2026-04-12 deprecation has been reversed (2026-08-03)
 >
-> **`deepthinking-mcp` is no longer under active development.** It has been replaced by **[deepthinking-plugin](https://github.com/danielsimonjr/deepthinking-plugin)** — a Claude Code plugin that delivers the same 34 reasoning modes as native prompt-based skills, with no Node.js server, no dependency footprint, and no context pollution.
+> `deepthinking-mcp` is **active and supported again**. It was briefly deprecated in favour of
+> `deepthinking-plugin`, which reimplemented the reasoning modes as prompt-based skills. That was
+> the wrong call: the right shape for this project is what it always was — a real MCP server,
+> packaged as a Claude Code plugin (`.claude-plugin/plugin.json` + `.mcp.json`) and served from
+> `local-marketplace`, exactly like `Windows-mcp`.
 >
-> **New users: skip this repo and [install the plugin](https://github.com/danielsimonjr/deepthinking-plugin).**
->
-> **Existing users: v9.1.3 keeps working indefinitely.** Security fixes land through 2026-10-12; after that, maintenance-only. See **[DEPRECATED.md](DEPRECATED.md)** for the full migration guide (~10 minutes), rationale, and timeline.
->
-> | Quick links | |
-> |---|---|
-> | New plugin repo | https://github.com/danielsimonjr/deepthinking-plugin |
-> | Migration guide | [DEPRECATED.md#migration-guide](DEPRECATED.md#migration-guide) |
-> | Why it was replaced | [DEPRECATED.md#why-it-was-replaced](DEPRECATED.md#why-it-was-replaced) |
-> | Latest plugin release | [v0.4.1](https://github.com/danielsimonjr/deepthinking-plugin/releases/tag/v0.4.1) |
+> Nothing about installation changed for existing users; v9.1.x keeps working. See
+> [DEPRECATED.md](DEPRECATED.md) for the retracted notice, kept for anyone following an old link.
 
 ---
 

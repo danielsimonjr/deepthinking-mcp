@@ -1,3 +1,23 @@
+# ⚠️ RETRACTED — this deprecation is no longer in effect
+
+> **Reversed 2026-08-03. `deepthinking-mcp` is active and supported.**
+>
+> Everything below is the **retracted** 2026-04-12 notice, kept only so that links pointing here
+> still resolve and the reasoning stays on the record. **Do not follow its migration guide.**
+>
+> **Why it was reversed:** the replacement, `deepthinking-plugin`, reimplemented the reasoning modes
+> as prompt-based skills and dropped the MCP server entirely. That was the wrong path. The correct
+> shape is the one this repo already had — a real MCP server, packaged as a Claude Code plugin
+> (`.claude-plugin/plugin.json` + `.mcp.json`) and served from `local-marketplace`, the same way
+> `Windows-mcp` is. Packaging was the gap, not the architecture.
+>
+> No action is required from existing users; v9.1.x continued working throughout.
+
+---
+
+<details>
+<summary><strong>Retracted notice (2026-04-12) — historical record only</strong></summary>
+
 # deepthinking-mcp is deprecated
 
 **As of 2026-04-12, `deepthinking-mcp` is no longer under active development.** It has been replaced by **[deepthinking-plugin](https://github.com/danielsimonjr/deepthinking-plugin)**, a Claude Code plugin that delivers the same 34 reasoning modes as prompt-based skills rather than as a Node.js MCP server.
@@ -231,3 +251,6 @@ The plugin was built in one continuous session from the same reasoning knowledge
 Thanks for using `deepthinking-mcp`. See you on the plugin.
 
 — 2026-04-12
+
+</details>
+

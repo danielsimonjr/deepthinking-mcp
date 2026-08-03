@@ -5,7 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [9.1.4] - 2026-08-03
+
+### Changed
+
+- **The 2026-04-12 deprecation is reversed — this package is active again.** It had been deprecated
+  in favour of `deepthinking-plugin`, which reimplemented the reasoning modes as prompt-based skills
+  and dropped the MCP server. That was the wrong path: the correct shape is a real MCP server
+  **packaged as a Claude Code plugin** and served from `local-marketplace`, exactly like
+  `Windows-mcp`. Packaging was the gap, not the architecture. README badge flipped to ACTIVE and
+  `DEPRECATED.md` retained as a clearly-marked retracted notice so old links still resolve.
+
+### Added
+
+- **Claude Code plugin packaging**: `.claude-plugin/plugin.json`, and a `.mcp.json` that now
+  declares a single server instead of the **legacy global multi-server config** that had been
+  committed here by mistake — it listed 14 unrelated servers pinned to hardcoded
+  `C:/Users/danie/Dropbox/Github/...` paths, several long dead (e.g. `math-mcp/dist/index-wasm.js`,
+  deleted in math-mcp v4).
+- The server is launched with `npx -y deepthinking-mcp@9.1.4` rather than a committed bundle.
+  **Bump that pinned version on every release.**
+
+  > **Why no `bundle/index.mjs`, unlike the sibling `*-mcp` plugins.** Flattening zod v4 into a
+  > single module breaks it: the bundled server dies on startup with
+  > `TypeError: Class2 is not a constructor` because zod's `ZodCustom` is still undefined when a
+  > top-level consumer calls `z.custom()`. Verified against esbuild ESM, ESM without tree-shaking,
+  > ESM with `keepNames`, `target: node22`, CJS with an `import.meta.url` shim, and tsup with
+  > `noExternal: [/.*/]` — six variants, all failing identically. This is why tsup's own config
+  > leaves zod external and why `dist/index.js` never hit it.
+  >
+  > A wrapper entry importing zod first does **not** fix it either: `"sideEffects": false` lets
+  > esbuild tree-shake a side-effect-only entry down to a **0.1 KB file that exits 0** — which
+  > looks exactly like a healthy start. Both failure modes exit cleanly, so any future attempt must
+  > be validated with a real `initialize` + `tools/list` handshake, never with "it didn't crash".
 
 ### Security
 
@@ -17,15 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Verified in the lockfile: `@hono/node-server` 1.19.14 → **2.0.12**, `hono` → **4.12.31**,
   `fast-uri` → **3.1.4**. Gate: build clean, **5065/5065 tests passing** across 177 files.
 
-  This package is **deprecated** (superseded by `deepthinking-plugin`), but its deprecation notice
-  commits to security fixes through **2026-10-12**, so this fix is inside the promised window.
-
-  > **Not yet published — deliberately.** Publishing this as 9.1.4 would create a version that is
-  > *not* deprecated while every existing version (1.0.0 – 9.1.3) is, so `npm install
-  > deepthinking-mcp` would stop emitting a deprecation warning and the package would silently read
-  > as supported again. Releasing it therefore requires pairing `npm publish` with
-  > `npm deprecate deepthinking-mcp@9.1.4 "<message>"` in the same operation. Both are outward-facing
-  > registry mutations, so they are Daniel's call — see the workspace TODO.
+  Shipped in this release. (An earlier draft of this entry held the fix back to avoid publishing a
+  non-deprecated version of a deprecated package — moot now that the deprecation is reversed.)
 
 ### CI
 - **Removed both npm-publish paths from CI; publishing is now local-only.** Deleted `.github/workflows/publish.yml` (a publish-only workflow) and the `publish-npm` job in `release.yml`. Neither had ever successfully published: `gh api repos/danielsimonjr/deepthinking-mcp/actions/secrets` returns an empty list, so `secrets.NPM_TOKEN` resolved to an empty string and `npm publish` authenticated with nothing. Corroborated from the registry side — `npm view deepthinking-mcp dist.attestations` is empty, meaning no version was ever published from a CI OIDC context. Every release has in fact been published from a workstation, exactly as this repo's own `CLAUDE.md` build-and-publish workflow documents (step 6: `npm publish`). `publish.yml` also duplicated `release.yml`'s trigger (`push: tags: v*`), so a single tag push fired two concurrent `npm publish` runs — a double-publish race that stayed invisible only because both failed to authenticate. Note that `publish.yml` had `id-token: write` and looked OIDC-capable, but `actions/setup-node` with `registry-url:` writes an `.npmrc` containing `_authToken=${NODE_AUTH_TOKEN}`; with the secret unset npm sees an empty-but-present token, commits to the token path, and never falls through to trusted publishing. Also dropped the now-unused `packages: write` from `release.yml`'s top-level `permissions:` (least-privilege). `release.yml` still runs test → build → GitHub release → notify; the `notify` job's `needs` and summary line were updated so it no longer references the deleted job.

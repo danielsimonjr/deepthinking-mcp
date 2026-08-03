@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url';
 import { z } from 'zod';
 import * as fs3 from 'fs';
 import { readFileSync, promises } from 'fs';
-import * as os from 'os';
+import * as os2 from 'os';
 import { createHash, randomUUID } from 'crypto';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -13,12 +13,6 @@ import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprot
 
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
-  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
-}) : x)(function(x) {
-  if (typeof require !== "undefined") return require.apply(this, arguments);
-  throw Error('Dynamic require of "' + x + '" is not supported');
-});
 var __esm = (fn, res, err) => function __init() {
   if (err) throw err[0];
   try {
@@ -215,13 +209,21 @@ var init_config = __esm({
     init_esm_shims();
     defaultConfig = {
       maxThoughtsInMemory: parseInt(process.env.MCP_MAX_THOUGHTS || "1000", 10),
-      compressionThreshold: parseInt(process.env.MCP_COMPRESSION_THRESHOLD || "500", 10),
+      compressionThreshold: parseInt(
+        process.env.MCP_COMPRESSION_THRESHOLD || "500",
+        10
+      ),
       maxContentLength: parseInt(process.env.MCP_MAX_CONTENT_LENGTH || "10000", 10),
-      validationTolerance: parseFloat(process.env.MCP_VALIDATION_TOLERANCE || "0.01"),
+      validationTolerance: parseFloat(
+        process.env.MCP_VALIDATION_TOLERANCE || "0.01"
+      ),
       maxActiveSessions: parseInt(process.env.MCP_MAX_SESSIONS || "100", 10),
       sessionTimeoutMs: parseInt(process.env.MCP_SESSION_TIMEOUT_MS || "0", 10),
       enableValidationCache: process.env.MCP_ENABLE_VALIDATION_CACHE !== "false",
-      validationCacheMaxSize: parseInt(process.env.MCP_VALIDATION_CACHE_SIZE || "1000", 10),
+      validationCacheMaxSize: parseInt(
+        process.env.MCP_VALIDATION_CACHE_SIZE || "1000",
+        10
+      ),
       enablePersistence: process.env.MCP_ENABLE_PERSISTENCE === "true",
       persistenceDir: process.env.MCP_PERSISTENCE_DIR || "./.deepthinking-sessions",
       logLevel: process.env.MCP_LOG_LEVEL || "info",
@@ -247,7 +249,28 @@ var init_thinking = __esm({
     init_esm_shims();
     ThinkingToolSchema = z.object({
       sessionId: z.string().optional(),
-      mode: z.enum(["sequential", "shannon", "mathematics", "physics", "hybrid", "inductive", "deductive", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential", "firstprinciples", "systemsthinking", "scientificmethod", "optimization", "formallogic"]).default("hybrid"),
+      mode: z.enum([
+        "sequential",
+        "shannon",
+        "mathematics",
+        "physics",
+        "hybrid",
+        "inductive",
+        "deductive",
+        "abductive",
+        "causal",
+        "bayesian",
+        "counterfactual",
+        "analogical",
+        "temporal",
+        "gametheory",
+        "evidential",
+        "firstprinciples",
+        "systemsthinking",
+        "scientificmethod",
+        "optimization",
+        "formallogic"
+      ]).default("hybrid"),
       thought: z.string(),
       thoughtNumber: z.number().int().positive(),
       totalThoughts: z.number().int().positive(),
@@ -257,7 +280,13 @@ var init_thinking = __esm({
       revisionReason: z.string().optional(),
       branchFrom: z.string().optional(),
       branchId: z.string().optional(),
-      stage: z.enum(["problem_definition", "constraints", "model", "proof", "implementation"]).optional(),
+      stage: z.enum([
+        "problem_definition",
+        "constraints",
+        "model",
+        "proof",
+        "implementation"
+      ]).optional(),
       uncertainty: z.number().min(0).max(1).optional(),
       dependencies: z.array(z.string()).optional(),
       assumptions: z.array(z.string()).optional(),
@@ -268,7 +297,13 @@ var init_thinking = __esm({
         ascii: z.string().optional()
       }).optional(),
       proofStrategy: z.object({
-        type: z.enum(["direct", "contradiction", "induction", "construction", "contrapositive"]),
+        type: z.enum([
+          "direct",
+          "contradiction",
+          "induction",
+          "construction",
+          "contrapositive"
+        ]),
         steps: z.array(z.string())
       }).optional(),
       tensorProperties: z.object({
@@ -299,46 +334,52 @@ var init_thinking = __esm({
       observations: z.union([
         z.array(z.string()),
         // For inductive reasoning - simple strings
-        z.array(z.object({
-          // For abductive reasoning - structured objects
-          id: z.string(),
-          description: z.string(),
-          confidence: z.number().min(0).max(1)
-        }))
+        z.array(
+          z.object({
+            // For abductive reasoning - structured objects
+            id: z.string(),
+            description: z.string(),
+            confidence: z.number().min(0).max(1)
+          })
+        )
       ]).optional(),
-      hypotheses: z.array(z.object({
-        id: z.string(),
-        // Abductive fields
-        explanation: z.string().optional(),
-        assumptions: z.array(z.string()).optional(),
-        predictions: z.array(z.string()).optional(),
-        score: z.number().optional(),
-        // Evidential fields
-        name: z.string().optional(),
-        description: z.string().optional(),
-        mutuallyExclusive: z.boolean().optional(),
-        subsets: z.array(z.string()).optional()
-      })).optional(),
+      hypotheses: z.array(
+        z.object({
+          id: z.string(),
+          // Abductive fields
+          explanation: z.string().optional(),
+          assumptions: z.array(z.string()).optional(),
+          predictions: z.array(z.string()).optional(),
+          score: z.number().optional(),
+          // Evidential fields
+          name: z.string().optional(),
+          description: z.string().optional(),
+          mutuallyExclusive: z.boolean().optional(),
+          subsets: z.array(z.string()).optional()
+        })
+      ).optional(),
       evaluationCriteria: z.object({
         parsimony: z.number(),
         explanatoryPower: z.number(),
         plausibility: z.number(),
         testability: z.boolean()
       }).optional(),
-      evidence: z.array(z.object({
-        id: z.string(),
-        description: z.string(),
-        // Abductive fields
-        hypothesisId: z.string().optional(),
-        type: z.enum(["supporting", "contradicting", "neutral"]).optional(),
-        strength: z.number().min(0).max(1).optional(),
-        // Evidential fields
-        source: z.string().optional(),
-        reliability: z.number().min(0).max(1).optional(),
-        timestamp: z.number().optional(),
-        supports: z.array(z.string()).optional(),
-        contradicts: z.array(z.string()).optional()
-      })).optional(),
+      evidence: z.array(
+        z.object({
+          id: z.string(),
+          description: z.string(),
+          // Abductive fields
+          hypothesisId: z.string().optional(),
+          type: z.enum(["supporting", "contradicting", "neutral"]).optional(),
+          strength: z.number().min(0).max(1).optional(),
+          // Evidential fields
+          source: z.string().optional(),
+          reliability: z.number().min(0).max(1).optional(),
+          timestamp: z.number().optional(),
+          supports: z.array(z.string()).optional(),
+          contradicts: z.array(z.string()).optional()
+        })
+      ).optional(),
       bestExplanation: z.object({
         id: z.string(),
         explanation: z.string(),
@@ -348,39 +389,51 @@ var init_thinking = __esm({
       }).optional(),
       // Causal reasoning properties (v2.0)
       causalGraph: z.object({
-        nodes: z.array(z.object({
-          id: z.string(),
-          name: z.string(),
-          type: z.enum(["cause", "effect", "mediator", "confounder"]),
-          description: z.string()
-        })),
-        edges: z.array(z.object({
+        nodes: z.array(
+          z.object({
+            id: z.string(),
+            name: z.string(),
+            type: z.enum(["cause", "effect", "mediator", "confounder"]),
+            description: z.string()
+          })
+        ),
+        edges: z.array(
+          z.object({
+            from: z.string(),
+            to: z.string(),
+            strength: z.number(),
+            confidence: z.number().min(0).max(1)
+          })
+        )
+      }).optional(),
+      interventions: z.array(
+        z.object({
+          nodeId: z.string(),
+          action: z.string(),
+          expectedEffects: z.array(
+            z.object({
+              nodeId: z.string(),
+              expectedChange: z.string(),
+              confidence: z.number()
+            })
+          )
+        })
+      ).optional(),
+      mechanisms: z.array(
+        z.object({
           from: z.string(),
           to: z.string(),
-          strength: z.number(),
-          confidence: z.number().min(0).max(1)
-        }))
-      }).optional(),
-      interventions: z.array(z.object({
-        nodeId: z.string(),
-        action: z.string(),
-        expectedEffects: z.array(z.object({
+          description: z.string(),
+          type: z.enum(["direct", "indirect", "feedback"])
+        })
+      ).optional(),
+      confounders: z.array(
+        z.object({
           nodeId: z.string(),
-          expectedChange: z.string(),
-          confidence: z.number()
-        }))
-      })).optional(),
-      mechanisms: z.array(z.object({
-        from: z.string(),
-        to: z.string(),
-        description: z.string(),
-        type: z.enum(["direct", "indirect", "feedback"])
-      })).optional(),
-      confounders: z.array(z.object({
-        nodeId: z.string(),
-        affects: z.array(z.string()),
-        description: z.string()
-      })).optional(),
+          affects: z.array(z.string()),
+          description: z.string()
+        })
+      ).optional(),
       // Bayesian reasoning properties (v2.0)
       hypothesis: z.object({
         id: z.string(),
@@ -404,37 +457,49 @@ var init_thinking = __esm({
         id: z.string(),
         name: z.string(),
         description: z.string(),
-        conditions: z.array(z.object({
-          factor: z.string(),
-          value: z.string()
-        })),
-        outcomes: z.array(z.object({
-          description: z.string(),
-          impact: z.enum(["positive", "negative", "neutral"]),
-          magnitude: z.number().optional()
-        }))
+        conditions: z.array(
+          z.object({
+            factor: z.string(),
+            value: z.string()
+          })
+        ),
+        outcomes: z.array(
+          z.object({
+            description: z.string(),
+            impact: z.enum(["positive", "negative", "neutral"]),
+            magnitude: z.number().optional()
+          })
+        )
       }).optional(),
-      counterfactuals: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        conditions: z.array(z.object({
-          factor: z.string(),
-          value: z.string()
-        })),
-        outcomes: z.array(z.object({
+      counterfactuals: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
           description: z.string(),
-          impact: z.enum(["positive", "negative", "neutral"]),
-          magnitude: z.number().optional()
-        }))
-      })).optional(),
+          conditions: z.array(
+            z.object({
+              factor: z.string(),
+              value: z.string()
+            })
+          ),
+          outcomes: z.array(
+            z.object({
+              description: z.string(),
+              impact: z.enum(["positive", "negative", "neutral"]),
+              magnitude: z.number().optional()
+            })
+          )
+        })
+      ).optional(),
       comparison: z.object({
-        differences: z.array(z.object({
-          aspect: z.string(),
-          actual: z.string(),
-          counterfactual: z.string(),
-          significance: z.enum(["high", "medium", "low"])
-        })),
+        differences: z.array(
+          z.object({
+            aspect: z.string(),
+            actual: z.string(),
+            counterfactual: z.string(),
+            significance: z.enum(["high", "medium", "low"])
+          })
+        ),
         insights: z.array(z.string()),
         lessons: z.array(z.string())
       }).optional(),
@@ -442,231 +507,319 @@ var init_thinking = __esm({
         description: z.string(),
         alternatives: z.array(z.string())
       }).optional(),
-      causalChains: z.array(z.object({
-        intervention: z.string(),
-        steps: z.array(z.string()),
-        finalOutcome: z.string()
-      })).optional(),
+      causalChains: z.array(
+        z.object({
+          intervention: z.string(),
+          steps: z.array(z.string()),
+          finalOutcome: z.string()
+        })
+      ).optional(),
       // Analogical reasoning properties (v2.0)
       sourceDomain: z.object({
         id: z.string(),
         name: z.string(),
         description: z.string(),
-        entities: z.array(z.object({
-          id: z.string(),
-          name: z.string(),
-          type: z.string()
-        })),
-        relations: z.array(z.object({
-          id: z.string(),
-          type: z.string(),
-          from: z.string(),
-          to: z.string()
-        }))
+        entities: z.array(
+          z.object({
+            id: z.string(),
+            name: z.string(),
+            type: z.string()
+          })
+        ),
+        relations: z.array(
+          z.object({
+            id: z.string(),
+            type: z.string(),
+            from: z.string(),
+            to: z.string()
+          })
+        )
       }).optional(),
       targetDomain: z.object({
         id: z.string(),
         name: z.string(),
         description: z.string(),
-        entities: z.array(z.object({
-          id: z.string(),
-          name: z.string(),
-          type: z.string()
-        })),
-        relations: z.array(z.object({
-          id: z.string(),
-          type: z.string(),
-          from: z.string(),
-          to: z.string()
-        }))
+        entities: z.array(
+          z.object({
+            id: z.string(),
+            name: z.string(),
+            type: z.string()
+          })
+        ),
+        relations: z.array(
+          z.object({
+            id: z.string(),
+            type: z.string(),
+            from: z.string(),
+            to: z.string()
+          })
+        )
       }).optional(),
-      mapping: z.array(z.object({
-        sourceEntityId: z.string(),
-        targetEntityId: z.string(),
-        justification: z.string(),
-        confidence: z.number().min(0).max(1)
-      })).optional(),
-      insights: z.array(z.object({
-        description: z.string(),
-        sourceEvidence: z.string(),
-        targetApplication: z.string()
-      })).optional(),
-      inferences: z.array(z.object({
-        sourcePattern: z.string(),
-        targetPrediction: z.string(),
-        confidence: z.number().min(0).max(1),
-        needsVerification: z.boolean()
-      })).optional(),
+      mapping: z.array(
+        z.object({
+          sourceEntityId: z.string(),
+          targetEntityId: z.string(),
+          justification: z.string(),
+          confidence: z.number().min(0).max(1)
+        })
+      ).optional(),
+      insights: z.array(
+        z.object({
+          description: z.string(),
+          sourceEvidence: z.string(),
+          targetApplication: z.string()
+        })
+      ).optional(),
+      inferences: z.array(
+        z.object({
+          sourcePattern: z.string(),
+          targetPrediction: z.string(),
+          confidence: z.number().min(0).max(1),
+          needsVerification: z.boolean()
+        })
+      ).optional(),
       limitations: z.array(z.string()).optional(),
       analogyStrength: z.number().min(0).max(1).optional(),
       // Temporal reasoning properties (Phase 3, v2.1)
       timeline: z.object({
         id: z.string(),
         name: z.string(),
-        timeUnit: z.enum(["milliseconds", "seconds", "minutes", "hours", "days", "months", "years"]),
+        timeUnit: z.enum([
+          "milliseconds",
+          "seconds",
+          "minutes",
+          "hours",
+          "days",
+          "months",
+          "years"
+        ]),
         startTime: z.number().optional(),
         endTime: z.number().optional(),
         events: z.array(z.string())
       }).optional(),
-      events: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        timestamp: z.number(),
-        duration: z.number().optional(),
-        type: z.enum(["instant", "interval"]),
-        properties: z.record(z.string(), z.any())
-      })).optional(),
-      intervals: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        start: z.number(),
-        end: z.number(),
-        overlaps: z.array(z.string()).optional(),
-        contains: z.array(z.string()).optional()
-      })).optional(),
-      constraints: z.array(z.object({
-        id: z.string(),
-        type: z.enum(["before", "after", "during", "overlaps", "meets", "starts", "finishes", "equals"]),
-        subject: z.string(),
-        object: z.string(),
-        confidence: z.number().min(0).max(1)
-      })).optional(),
-      relations: z.array(z.object({
-        id: z.string(),
-        from: z.string(),
-        to: z.string(),
-        relationType: z.enum(["causes", "enables", "prevents", "precedes", "follows"]),
-        strength: z.number().min(0).max(1),
-        delay: z.number().optional()
-      })).optional(),
+      events: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          description: z.string(),
+          timestamp: z.number(),
+          duration: z.number().optional(),
+          type: z.enum(["instant", "interval"]),
+          properties: z.record(z.string(), z.any())
+        })
+      ).optional(),
+      intervals: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          start: z.number(),
+          end: z.number(),
+          overlaps: z.array(z.string()).optional(),
+          contains: z.array(z.string()).optional()
+        })
+      ).optional(),
+      constraints: z.array(
+        z.object({
+          id: z.string(),
+          type: z.enum([
+            "before",
+            "after",
+            "during",
+            "overlaps",
+            "meets",
+            "starts",
+            "finishes",
+            "equals"
+          ]),
+          subject: z.string(),
+          object: z.string(),
+          confidence: z.number().min(0).max(1)
+        })
+      ).optional(),
+      relations: z.array(
+        z.object({
+          id: z.string(),
+          from: z.string(),
+          to: z.string(),
+          relationType: z.enum([
+            "causes",
+            "enables",
+            "prevents",
+            "precedes",
+            "follows"
+          ]),
+          strength: z.number().min(0).max(1),
+          delay: z.number().optional()
+        })
+      ).optional(),
       // Game theory properties (Phase 3, v2.2)
       game: z.object({
         id: z.string(),
         name: z.string(),
         description: z.string(),
-        type: z.enum(["normal_form", "extensive_form", "cooperative", "non_cooperative"]),
+        type: z.enum([
+          "normal_form",
+          "extensive_form",
+          "cooperative",
+          "non_cooperative"
+        ]),
         numPlayers: z.number().int().min(2),
         isZeroSum: z.boolean(),
         isPerfectInformation: z.boolean()
       }).optional(),
-      players: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        role: z.string().optional(),
-        isRational: z.boolean(),
-        availableStrategies: z.array(z.string())
-      })).optional(),
-      strategies: z.array(z.object({
-        id: z.string(),
-        playerId: z.string(),
-        name: z.string(),
-        description: z.string(),
-        isPure: z.boolean(),
-        probability: z.number().min(0).max(1).optional()
-      })).optional(),
+      players: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          role: z.string().optional(),
+          isRational: z.boolean(),
+          availableStrategies: z.array(z.string())
+        })
+      ).optional(),
+      strategies: z.array(
+        z.object({
+          id: z.string(),
+          playerId: z.string(),
+          name: z.string(),
+          description: z.string(),
+          isPure: z.boolean(),
+          probability: z.number().min(0).max(1).optional()
+        })
+      ).optional(),
       payoffMatrix: z.object({
         players: z.array(z.string()),
         dimensions: z.array(z.number()),
-        payoffs: z.array(z.object({
-          strategyProfile: z.array(z.string()),
-          payoffs: z.array(z.number())
-        }))
+        payoffs: z.array(
+          z.object({
+            strategyProfile: z.array(z.string()),
+            payoffs: z.array(z.number())
+          })
+        )
       }).optional(),
-      nashEquilibria: z.array(z.object({
-        id: z.string(),
-        strategyProfile: z.array(z.string()),
-        payoffs: z.array(z.number()),
-        type: z.enum(["pure", "mixed"]),
-        isStrict: z.boolean(),
-        stability: z.number().min(0).max(1)
-      })).optional(),
-      dominantStrategies: z.array(z.object({
-        playerId: z.string(),
-        strategyId: z.string(),
-        type: z.enum(["strictly_dominant", "weakly_dominant"]),
-        dominatesStrategies: z.array(z.string()),
-        justification: z.string()
-      })).optional(),
+      nashEquilibria: z.array(
+        z.object({
+          id: z.string(),
+          strategyProfile: z.array(z.string()),
+          payoffs: z.array(z.number()),
+          type: z.enum(["pure", "mixed"]),
+          isStrict: z.boolean(),
+          stability: z.number().min(0).max(1)
+        })
+      ).optional(),
+      dominantStrategies: z.array(
+        z.object({
+          playerId: z.string(),
+          strategyId: z.string(),
+          type: z.enum(["strictly_dominant", "weakly_dominant"]),
+          dominatesStrategies: z.array(z.string()),
+          justification: z.string()
+        })
+      ).optional(),
       gameTree: z.object({
         rootNode: z.string(),
-        nodes: z.array(z.object({
-          id: z.string(),
-          type: z.enum(["decision", "chance", "terminal"]),
-          playerId: z.string().optional(),
-          parentNode: z.string().optional(),
-          childNodes: z.array(z.string()),
-          action: z.string().optional(),
-          probability: z.number().min(0).max(1).optional(),
-          payoffs: z.array(z.number()).optional()
-        })),
-        informationSets: z.array(z.object({
-          id: z.string(),
-          playerId: z.string(),
-          nodes: z.array(z.string()),
-          availableActions: z.array(z.string())
-        })).optional()
+        nodes: z.array(
+          z.object({
+            id: z.string(),
+            type: z.enum(["decision", "chance", "terminal"]),
+            playerId: z.string().optional(),
+            parentNode: z.string().optional(),
+            childNodes: z.array(z.string()),
+            action: z.string().optional(),
+            probability: z.number().min(0).max(1).optional(),
+            payoffs: z.array(z.number()).optional()
+          })
+        ),
+        informationSets: z.array(
+          z.object({
+            id: z.string(),
+            playerId: z.string(),
+            nodes: z.array(z.string()),
+            availableActions: z.array(z.string())
+          })
+        ).optional()
       }).optional(),
       // Evidential properties (Phase 3, v2.3)
       frameOfDiscernment: z.array(z.string()).optional(),
-      beliefFunctions: z.array(z.object({
-        id: z.string(),
-        source: z.string(),
-        massAssignments: z.array(z.object({
-          hypothesisSet: z.array(z.string()),
-          mass: z.number().min(0).max(1),
-          justification: z.string()
-        })),
-        conflictMass: z.number().optional()
-      })).optional(),
+      beliefFunctions: z.array(
+        z.object({
+          id: z.string(),
+          source: z.string(),
+          massAssignments: z.array(
+            z.object({
+              hypothesisSet: z.array(z.string()),
+              mass: z.number().min(0).max(1),
+              justification: z.string()
+            })
+          ),
+          conflictMass: z.number().optional()
+        })
+      ).optional(),
       combinedBelief: z.object({
         id: z.string(),
         source: z.string(),
-        massAssignments: z.array(z.object({
-          hypothesisSet: z.array(z.string()),
-          mass: z.number().min(0).max(1),
-          justification: z.string()
-        })),
+        massAssignments: z.array(
+          z.object({
+            hypothesisSet: z.array(z.string()),
+            mass: z.number().min(0).max(1),
+            justification: z.string()
+          })
+        ),
         conflictMass: z.number().optional()
       }).optional(),
       plausibility: z.object({
         id: z.string(),
-        assignments: z.array(z.object({
-          hypothesisSet: z.array(z.string()),
-          plausibility: z.number().min(0).max(1),
-          belief: z.number().min(0).max(1),
-          uncertaintyInterval: z.tuple([z.number(), z.number()])
-        }))
+        assignments: z.array(
+          z.object({
+            hypothesisSet: z.array(z.string()),
+            plausibility: z.number().min(0).max(1),
+            belief: z.number().min(0).max(1),
+            uncertaintyInterval: z.tuple([z.number(), z.number()])
+          })
+        )
       }).optional(),
-      decisions: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        selectedHypothesis: z.array(z.string()),
-        confidence: z.number().min(0).max(1),
-        reasoning: z.string(),
-        alternatives: z.array(z.object({
-          hypothesis: z.array(z.string()),
-          expectedUtility: z.number(),
-          risk: z.number()
-        }))
-      })).optional(),
+      decisions: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          selectedHypothesis: z.array(z.string()),
+          confidence: z.number().min(0).max(1),
+          reasoning: z.string(),
+          alternatives: z.array(
+            z.object({
+              hypothesis: z.array(z.string()),
+              expectedUtility: z.number(),
+              risk: z.number()
+            })
+          )
+        })
+      ).optional(),
       // First-Principles properties (Phase 3, v3.1.0)
       question: z.string().optional(),
-      principles: z.array(z.object({
-        id: z.string(),
-        type: z.enum(["axiom", "definition", "observation", "logical_inference", "assumption"]),
-        statement: z.string(),
-        justification: z.string(),
-        dependsOn: z.array(z.string()).optional(),
-        confidence: z.number().min(0).max(1).optional()
-      })).optional(),
-      derivationSteps: z.array(z.object({
-        stepNumber: z.number().int().positive(),
-        principle: z.string(),
-        inference: z.string(),
-        logicalForm: z.string().optional(),
-        confidence: z.number().min(0).max(1)
-      })).optional(),
+      principles: z.array(
+        z.object({
+          id: z.string(),
+          type: z.enum([
+            "axiom",
+            "definition",
+            "observation",
+            "logical_inference",
+            "assumption"
+          ]),
+          statement: z.string(),
+          justification: z.string(),
+          dependsOn: z.array(z.string()).optional(),
+          confidence: z.number().min(0).max(1).optional()
+        })
+      ).optional(),
+      derivationSteps: z.array(
+        z.object({
+          stepNumber: z.number().int().positive(),
+          principle: z.string(),
+          inference: z.string(),
+          logicalForm: z.string().optional(),
+          confidence: z.number().min(0).max(1)
+        })
+      ).optional(),
       conclusion: z.union([
         z.string(),
         // For deductive reasoning - simple conclusion
@@ -688,46 +841,67 @@ var init_thinking = __esm({
         purpose: z.string(),
         timeHorizon: z.string().optional()
       }).optional(),
-      components: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        type: z.enum(["stock", "flow", "variable", "parameter", "delay"]),
-        description: z.string(),
-        unit: z.string().optional(),
-        initialValue: z.number().optional(),
-        formula: z.string().optional(),
-        influencedBy: z.array(z.string()).optional()
-      })).optional(),
-      feedbackLoops: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        type: z.enum(["reinforcing", "balancing"]),
-        description: z.string(),
-        components: z.array(z.string()),
-        polarity: z.enum(["+", "-"]),
-        strength: z.number().min(0).max(1),
-        delay: z.number().optional(),
-        dominance: z.enum(["early", "middle", "late"]).optional()
-      })).optional(),
-      leveragePoints: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        location: z.string(),
-        description: z.string(),
-        effectiveness: z.number().min(0).max(1),
-        difficulty: z.number().min(0).max(1),
-        type: z.enum(["parameter", "feedback", "structure", "goal", "paradigm"]),
-        interventionExamples: z.array(z.string())
-      })).optional(),
-      behaviors: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        pattern: z.enum(["growth", "decline", "oscillation", "equilibrium", "chaos", "overshoot_collapse"]),
-        causes: z.array(z.string()),
-        timeframe: z.string(),
-        unintendedConsequences: z.array(z.string()).optional()
-      })).optional(),
+      components: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          type: z.enum(["stock", "flow", "variable", "parameter", "delay"]),
+          description: z.string(),
+          unit: z.string().optional(),
+          initialValue: z.number().optional(),
+          formula: z.string().optional(),
+          influencedBy: z.array(z.string()).optional()
+        })
+      ).optional(),
+      feedbackLoops: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          type: z.enum(["reinforcing", "balancing"]),
+          description: z.string(),
+          components: z.array(z.string()),
+          polarity: z.enum(["+", "-"]),
+          strength: z.number().min(0).max(1),
+          delay: z.number().optional(),
+          dominance: z.enum(["early", "middle", "late"]).optional()
+        })
+      ).optional(),
+      leveragePoints: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          location: z.string(),
+          description: z.string(),
+          effectiveness: z.number().min(0).max(1),
+          difficulty: z.number().min(0).max(1),
+          type: z.enum([
+            "parameter",
+            "feedback",
+            "structure",
+            "goal",
+            "paradigm"
+          ]),
+          interventionExamples: z.array(z.string())
+        })
+      ).optional(),
+      behaviors: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          description: z.string(),
+          pattern: z.enum([
+            "growth",
+            "decline",
+            "oscillation",
+            "equilibrium",
+            "chaos",
+            "overshoot_collapse"
+          ]),
+          causes: z.array(z.string()),
+          timeframe: z.string(),
+          unintendedConsequences: z.array(z.string()).optional()
+        })
+      ).optional(),
       // Scientific Method properties (Phase 4, v3.2.0)
       researchQuestion: z.object({
         id: z.string(),
@@ -741,18 +915,25 @@ var init_thinking = __esm({
           control: z.array(z.string())
         })
       }).optional(),
-      scientificHypotheses: z.array(z.object({
-        id: z.string(),
-        type: z.enum(["null", "alternative", "directional", "non_directional"]),
-        statement: z.string(),
-        prediction: z.string(),
-        rationale: z.string(),
-        testable: z.boolean(),
-        falsifiable: z.boolean()
-      })).optional(),
+      scientificHypotheses: z.array(
+        z.object({
+          id: z.string(),
+          type: z.enum(["null", "alternative", "directional", "non_directional"]),
+          statement: z.string(),
+          prediction: z.string(),
+          rationale: z.string(),
+          testable: z.boolean(),
+          falsifiable: z.boolean()
+        })
+      ).optional(),
       experiment: z.object({
         id: z.string(),
-        type: z.enum(["experimental", "quasi_experimental", "observational", "correlational"]),
+        type: z.enum([
+          "experimental",
+          "quasi_experimental",
+          "observational",
+          "correlational"
+        ]),
         design: z.string(),
         sampleSize: z.number().int().positive(),
         sampleSizeJustification: z.string().optional(),
@@ -777,17 +958,19 @@ var init_thinking = __esm({
       }).optional(),
       statisticalAnalysis: z.object({
         id: z.string(),
-        tests: z.array(z.object({
-          id: z.string(),
-          name: z.string(),
-          hypothesisTested: z.string(),
-          testStatistic: z.number(),
-          pValue: z.number().min(0).max(1),
-          confidenceInterval: z.tuple([z.number(), z.number()]).optional(),
-          alpha: z.number().min(0).max(1),
-          result: z.enum(["reject_null", "fail_to_reject_null"]),
-          interpretation: z.string()
-        })),
+        tests: z.array(
+          z.object({
+            id: z.string(),
+            name: z.string(),
+            hypothesisTested: z.string(),
+            testStatistic: z.number(),
+            pValue: z.number().min(0).max(1),
+            confidenceInterval: z.tuple([z.number(), z.number()]).optional(),
+            alpha: z.number().min(0).max(1),
+            result: z.enum(["reject_null", "fail_to_reject_null"]),
+            interpretation: z.string()
+          })
+        ),
         summary: z.string(),
         effectSize: z.object({
           type: z.string(),
@@ -818,44 +1001,63 @@ var init_thinking = __esm({
         id: z.string(),
         name: z.string(),
         description: z.string(),
-        type: z.enum(["linear", "nonlinear", "integer", "mixed_integer", "constraint_satisfaction", "multi_objective"]),
+        type: z.enum([
+          "linear",
+          "nonlinear",
+          "integer",
+          "mixed_integer",
+          "constraint_satisfaction",
+          "multi_objective"
+        ]),
         approach: z.enum(["exact", "heuristic", "metaheuristic", "approximation"]).optional(),
         complexity: z.string().optional()
       }).optional(),
-      decisionVariables: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        type: z.enum(["continuous", "integer", "binary", "categorical"]),
-        unit: z.string().optional(),
-        semantics: z.string()
-      })).optional(),
-      optimizationConstraints: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        type: z.enum(["hard", "soft"]),
-        formula: z.string(),
-        variables: z.array(z.string()),
-        penalty: z.number().optional(),
-        rationale: z.string(),
-        priority: z.number().optional()
-      })).optional(),
-      objectives: z.array(z.object({
-        id: z.string(),
-        name: z.string(),
-        description: z.string(),
-        type: z.enum(["minimize", "maximize"]),
-        formula: z.string(),
-        variables: z.array(z.string()),
-        weight: z.number().min(0).max(1).optional(),
-        units: z.string().optional(),
-        idealValue: z.number().optional(),
-        acceptableRange: z.tuple([z.number(), z.number()]).optional()
-      })).optional(),
+      decisionVariables: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          description: z.string(),
+          type: z.enum(["continuous", "integer", "binary", "categorical"]),
+          unit: z.string().optional(),
+          semantics: z.string()
+        })
+      ).optional(),
+      optimizationConstraints: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          description: z.string(),
+          type: z.enum(["hard", "soft"]),
+          formula: z.string(),
+          variables: z.array(z.string()),
+          penalty: z.number().optional(),
+          rationale: z.string(),
+          priority: z.number().optional()
+        })
+      ).optional(),
+      objectives: z.array(
+        z.object({
+          id: z.string(),
+          name: z.string(),
+          description: z.string(),
+          type: z.enum(["minimize", "maximize"]),
+          formula: z.string(),
+          variables: z.array(z.string()),
+          weight: z.number().min(0).max(1).optional(),
+          units: z.string().optional(),
+          idealValue: z.number().optional(),
+          acceptableRange: z.tuple([z.number(), z.number()]).optional()
+        })
+      ).optional(),
       solution: z.object({
         id: z.string(),
-        type: z.enum(["optimal", "feasible", "infeasible", "unbounded", "approximate"]),
+        type: z.enum([
+          "optimal",
+          "feasible",
+          "infeasible",
+          "unbounded",
+          "approximate"
+        ]),
         variableValues: z.record(z.string(), z.union([z.number(), z.string()])),
         objectiveValues: z.record(z.string(), z.number()),
         quality: z.number().min(0).max(1),
@@ -872,36 +1074,73 @@ var init_thinking = __esm({
         recommendations: z.array(z.string())
       }).optional(),
       // Formal Logic properties (Phase 4, v3.2.0)
-      propositions: z.array(z.object({
-        id: z.string(),
-        symbol: z.string(),
-        statement: z.string(),
-        truthValue: z.boolean().optional(),
-        type: z.enum(["atomic", "compound"]),
-        formula: z.string().optional()
-      })).optional(),
-      logicalInferences: z.array(z.object({
-        id: z.string(),
-        rule: z.enum(["modus_ponens", "modus_tollens", "hypothetical_syllogism", "disjunctive_syllogism", "conjunction", "simplification", "addition", "resolution", "contradiction", "excluded_middle"]),
-        premises: z.array(z.string()),
-        conclusion: z.string(),
-        justification: z.string(),
-        valid: z.boolean()
-      })).optional(),
+      propositions: z.array(
+        z.object({
+          id: z.string(),
+          symbol: z.string(),
+          statement: z.string(),
+          truthValue: z.boolean().optional(),
+          type: z.enum(["atomic", "compound"]),
+          formula: z.string().optional()
+        })
+      ).optional(),
+      logicalInferences: z.array(
+        z.object({
+          id: z.string(),
+          rule: z.enum([
+            "modus_ponens",
+            "modus_tollens",
+            "hypothetical_syllogism",
+            "disjunctive_syllogism",
+            "conjunction",
+            "simplification",
+            "addition",
+            "resolution",
+            "contradiction",
+            "excluded_middle"
+          ]),
+          premises: z.array(z.string()),
+          conclusion: z.string(),
+          justification: z.string(),
+          valid: z.boolean()
+        })
+      ).optional(),
       logicalProof: z.object({
         id: z.string(),
         theorem: z.string(),
-        technique: z.enum(["direct", "contradiction", "contrapositive", "cases", "induction", "natural_deduction", "resolution", "semantic_tableaux"]),
-        steps: z.array(z.object({
-          stepNumber: z.number().int().positive(),
-          statement: z.string(),
-          formula: z.string().optional(),
-          justification: z.string(),
-          rule: z.enum(["modus_ponens", "modus_tollens", "hypothetical_syllogism", "disjunctive_syllogism", "conjunction", "simplification", "addition", "resolution", "contradiction", "excluded_middle"]).optional(),
-          referencesSteps: z.array(z.number()).optional(),
-          isAssumption: z.boolean().optional(),
-          dischargesAssumption: z.number().optional()
-        })),
+        technique: z.enum([
+          "direct",
+          "contradiction",
+          "contrapositive",
+          "cases",
+          "induction",
+          "natural_deduction",
+          "resolution",
+          "semantic_tableaux"
+        ]),
+        steps: z.array(
+          z.object({
+            stepNumber: z.number().int().positive(),
+            statement: z.string(),
+            formula: z.string().optional(),
+            justification: z.string(),
+            rule: z.enum([
+              "modus_ponens",
+              "modus_tollens",
+              "hypothetical_syllogism",
+              "disjunctive_syllogism",
+              "conjunction",
+              "simplification",
+              "addition",
+              "resolution",
+              "contradiction",
+              "excluded_middle"
+            ]).optional(),
+            referencesSteps: z.array(z.number()).optional(),
+            isAssumption: z.boolean().optional(),
+            dischargesAssumption: z.number().optional()
+          })
+        ),
         conclusion: z.string(),
         valid: z.boolean(),
         completeness: z.number().min(0).max(1),
@@ -911,11 +1150,13 @@ var init_thinking = __esm({
         id: z.string(),
         propositions: z.array(z.string()),
         formula: z.string().optional(),
-        rows: z.array(z.object({
-          rowNumber: z.number().int().positive(),
-          assignments: z.record(z.string(), z.boolean()),
-          result: z.boolean()
-        })),
+        rows: z.array(
+          z.object({
+            rowNumber: z.number().int().positive(),
+            assignments: z.record(z.string(), z.boolean()),
+            result: z.boolean()
+          })
+        ),
         isTautology: z.boolean(),
         isContradiction: z.boolean(),
         isContingent: z.boolean()
@@ -929,9 +1170,48 @@ var init_thinking = __esm({
         complexity: z.string().optional(),
         explanation: z.string()
       }).optional(),
-      action: z.enum(["add_thought", "summarize", "export", "export_all", "switch_mode", "get_session", "recommend_mode", "delete_session"]).default("add_thought"),
-      exportFormat: z.enum(["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"]).optional(),
-      newMode: z.enum(["sequential", "shannon", "mathematics", "physics", "hybrid", "inductive", "deductive", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential", "firstprinciples", "systemsthinking", "scientificmethod", "optimization", "formallogic"]).optional(),
+      action: z.enum([
+        "add_thought",
+        "summarize",
+        "export",
+        "export_all",
+        "switch_mode",
+        "get_session",
+        "recommend_mode",
+        "delete_session"
+      ]).default("add_thought"),
+      exportFormat: z.enum([
+        "markdown",
+        "latex",
+        "json",
+        "html",
+        "jupyter",
+        "mermaid",
+        "dot",
+        "ascii"
+      ]).optional(),
+      newMode: z.enum([
+        "sequential",
+        "shannon",
+        "mathematics",
+        "physics",
+        "hybrid",
+        "inductive",
+        "deductive",
+        "abductive",
+        "causal",
+        "bayesian",
+        "counterfactual",
+        "analogical",
+        "temporal",
+        "gametheory",
+        "evidential",
+        "firstprinciples",
+        "systemsthinking",
+        "scientificmethod",
+        "optimization",
+        "formallogic"
+      ]).optional(),
       // Mode recommendation parameters (v2.4)
       problemType: z.string().optional(),
       problemCharacteristics: z.object({
@@ -957,7 +1237,28 @@ var init_thinking = __esm({
           sessionId: { type: "string" },
           mode: {
             type: "string",
-            enum: ["sequential", "shannon", "mathematics", "physics", "hybrid", "inductive", "deductive", "abductive", "causal", "bayesian", "counterfactual", "analogical", "temporal", "gametheory", "evidential", "firstprinciples", "systemsthinking", "scientificmethod", "optimization", "formallogic"],
+            enum: [
+              "sequential",
+              "shannon",
+              "mathematics",
+              "physics",
+              "hybrid",
+              "inductive",
+              "deductive",
+              "abductive",
+              "causal",
+              "bayesian",
+              "counterfactual",
+              "analogical",
+              "temporal",
+              "gametheory",
+              "evidential",
+              "firstprinciples",
+              "systemsthinking",
+              "scientificmethod",
+              "optimization",
+              "formallogic"
+            ],
             default: "hybrid"
           },
           thought: { type: "string", minLength: 1 },
@@ -971,7 +1272,13 @@ var init_thinking = __esm({
           branchId: { type: "string" },
           stage: {
             type: "string",
-            enum: ["problem_definition", "constraints", "model", "proof", "implementation"]
+            enum: [
+              "problem_definition",
+              "constraints",
+              "model",
+              "proof",
+              "implementation"
+            ]
           },
           uncertainty: { type: "number", minimum: 0, maximum: 1 },
           dependencies: { type: "array", items: { type: "string" } },
@@ -990,7 +1297,16 @@ var init_thinking = __esm({
           proofStrategy: {
             type: "object",
             properties: {
-              type: { type: "string", enum: ["direct", "contradiction", "induction", "construction", "contrapositive"] },
+              type: {
+                type: "string",
+                enum: [
+                  "direct",
+                  "contradiction",
+                  "induction",
+                  "construction",
+                  "contrapositive"
+                ]
+              },
               steps: { type: "array", items: { type: "string" } }
             },
             additionalProperties: false
@@ -998,19 +1314,32 @@ var init_thinking = __esm({
           tensorProperties: {
             type: "object",
             properties: {
-              rank: { type: "array", items: { type: "number" }, minItems: 2, maxItems: 2 },
+              rank: {
+                type: "array",
+                items: { type: "number" },
+                minItems: 2,
+                maxItems: 2
+              },
               components: { type: "string" },
               latex: { type: "string" },
               symmetries: { type: "array", items: { type: "string" } },
               invariants: { type: "array", items: { type: "string" } },
-              transformation: { type: "string", enum: ["covariant", "contravariant", "mixed"] }
+              transformation: {
+                type: "string",
+                enum: ["covariant", "contravariant", "mixed"]
+              }
             },
             additionalProperties: false
           }
           // All other optional properties from various modes (simplified for legacy compatibility)
           // Most users should migrate to focused tools for full schema validation
         },
-        required: ["thought", "thoughtNumber", "totalThoughts", "nextThoughtNeeded"],
+        required: [
+          "thought",
+          "thoughtNumber",
+          "totalThoughts",
+          "nextThoughtNeeded"
+        ],
         additionalProperties: true
         // Allow extra properties for backward compatibility
       }
@@ -1109,7 +1438,15 @@ function combineExportProfiles(profileIds, name, mergeOptions = "union") {
 function recommendExportProfile(keywords) {
   const lowerKeywords = keywords.map((k) => k.toLowerCase());
   if (lowerKeywords.some(
-    (k) => ["paper", "thesis", "publication", "academic", "research", "latex", "citation"].includes(k)
+    (k) => [
+      "paper",
+      "thesis",
+      "publication",
+      "academic",
+      "research",
+      "latex",
+      "citation"
+    ].includes(k)
   )) {
     return "academic";
   }
@@ -1229,7 +1566,9 @@ __export(file_exporter_exports, {
   resolveSandboxedOutputDir: () => resolveSandboxedOutputDir
 });
 function resolveSandboxedOutputDir(requestedDir, sandboxRoot) {
-  const root = path4.resolve(sandboxRoot && sandboxRoot.length > 0 ? sandboxRoot : DEFAULT_EXPORT_SANDBOX);
+  const root = path4.resolve(
+    sandboxRoot && sandboxRoot.length > 0 ? sandboxRoot : DEFAULT_EXPORT_SANDBOX
+  );
   if (!requestedDir || requestedDir.length === 0) {
     return root;
   }
@@ -1250,7 +1589,11 @@ var init_file_exporter = __esm({
   "src/export/file-exporter.ts"() {
     init_esm_shims();
     init_profiles();
-    DEFAULT_EXPORT_SANDBOX = path4.join(os.homedir(), ".claude", "deepthinking-exports");
+    DEFAULT_EXPORT_SANDBOX = path4.join(
+      os2.homedir(),
+      ".claude",
+      "deepthinking-exports"
+    );
     FORMAT_EXTENSIONS = {
       markdown: ".md",
       latex: ".tex",
@@ -1411,7 +1754,7 @@ var init_file_exporter = __esm({
         const extension = FORMAT_EXTENSIONS[format];
         const date = this.formatDate(/* @__PURE__ */ new Date(), this.config.dateFormat || "iso");
         const mode = session.mode || "unknown";
-        let filename = pattern.replace("{session}", this.sanitizeFilename(session.id)).replace("{mode}", this.sanitizeFilename(mode)).replace("{format}", format).replace("{date}", date);
+        const filename = pattern.replace("{session}", this.sanitizeFilename(session.id)).replace("{mode}", this.sanitizeFilename(mode)).replace("{format}", format).replace("{date}", date);
         return filename + extension;
       }
       /**
@@ -1476,9 +1819,7 @@ function getPresetsByTag(tag) {
   );
 }
 function getPresetsWithMode(mode) {
-  return Object.values(PRESETS).filter(
-    (preset) => preset.modes.includes(mode)
-  );
+  return Object.values(PRESETS).filter((preset) => preset.modes.includes(mode));
 }
 function getPresetsByStrategy(strategy) {
   return Object.values(PRESETS).filter(
@@ -1918,7 +2259,11 @@ var init_merger = __esm({
               conflictType: "direct_contradiction",
               severity: 0.8
             });
-            const synthesis = this.findSynthesis(thesis, antithesis, synthesisInsights);
+            const synthesis = this.findSynthesis(
+              thesis,
+              antithesis,
+              synthesisInsights
+            );
             if (synthesis) {
               result.push({
                 ...synthesis,
@@ -2138,7 +2483,10 @@ var init_merger = __esm({
       findSynthesis(thesis, antithesis, candidates) {
         return candidates.find((c) => {
           const simToThesis = this.calculateSimilarity(c.content, thesis.content);
-          const simToAntithesis = this.calculateSimilarity(c.content, antithesis.content);
+          const simToAntithesis = this.calculateSimilarity(
+            c.content,
+            antithesis.content
+          );
           return simToThesis > 0.3 && simToAntithesis > 0.3;
         });
       }
@@ -2231,13 +2579,14 @@ var init_conflict_resolver = __esm({
           case "favor_higher_confidence":
             resolution = this.resolveByConfidence(conflict);
             break;
-          case "synthesize":
+          case "synthesize": {
             const { resolved, synthesized } = this.resolveBySynthesis(conflict);
             resolution = resolved;
             if (synthesized) {
               newInsights.push(synthesized);
             }
             break;
+          }
           case "preserve_both":
             resolution = this.resolveByPreservingBoth(conflict);
             break;
@@ -2327,7 +2676,10 @@ var init_conflict_resolver = __esm({
           const conclusionA = this.extractConclusion(a.content);
           const conclusionB = this.extractConclusion(b.content);
           if (conclusionA && conclusionB) {
-            const conclusionSim = this.calculateSimilarity(conclusionA, conclusionB);
+            const conclusionSim = this.calculateSimilarity(
+              conclusionA,
+              conclusionB
+            );
             return conclusionSim < 0.5;
           }
         }
@@ -2490,7 +2842,10 @@ var init_conflict_resolver = __esm({
           explanation: `Preserved both insights as they represent different valid perspectives from ${conflict.insight1.mode} and ${conflict.insight2.mode}`,
           preservedFrom: [conflict.insight1.mode, conflict.insight2.mode],
           resolutionStrategy: "preserve_both",
-          confidence: Math.max(conflict.insight1.confidence, conflict.insight2.confidence)
+          confidence: Math.max(
+            conflict.insight1.confidence,
+            conflict.insight2.confidence
+          )
         };
       }
       /**
@@ -2646,7 +3001,10 @@ var init_analyzer = __esm({
         });
         const { modes, combination } = this.resolveModes(request);
         if (modes.length === 0) {
-          return this.createEmptyResponse(startTime, "No modes specified or preset not found");
+          return this.createEmptyResponse(
+            startTime,
+            "No modes specified or preset not found"
+          );
         }
         const totalModes = modes.length;
         this.reportProgress(onProgress, {
@@ -2690,7 +3048,10 @@ var init_analyzer = __esm({
         });
         const conflicts = this.conflictResolver.detectConflicts(allInsights);
         const resolutions = this.conflictResolver.resolveAll(conflicts);
-        const resolvedInsights = this.conflictResolver.applyResolutions(allInsights, resolutions);
+        const resolvedInsights = this.conflictResolver.applyResolutions(
+          allInsights,
+          resolutions
+        );
         this.reportProgress(onProgress, {
           phase: "merging",
           percentage: 85,
@@ -2701,7 +3062,11 @@ var init_analyzer = __esm({
         const mergeStrategy = request.mergeStrategy || combination?.mergeStrategy || "union";
         const mergeConfig = combination?.mergeConfig;
         const resolvedByMode = this.groupInsightsByMode(resolvedInsights);
-        const mergeResult = this.merger.merge(resolvedByMode, mergeStrategy, mergeConfig);
+        const mergeResult = this.merger.merge(
+          resolvedByMode,
+          mergeStrategy,
+          mergeConfig
+        );
         this.reportProgress(onProgress, {
           phase: "complete",
           percentage: 100,
@@ -2743,13 +3108,22 @@ var init_analyzer = __esm({
        * @param onProgress - Optional progress callback
        */
       async analyzeWithModes(thought, modes, mergeStrategy = "union", onProgress) {
-        return this.analyze({ thought, customModes: modes, mergeStrategy }, onProgress);
+        return this.analyze(
+          { thought, customModes: modes, mergeStrategy },
+          onProgress
+        );
       }
       /**
        * Get available presets for analysis
        */
       getAvailablePresets() {
-        return ["comprehensive_analysis", "hypothesis_testing", "decision_making", "root_cause", "future_planning"];
+        return [
+          "comprehensive_analysis",
+          "hypothesis_testing",
+          "decision_making",
+          "root_cause",
+          "future_planning"
+        ];
       }
       /**
        * Get supported modes for analysis
@@ -2805,7 +3179,10 @@ var init_analyzer = __esm({
         }
         const defaultCombination = getPreset("comprehensive_analysis");
         return {
-          modes: defaultCombination?.modes || ["deductive" /* DEDUCTIVE */, "inductive" /* INDUCTIVE */],
+          modes: defaultCombination?.modes || [
+            "deductive" /* DEDUCTIVE */,
+            "inductive" /* INDUCTIVE */
+          ],
           combination: defaultCombination
         };
       }
@@ -2821,7 +3198,11 @@ var init_analyzer = __esm({
             const modeStartTime = Date.now();
             try {
               onModeComplete?.(completed, mode);
-              const insights = this.generateModeInsights(mode, request.thought, request.context);
+              const insights = this.generateModeInsights(
+                mode,
+                request.thought,
+                request.context
+              );
               const result = {
                 mode,
                 insights,
@@ -2917,7 +3298,11 @@ var init_analyzer = __esm({
               content: `Probability assessment: Updated belief about ${thought.substring(0, 30)}...`,
               sourceMode: mode,
               confidence: baseConfidence,
-              evidence: ["Prior probability", "Evidence likelihood", "Posterior calculation"],
+              evidence: [
+                "Prior probability",
+                "Evidence likelihood",
+                "Posterior calculation"
+              ],
               timestamp,
               category: "probabilistic_assessment",
               priority: 7
@@ -3070,7 +3455,10 @@ var init_analyzer = __esm({
           existing.push(insight.sourceMode);
           supportingEvidence.set(insight.id, existing);
         }
-        const synthesizedConclusion = this.synthesizeConclusion(mergeResult.insights, conflicts);
+        const synthesizedConclusion = this.synthesizeConclusion(
+          mergeResult.insights,
+          conflicts
+        );
         return {
           id: randomUUID(),
           primaryInsights: mergeResult.insights,
@@ -3122,7 +3510,9 @@ var init_analyzer = __esm({
           callback(progress);
         }
         if (this.config.verbose) {
-          console.log(`[MultiModeAnalyzer] ${progress.phase}: ${progress.message} (${progress.percentage}%)`);
+          console.log(
+            `[MultiModeAnalyzer] ${progress.phase}: ${progress.message} (${progress.percentage}%)`
+          );
         }
       }
       /**
@@ -3152,7 +3542,13 @@ var init_analyzer = __esm({
           },
           modeResults: /* @__PURE__ */ new Map(),
           success: false,
-          errors: [{ mode: "hybrid" /* HYBRID */, message: errorMessage, recoverable: false }],
+          errors: [
+            {
+              mode: "hybrid" /* HYBRID */,
+              message: errorMessage,
+              recoverable: false
+            }
+          ],
           executionTime: Date.now() - startTime
         };
       }
@@ -3236,9 +3632,22 @@ var ModeRecommender = class {
         mode: "hybrid" /* HYBRID */,
         score: 0.92,
         reasoning: "Complex problem benefits from multi-modal synthesis combining inductive, deductive, and abductive reasoning",
-        strengths: ["Comprehensive analysis", "Combines empirical and logical approaches", "Maximum evidential strength", "Convergent validation"],
-        limitations: ["Time-intensive", "Requires understanding of multiple reasoning types"],
-        examples: ["Philosophical arguments", "Scientific theories", "Complex decision-making", "Metaphysical questions"]
+        strengths: [
+          "Comprehensive analysis",
+          "Combines empirical and logical approaches",
+          "Maximum evidential strength",
+          "Convergent validation"
+        ],
+        limitations: [
+          "Time-intensive",
+          "Requires understanding of multiple reasoning types"
+        ],
+        examples: [
+          "Philosophical arguments",
+          "Scientific theories",
+          "Complex decision-making",
+          "Metaphysical questions"
+        ]
       });
     }
     if (!characteristics.requiresProof && (characteristics.requiresQuantification || characteristics.hasIncompleteInfo || isPhilosophical)) {
@@ -3246,9 +3655,23 @@ var ModeRecommender = class {
         mode: "inductive" /* INDUCTIVE */,
         score: isPhilosophical ? 0.85 : 0.8,
         reasoning: "Problem requires pattern recognition and generalization from observations",
-        strengths: ["Empirical grounding", "Pattern detection", "Probabilistic reasoning", "Scientific discovery"],
-        limitations: ["Cannot prove with certainty", "Vulnerable to black swans", "Sample size dependent"],
-        examples: ["Scientific hypotheses", "Trend analysis", "Empirical arguments", "Data-driven insights"]
+        strengths: [
+          "Empirical grounding",
+          "Pattern detection",
+          "Probabilistic reasoning",
+          "Scientific discovery"
+        ],
+        limitations: [
+          "Cannot prove with certainty",
+          "Vulnerable to black swans",
+          "Sample size dependent"
+        ],
+        examples: [
+          "Scientific hypotheses",
+          "Trend analysis",
+          "Empirical arguments",
+          "Data-driven insights"
+        ]
       });
     }
     if (characteristics.requiresProof || isPhilosophical) {
@@ -3256,9 +3679,23 @@ var ModeRecommender = class {
         mode: "deductive" /* DEDUCTIVE */,
         score: characteristics.requiresProof ? 0.9 : 0.75,
         reasoning: "Problem requires logical derivation from general principles to specific conclusions",
-        strengths: ["Logical validity", "Rigorous inference", "Exposes contradictions", "Formal reasoning"],
-        limitations: ["Soundness depends on premise truth", "Vulnerable to definitional disputes", "May not handle uncertainty well"],
-        examples: ["Logical proofs", "Mathematical theorems", "Philosophical arguments", "Formal verification"]
+        strengths: [
+          "Logical validity",
+          "Rigorous inference",
+          "Exposes contradictions",
+          "Formal reasoning"
+        ],
+        limitations: [
+          "Soundness depends on premise truth",
+          "Vulnerable to definitional disputes",
+          "May not handle uncertainty well"
+        ],
+        examples: [
+          "Logical proofs",
+          "Mathematical theorems",
+          "Philosophical arguments",
+          "Formal verification"
+        ]
       });
     }
     if (characteristics.requiresExplanation || isPhilosophical) {
@@ -3266,9 +3703,23 @@ var ModeRecommender = class {
         mode: "abductive" /* ABDUCTIVE */,
         score: isPhilosophical ? 0.9 : 0.87,
         reasoning: "Problem requires finding best explanations through comparative hypothesis evaluation",
-        strengths: ["Hypothesis generation", "Comparative evaluation", "Explanatory power assessment", "Handles competing theories"],
-        limitations: ["May miss non-obvious explanations", "Explanatory power is subjective"],
-        examples: ["Scientific explanation", "Debugging", "Diagnosis", "Theory selection", "Metaphysical arguments"]
+        strengths: [
+          "Hypothesis generation",
+          "Comparative evaluation",
+          "Explanatory power assessment",
+          "Handles competing theories"
+        ],
+        limitations: [
+          "May miss non-obvious explanations",
+          "Explanatory power is subjective"
+        ],
+        examples: [
+          "Scientific explanation",
+          "Debugging",
+          "Diagnosis",
+          "Theory selection",
+          "Metaphysical arguments"
+        ]
       });
     }
     if (characteristics.complexity === "high" || characteristics.hasAlternatives && characteristics.uncertainty === "high") {
@@ -3276,9 +3727,24 @@ var ModeRecommender = class {
         mode: "metareasoning" /* METAREASONING */,
         score: characteristics.complexity === "high" ? 0.88 : 0.82,
         reasoning: "Complex or uncertain problems benefit from strategic monitoring and adaptive reasoning",
-        strengths: ["Strategy evaluation", "Mode switching recommendations", "Quality monitoring", "Resource allocation", "Self-reflection"],
-        limitations: ["Meta-level overhead", "Requires understanding of other modes", "May not directly solve the problem"],
-        examples: ["Strategy selection", "Debugging stuck reasoning", "Quality assessment", "Adaptive problem-solving"]
+        strengths: [
+          "Strategy evaluation",
+          "Mode switching recommendations",
+          "Quality monitoring",
+          "Resource allocation",
+          "Self-reflection"
+        ],
+        limitations: [
+          "Meta-level overhead",
+          "Requires understanding of other modes",
+          "May not directly solve the problem"
+        ],
+        examples: [
+          "Strategy selection",
+          "Debugging stuck reasoning",
+          "Quality assessment",
+          "Adaptive problem-solving"
+        ]
       });
     }
     if (characteristics.timeDependent) {
@@ -3286,9 +3752,17 @@ var ModeRecommender = class {
         mode: "temporal" /* TEMPORAL */,
         score: 0.9,
         reasoning: "Problem involves time-dependent events and sequences",
-        strengths: ["Event sequencing", "Temporal causality", "Timeline construction"],
+        strengths: [
+          "Event sequencing",
+          "Temporal causality",
+          "Timeline construction"
+        ],
         limitations: ["Limited strategic reasoning"],
-        examples: ["Process modeling", "Event correlation", "Timeline debugging"]
+        examples: [
+          "Process modeling",
+          "Event correlation",
+          "Timeline debugging"
+        ]
       });
     }
     if (characteristics.multiAgent) {
@@ -3296,7 +3770,11 @@ var ModeRecommender = class {
         mode: "gametheory" /* GAMETHEORY */,
         score: 0.85,
         reasoning: "Problem involves strategic interactions between agents",
-        strengths: ["Equilibrium analysis", "Strategic reasoning", "Multi-agent dynamics"],
+        strengths: [
+          "Equilibrium analysis",
+          "Strategic reasoning",
+          "Multi-agent dynamics"
+        ],
         limitations: ["Assumes rationality", "Complex computations"],
         examples: ["Competitive analysis", "Auction design", "Negotiation"]
       });
@@ -3306,9 +3784,21 @@ var ModeRecommender = class {
         mode: "evidential" /* EVIDENTIAL */,
         score: 0.82,
         reasoning: "Problem has incomplete information and high uncertainty requiring Dempster-Shafer belief functions",
-        strengths: ["Handles ignorance", "Evidence combination", "Uncertainty intervals"],
-        limitations: ["Computational complexity", "Requires careful mass assignment", "Better for sensor fusion than philosophical reasoning"],
-        examples: ["Sensor fusion", "Diagnostic reasoning", "Intelligence analysis"]
+        strengths: [
+          "Handles ignorance",
+          "Evidence combination",
+          "Uncertainty intervals"
+        ],
+        limitations: [
+          "Computational complexity",
+          "Requires careful mass assignment",
+          "Better for sensor fusion than philosophical reasoning"
+        ],
+        examples: [
+          "Sensor fusion",
+          "Diagnostic reasoning",
+          "Intelligence analysis"
+        ]
       });
     }
     if (characteristics.timeDependent && characteristics.requiresExplanation) {
@@ -3316,8 +3806,15 @@ var ModeRecommender = class {
         mode: "causal" /* CAUSAL */,
         score: 0.86,
         reasoning: "Problem requires understanding cause-effect relationships",
-        strengths: ["Intervention analysis", "Causal graphs", "Impact assessment"],
-        limitations: ["Requires domain knowledge", "Difficult to identify confounders"],
+        strengths: [
+          "Intervention analysis",
+          "Causal graphs",
+          "Impact assessment"
+        ],
+        limitations: [
+          "Requires domain knowledge",
+          "Difficult to identify confounders"
+        ],
         examples: ["Impact analysis", "System design", "Policy evaluation"]
       });
     }
@@ -3326,8 +3823,15 @@ var ModeRecommender = class {
         mode: "bayesian" /* BAYESIAN */,
         score: 0.84,
         reasoning: "Problem requires probabilistic reasoning with evidence updates",
-        strengths: ["Principled uncertainty", "Evidence integration", "Prior knowledge"],
-        limitations: ["Requires probability estimates", "Computationally intensive"],
+        strengths: [
+          "Principled uncertainty",
+          "Evidence integration",
+          "Prior knowledge"
+        ],
+        limitations: [
+          "Requires probability estimates",
+          "Computationally intensive"
+        ],
         examples: ["A/B testing", "Risk assessment", "Predictive modeling"]
       });
     }
@@ -3336,9 +3840,17 @@ var ModeRecommender = class {
         mode: "counterfactual" /* COUNTERFACTUAL */,
         score: 0.82,
         reasoning: "Problem benefits from analyzing alternative scenarios",
-        strengths: ["What-if analysis", "Post-mortem insights", "Decision comparison"],
+        strengths: [
+          "What-if analysis",
+          "Post-mortem insights",
+          "Decision comparison"
+        ],
         limitations: ["Speculative", "Difficult to validate"],
-        examples: ["Post-mortems", "Strategic planning", "Architecture decisions"]
+        examples: [
+          "Post-mortems",
+          "Strategic planning",
+          "Architecture decisions"
+        ]
       });
     }
     if (characteristics.complexity === "high" && characteristics.requiresExplanation) {
@@ -3346,8 +3858,15 @@ var ModeRecommender = class {
         mode: "analogical" /* ANALOGICAL */,
         score: 0.8,
         reasoning: "Problem can benefit from cross-domain analogies",
-        strengths: ["Creative insights", "Knowledge transfer", "Pattern recognition"],
-        limitations: ["Analogies may be superficial", "Requires diverse knowledge"],
+        strengths: [
+          "Creative insights",
+          "Knowledge transfer",
+          "Pattern recognition"
+        ],
+        limitations: [
+          "Analogies may be superficial",
+          "Requires diverse knowledge"
+        ],
         examples: ["Novel problem solving", "Design thinking", "Innovation"]
       });
     }
@@ -3356,9 +3875,17 @@ var ModeRecommender = class {
         mode: "mathematics" /* MATHEMATICS */,
         score: 0.95,
         reasoning: "Problem requires formal proofs and symbolic reasoning",
-        strengths: ["Rigorous proofs", "Symbolic computation", "Theorem proving"],
+        strengths: [
+          "Rigorous proofs",
+          "Symbolic computation",
+          "Theorem proving"
+        ],
         limitations: ["Limited to mathematical domains"],
-        examples: ["Algorithm correctness", "Complexity analysis", "Formal verification"]
+        examples: [
+          "Algorithm correctness",
+          "Complexity analysis",
+          "Formal verification"
+        ]
       });
     }
     if (characteristics.domain === "physics" || characteristics.domain === "engineering") {
@@ -3368,7 +3895,11 @@ var ModeRecommender = class {
         reasoning: "Problem involves physical systems or tensor mathematics",
         strengths: ["Field theory", "Conservation laws", "Tensor analysis"],
         limitations: ["Specialized to physics domains"],
-        examples: ["Physical modeling", "System dynamics", "Engineering analysis"]
+        examples: [
+          "Physical modeling",
+          "System dynamics",
+          "Engineering analysis"
+        ]
       });
     }
     if (characteristics.complexity === "high" && characteristics.requiresProof) {
@@ -3376,9 +3907,17 @@ var ModeRecommender = class {
         mode: "shannon" /* SHANNON */,
         score: 0.88,
         reasoning: "Complex problem requiring systematic decomposition",
-        strengths: ["Systematic approach", "Problem decomposition", "Rigorous analysis"],
+        strengths: [
+          "Systematic approach",
+          "Problem decomposition",
+          "Rigorous analysis"
+        ],
         limitations: ["Time-intensive", "Requires discipline"],
-        examples: ["Complex system design", "Research problems", "Novel algorithms"]
+        examples: [
+          "Complex system design",
+          "Research problems",
+          "Novel algorithms"
+        ]
       });
     }
     if (characteristics.domain === "engineering" || characteristics.domain === "software" || characteristics.domain === "systems" || characteristics.requiresQuantification && !characteristics.requiresProof) {
@@ -3386,9 +3925,24 @@ var ModeRecommender = class {
         mode: "engineering" /* ENGINEERING */,
         score: characteristics.domain === "engineering" ? 0.92 : 0.85,
         reasoning: "Problem requires systematic engineering analysis with trade-offs and constraints",
-        strengths: ["Requirements analysis", "Trade-off evaluation", "System design", "Failure mode analysis", "Implementation planning"],
-        limitations: ["May over-engineer simple problems", "Requires domain expertise"],
-        examples: ["System architecture", "Design decisions", "Performance optimization", "Reliability analysis", "Technical debt assessment"]
+        strengths: [
+          "Requirements analysis",
+          "Trade-off evaluation",
+          "System design",
+          "Failure mode analysis",
+          "Implementation planning"
+        ],
+        limitations: [
+          "May over-engineer simple problems",
+          "Requires domain expertise"
+        ],
+        examples: [
+          "System architecture",
+          "Design decisions",
+          "Performance optimization",
+          "Reliability analysis",
+          "Technical debt assessment"
+        ]
       });
     }
     if (characteristics.domain === "computer science" || characteristics.domain === "computation" || characteristics.requiresProof && characteristics.domain.includes("algorithm")) {
@@ -3396,9 +3950,19 @@ var ModeRecommender = class {
         mode: "computability" /* COMPUTABILITY */,
         score: 0.88,
         reasoning: "Problem involves computational complexity, decidability, or algorithmic analysis",
-        strengths: ["Turing machine analysis", "Decidability proofs", "Complexity classification", "Halting problem variants"],
+        strengths: [
+          "Turing machine analysis",
+          "Decidability proofs",
+          "Complexity classification",
+          "Halting problem variants"
+        ],
         limitations: ["Highly theoretical", "Requires formal CS background"],
-        examples: ["Algorithm decidability", "Complexity bounds", "Reduction proofs", "Computational limits"]
+        examples: [
+          "Algorithm decidability",
+          "Complexity bounds",
+          "Reduction proofs",
+          "Computational limits"
+        ]
       });
     }
     if (characteristics.domain === "security" || characteristics.domain === "cryptography" || characteristics.domain.includes("crypto")) {
@@ -3406,9 +3970,21 @@ var ModeRecommender = class {
         mode: "cryptanalytic" /* CRYPTANALYTIC */,
         score: 0.9,
         reasoning: "Problem involves cryptographic analysis, security assessment, or information-theoretic reasoning",
-        strengths: ["Statistical analysis", "Pattern detection", "Deciban calculations", "Key space analysis", "Attack surface evaluation"],
+        strengths: [
+          "Statistical analysis",
+          "Pattern detection",
+          "Deciban calculations",
+          "Key space analysis",
+          "Attack surface evaluation"
+        ],
         limitations: ["Specialized domain", "Requires mathematical background"],
-        examples: ["Cipher analysis", "Protocol security", "Key management", "Attack vectors", "Information leakage"]
+        examples: [
+          "Cipher analysis",
+          "Protocol security",
+          "Key management",
+          "Attack vectors",
+          "Information leakage"
+        ]
       });
     }
     if (characteristics.complexity === "high" && (characteristics.hasAlternatives || characteristics.requiresExplanation)) {
@@ -3416,9 +3992,22 @@ var ModeRecommender = class {
         mode: "recursive" /* RECURSIVE */,
         score: 0.82,
         reasoning: "Problem has recursive structure or can be decomposed into smaller similar subproblems",
-        strengths: ["Problem decomposition", "Self-similar analysis", "Base case identification", "Recursive patterns"],
-        limitations: ["Stack overflow risk in deep recursion", "May miss non-recursive solutions"],
-        examples: ["Divide and conquer", "Tree traversal", "Fractal analysis", "Self-referential problems"]
+        strengths: [
+          "Problem decomposition",
+          "Self-similar analysis",
+          "Base case identification",
+          "Recursive patterns"
+        ],
+        limitations: [
+          "Stack overflow risk in deep recursion",
+          "May miss non-recursive solutions"
+        ],
+        examples: [
+          "Divide and conquer",
+          "Tree traversal",
+          "Fractal analysis",
+          "Self-referential problems"
+        ]
       });
     }
     if (characteristics.hasAlternatives && characteristics.uncertainty === "high") {
@@ -3426,9 +4015,22 @@ var ModeRecommender = class {
         mode: "modal" /* MODAL */,
         score: 0.8,
         reasoning: "Problem involves possibility, necessity, or reasoning about alternative scenarios",
-        strengths: ["Possible worlds analysis", "Necessity vs possibility", "Epistemic reasoning", "Deontic analysis"],
-        limitations: ["Abstract and theoretical", "May overcomplicate simple choices"],
-        examples: ["Modal logic proofs", "Necessity analysis", "Epistemic uncertainty", "Deontic obligations"]
+        strengths: [
+          "Possible worlds analysis",
+          "Necessity vs possibility",
+          "Epistemic reasoning",
+          "Deontic analysis"
+        ],
+        limitations: [
+          "Abstract and theoretical",
+          "May overcomplicate simple choices"
+        ],
+        examples: [
+          "Modal logic proofs",
+          "Necessity analysis",
+          "Epistemic uncertainty",
+          "Deontic obligations"
+        ]
       });
     }
     if (characteristics.uncertainty === "high" && characteristics.requiresQuantification) {
@@ -3436,9 +4038,22 @@ var ModeRecommender = class {
         mode: "stochastic" /* STOCHASTIC */,
         score: 0.84,
         reasoning: "Problem involves random processes, probabilistic transitions, or stochastic modeling",
-        strengths: ["Markov chains", "Random process modeling", "Probabilistic state transitions", "Monte Carlo methods"],
-        limitations: ["Requires probability theory", "Computationally intensive"],
-        examples: ["Queueing systems", "Random walks", "Stochastic optimization", "Process simulation"]
+        strengths: [
+          "Markov chains",
+          "Random process modeling",
+          "Probabilistic state transitions",
+          "Monte Carlo methods"
+        ],
+        limitations: [
+          "Requires probability theory",
+          "Computationally intensive"
+        ],
+        examples: [
+          "Queueing systems",
+          "Random walks",
+          "Stochastic optimization",
+          "Process simulation"
+        ]
       });
     }
     if (characteristics.hasAlternatives && characteristics.requiresQuantification) {
@@ -3446,9 +4061,19 @@ var ModeRecommender = class {
         mode: "constraint" /* CONSTRAINT */,
         score: 0.83,
         reasoning: "Problem involves multiple constraints that must be satisfied simultaneously",
-        strengths: ["Constraint propagation", "Feasibility analysis", "SAT solving", "CSP formulation"],
+        strengths: [
+          "Constraint propagation",
+          "Feasibility analysis",
+          "SAT solving",
+          "CSP formulation"
+        ],
         limitations: ["NP-hard in general", "May have no solution"],
-        examples: ["Scheduling", "Resource allocation", "Configuration", "Puzzle solving"]
+        examples: [
+          "Scheduling",
+          "Resource allocation",
+          "Configuration",
+          "Puzzle solving"
+        ]
       });
     }
     if (characteristics.requiresQuantification && characteristics.hasAlternatives) {
@@ -3456,9 +4081,23 @@ var ModeRecommender = class {
         mode: "optimization" /* OPTIMIZATION */,
         score: 0.86,
         reasoning: "Problem requires finding optimal or near-optimal solutions from alternatives",
-        strengths: ["Objective function formulation", "Gradient methods", "Convex optimization", "Meta-heuristics"],
-        limitations: ["Local optima", "Computational complexity", "May require relaxation"],
-        examples: ["Resource optimization", "Parameter tuning", "Portfolio optimization", "Route planning"]
+        strengths: [
+          "Objective function formulation",
+          "Gradient methods",
+          "Convex optimization",
+          "Meta-heuristics"
+        ],
+        limitations: [
+          "Local optima",
+          "Computational complexity",
+          "May require relaxation"
+        ],
+        examples: [
+          "Resource optimization",
+          "Parameter tuning",
+          "Portfolio optimization",
+          "Route planning"
+        ]
       });
     }
     if (isPhilosophical || characteristics.complexity === "high" && characteristics.requiresExplanation) {
@@ -3466,9 +4105,23 @@ var ModeRecommender = class {
         mode: "firstprinciples" /* FIRSTPRINCIPLES */,
         score: isPhilosophical ? 0.88 : 0.82,
         reasoning: "Problem benefits from breaking down to fundamental truths and building up from there",
-        strengths: ["Assumption identification", "Foundational analysis", "Novel solutions", "Deep understanding"],
-        limitations: ["Time-intensive", "May rediscover known solutions", "Requires broad knowledge"],
-        examples: ["Innovation challenges", "Paradigm shifts", "Root cause analysis", "Foundational questions"]
+        strengths: [
+          "Assumption identification",
+          "Foundational analysis",
+          "Novel solutions",
+          "Deep understanding"
+        ],
+        limitations: [
+          "Time-intensive",
+          "May rediscover known solutions",
+          "Requires broad knowledge"
+        ],
+        examples: [
+          "Innovation challenges",
+          "Paradigm shifts",
+          "Root cause analysis",
+          "Foundational questions"
+        ]
       });
     }
     if (characteristics.complexity === "high" && (characteristics.timeDependent || characteristics.multiAgent)) {
@@ -3476,9 +4129,22 @@ var ModeRecommender = class {
         mode: "systemsthinking" /* SYSTEMSTHINKING */,
         score: 0.85,
         reasoning: "Problem involves complex systems with interconnected components and feedback loops",
-        strengths: ["Holistic view", "Feedback loop analysis", "Emergence detection", "Leverage point identification"],
-        limitations: ["Can be overwhelming", "Requires system boundaries definition"],
-        examples: ["Organizational change", "Ecosystem analysis", "Market dynamics", "Social systems"]
+        strengths: [
+          "Holistic view",
+          "Feedback loop analysis",
+          "Emergence detection",
+          "Leverage point identification"
+        ],
+        limitations: [
+          "Can be overwhelming",
+          "Requires system boundaries definition"
+        ],
+        examples: [
+          "Organizational change",
+          "Ecosystem analysis",
+          "Market dynamics",
+          "Social systems"
+        ]
       });
     }
     if (characteristics.hasIncompleteInfo && (characteristics.requiresExplanation || characteristics.requiresQuantification)) {
@@ -3486,9 +4152,23 @@ var ModeRecommender = class {
         mode: "scientificmethod" /* SCIENTIFICMETHOD */,
         score: 0.84,
         reasoning: "Problem requires systematic empirical investigation and hypothesis testing",
-        strengths: ["Hypothesis formulation", "Experimental design", "Falsification", "Reproducibility"],
-        limitations: ["Requires data collection", "Time for experiments", "May not apply to all domains"],
-        examples: ["Research questions", "A/B testing", "Empirical studies", "Data-driven decisions"]
+        strengths: [
+          "Hypothesis formulation",
+          "Experimental design",
+          "Falsification",
+          "Reproducibility"
+        ],
+        limitations: [
+          "Requires data collection",
+          "Time for experiments",
+          "May not apply to all domains"
+        ],
+        examples: [
+          "Research questions",
+          "A/B testing",
+          "Empirical studies",
+          "Data-driven decisions"
+        ]
       });
     }
     if (characteristics.requiresProof && !characteristics.requiresQuantification) {
@@ -3496,9 +4176,22 @@ var ModeRecommender = class {
         mode: "formallogic" /* FORMALLOGIC */,
         score: 0.87,
         reasoning: "Problem requires rigorous formal logical analysis and proof construction",
-        strengths: ["Propositional logic", "Predicate logic", "Proof systems", "Logical completeness"],
-        limitations: ["May be overly formal", "Limited expressiveness for some domains"],
-        examples: ["Formal verification", "Logical puzzles", "Argument validity", "Theorem proving"]
+        strengths: [
+          "Propositional logic",
+          "Predicate logic",
+          "Proof systems",
+          "Logical completeness"
+        ],
+        limitations: [
+          "May be overly formal",
+          "Limited expressiveness for some domains"
+        ],
+        examples: [
+          "Formal verification",
+          "Logical puzzles",
+          "Argument validity",
+          "Theorem proving"
+        ]
       });
     }
     if (characteristics.domain === "computer science" || characteristics.domain === "algorithms" || characteristics.domain === "data structures" || characteristics.domain === "software" || characteristics.requiresProof && characteristics.requiresQuantification) {
@@ -3513,7 +4206,10 @@ var ModeRecommender = class {
           "Data structure selection and analysis",
           "Graph algorithms and optimization"
         ],
-        limitations: ["Focused on computational problems", "Requires algorithmic thinking"],
+        limitations: [
+          "Focused on computational problems",
+          "Requires algorithmic thinking"
+        ],
         examples: [
           "Sorting and searching",
           "Graph traversal (BFS, DFS)",
@@ -3535,7 +4231,11 @@ var ModeRecommender = class {
           "Cross-source analysis",
           "Knowledge synthesis"
         ],
-        limitations: ["Requires access to multiple sources", "Time-intensive", "May miss emerging research"],
+        limitations: [
+          "Requires access to multiple sources",
+          "Time-intensive",
+          "May miss emerging research"
+        ],
         examples: [
           "Literature reviews",
           "Systematic reviews",
@@ -3557,7 +4257,10 @@ var ModeRecommender = class {
           "Rebuttal handling",
           "Qualifier specification"
         ],
-        limitations: ["Formal structure may feel rigid", "Requires clear claim formulation"],
+        limitations: [
+          "Formal structure may feel rigid",
+          "Requires clear claim formulation"
+        ],
         examples: [
           "Academic papers",
           "Thesis arguments",
@@ -3601,7 +4304,11 @@ var ModeRecommender = class {
           "Content analysis",
           "Code development"
         ],
-        limitations: ["Subjective interpretation", "Time-intensive coding", "Requires methodological rigor"],
+        limitations: [
+          "Subjective interpretation",
+          "Time-intensive coding",
+          "Requires methodological rigor"
+        ],
         examples: [
           "Interview analysis",
           "Document analysis",
@@ -3631,11 +4338,25 @@ var ModeRecommender = class {
     const isPhilosophical = characteristics.domain.toLowerCase().includes("metaphysics") || characteristics.domain.toLowerCase().includes("theology") || characteristics.domain.toLowerCase().includes("philosophy") || characteristics.domain.toLowerCase().includes("epistemology") || characteristics.domain.toLowerCase().includes("ethics");
     if (isPhilosophical || characteristics.complexity === "high" && characteristics.requiresExplanation && characteristics.hasAlternatives) {
       combinations.push({
-        modes: ["inductive" /* INDUCTIVE */, "deductive" /* DEDUCTIVE */, "abductive" /* ABDUCTIVE */],
+        modes: [
+          "inductive" /* INDUCTIVE */,
+          "deductive" /* DEDUCTIVE */,
+          "abductive" /* ABDUCTIVE */
+        ],
         sequence: "hybrid",
         rationale: "Synthesize empirical patterns, logical derivations, and explanatory hypotheses for maximum evidential strength",
-        benefits: ["Convergent validation from three independent methods", "Empirical grounding + logical rigor + explanatory power", "Highest achievable confidence through multi-modal synthesis", "Exposes both empirical patterns and logical contradictions"],
-        synergies: ["Inductive patterns inform abductive hypotheses", "Deductive logic tests hypothesis validity", "Abductive explanations guide inductive search", "All three methods converge on same conclusion"]
+        benefits: [
+          "Convergent validation from three independent methods",
+          "Empirical grounding + logical rigor + explanatory power",
+          "Highest achievable confidence through multi-modal synthesis",
+          "Exposes both empirical patterns and logical contradictions"
+        ],
+        synergies: [
+          "Inductive patterns inform abductive hypotheses",
+          "Deductive logic tests hypothesis validity",
+          "Abductive explanations guide inductive search",
+          "All three methods converge on same conclusion"
+        ]
       });
     }
     if (characteristics.timeDependent && characteristics.requiresExplanation) {
@@ -3643,8 +4364,14 @@ var ModeRecommender = class {
         modes: ["temporal" /* TEMPORAL */, "causal" /* CAUSAL */],
         sequence: "sequential",
         rationale: "Build timeline first, then analyze causal relationships",
-        benefits: ["Complete temporal-causal model", "Root cause with timeline context"],
-        synergies: ["Temporal events inform causal nodes", "Causal edges explain temporal sequences"]
+        benefits: [
+          "Complete temporal-causal model",
+          "Root cause with timeline context"
+        ],
+        synergies: [
+          "Temporal events inform causal nodes",
+          "Causal edges explain temporal sequences"
+        ]
       });
     }
     if (characteristics.requiresExplanation && characteristics.requiresQuantification) {
@@ -3652,8 +4379,14 @@ var ModeRecommender = class {
         modes: ["abductive" /* ABDUCTIVE */, "bayesian" /* BAYESIAN */],
         sequence: "sequential",
         rationale: "Generate hypotheses, then quantify with probabilities",
-        benefits: ["Systematic hypothesis generation", "Quantified belief updates"],
-        synergies: ["Abductive hypotheses become Bayesian hypotheses", "Bayesian updates refine explanations"]
+        benefits: [
+          "Systematic hypothesis generation",
+          "Quantified belief updates"
+        ],
+        synergies: [
+          "Abductive hypotheses become Bayesian hypotheses",
+          "Bayesian updates refine explanations"
+        ]
       });
     }
     if (characteristics.multiAgent && characteristics.hasAlternatives) {
@@ -3661,8 +4394,14 @@ var ModeRecommender = class {
         modes: ["gametheory" /* GAMETHEORY */, "counterfactual" /* COUNTERFACTUAL */],
         sequence: "hybrid",
         rationale: "Analyze equilibria, then explore alternative strategies",
-        benefits: ["Strategic analysis + scenario exploration", "Robustness testing"],
-        synergies: ["Equilibria as actual scenarios", "Strategy changes as interventions"]
+        benefits: [
+          "Strategic analysis + scenario exploration",
+          "Robustness testing"
+        ],
+        synergies: [
+          "Equilibria as actual scenarios",
+          "Strategy changes as interventions"
+        ]
       });
     }
     if (characteristics.hasIncompleteInfo && characteristics.timeDependent) {
@@ -3670,8 +4409,14 @@ var ModeRecommender = class {
         modes: ["evidential" /* EVIDENTIAL */, "causal" /* CAUSAL */],
         sequence: "parallel",
         rationale: "Combine uncertain evidence while modeling causal structure",
-        benefits: ["Handles uncertainty and causality", "Evidence fusion with causal reasoning"],
-        synergies: ["Belief functions inform causal strengths", "Causal structure guides evidence combination"]
+        benefits: [
+          "Handles uncertainty and causality",
+          "Evidence fusion with causal reasoning"
+        ],
+        synergies: [
+          "Belief functions inform causal strengths",
+          "Causal structure guides evidence combination"
+        ]
       });
     }
     if (characteristics.timeDependent && characteristics.multiAgent) {
@@ -3680,7 +4425,10 @@ var ModeRecommender = class {
         sequence: "sequential",
         rationale: "Model event sequences, then analyze strategic interactions over time",
         benefits: ["Dynamic game analysis", "Time-dependent strategies"],
-        synergies: ["Temporal events as game stages", "Strategies evolve over timeline"]
+        synergies: [
+          "Temporal events as game stages",
+          "Strategies evolve over timeline"
+        ]
       });
     }
     if (characteristics.requiresProof && characteristics.complexity === "high") {
@@ -3688,8 +4436,14 @@ var ModeRecommender = class {
         modes: ["shannon" /* SHANNON */, "mathematics" /* MATHEMATICS */],
         sequence: "hybrid",
         rationale: "Use Shannon methodology to structure complex mathematical proofs",
-        benefits: ["Systematic proof construction", "Clear problem decomposition"],
-        synergies: ["Shannon stages guide proof strategy", "Mathematical rigor validates each stage"]
+        benefits: [
+          "Systematic proof construction",
+          "Clear problem decomposition"
+        ],
+        synergies: [
+          "Shannon stages guide proof strategy",
+          "Mathematical rigor validates each stage"
+        ]
       });
     }
     if ((characteristics.domain === "engineering" || characteristics.domain === "software") && characteristics.hasAlternatives) {
@@ -3697,8 +4451,15 @@ var ModeRecommender = class {
         modes: ["engineering" /* ENGINEERING */, "optimization" /* OPTIMIZATION */],
         sequence: "sequential",
         rationale: "Design system architecture, then optimize for performance/cost",
-        benefits: ["Structured design", "Optimal trade-offs", "Measurable improvements"],
-        synergies: ["Engineering constraints feed optimization", "Optimization validates design choices"]
+        benefits: [
+          "Structured design",
+          "Optimal trade-offs",
+          "Measurable improvements"
+        ],
+        synergies: [
+          "Engineering constraints feed optimization",
+          "Optimization validates design choices"
+        ]
       });
     }
     if (characteristics.requiresQuantification && characteristics.hasAlternatives && (characteristics.domain === "engineering" || characteristics.domain === "software")) {
@@ -3706,8 +4467,15 @@ var ModeRecommender = class {
         modes: ["constraint" /* CONSTRAINT */, "engineering" /* ENGINEERING */],
         sequence: "sequential",
         rationale: "Identify constraints first, then design within those boundaries",
-        benefits: ["Feasibility guaranteed", "Requirements satisfaction", "Clear boundaries"],
-        synergies: ["Constraints define engineering solution space", "Engineering validates constraint satisfaction"]
+        benefits: [
+          "Feasibility guaranteed",
+          "Requirements satisfaction",
+          "Clear boundaries"
+        ],
+        synergies: [
+          "Constraints define engineering solution space",
+          "Engineering validates constraint satisfaction"
+        ]
       });
     }
     if (characteristics.complexity === "high" && characteristics.requiresExplanation) {
@@ -3716,7 +4484,10 @@ var ModeRecommender = class {
         sequence: "sequential",
         rationale: "Build from fundamental truths, then analyze systemic interactions",
         benefits: ["Deep understanding", "Holistic view", "Novel insights"],
-        synergies: ["First principles reveal core elements", "Systems thinking shows interconnections"]
+        synergies: [
+          "First principles reveal core elements",
+          "Systems thinking shows interconnections"
+        ]
       });
     }
     if (characteristics.hasIncompleteInfo && characteristics.requiresQuantification) {
@@ -3724,8 +4495,15 @@ var ModeRecommender = class {
         modes: ["scientificmethod" /* SCIENTIFICMETHOD */, "bayesian" /* BAYESIAN */],
         sequence: "hybrid",
         rationale: "Design experiments and update beliefs with Bayesian inference",
-        benefits: ["Rigorous methodology", "Quantified uncertainty", "Evidence integration"],
-        synergies: ["Experiments generate evidence", "Bayesian updates refine hypotheses"]
+        benefits: [
+          "Rigorous methodology",
+          "Quantified uncertainty",
+          "Evidence integration"
+        ],
+        synergies: [
+          "Experiments generate evidence",
+          "Bayesian updates refine hypotheses"
+        ]
       });
     }
     if (characteristics.requiresProof && !characteristics.hasIncompleteInfo) {
@@ -3733,8 +4511,15 @@ var ModeRecommender = class {
         modes: ["formallogic" /* FORMALLOGIC */, "deductive" /* DEDUCTIVE */],
         sequence: "hybrid",
         rationale: "Use formal logic systems with deductive derivation",
-        benefits: ["Maximum rigor", "Logically valid conclusions", "Formal verification"],
-        synergies: ["Formal logic provides structure", "Deduction ensures valid inference"]
+        benefits: [
+          "Maximum rigor",
+          "Logically valid conclusions",
+          "Formal verification"
+        ],
+        synergies: [
+          "Formal logic provides structure",
+          "Deduction ensures valid inference"
+        ]
       });
     }
     if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
@@ -3742,8 +4527,15 @@ var ModeRecommender = class {
         modes: ["recursive" /* RECURSIVE */, "optimization" /* OPTIMIZATION */],
         sequence: "hybrid",
         rationale: "Decompose problem recursively, optimize at each level",
-        benefits: ["Scalable solutions", "Local and global optimization", "Manageable complexity"],
-        synergies: ["Recursion breaks down problem", "Optimization solves subproblems optimally"]
+        benefits: [
+          "Scalable solutions",
+          "Local and global optimization",
+          "Manageable complexity"
+        ],
+        synergies: [
+          "Recursion breaks down problem",
+          "Optimization solves subproblems optimally"
+        ]
       });
     }
     if (characteristics.uncertainty === "high" && characteristics.requiresQuantification) {
@@ -3751,8 +4543,15 @@ var ModeRecommender = class {
         modes: ["stochastic" /* STOCHASTIC */, "bayesian" /* BAYESIAN */],
         sequence: "parallel",
         rationale: "Model random processes while updating beliefs probabilistically",
-        benefits: ["Complete uncertainty model", "Dynamic belief updates", "Probabilistic predictions"],
-        synergies: ["Stochastic models generate distributions", "Bayesian reasoning integrates evidence"]
+        benefits: [
+          "Complete uncertainty model",
+          "Dynamic belief updates",
+          "Probabilistic predictions"
+        ],
+        synergies: [
+          "Stochastic models generate distributions",
+          "Bayesian reasoning integrates evidence"
+        ]
       });
     }
     if (characteristics.domain === "computer science" && characteristics.requiresProof) {
@@ -3760,8 +4559,15 @@ var ModeRecommender = class {
         modes: ["computability" /* COMPUTABILITY */, "formallogic" /* FORMALLOGIC */],
         sequence: "hybrid",
         rationale: "Analyze computational limits with formal logical proofs",
-        benefits: ["Decidability analysis", "Rigorous complexity proofs", "Theoretical foundations"],
-        synergies: ["Computability defines limits", "Formal logic proves properties"]
+        benefits: [
+          "Decidability analysis",
+          "Rigorous complexity proofs",
+          "Theoretical foundations"
+        ],
+        synergies: [
+          "Computability defines limits",
+          "Formal logic proves properties"
+        ]
       });
     }
     if (characteristics.domain === "security" && characteristics.uncertainty === "high") {
@@ -3769,8 +4575,15 @@ var ModeRecommender = class {
         modes: ["cryptanalytic" /* CRYPTANALYTIC */, "stochastic" /* STOCHASTIC */],
         sequence: "parallel",
         rationale: "Analyze cryptographic systems with probabilistic attack modeling",
-        benefits: ["Security assessment", "Attack probability estimation", "Key space analysis"],
-        synergies: ["Cryptanalysis identifies vulnerabilities", "Stochastic models attack success rates"]
+        benefits: [
+          "Security assessment",
+          "Attack probability estimation",
+          "Key space analysis"
+        ],
+        synergies: [
+          "Cryptanalysis identifies vulnerabilities",
+          "Stochastic models attack success rates"
+        ]
       });
     }
     if (characteristics.complexity === "high" && (characteristics.multiAgent || characteristics.timeDependent)) {
@@ -3778,8 +4591,15 @@ var ModeRecommender = class {
         modes: ["systemsthinking" /* SYSTEMSTHINKING */, "engineering" /* ENGINEERING */],
         sequence: "sequential",
         rationale: "Understand system dynamics holistically, then engineer solutions",
-        benefits: ["Holistic design", "Feedback-aware engineering", "Emergent behavior consideration"],
-        synergies: ["Systems view informs design", "Engineering implements systemic solutions"]
+        benefits: [
+          "Holistic design",
+          "Feedback-aware engineering",
+          "Emergent behavior consideration"
+        ],
+        synergies: [
+          "Systems view informs design",
+          "Engineering implements systemic solutions"
+        ]
       });
     }
     if (characteristics.hasAlternatives && characteristics.uncertainty === "high") {
@@ -3787,8 +4607,15 @@ var ModeRecommender = class {
         modes: ["modal" /* MODAL */, "counterfactual" /* COUNTERFACTUAL */],
         sequence: "parallel",
         rationale: "Analyze possible worlds and counterfactual scenarios together",
-        benefits: ["Complete possibility space", "What-if analysis", "Robust decision making"],
-        synergies: ["Modal logic structures possibilities", "Counterfactuals explore specific alternatives"]
+        benefits: [
+          "Complete possibility space",
+          "What-if analysis",
+          "Robust decision making"
+        ],
+        synergies: [
+          "Modal logic structures possibilities",
+          "Counterfactuals explore specific alternatives"
+        ]
       });
     }
     if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
@@ -3796,17 +4623,37 @@ var ModeRecommender = class {
         modes: ["metareasoning" /* METAREASONING */, "optimization" /* OPTIMIZATION */],
         sequence: "hybrid",
         rationale: "Monitor reasoning strategies and optimize approach selection",
-        benefits: ["Adaptive reasoning", "Resource optimization", "Strategy refinement"],
-        synergies: ["Metareasoning evaluates strategies", "Optimization selects best approach"]
+        benefits: [
+          "Adaptive reasoning",
+          "Resource optimization",
+          "Strategy refinement"
+        ],
+        synergies: [
+          "Metareasoning evaluates strategies",
+          "Optimization selects best approach"
+        ]
       });
     }
     if (characteristics.requiresExplanation && characteristics.hasAlternatives) {
       combinations.push({
-        modes: ["metareasoning" /* METAREASONING */, "formallogic" /* FORMALLOGIC */, "abductive" /* ABDUCTIVE */],
+        modes: [
+          "metareasoning" /* METAREASONING */,
+          "formallogic" /* FORMALLOGIC */,
+          "abductive" /* ABDUCTIVE */
+        ],
         sequence: "sequential",
         rationale: "Detect cognitive biases through meta-analysis, identify logical fallacies, and generate alternative explanations as counter-arguments",
-        benefits: ["Comprehensive bias detection", "Fallacy identification", "Counter-argument generation", "Critical analysis"],
-        synergies: ["Metareasoning identifies reasoning flaws", "Formal logic validates argument structure", "Abductive generates alternative explanations"]
+        benefits: [
+          "Comprehensive bias detection",
+          "Fallacy identification",
+          "Counter-argument generation",
+          "Critical analysis"
+        ],
+        synergies: [
+          "Metareasoning identifies reasoning flaws",
+          "Formal logic validates argument structure",
+          "Abductive generates alternative explanations"
+        ]
       });
     }
     if (characteristics.hasAlternatives && characteristics.uncertainty !== "low") {
@@ -3814,8 +4661,15 @@ var ModeRecommender = class {
         modes: ["metareasoning" /* METAREASONING */, "counterfactual" /* COUNTERFACTUAL */],
         sequence: "parallel",
         rationale: "Self-reflect on reasoning while exploring alternative scenarios to counter biases",
-        benefits: ["Bias awareness", "Alternative perspective generation", "Decision robustness"],
-        synergies: ["Metareasoning detects bias patterns", "Counterfactual explores what-if scenarios"]
+        benefits: [
+          "Bias awareness",
+          "Alternative perspective generation",
+          "Decision robustness"
+        ],
+        synergies: [
+          "Metareasoning detects bias patterns",
+          "Counterfactual explores what-if scenarios"
+        ]
       });
     }
     if (characteristics.domain === "computer science" && characteristics.requiresProof) {
@@ -3823,8 +4677,15 @@ var ModeRecommender = class {
         modes: ["algorithmic" /* ALGORITHMIC */, "computability" /* COMPUTABILITY */],
         sequence: "hybrid",
         rationale: "Combine algorithm design with computability analysis for theoretical completeness",
-        benefits: ["Algorithm correctness proofs", "Complexity class analysis", "Decidability bounds"],
-        synergies: ["Algorithmic design informs complexity", "Computability proves fundamental limits"]
+        benefits: [
+          "Algorithm correctness proofs",
+          "Complexity class analysis",
+          "Decidability bounds"
+        ],
+        synergies: [
+          "Algorithmic design informs complexity",
+          "Computability proves fundamental limits"
+        ]
       });
     }
     if (characteristics.hasAlternatives && characteristics.requiresQuantification) {
@@ -3832,8 +4693,15 @@ var ModeRecommender = class {
         modes: ["algorithmic" /* ALGORITHMIC */, "optimization" /* OPTIMIZATION */],
         sequence: "sequential",
         rationale: "Design algorithm first, then optimize for performance",
-        benefits: ["Correct-by-construction", "Performance optimization", "Trade-off analysis"],
-        synergies: ["Algorithm provides baseline", "Optimization improves constants and bounds"]
+        benefits: [
+          "Correct-by-construction",
+          "Performance optimization",
+          "Trade-off analysis"
+        ],
+        synergies: [
+          "Algorithm provides baseline",
+          "Optimization improves constants and bounds"
+        ]
       });
     }
     if (characteristics.requiresProof && characteristics.domain !== "philosophy") {
@@ -3841,8 +4709,15 @@ var ModeRecommender = class {
         modes: ["algorithmic" /* ALGORITHMIC */, "mathematics" /* MATHEMATICS */],
         sequence: "hybrid",
         rationale: "Combine algorithm design with mathematical proof techniques",
-        benefits: ["Rigorous correctness proofs", "Loop invariant verification", "Inductive reasoning"],
-        synergies: ["Algorithmic structures guide proof strategy", "Mathematical rigor ensures correctness"]
+        benefits: [
+          "Rigorous correctness proofs",
+          "Loop invariant verification",
+          "Inductive reasoning"
+        ],
+        synergies: [
+          "Algorithmic structures guide proof strategy",
+          "Mathematical rigor ensures correctness"
+        ]
       });
     }
     if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
@@ -3850,8 +4725,15 @@ var ModeRecommender = class {
         modes: ["algorithmic" /* ALGORITHMIC */, "recursive" /* RECURSIVE */],
         sequence: "parallel",
         rationale: "Apply divide-and-conquer paradigm with recursive decomposition",
-        benefits: ["Natural problem decomposition", "Recurrence solving", "Subproblem identification"],
-        synergies: ["Algorithmic patterns guide recursion", "Recursive structure enables Master Theorem"]
+        benefits: [
+          "Natural problem decomposition",
+          "Recurrence solving",
+          "Subproblem identification"
+        ],
+        synergies: [
+          "Algorithmic patterns guide recursion",
+          "Recursive structure enables Master Theorem"
+        ]
       });
     }
     if (characteristics.uncertainty !== "low" && characteristics.requiresQuantification) {
@@ -3859,8 +4741,15 @@ var ModeRecommender = class {
         modes: ["algorithmic" /* ALGORITHMIC */, "stochastic" /* STOCHASTIC */],
         sequence: "parallel",
         rationale: "Design randomized algorithms with probabilistic analysis",
-        benefits: ["Expected-case analysis", "Monte Carlo methods", "Las Vegas algorithms"],
-        synergies: ["Algorithmic framework structures randomization", "Stochastic analysis proves bounds"]
+        benefits: [
+          "Expected-case analysis",
+          "Monte Carlo methods",
+          "Las Vegas algorithms"
+        ],
+        synergies: [
+          "Algorithmic framework structures randomization",
+          "Stochastic analysis proves bounds"
+        ]
       });
     }
     if (characteristics.domain === "research" || characteristics.domain === "academic") {
@@ -3868,8 +4757,15 @@ var ModeRecommender = class {
         modes: ["synthesis" /* SYNTHESIS */, "critique" /* CRITIQUE */],
         sequence: "sequential",
         rationale: "Synthesize literature first, then critically evaluate the synthesized findings",
-        benefits: ["Comprehensive review", "Critical evaluation", "Research gap identification"],
-        synergies: ["Synthesis identifies patterns", "Critique validates findings"]
+        benefits: [
+          "Comprehensive review",
+          "Critical evaluation",
+          "Research gap identification"
+        ],
+        synergies: [
+          "Synthesis identifies patterns",
+          "Critique validates findings"
+        ]
       });
     }
     if (characteristics.hasIncompleteInfo && characteristics.requiresExplanation) {
@@ -3877,7 +4773,11 @@ var ModeRecommender = class {
         modes: ["synthesis" /* SYNTHESIS */, "analysis" /* ANALYSIS */],
         sequence: "hybrid",
         rationale: "Combine literature synthesis with qualitative analysis methods",
-        benefits: ["Multi-source integration", "Thematic consistency", "Methodological rigor"],
+        benefits: [
+          "Multi-source integration",
+          "Thematic consistency",
+          "Methodological rigor"
+        ],
         synergies: ["Synthesis provides sources", "Analysis extracts themes"]
       });
     }
@@ -3886,8 +4786,15 @@ var ModeRecommender = class {
         modes: ["argumentation" /* ARGUMENTATION */, "critique" /* CRITIQUE */],
         sequence: "parallel",
         rationale: "Build arguments while critically evaluating opposing views",
-        benefits: ["Strong arguments", "Addressed weaknesses", "Robust conclusions"],
-        synergies: ["Argumentation structures claims", "Critique strengthens rebuttals"]
+        benefits: [
+          "Strong arguments",
+          "Addressed weaknesses",
+          "Robust conclusions"
+        ],
+        synergies: [
+          "Argumentation structures claims",
+          "Critique strengthens rebuttals"
+        ]
       });
     }
     if (characteristics.requiresProof && characteristics.requiresExplanation) {
@@ -3895,7 +4802,11 @@ var ModeRecommender = class {
         modes: ["argumentation" /* ARGUMENTATION */, "deductive" /* DEDUCTIVE */],
         sequence: "hybrid",
         rationale: "Combine Toulmin argumentation with deductive logical rigor",
-        benefits: ["Structured arguments", "Logical validity", "Academic rigor"],
+        benefits: [
+          "Structured arguments",
+          "Logical validity",
+          "Academic rigor"
+        ],
         synergies: ["Toulmin provides structure", "Deduction ensures validity"]
       });
     }
@@ -3904,7 +4815,11 @@ var ModeRecommender = class {
         modes: ["analysis" /* ANALYSIS */, "inductive" /* INDUCTIVE */],
         sequence: "sequential",
         rationale: "Apply qualitative analysis then generalize through inductive reasoning",
-        benefits: ["Grounded findings", "Pattern generalization", "Theory building"],
+        benefits: [
+          "Grounded findings",
+          "Pattern generalization",
+          "Theory building"
+        ],
         synergies: ["Analysis identifies codes", "Induction builds theory"]
       });
     }
@@ -3913,8 +4828,15 @@ var ModeRecommender = class {
         modes: ["critique" /* CRITIQUE */, "metareasoning" /* METAREASONING */],
         sequence: "parallel",
         rationale: "Critically analyze while monitoring own biases and reasoning quality",
-        benefits: ["Self-aware critique", "Bias mitigation", "Improved objectivity"],
-        synergies: ["Critique evaluates content", "Metareasoning evaluates process"]
+        benefits: [
+          "Self-aware critique",
+          "Bias mitigation",
+          "Improved objectivity"
+        ],
+        synergies: [
+          "Critique evaluates content",
+          "Metareasoning evaluates process"
+        ]
       });
     }
     if (characteristics.requiresQuantification && characteristics.hasIncompleteInfo) {
@@ -3922,7 +4844,11 @@ var ModeRecommender = class {
         modes: ["synthesis" /* SYNTHESIS */, "bayesian" /* BAYESIAN */],
         sequence: "hybrid",
         rationale: "Synthesize literature while quantifying evidence strength",
-        benefits: ["Quantified synthesis", "Evidence weighting", "Probabilistic conclusions"],
+        benefits: [
+          "Quantified synthesis",
+          "Evidence weighting",
+          "Probabilistic conclusions"
+        ],
         synergies: ["Synthesis gathers evidence", "Bayesian weights findings"]
       });
     }
@@ -3936,201 +4862,201 @@ var ModeRecommender = class {
   quickRecommend(problemType) {
     const typeMap = {
       // Core reasoning modes
-      "explanation": "abductive" /* ABDUCTIVE */,
-      "hypothesis": "abductive" /* ABDUCTIVE */,
-      "inference": "abductive" /* ABDUCTIVE */,
-      "pattern": "inductive" /* INDUCTIVE */,
-      "generalization": "inductive" /* INDUCTIVE */,
-      "empirical": "inductive" /* INDUCTIVE */,
-      "logic": "deductive" /* DEDUCTIVE */,
-      "proof": "deductive" /* DEDUCTIVE */,
-      "derivation": "deductive" /* DEDUCTIVE */,
-      "complex": "hybrid" /* HYBRID */,
-      "philosophical": "hybrid" /* HYBRID */,
-      "metaphysical": "hybrid" /* HYBRID */,
+      explanation: "abductive" /* ABDUCTIVE */,
+      hypothesis: "abductive" /* ABDUCTIVE */,
+      inference: "abductive" /* ABDUCTIVE */,
+      pattern: "inductive" /* INDUCTIVE */,
+      generalization: "inductive" /* INDUCTIVE */,
+      empirical: "inductive" /* INDUCTIVE */,
+      logic: "deductive" /* DEDUCTIVE */,
+      proof: "deductive" /* DEDUCTIVE */,
+      derivation: "deductive" /* DEDUCTIVE */,
+      complex: "hybrid" /* HYBRID */,
+      philosophical: "hybrid" /* HYBRID */,
+      metaphysical: "hybrid" /* HYBRID */,
       // Meta-reasoning
-      "meta": "metareasoning" /* METAREASONING */,
+      meta: "metareasoning" /* METAREASONING */,
       "strategy-selection": "metareasoning" /* METAREASONING */,
       "quality-assessment": "metareasoning" /* METAREASONING */,
-      "reflection": "metareasoning" /* METAREASONING */,
+      reflection: "metareasoning" /* METAREASONING */,
       "self-evaluation": "metareasoning" /* METAREASONING */,
       // Specialized modes
-      "debugging": "abductive" /* ABDUCTIVE */,
-      "mathematical": "mathematics" /* MATHEMATICS */,
-      "timeline": "temporal" /* TEMPORAL */,
-      "strategy": "gametheory" /* GAMETHEORY */,
-      "uncertainty": "evidential" /* EVIDENTIAL */,
-      "causality": "causal" /* CAUSAL */,
-      "probability": "bayesian" /* BAYESIAN */,
-      "bayesian": "bayesian" /* BAYESIAN */,
-      "bayes": "bayesian" /* BAYESIAN */,
-      "posterior": "bayesian" /* BAYESIAN */,
-      "prior": "bayesian" /* BAYESIAN */,
-      "likelihood": "bayesian" /* BAYESIAN */,
+      debugging: "abductive" /* ABDUCTIVE */,
+      mathematical: "mathematics" /* MATHEMATICS */,
+      timeline: "temporal" /* TEMPORAL */,
+      strategy: "gametheory" /* GAMETHEORY */,
+      uncertainty: "evidential" /* EVIDENTIAL */,
+      causality: "causal" /* CAUSAL */,
+      probability: "bayesian" /* BAYESIAN */,
+      bayesian: "bayesian" /* BAYESIAN */,
+      bayes: "bayesian" /* BAYESIAN */,
+      posterior: "bayesian" /* BAYESIAN */,
+      prior: "bayesian" /* BAYESIAN */,
+      likelihood: "bayesian" /* BAYESIAN */,
       "evidence-update": "bayesian" /* BAYESIAN */,
       "belief-update": "bayesian" /* BAYESIAN */,
       "conditional-probability": "bayesian" /* BAYESIAN */,
       "hypothesis-testing": "bayesian" /* BAYESIAN */,
-      "probabilistic": "bayesian" /* BAYESIAN */,
+      probabilistic: "bayesian" /* BAYESIAN */,
       "what-if": "counterfactual" /* COUNTERFACTUAL */,
-      "analogy": "analogical" /* ANALOGICAL */,
-      "physics": "physics" /* PHYSICS */,
-      "systematic": "shannon" /* SHANNON */,
+      analogy: "analogical" /* ANALOGICAL */,
+      physics: "physics" /* PHYSICS */,
+      systematic: "shannon" /* SHANNON */,
       // ===== NEW MODES (v7.2.0) =====
       // Engineering reasoning
-      "engineering": "engineering" /* ENGINEERING */,
-      "design": "engineering" /* ENGINEERING */,
-      "architecture": "engineering" /* ENGINEERING */,
+      engineering: "engineering" /* ENGINEERING */,
+      design: "engineering" /* ENGINEERING */,
+      architecture: "engineering" /* ENGINEERING */,
       "trade-off": "engineering" /* ENGINEERING */,
-      "tradeoff": "engineering" /* ENGINEERING */,
+      tradeoff: "engineering" /* ENGINEERING */,
       "system-design": "engineering" /* ENGINEERING */,
-      "implementation": "engineering" /* ENGINEERING */,
-      "reliability": "engineering" /* ENGINEERING */,
-      "scalability": "engineering" /* ENGINEERING */,
-      "performance": "engineering" /* ENGINEERING */,
+      implementation: "engineering" /* ENGINEERING */,
+      reliability: "engineering" /* ENGINEERING */,
+      scalability: "engineering" /* ENGINEERING */,
+      performance: "engineering" /* ENGINEERING */,
       // Computability reasoning
-      "computability": "computability" /* COMPUTABILITY */,
-      "decidability": "computability" /* COMPUTABILITY */,
-      "turing": "computability" /* COMPUTABILITY */,
-      "halting": "computability" /* COMPUTABILITY */,
+      computability: "computability" /* COMPUTABILITY */,
+      decidability: "computability" /* COMPUTABILITY */,
+      turing: "computability" /* COMPUTABILITY */,
+      halting: "computability" /* COMPUTABILITY */,
       "complexity-class": "computability" /* COMPUTABILITY */,
-      "undecidable": "computability" /* COMPUTABILITY */,
+      undecidable: "computability" /* COMPUTABILITY */,
       // Cryptanalytic reasoning
-      "cryptanalysis": "cryptanalytic" /* CRYPTANALYTIC */,
-      "cryptography": "cryptanalytic" /* CRYPTANALYTIC */,
-      "security": "cryptanalytic" /* CRYPTANALYTIC */,
-      "cipher": "cryptanalytic" /* CRYPTANALYTIC */,
-      "encryption": "cryptanalytic" /* CRYPTANALYTIC */,
-      "decryption": "cryptanalytic" /* CRYPTANALYTIC */,
+      cryptanalysis: "cryptanalytic" /* CRYPTANALYTIC */,
+      cryptography: "cryptanalytic" /* CRYPTANALYTIC */,
+      security: "cryptanalytic" /* CRYPTANALYTIC */,
+      cipher: "cryptanalytic" /* CRYPTANALYTIC */,
+      encryption: "cryptanalytic" /* CRYPTANALYTIC */,
+      decryption: "cryptanalytic" /* CRYPTANALYTIC */,
       "attack-vector": "cryptanalytic" /* CRYPTANALYTIC */,
       "key-analysis": "cryptanalytic" /* CRYPTANALYTIC */,
       "protocol-security": "cryptanalytic" /* CRYPTANALYTIC */,
       // Recursive reasoning
-      "recursive": "recursive" /* RECURSIVE */,
-      "recursion": "recursive" /* RECURSIVE */,
+      recursive: "recursive" /* RECURSIVE */,
+      recursion: "recursive" /* RECURSIVE */,
       "divide-conquer": "recursive" /* RECURSIVE */,
       "self-similar": "recursive" /* RECURSIVE */,
-      "decomposition": "recursive" /* RECURSIVE */,
-      "fractal": "recursive" /* RECURSIVE */,
+      decomposition: "recursive" /* RECURSIVE */,
+      fractal: "recursive" /* RECURSIVE */,
       "tree-traversal": "recursive" /* RECURSIVE */,
       // Modal reasoning
-      "modal": "modal" /* MODAL */,
-      "possibility": "modal" /* MODAL */,
-      "necessity": "modal" /* MODAL */,
+      modal: "modal" /* MODAL */,
+      possibility: "modal" /* MODAL */,
+      necessity: "modal" /* MODAL */,
       "possible-worlds": "modal" /* MODAL */,
-      "epistemic": "modal" /* MODAL */,
-      "deontic": "modal" /* MODAL */,
-      "alethic": "modal" /* MODAL */,
+      epistemic: "modal" /* MODAL */,
+      deontic: "modal" /* MODAL */,
+      alethic: "modal" /* MODAL */,
       // Stochastic reasoning
-      "stochastic": "stochastic" /* STOCHASTIC */,
+      stochastic: "stochastic" /* STOCHASTIC */,
       "random-process": "stochastic" /* STOCHASTIC */,
-      "markov": "stochastic" /* STOCHASTIC */,
+      markov: "stochastic" /* STOCHASTIC */,
       "monte-carlo": "stochastic" /* STOCHASTIC */,
       "probabilistic-process": "stochastic" /* STOCHASTIC */,
-      "queueing": "stochastic" /* STOCHASTIC */,
+      queueing: "stochastic" /* STOCHASTIC */,
       "random-walk": "stochastic" /* STOCHASTIC */,
       // Constraint reasoning
-      "constraint": "constraint" /* CONSTRAINT */,
-      "constraints": "constraint" /* CONSTRAINT */,
-      "csp": "constraint" /* CONSTRAINT */,
-      "sat": "constraint" /* CONSTRAINT */,
-      "scheduling": "constraint" /* CONSTRAINT */,
-      "allocation": "constraint" /* CONSTRAINT */,
-      "feasibility": "constraint" /* CONSTRAINT */,
-      "satisfiability": "constraint" /* CONSTRAINT */,
+      constraint: "constraint" /* CONSTRAINT */,
+      constraints: "constraint" /* CONSTRAINT */,
+      csp: "constraint" /* CONSTRAINT */,
+      sat: "constraint" /* CONSTRAINT */,
+      scheduling: "constraint" /* CONSTRAINT */,
+      allocation: "constraint" /* CONSTRAINT */,
+      feasibility: "constraint" /* CONSTRAINT */,
+      satisfiability: "constraint" /* CONSTRAINT */,
       // Optimization reasoning
-      "optimization": "optimization" /* OPTIMIZATION */,
-      "optimize": "optimization" /* OPTIMIZATION */,
-      "optimal": "optimization" /* OPTIMIZATION */,
-      "minimize": "optimization" /* OPTIMIZATION */,
-      "maximize": "optimization" /* OPTIMIZATION */,
-      "gradient": "optimization" /* OPTIMIZATION */,
-      "convex": "optimization" /* OPTIMIZATION */,
-      "heuristic": "optimization" /* OPTIMIZATION */,
-      "search": "optimization" /* OPTIMIZATION */,
+      optimization: "optimization" /* OPTIMIZATION */,
+      optimize: "optimization" /* OPTIMIZATION */,
+      optimal: "optimization" /* OPTIMIZATION */,
+      minimize: "optimization" /* OPTIMIZATION */,
+      maximize: "optimization" /* OPTIMIZATION */,
+      gradient: "optimization" /* OPTIMIZATION */,
+      convex: "optimization" /* OPTIMIZATION */,
+      heuristic: "optimization" /* OPTIMIZATION */,
+      search: "optimization" /* OPTIMIZATION */,
       // First Principles reasoning
       "first-principles": "firstprinciples" /* FIRSTPRINCIPLES */,
-      "fundamental": "firstprinciples" /* FIRSTPRINCIPLES */,
-      "foundational": "firstprinciples" /* FIRSTPRINCIPLES */,
-      "axiom": "firstprinciples" /* FIRSTPRINCIPLES */,
+      fundamental: "firstprinciples" /* FIRSTPRINCIPLES */,
+      foundational: "firstprinciples" /* FIRSTPRINCIPLES */,
+      axiom: "firstprinciples" /* FIRSTPRINCIPLES */,
       "ground-truth": "firstprinciples" /* FIRSTPRINCIPLES */,
       "from-scratch": "firstprinciples" /* FIRSTPRINCIPLES */,
       "basic-principles": "firstprinciples" /* FIRSTPRINCIPLES */,
       "root-cause": "firstprinciples" /* FIRSTPRINCIPLES */,
       // Systems Thinking reasoning
       "systems-thinking": "systemsthinking" /* SYSTEMSTHINKING */,
-      "systems": "systemsthinking" /* SYSTEMSTHINKING */,
-      "holistic": "systemsthinking" /* SYSTEMSTHINKING */,
+      systems: "systemsthinking" /* SYSTEMSTHINKING */,
+      holistic: "systemsthinking" /* SYSTEMSTHINKING */,
       "feedback-loop": "systemsthinking" /* SYSTEMSTHINKING */,
-      "emergence": "systemsthinking" /* SYSTEMSTHINKING */,
-      "interconnected": "systemsthinking" /* SYSTEMSTHINKING */,
-      "ecosystem": "systemsthinking" /* SYSTEMSTHINKING */,
+      emergence: "systemsthinking" /* SYSTEMSTHINKING */,
+      interconnected: "systemsthinking" /* SYSTEMSTHINKING */,
+      ecosystem: "systemsthinking" /* SYSTEMSTHINKING */,
       "leverage-point": "systemsthinking" /* SYSTEMSTHINKING */,
       // Scientific Method reasoning
-      "scientific": "scientificmethod" /* SCIENTIFICMETHOD */,
-      "experiment": "scientificmethod" /* SCIENTIFICMETHOD */,
-      "research": "scientificmethod" /* SCIENTIFICMETHOD */,
-      "falsification": "scientificmethod" /* SCIENTIFICMETHOD */,
+      scientific: "scientificmethod" /* SCIENTIFICMETHOD */,
+      experiment: "scientificmethod" /* SCIENTIFICMETHOD */,
+      research: "scientificmethod" /* SCIENTIFICMETHOD */,
+      falsification: "scientificmethod" /* SCIENTIFICMETHOD */,
       "a/b-testing": "scientificmethod" /* SCIENTIFICMETHOD */,
-      "reproducibility": "scientificmethod" /* SCIENTIFICMETHOD */,
+      reproducibility: "scientificmethod" /* SCIENTIFICMETHOD */,
       "control-group": "scientificmethod" /* SCIENTIFICMETHOD */,
       // Formal Logic reasoning
       "formal-logic": "formallogic" /* FORMALLOGIC */,
-      "propositional": "formallogic" /* FORMALLOGIC */,
-      "predicate": "formallogic" /* FORMALLOGIC */,
+      propositional: "formallogic" /* FORMALLOGIC */,
+      predicate: "formallogic" /* FORMALLOGIC */,
       "theorem-proving": "formallogic" /* FORMALLOGIC */,
       "formal-proof": "formallogic" /* FORMALLOGIC */,
-      "validity": "formallogic" /* FORMALLOGIC */,
-      "soundness": "formallogic" /* FORMALLOGIC */,
-      "completeness": "formallogic" /* FORMALLOGIC */,
+      validity: "formallogic" /* FORMALLOGIC */,
+      soundness: "formallogic" /* FORMALLOGIC */,
+      completeness: "formallogic" /* FORMALLOGIC */,
       // Bias detection and critical analysis
-      "bias": "metareasoning" /* METAREASONING */,
+      bias: "metareasoning" /* METAREASONING */,
       "bias-detection": "metareasoning" /* METAREASONING */,
       "cognitive-bias": "metareasoning" /* METAREASONING */,
-      "fallacy": "formallogic" /* FORMALLOGIC */,
-      "fallacies": "formallogic" /* FORMALLOGIC */,
+      fallacy: "formallogic" /* FORMALLOGIC */,
+      fallacies: "formallogic" /* FORMALLOGIC */,
       "logical-fallacy": "formallogic" /* FORMALLOGIC */,
       "counter-argument": "counterfactual" /* COUNTERFACTUAL */,
-      "counterargument": "counterfactual" /* COUNTERFACTUAL */,
+      counterargument: "counterfactual" /* COUNTERFACTUAL */,
       "fact-check": "evidential" /* EVIDENTIAL */,
-      "misinformation": "evidential" /* EVIDENTIAL */,
-      "disinformation": "evidential" /* EVIDENTIAL */,
+      misinformation: "evidential" /* EVIDENTIAL */,
+      disinformation: "evidential" /* EVIDENTIAL */,
       "reasoning-flaw": "metareasoning" /* METAREASONING */,
       "argument-analysis": "formallogic" /* FORMALLOGIC */,
       // ===== ALGORITHMIC REASONING (v7.3.0) - CLRS Coverage =====
       // General algorithm terms
-      "algorithm": "algorithmic" /* ALGORITHMIC */,
-      "algorithms": "algorithmic" /* ALGORITHMIC */,
-      "algorithmic": "algorithmic" /* ALGORITHMIC */,
+      algorithm: "algorithmic" /* ALGORITHMIC */,
+      algorithms: "algorithmic" /* ALGORITHMIC */,
+      algorithmic: "algorithmic" /* ALGORITHMIC */,
       "data-structure": "algorithmic" /* ALGORITHMIC */,
       "data-structures": "algorithmic" /* ALGORITHMIC */,
-      "complexity": "algorithmic" /* ALGORITHMIC */,
+      complexity: "algorithmic" /* ALGORITHMIC */,
       "time-complexity": "algorithmic" /* ALGORITHMIC */,
       "space-complexity": "algorithmic" /* ALGORITHMIC */,
       "big-o": "algorithmic" /* ALGORITHMIC */,
-      "asymptotic": "algorithmic" /* ALGORITHMIC */,
+      asymptotic: "algorithmic" /* ALGORITHMIC */,
       "correctness-proof": "algorithmic" /* ALGORITHMIC */,
       "loop-invariant": "algorithmic" /* ALGORITHMIC */,
-      "invariant": "algorithmic" /* ALGORITHMIC */,
+      invariant: "algorithmic" /* ALGORITHMIC */,
       // Design patterns
       "divide-and-conquer": "algorithmic" /* ALGORITHMIC */,
       "dynamic-programming": "algorithmic" /* ALGORITHMIC */,
-      "dp": "algorithmic" /* ALGORITHMIC */,
-      "memoization": "algorithmic" /* ALGORITHMIC */,
+      dp: "algorithmic" /* ALGORITHMIC */,
+      memoization: "algorithmic" /* ALGORITHMIC */,
       "greedy-algorithm": "algorithmic" /* ALGORITHMIC */,
-      "backtracking": "algorithmic" /* ALGORITHMIC */,
+      backtracking: "algorithmic" /* ALGORITHMIC */,
       "branch-and-bound": "algorithmic" /* ALGORITHMIC */,
-      "amortized": "algorithmic" /* ALGORITHMIC */,
+      amortized: "algorithmic" /* ALGORITHMIC */,
       "amortized-analysis": "algorithmic" /* ALGORITHMIC */,
       // Sorting algorithms
-      "sorting": "algorithmic" /* ALGORITHMIC */,
-      "sort": "algorithmic" /* ALGORITHMIC */,
+      sorting: "algorithmic" /* ALGORITHMIC */,
+      sort: "algorithmic" /* ALGORITHMIC */,
       "insertion-sort": "algorithmic" /* ALGORITHMIC */,
       "merge-sort": "algorithmic" /* ALGORITHMIC */,
-      "mergesort": "algorithmic" /* ALGORITHMIC */,
-      "quicksort": "algorithmic" /* ALGORITHMIC */,
+      mergesort: "algorithmic" /* ALGORITHMIC */,
+      quicksort: "algorithmic" /* ALGORITHMIC */,
       "quick-sort": "algorithmic" /* ALGORITHMIC */,
-      "heapsort": "algorithmic" /* ALGORITHMIC */,
+      heapsort: "algorithmic" /* ALGORITHMIC */,
       "heap-sort": "algorithmic" /* ALGORITHMIC */,
       "counting-sort": "algorithmic" /* ALGORITHMIC */,
       "radix-sort": "algorithmic" /* ALGORITHMIC */,
@@ -4143,36 +5069,36 @@ var ModeRecommender = class {
       "median-of-medians": "algorithmic" /* ALGORITHMIC */,
       "order-statistics": "algorithmic" /* ALGORITHMIC */,
       // Data structures
-      "heap": "algorithmic" /* ALGORITHMIC */,
+      heap: "algorithmic" /* ALGORITHMIC */,
       "binary-heap": "algorithmic" /* ALGORITHMIC */,
       "priority-queue": "algorithmic" /* ALGORITHMIC */,
       "hash-table": "algorithmic" /* ALGORITHMIC */,
-      "hashing": "algorithmic" /* ALGORITHMIC */,
+      hashing: "algorithmic" /* ALGORITHMIC */,
       "binary-search-tree": "algorithmic" /* ALGORITHMIC */,
-      "bst": "algorithmic" /* ALGORITHMIC */,
+      bst: "algorithmic" /* ALGORITHMIC */,
       "red-black-tree": "algorithmic" /* ALGORITHMIC */,
       "avl-tree": "algorithmic" /* ALGORITHMIC */,
       "b-tree": "algorithmic" /* ALGORITHMIC */,
       "fibonacci-heap": "algorithmic" /* ALGORITHMIC */,
       "union-find": "algorithmic" /* ALGORITHMIC */,
       "disjoint-set": "algorithmic" /* ALGORITHMIC */,
-      "trie": "algorithmic" /* ALGORITHMIC */,
+      trie: "algorithmic" /* ALGORITHMIC */,
       "segment-tree": "algorithmic" /* ALGORITHMIC */,
       "fenwick-tree": "algorithmic" /* ALGORITHMIC */,
       // Graph algorithms
       "graph-algorithm": "algorithmic" /* ALGORITHMIC */,
-      "bfs": "algorithmic" /* ALGORITHMIC */,
+      bfs: "algorithmic" /* ALGORITHMIC */,
       "breadth-first": "algorithmic" /* ALGORITHMIC */,
-      "dfs": "algorithmic" /* ALGORITHMIC */,
+      dfs: "algorithmic" /* ALGORITHMIC */,
       "depth-first": "algorithmic" /* ALGORITHMIC */,
       "topological-sort": "algorithmic" /* ALGORITHMIC */,
       "strongly-connected": "algorithmic" /* ALGORITHMIC */,
-      "scc": "algorithmic" /* ALGORITHMIC */,
+      scc: "algorithmic" /* ALGORITHMIC */,
       "minimum-spanning-tree": "algorithmic" /* ALGORITHMIC */,
-      "mst": "algorithmic" /* ALGORITHMIC */,
-      "kruskal": "algorithmic" /* ALGORITHMIC */,
-      "prim": "algorithmic" /* ALGORITHMIC */,
-      "dijkstra": "algorithmic" /* ALGORITHMIC */,
+      mst: "algorithmic" /* ALGORITHMIC */,
+      kruskal: "algorithmic" /* ALGORITHMIC */,
+      prim: "algorithmic" /* ALGORITHMIC */,
+      dijkstra: "algorithmic" /* ALGORITHMIC */,
       "bellman-ford": "algorithmic" /* ALGORITHMIC */,
       "floyd-warshall": "algorithmic" /* ALGORITHMIC */,
       "shortest-path": "algorithmic" /* ALGORITHMIC */,
@@ -4181,11 +5107,11 @@ var ModeRecommender = class {
       "edmonds-karp": "algorithmic" /* ALGORITHMIC */,
       "bipartite-matching": "algorithmic" /* ALGORITHMIC */,
       // Dynamic programming problems
-      "lcs": "algorithmic" /* ALGORITHMIC */,
+      lcs: "algorithmic" /* ALGORITHMIC */,
       "longest-common-subsequence": "algorithmic" /* ALGORITHMIC */,
       "edit-distance": "algorithmic" /* ALGORITHMIC */,
-      "levenshtein": "algorithmic" /* ALGORITHMIC */,
-      "knapsack": "algorithmic" /* ALGORITHMIC */,
+      levenshtein: "algorithmic" /* ALGORITHMIC */,
+      knapsack: "algorithmic" /* ALGORITHMIC */,
       "matrix-chain": "algorithmic" /* ALGORITHMIC */,
       "optimal-bst": "algorithmic" /* ALGORITHMIC */,
       "rod-cutting": "algorithmic" /* ALGORITHMIC */,
@@ -4193,7 +5119,7 @@ var ModeRecommender = class {
       // String algorithms
       "string-matching": "algorithmic" /* ALGORITHMIC */,
       "pattern-matching": "algorithmic" /* ALGORITHMIC */,
-      "kmp": "algorithmic" /* ALGORITHMIC */,
+      kmp: "algorithmic" /* ALGORITHMIC */,
       "knuth-morris-pratt": "algorithmic" /* ALGORITHMIC */,
       "rabin-karp": "algorithmic" /* ALGORITHMIC */,
       "boyer-moore": "algorithmic" /* ALGORITHMIC */,
@@ -4206,33 +5132,33 @@ var ModeRecommender = class {
       "closest-pair": "algorithmic" /* ALGORITHMIC */,
       "line-intersection": "algorithmic" /* ALGORITHMIC */,
       // Number theory algorithms
-      "gcd": "algorithmic" /* ALGORITHMIC */,
-      "euclidean": "algorithmic" /* ALGORITHMIC */,
+      gcd: "algorithmic" /* ALGORITHMIC */,
+      euclidean: "algorithmic" /* ALGORITHMIC */,
       "modular-arithmetic": "algorithmic" /* ALGORITHMIC */,
-      "primality": "algorithmic" /* ALGORITHMIC */,
+      primality: "algorithmic" /* ALGORITHMIC */,
       "miller-rabin": "algorithmic" /* ALGORITHMIC */,
-      "rsa": "algorithmic" /* ALGORITHMIC */,
+      rsa: "algorithmic" /* ALGORITHMIC */,
       // Matrix algorithms
-      "strassen": "algorithmic" /* ALGORITHMIC */,
+      strassen: "algorithmic" /* ALGORITHMIC */,
       "matrix-multiplication": "algorithmic" /* ALGORITHMIC */,
       "matrix-exponentiation": "algorithmic" /* ALGORITHMIC */,
       // Advanced topics
-      "fft": "algorithmic" /* ALGORITHMIC */,
+      fft: "algorithmic" /* ALGORITHMIC */,
       "fast-fourier": "algorithmic" /* ALGORITHMIC */,
       "polynomial-multiplication": "algorithmic" /* ALGORITHMIC */,
       "linear-programming": "algorithmic" /* ALGORITHMIC */,
-      "simplex": "algorithmic" /* ALGORITHMIC */,
+      simplex: "algorithmic" /* ALGORITHMIC */,
       "approximation-algorithm": "algorithmic" /* ALGORITHMIC */,
       "np-hard": "algorithmic" /* ALGORITHMIC */,
       "np-complete": "algorithmic" /* ALGORITHMIC */,
       // Recurrences and analysis
-      "recurrence": "algorithmic" /* ALGORITHMIC */,
+      recurrence: "algorithmic" /* ALGORITHMIC */,
       "master-theorem": "algorithmic" /* ALGORITHMIC */,
       "recursion-tree": "algorithmic" /* ALGORITHMIC */,
       "substitution-method": "algorithmic" /* ALGORITHMIC */,
       // ===== ACADEMIC RESEARCH MODES (v7.4.0) =====
       // Synthesis mode - literature review and knowledge integration
-      "synthesis": "synthesis" /* SYNTHESIS */,
+      synthesis: "synthesis" /* SYNTHESIS */,
       "literature-review": "synthesis" /* SYNTHESIS */,
       "literature-synthesis": "synthesis" /* SYNTHESIS */,
       "systematic-review": "synthesis" /* SYNTHESIS */,
@@ -4245,23 +5171,23 @@ var ModeRecommender = class {
       "gap-analysis": "synthesis" /* SYNTHESIS */,
       "cross-study": "synthesis" /* SYNTHESIS */,
       // Argumentation mode - academic argumentation and Toulmin model
-      "argumentation": "argumentation" /* ARGUMENTATION */,
-      "argument": "argumentation" /* ARGUMENTATION */,
-      "toulmin": "argumentation" /* ARGUMENTATION */,
+      argumentation: "argumentation" /* ARGUMENTATION */,
+      argument: "argumentation" /* ARGUMENTATION */,
+      toulmin: "argumentation" /* ARGUMENTATION */,
       "toulmin-model": "argumentation" /* ARGUMENTATION */,
       "claim-evidence": "argumentation" /* ARGUMENTATION */,
-      "warrant": "argumentation" /* ARGUMENTATION */,
-      "backing": "argumentation" /* ARGUMENTATION */,
-      "qualifier": "argumentation" /* ARGUMENTATION */,
-      "rebuttal": "argumentation" /* ARGUMENTATION */,
+      warrant: "argumentation" /* ARGUMENTATION */,
+      backing: "argumentation" /* ARGUMENTATION */,
+      qualifier: "argumentation" /* ARGUMENTATION */,
+      rebuttal: "argumentation" /* ARGUMENTATION */,
       "thesis-argument": "argumentation" /* ARGUMENTATION */,
       "position-paper": "argumentation" /* ARGUMENTATION */,
-      "debate": "argumentation" /* ARGUMENTATION */,
-      "persuasion": "argumentation" /* ARGUMENTATION */,
-      "dialectic": "argumentation" /* ARGUMENTATION */,
-      "rhetorical": "argumentation" /* ARGUMENTATION */,
+      debate: "argumentation" /* ARGUMENTATION */,
+      persuasion: "argumentation" /* ARGUMENTATION */,
+      dialectic: "argumentation" /* ARGUMENTATION */,
+      rhetorical: "argumentation" /* ARGUMENTATION */,
       // Critique mode - critical analysis and peer review
-      "critique": "critique" /* CRITIQUE */,
+      critique: "critique" /* CRITIQUE */,
       "critical-analysis": "critique" /* CRITIQUE */,
       "peer-review": "critique" /* CRITIQUE */,
       "paper-review": "critique" /* CRITIQUE */,
@@ -4271,7 +5197,7 @@ var ModeRecommender = class {
       "strength-weakness": "critique" /* CRITIQUE */,
       "constructive-feedback": "critique" /* CRITIQUE */,
       "research-critique": "critique" /* CRITIQUE */,
-      "evaluation": "critique" /* CRITIQUE */,
+      evaluation: "critique" /* CRITIQUE */,
       // Analysis mode - qualitative analysis methods
       "qualitative-analysis": "analysis" /* ANALYSIS */,
       "thematic-analysis": "analysis" /* ANALYSIS */,
@@ -4279,13 +5205,13 @@ var ModeRecommender = class {
       "discourse-analysis": "analysis" /* ANALYSIS */,
       "content-analysis": "analysis" /* ANALYSIS */,
       "narrative-analysis": "analysis" /* ANALYSIS */,
-      "phenomenological": "analysis" /* ANALYSIS */,
-      "ethnographic": "analysis" /* ANALYSIS */,
-      "coding": "analysis" /* ANALYSIS */,
+      phenomenological: "analysis" /* ANALYSIS */,
+      ethnographic: "analysis" /* ANALYSIS */,
+      coding: "analysis" /* ANALYSIS */,
       "interview-analysis": "analysis" /* ANALYSIS */,
       "document-analysis": "analysis" /* ANALYSIS */,
       "case-study": "analysis" /* ANALYSIS */,
-      "qualitative": "analysis" /* ANALYSIS */
+      qualitative: "analysis" /* ANALYSIS */
     };
     const normalizedInput = problemType.toLowerCase();
     if (typeMap[normalizedInput]) {
@@ -4512,11 +5438,15 @@ var Logger = class {
    * Export logs as JSON
    */
   exportLogs() {
-    return JSON.stringify(this.logs.map((log) => ({
-      ...log,
-      level: LogLevel[log.level],
-      timestamp: log.timestamp.toISOString()
-    })), null, 2);
+    return JSON.stringify(
+      this.logs.map((log) => ({
+        ...log,
+        level: LogLevel[log.level],
+        timestamp: log.timestamp.toISOString()
+      })),
+      null,
+      2
+    );
   }
 };
 var logger = new Logger();
@@ -4693,7 +5623,10 @@ var GenericModeHandler = class {
         return {
           ...baseThought,
           mode: "abductive" /* ABDUCTIVE */,
-          thoughtType: toExtendedThoughtType(input.thoughtType, "problem_definition"),
+          thoughtType: toExtendedThoughtType(
+            input.thoughtType,
+            "problem_definition"
+          ),
           observations: input.observations || [],
           hypotheses: input.hypotheses || [],
           evaluationCriteria: input.evaluationCriteria,
@@ -4719,7 +5652,10 @@ var GenericModeHandler = class {
     return {
       ...baseThought,
       mode: "causal" /* CAUSAL */,
-      thoughtType: toExtendedThoughtType(input.thoughtType, "problem_definition"),
+      thoughtType: toExtendedThoughtType(
+        input.thoughtType,
+        "problem_definition"
+      ),
       causalGraph,
       interventions: input.interventions || [],
       mechanisms: input.mechanisms || [],
@@ -4755,7 +5691,11 @@ var GenericModeHandler = class {
     const warnings = [];
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -4809,39 +5749,127 @@ var GenericModeHandler = class {
   getRelatedModes(mode) {
     const relatedModes = {
       ["sequential" /* SEQUENTIAL */]: ["hybrid" /* HYBRID */, "shannon" /* SHANNON */],
-      ["shannon" /* SHANNON */]: ["sequential" /* SEQUENTIAL */, "mathematics" /* MATHEMATICS */],
-      ["mathematics" /* MATHEMATICS */]: ["physics" /* PHYSICS */, "algorithmic" /* ALGORITHMIC */],
-      ["physics" /* PHYSICS */]: ["mathematics" /* MATHEMATICS */, "engineering" /* ENGINEERING */],
-      ["hybrid" /* HYBRID */]: ["sequential" /* SEQUENTIAL */, "metareasoning" /* METAREASONING */],
-      ["causal" /* CAUSAL */]: ["bayesian" /* BAYESIAN */, "counterfactual" /* COUNTERFACTUAL */],
+      ["shannon" /* SHANNON */]: [
+        "sequential" /* SEQUENTIAL */,
+        "mathematics" /* MATHEMATICS */
+      ],
+      ["mathematics" /* MATHEMATICS */]: [
+        "physics" /* PHYSICS */,
+        "algorithmic" /* ALGORITHMIC */
+      ],
+      ["physics" /* PHYSICS */]: [
+        "mathematics" /* MATHEMATICS */,
+        "engineering" /* ENGINEERING */
+      ],
+      ["hybrid" /* HYBRID */]: [
+        "sequential" /* SEQUENTIAL */,
+        "metareasoning" /* METAREASONING */
+      ],
+      ["causal" /* CAUSAL */]: [
+        "bayesian" /* BAYESIAN */,
+        "counterfactual" /* COUNTERFACTUAL */
+      ],
       ["bayesian" /* BAYESIAN */]: ["causal" /* CAUSAL */, "evidential" /* EVIDENTIAL */],
-      ["inductive" /* INDUCTIVE */]: ["deductive" /* DEDUCTIVE */, "abductive" /* ABDUCTIVE */],
-      ["deductive" /* DEDUCTIVE */]: ["inductive" /* INDUCTIVE */, "formallogic" /* FORMALLOGIC */],
+      ["inductive" /* INDUCTIVE */]: [
+        "deductive" /* DEDUCTIVE */,
+        "abductive" /* ABDUCTIVE */
+      ],
+      ["deductive" /* DEDUCTIVE */]: [
+        "inductive" /* INDUCTIVE */,
+        "formallogic" /* FORMALLOGIC */
+      ],
       ["abductive" /* ABDUCTIVE */]: ["inductive" /* INDUCTIVE */, "causal" /* CAUSAL */],
-      ["counterfactual" /* COUNTERFACTUAL */]: ["causal" /* CAUSAL */, "gametheory" /* GAMETHEORY */],
-      ["analogical" /* ANALOGICAL */]: ["inductive" /* INDUCTIVE */, "firstprinciples" /* FIRSTPRINCIPLES */],
+      ["counterfactual" /* COUNTERFACTUAL */]: [
+        "causal" /* CAUSAL */,
+        "gametheory" /* GAMETHEORY */
+      ],
+      ["analogical" /* ANALOGICAL */]: [
+        "inductive" /* INDUCTIVE */,
+        "firstprinciples" /* FIRSTPRINCIPLES */
+      ],
       ["temporal" /* TEMPORAL */]: ["causal" /* CAUSAL */, "sequential" /* SEQUENTIAL */],
-      ["historical" /* HISTORICAL */]: ["temporal" /* TEMPORAL */, "causal" /* CAUSAL */, "synthesis" /* SYNTHESIS */],
-      ["gametheory" /* GAMETHEORY */]: ["optimization" /* OPTIMIZATION */, "counterfactual" /* COUNTERFACTUAL */],
-      ["evidential" /* EVIDENTIAL */]: ["bayesian" /* BAYESIAN */, "scientificmethod" /* SCIENTIFICMETHOD */],
-      ["firstprinciples" /* FIRSTPRINCIPLES */]: ["deductive" /* DEDUCTIVE */, "analogical" /* ANALOGICAL */],
-      ["systemsthinking" /* SYSTEMSTHINKING */]: ["causal" /* CAUSAL */, "optimization" /* OPTIMIZATION */],
-      ["scientificmethod" /* SCIENTIFICMETHOD */]: ["evidential" /* EVIDENTIAL */, "synthesis" /* SYNTHESIS */],
-      ["formallogic" /* FORMALLOGIC */]: ["deductive" /* DEDUCTIVE */, "mathematics" /* MATHEMATICS */],
-      ["metareasoning" /* METAREASONING */]: ["hybrid" /* HYBRID */, "critique" /* CRITIQUE */],
-      ["recursive" /* RECURSIVE */]: ["algorithmic" /* ALGORITHMIC */, "mathematics" /* MATHEMATICS */],
-      ["modal" /* MODAL */]: ["formallogic" /* FORMALLOGIC */, "counterfactual" /* COUNTERFACTUAL */],
-      ["stochastic" /* STOCHASTIC */]: ["bayesian" /* BAYESIAN */, "optimization" /* OPTIMIZATION */],
-      ["constraint" /* CONSTRAINT */]: ["optimization" /* OPTIMIZATION */, "formallogic" /* FORMALLOGIC */],
-      ["optimization" /* OPTIMIZATION */]: ["constraint" /* CONSTRAINT */, "gametheory" /* GAMETHEORY */],
-      ["engineering" /* ENGINEERING */]: ["optimization" /* OPTIMIZATION */, "systemsthinking" /* SYSTEMSTHINKING */],
-      ["computability" /* COMPUTABILITY */]: ["algorithmic" /* ALGORITHMIC */, "formallogic" /* FORMALLOGIC */],
-      ["cryptanalytic" /* CRYPTANALYTIC */]: ["bayesian" /* BAYESIAN */, "algorithmic" /* ALGORITHMIC */],
-      ["algorithmic" /* ALGORITHMIC */]: ["mathematics" /* MATHEMATICS */, "optimization" /* OPTIMIZATION */],
+      ["historical" /* HISTORICAL */]: [
+        "temporal" /* TEMPORAL */,
+        "causal" /* CAUSAL */,
+        "synthesis" /* SYNTHESIS */
+      ],
+      ["gametheory" /* GAMETHEORY */]: [
+        "optimization" /* OPTIMIZATION */,
+        "counterfactual" /* COUNTERFACTUAL */
+      ],
+      ["evidential" /* EVIDENTIAL */]: [
+        "bayesian" /* BAYESIAN */,
+        "scientificmethod" /* SCIENTIFICMETHOD */
+      ],
+      ["firstprinciples" /* FIRSTPRINCIPLES */]: [
+        "deductive" /* DEDUCTIVE */,
+        "analogical" /* ANALOGICAL */
+      ],
+      ["systemsthinking" /* SYSTEMSTHINKING */]: [
+        "causal" /* CAUSAL */,
+        "optimization" /* OPTIMIZATION */
+      ],
+      ["scientificmethod" /* SCIENTIFICMETHOD */]: [
+        "evidential" /* EVIDENTIAL */,
+        "synthesis" /* SYNTHESIS */
+      ],
+      ["formallogic" /* FORMALLOGIC */]: [
+        "deductive" /* DEDUCTIVE */,
+        "mathematics" /* MATHEMATICS */
+      ],
+      ["metareasoning" /* METAREASONING */]: [
+        "hybrid" /* HYBRID */,
+        "critique" /* CRITIQUE */
+      ],
+      ["recursive" /* RECURSIVE */]: [
+        "algorithmic" /* ALGORITHMIC */,
+        "mathematics" /* MATHEMATICS */
+      ],
+      ["modal" /* MODAL */]: [
+        "formallogic" /* FORMALLOGIC */,
+        "counterfactual" /* COUNTERFACTUAL */
+      ],
+      ["stochastic" /* STOCHASTIC */]: [
+        "bayesian" /* BAYESIAN */,
+        "optimization" /* OPTIMIZATION */
+      ],
+      ["constraint" /* CONSTRAINT */]: [
+        "optimization" /* OPTIMIZATION */,
+        "formallogic" /* FORMALLOGIC */
+      ],
+      ["optimization" /* OPTIMIZATION */]: [
+        "constraint" /* CONSTRAINT */,
+        "gametheory" /* GAMETHEORY */
+      ],
+      ["engineering" /* ENGINEERING */]: [
+        "optimization" /* OPTIMIZATION */,
+        "systemsthinking" /* SYSTEMSTHINKING */
+      ],
+      ["computability" /* COMPUTABILITY */]: [
+        "algorithmic" /* ALGORITHMIC */,
+        "formallogic" /* FORMALLOGIC */
+      ],
+      ["cryptanalytic" /* CRYPTANALYTIC */]: [
+        "bayesian" /* BAYESIAN */,
+        "algorithmic" /* ALGORITHMIC */
+      ],
+      ["algorithmic" /* ALGORITHMIC */]: [
+        "mathematics" /* MATHEMATICS */,
+        "optimization" /* OPTIMIZATION */
+      ],
       ["synthesis" /* SYNTHESIS */]: ["critique" /* CRITIQUE */, "analysis" /* ANALYSIS */],
-      ["argumentation" /* ARGUMENTATION */]: ["critique" /* CRITIQUE */, "formallogic" /* FORMALLOGIC */],
-      ["critique" /* CRITIQUE */]: ["argumentation" /* ARGUMENTATION */, "synthesis" /* SYNTHESIS */],
-      ["analysis" /* ANALYSIS */]: ["synthesis" /* SYNTHESIS */, "scientificmethod" /* SCIENTIFICMETHOD */],
+      ["argumentation" /* ARGUMENTATION */]: [
+        "critique" /* CRITIQUE */,
+        "formallogic" /* FORMALLOGIC */
+      ],
+      ["critique" /* CRITIQUE */]: [
+        "argumentation" /* ARGUMENTATION */,
+        "synthesis" /* SYNTHESIS */
+      ],
+      ["analysis" /* ANALYSIS */]: [
+        "synthesis" /* SYNTHESIS */,
+        "scientificmethod" /* SCIENTIFICMETHOD */
+      ],
       ["custom" /* CUSTOM */]: ["hybrid" /* HYBRID */]
     };
     return relatedModes[mode] || ["hybrid" /* HYBRID */];
@@ -4986,7 +6014,11 @@ var SequentialHandler = class {
     const warnings = [];
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -5042,7 +6074,11 @@ var SequentialHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["hybrid" /* HYBRID */, "shannon" /* SHANNON */, "metareasoning" /* METAREASONING */],
+      relatedModes: [
+        "hybrid" /* HYBRID */,
+        "shannon" /* SHANNON */,
+        "metareasoning" /* METAREASONING */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -5173,7 +6209,11 @@ var ShannonHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -5217,7 +6257,11 @@ var ShannonHandler = class {
     }
     if (inputAny.confidenceFactors) {
       const cf = inputAny.confidenceFactors;
-      const cfFields = ["dataQuality", "methodologyRobustness", "assumptionValidity"];
+      const cfFields = [
+        "dataQuality",
+        "methodologyRobustness",
+        "assumptionValidity"
+      ];
       for (const field of cfFields) {
         if (cf[field] !== void 0 && (cf[field] < 0 || cf[field] > 1)) {
           warnings.push(
@@ -5264,7 +6308,11 @@ var ShannonHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["sequential" /* SEQUENTIAL */, "mathematics" /* MATHEMATICS */, "engineering" /* ENGINEERING */],
+      relatedModes: [
+        "sequential" /* SEQUENTIAL */,
+        "mathematics" /* MATHEMATICS */,
+        "engineering" /* ENGINEERING */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -5320,7 +6368,11 @@ var ShannonHandler = class {
         enhancements.suggestions.push(
           "Start with the simplest case and build up to the general proof"
         );
-        enhancements.relatedModes = ["mathematics" /* MATHEMATICS */, "formallogic" /* FORMALLOGIC */, "deductive" /* DEDUCTIVE */];
+        enhancements.relatedModes = [
+          "mathematics" /* MATHEMATICS */,
+          "formallogic" /* FORMALLOGIC */,
+          "deductive" /* DEDUCTIVE */
+        ];
         break;
       case "implementation" /* IMPLEMENTATION */:
         enhancements.guidingQuestions.push(
@@ -5331,7 +6383,10 @@ var ShannonHandler = class {
         enhancements.suggestions.push(
           "Create a clear mapping between model elements and implementation components"
         );
-        enhancements.relatedModes = ["engineering" /* ENGINEERING */, "algorithmic" /* ALGORITHMIC */];
+        enhancements.relatedModes = [
+          "engineering" /* ENGINEERING */,
+          "algorithmic" /* ALGORITHMIC */
+        ];
         break;
     }
     if (thought.uncertainty > 0.7) {
@@ -5422,7 +6477,13 @@ var VALID_THOUGHT_TYPES2 = [
   "gap_identification",
   "assumption_trace"
 ];
-var VALID_PROOF_TYPES = ["direct", "contradiction", "induction", "construction", "contrapositive"];
+var VALID_PROOF_TYPES = [
+  "direct",
+  "contradiction",
+  "induction",
+  "construction",
+  "contrapositive"
+];
 var MathematicsHandler = class {
   mode = "mathematics" /* MATHEMATICS */;
   modeName = "Mathematical Reasoning";
@@ -5474,7 +6535,11 @@ var MathematicsHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -5512,7 +6577,9 @@ var MathematicsHandler = class {
       warnings.push(...modelValidation.warnings);
     }
     if (input.proofStrategy) {
-      const strategyValidation = this.validateProofStrategy(input.proofStrategy);
+      const strategyValidation = this.validateProofStrategy(
+        input.proofStrategy
+      );
       errors.push(...strategyValidation.errors);
       warnings.push(...strategyValidation.warnings);
     }
@@ -5545,7 +6612,11 @@ var MathematicsHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["physics" /* PHYSICS */, "formallogic" /* FORMALLOGIC */, "deductive" /* DEDUCTIVE */],
+      relatedModes: [
+        "physics" /* PHYSICS */,
+        "formallogic" /* FORMALLOGIC */,
+        "deductive" /* DEDUCTIVE */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -5607,7 +6678,10 @@ var MathematicsHandler = class {
         );
         break;
       case "proof_decomposition":
-        enhancements.relatedModes = ["algorithmic" /* ALGORITHMIC */, "formallogic" /* FORMALLOGIC */];
+        enhancements.relatedModes = [
+          "algorithmic" /* ALGORITHMIC */,
+          "formallogic" /* FORMALLOGIC */
+        ];
         enhancements.suggestions.push(
           "Break the proof into atomic, independently verifiable steps"
         );
@@ -5808,7 +6882,9 @@ var PhysicsHandler = class {
     const inputAny = input;
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
     const tensorProperties = this.normalizeTensor(input.tensorProperties);
-    const physicalInterpretation = this.normalizeInterpretation(input.physicalInterpretation);
+    const physicalInterpretation = this.normalizeInterpretation(
+      input.physicalInterpretation
+    );
     return {
       id: randomUUID(),
       sessionId,
@@ -5841,7 +6917,11 @@ var PhysicsHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -5879,17 +6959,25 @@ var PhysicsHandler = class {
       warnings.push(...tensorValidation.warnings);
     }
     if (input.physicalInterpretation) {
-      const interpValidation = this.validateInterpretation(input.physicalInterpretation);
+      const interpValidation = this.validateInterpretation(
+        input.physicalInterpretation
+      );
       errors.push(...interpValidation.errors);
       warnings.push(...interpValidation.warnings);
     }
     if (inputAny.fieldTheoryContext) {
-      const fieldValidation = this.validateFieldTheory(inputAny.fieldTheoryContext);
+      const fieldValidation = this.validateFieldTheory(
+        inputAny.fieldTheoryContext
+      );
       errors.push(...fieldValidation.errors);
       warnings.push(...fieldValidation.warnings);
     }
     if (!input.tensorProperties) {
-      const tensorTypes = ["tensor_formulation", "gauge_theory", "differential_geometry"];
+      const tensorTypes = [
+        "tensor_formulation",
+        "gauge_theory",
+        "differential_geometry"
+      ];
       if (tensorTypes.includes(inputAny.thoughtType)) {
         warnings.push(
           createValidationWarning(
@@ -5920,7 +7008,11 @@ var PhysicsHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["mathematics" /* MATHEMATICS */, "engineering" /* ENGINEERING */, "systemsthinking" /* SYSTEMSTHINKING */],
+      relatedModes: [
+        "mathematics" /* MATHEMATICS */,
+        "engineering" /* ENGINEERING */,
+        "systemsthinking" /* SYSTEMSTHINKING */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -5951,7 +7043,10 @@ var PhysicsHandler = class {
           "What is the gauge group?",
           "What are the gauge fields and their transformations?"
         );
-        enhancements.relatedModes = ["mathematics" /* MATHEMATICS */, "formallogic" /* FORMALLOGIC */];
+        enhancements.relatedModes = [
+          "mathematics" /* MATHEMATICS */,
+          "formallogic" /* FORMALLOGIC */
+        ];
         break;
       case "field_equations":
         enhancements.guidingQuestions.push(
@@ -6219,12 +7314,21 @@ var HybridHandler = class {
   createThought(input, sessionId) {
     const inputAny = input;
     const problemCharacteristics = inputAny.problemCharacteristics ? this.normalizeProblemCharacteristics(inputAny.problemCharacteristics) : this.inferCharacteristics(input);
-    const recommendations = this.recommender.recommendModes(problemCharacteristics);
+    const recommendations = this.recommender.recommendModes(
+      problemCharacteristics
+    );
     const topModes = recommendations.slice(0, 3);
     const activeModes = inputAny.activeModes ? inputAny.activeModes.map((m) => this.resolveMode(m)) : topModes.map((r) => r.mode);
-    const modeContributions = inputAny.modeContributions ? inputAny.modeContributions.map((c) => this.normalizeContribution(c)) : this.initializeContributions(activeModes);
-    const convergenceStatus = this.calculateConvergence(modeContributions, inputAny.convergenceStatus);
-    const synthesisStrategy = this.resolveSynthesisStrategy(inputAny.synthesisStrategy);
+    const modeContributions = inputAny.modeContributions ? inputAny.modeContributions.map(
+      (c) => this.normalizeContribution(c)
+    ) : this.initializeContributions(activeModes);
+    const convergenceStatus = this.calculateConvergence(
+      modeContributions,
+      inputAny.convergenceStatus
+    );
+    const synthesisStrategy = this.resolveSynthesisStrategy(
+      inputAny.synthesisStrategy
+    );
     const overallConfidence = this.calculateOverallConfidence(
       modeContributions,
       convergenceStatus,
@@ -6275,7 +7379,11 @@ var HybridHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -6361,7 +7469,9 @@ var HybridHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: thought.activeModes.filter((m) => m !== "hybrid" /* HYBRID */),
+      relatedModes: thought.activeModes.filter(
+        (m) => m !== "hybrid" /* HYBRID */
+      ),
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -6382,9 +7492,7 @@ var HybridHandler = class {
     enhancements.suggestions.push(
       `Active modes: ${thought.activeModes.join(", ")}`
     );
-    enhancements.suggestions.push(
-      `Strategy: ${thought.synthesisStrategy}`
-    );
+    enhancements.suggestions.push(`Strategy: ${thought.synthesisStrategy}`);
     const confidencePercent = (thought.overallConfidence * 100).toFixed(1);
     const targetPercent = (TARGET_CONFIDENCE * 100).toFixed(0);
     enhancements.suggestions.push(
@@ -6478,11 +7586,15 @@ var HybridHandler = class {
     if (thought.overallConfidence < TARGET_CONFIDENCE) {
       const gap = TARGET_CONFIDENCE - thought.overallConfidence;
       if (gap > 0.2) {
-        enhancements.suggestions.push("Consider adding another complementary mode");
+        enhancements.suggestions.push(
+          "Consider adding another complementary mode"
+        );
       } else if (gap > 0.1) {
         enhancements.suggestions.push("Focus on resolving mode disagreements");
       } else {
-        enhancements.suggestions.push("Strengthen evidence in highest-contributing mode");
+        enhancements.suggestions.push(
+          "Strengthen evidence in highest-contributing mode"
+        );
       }
     }
     return enhancements;
@@ -6491,7 +7603,9 @@ var HybridHandler = class {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Normalize problem characteristics
@@ -6574,7 +7688,10 @@ var HybridHandler = class {
       confidence: Math.max(0, Math.min(1, contrib.confidence ?? 0.5)),
       insights: contrib.insights || [],
       evidence: contrib.evidence || [],
-      agreementWithOthers: Math.max(0, Math.min(1, contrib.agreementWithOthers ?? 0.5))
+      agreementWithOthers: Math.max(
+        0,
+        Math.min(1, contrib.agreementWithOthers ?? 0.5)
+      )
     };
   }
   /**
@@ -6595,7 +7712,9 @@ var HybridHandler = class {
   calculateConvergence(contributions, explicit) {
     const agreementScores = contributions.map((c) => c.agreementWithOthers);
     const avgAgreement = agreementScores.length > 0 ? agreementScores.reduce((a, b) => a + b, 0) / agreementScores.length : 0;
-    const modesAgreeing = contributions.filter((c) => c.agreementWithOthers > 0.7).length;
+    const modesAgreeing = contributions.filter(
+      (c) => c.agreementWithOthers > 0.7
+    ).length;
     const confidenceFromAgreement = Math.min(
       avgAgreement * 0.5 + modesAgreeing / contributions.length * 0.5,
       1
@@ -6727,7 +7846,11 @@ var InductiveHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -6807,7 +7930,11 @@ var InductiveHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["deductive" /* DEDUCTIVE */, "abductive" /* ABDUCTIVE */, "scientificmethod" /* SCIENTIFICMETHOD */],
+      relatedModes: [
+        "deductive" /* DEDUCTIVE */,
+        "abductive" /* ABDUCTIVE */,
+        "scientificmethod" /* SCIENTIFICMETHOD */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -6863,7 +7990,10 @@ var InductiveHandler = class {
       enhancements.guidingQuestions.push(
         "Can the generalization be modified to account for counterexamples?"
       );
-      const suggestedConfidence = Math.max(0.3, thought.confidence - counterCount * 0.1);
+      const suggestedConfidence = Math.max(
+        0.3,
+        thought.confidence - counterCount * 0.1
+      );
       if (thought.confidence > suggestedConfidence + 0.2) {
         enhancements.warnings.push(
           `Consider lowering confidence given counterexamples (suggested: ${suggestedConfidence.toFixed(2)})`
@@ -6983,7 +8113,11 @@ var DeductiveHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -7062,7 +8196,11 @@ var DeductiveHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["inductive" /* INDUCTIVE */, "formallogic" /* FORMALLOGIC */, "mathematics" /* MATHEMATICS */],
+      relatedModes: [
+        "inductive" /* INDUCTIVE */,
+        "formallogic" /* FORMALLOGIC */,
+        "mathematics" /* MATHEMATICS */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -7104,17 +8242,15 @@ var DeductiveHandler = class {
     }
     if (thought.logicForm) {
       enhancements.metrics.logicForm = thought.logicForm;
-      enhancements.suggestions.push(`Using ${thought.logicForm} argument form`);
+      enhancements.suggestions.push(
+        `Using ${thought.logicForm} argument form`
+      );
       switch (thought.logicForm.toLowerCase().replace(/\s+/g, "_")) {
         case "modus_ponens":
-          enhancements.suggestions.push(
-            "Structure: P \u2192 Q, P, therefore Q"
-          );
+          enhancements.suggestions.push("Structure: P \u2192 Q, P, therefore Q");
           break;
         case "modus_tollens":
-          enhancements.suggestions.push(
-            "Structure: P \u2192 Q, \xACQ, therefore \xACP"
-          );
+          enhancements.suggestions.push("Structure: P \u2192 Q, \xACQ, therefore \xACP");
           break;
         case "hypothetical_syllogism":
           enhancements.suggestions.push(
@@ -7122,9 +8258,7 @@ var DeductiveHandler = class {
           );
           break;
         case "disjunctive_syllogism":
-          enhancements.suggestions.push(
-            "Structure: P \u2228 Q, \xACP, therefore Q"
-          );
+          enhancements.suggestions.push("Structure: P \u2228 Q, \xACP, therefore Q");
           break;
         case "reductio_ad_absurdum":
           enhancements.suggestions.push(
@@ -7282,7 +8416,11 @@ var AbductiveHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["inductive" /* INDUCTIVE */, "bayesian" /* BAYESIAN */, "causal" /* CAUSAL */],
+      relatedModes: [
+        "inductive" /* INDUCTIVE */,
+        "bayesian" /* BAYESIAN */,
+        "causal" /* CAUSAL */
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
@@ -7304,13 +8442,19 @@ var AbductiveHandler = class {
       explanatoryPower: thought.evaluationCriteria?.explanatoryPower || 0
     };
     if (hypotheses.length < 2) {
-      enhancements.suggestions.push("Generate alternative hypotheses to compare explanatory power");
+      enhancements.suggestions.push(
+        "Generate alternative hypotheses to compare explanatory power"
+      );
     }
     if (observations.length < 3) {
-      enhancements.suggestions.push("Gather more observations to differentiate between hypotheses");
+      enhancements.suggestions.push(
+        "Gather more observations to differentiate between hypotheses"
+      );
     }
     if (evidence.length === 0) {
-      enhancements.suggestions.push("Collect evidence to support or refute hypotheses");
+      enhancements.suggestions.push(
+        "Collect evidence to support or refute hypotheses"
+      );
     }
     enhancements.guidingQuestions = [
       "Which hypothesis best explains ALL observations?",
@@ -7560,7 +8704,7 @@ function computeClosenessCentrality(graph, normalize = true) {
     }
     let totalDist = 0;
     let reachable = 0;
-    for (const [_, d] of dist) {
+    for (const d of dist.values()) {
       if (d !== Infinity && d > 0) {
         totalDist += d;
         reachable++;
@@ -7703,10 +8847,11 @@ function getMostCentralNode(graph, measure = "pagerank") {
   switch (measure) {
     case "degree":
     case "in_degree":
-    case "out_degree":
+    case "out_degree": {
       const { degree, inDegree, outDegree } = computeDegreeCentrality(graph);
       centralityMap = measure === "in_degree" ? inDegree : measure === "out_degree" ? outDegree : degree;
       break;
+    }
     case "betweenness":
       centralityMap = computeBetweennessCentrality(graph);
       break;
@@ -7954,9 +9099,17 @@ function findBackdoorPaths(graph, treatment, outcome, maxLength = 10) {
 }
 function findBackdoorAdjustmentSet(graph, treatment, outcome) {
   const treatmentDescendants = getDescendants(graph, treatment);
-  const candidates = graph.nodes.map((n) => n.id).filter((id) => id !== treatment && id !== outcome && !treatmentDescendants.has(id));
+  const candidates = graph.nodes.map((n) => n.id).filter(
+    (id) => id !== treatment && id !== outcome && !treatmentDescendants.has(id)
+  );
   for (let size = 0; size <= candidates.length; size++) {
-    const result = findBackdoorSetOfSize(graph, treatment, outcome, candidates, size);
+    const result = findBackdoorSetOfSize(
+      graph,
+      treatment,
+      outcome,
+      candidates,
+      size
+    );
     if (result !== null) {
       return result;
     }
@@ -8015,7 +9168,11 @@ function isIdentifiable(graph, treatment, outcome) {
       method: "frontdoor"
     };
   }
-  const instrumentalResult = findInstrumentalVariable(graph, treatment, outcome);
+  const instrumentalResult = findInstrumentalVariable(
+    graph,
+    treatment,
+    outcome
+  );
   if (instrumentalResult !== null) {
     return {
       identifiable: true,
@@ -8038,7 +9195,9 @@ function isIdentifiable(graph, treatment, outcome) {
 }
 function findAllBackdoorSets(graph, treatment, outcome, maxSize = 5) {
   const treatmentDescendants = getDescendants2(graph, treatment);
-  const candidates = graph.nodes.map((n) => n.id).filter((id) => id !== treatment && id !== outcome && !treatmentDescendants.has(id));
+  const candidates = graph.nodes.map((n) => n.id).filter(
+    (id) => id !== treatment && id !== outcome && !treatmentDescendants.has(id)
+  );
   const validSets = [];
   for (let size = 0; size <= Math.min(maxSize, candidates.length); size++) {
     for (const subset of getCombinations(candidates, size)) {
@@ -8058,10 +9217,16 @@ function checkFrontdoorCriterion(graph, treatment, outcome) {
     if (!interceptsAllDirectedPaths(graph, treatment, outcome, [m])) {
       continue;
     }
-    const mutilatedForXM = createMutilatedGraph(graph, [{ variable: treatment, value: 0, type: "atomic" }]);
+    const mutilatedForXM = createMutilatedGraph(graph, [
+      { variable: treatment, value: 0, type: "atomic" }
+    ]);
     checkDSeparation(graph, { x: [treatment], y: [m], z: [] });
     checkDSeparation(mutilatedForXM, { x: [treatment], y: [m], z: [] });
-    const backdoorMY = checkDSeparation(graph, { x: [m], y: [outcome], z: [treatment] });
+    const backdoorMY = checkDSeparation(graph, {
+      x: [m],
+      y: [outcome],
+      z: [treatment]
+    });
     if (backdoorMY.separated) {
       return { satisfied: true, mediators: [m] };
     }
@@ -8104,12 +9269,22 @@ function interceptsAllDirectedPaths(graph, treatment, outcome, mediators) {
 function findInstrumentalVariable(graph, treatment, outcome) {
   for (const node of graph.nodes) {
     if (node.id === treatment || node.id === outcome) continue;
-    const affectsX = graph.edges.some((e) => e.from === node.id && e.to === treatment);
+    const affectsX = graph.edges.some(
+      (e) => e.from === node.id && e.to === treatment
+    );
     if (!affectsX) continue;
-    const affectsYDirectly = graph.edges.some((e) => e.from === node.id && e.to === outcome);
+    const affectsYDirectly = graph.edges.some(
+      (e) => e.from === node.id && e.to === outcome
+    );
     if (affectsYDirectly) continue;
-    const mutilated = createMutilatedGraph(graph, [{ variable: treatment, value: 0, type: "atomic" }]);
-    const independentOfY = checkDSeparation(mutilated, { x: [node.id], y: [outcome], z: [] });
+    const mutilated = createMutilatedGraph(graph, [
+      { variable: treatment, value: 0, type: "atomic" }
+    ]);
+    const independentOfY = checkDSeparation(mutilated, {
+      x: [node.id],
+      y: [outcome],
+      z: []
+    });
     if (independentOfY.separated) {
       return node.id;
     }
@@ -8235,7 +9410,10 @@ var CausalHandler = class {
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: "causal" /* CAUSAL */,
-      thoughtType: toExtendedThoughtType(input.thoughtType, "problem_definition"),
+      thoughtType: toExtendedThoughtType(
+        input.thoughtType,
+        "problem_definition"
+      ),
       causalGraph,
       interventions: input.interventions || [],
       mechanisms: input.mechanisms || [],
@@ -8257,7 +9435,11 @@ var CausalHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -8321,7 +9503,11 @@ var CausalHandler = class {
       relatedModes: ["bayesian" /* BAYESIAN */, "counterfactual" /* COUNTERFACTUAL */],
       guidingQuestions: [],
       warnings: [],
-      mentalModels: ["Causal Diagrams", "Do-Calculus", "Structural Equation Models"]
+      mentalModels: [
+        "Causal Diagrams",
+        "Do-Calculus",
+        "Structural Equation Models"
+      ]
     };
     if (thought.causalGraph) {
       const nodeCount = thought.causalGraph.nodes.length;
@@ -8354,7 +9540,9 @@ var CausalHandler = class {
         );
       }
       if (nodeCount >= 2 && edgeCount >= 1) {
-        const advancedAnalysis = this.performAdvancedGraphAnalysis(thought.causalGraph);
+        const advancedAnalysis = this.performAdvancedGraphAnalysis(
+          thought.causalGraph
+        );
         if (advancedAnalysis.centralNode) {
           enhancements.suggestions.push(
             `Node "${advancedAnalysis.centralNode}" is most central (highest PageRank). Consider its importance in causal pathways.`
@@ -8432,12 +9620,25 @@ var CausalHandler = class {
     const entryNodes = this.findEntryNodes(graph);
     const exitNodes = this.findExitNodes(graph);
     if (entryNodes.length > 0 && exitNodes.length > 0) {
-      const treatment = graph.nodes.find((n) => n.name === entryNodes[0] || n.id === entryNodes[0])?.id;
-      const outcome = graph.nodes.find((n) => n.name === exitNodes[0] || n.id === exitNodes[0])?.id;
+      const treatment = graph.nodes.find(
+        (n) => n.name === entryNodes[0] || n.id === entryNodes[0]
+      )?.id;
+      const outcome = graph.nodes.find(
+        (n) => n.name === exitNodes[0] || n.id === exitNodes[0]
+      )?.id;
       if (treatment && outcome) {
         try {
-          identifiability = isIdentifiable(graphForAnalysis, treatment, outcome);
-          backdoorSets = findAllBackdoorSets(graphForAnalysis, treatment, outcome, 3);
+          identifiability = isIdentifiable(
+            graphForAnalysis,
+            treatment,
+            outcome
+          );
+          backdoorSets = findAllBackdoorSets(
+            graphForAnalysis,
+            treatment,
+            outcome,
+            3
+          );
         } catch {
         }
       }
@@ -8716,7 +9917,12 @@ var BayesianHandler = class {
       description: inputAny.likelihoodDescription || "Default likelihood"
     };
     const evidence = inputAny.evidence || [];
-    const posterior = this.calculatePosterior(prior, likelihood, evidence, inputAny);
+    const posterior = this.calculatePosterior(
+      prior,
+      likelihood,
+      evidence,
+      inputAny
+    );
     const bayesFactor = this.calculateBayesFactor(evidence);
     return {
       id: randomUUID(),
@@ -8753,7 +9959,11 @@ var BayesianHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -8767,7 +9977,10 @@ var BayesianHandler = class {
     }
     const priorProb = inputAny.priorProbability;
     if (priorProb !== void 0) {
-      const priorValidation = this.validateProbability(priorProb, "priorProbability");
+      const priorValidation = this.validateProbability(
+        priorProb,
+        "priorProbability"
+      );
       if (!priorValidation.valid) {
         errors.push(...priorValidation.errors);
       }
@@ -8775,7 +9988,10 @@ var BayesianHandler = class {
     }
     const likelihoodProb = inputAny.likelihood;
     if (likelihoodProb !== void 0) {
-      const likelihoodValidation = this.validateProbability(likelihoodProb, "likelihood");
+      const likelihoodValidation = this.validateProbability(
+        likelihoodProb,
+        "likelihood"
+      );
       if (!likelihoodValidation.valid) {
         errors.push(...likelihoodValidation.errors);
       }
@@ -8783,7 +9999,10 @@ var BayesianHandler = class {
     }
     const posteriorProb = inputAny.posteriorProbability;
     if (posteriorProb !== void 0) {
-      const posteriorValidation = this.validateProbability(posteriorProb, "posteriorProbability");
+      const posteriorValidation = this.validateProbability(
+        posteriorProb,
+        "posteriorProbability"
+      );
       if (!posteriorValidation.valid) {
         errors.push(...posteriorValidation.errors);
       }
@@ -8837,7 +10056,12 @@ var BayesianHandler = class {
       guidingQuestions: [],
       warnings: [],
       metrics: {},
-      mentalModels: ["Bayes Theorem", "Prior Updating", "Likelihood Ratio", "Base Rate Fallacy"]
+      mentalModels: [
+        "Bayes Theorem",
+        "Prior Updating",
+        "Likelihood Ratio",
+        "Base Rate Fallacy"
+      ]
     };
     enhancements.metrics = {
       priorProbability: thought.prior.probability,
@@ -8854,9 +10078,13 @@ var BayesianHandler = class {
       } else {
         strength = bf > 10 ? "Strong evidence for" : bf > 3 ? "Moderate evidence for" : "Weak evidence for";
       }
-      enhancements.suggestions.push(`Bayes factor (${bf.toFixed(2)}) indicates: ${strength} the hypothesis`);
+      enhancements.suggestions.push(
+        `Bayes factor (${bf.toFixed(2)}) indicates: ${strength} the hypothesis`
+      );
     }
-    const shift = Math.abs(thought.posterior.probability - thought.prior.probability);
+    const shift = Math.abs(
+      thought.posterior.probability - thought.prior.probability
+    );
     if (shift < 0.05) {
       enhancements.suggestions.push(
         "Small prior-to-posterior shift. Consider seeking more diagnostic evidence."
@@ -9146,7 +10374,11 @@ var CounterfactualHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -9170,7 +10402,9 @@ var CounterfactualHandler = class {
         errors.push(...cfValidation.errors);
         warnings.push(...cfValidation.warnings);
         if (cf.conditions && Array.isArray(cf.conditions)) {
-          const hasIntervention = cf.conditions.some((c) => c.isIntervention === true);
+          const hasIntervention = cf.conditions.some(
+            (c) => c.isIntervention === true
+          );
           if (!hasIntervention) {
             warnings.push(
               createValidationWarning(
@@ -9193,7 +10427,9 @@ var CounterfactualHandler = class {
       }
     }
     if (inputAny.interventionPoint) {
-      const ipValidation = this.validateInterventionPoint(inputAny.interventionPoint);
+      const ipValidation = this.validateInterventionPoint(
+        inputAny.interventionPoint
+      );
       errors.push(...ipValidation.errors);
       warnings.push(...ipValidation.warnings);
     }
@@ -9220,10 +10456,18 @@ var CounterfactualHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["causal" /* CAUSAL */, "bayesian" /* BAYESIAN */, "temporal" /* TEMPORAL */],
+      relatedModes: [
+        "causal" /* CAUSAL */,
+        "bayesian" /* BAYESIAN */,
+        "temporal" /* TEMPORAL */
+      ],
       guidingQuestions: [],
       warnings: [],
-      mentalModels: ["Possible Worlds", "Nearest World Semantics", "Intervention Calculus"]
+      mentalModels: [
+        "Possible Worlds",
+        "Nearest World Semantics",
+        "Intervention Calculus"
+      ]
     };
     const actualConditions = thought.actual?.conditions?.length || 0;
     const counterfactualCount = thought.counterfactuals?.length || 0;
@@ -9281,7 +10525,9 @@ var CounterfactualHandler = class {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Validate a scenario
@@ -9456,7 +10702,9 @@ var CounterfactualHandler = class {
     if (thought.counterfactuals) {
       for (const cf of thought.counterfactuals) {
         if (cf.conditions) {
-          count += cf.conditions.filter((c) => c.isIntervention === true).length;
+          count += cf.conditions.filter(
+            (c) => c.isIntervention === true
+          ).length;
         }
       }
     }
@@ -9543,7 +10791,9 @@ var TemporalHandler = class {
         }
       }
     }
-    const inconsistencies = this.detectInconsistencies(inputAny.relations || []);
+    const inconsistencies = this.detectInconsistencies(
+      inputAny.relations || []
+    );
     for (const inc of inconsistencies) {
       warnings.push(
         createValidationWarning(
@@ -9573,7 +10823,11 @@ var TemporalHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["causal" /* CAUSAL */, "sequential" /* SEQUENTIAL */, "counterfactual" /* COUNTERFACTUAL */],
+      relatedModes: [
+        "causal" /* CAUSAL */,
+        "sequential" /* SEQUENTIAL */,
+        "counterfactual" /* COUNTERFACTUAL */
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
@@ -9594,11 +10848,15 @@ var TemporalHandler = class {
       intervalEvents: events.filter((e) => e.type === "interval").length
     };
     if (events.length > 1 && relations.length === 0) {
-      enhancements.suggestions.push("Define temporal relations between events");
+      enhancements.suggestions.push(
+        "Define temporal relations between events"
+      );
     }
     const expectedRelations = events.length * (events.length - 1) / 2;
     if (relations.length < expectedRelations * 0.3 && events.length > 2) {
-      enhancements.suggestions.push("Timeline may be under-constrained - consider adding more relations");
+      enhancements.suggestions.push(
+        "Timeline may be under-constrained - consider adding more relations"
+      );
     }
     enhancements.guidingQuestions = [
       "Which events must occur before others?",
@@ -9610,7 +10868,9 @@ var TemporalHandler = class {
     return enhancements;
   }
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type to valid TemporalThoughtType
@@ -9636,7 +10896,9 @@ var TemporalHandler = class {
     for (const [from, toSet] of beforeSet) {
       for (const to of toSet) {
         if (beforeSet.get(to)?.has(from)) {
-          inconsistencies.push(`${from} precedes ${to} and ${to} precedes ${from}`);
+          inconsistencies.push(
+            `${from} precedes ${to} and ${to} precedes ${from}`
+          );
         }
       }
     }
@@ -9686,7 +10948,9 @@ var HistoricalHandler = class {
       methodology: inputAny.methodology
     };
     if (thought.sources && thought.sources.length > 0) {
-      thought.aggregateReliability = this.calculateAggregateReliability(thought.sources);
+      thought.aggregateReliability = this.calculateAggregateReliability(
+        thought.sources
+      );
     }
     if (thought.events && thought.events.length > 0) {
       thought.temporalSpan = this.calculateTemporalSpan(thought.events);
@@ -9800,7 +11064,9 @@ var HistoricalHandler = class {
       );
     }
     if (sources.length > 0) {
-      const lowReliabilitySources = sources.filter((s) => s.reliability < 0.5);
+      const lowReliabilitySources = sources.filter(
+        (s) => s.reliability < 0.5
+      );
       if (lowReliabilitySources.length > 0) {
         warnings.push(
           createValidationWarning(
@@ -9822,7 +11088,11 @@ var HistoricalHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["temporal" /* TEMPORAL */, "causal" /* CAUSAL */, "synthesis" /* SYNTHESIS */],
+      relatedModes: [
+        "temporal" /* TEMPORAL */,
+        "causal" /* CAUSAL */,
+        "synthesis" /* SYNTHESIS */
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
@@ -9848,34 +11118,52 @@ var HistoricalHandler = class {
       actorCount: actors.length,
       primarySourceRatio: sources.length > 0 ? sources.filter((s) => s.type === "primary").length / sources.length : 0,
       averageSourceReliability: thought.aggregateReliability || 0,
-      transformativeEventCount: events.filter((e) => e.significance === "transformative").length
+      transformativeEventCount: events.filter(
+        (e) => e.significance === "transformative"
+      ).length
     };
     if (sources.length === 0) {
-      enhancements.suggestions.push("Add historical sources to support your analysis");
+      enhancements.suggestions.push(
+        "Add historical sources to support your analysis"
+      );
     }
     if (sources.length > 0 && sources.filter((s) => s.type === "primary").length === 0) {
-      enhancements.suggestions.push("Consider adding primary sources for more direct evidence");
+      enhancements.suggestions.push(
+        "Consider adding primary sources for more direct evidence"
+      );
     }
     if (events.length > 3 && causalChains.length === 0) {
-      enhancements.suggestions.push("Consider tracing causal chains between major events");
+      enhancements.suggestions.push(
+        "Consider tracing causal chains between major events"
+      );
     }
     if (events.length > 5 && periods.length === 0) {
-      enhancements.suggestions.push("Consider organizing events into historical periods");
+      enhancements.suggestions.push(
+        "Consider organizing events into historical periods"
+      );
     }
     if (actors.length === 0 && events.length > 0) {
-      enhancements.suggestions.push("Identify key historical actors involved in these events");
+      enhancements.suggestions.push(
+        "Identify key historical actors involved in these events"
+      );
     }
     const uncorroboratedSources = sources.filter(
       (s) => (!s.corroboratedBy || s.corroboratedBy.length === 0) && s.type === "primary"
     );
     if (uncorroboratedSources.length > 0) {
-      enhancements.suggestions.push(`${uncorroboratedSources.length} primary source(s) lack corroboration`);
+      enhancements.suggestions.push(
+        `${uncorroboratedSources.length} primary source(s) lack corroboration`
+      );
     }
-    enhancements.guidingQuestions = this.getGuidingQuestions(thought.thoughtType);
+    enhancements.guidingQuestions = this.getGuidingQuestions(
+      thought.thoughtType
+    );
     return enhancements;
   }
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type to valid HistoricalThoughtType
@@ -9901,7 +11189,10 @@ var HistoricalHandler = class {
     const corroboratedCount = sources.filter(
       (s) => s.corroboratedBy && s.corroboratedBy.length > 0
     ).length;
-    const corroborationBonus = Math.min(0.1, corroboratedCount / sources.length * 0.1);
+    const corroborationBonus = Math.min(
+      0.1,
+      corroboratedCount / sources.length * 0.1
+    );
     return Math.min(1, weightedSum / totalWeight + corroborationBonus);
   }
   /**
@@ -10053,11 +11344,19 @@ var GameTheoryHandler = class {
     const payoffMatrix = inputAny.payoffMatrix;
     let nashEquilibria = inputAny.nashEquilibria;
     if (!nashEquilibria && payoffMatrix && players.length > 0) {
-      nashEquilibria = this.findPureStrategyNashEquilibria(payoffMatrix, players, strategies);
+      nashEquilibria = this.findPureStrategyNashEquilibria(
+        payoffMatrix,
+        players,
+        strategies
+      );
     }
     let dominantStrategies = inputAny.dominantStrategies;
     if (!dominantStrategies && payoffMatrix && players.length > 0) {
-      dominantStrategies = this.findDominantStrategies(payoffMatrix, players, strategies);
+      dominantStrategies = this.findDominantStrategies(
+        payoffMatrix,
+        players,
+        strategies
+      );
     }
     return {
       id: randomUUID(),
@@ -10098,7 +11397,11 @@ var GameTheoryHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -10128,7 +11431,11 @@ var GameTheoryHandler = class {
       warnings.push(...strategyValidation.warnings);
     }
     if (payoffMatrix) {
-      const matrixValidation = this.validatePayoffMatrix(payoffMatrix, players, strategies);
+      const matrixValidation = this.validatePayoffMatrix(
+        payoffMatrix,
+        players,
+        strategies
+      );
       if (!matrixValidation.valid) {
         errors.push(...matrixValidation.errors);
       }
@@ -10203,7 +11510,10 @@ var GameTheoryHandler = class {
           "Which equilibrium is most likely to emerge? Are there Schelling focal points?"
         );
       }
-      const paretoOptimal = this.checkParetoOptimality(thought.nashEquilibria, thought.payoffMatrix);
+      const paretoOptimal = this.checkParetoOptimality(
+        thought.nashEquilibria,
+        thought.payoffMatrix
+      );
       if (!paretoOptimal) {
         enhancements.warnings.push(
           "Nash equilibrium may not be Pareto optimal (like in Prisoner's Dilemma)"
@@ -10231,12 +11541,19 @@ var GameTheoryHandler = class {
         enhancements.guidingQuestions.push(
           "What coalitions might form? How should payoffs be divided fairly?"
         );
-        enhancements.mentalModels.push("Shapley Value", "Core", "Coalition Formation");
+        enhancements.mentalModels.push(
+          "Shapley Value",
+          "Core",
+          "Coalition Formation"
+        );
       } else if (thought.game.type === "extensive_form") {
         enhancements.guidingQuestions.push(
           "What is the subgame perfect equilibrium? Use backward induction."
         );
-        enhancements.mentalModels.push("Backward Induction", "Subgame Perfect Equilibrium");
+        enhancements.mentalModels.push(
+          "Backward Induction",
+          "Subgame Perfect Equilibrium"
+        );
       }
     }
     return enhancements;
@@ -10343,9 +11660,14 @@ var GameTheoryHandler = class {
       }
     }
     for (const player of players) {
-      const playerStrategies = strategies.filter((s) => s.playerId === player.id && !s.isPure);
+      const playerStrategies = strategies.filter(
+        (s) => s.playerId === player.id && !s.isPure
+      );
       if (playerStrategies.length > 0) {
-        const probSum = playerStrategies.reduce((sum, s) => sum + (s.probability || 0), 0);
+        const probSum = playerStrategies.reduce(
+          (sum, s) => sum + (s.probability || 0),
+          0
+        );
         if (Math.abs(probSum - 1) > 1e-3) {
           warnings.push(
             createValidationWarning(
@@ -10443,8 +11765,18 @@ var GameTheoryHandler = class {
           strategyProfile: entry.strategyProfile,
           payoffs: entry.payoffs,
           type: "pure",
-          isStrict: this.isStrictEquilibrium(entry, matrix, players, strategies),
-          stability: this.calculateEquilibriumStability(entry, matrix, players, strategies)
+          isStrict: this.isStrictEquilibrium(
+            entry,
+            matrix,
+            players,
+            strategies
+          ),
+          stability: this.calculateEquilibriumStability(
+            entry,
+            matrix,
+            players,
+            strategies
+          )
         });
       }
     }
@@ -10548,9 +11880,16 @@ var GameTheoryHandler = class {
     }
     for (let playerIdx = 0; playerIdx < players.length; playerIdx++) {
       const player = players[playerIdx];
-      const playerStrategies = strategies.filter((s) => s.playerId === player.id);
+      const playerStrategies = strategies.filter(
+        (s) => s.playerId === player.id
+      );
       for (const strategy of playerStrategies) {
-        const dominates = this.checkDominance(strategy, playerIdx, matrix, playerStrategies);
+        const dominates = this.checkDominance(
+          strategy,
+          playerIdx,
+          matrix,
+          playerStrategies
+        );
         if (dominates.length > 0) {
           dominantStrategies.push({
             playerId: player.id,
@@ -10661,19 +12000,21 @@ var EvidentialHandler = class {
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
     let beliefFunctions = inputAny.beliefFunctions || [];
     if (inputAny.massFunction && typeof inputAny.massFunction === "object" && beliefFunctions.length === 0) {
-      const massAssignments = Object.entries(inputAny.massFunction).map(
-        ([key, mass]) => ({
-          hypothesisSet: key.split(",").map((s) => s.trim()),
-          mass,
-          justification: "From mass function input"
-        })
-      );
-      beliefFunctions = [{
-        id: "bf-from-mass-function",
-        source: "input",
-        massAssignments,
-        conflictMass: 0
-      }];
+      const massAssignments = Object.entries(
+        inputAny.massFunction
+      ).map(([key, mass]) => ({
+        hypothesisSet: key.split(",").map((s) => s.trim()),
+        mass,
+        justification: "From mass function input"
+      }));
+      beliefFunctions = [
+        {
+          id: "bf-from-mass-function",
+          source: "input",
+          massAssignments,
+          conflictMass: 0
+        }
+      ];
     }
     return {
       id: randomUUID(),
@@ -10706,7 +12047,10 @@ var EvidentialHandler = class {
     if (inputAny.beliefFunctions) {
       for (const bf of inputAny.beliefFunctions) {
         if (bf.massAssignments) {
-          const sum = bf.massAssignments.reduce((acc, ma) => acc + (ma.mass || 0), 0);
+          const sum = bf.massAssignments.reduce(
+            (acc, ma) => acc + (ma.mass || 0),
+            0
+          );
           if (Math.abs(sum - 1) > 1e-3) {
             errors.push(
               createValidationError(
@@ -10729,7 +12073,9 @@ var EvidentialHandler = class {
       );
     }
     if (inputAny.evidence) {
-      const unreliableEvidence = inputAny.evidence.filter((e) => e.reliability === void 0);
+      const unreliableEvidence = inputAny.evidence.filter(
+        (e) => e.reliability === void 0
+      );
       if (unreliableEvidence.length > 0) {
         warnings.push(
           createValidationWarning(
@@ -10774,16 +12120,24 @@ var EvidentialHandler = class {
       hasCombinedBelief: thought.combinedBelief ? 1 : 0
     };
     if (hypotheses.length === 0) {
-      enhancements.suggestions.push("Define hypotheses in the frame of discernment");
+      enhancements.suggestions.push(
+        "Define hypotheses in the frame of discernment"
+      );
     }
     if (evidence.length === 0) {
-      enhancements.suggestions.push("Collect evidence supporting or contradicting hypotheses");
+      enhancements.suggestions.push(
+        "Collect evidence supporting or contradicting hypotheses"
+      );
     }
     if (evidence.length > 0 && beliefFunctions.length === 0) {
-      enhancements.suggestions.push("Assign belief functions based on evidence");
+      enhancements.suggestions.push(
+        "Assign belief functions based on evidence"
+      );
     }
     if (beliefFunctions.length > 1 && !thought.combinedBelief) {
-      enhancements.suggestions.push("Combine belief functions using Dempster's rule");
+      enhancements.suggestions.push(
+        "Combine belief functions using Dempster's rule"
+      );
     }
     enhancements.guidingQuestions = [
       "What evidence supports each hypothesis?",
@@ -10795,7 +12149,9 @@ var EvidentialHandler = class {
     return enhancements;
   }
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type to valid EvidentialThoughtType
@@ -10827,15 +12183,15 @@ var AnalogicalHandler = class {
       inputAny.targetDomain || inputAny.targetAnalogy,
       "target"
     );
-    const mapping = this.processMappings(inputAny.mapping || inputAny.mappings || []);
-    const insights = this.processInsights(inputAny.insights || inputAny.inferredProperties || []);
+    const mapping = this.processMappings(
+      inputAny.mapping || inputAny.mappings || []
+    );
+    const insights = this.processInsights(
+      inputAny.insights || inputAny.inferredProperties || []
+    );
     const inferences = this.processInferences(inputAny.inferences || []);
     const limitations = inputAny.limitations || this.identifyLimitations(mapping);
-    const analogyStrength = inputAny.analogyStrength ?? this.calculateAnalogyStrength(
-      sourceDomain,
-      targetDomain,
-      mapping
-    );
+    const analogyStrength = inputAny.analogyStrength ?? this.calculateAnalogyStrength(sourceDomain, targetDomain, mapping);
     return {
       id: randomUUID(),
       sessionId,
@@ -10893,7 +12249,9 @@ var AnalogicalHandler = class {
       );
     }
     if (mappings) {
-      const lowConfidence = mappings.filter((m) => (m.confidence || 0) < 0.5);
+      const lowConfidence = mappings.filter(
+        (m) => (m.confidence || 0) < 0.5
+      );
       if (lowConfidence.length > 0) {
         warnings.push(
           createValidationWarning(
@@ -10912,7 +12270,11 @@ var AnalogicalHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["abductive" /* ABDUCTIVE */, "inductive" /* INDUCTIVE */, "causal" /* CAUSAL */],
+      relatedModes: [
+        "abductive" /* ABDUCTIVE */,
+        "inductive" /* INDUCTIVE */,
+        "causal" /* CAUSAL */
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
@@ -10936,8 +12298,16 @@ var AnalogicalHandler = class {
       analogyStrength: thought.analogyStrength || 0
     };
     if (sourceDomain?.entities && targetDomain?.entities) {
-      const unmappedSource = this.findUnmappedEntities(sourceDomain.entities, mapping, "source");
-      const unmappedTarget = this.findUnmappedEntities(targetDomain.entities, mapping, "target");
+      const unmappedSource = this.findUnmappedEntities(
+        sourceDomain.entities,
+        mapping,
+        "source"
+      );
+      const unmappedTarget = this.findUnmappedEntities(
+        targetDomain.entities,
+        mapping,
+        "target"
+      );
       if (unmappedSource.length > 0) {
         enhancements.suggestions.push(
           `Consider mapping source entities: ${unmappedSource.slice(0, 3).join(", ")}`
@@ -10950,7 +12320,9 @@ var AnalogicalHandler = class {
       }
     }
     if ((thought.analogyStrength || 0) < 0.5) {
-      enhancements.warnings = ["Low analogy strength - potential for negative transfer"];
+      enhancements.warnings = [
+        "Low analogy strength - potential for negative transfer"
+      ];
     }
     enhancements.guidingQuestions = [
       "What structural relations are preserved across domains?",
@@ -11105,7 +12477,9 @@ var AnalogicalHandler = class {
    */
   findUnmappedEntities(entities, mappings, side) {
     const mappedIds = new Set(
-      mappings.map((m) => side === "source" ? m.sourceEntityId : m.targetEntityId)
+      mappings.map(
+        (m) => side === "source" ? m.sourceEntityId : m.targetEntityId
+      )
     );
     return entities.filter((e) => !mappedIds.has(e.id)).map((e) => e.name);
   }
@@ -11183,7 +12557,9 @@ var FirstPrinciplesHandler = class {
       );
     }
     if (inputAny.principles) {
-      const unjustified = inputAny.principles.filter((p) => !p.justification || p.justification.trim() === "");
+      const unjustified = inputAny.principles.filter(
+        (p) => !p.justification || p.justification.trim() === ""
+      );
       if (unjustified.length > 0) {
         warnings.push(
           createValidationWarning(
@@ -11195,7 +12571,9 @@ var FirstPrinciplesHandler = class {
       }
     }
     if (inputAny.derivationSteps && inputAny.derivationSteps.length > 0) {
-      const principleIds = new Set((inputAny.principles || []).map((p) => p.id));
+      const principleIds = new Set(
+        (inputAny.principles || []).map((p) => p.id)
+      );
       for (const step of inputAny.derivationSteps) {
         if (step.principle && !principleIds.has(step.principle)) {
           warnings.push(
@@ -11216,7 +12594,11 @@ var FirstPrinciplesHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["deductive" /* DEDUCTIVE */, "abductive" /* ABDUCTIVE */, "formallogic" /* FORMALLOGIC */],
+      relatedModes: [
+        "deductive" /* DEDUCTIVE */,
+        "abductive" /* ABDUCTIVE */,
+        "formallogic" /* FORMALLOGIC */
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
@@ -11236,16 +12618,24 @@ var FirstPrinciplesHandler = class {
       alternativeCount: thought.alternativeInterpretations?.length || 0
     };
     if (principles.length === 0) {
-      enhancements.suggestions.push('Start by asking "What do we know for certain?"');
+      enhancements.suggestions.push(
+        'Start by asking "What do we know for certain?"'
+      );
     }
     if (principles.length > 0 && derivationSteps.length === 0) {
-      enhancements.suggestions.push("Build up from principles to derive new insights");
+      enhancements.suggestions.push(
+        "Build up from principles to derive new insights"
+      );
     }
     if (!thought.question) {
-      enhancements.suggestions.push("Define the fundamental question you are investigating");
+      enhancements.suggestions.push(
+        "Define the fundamental question you are investigating"
+      );
     }
     if (!thought.conclusion || !thought.conclusion.statement) {
-      enhancements.suggestions.push("Formulate a conclusion based on your derivation");
+      enhancements.suggestions.push(
+        "Formulate a conclusion based on your derivation"
+      );
     }
     enhancements.guidingQuestions = [
       "What is the most fundamental truth here?",
@@ -11442,7 +12832,11 @@ var SystemsThinkingHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -11461,7 +12855,11 @@ var SystemsThinkingHandler = class {
       }
       for (let i = 0; i < inputAny.components.length; i++) {
         const component = inputAny.components[i];
-        const compValidation = this.validateComponent(component, i, componentIds);
+        const compValidation = this.validateComponent(
+          component,
+          i,
+          componentIds
+        );
         errors.push(...compValidation.errors);
         warnings.push(...compValidation.warnings);
       }
@@ -11497,7 +12895,11 @@ var SystemsThinkingHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["causal" /* CAUSAL */, "optimization" /* OPTIMIZATION */, "scientificmethod" /* SCIENTIFICMETHOD */],
+      relatedModes: [
+        "causal" /* CAUSAL */,
+        "optimization" /* OPTIMIZATION */,
+        "scientificmethod" /* SCIENTIFICMETHOD */
+      ],
       guidingQuestions: [],
       warnings: [],
       mentalModels: [
@@ -11512,8 +12914,12 @@ var SystemsThinkingHandler = class {
     const feedbackLoopCount = thought.feedbackLoops?.length || 0;
     const leveragePointCount = thought.leveragePoints?.length || 0;
     const behaviorCount = thought.behaviors?.length || 0;
-    const reinforcingLoops = (thought.feedbackLoops || []).filter((l) => l.type === "reinforcing").length;
-    const balancingLoops = (thought.feedbackLoops || []).filter((l) => l.type === "balancing").length;
+    const reinforcingLoops = (thought.feedbackLoops || []).filter(
+      (l) => l.type === "reinforcing"
+    ).length;
+    const balancingLoops = (thought.feedbackLoops || []).filter(
+      (l) => l.type === "balancing"
+    ).length;
     enhancements.metrics = {
       componentCount,
       feedbackLoopCount,
@@ -11524,11 +12930,13 @@ var SystemsThinkingHandler = class {
     };
     const detectedArchetypesResult = this.detectArchetypes(thought);
     if (detectedArchetypesResult.length > 0) {
-      enhancements.detectedArchetypes = detectedArchetypesResult.map((a) => ({
-        name: a.name,
-        confidence: a.confidence,
-        matchedPatterns: a.archetype.warningSigns
-      }));
+      enhancements.detectedArchetypes = detectedArchetypesResult.map(
+        (a) => ({
+          name: a.name,
+          confidence: a.confidence,
+          matchedPatterns: a.archetype.warningSigns
+        })
+      );
       for (const detected of detectedArchetypesResult) {
         if (detected.confidence > 0.5) {
           enhancements.warnings.push(
@@ -11567,7 +12975,9 @@ var SystemsThinkingHandler = class {
         "Which feedback loop is currently dominant in the system behavior?"
       );
     }
-    const delayedLoops = (thought.feedbackLoops || []).filter((l) => l.delay && l.delay > 0);
+    const delayedLoops = (thought.feedbackLoops || []).filter(
+      (l) => l.delay && l.delay > 0
+    );
     if (delayedLoops.length > 0) {
       enhancements.guidingQuestions.push(
         "How do delays in feedback affect system predictability?"
@@ -11584,13 +12994,17 @@ var SystemsThinkingHandler = class {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type to valid SystemsThinkingThoughtType
    */
   resolveThoughtType(inputType) {
-    if (inputType && this.supportedThoughtTypes.includes(inputType)) {
+    if (inputType && this.supportedThoughtTypes.includes(
+      inputType
+    )) {
       return inputType;
     }
     return "system_definition";
@@ -11763,7 +13177,9 @@ var SystemsThinkingHandler = class {
   detectArchetypes(thought) {
     const detected = [];
     const loops = thought.feedbackLoops || [];
-    const reinforcingCount = loops.filter((l) => l.type === "reinforcing").length;
+    const reinforcingCount = loops.filter(
+      (l) => l.type === "reinforcing"
+    ).length;
     const balancingCount = loops.filter((l) => l.type === "balancing").length;
     const hasDelay = loops.some((l) => l.delay && l.delay > 0);
     for (const archetype of SYSTEMS_ARCHETYPES) {
@@ -11914,7 +13330,11 @@ var ScientificMethodHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["abductive" /* ABDUCTIVE */, "inductive" /* INDUCTIVE */, "bayesian" /* BAYESIAN */],
+      relatedModes: [
+        "abductive" /* ABDUCTIVE */,
+        "inductive" /* INDUCTIVE */,
+        "bayesian" /* BAYESIAN */
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
@@ -11940,17 +13360,29 @@ var ScientificMethodHandler = class {
       hasConclusion: hasConclusion ? 1 : 0
     };
     if (!thought.researchQuestion) {
-      enhancements.suggestions.push("Start by formulating a clear research question");
+      enhancements.suggestions.push(
+        "Start by formulating a clear research question"
+      );
     } else if (hypotheses.length === 0) {
-      enhancements.suggestions.push("Derive specific, testable hypotheses from your research question");
+      enhancements.suggestions.push(
+        "Derive specific, testable hypotheses from your research question"
+      );
     } else if (!hasExperiment) {
-      enhancements.suggestions.push("Design an experiment to test your hypotheses");
+      enhancements.suggestions.push(
+        "Design an experiment to test your hypotheses"
+      );
     } else if (!hasData) {
-      enhancements.suggestions.push("Collect data according to your experimental design");
+      enhancements.suggestions.push(
+        "Collect data according to your experimental design"
+      );
     } else if (!hasAnalysis) {
-      enhancements.suggestions.push("Analyze data using appropriate statistical methods");
+      enhancements.suggestions.push(
+        "Analyze data using appropriate statistical methods"
+      );
     } else if (!hasConclusion) {
-      enhancements.suggestions.push("Draw conclusions based on your analysis results");
+      enhancements.suggestions.push(
+        "Draw conclusions based on your analysis results"
+      );
     }
     enhancements.guidingQuestions = [
       "What would falsify this hypothesis?",
@@ -11963,13 +13395,17 @@ var ScientificMethodHandler = class {
     return enhancements;
   }
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type to valid ScientificMethodThoughtType
    */
   resolveThoughtType(inputType) {
-    if (inputType && this.supportedThoughtTypes.includes(inputType)) {
+    if (inputType && this.supportedThoughtTypes.includes(
+      inputType
+    )) {
       return inputType;
     }
     return "question_formulation";
@@ -12070,7 +13506,11 @@ var FormalLogicHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["deductive" /* DEDUCTIVE */, "mathematics" /* MATHEMATICS */, "firstprinciples" /* FIRSTPRINCIPLES */],
+      relatedModes: [
+        "deductive" /* DEDUCTIVE */,
+        "mathematics" /* MATHEMATICS */,
+        "firstprinciples" /* FIRSTPRINCIPLES */
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
@@ -12095,9 +13535,13 @@ var FormalLogicHandler = class {
     if (propositions.length === 0) {
       enhancements.suggestions.push("Start by defining atomic propositions");
     } else if (inferences.length === 0 && !proof) {
-      enhancements.suggestions.push("Apply inference rules to derive new conclusions");
+      enhancements.suggestions.push(
+        "Apply inference rules to derive new conclusions"
+      );
     } else if (proof && proof.completeness < 1) {
-      enhancements.suggestions.push("Continue building the proof with additional steps");
+      enhancements.suggestions.push(
+        "Continue building the proof with additional steps"
+      );
     }
     enhancements.guidingQuestions = [
       "Are all propositions clearly stated?",
@@ -12112,7 +13556,9 @@ var FormalLogicHandler = class {
     return enhancements;
   }
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type to valid FormalLogicThoughtType
@@ -12151,7 +13597,10 @@ var SynthesisHandler = class {
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
     let contradictions = inputAny.contradictions || [];
     if (contradictions.length === 0 && inputAny.sources && inputAny.sources.length > 1) {
-      contradictions = this.detectPotentialContradictions(inputAny.sources, inputAny.themes);
+      contradictions = this.detectPotentialContradictions(
+        inputAny.sources,
+        inputAny.themes
+      );
     }
     const sourceCoverage = this.calculateSourceCoverage(
       inputAny.sources || [],
@@ -12197,7 +13646,11 @@ var SynthesisHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -12238,7 +13691,11 @@ var SynthesisHandler = class {
       if (inputAny.contradictions && Array.isArray(inputAny.contradictions)) {
         for (let i = 0; i < inputAny.contradictions.length; i++) {
           const contradiction = inputAny.contradictions[i];
-          const contValidation = this.validateContradiction(contradiction, i, sourceIds);
+          const contValidation = this.validateContradiction(
+            contradiction,
+            i,
+            sourceIds
+          );
           errors.push(...contValidation.errors);
           warnings.push(...contValidation.warnings);
         }
@@ -12254,7 +13711,9 @@ var SynthesisHandler = class {
       }
     }
     if (inputAny.gaps && Array.isArray(inputAny.gaps) && inputAny.themes) {
-      const themeIds = new Set(inputAny.themes.map((t) => t.id).filter(Boolean));
+      const themeIds = new Set(
+        inputAny.themes.map((t) => t.id).filter(Boolean)
+      );
       for (let i = 0; i < inputAny.gaps.length; i++) {
         const gap = inputAny.gaps[i];
         if (gap.relatedThemes) {
@@ -12283,7 +13742,11 @@ var SynthesisHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["critique" /* CRITIQUE */, "argumentation" /* ARGUMENTATION */, "analysis" /* ANALYSIS */],
+      relatedModes: [
+        "critique" /* CRITIQUE */,
+        "argumentation" /* ARGUMENTATION */,
+        "analysis" /* ANALYSIS */
+      ],
       guidingQuestions: [],
       warnings: [],
       mentalModels: [
@@ -12362,7 +13825,9 @@ var SynthesisHandler = class {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type to valid SynthesisThoughtType
@@ -12529,8 +13994,12 @@ var SynthesisHandler = class {
         }
       }
     }
-    const coveredSources = Array.from(coveredSourceIds).filter((id) => sourceIds.has(id));
-    const uncoveredSources = Array.from(sourceIds).filter((id) => !coveredSourceIds.has(id));
+    const coveredSources = Array.from(coveredSourceIds).filter(
+      (id) => sourceIds.has(id)
+    );
+    const uncoveredSources = Array.from(sourceIds).filter(
+      (id) => !coveredSourceIds.has(id)
+    );
     return {
       coverageRatio: sourceIds.size > 0 ? coveredSources.length / sourceIds.size : 0,
       uncoveredSources,
@@ -12574,16 +14043,56 @@ var SynthesisHandler = class {
 // src/modes/handlers/ArgumentationHandler.ts
 init_esm_shims();
 var COMMON_FALLACIES = [
-  { name: "Ad Hominem", category: "informal", patterns: ["attacks the person", "character of"] },
-  { name: "Straw Man", category: "informal", patterns: ["misrepresents", "exaggerated version"] },
-  { name: "False Dilemma", category: "informal", patterns: ["either/or", "only two options"] },
-  { name: "Circular Reasoning", category: "formal", patterns: ["because it is", "self-evident"] },
-  { name: "Appeal to Authority", category: "informal", patterns: ["expert says", "authority claims"] },
-  { name: "Hasty Generalization", category: "informal", patterns: ["always", "never", "all", "none"] },
-  { name: "Red Herring", category: "informal", patterns: ["but what about", "changing subject"] },
-  { name: "Slippery Slope", category: "informal", patterns: ["will lead to", "eventually"] },
-  { name: "Appeal to Emotion", category: "informal", patterns: ["feel", "fear", "outrage"] },
-  { name: "False Cause", category: "formal", patterns: ["caused by", "therefore"] }
+  {
+    name: "Ad Hominem",
+    category: "informal",
+    patterns: ["attacks the person", "character of"]
+  },
+  {
+    name: "Straw Man",
+    category: "informal",
+    patterns: ["misrepresents", "exaggerated version"]
+  },
+  {
+    name: "False Dilemma",
+    category: "informal",
+    patterns: ["either/or", "only two options"]
+  },
+  {
+    name: "Circular Reasoning",
+    category: "formal",
+    patterns: ["because it is", "self-evident"]
+  },
+  {
+    name: "Appeal to Authority",
+    category: "informal",
+    patterns: ["expert says", "authority claims"]
+  },
+  {
+    name: "Hasty Generalization",
+    category: "informal",
+    patterns: ["always", "never", "all", "none"]
+  },
+  {
+    name: "Red Herring",
+    category: "informal",
+    patterns: ["but what about", "changing subject"]
+  },
+  {
+    name: "Slippery Slope",
+    category: "informal",
+    patterns: ["will lead to", "eventually"]
+  },
+  {
+    name: "Appeal to Emotion",
+    category: "informal",
+    patterns: ["feel", "fear", "outrage"]
+  },
+  {
+    name: "False Cause",
+    category: "formal",
+    patterns: ["caused by", "therefore"]
+  }
 ];
 var ArgumentationHandler = class {
   mode = "argumentation" /* ARGUMENTATION */;
@@ -12606,7 +14115,10 @@ var ArgumentationHandler = class {
     const inputAny = input;
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
     const arguments_ = this.processArguments(inputAny.arguments || []);
-    const argumentStrength = this.calculateOverallStrength(arguments_, inputAny);
+    const argumentStrength = this.calculateOverallStrength(
+      arguments_,
+      inputAny
+    );
     const detectedFallacies = inputAny.fallacies || this.detectFallacies(inputAny);
     return {
       id: randomUUID(),
@@ -12687,7 +14199,9 @@ var ArgumentationHandler = class {
       );
     }
     if (inputAny.warrants) {
-      const weakWarrants = inputAny.warrants.filter((w) => w.strength < 0.5);
+      const weakWarrants = inputAny.warrants.filter(
+        (w) => w.strength < 0.5
+      );
       if (weakWarrants.length > inputAny.warrants.length / 2) {
         warnings.push(
           createValidationWarning(
@@ -12712,7 +14226,9 @@ var ArgumentationHandler = class {
       warnings.push(...dialecticValidation.warnings);
     }
     if (inputAny.fallacies && inputAny.fallacies.length > 0) {
-      const criticalFallacies = inputAny.fallacies.filter((f) => f.severity === "critical");
+      const criticalFallacies = inputAny.fallacies.filter(
+        (f) => f.severity === "critical"
+      );
       if (criticalFallacies.length > 0) {
         warnings.push(
           createValidationWarning(
@@ -12734,7 +14250,11 @@ var ArgumentationHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["formallogic" /* FORMALLOGIC */, "deductive" /* DEDUCTIVE */, "critique" /* CRITIQUE */],
+      relatedModes: [
+        "formallogic" /* FORMALLOGIC */,
+        "deductive" /* DEDUCTIVE */,
+        "critique" /* CRITIQUE */
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
@@ -12770,40 +14290,62 @@ var ArgumentationHandler = class {
     };
     const thoughtType = thought.thoughtType;
     if (thoughtType === "claim_formulation") {
-      enhancements.suggestions.push("Ensure claim is specific, debatable, and significant");
-      enhancements.guidingQuestions.push("Is this claim falsifiable and not self-evident?");
+      enhancements.suggestions.push(
+        "Ensure claim is specific, debatable, and significant"
+      );
+      enhancements.guidingQuestions.push(
+        "Is this claim falsifiable and not self-evident?"
+      );
     }
     if (thoughtType === "grounds_identification") {
-      enhancements.suggestions.push("Gather diverse types of evidence: empirical, statistical, testimonial");
+      enhancements.suggestions.push(
+        "Gather diverse types of evidence: empirical, statistical, testimonial"
+      );
       if (avgGroundsReliability < 0.6) {
-        enhancements.suggestions.push("Consider strengthening evidence reliability");
+        enhancements.suggestions.push(
+          "Consider strengthening evidence reliability"
+        );
       }
     }
     if (thoughtType === "warrant_construction") {
       const implicitWarrants = warrants.filter((w) => w.implicit);
       if (implicitWarrants.length > warrants.length * 0.5) {
-        enhancements.suggestions.push("Many warrants are implicit - consider making them explicit");
+        enhancements.suggestions.push(
+          "Many warrants are implicit - consider making them explicit"
+        );
       }
     }
     if (thoughtType === "rebuttal_anticipation") {
-      enhancements.suggestions.push("Consider rebuttals targeting each Toulmin element");
-      enhancements.guidingQuestions.push("What would a skeptic say about this argument?");
+      enhancements.suggestions.push(
+        "Consider rebuttals targeting each Toulmin element"
+      );
+      enhancements.guidingQuestions.push(
+        "What would a skeptic say about this argument?"
+      );
     }
     if (thoughtType === "dialectic_analysis" && thought.dialectic) {
       if (!thought.dialectic.synthesis) {
-        enhancements.suggestions.push("Develop a synthesis that transcends thesis and antithesis");
+        enhancements.suggestions.push(
+          "Develop a synthesis that transcends thesis and antithesis"
+        );
       }
     }
     if (fallacies.length > 0) {
       enhancements.warnings = enhancements.warnings || [];
       for (const fallacy of fallacies) {
-        enhancements.warnings.push(`${fallacy.severity} fallacy: ${fallacy.name} - ${fallacy.description}`);
+        enhancements.warnings.push(
+          `${fallacy.severity} fallacy: ${fallacy.name} - ${fallacy.description}`
+        );
       }
     }
     if (thought.argumentStrength < 0.5) {
-      enhancements.suggestions.push("Argument strength is low - consider adding more grounds or strengthening warrants");
+      enhancements.suggestions.push(
+        "Argument strength is low - consider adding more grounds or strengthening warrants"
+      );
     } else if (thought.argumentStrength > 0.8) {
-      enhancements.suggestions.push("Strong argument - consider addressing potential rebuttals");
+      enhancements.suggestions.push(
+        "Strong argument - consider addressing potential rebuttals"
+      );
     }
     enhancements.guidingQuestions.push(
       "Is the evidence sufficient and relevant to the claim?",
@@ -12814,7 +14356,9 @@ var ArgumentationHandler = class {
     return enhancements;
   }
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type to valid ArgumentationThoughtType
@@ -13120,7 +14664,10 @@ var CritiqueHandler = class {
     const weaknessesIdentified = critiquePoints.filter(
       (p) => p.type === "weakness" || p.type === "concern"
     ).length;
-    const balanceRatio = this.calculateBalanceRatio(strengthsIdentified, weaknessesIdentified);
+    const balanceRatio = this.calculateBalanceRatio(
+      strengthsIdentified,
+      weaknessesIdentified
+    );
     return {
       id: randomUUID(),
       sessionId,
@@ -13159,7 +14706,11 @@ var CritiqueHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -13176,12 +14727,16 @@ var CritiqueHandler = class {
       warnings.push(...workValidation.warnings);
     }
     if (inputAny.methodologyEvaluation) {
-      const methValidation = this.validateMethodologyEvaluation(inputAny.methodologyEvaluation);
+      const methValidation = this.validateMethodologyEvaluation(
+        inputAny.methodologyEvaluation
+      );
       errors.push(...methValidation.errors);
       warnings.push(...methValidation.warnings);
     }
     if (inputAny.argumentCritique) {
-      const argValidation = this.validateArgumentCritique(inputAny.argumentCritique);
+      const argValidation = this.validateArgumentCritique(
+        inputAny.argumentCritique
+      );
       warnings.push(...argValidation.warnings);
     }
     if (inputAny.critiquePoints && Array.isArray(inputAny.critiquePoints)) {
@@ -13231,7 +14786,11 @@ var CritiqueHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["argumentation" /* ARGUMENTATION */, "synthesis" /* SYNTHESIS */, "analysis" /* ANALYSIS */],
+      relatedModes: [
+        "argumentation" /* ARGUMENTATION */,
+        "synthesis" /* SYNTHESIS */,
+        "analysis" /* ANALYSIS */
+      ],
       guidingQuestions: [],
       warnings: [],
       mentalModels: [
@@ -13320,7 +14879,9 @@ var CritiqueHandler = class {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type to valid CritiqueThoughtType
@@ -13511,7 +15072,10 @@ var CritiqueHandler = class {
       strength_recognition: ["Clarification", "Implications"],
       improvement_suggestion: ["Perspectives", "Meta"]
     };
-    const categoryNames = typeToCategories[thoughtType] || ["Clarification", "Evidence"];
+    const categoryNames = typeToCategories[thoughtType] || [
+      "Clarification",
+      "Evidence"
+    ];
     return SOCRATIC_CATEGORIES.filter((c) => categoryNames.includes(c.name));
   }
 };
@@ -13521,39 +15085,87 @@ init_esm_shims();
 var METHODOLOGY_GUIDANCE = {
   thematic_analysis: {
     description: "Braun & Clarke's reflexive thematic analysis",
-    keySteps: ["Data familiarization", "Initial coding", "Theme development", "Theme refinement", "Final analysis"]
+    keySteps: [
+      "Data familiarization",
+      "Initial coding",
+      "Theme development",
+      "Theme refinement",
+      "Final analysis"
+    ]
   },
   grounded_theory: {
     description: "Glaser & Strauss, Charmaz grounded theory approach",
-    keySteps: ["Open coding", "Axial coding", "Selective coding", "Theoretical sampling", "Saturation"]
+    keySteps: [
+      "Open coding",
+      "Axial coding",
+      "Selective coding",
+      "Theoretical sampling",
+      "Saturation"
+    ]
   },
   discourse_analysis: {
     description: "Foucauldian or Critical discourse analysis",
-    keySteps: ["Text selection", "Identify patterns", "Analyze power relations", "Interpret social functions"]
+    keySteps: [
+      "Text selection",
+      "Identify patterns",
+      "Analyze power relations",
+      "Interpret social functions"
+    ]
   },
   content_analysis: {
     description: "Qualitative content analysis",
-    keySteps: ["Define categories", "Create coding scheme", "Code systematically", "Analyze patterns"]
+    keySteps: [
+      "Define categories",
+      "Create coding scheme",
+      "Code systematically",
+      "Analyze patterns"
+    ]
   },
   phenomenological: {
     description: "IPA or Descriptive phenomenological analysis",
-    keySteps: ["Bracket assumptions", "Describe experience", "Identify essences", "Synthesize meanings"]
+    keySteps: [
+      "Bracket assumptions",
+      "Describe experience",
+      "Identify essences",
+      "Synthesize meanings"
+    ]
   },
   narrative_analysis: {
     description: "Narrative inquiry approach",
-    keySteps: ["Collect stories", "Analyze structure", "Identify themes", "Interpret meanings"]
+    keySteps: [
+      "Collect stories",
+      "Analyze structure",
+      "Identify themes",
+      "Interpret meanings"
+    ]
   },
   framework_analysis: {
     description: "Ritchie & Spencer framework analysis",
-    keySteps: ["Familiarization", "Framework identification", "Indexing", "Charting", "Interpretation"]
+    keySteps: [
+      "Familiarization",
+      "Framework identification",
+      "Indexing",
+      "Charting",
+      "Interpretation"
+    ]
   },
   template_analysis: {
     description: "King's template analysis",
-    keySteps: ["Initial template", "Apply to data", "Modify template", "Final template"]
+    keySteps: [
+      "Initial template",
+      "Apply to data",
+      "Modify template",
+      "Final template"
+    ]
   },
   mixed_qualitative: {
     description: "Combined qualitative approaches",
-    keySteps: ["Justify combination", "Apply methods", "Integrate findings", "Ensure coherence"]
+    keySteps: [
+      "Justify combination",
+      "Apply methods",
+      "Integrate findings",
+      "Ensure coherence"
+    ]
   }
 };
 var AnalysisHandler = class {
@@ -13577,7 +15189,10 @@ var AnalysisHandler = class {
     const inputAny = input;
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
     const codebook = this.processCodebook(inputAny.codebook);
-    const codingProgress = this.calculateCodingProgress(inputAny.dataSegments, codebook);
+    const codingProgress = this.calculateCodingProgress(
+      inputAny.dataSegments,
+      codebook
+    );
     const rigorAssessment = inputAny.rigorAssessment || this.assessRigor(inputAny);
     return {
       id: randomUUID(),
@@ -13661,8 +15276,12 @@ var AnalysisHandler = class {
       }
     }
     if (inputAny.themes && inputAny.themes.length > 0) {
-      const saturatedThemes = inputAny.themes.filter((t) => t.prevalence > 0.7);
-      const sparseThemes = inputAny.themes.filter((t) => t.prevalence < 0.2);
+      const saturatedThemes = inputAny.themes.filter(
+        (t) => t.prevalence > 0.7
+      );
+      const sparseThemes = inputAny.themes.filter(
+        (t) => t.prevalence < 0.2
+      );
       if (sparseThemes.length > saturatedThemes.length) {
         warnings.push(
           createValidationWarning(
@@ -13684,7 +15303,11 @@ var AnalysisHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["synthesis" /* SYNTHESIS */, "critique" /* CRITIQUE */, "inductive" /* INDUCTIVE */],
+      relatedModes: [
+        "synthesis" /* SYNTHESIS */,
+        "critique" /* CRITIQUE */,
+        "inductive" /* INDUCTIVE */
+      ],
       metrics: {},
       guidingQuestions: [],
       mentalModels: [
@@ -13715,34 +15338,50 @@ var AnalysisHandler = class {
     if (methodology && METHODOLOGY_GUIDANCE[methodology]) {
       const guide = METHODOLOGY_GUIDANCE[methodology];
       enhancements.suggestions.push(`Using ${guide.description}`);
-      enhancements.guidingQuestions.push(`Have you completed: ${guide.keySteps.join(" \u2192 ")}?`);
+      enhancements.guidingQuestions.push(
+        `Have you completed: ${guide.keySteps.join(" \u2192 ")}?`
+      );
     }
     const thoughtType = thought.thoughtType;
     if (thoughtType === "initial_coding" && codeCount < 10) {
-      enhancements.suggestions.push("Continue generating initial codes - aim for breadth");
+      enhancements.suggestions.push(
+        "Continue generating initial codes - aim for breadth"
+      );
     }
     if (thoughtType === "focused_coding" && codeCount > 50) {
-      enhancements.suggestions.push("Consider consolidating codes into higher-level categories");
+      enhancements.suggestions.push(
+        "Consider consolidating codes into higher-level categories"
+      );
     }
     if (thoughtType === "theme_development" && themeCount === 0) {
-      enhancements.suggestions.push("Group related codes into candidate themes");
+      enhancements.suggestions.push(
+        "Group related codes into candidate themes"
+      );
     }
     if (thoughtType === "saturation_assessment") {
       const rigor = thought.rigorAssessment;
       if (rigor?.saturation?.newCodesLastN !== void 0 && rigor.saturation.newCodesLastN > 3) {
-        enhancements.suggestions.push("New codes still emerging - saturation not yet achieved");
+        enhancements.suggestions.push(
+          "New codes still emerging - saturation not yet achieved"
+        );
       } else if (rigor?.saturation?.achieved) {
-        enhancements.suggestions.push("Theoretical saturation achieved - ready for final analysis");
+        enhancements.suggestions.push(
+          "Theoretical saturation achieved - ready for final analysis"
+        );
       }
     }
     if (thought.rigorAssessment) {
       const rigor = thought.rigorAssessment;
       if (rigor.credibility.rating < 0.5) {
         enhancements.warnings = enhancements.warnings || [];
-        enhancements.warnings.push("Low credibility rating - consider member checking or triangulation");
+        enhancements.warnings.push(
+          "Low credibility rating - consider member checking or triangulation"
+        );
       }
       if (!rigor.confirmability.reflexivity) {
-        enhancements.suggestions.push("Document researcher reflexivity for confirmability");
+        enhancements.suggestions.push(
+          "Document researcher reflexivity for confirmability"
+        );
       }
     }
     enhancements.guidingQuestions.push(
@@ -13754,7 +15393,9 @@ var AnalysisHandler = class {
     return enhancements;
   }
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type to valid AnalysisThoughtType
@@ -13802,9 +15443,12 @@ var AnalysisHandler = class {
    * Calculate coding progress
    */
   calculateCodingProgress(dataSegments, _codebook) {
-    if (!dataSegments) return { segmentsCoded: 0, totalSegments: 0, percentComplete: 0 };
+    if (!dataSegments)
+      return { segmentsCoded: 0, totalSegments: 0, percentComplete: 0 };
     const totalSegments = dataSegments.length;
-    const segmentsCoded = dataSegments.filter((seg) => seg.codes && seg.codes.length > 0).length;
+    const segmentsCoded = dataSegments.filter(
+      (seg) => seg.codes && seg.codes.length > 0
+    ).length;
     const percentComplete = totalSegments > 0 ? segmentsCoded / totalSegments * 100 : 0;
     return { segmentsCoded, totalSegments, percentComplete };
   }
@@ -13813,9 +15457,13 @@ var AnalysisHandler = class {
    */
   assessRigor(input) {
     const hasMultipleCoders = input.codebook?.intercoderReliability !== void 0;
-    const hasThickDescription = input.themes?.some((t) => t.keyQuotes?.length > 2);
+    const hasThickDescription = input.themes?.some(
+      (t) => t.keyQuotes?.length > 2
+    );
     const hasMemos = input.memos && input.memos.length > 0;
-    const hasReflexiveMemos = input.memos?.some((m) => m.type === "reflective_memo");
+    const hasReflexiveMemos = input.memos?.some(
+      (m) => m.type === "reflective_memo"
+    );
     return {
       credibility: {
         rating: hasMultipleCoders ? 0.7 : 0.5,
@@ -13875,7 +15523,9 @@ var AnalysisHandler = class {
     }
     if (codebook.codeHierarchy) {
       const allCodeIds = new Set((codebook.codes || []).map((c) => c.id));
-      for (const [parentId, childIds] of Object.entries(codebook.codeHierarchy.parentChildMap || {})) {
+      for (const [parentId, childIds] of Object.entries(
+        codebook.codeHierarchy.parentChildMap || {}
+      )) {
         if (!allCodeIds.has(parentId)) {
           warnings.push(
             createValidationWarning(
@@ -13968,7 +15618,11 @@ var EngineeringHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -14026,7 +15680,11 @@ var EngineeringHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["algorithmic" /* ALGORITHMIC */, "systemsthinking" /* SYSTEMSTHINKING */, "optimization" /* OPTIMIZATION */],
+      relatedModes: [
+        "algorithmic" /* ALGORITHMIC */,
+        "systemsthinking" /* SYSTEMSTHINKING */,
+        "optimization" /* OPTIMIZATION */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {},
@@ -14095,7 +15753,9 @@ var EngineeringHandler = class {
         );
         if (thought.designDecisions) {
           enhancements.metrics.decisionCount = thought.designDecisions.decisions.length;
-          const accepted = thought.designDecisions.decisions.filter((d) => d.status === "accepted").length;
+          const accepted = thought.designDecisions.decisions.filter(
+            (d) => d.status === "accepted"
+          ).length;
           enhancements.metrics.acceptedDecisions = accepted;
         }
         break;
@@ -14146,7 +15806,15 @@ var EngineeringHandler = class {
    */
   processRequirements(raw) {
     if (!raw.requirements) {
-      return { requirements: [], coverage: { total: 0, verified: 0, tracedToSource: 0, allocatedToDesign: 0 } };
+      return {
+        requirements: [],
+        coverage: {
+          total: 0,
+          verified: 0,
+          tracedToSource: 0,
+          allocatedToDesign: 0
+        }
+      };
     }
     const requirements = raw.requirements.map((req) => ({
       id: req.id || `REQ-${randomUUID().slice(0, 8)}`,
@@ -14172,8 +15840,12 @@ var EngineeringHandler = class {
     return {
       total: requirements.length,
       verified: requirements.filter((r) => r.verificationMethod).length,
-      tracedToSource: requirements.filter((r) => r.tracesTo && r.tracesTo.length > 0).length,
-      allocatedToDesign: requirements.filter((r) => r.satisfiedBy && r.satisfiedBy.length > 0).length
+      tracedToSource: requirements.filter(
+        (r) => r.tracesTo && r.tracesTo.length > 0
+      ).length,
+      allocatedToDesign: requirements.filter(
+        (r) => r.satisfiedBy && r.satisfiedBy.length > 0
+      ).length
     };
   }
   /**
@@ -14269,7 +15941,9 @@ var EngineeringHandler = class {
     const expectedScores = altIds.flatMap(
       (altId) => critIds.map((critId) => `${altId}-${critId}`)
     );
-    const missingScores = expectedScores.filter((key) => !scoreKeys.includes(key));
+    const missingScores = expectedScores.filter(
+      (key) => !scoreKeys.includes(key)
+    );
     if (missingScores.length > 0) {
       warnings.push(
         createValidationWarning(
@@ -14395,7 +16069,11 @@ var ComputabilityHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -14434,12 +16112,17 @@ var ComputabilityHandler = class {
       }
     }
     if (inputAny.decidabilityProof) {
-      const proofWarnings = this.validateDecidabilityProof(inputAny.decidabilityProof);
+      const proofWarnings = this.validateDecidabilityProof(
+        inputAny.decidabilityProof
+      );
       warnings.push(...proofWarnings);
     }
     if (inputAny.reductions) {
       for (let i = 0; i < inputAny.reductions.length; i++) {
-        const reductionWarnings = this.validateReduction(inputAny.reductions[i], i);
+        const reductionWarnings = this.validateReduction(
+          inputAny.reductions[i],
+          i
+        );
         warnings.push(...reductionWarnings);
       }
     }
@@ -14463,7 +16146,11 @@ var ComputabilityHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["mathematics" /* MATHEMATICS */, "algorithmic" /* ALGORITHMIC */, "formallogic" /* FORMALLOGIC */],
+      relatedModes: [
+        "mathematics" /* MATHEMATICS */,
+        "algorithmic" /* ALGORITHMIC */,
+        "formallogic" /* FORMALLOGIC */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -14869,7 +16556,11 @@ var CryptanalyticHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -14918,7 +16609,10 @@ var CryptanalyticHandler = class {
     }
     if (inputAny.evidenceChains) {
       for (let i = 0; i < inputAny.evidenceChains.length; i++) {
-        const chainWarnings = this.validateEvidenceChain(inputAny.evidenceChains[i], i);
+        const chainWarnings = this.validateEvidenceChain(
+          inputAny.evidenceChains[i],
+          i
+        );
         warnings.push(...chainWarnings);
       }
     }
@@ -14942,7 +16636,11 @@ var CryptanalyticHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["bayesian" /* BAYESIAN */, "evidential" /* EVIDENTIAL */, "inductive" /* INDUCTIVE */],
+      relatedModes: [
+        "bayesian" /* BAYESIAN */,
+        "evidential" /* EVIDENTIAL */,
+        "inductive" /* INDUCTIVE */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -15016,7 +16714,9 @@ var CryptanalyticHandler = class {
           "Can we chain multiple Banburismus results?"
         );
         if (thought.banburismusAnalysis) {
-          const significant = thought.banburismusAnalysis.filter((b) => b.isSignificant);
+          const significant = thought.banburismusAnalysis.filter(
+            (b) => b.isSignificant
+          );
           enhancements.metrics.significantOffsets = significant.length;
           for (const b of significant) {
             enhancements.suggestions.push(
@@ -15072,9 +16772,7 @@ var CryptanalyticHandler = class {
       enhancements.suggestions.push(`Key insight: ${thought.keyInsight}`);
     }
     if (thought.uncertainty > 0.7) {
-      enhancements.warnings.push(
-        "High uncertainty - gather more evidence"
-      );
+      enhancements.warnings.push("High uncertainty - gather more evidence");
     }
     return enhancements;
   }
@@ -15097,9 +16795,14 @@ var CryptanalyticHandler = class {
    * Normalize hypothesis
    */
   normalizeHypothesis(h) {
-    const evidence = (h.evidence || []).map((e) => this.normalizeEvidence(e));
+    const evidence = (h.evidence || []).map(
+      (e) => this.normalizeEvidence(e)
+    );
     const totalDecibans = evidence.reduce((sum, e) => sum + e.decibans, 0);
-    const posteriorProbability = decibansToProbability(totalDecibans, h.priorProbability || 0.5);
+    const posteriorProbability = decibansToProbability(
+      totalDecibans,
+      h.priorProbability || 0.5
+    );
     return {
       id: h.id || randomUUID(),
       description: h.description || "",
@@ -15328,7 +17031,11 @@ var AlgorithmicHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -15374,7 +17081,9 @@ var AlgorithmicHandler = class {
       warnings.push(...dpWarnings);
     }
     if (inputAny.correctnessProof) {
-      const proofWarnings = this.validateCorrectnessProof(inputAny.correctnessProof);
+      const proofWarnings = this.validateCorrectnessProof(
+        inputAny.correctnessProof
+      );
       warnings.push(...proofWarnings);
     }
     if (inputAny.thoughtType === "algorithm_definition" && !inputAny.timeComplexity) {
@@ -15406,7 +17115,11 @@ var AlgorithmicHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["mathematics" /* MATHEMATICS */, "computability" /* COMPUTABILITY */, "optimization" /* OPTIMIZATION */],
+      relatedModes: [
+        "mathematics" /* MATHEMATICS */,
+        "computability" /* COMPUTABILITY */,
+        "optimization" /* OPTIMIZATION */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -15512,9 +17225,7 @@ var AlgorithmicHandler = class {
           "Is there optimal substructure?"
         );
         if (thought.greedyProof) {
-          enhancements.suggestions.push(
-            "Greedy choice property verified"
-          );
+          enhancements.suggestions.push("Greedy choice property verified");
         }
         break;
       case "amortized_analysis":
@@ -15545,10 +17256,14 @@ var AlgorithmicHandler = class {
     }
     if (thought.designPattern) {
       enhancements.metrics.designPattern = thought.designPattern;
-      enhancements.suggestions.push(`Design pattern: ${thought.designPattern}`);
+      enhancements.suggestions.push(
+        `Design pattern: ${thought.designPattern}`
+      );
     }
     if (thought.clrsAlgorithm) {
-      enhancements.suggestions.push(`CLRS Algorithm: ${thought.clrsAlgorithm}`);
+      enhancements.suggestions.push(
+        `CLRS Algorithm: ${thought.clrsAlgorithm}`
+      );
     }
     if (thought.clrsCategory) {
       enhancements.metrics.clrsCategory = thought.clrsCategory;
@@ -15570,7 +17285,9 @@ var AlgorithmicHandler = class {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type from input
@@ -15763,7 +17480,12 @@ var AlgorithmicHandler = class {
 
 // src/modes/handlers/MetaReasoningHandler.ts
 init_esm_shims();
-var VALID_META_ACTIONS = ["CONTINUE", "SWITCH", "REFINE", "COMBINE"];
+var VALID_META_ACTIONS = [
+  "CONTINUE",
+  "SWITCH",
+  "REFINE",
+  "COMBINE"
+];
 var MetaReasoningHandler = class {
   mode = "metareasoning" /* METAREASONING */;
   modeName = "Meta-Reasoning";
@@ -15784,15 +17506,28 @@ var MetaReasoningHandler = class {
    */
   createThought(input, sessionId) {
     const inputAny = input;
-    const currentStrategy = this.normalizeCurrentStrategy(inputAny.currentStrategy, sessionId);
-    const strategyEvaluation = this.normalizeStrategyEvaluation(inputAny.strategyEvaluation);
+    const currentStrategy = this.normalizeCurrentStrategy(
+      inputAny.currentStrategy,
+      sessionId
+    );
+    const strategyEvaluation = this.normalizeStrategyEvaluation(
+      inputAny.strategyEvaluation
+    );
     const alternativeStrategies = (inputAny.alternativeStrategies || []).map(
       (s) => this.normalizeAlternativeStrategy(s)
     );
     const recommendation = inputAny.recommendation ? this.normalizeRecommendation(inputAny.recommendation) : this.generateRecommendation(strategyEvaluation, alternativeStrategies);
-    const resourceAllocation = this.normalizeResourceAllocation(inputAny.resourceAllocation, input);
-    const qualityMetrics = this.normalizeQualityMetrics(inputAny.qualityMetrics);
-    const sessionContext = this.normalizeSessionContext(inputAny.sessionContext, sessionId);
+    const resourceAllocation = this.normalizeResourceAllocation(
+      inputAny.resourceAllocation,
+      input
+    );
+    const qualityMetrics = this.normalizeQualityMetrics(
+      inputAny.qualityMetrics
+    );
+    const sessionContext = this.normalizeSessionContext(
+      inputAny.sessionContext,
+      sessionId
+    );
     return {
       id: randomUUID(),
       sessionId,
@@ -15824,7 +17559,11 @@ var MetaReasoningHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -15847,7 +17586,12 @@ var MetaReasoningHandler = class {
     }
     if (inputAny.strategyEvaluation) {
       const se = inputAny.strategyEvaluation;
-      const scoreFields = ["effectiveness", "efficiency", "confidence", "qualityScore"];
+      const scoreFields = [
+        "effectiveness",
+        "efficiency",
+        "confidence",
+        "qualityScore"
+      ];
       for (const field of scoreFields) {
         if (se[field] !== void 0 && (se[field] < 0 || se[field] > 1)) {
           warnings.push(
@@ -15916,9 +17660,7 @@ var MetaReasoningHandler = class {
         "Low effectiveness - consider switching strategies"
       );
     } else if (thought.strategyEvaluation.effectiveness > 0.8) {
-      enhancements.suggestions.push(
-        "\u2713 Current strategy is highly effective"
-      );
+      enhancements.suggestions.push("\u2713 Current strategy is highly effective");
     }
     if (thought.strategyEvaluation.efficiency < 0.4) {
       enhancements.warnings.push(
@@ -16097,7 +17839,9 @@ var MetaReasoningHandler = class {
       completeness: this.clamp(metrics?.completeness ?? 0.5),
       originality: this.clamp(metrics?.originality ?? 0.5),
       clarity: this.clamp(metrics?.clarity ?? 0.7),
-      overallQuality: this.clamp(metrics?.overallQuality ?? ((metrics?.logicalConsistency || 0.7) + (metrics?.evidenceQuality || 0.6) + (metrics?.completeness || 0.5) + (metrics?.clarity || 0.7)) / 4)
+      overallQuality: this.clamp(
+        metrics?.overallQuality ?? ((metrics?.logicalConsistency || 0.7) + (metrics?.evidenceQuality || 0.6) + (metrics?.completeness || 0.5) + (metrics?.clarity || 0.7)) / 4
+      )
     };
   }
   /**
@@ -16191,7 +17935,11 @@ var RecursiveHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -16275,7 +18023,11 @@ var RecursiveHandler = class {
     const recThought = thought;
     const enhancements = {
       suggestions: [],
-      relatedModes: ["algorithmic" /* ALGORITHMIC */, "mathematics" /* MATHEMATICS */, "optimization" /* OPTIMIZATION */],
+      relatedModes: [
+        "algorithmic" /* ALGORITHMIC */,
+        "mathematics" /* MATHEMATICS */,
+        "optimization" /* OPTIMIZATION */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -16293,7 +18045,9 @@ var RecursiveHandler = class {
         "Recursive Problem Structure"
       ]
     };
-    enhancements.suggestions.push(`Strategy: ${recThought.strategy.replace(/_/g, " ")}`);
+    enhancements.suggestions.push(
+      `Strategy: ${recThought.strategy.replace(/_/g, " ")}`
+    );
     switch (recThought.thoughtType) {
       case "problem_decomposition":
         enhancements.guidingQuestions.push(
@@ -16302,8 +18056,12 @@ var RecursiveHandler = class {
           "Is there overlap between subproblems (memoization opportunity)?"
         );
         if (recThought.subproblems) {
-          const pendingCount = recThought.subproblems.filter((s) => s.status === "pending").length;
-          const solvedCount = recThought.subproblems.filter((s) => s.status === "solved").length;
+          const pendingCount = recThought.subproblems.filter(
+            (s) => s.status === "pending"
+          ).length;
+          const solvedCount = recThought.subproblems.filter(
+            (s) => s.status === "solved"
+          ).length;
           enhancements.suggestions.push(
             `Subproblems: ${solvedCount} solved, ${pendingCount} pending`
           );
@@ -16316,7 +18074,9 @@ var RecursiveHandler = class {
           "Do base cases cover all termination conditions?"
         );
         if (recThought.baseCases) {
-          const verifiedCount = recThought.baseCases.filter((b) => b.verified).length;
+          const verifiedCount = recThought.baseCases.filter(
+            (b) => b.verified
+          ).length;
           enhancements.suggestions.push(
             `Base cases: ${verifiedCount}/${recThought.baseCases.length} verified`
           );
@@ -16329,9 +18089,13 @@ var RecursiveHandler = class {
           "What is the recurrence relation?"
         );
         if (recThought.recurrence) {
-          enhancements.suggestions.push(`Recurrence: ${recThought.recurrence.formula}`);
+          enhancements.suggestions.push(
+            `Recurrence: ${recThought.recurrence.formula}`
+          );
           if (recThought.recurrence.closedForm) {
-            enhancements.suggestions.push(`Closed form: ${recThought.recurrence.closedForm}`);
+            enhancements.suggestions.push(
+              `Closed form: ${recThought.recurrence.closedForm}`
+            );
           }
         }
         break;
@@ -16349,7 +18113,9 @@ var RecursiveHandler = class {
           "Does the combined solution maintain correctness?"
         );
         if (recThought.divisionFactor) {
-          enhancements.suggestions.push(`Division factor: ${recThought.divisionFactor}`);
+          enhancements.suggestions.push(
+            `Division factor: ${recThought.divisionFactor}`
+          );
         }
         break;
       case "termination_analysis":
@@ -16359,7 +18125,9 @@ var RecursiveHandler = class {
           "Are there potential stack overflow risks?"
         );
         if (recThought.recurrence?.complexity) {
-          enhancements.suggestions.push(`Time complexity: ${recThought.recurrence.complexity}`);
+          enhancements.suggestions.push(
+            `Time complexity: ${recThought.recurrence.complexity}`
+          );
         }
         break;
     }
@@ -16370,11 +18138,15 @@ var RecursiveHandler = class {
     }
     if (!recThought.baseCaseReached && recThought.currentDepth > 0) {
       if (!recThought.baseCases || recThought.baseCases.length === 0) {
-        enhancements.warnings.push("No base cases defined - ensure termination condition exists");
+        enhancements.warnings.push(
+          "No base cases defined - ensure termination condition exists"
+        );
       }
     }
     if (recThought.strategy === "dynamic_programming") {
-      enhancements.suggestions.push("Consider memoization to avoid redundant computation");
+      enhancements.suggestions.push(
+        "Consider memoization to avoid redundant computation"
+      );
       enhancements.relatedModes.push("optimization" /* OPTIMIZATION */);
     }
     return enhancements;
@@ -16383,7 +18155,9 @@ var RecursiveHandler = class {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type from input
@@ -16463,7 +18237,12 @@ var VALID_THOUGHT_TYPES9 = [
   "countermodel"
 ];
 var VALID_LOGIC_SYSTEMS = ["K", "T", "S4", "S5", "D", "B", "custom"];
-var VALID_MODAL_DOMAINS = ["alethic", "epistemic", "deontic", "temporal"];
+var VALID_MODAL_DOMAINS = [
+  "alethic",
+  "epistemic",
+  "deontic",
+  "temporal"
+];
 var ModalHandler = class {
   mode = "modal" /* MODAL */;
   modeName = "Modal Reasoning";
@@ -16478,7 +18257,9 @@ var ModalHandler = class {
   createThought(input, sessionId) {
     const inputAny = input;
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
-    const worlds = (inputAny.worlds || []).map((w) => this.normalizeWorld(w));
+    const worlds = (inputAny.worlds || []).map(
+      (w) => this.normalizeWorld(w)
+    );
     if (worlds.length === 0) {
       worlds.push(this.createDefaultWorld());
     }
@@ -16487,7 +18268,10 @@ var ModalHandler = class {
       (p) => this.normalizeProposition(p, worlds)
     );
     const accessibilityRelations = (inputAny.accessibilityRelations || []).map(
-      (r) => this.normalizeAccessibilityRelation(r, inputAny.modalDomain || "alethic")
+      (r) => this.normalizeAccessibilityRelation(
+        r,
+        inputAny.modalDomain || "alethic"
+      )
     );
     const inferences = inputAny.inferences ? inputAny.inferences.map((i) => this.normalizeInference(i)) : void 0;
     const modalLogicType = this.resolveLogicSystem(inputAny.modalLogicType);
@@ -16524,7 +18308,11 @@ var ModalHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -16621,7 +18409,11 @@ var ModalHandler = class {
     const accessibilityRelations = modalThought.accessibilityRelations || [];
     const enhancements = {
       suggestions: [],
-      relatedModes: ["formallogic" /* FORMALLOGIC */, "counterfactual" /* COUNTERFACTUAL */, "deductive" /* DEDUCTIVE */],
+      relatedModes: [
+        "formallogic" /* FORMALLOGIC */,
+        "counterfactual" /* COUNTERFACTUAL */,
+        "deductive" /* DEDUCTIVE */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -16644,7 +18436,9 @@ var ModalHandler = class {
     );
     const systemProperties = this.getLogicSystemProperties(logicType);
     if (systemProperties.length > 0) {
-      enhancements.suggestions.push(`Properties: ${systemProperties.join(", ")}`);
+      enhancements.suggestions.push(
+        `Properties: ${systemProperties.join(", ")}`
+      );
     }
     switch (modalThought.thoughtType) {
       case "world_definition":
@@ -16653,9 +18447,11 @@ var ModalHandler = class {
           "Which world represents the actual state of affairs?",
           "How are the worlds related (accessibility)?"
         );
-        enhancements.suggestions.push(`Defined ${worlds.length} possible world(s)`);
+        enhancements.suggestions.push(
+          `Defined ${worlds.length} possible world(s)`
+        );
         break;
-      case "proposition_analysis":
+      case "proposition_analysis": {
         enhancements.guidingQuestions.push(
           "Is the proposition necessarily true (true in all accessible worlds)?",
           "Is the proposition possibly true (true in some accessible world)?",
@@ -16671,6 +18467,7 @@ var ModalHandler = class {
           `Propositions: ${necessaryCount} necessary, ${possibleCount} possible`
         );
         break;
+      }
       case "accessibility_analysis":
         enhancements.guidingQuestions.push(
           "Is the accessibility relation reflexive (every world accesses itself)?",
@@ -16699,7 +18496,9 @@ var ModalHandler = class {
           "Are there countermodels to this inference?"
         );
         if (modalThought.inferences) {
-          const validCount = modalThought.inferences.filter((i) => i.valid).length;
+          const validCount = modalThought.inferences.filter(
+            (i) => i.valid
+          ).length;
           enhancements.suggestions.push(
             `Inferences: ${validCount}/${modalThought.inferences.length} valid`
           );
@@ -16715,19 +18514,33 @@ var ModalHandler = class {
     }
     switch (modalThought.modalDomain) {
       case "epistemic":
-        enhancements.suggestions.push("Epistemic: \u25A1p = agent knows p, \u25C7p = p is compatible with knowledge");
+        enhancements.suggestions.push(
+          "Epistemic: \u25A1p = agent knows p, \u25C7p = p is compatible with knowledge"
+        );
         enhancements.mentalModels.push("Knowledge States", "Belief Revision");
         break;
       case "deontic":
-        enhancements.suggestions.push("Deontic: \u25A1p = p is obligatory, \u25C7p = p is permissible");
-        enhancements.mentalModels.push("Moral Obligations", "Permission Logic");
+        enhancements.suggestions.push(
+          "Deontic: \u25A1p = p is obligatory, \u25C7p = p is permissible"
+        );
+        enhancements.mentalModels.push(
+          "Moral Obligations",
+          "Permission Logic"
+        );
         break;
       case "temporal":
-        enhancements.suggestions.push("Temporal: \u25A1p = always p, \u25C7p = eventually p");
-        enhancements.mentalModels.push("Temporal Ordering", "Future Possibilities");
+        enhancements.suggestions.push(
+          "Temporal: \u25A1p = always p, \u25C7p = eventually p"
+        );
+        enhancements.mentalModels.push(
+          "Temporal Ordering",
+          "Future Possibilities"
+        );
         break;
       case "alethic":
-        enhancements.suggestions.push("Alethic: \u25A1p = necessarily p, \u25C7p = possibly p");
+        enhancements.suggestions.push(
+          "Alethic: \u25A1p = necessarily p, \u25C7p = possibly p"
+        );
         break;
     }
     if (worlds.length === 1) {
@@ -16931,8 +18744,12 @@ var StochasticHandler = class {
     const inputAny = input;
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
     const markovChain = inputAny.markovChain ? this.normalizeMarkovChain(inputAny.markovChain) : void 0;
-    const randomVariables = inputAny.randomVariables ? inputAny.randomVariables.map((rv) => this.normalizeRandomVariable(rv)) : void 0;
-    const simulations = inputAny.simulations || inputAny.simulationResults ? (inputAny.simulations || inputAny.simulationResults).map((sr) => this.normalizeSimulationResult(sr)) : void 0;
+    const randomVariables = inputAny.randomVariables ? inputAny.randomVariables.map(
+      (rv) => this.normalizeRandomVariable(rv)
+    ) : void 0;
+    const simulations = inputAny.simulations || inputAny.simulationResults ? (inputAny.simulations || inputAny.simulationResults).map(
+      (sr) => this.normalizeSimulationResult(sr)
+    ) : void 0;
     const processType = this.resolveProcessType(inputAny.processType);
     return {
       id: randomUUID(),
@@ -16967,7 +18784,11 @@ var StochasticHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -17018,10 +18839,9 @@ var StochasticHandler = class {
         }
       }
       if (mc.initialDistribution) {
-        const sum = Object.values(mc.initialDistribution).reduce(
-          (a, b) => a + b,
-          0
-        );
+        const sum = Object.values(
+          mc.initialDistribution
+        ).reduce((a, b) => a + b, 0);
         if (Math.abs(sum - 1) > 0.01) {
           warnings.push(
             createValidationWarning(
@@ -17036,10 +18856,17 @@ var StochasticHandler = class {
     if (inputAny.randomVariables) {
       for (let i = 0; i < inputAny.randomVariables.length; i++) {
         const rv = inputAny.randomVariables[i];
-        const issues = this.validateDistributionParameters(rv.distribution, rv.parameters);
+        const issues = this.validateDistributionParameters(
+          rv.distribution,
+          rv.parameters
+        );
         for (const issue of issues) {
           warnings.push(
-            createValidationWarning(`randomVariables[${i}]`, issue, "Check distribution parameters")
+            createValidationWarning(
+              `randomVariables[${i}]`,
+              issue,
+              "Check distribution parameters"
+            )
           );
         }
       }
@@ -17072,7 +18899,11 @@ var StochasticHandler = class {
     const markovChain = thoughtAny.markovChain;
     const enhancements = {
       suggestions: [],
-      relatedModes: ["bayesian" /* BAYESIAN */, "optimization" /* OPTIMIZATION */, "temporal" /* TEMPORAL */],
+      relatedModes: [
+        "bayesian" /* BAYESIAN */,
+        "optimization" /* OPTIMIZATION */,
+        "temporal" /* TEMPORAL */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -17089,7 +18920,9 @@ var StochasticHandler = class {
         "Queuing Theory"
       ]
     };
-    enhancements.suggestions.push(`Process type: ${stochThought.processType.replace(/_/g, " ")}`);
+    enhancements.suggestions.push(
+      `Process type: ${stochThought.processType.replace(/_/g, " ")}`
+    );
     switch (stochThought.thoughtType) {
       case "process_definition":
         enhancements.guidingQuestions.push(
@@ -17110,9 +18943,13 @@ var StochasticHandler = class {
           "What is the expected number of steps to reach a target state?"
         );
         if (markovChain) {
-          const absorbingCount = markovChain.states.filter((s) => s.isAbsorbing).length;
+          const absorbingCount = markovChain.states.filter(
+            (s) => s.isAbsorbing
+          ).length;
           if (absorbingCount > 0) {
-            enhancements.suggestions.push(`Absorbing states: ${absorbingCount}`);
+            enhancements.suggestions.push(
+              `Absorbing states: ${absorbingCount}`
+            );
           }
         }
         break;
@@ -17124,9 +18961,13 @@ var StochasticHandler = class {
         );
         if (markovChain) {
           if (markovChain.isErgodic) {
-            enhancements.suggestions.push("Chain is ergodic - unique stationary distribution exists");
+            enhancements.suggestions.push(
+              "Chain is ergodic - unique stationary distribution exists"
+            );
           } else if (markovChain.isIrreducible === false) {
-            enhancements.warnings.push("Chain is reducible - multiple stationary distributions possible");
+            enhancements.warnings.push(
+              "Chain is reducible - multiple stationary distributions possible"
+            );
           }
           if (markovChain.period && markovChain.period > 1) {
             enhancements.warnings.push(
@@ -17177,7 +19018,9 @@ var StochasticHandler = class {
           "What is the mixing time?"
         );
         if (thoughtAny.convergenceRate !== void 0) {
-          enhancements.suggestions.push(`Convergence rate: ${thoughtAny.convergenceRate.toFixed(4)}`);
+          enhancements.suggestions.push(
+            `Convergence rate: ${thoughtAny.convergenceRate.toFixed(4)}`
+          );
         }
         break;
       case "hitting_time_analysis":
@@ -17190,18 +19033,33 @@ var StochasticHandler = class {
     }
     switch (stochThought.processType) {
       case "queueing":
-        enhancements.mentalModels.push("Little's Law", "M/M/1 Queue", "Birth-Death Process");
-        enhancements.suggestions.push("Consider arrival rate \u03BB and service rate \u03BC");
+        enhancements.mentalModels.push(
+          "Little's Law",
+          "M/M/1 Queue",
+          "Birth-Death Process"
+        );
+        enhancements.suggestions.push(
+          "Consider arrival rate \u03BB and service rate \u03BC"
+        );
         break;
       case "random_walk":
-        enhancements.mentalModels.push("Gambler's Ruin", "Recurrence", "Transience");
+        enhancements.mentalModels.push(
+          "Gambler's Ruin",
+          "Recurrence",
+          "Transience"
+        );
         break;
       case "birth_death":
-        enhancements.mentalModels.push("Population Dynamics", "Balance Equations");
+        enhancements.mentalModels.push(
+          "Population Dynamics",
+          "Balance Equations"
+        );
         break;
     }
     if (stochThought.stepCount < 10 && stochThought.thoughtType === "convergence_analysis") {
-      enhancements.warnings.push("Low step count - convergence analysis may be unreliable");
+      enhancements.warnings.push(
+        "Low step count - convergence analysis may be unreliable"
+      );
     }
     return enhancements;
   }
@@ -17209,7 +19067,9 @@ var StochasticHandler = class {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type from input
@@ -17234,7 +19094,9 @@ var StochasticHandler = class {
    */
   normalizeMarkovChain(mc) {
     const states = (mc.states || []).map((s) => this.normalizeState(s));
-    const transitions = (mc.transitions || []).map((t) => this.normalizeTransition(t));
+    const transitions = (mc.transitions || []).map(
+      (t) => this.normalizeTransition(t)
+    );
     const isIrreducible = mc.isIrreducible ?? this.checkIrreducibility(states, transitions);
     const period = mc.period ?? 1;
     const isErgodic = mc.isErgodic ?? (isIrreducible && period === 1);
@@ -17287,9 +19149,14 @@ var StochasticHandler = class {
       variance: rv.variance
     };
     if (normalized.expectedValue === void 0 || normalized.variance === void 0) {
-      const stats = this.calculateDistributionStats(normalized.distribution, normalized.parameters);
-      if (normalized.expectedValue === void 0) normalized.expectedValue = stats.mean;
-      if (normalized.variance === void 0) normalized.variance = stats.variance;
+      const stats = this.calculateDistributionStats(
+        normalized.distribution,
+        normalized.parameters
+      );
+      if (normalized.expectedValue === void 0)
+        normalized.expectedValue = stats.mean;
+      if (normalized.variance === void 0)
+        normalized.variance = stats.variance;
     }
     return normalized;
   }
@@ -17380,21 +19247,28 @@ var StochasticHandler = class {
     switch (distribution) {
       case "normal":
       case "gaussian":
-        return { mean: params.mu || params.mean || 0, variance: params.variance || params.sigma2 || 1 };
-      case "exponential":
+        return {
+          mean: params.mu || params.mean || 0,
+          variance: params.variance || params.sigma2 || 1
+        };
+      case "exponential": {
         const lambda = params.lambda || params.rate || 1;
         return { mean: 1 / lambda, variance: 1 / (lambda * lambda) };
-      case "poisson":
+      }
+      case "poisson": {
         const poissonLambda = params.lambda || 1;
         return { mean: poissonLambda, variance: poissonLambda };
-      case "uniform":
+      }
+      case "uniform": {
         const a = params.a ?? params.min ?? 0;
         const b = params.b ?? params.max ?? 1;
         return { mean: (a + b) / 2, variance: (b - a) ** 2 / 12 };
-      case "binomial":
+      }
+      case "binomial": {
         const n = params.n || 1;
         const p = params.p || 0.5;
         return { mean: n * p, variance: n * p * (1 - p) };
+      }
       default:
         return {};
     }
@@ -17430,10 +19304,10 @@ var ConstraintHandler = class {
   createThought(input, sessionId) {
     const inputAny = input;
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
-    const variables = (inputAny.variables || []).map((v) => this.normalizeVariable(v));
-    const constraints = (inputAny.constraints || inputAny.cspConstraints || []).map(
-      (c) => this.normalizeConstraint(c)
+    const variables = (inputAny.variables || []).map(
+      (v) => this.normalizeVariable(v)
     );
+    const constraints = (inputAny.constraints || inputAny.cspConstraints || []).map((c) => this.normalizeConstraint(c));
     const arcs = inputAny.arcs ? inputAny.arcs.map((a) => this.normalizeArc(a)) : this.generateArcs(variables, constraints);
     const currentAssignments = inputAny.currentAssignments || {};
     const assignmentHistory = (inputAny.assignmentHistory || []).map(
@@ -17481,7 +19355,11 @@ var ConstraintHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -17516,7 +19394,9 @@ var ConstraintHandler = class {
         }
       }
     }
-    const varIds = new Set((inputAny.variables || []).map((v) => v.id || v.name));
+    const varIds = new Set(
+      (inputAny.variables || []).map((v) => v.id || v.name)
+    );
     const cspConstraints = inputAny.constraints || inputAny.cspConstraints || [];
     for (let i = 0; i < cspConstraints.length; i++) {
       const c = cspConstraints[i];
@@ -17562,8 +19442,12 @@ var ConstraintHandler = class {
       }
     }
     if (inputAny.currentAssignments && inputAny.variables) {
-      for (const [varId, value] of Object.entries(inputAny.currentAssignments)) {
-        const variable = inputAny.variables.find((v) => (v.id || v.name) === varId);
+      for (const [varId, value] of Object.entries(
+        inputAny.currentAssignments
+      )) {
+        const variable = inputAny.variables.find(
+          (v) => (v.id || v.name) === varId
+        );
         if (variable && variable.domain && !variable.domain.includes(value)) {
           warnings.push(
             createValidationWarning(
@@ -17587,7 +19471,11 @@ var ConstraintHandler = class {
     const cspThought = thought;
     const enhancements = {
       suggestions: [],
-      relatedModes: ["optimization" /* OPTIMIZATION */, "algorithmic" /* ALGORITHMIC */, "formallogic" /* FORMALLOGIC */],
+      relatedModes: [
+        "optimization" /* OPTIMIZATION */,
+        "algorithmic" /* ALGORITHMIC */,
+        "formallogic" /* FORMALLOGIC */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -17606,11 +19494,15 @@ var ConstraintHandler = class {
         "Conflict-Directed Backjumping"
       ]
     };
-    enhancements.suggestions.push(`Status: ${cspThought.solutionStatus || "unknown"}`);
+    enhancements.suggestions.push(
+      `Status: ${cspThought.solutionStatus || "unknown"}`
+    );
     if (cspThought.isArcConsistent) {
       enhancements.suggestions.push("Problem is arc-consistent");
     } else {
-      enhancements.warnings.push("Problem is not arc-consistent - consider propagation");
+      enhancements.warnings.push(
+        "Problem is not arc-consistent - consider propagation"
+      );
     }
     switch (cspThought.thoughtType) {
       case "problem_formulation":
@@ -17620,34 +19512,50 @@ var ConstraintHandler = class {
           "Are there any global constraints?"
         );
         break;
-      case "variable_definition":
+      case "variable_definition": {
         enhancements.guidingQuestions.push(
           "What is the domain of each variable?",
           "Are domains finite and discrete?",
           "Can domains be reduced initially?"
         );
-        const avgDomainSize = cspThought.variables.length > 0 ? cspThought.variables.reduce((sum, v) => sum + v.domain.length, 0) / cspThought.variables.length : 0;
-        enhancements.suggestions.push(`Average domain size: ${avgDomainSize.toFixed(1)}`);
+        const avgDomainSize = cspThought.variables.length > 0 ? cspThought.variables.reduce(
+          (sum, v) => sum + v.domain.length,
+          0
+        ) / cspThought.variables.length : 0;
+        enhancements.suggestions.push(
+          `Average domain size: ${avgDomainSize.toFixed(1)}`
+        );
         break;
-      case "constraint_definition":
+      }
+      case "constraint_definition": {
         enhancements.guidingQuestions.push(
           "Are all constraints necessary?",
           "Are there redundant constraints?",
           "Can constraints be tightened?"
         );
-        const requiredCount = cspThought.constraints.filter((c) => c.priority === "required").length;
+        const requiredCount = cspThought.constraints.filter(
+          (c) => c.priority === "required"
+        ).length;
         const softCount = cspThought.constraints.length - requiredCount;
-        enhancements.suggestions.push(`Constraints: ${requiredCount} required, ${softCount} soft`);
+        enhancements.suggestions.push(
+          `Constraints: ${requiredCount} required, ${softCount} soft`
+        );
         break;
-      case "domain_reduction":
+      }
+      case "domain_reduction": {
         enhancements.guidingQuestions.push(
           "Which values can be pruned?",
           "Are there singleton domains?",
           "Has propagation been exhausted?"
         );
-        const reducedCount = cspThought.variables.filter((v) => v.domainReduced).length;
-        enhancements.suggestions.push(`Variables with reduced domains: ${reducedCount}`);
+        const reducedCount = cspThought.variables.filter(
+          (v) => v.domainReduced
+        ).length;
+        enhancements.suggestions.push(
+          `Variables with reduced domains: ${reducedCount}`
+        );
         break;
+      }
       case "arc_consistency":
         enhancements.guidingQuestions.push(
           "Are all arcs consistent?",
@@ -17665,22 +19573,27 @@ var ConstraintHandler = class {
           "Can we detect early failure?"
         );
         break;
-      case "solution_search":
+      case "solution_search": {
         enhancements.guidingQuestions.push(
           "Which variable should be assigned next?",
           "What value should be tried first?",
           "Is the current partial solution extensible?"
         );
         const progress = cspThought.variables.length > 0 ? Object.keys(cspThought.currentAssignments).length / cspThought.variables.length * 100 : 0;
-        enhancements.suggestions.push(`Search progress: ${progress.toFixed(1)}%`);
+        enhancements.suggestions.push(
+          `Search progress: ${progress.toFixed(1)}%`
+        );
         break;
+      }
       case "backtracking":
         enhancements.guidingQuestions.push(
           "Why did the current assignment fail?",
           "What is the most recent decision point?",
           "Can we learn from this failure (nogood)?"
         );
-        enhancements.suggestions.push(`Backtracks so far: ${cspThought.backtracks}`);
+        enhancements.suggestions.push(
+          `Backtracks so far: ${cspThought.backtracks}`
+        );
         break;
       case "feasibility_check":
         enhancements.guidingQuestions.push(
@@ -17690,7 +19603,9 @@ var ConstraintHandler = class {
         );
         break;
     }
-    const emptyDomainVars = cspThought.variables.filter((v) => v.domain.length === 0);
+    const emptyDomainVars = cspThought.variables.filter(
+      (v) => v.domain.length === 0
+    );
     if (emptyDomainVars.length > 0) {
       enhancements.warnings.push(
         `${emptyDomainVars.length} variable(s) have empty domains - problem is infeasible`
@@ -17715,7 +19630,9 @@ var ConstraintHandler = class {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type from input
@@ -17816,14 +19733,21 @@ var ConstraintHandler = class {
    * Determine solution status
    */
   determineSolutionStatus(explicit, variables, constraints, assignments) {
-    const validStatuses = ["searching", "found", "infeasible", "timeout"];
+    const validStatuses = [
+      "searching",
+      "found",
+      "infeasible",
+      "timeout"
+    ];
     if (explicit && validStatuses.includes(explicit)) {
       return explicit;
     }
     if (variables.some((v) => v.domain.length === 0)) {
       return "infeasible";
     }
-    const allAssigned = variables.every((v) => assignments[v.id] !== void 0 || assignments[v.name] !== void 0);
+    const allAssigned = variables.every(
+      (v) => assignments[v.id] !== void 0 || assignments[v.name] !== void 0
+    );
     if (allAssigned && variables.length > 0) {
       const allSatisfied = constraints.filter((c) => c.priority === "required").every((c) => c.satisfied !== false);
       if (allSatisfied) {
@@ -17852,7 +19776,13 @@ var VALID_PROBLEM_TYPES = [
   "constraint_satisfaction",
   "multi_objective"
 ];
-var VALID_SOLUTION_TYPES = ["optimal", "feasible", "infeasible", "unbounded", "approximate"];
+var VALID_SOLUTION_TYPES = [
+  "optimal",
+  "feasible",
+  "infeasible",
+  "unbounded",
+  "approximate"
+];
 var OptimizationHandler = class {
   mode = "optimization" /* OPTIMIZATION */;
   modeName = "Optimization Analysis";
@@ -17869,7 +19799,9 @@ var OptimizationHandler = class {
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
     const problem = inputAny.problem ? this.normalizeProblem(inputAny.problem) : void 0;
     const variables = inputAny.variables ? inputAny.variables.map((v) => this.normalizeVariable(v)) : void 0;
-    const optimizationConstraints = inputAny.optimizationConstraints || inputAny.constraints ? (inputAny.optimizationConstraints || inputAny.constraints).map((c) => this.normalizeConstraint(c)) : void 0;
+    const optimizationConstraints = inputAny.optimizationConstraints || inputAny.constraints ? (inputAny.optimizationConstraints || inputAny.constraints).map(
+      (c) => this.normalizeConstraint(c)
+    ) : void 0;
     const objectives = inputAny.objectives ? inputAny.objectives.map((o) => this.normalizeObjective(o)) : void 0;
     const solution = inputAny.solution ? this.normalizeSolution(inputAny.solution, optimizationConstraints) : void 0;
     const analysis = inputAny.analysis ? this.normalizeAnalysis(inputAny.analysis) : void 0;
@@ -17904,7 +19836,11 @@ var OptimizationHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -18014,7 +19950,11 @@ var OptimizationHandler = class {
   getEnhancements(thought) {
     const enhancements = {
       suggestions: [],
-      relatedModes: ["mathematics" /* MATHEMATICS */, "algorithmic" /* ALGORITHMIC */, "engineering" /* ENGINEERING */],
+      relatedModes: [
+        "mathematics" /* MATHEMATICS */,
+        "algorithmic" /* ALGORITHMIC */,
+        "engineering" /* ENGINEERING */
+      ],
       guidingQuestions: [],
       warnings: [],
       metrics: {
@@ -18068,7 +20008,9 @@ var OptimizationHandler = class {
           "Are the constraints consistent?"
         );
         if (thought.optimizationConstraints) {
-          const hard = thought.optimizationConstraints.filter((c) => c.type === "hard").length;
+          const hard = thought.optimizationConstraints.filter(
+            (c) => c.type === "hard"
+          ).length;
           const soft = thought.optimizationConstraints.length - hard;
           enhancements.suggestions.push(
             `Constraints: ${hard} hard, ${soft} soft`
@@ -18082,7 +20024,9 @@ var OptimizationHandler = class {
           "How will trade-offs be handled?"
         );
         if (thought.objectives) {
-          const maxCount = thought.objectives.filter((o) => o.type === "maximize").length;
+          const maxCount = thought.objectives.filter(
+            (o) => o.type === "maximize"
+          ).length;
           const minCount = thought.objectives.length - maxCount;
           enhancements.suggestions.push(
             `Objectives: ${maxCount} maximize, ${minCount} minimize`
@@ -18149,7 +20093,9 @@ var OptimizationHandler = class {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType) {
-    return this.supportedThoughtTypes.includes(thoughtType);
+    return this.supportedThoughtTypes.includes(
+      thoughtType
+    );
   }
   /**
    * Resolve thought type from input
@@ -18182,7 +20128,11 @@ var OptimizationHandler = class {
       name: variable.name || "",
       description: variable.description || "",
       type: variable.type || "continuous",
-      domain: variable.domain || { type: "continuous", lowerBound: 0, upperBound: Infinity },
+      domain: variable.domain || {
+        type: "continuous",
+        lowerBound: 0,
+        upperBound: Infinity
+      },
       unit: variable.unit,
       semantics: variable.semantics || ""
     };
@@ -18275,8 +20225,12 @@ var CustomHandler = class {
   createThought(input, sessionId) {
     const inputAny = input;
     const customFields = inputAny.customFields ? inputAny.customFields.map((f) => this.normalizeField(f)) : [];
-    const stages2 = inputAny.stages ? inputAny.stages.map((s, idx) => this.normalizeStage(s, idx)) : void 0;
-    const validationRules = inputAny.validationRules ? inputAny.validationRules.map((r) => this.normalizeValidationRule(r)) : void 0;
+    const stages2 = inputAny.stages ? inputAny.stages.map(
+      (s, idx) => this.normalizeStage(s, idx)
+    ) : void 0;
+    const validationRules = inputAny.validationRules ? inputAny.validationRules.map(
+      (r) => this.normalizeValidationRule(r)
+    ) : void 0;
     const basedOnModes = inputAny.basedOnModes ? inputAny.basedOnModes.map((m) => this.resolveMode(m)) : void 0;
     return {
       id: randomUUID(),
@@ -18316,7 +20270,11 @@ var CustomHandler = class {
     const inputAny = input;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     if (input.thoughtNumber > input.totalThoughts) {
@@ -18434,18 +20392,26 @@ var CustomHandler = class {
     };
     enhancements.suggestions.push(`Custom mode: ${thought.customModeName}`);
     if (thought.customModeDescription) {
-      enhancements.suggestions.push(`Description: ${thought.customModeDescription}`);
+      enhancements.suggestions.push(
+        `Description: ${thought.customModeDescription}`
+      );
     }
     if (thought.stages && thought.stages.length > 0) {
       const completed = thought.stages.filter((s) => s.completed).length;
       const total = thought.stages.length;
       const progress = (completed / total * 100).toFixed(0);
-      enhancements.suggestions.push(`Stage progress: ${completed}/${total} (${progress}%)`);
+      enhancements.suggestions.push(
+        `Stage progress: ${completed}/${total} (${progress}%)`
+      );
       if (thought.currentStage) {
-        const current = thought.stages.find((s) => s.id === thought.currentStage);
+        const current = thought.stages.find(
+          (s) => s.id === thought.currentStage
+        );
         if (current) {
           enhancements.suggestions.push(`Current stage: ${current.name}`);
-          enhancements.guidingQuestions.push(`What is needed to complete "${current.name}"?`);
+          enhancements.guidingQuestions.push(
+            `What is needed to complete "${current.name}"?`
+          );
         }
       }
       const nextStage = thought.stages.find((s) => !s.completed);
@@ -18457,7 +20423,9 @@ var CustomHandler = class {
       const filledFields = thought.customFields.filter(
         (f) => f.value !== void 0 && f.value !== null
       ).length;
-      enhancements.suggestions.push(`Fields: ${filledFields}/${thought.customFields.length} populated`);
+      enhancements.suggestions.push(
+        `Fields: ${filledFields}/${thought.customFields.length} populated`
+      );
       const missingRequired = thought.customFields.filter(
         (f) => f.required && (f.value === void 0 || f.value === null)
       );
@@ -18729,7 +20697,11 @@ var ModeHandlerRegistry = class _ModeHandlerRegistry {
     const mode = input.mode || "hybrid" /* HYBRID */;
     if (!input.thought || input.thought.trim().length === 0) {
       return validationFailure([
-        createValidationError("thought", "Thought content is required", "EMPTY_THOUGHT")
+        createValidationError(
+          "thought",
+          "Thought content is required",
+          "EMPTY_THOUGHT"
+        )
       ]);
     }
     const handler = this.getHandler(mode);
@@ -18814,15 +20786,61 @@ var ModeHandlerRegistry = class _ModeHandlerRegistry {
         "conservation_law",
         "dimensional_analysis"
       ],
-      causal: ["problem_definition", "graph_construction", "intervention_analysis", "mechanism_identification"],
-      bayesian: ["prior_definition", "likelihood_assessment", "posterior_calculation", "sensitivity_analysis"],
-      temporal: ["event_definition", "interval_analysis", "constraint_checking", "timeline_construction"],
-      historical: ["event_analysis", "source_evaluation", "pattern_identification", "causal_chain", "periodization"],
-      gametheory: ["game_definition", "strategy_analysis", "equilibrium_finding", "payoff_calculation"],
-      synthesis: ["source_identification", "theme_extraction", "gap_analysis", "framework_construction"],
-      argumentation: ["claim_formulation", "grounds_development", "warrant_construction", "rebuttal_analysis"],
-      critique: ["work_characterization", "methodology_evaluation", "argument_critique", "contribution_assessment"],
-      analysis: ["data_familiarization", "coding", "theme_development", "pattern_analysis"]
+      causal: [
+        "problem_definition",
+        "graph_construction",
+        "intervention_analysis",
+        "mechanism_identification"
+      ],
+      bayesian: [
+        "prior_definition",
+        "likelihood_assessment",
+        "posterior_calculation",
+        "sensitivity_analysis"
+      ],
+      temporal: [
+        "event_definition",
+        "interval_analysis",
+        "constraint_checking",
+        "timeline_construction"
+      ],
+      historical: [
+        "event_analysis",
+        "source_evaluation",
+        "pattern_identification",
+        "causal_chain",
+        "periodization"
+      ],
+      gametheory: [
+        "game_definition",
+        "strategy_analysis",
+        "equilibrium_finding",
+        "payoff_calculation"
+      ],
+      synthesis: [
+        "source_identification",
+        "theme_extraction",
+        "gap_analysis",
+        "framework_construction"
+      ],
+      argumentation: [
+        "claim_formulation",
+        "grounds_development",
+        "warrant_construction",
+        "rebuttal_analysis"
+      ],
+      critique: [
+        "work_characterization",
+        "methodology_evaluation",
+        "argument_critique",
+        "contribution_assessment"
+      ],
+      analysis: [
+        "data_familiarization",
+        "coding",
+        "theme_development",
+        "pattern_analysis"
+      ]
     };
     const modeKey = mode.toLowerCase();
     return thoughtTypes[modeKey] || ["general"];
@@ -19329,9 +21347,12 @@ var DOTGraphBuilder = class _DOTGraphBuilder {
         const styleStr = Array.isArray(nodeDefaults.style) ? nodeDefaults.style.join(",") : nodeDefaults.style;
         defaultAttrs.push(`style="${styleStr}"`);
       }
-      if (nodeDefaults.fillColor) defaultAttrs.push(`fillcolor="${nodeDefaults.fillColor}"`);
-      if (nodeDefaults.fontName) defaultAttrs.push(`fontname="${nodeDefaults.fontName}"`);
-      if (nodeDefaults.fontSize) defaultAttrs.push(`fontsize=${nodeDefaults.fontSize}`);
+      if (nodeDefaults.fillColor)
+        defaultAttrs.push(`fillcolor="${nodeDefaults.fillColor}"`);
+      if (nodeDefaults.fontName)
+        defaultAttrs.push(`fontname="${nodeDefaults.fontName}"`);
+      if (nodeDefaults.fontSize)
+        defaultAttrs.push(`fontsize=${nodeDefaults.fontSize}`);
       if (defaultAttrs.length > 0) {
         lines.push(`  node [${defaultAttrs.join(", ")}];`);
       }
@@ -19339,8 +21360,10 @@ var DOTGraphBuilder = class _DOTGraphBuilder {
     if (edgeDefaults) {
       const defaultAttrs = [];
       if (edgeDefaults.style) defaultAttrs.push(`style=${edgeDefaults.style}`);
-      if (edgeDefaults.color) defaultAttrs.push(`color="${edgeDefaults.color}"`);
-      if (edgeDefaults.arrowHead) defaultAttrs.push(`arrowhead=${edgeDefaults.arrowHead}`);
+      if (edgeDefaults.color)
+        defaultAttrs.push(`color="${edgeDefaults.color}"`);
+      if (edgeDefaults.arrowHead)
+        defaultAttrs.push(`arrowhead=${edgeDefaults.arrowHead}`);
       if (defaultAttrs.length > 0) {
         lines.push(`  edge [${defaultAttrs.join(", ")}];`);
       }
@@ -19360,7 +21383,9 @@ var DOTGraphBuilder = class _DOTGraphBuilder {
     if (this.subgraphs.length > 0) {
       lines.push("");
       for (const subgraph of this.subgraphs) {
-        const subgraphNodeDefs = this.nodes.filter((n) => subgraph.nodes.includes(n.id));
+        const subgraphNodeDefs = this.nodes.filter(
+          (n) => subgraph.nodes.includes(n.id)
+        );
         lines.push(`  subgraph ${sanitizeDotId(`cluster_${subgraph.id}`)} {`);
         if (subgraph.label) {
           lines.push(`    label="${escapeDotString(subgraph.label)}";`);
@@ -19527,7 +21552,9 @@ function generateMermaidStateDiagram(states, transitions) {
       lines.push(`  ${sanitizeMermaidId(state.id)} --> [*]`);
     }
     if (state.type !== "start" && state.type !== "end") {
-      lines.push(`  ${sanitizeMermaidId(state.id)} : ${escapeMermaidLabel(state.label)}`);
+      lines.push(
+        `  ${sanitizeMermaidId(state.id)} : ${escapeMermaidLabel(state.label)}`
+      );
     }
   }
   lines.push("");
@@ -19771,7 +21798,9 @@ var MermaidGraphBuilder = class _MermaidGraphBuilder {
       lines.push("");
       for (const subgraph of this.subgraphs) {
         lines.push(renderMermaidSubgraph(subgraph));
-        const subgraphNodes = this.nodes.filter((n) => subgraph.nodes.includes(n.id));
+        const subgraphNodes = this.nodes.filter(
+          (n) => subgraph.nodes.includes(n.id)
+        );
         for (const node of subgraphNodes) {
           const nodeStr = renderMermaidNode(node);
           lines.push(`  ${nodeStr}`);
@@ -19897,7 +21926,11 @@ var MermaidGanttBuilder = class {
     if (!this.currentSection) {
       this.addSection("Tasks");
     }
-    this.currentSection.tasks.push({ ...milestone, type: "milestone", duration: "0s" });
+    this.currentSection.tasks.push({
+      ...milestone,
+      type: "milestone",
+      duration: "0s"
+    });
     return this;
   }
   /**
@@ -20232,10 +22265,11 @@ function padAscii(str, width, align = "left", padChar = " ") {
   switch (align) {
     case "right":
       return padChar.repeat(padding) + str;
-    case "center":
+    case "center": {
       const leftPad = Math.floor(padding / 2);
       const rightPad = padding - leftPad;
       return padChar.repeat(leftPad) + str + padChar.repeat(rightPad);
+    }
     case "left":
     default:
       return str + padChar.repeat(padding);
@@ -20281,7 +22315,9 @@ function generateAsciiBox(content, options = {}) {
       chars.topLeft + chars.horizontal.repeat(leftBorder) + titlePadded + chars.horizontal.repeat(rightBorder) + chars.topRight
     );
   } else {
-    result.push(chars.topLeft + chars.horizontal.repeat(boxWidth - 2) + chars.topRight);
+    result.push(
+      chars.topLeft + chars.horizontal.repeat(boxWidth - 2) + chars.topRight
+    );
   }
   for (let i = 0; i < padding; i++) {
     result.push(chars.vertical + " ".repeat(boxWidth - 2) + chars.vertical);
@@ -20295,7 +22331,9 @@ function generateAsciiBox(content, options = {}) {
   for (let i = 0; i < padding; i++) {
     result.push(chars.vertical + " ".repeat(boxWidth - 2) + chars.vertical);
   }
-  result.push(chars.bottomLeft + chars.horizontal.repeat(boxWidth - 2) + chars.bottomRight);
+  result.push(
+    chars.bottomLeft + chars.horizontal.repeat(boxWidth - 2) + chars.bottomRight
+  );
   return result.join("\n");
 }
 function generateAsciiBulletList(items, bullet = "bullet", indent = 2) {
@@ -20351,7 +22389,9 @@ function generateAsciiTable(headers, rows, options = {}) {
   for (const row of rows) {
     result.push(renderRow(row));
   }
-  result.push(renderSeparator(chars.bottomLeft, chars.teeUp, chars.bottomRight));
+  result.push(
+    renderSeparator(chars.bottomLeft, chars.teeUp, chars.bottomRight)
+  );
   return result.join("\n");
 }
 function getAsciiArrow(direction, useAscii = false) {
@@ -20388,9 +22428,15 @@ function generateAsciiFlowDiagram(steps, direction = "vertical", options = {}) {
   for (let i = 0; i < steps.length; i++) {
     const step = truncateAscii(steps[i], maxWidth);
     const boxWidth = Math.max(step.length + 4, 20);
-    lines.push(chars.topLeft + chars.horizontal.repeat(boxWidth - 2) + chars.topRight);
-    lines.push(chars.vertical + " " + padAscii(step, boxWidth - 4) + " " + chars.vertical);
-    lines.push(chars.bottomLeft + chars.horizontal.repeat(boxWidth - 2) + chars.bottomRight);
+    lines.push(
+      chars.topLeft + chars.horizontal.repeat(boxWidth - 2) + chars.topRight
+    );
+    lines.push(
+      chars.vertical + " " + padAscii(step, boxWidth - 4) + " " + chars.vertical
+    );
+    lines.push(
+      chars.bottomLeft + chars.horizontal.repeat(boxWidth - 2) + chars.bottomRight
+    );
     if (i < steps.length - 1) {
       const arrowPadding = " ".repeat(Math.floor(boxWidth / 2) - 1);
       lines.push(arrowPadding + "\u2193");
@@ -20414,7 +22460,9 @@ function generateAsciiMetric(label, value, maxLabelWidth = 20) {
 function generateAsciiMetricsPanel(metrics, options = {}) {
   const { style = "single", title = "Metrics" } = options;
   const maxLabelWidth = Math.max(...metrics.map((m) => m.label.length)) + 1;
-  const content = metrics.map((m) => generateAsciiMetric(m.label, m.value, maxLabelWidth));
+  const content = metrics.map(
+    (m) => generateAsciiMetric(m.label, m.value, maxLabelWidth)
+  );
   return generateAsciiBox(content, { style, title });
 }
 function generateAsciiGraph(nodes, edges) {
@@ -20432,7 +22480,9 @@ function generateAsciiGraph(nodes, edges) {
       const targetNode = nodes.find((n) => n.id === edge.target);
       const arrow = getAsciiArrow(edge.direction || "right");
       const label = edge.label ? ` (${edge.label})` : "";
-      lines.push(`  ${sourceNode?.label || edge.source} ${arrow} ${targetNode?.label || edge.target}${label}`);
+      lines.push(
+        `  ${sourceNode?.label || edge.source} ${arrow} ${targetNode?.label || edge.target}${label}`
+      );
     }
   }
   return lines.join("\n");
@@ -20511,7 +22561,12 @@ var ASCIIDocBuilder = class _ASCIIDocBuilder {
    * @returns this for chaining
    */
   addBoxedTitle(title, style) {
-    this.content.push(generateAsciiBoxedTitle(title, style || this.options.boxStyle || "single"));
+    this.content.push(
+      generateAsciiBoxedTitle(
+        title,
+        style || this.options.boxStyle || "single"
+      )
+    );
     return this;
   }
   /**
@@ -20522,7 +22577,13 @@ var ASCIIDocBuilder = class _ASCIIDocBuilder {
    * @returns this for chaining
    */
   addBulletList(items, bullet = "bullet", indent) {
-    this.content.push(generateAsciiBulletList(items, bullet, indent ?? this.options.indent ?? 2));
+    this.content.push(
+      generateAsciiBulletList(
+        items,
+        bullet,
+        indent ?? this.options.indent ?? 2
+      )
+    );
     return this;
   }
   /**
@@ -20533,7 +22594,13 @@ var ASCIIDocBuilder = class _ASCIIDocBuilder {
    * @returns this for chaining
    */
   addNumberedList(items, indent, startNumber = 1) {
-    this.content.push(generateAsciiNumberedList(items, indent ?? this.options.indent ?? 2, startNumber));
+    this.content.push(
+      generateAsciiNumberedList(
+        items,
+        indent ?? this.options.indent ?? 2,
+        startNumber
+      )
+    );
     return this;
   }
   /**
@@ -20593,10 +22660,12 @@ var ASCIIDocBuilder = class _ASCIIDocBuilder {
    * @returns this for chaining
    */
   addFlowDiagram(steps, direction = "vertical") {
-    this.content.push(generateAsciiFlowDiagram(steps, direction, {
-      boxStyle: this.options.boxStyle,
-      maxWidth: this.options.maxWidth
-    }));
+    this.content.push(
+      generateAsciiFlowDiagram(steps, direction, {
+        boxStyle: this.options.boxStyle,
+        maxWidth: this.options.maxWidth
+      })
+    );
     return this;
   }
   /**
@@ -20869,7 +22938,12 @@ function renderEllipseNode(pos, colors) {
     </g>`;
 }
 function renderEdge(fromPos, toPos, options = {}) {
-  const { label, style = "solid", color = "#333333", markerEnd = "arrowhead" } = options;
+  const {
+    label,
+    style = "solid",
+    color = "#333333",
+    markerEnd = "arrowhead"
+  } = options;
   const fromX = fromPos.x + fromPos.width / 2;
   const fromY = fromPos.y + fromPos.height;
   const toX = toPos.x + toPos.width / 2;
@@ -21297,7 +23371,9 @@ function renderTikZMetrics(x, y, metrics) {
 
   % Metrics Panel
   \\node[draw, fill=white, rounded corners, align=left, font=\\footnotesize] at (${x}, ${y}) {`;
-  const lines = metrics.map((m) => `${escapeLatex(m.label)}: ${escapeLatex(String(m.value))}`);
+  const lines = metrics.map(
+    (m) => `${escapeLatex(m.label)}: ${escapeLatex(String(m.value))}`
+  );
   tikz += lines.join(" \\\\ ");
   tikz += "};";
   return tikz;
@@ -21691,7 +23767,9 @@ function generateModelicaPackageFooter(name, options = {}) {
   if (options.includeAnnotations !== false) {
     lines.push("  annotation(");
     lines.push('    Documentation(info="<html>');
-    lines.push(`      <p>Generated by DeepThinking MCP v${options.version || "7.1.0"}</p>`);
+    lines.push(
+      `      <p>Generated by DeepThinking MCP v${options.version || "7.1.0"}</p>`
+    );
     lines.push('    </html>"),');
     lines.push('    version="1.0.0"');
     lines.push("  );");
@@ -21724,12 +23802,18 @@ function generateLinearFlowModelica(stages2, currentStage, options = {}) {
   for (let i = 0; i < stages2.length; i++) {
     const stage = stages2[i];
     const comma = i < stages2.length - 1 ? "," : "";
-    lines.push(`    ${sanitizeModelicaId(stage)} "${escapeModelicaString(stage)}"${comma}`);
+    lines.push(
+      `    ${sanitizeModelicaId(stage)} "${escapeModelicaString(stage)}"${comma}`
+    );
   }
   lines.push("  );");
   lines.push("");
-  lines.push(`  parameter Stage currentStage = Stage.${sanitizeModelicaId(currentStage)};`);
-  lines.push(`  final parameter Integer stageIndex = ${stages2.indexOf(currentStage) + 1};`);
+  lines.push(
+    `  parameter Stage currentStage = Stage.${sanitizeModelicaId(currentStage)};`
+  );
+  lines.push(
+    `  final parameter Integer stageIndex = ${stages2.indexOf(currentStage) + 1};`
+  );
   lines.push(`  final parameter Integer totalStages = ${stages2.length};`);
   lines.push(`  final parameter Real progress = stageIndex / totalStages;`);
   lines.push("");
@@ -21766,7 +23850,7 @@ function sanitizeUmlId(id) {
   return sanitized || "unnamed";
 }
 function escapeUml(str) {
-  return str.replace(/\\/g, "\\\\").replace(/"/g, '"').replace(/\n/g, "\\n").replace(/<(?![\/#])/g, "&lt;").replace(/(?<![\/#])>/g, "&gt;");
+  return str.replace(/\\/g, "\\\\").replace(/"/g, '"').replace(/\n/g, "\\n").replace(/<(?![/#])/g, "&lt;").replace(/(?<![/#])>/g, "&gt;");
 }
 function getArrowSyntax(type) {
   switch (type) {
@@ -21798,7 +23882,9 @@ function generateUmlHeader(options = {}) {
     lines.push(`!theme ${options.theme}`);
   }
   if (options.direction) {
-    lines.push(options.direction === "left to right" ? "left to right direction" : "top to bottom direction");
+    lines.push(
+      options.direction === "left to right" ? "left to right direction" : "top to bottom direction"
+    );
   }
   if (options.scale) {
     lines.push(`scale ${options.scale}`);
@@ -21869,7 +23955,9 @@ function renderUmlNode(node) {
     case "rectangle":
     default:
       if (node.stereotype) {
-        lines.push(`rectangle "${escapeUml(label)}" <<${escapeUml(node.stereotype)}>> as ${id}`);
+        lines.push(
+          `rectangle "${escapeUml(label)}" <<${escapeUml(node.stereotype)}>> as ${id}`
+        );
       } else {
         lines.push(`rectangle "${escapeUml(label)}" as ${id}`);
       }
@@ -22311,7 +24399,11 @@ function frontmatter(metadata) {
   return lines.join("\n");
 }
 function document(title, content, options = {}) {
-  const { includeFrontmatter = false, metadata = {}, includeTableOfContents = false } = options;
+  const {
+    includeFrontmatter = false,
+    metadata = {},
+    includeTableOfContents = false
+  } = options;
   const parts = [];
   if (includeFrontmatter) {
     const fm = {
@@ -22531,7 +24623,11 @@ function sequentialToSVG(thought, options) {
   });
   currentY += nodeHeight + padding;
   const actualHeight = currentY + 80;
-  let svg = generateSVGHeader(svgWidth, actualHeight, "Sequential Dependency Graph");
+  let svg = generateSVGHeader(
+    svgWidth,
+    actualHeight,
+    "Sequential Dependency Graph"
+  );
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
   if (thought.buildUpon) {
     for (const depId of thought.buildUpon) {
@@ -22663,38 +24759,57 @@ function sequentialToHTML(thought, options) {
     htmlTitle = "Sequential Thinking Analysis",
     htmlTheme = "light"
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   html += '<div class="metrics-grid">';
   html += renderMetricCard("Thought #", thought.thoughtNumber, "primary");
   html += renderMetricCard("Total", thought.totalThoughts, "info");
   if (thought.buildUpon && thought.buildUpon.length > 0) {
-    html += renderMetricCard("Dependencies", thought.buildUpon.length, "secondary");
+    html += renderMetricCard(
+      "Dependencies",
+      thought.buildUpon.length,
+      "secondary"
+    );
   }
   html += "</div>\n";
   const badges = [];
   if (thought.isRevision) badges.push(renderBadge("Revision", "warning"));
   if (thought.branchFrom) badges.push(renderBadge("Branched", "info"));
-  html += renderSection("Current Thought", `
+  html += renderSection(
+    "Current Thought",
+    `
     <div class="flex gap-1" style="margin-bottom: 0.5rem">${badges.join(" ")}</div>
     <p>${escapeHTML(thought.content)}</p>
     ${thought.nextThoughtNeeded ? '<p class="text-info">More thoughts needed...</p>' : '<p class="text-success">Reasoning complete.</p>'}
-  `, "\u{1F4AD}");
+  `,
+    "\u{1F4AD}"
+  );
   if (thought.buildUpon && thought.buildUpon.length > 0) {
     html += renderSection("Builds Upon", renderList(thought.buildUpon), "\u{1F517}");
   }
   if (thought.branchFrom) {
-    html += renderSection("Branch Information", `
+    html += renderSection(
+      "Branch Information",
+      `
       <p><strong>Branched from:</strong> ${escapeHTML(thought.branchFrom)}</p>
       ${thought.branchId ? `<p><strong>Branch ID:</strong> ${escapeHTML(thought.branchId)}</p>` : ""}
-    `, "\u{1F33F}");
+    `,
+      "\u{1F33F}"
+    );
   }
   if (thought.isRevision && thought.revisesThought) {
-    html += renderSection("Revision Information", `
+    html += renderSection(
+      "Revision Information",
+      `
       <p><strong>Revises:</strong> ${escapeHTML(thought.revisesThought)}</p>
       ${thought.revisionReason ? `<p><strong>Reason:</strong> ${escapeHTML(thought.revisionReason)}</p>` : ""}
-    `, "\u270F\uFE0F");
+    `,
+      "\u270F\uFE0F"
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -22704,14 +24819,20 @@ function sequentialToModelica(thought, options) {
   const packageName = modelicaPackageName || "SequentialDependency";
   const lines = [];
   lines.push(`package ${sanitizeModelicaId(packageName)}`);
-  lines.push(`  "Sequential dependency graph for thought ${sanitizeId(thought.id)}"`);
+  lines.push(
+    `  "Sequential dependency graph for thought ${sanitizeId(thought.id)}"`
+  );
   lines.push("");
   lines.push("  record CurrentThought");
   lines.push(`    constant String id = "${sanitizeModelicaId(thought.id)}";`);
   lines.push(`    constant Integer thoughtNumber = ${thought.thoughtNumber};`);
   lines.push(`    constant Integer totalThoughts = ${thought.totalThoughts};`);
-  lines.push(`    constant Boolean isRevision = ${thought.isRevision || false};`);
-  lines.push(`    constant Boolean nextThoughtNeeded = ${thought.nextThoughtNeeded};`);
+  lines.push(
+    `    constant Boolean isRevision = ${thought.isRevision || false};`
+  );
+  lines.push(
+    `    constant Boolean nextThoughtNeeded = ${thought.nextThoughtNeeded};`
+  );
   lines.push("  end CurrentThought;");
   lines.push("");
   if (thought.buildUpon && thought.buildUpon.length > 0) {
@@ -22720,25 +24841,35 @@ function sequentialToModelica(thought, options) {
     for (let i = 0; i < thought.buildUpon.length; i++) {
       const dep = thought.buildUpon[i];
       const comma = i < thought.buildUpon.length - 1 ? "," : "";
-      lines.push(`    ${sanitizeModelicaId(dep)} "${escapeModelicaString(dep)}"${comma}`);
+      lines.push(
+        `    ${sanitizeModelicaId(dep)} "${escapeModelicaString(dep)}"${comma}`
+      );
     }
     lines.push("  );");
     lines.push("");
   }
   if (thought.branchFrom) {
     lines.push("  record BranchInfo");
-    lines.push(`    constant String branchFrom = "${sanitizeModelicaId(thought.branchFrom)}";`);
+    lines.push(
+      `    constant String branchFrom = "${sanitizeModelicaId(thought.branchFrom)}";`
+    );
     if (thought.branchId) {
-      lines.push(`    constant String branchId = "${sanitizeModelicaId(thought.branchId)}";`);
+      lines.push(
+        `    constant String branchId = "${sanitizeModelicaId(thought.branchId)}";`
+      );
     }
     lines.push("  end BranchInfo;");
     lines.push("");
   }
   if (thought.revisesThought) {
     lines.push("  record RevisionInfo");
-    lines.push(`    constant String revisesThought = "${sanitizeModelicaId(thought.revisesThought)}";`);
+    lines.push(
+      `    constant String revisesThought = "${sanitizeModelicaId(thought.revisesThought)}";`
+    );
     if (thought.revisionReason) {
-      lines.push(`    constant String revisionReason = "${escapeModelicaString(thought.revisionReason)}";`);
+      lines.push(
+        `    constant String revisionReason = "${escapeModelicaString(thought.revisionReason)}";`
+      );
     }
     lines.push("  end RevisionInfo;");
     lines.push("");
@@ -22762,14 +24893,22 @@ function sequentialToUML(thought, options) {
     }
   }
   activities.push(thought.content.substring(0, 50) + "...");
-  return generateActivityDiagram(activities, thought.content.substring(0, 50) + "...", {
-    title: "Sequential Dependency Graph",
-    theme: umlTheme,
-    direction: umlDirection
-  });
+  return generateActivityDiagram(
+    activities,
+    thought.content.substring(0, 50) + "...",
+    {
+      title: "Sequential Dependency Graph",
+      theme: umlTheme,
+      direction: umlDirection
+    }
+  );
 }
 function sequentialToJSON(thought, options) {
-  const { jsonPrettyPrint = true, jsonIndent = 2, includeMetrics = true } = options;
+  const {
+    jsonPrettyPrint = true,
+    jsonIndent = 2,
+    includeMetrics = true
+  } = options;
   const graph = createJsonGraph("Sequential Dependency Graph", "sequential", {
     includeMetrics
   });
@@ -22821,7 +24960,10 @@ function sequentialToJSON(thought, options) {
     addMetric(graph, "isRevision", thought.isRevision || false);
     addMetric(graph, "nextThoughtNeeded", thought.nextThoughtNeeded);
   }
-  return serializeGraph(graph, { prettyPrint: jsonPrettyPrint, indent: jsonIndent });
+  return serializeGraph(graph, {
+    prettyPrint: jsonPrettyPrint,
+    indent: jsonIndent
+  });
 }
 function sequentialToMarkdown(thought, options) {
   const {
@@ -22832,8 +24974,8 @@ function sequentialToMarkdown(thought, options) {
   const parts = [];
   const overviewContent = keyValueSection({
     "Thought Number": `${thought.thoughtNumber} of ${thought.totalThoughts}`,
-    "Status": thought.nextThoughtNeeded ? "In Progress" : "Complete",
-    "Revision": thought.isRevision ? "Yes" : "No"
+    Status: thought.nextThoughtNeeded ? "In Progress" : "Complete",
+    Revision: thought.isRevision ? "Yes" : "No"
   });
   parts.push(section("Overview", overviewContent));
   parts.push(section("Current Thought", thought.content));
@@ -22849,8 +24991,8 @@ function sequentialToMarkdown(thought, options) {
   }
   if (thought.isRevision && thought.revisesThought) {
     const revisionContent = keyValueSection({
-      "Revises": thought.revisesThought,
-      ...thought.revisionReason ? { "Reason": thought.revisionReason } : {}
+      Revises: thought.revisesThought,
+      ...thought.revisionReason ? { Reason: thought.revisionReason } : {}
     });
     parts.push(section("Revision Information", revisionContent));
   }
@@ -22872,10 +25014,20 @@ function sequentialToMarkdown(thought, options) {
 // src/export/visual/modes/shannon.ts
 init_esm_shims();
 function exportShannonStageFlow(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return shannonToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return shannonToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return shannonToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -23126,50 +25278,88 @@ function shannonToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   if (includeMetrics) {
     const stageIndex = stages.indexOf(thought.stage);
     const progress = (stageIndex + 1) / stages.length * 100;
     html += '<div class="metrics-grid">';
-    html += renderMetricCard("Current Stage", stageLabels[thought.stage], "primary");
-    html += renderMetricCard("Uncertainty", thought.uncertainty.toFixed(2), "info");
+    html += renderMetricCard(
+      "Current Stage",
+      stageLabels[thought.stage],
+      "primary"
+    );
+    html += renderMetricCard(
+      "Uncertainty",
+      thought.uncertainty.toFixed(2),
+      "info"
+    );
     html += renderMetricCard("Progress", `${progress.toFixed(0)}%`, "success");
     html += "</div>\n";
   }
-  html += renderSection("Stage Flow", `
+  html += renderSection(
+    "Stage Flow",
+    `
     <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin: 1rem 0;">
       ${stages.map((stage) => {
-    const isCurrent = stage === thought.stage;
-    const badge = renderBadge(stageLabels[stage], isCurrent ? "primary" : "secondary");
-    return badge;
-  }).join(" \u2192 ")}
+      const isCurrent = stage === thought.stage;
+      const badge = renderBadge(
+        stageLabels[stage],
+        isCurrent ? "primary" : "secondary"
+      );
+      return badge;
+    }).join(" \u2192 ")}
     </div>
     ${renderProgressBar((stages.indexOf(thought.stage) + 1) / stages.length * 100, "primary")}
-  `, "\u{1F504}");
-  html += renderSection("Current Stage", `
+  `,
+    "\u{1F504}"
+  );
+  html += renderSection(
+    "Current Stage",
+    `
     <p><strong>${stageLabels[thought.stage]}</strong></p>
     <p class="text-secondary">Uncertainty: ${(thought.uncertainty * 100).toFixed(0)}%</p>
-  `, "\u{1F4CD}");
+  `,
+    "\u{1F4CD}"
+  );
   if (thought.dependencies && thought.dependencies.length > 0) {
-    html += renderSection("Dependencies", renderList(thought.dependencies), "\u{1F517}");
+    html += renderSection(
+      "Dependencies",
+      renderList(thought.dependencies),
+      "\u{1F517}"
+    );
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
     html += renderSection("Assumptions", renderList(thought.assumptions), "\u{1F4A1}");
   }
   if (thought.knownLimitations && thought.knownLimitations.length > 0) {
-    html += renderSection("Known Limitations", renderList(thought.knownLimitations), "\u26A0\uFE0F");
+    html += renderSection(
+      "Known Limitations",
+      renderList(thought.knownLimitations),
+      "\u26A0\uFE0F"
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
 }
 function shannonToModelica(thought, options) {
-  const { modelicaPackageName, modelicaIncludeAnnotations = true, includeMetrics = true } = options;
+  const {
+    modelicaPackageName,
+    modelicaIncludeAnnotations = true,
+    includeMetrics = true
+  } = options;
   const stageLabelsArray = stages.map((s) => stageLabels[s]);
-  let modelica = generateLinearFlowModelica(stageLabelsArray, stageLabels[thought.stage], {
-    packageName: modelicaPackageName || "ShannonStageFlow",
-    includeAnnotations: modelicaIncludeAnnotations});
+  let modelica = generateLinearFlowModelica(
+    stageLabelsArray,
+    stageLabels[thought.stage],
+    {
+      packageName: modelicaPackageName || "ShannonStageFlow",
+      includeAnnotations: modelicaIncludeAnnotations}
+  );
   if (includeMetrics && thought.uncertainty !== void 0) {
     const insertPoint = modelica.lastIndexOf("end ");
     const metricsSection = `
@@ -23191,13 +25381,23 @@ function shannonToUML(thought, options) {
   });
 }
 function shannonToJSON(thought, options) {
-  const { jsonPrettyPrint = true, jsonIndent = 2, includeMetrics = true } = options;
+  const {
+    jsonPrettyPrint = true,
+    jsonIndent = 2,
+    includeMetrics = true
+  } = options;
   const stageLabelsArray = stages.map((s) => stageLabels[s]);
-  let json = generateLinearFlowJson("Shannon Stage Flow", "shannon", stageLabelsArray, stageLabels[thought.stage], {
-    prettyPrint: jsonPrettyPrint,
-    indent: jsonIndent,
-    includeMetrics
-  });
+  let json = generateLinearFlowJson(
+    "Shannon Stage Flow",
+    "shannon",
+    stageLabelsArray,
+    stageLabels[thought.stage],
+    {
+      prettyPrint: jsonPrettyPrint,
+      indent: jsonIndent,
+      includeMetrics
+    }
+  );
   if (includeMetrics) {
     const graph = JSON.parse(json);
     graph.metadata.mode = "shannon";
@@ -23210,7 +25410,11 @@ function shannonToJSON(thought, options) {
     if (thought.assumptions) {
       graph.metrics.assumptionCount = thought.assumptions.length;
     }
-    json = JSON.stringify(graph, null, jsonPrettyPrint !== false ? jsonIndent : 0);
+    json = JSON.stringify(
+      graph,
+      null,
+      jsonPrettyPrint !== false ? jsonIndent : 0
+    );
   }
   return json;
 }
@@ -23227,8 +25431,8 @@ function shannonToMarkdown(thought, options) {
     const progress = (stageIndex2 + 1) / stages.length * 100;
     const metricsContent = keyValueSection({
       "Current Stage": stageLabels[thought.stage],
-      "Uncertainty": thought.uncertainty.toFixed(2),
-      "Progress": `${progress.toFixed(0)}%`
+      Uncertainty: thought.uncertainty.toFixed(2),
+      Progress: `${progress.toFixed(0)}%`
     });
     parts.push(section("Metrics", metricsContent));
   }
@@ -23238,12 +25442,19 @@ function shannonToMarkdown(thought, options) {
   }).join(" \u2192 ");
   const stageIndex = stages.indexOf(thought.stage);
   const progressPct = (stageIndex + 1) / stages.length * 100;
-  parts.push(section("Stage Flow", `${stageFlow}
+  parts.push(
+    section("Stage Flow", `${stageFlow}
 
-${progressBar(progressPct)}`));
-  parts.push(section("Current Stage", `**${stageLabels[thought.stage]}**
+${progressBar(progressPct)}`)
+  );
+  parts.push(
+    section(
+      "Current Stage",
+      `**${stageLabels[thought.stage]}**
 
-Uncertainty: ${(thought.uncertainty * 100).toFixed(0)}%`));
+Uncertainty: ${(thought.uncertainty * 100).toFixed(0)}%`
+    )
+  );
   if (thought.dependencies && thought.dependencies.length > 0) {
     parts.push(section("Dependencies", list(thought.dependencies)));
   }
@@ -23271,10 +25482,20 @@ Uncertainty: ${(thought.uncertainty * 100).toFixed(0)}%`));
 // src/export/visual/modes/mathematics.ts
 init_esm_shims();
 function exportMathematicsDerivation(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return mathematicsToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return mathematicsToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return mathematicsToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -23307,7 +25528,11 @@ function mathematicsToMermaid(thought, colorScheme, includeLabels, includeMetric
   builder.addNode({ id: typeId, label: typeLabel, shape: "subroutine" });
   if (thought.proofStrategy) {
     const strategyId = sanitizeId("strategy");
-    builder.addNode({ id: strategyId, label: thought.proofStrategy.type, shape: "stadium" });
+    builder.addNode({
+      id: strategyId,
+      label: thought.proofStrategy.type,
+      shape: "stadium"
+    });
     builder.addEdge({ source: typeId, target: strategyId });
     let prevStepId = strategyId;
     thought.proofStrategy.steps.forEach((step, index) => {
@@ -23320,7 +25545,11 @@ function mathematicsToMermaid(thought, colorScheme, includeLabels, includeMetric
     if (includeMetrics) {
       const completenessId = sanitizeId("completeness");
       const completenessLabel = `Completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%`;
-      builder.addNode({ id: completenessId, label: completenessLabel, shape: "hexagon" });
+      builder.addNode({
+        id: completenessId,
+        label: completenessLabel,
+        shape: "hexagon"
+      });
       builder.addEdge({ source: prevStepId, target: completenessId });
     }
   }
@@ -23334,13 +25563,21 @@ function mathematicsToMermaid(thought, colorScheme, includeLabels, includeMetric
     thought.theorems.forEach((theorem, index) => {
       const theoremId = sanitizeId(`theorem_${index}`);
       const theoremLabel = theorem.name || `Theorem ${index + 1}`;
-      builder.addNode({ id: theoremId, label: theoremLabel, shape: "trapezoid" });
+      builder.addNode({
+        id: theoremId,
+        label: theoremLabel,
+        shape: "trapezoid"
+      });
       builder.addEdge({ source: typeId, target: theoremId });
     });
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
     const assumptionsId = sanitizeId("assumptions");
-    builder.addNode({ id: assumptionsId, label: `Assumptions: ${thought.assumptions.length}`, shape: "asymmetric" });
+    builder.addNode({
+      id: assumptionsId,
+      label: `Assumptions: ${thought.assumptions.length}`,
+      shape: "asymmetric"
+    });
   }
   return builder.setOptions({ colorScheme: scheme }).render();
 }
@@ -23351,7 +25588,11 @@ function mathematicsToDOT(thought, includeLabels, includeMetrics) {
   builder.addNode({ id: typeId, label: typeLabel, shape: "doubleoctagon" });
   if (thought.proofStrategy) {
     const strategyId = sanitizeId("strategy");
-    builder.addNode({ id: strategyId, label: thought.proofStrategy.type, shape: "ellipse" });
+    builder.addNode({
+      id: strategyId,
+      label: thought.proofStrategy.type,
+      shape: "ellipse"
+    });
     builder.addEdge({ source: typeId, target: strategyId });
     let prevStepId = strategyId;
     thought.proofStrategy.steps.forEach((step, index) => {
@@ -23363,14 +25604,22 @@ function mathematicsToDOT(thought, includeLabels, includeMetrics) {
     });
     if (includeMetrics) {
       const completenessId = sanitizeId("completeness");
-      builder.addNode({ id: completenessId, label: `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`, shape: "diamond" });
+      builder.addNode({
+        id: completenessId,
+        label: `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`,
+        shape: "diamond"
+      });
       builder.addEdge({ source: prevStepId, target: completenessId });
     }
   }
   if (thought.theorems) {
     thought.theorems.forEach((theorem, index) => {
       const theoremId = sanitizeId(`theorem_${index}`);
-      builder.addNode({ id: theoremId, label: theorem.name || `Theorem ${index + 1}`, shape: "parallelogram" });
+      builder.addNode({
+        id: theoremId,
+        label: theorem.name || `Theorem ${index + 1}`,
+        shape: "parallelogram"
+      });
       builder.addEdge({ source: typeId, target: theoremId });
     });
   }
@@ -23379,7 +25628,9 @@ function mathematicsToDOT(thought, includeLabels, includeMetrics) {
 function mathematicsToASCII(thought) {
   const builder = new ASCIIDocBuilder();
   builder.addHeader("Mathematics Derivation");
-  builder.addText(`Type: ${(thought.thoughtType || "proof").replace(/_/g, " ")}`);
+  builder.addText(
+    `Type: ${(thought.thoughtType || "proof").replace(/_/g, " ")}`
+  );
   builder.addText(`Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`);
   builder.addEmptyLine();
   if (thought.mathematicalModel) {
@@ -23393,7 +25644,9 @@ function mathematicsToASCII(thought) {
   }
   if (thought.proofStrategy) {
     builder.addText(`Proof Strategy: ${thought.proofStrategy.type}`);
-    builder.addText(`Completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%`);
+    builder.addText(
+      `Completeness: ${(thought.proofStrategy.completeness * 100).toFixed(0)}%`
+    );
     builder.addText("Steps:");
     builder.addNumberedList(thought.proofStrategy.steps);
     if (thought.proofStrategy.baseCase) {
@@ -23407,7 +25660,9 @@ function mathematicsToASCII(thought) {
   if (thought.theorems && thought.theorems.length > 0) {
     builder.addText("Theorems:");
     thought.theorems.forEach((theorem, index) => {
-      builder.addText(`  [${index + 1}] ${theorem.name || `Theorem ${index + 1}`}: ${theorem.statement}`);
+      builder.addText(
+        `  [${index + 1}] ${theorem.name || `Theorem ${index + 1}`}: ${theorem.statement}`
+      );
       if (theorem.hypotheses.length > 0) {
         builder.addText(`      Hypotheses: ${theorem.hypotheses.join(", ")}`);
       }
@@ -23534,7 +25789,10 @@ function mathematicsToSVG(thought, options) {
   svg += "\n  </g>";
   if (includeMetrics) {
     const metrics = [
-      { label: "Uncertainty", value: `${(thought.uncertainty * 100).toFixed(1)}%` },
+      {
+        label: "Uncertainty",
+        value: `${(thought.uncertainty * 100).toFixed(1)}%`
+      },
       { label: "Theorems", value: thought.theorems?.length || 0 },
       { label: "Assumptions", value: thought.assumptions?.length || 0 }
     ];
@@ -23720,11 +25978,18 @@ function mathematicsToHTML(thought, options) {
     htmlTitle = "Mathematics Derivation Analysis",
     htmlTheme = "light"
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   html += '<div class="metrics-grid">';
-  html += renderMetricCard("Uncertainty", `${(thought.uncertainty * 100).toFixed(1)}%`, "warning");
+  html += renderMetricCard(
+    "Uncertainty",
+    `${(thought.uncertainty * 100).toFixed(1)}%`,
+    "warning"
+  );
   if (thought.theorems) {
     html += renderMetricCard("Theorems", thought.theorems.length, "primary");
   }
@@ -23732,7 +25997,11 @@ function mathematicsToHTML(thought, options) {
     html += renderMetricCard("Assumptions", thought.assumptions.length, "info");
   }
   if (thought.proofStrategy) {
-    html += renderMetricCard("Completeness", `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`, "success");
+    html += renderMetricCard(
+      "Completeness",
+      `${(thought.proofStrategy.completeness * 100).toFixed(0)}%`,
+      "success"
+    );
   }
   html += "</div>\n";
   const badges = [];
@@ -23766,31 +26035,41 @@ function mathematicsToHTML(thought, options) {
     html += renderSection("Proof Strategy", proofContent, "\u{1F50D}");
   }
   if (thought.theorems && thought.theorems.length > 0) {
-    const theoremsContent = thought.theorems.map((theorem, index) => `
+    const theoremsContent = thought.theorems.map(
+      (theorem, index) => `
       <div class="card">
         <div class="card-header">${escapeHTML(theorem.name || `Theorem ${index + 1}`)}</div>
         <p><strong>Statement:</strong> ${escapeHTML(theorem.statement)}</p>
         ${theorem.hypotheses.length > 0 ? `<p><strong>Hypotheses:</strong> ${escapeHTML(theorem.hypotheses.join(", "))}</p>` : ""}
         <p><strong>Conclusion:</strong> ${escapeHTML(theorem.conclusion)}</p>
       </div>
-    `).join("");
+    `
+    ).join("");
     html += renderSection("Theorems", theoremsContent, "\u{1F4DC}");
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
     const assumptionsList = thought.assumptions.map((a) => escapeHTML(a));
-    html += renderSection("Assumptions", `
+    html += renderSection(
+      "Assumptions",
+      `
       <ul class="list-styled">
         ${assumptionsList.map((a) => `<li>${a}</li>`).join("")}
       </ul>
-    `, "\u26A0\uFE0F");
+    `,
+      "\u26A0\uFE0F"
+    );
   }
   if (thought.dependencies && thought.dependencies.length > 0) {
     const depsList = thought.dependencies.map((d) => escapeHTML(d));
-    html += renderSection("Dependencies", `
+    html += renderSection(
+      "Dependencies",
+      `
       <ul class="list-styled">
         ${depsList.map((d) => `<li>${d}</li>`).join("")}
       </ul>
-    `, "\u{1F517}");
+    `,
+      "\u{1F517}"
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -23821,7 +26100,9 @@ function mathematicsToModelica(thought, options) {
   if (thought.theorems && thought.theorems.length > 0) {
     modelica += "  // Theorems\n";
     thought.theorems.forEach((theorem, index) => {
-      const theoremName = sanitizeModelicaId(theorem.name || `Theorem${index + 1}`);
+      const theoremName = sanitizeModelicaId(
+        theorem.name || `Theorem${index + 1}`
+      );
       modelica += `  model ${theoremName} "Theorem ${index + 1}"
 `;
       modelica += `    parameter String statement = "${escapeModelicaString(theorem.statement)}";
@@ -23840,7 +26121,9 @@ function mathematicsToModelica(thought, options) {
     });
   }
   if (thought.proofStrategy) {
-    const strategyName = sanitizeModelicaId(thought.proofStrategy.type.replace(/\s+/g, "_"));
+    const strategyName = sanitizeModelicaId(
+      thought.proofStrategy.type.replace(/\s+/g, "_")
+    );
     modelica += "  // Proof Strategy\n";
     modelica += `  model ${strategyName} "Proof Strategy"
 `;
@@ -23897,9 +26180,7 @@ function mathematicsToUML(thought, options) {
     label: includeLabels ? (thought.thoughtType || "Proof").replace(/_/g, " ") : typeId,
     shape: "class",
     stereotype: "mathematical",
-    attributes: [
-      `uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`
-    ]
+    attributes: [`uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`]
   });
   if (thought.mathematicalModel) {
     const modelId = sanitizeId("model");
@@ -24106,7 +26387,11 @@ function mathematicsToJSON(thought, options) {
     addMetric(graph, "assumption_count", thought.assumptions?.length || 0);
     addMetric(graph, "dependency_count", thought.dependencies?.length || 0);
     if (thought.proofStrategy) {
-      addMetric(graph, "proof_completeness", thought.proofStrategy.completeness);
+      addMetric(
+        graph,
+        "proof_completeness",
+        thought.proofStrategy.completeness
+      );
       addMetric(graph, "proof_step_count", thought.proofStrategy.steps.length);
     }
   }
@@ -24121,23 +26406,23 @@ function mathematicsToMarkdown(thought, options) {
   } = options;
   const parts = [];
   const typeContent = keyValueSection({
-    "Type": (thought.thoughtType || "proof").replace(/_/g, " "),
-    "Uncertainty": `${(thought.uncertainty * 100).toFixed(1)}%`
+    Type: (thought.thoughtType || "proof").replace(/_/g, " "),
+    Uncertainty: `${(thought.uncertainty * 100).toFixed(1)}%`
   });
   parts.push(section("Overview", typeContent));
   if (thought.mathematicalModel) {
     const modelContent = keyValueSection({
-      "LaTeX": `\`${thought.mathematicalModel.latex}\``,
-      "Symbolic": `\`${thought.mathematicalModel.symbolic}\``,
-      "ASCII": thought.mathematicalModel.ascii ? `\`${thought.mathematicalModel.ascii}\`` : "N/A"
+      LaTeX: `\`${thought.mathematicalModel.latex}\``,
+      Symbolic: `\`${thought.mathematicalModel.symbolic}\``,
+      ASCII: thought.mathematicalModel.ascii ? `\`${thought.mathematicalModel.ascii}\`` : "N/A"
     });
     parts.push(section("Mathematical Model", modelContent));
   }
   if (includeMetrics) {
     const metricsContent = keyValueSection({
-      "Uncertainty": `${(thought.uncertainty * 100).toFixed(1)}%`,
-      "Theorems": thought.theorems?.length || 0,
-      "Assumptions": thought.assumptions?.length || 0,
+      Uncertainty: `${(thought.uncertainty * 100).toFixed(1)}%`,
+      Theorems: thought.theorems?.length || 0,
+      Assumptions: thought.assumptions?.length || 0,
       "Proof Completeness": thought.proofStrategy ? `${(thought.proofStrategy.completeness * 100).toFixed(0)}%` : "N/A"
     });
     parts.push(section("Metrics", metricsContent));
@@ -24197,9 +26482,18 @@ function exportPhysicsVisualization(thought, options) {
   const { format, colorScheme = "default" } = options;
   switch (format) {
     case "mermaid":
-      return physicsToMermaid(thought, colorScheme, options.includeLabels ?? true, options.includeMetrics ?? true);
+      return physicsToMermaid(
+        thought,
+        colorScheme,
+        options.includeLabels ?? true,
+        options.includeMetrics ?? true
+      );
     case "dot":
-      return physicsToDOT(thought, options.includeLabels ?? true, options.includeMetrics ?? true);
+      return physicsToDOT(
+        thought,
+        options.includeLabels ?? true,
+        options.includeMetrics ?? true
+      );
     case "ascii":
       return physicsToASCII(thought);
     case "svg":
@@ -24232,18 +26526,38 @@ function physicsToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
     const tensorId = sanitizeId("tensor");
     const compId = sanitizeId("components");
     const compLabel = includeLabels ? thought.tensorProperties.components.slice(0, 30) + (thought.tensorProperties.components.length > 30 ? "..." : "") : "Components";
-    builder.addNode({ id: tensorId, label: `Rank (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`, shape: "stadium" }).addNode({ id: compId, label: compLabel, shape: "rectangle" }).addEdge({ source: typeId, target: tensorId }).addEdge({ source: tensorId, target: compId });
+    builder.addNode({
+      id: tensorId,
+      label: `Rank (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`,
+      shape: "stadium"
+    }).addNode({ id: compId, label: compLabel, shape: "rectangle" }).addEdge({ source: typeId, target: tensorId }).addEdge({ source: tensorId, target: compId });
     if (thought.tensorProperties.symmetries.length > 0) {
-      builder.addNode({ id: sanitizeId("symmetries"), label: `Symmetries: ${thought.tensorProperties.symmetries.length}`, shape: "hexagon" }).addEdge({ source: tensorId, target: sanitizeId("symmetries") });
+      builder.addNode({
+        id: sanitizeId("symmetries"),
+        label: `Symmetries: ${thought.tensorProperties.symmetries.length}`,
+        shape: "hexagon"
+      }).addEdge({ source: tensorId, target: sanitizeId("symmetries") });
     }
     if (thought.tensorProperties.invariants.length > 0) {
-      builder.addNode({ id: sanitizeId("invariants"), label: `Invariants: ${thought.tensorProperties.invariants.length}`, shape: "hexagon" }).addEdge({ source: tensorId, target: sanitizeId("invariants") });
+      builder.addNode({
+        id: sanitizeId("invariants"),
+        label: `Invariants: ${thought.tensorProperties.invariants.length}`,
+        shape: "hexagon"
+      }).addEdge({ source: tensorId, target: sanitizeId("invariants") });
     }
   }
   if (thought.physicalInterpretation) {
     const interpId = sanitizeId("interpretation");
     const unitsId = sanitizeId("units");
-    builder.addNode({ id: interpId, label: thought.physicalInterpretation.quantity, shape: "parallelogram" }).addNode({ id: unitsId, label: thought.physicalInterpretation.units, shape: "stadium" }).addEdge({ source: typeId, target: interpId }).addEdge({ source: interpId, target: unitsId });
+    builder.addNode({
+      id: interpId,
+      label: thought.physicalInterpretation.quantity,
+      shape: "parallelogram"
+    }).addNode({
+      id: unitsId,
+      label: thought.physicalInterpretation.units,
+      shape: "stadium"
+    }).addEdge({ source: typeId, target: interpId }).addEdge({ source: interpId, target: unitsId });
     thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
       const lawId = sanitizeId(`conservation_${index}`);
       const lawLabel = includeLabels ? law.slice(0, 25) + (law.length > 25 ? "..." : "") : `Law ${index + 1}`;
@@ -24253,17 +26567,29 @@ function physicsToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   if (thought.fieldTheoryContext) {
     const fieldId = sanitizeId("field_theory");
     const symGroupId = sanitizeId("symmetry_group");
-    builder.addNode({ id: fieldId, label: "Field Theory", shape: "cylinder" }).addNode({ id: symGroupId, label: thought.fieldTheoryContext.symmetryGroup, shape: "hexagon" }).addEdge({ source: typeId, target: fieldId }).addEdge({ source: fieldId, target: symGroupId });
+    builder.addNode({ id: fieldId, label: "Field Theory", shape: "cylinder" }).addNode({
+      id: symGroupId,
+      label: thought.fieldTheoryContext.symmetryGroup,
+      shape: "hexagon"
+    }).addEdge({ source: typeId, target: fieldId }).addEdge({ source: fieldId, target: symGroupId });
     thought.fieldTheoryContext.fields.forEach((field, index) => {
       const fId = sanitizeId(`field_${index}`);
       builder.addNode({ id: fId, label: field, shape: "rectangle" }).addEdge({ source: fieldId, target: fId });
     });
   }
   if (includeMetrics) {
-    builder.addNode({ id: sanitizeId("uncertainty"), label: `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`, shape: "hexagon" });
+    builder.addNode({
+      id: sanitizeId("uncertainty"),
+      label: `Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%`,
+      shape: "hexagon"
+    });
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
-    builder.addNode({ id: sanitizeId("assumptions"), label: `Assumptions: ${thought.assumptions.length}`, shape: "asymmetric" });
+    builder.addNode({
+      id: sanitizeId("assumptions"),
+      label: `Assumptions: ${thought.assumptions.length}`,
+      shape: "asymmetric"
+    });
   }
   return builder.setOptions({ colorScheme: scheme }).render();
 }
@@ -24277,12 +26603,28 @@ function physicsToDOT(thought, includeLabels, includeMetrics) {
     const compId = sanitizeId("components");
     const transId = sanitizeId("transformation");
     const compLabel = includeLabels ? thought.tensorProperties.components.slice(0, 25).replace(/"/g, '\\"') : "Components";
-    builder.addNode({ id: tensorId, label: `Rank (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`, shape: "ellipse" }).addNode({ id: compId, label: compLabel }).addNode({ id: transId, label: thought.tensorProperties.transformation, shape: "diamond" }).addEdge({ source: typeId, target: tensorId }).addEdge({ source: tensorId, target: compId }).addEdge({ source: tensorId, target: transId });
+    builder.addNode({
+      id: tensorId,
+      label: `Rank (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`,
+      shape: "ellipse"
+    }).addNode({ id: compId, label: compLabel }).addNode({
+      id: transId,
+      label: thought.tensorProperties.transformation,
+      shape: "diamond"
+    }).addEdge({ source: typeId, target: tensorId }).addEdge({ source: tensorId, target: compId }).addEdge({ source: tensorId, target: transId });
   }
   if (thought.physicalInterpretation) {
     const interpId = sanitizeId("interpretation");
     const unitsId = sanitizeId("units");
-    builder.addNode({ id: interpId, label: thought.physicalInterpretation.quantity, shape: "parallelogram" }).addNode({ id: unitsId, label: thought.physicalInterpretation.units, shape: "ellipse" }).addEdge({ source: typeId, target: interpId }).addEdge({ source: interpId, target: unitsId });
+    builder.addNode({
+      id: interpId,
+      label: thought.physicalInterpretation.quantity,
+      shape: "parallelogram"
+    }).addNode({
+      id: unitsId,
+      label: thought.physicalInterpretation.units,
+      shape: "ellipse"
+    }).addEdge({ source: typeId, target: interpId }).addEdge({ source: interpId, target: unitsId });
     thought.physicalInterpretation.conservationLaws.forEach((law, index) => {
       const lawId = sanitizeId(`conservation_${index}`);
       const lawLabel = includeLabels ? law.slice(0, 20).replace(/"/g, '\\"') : `Law ${index + 1}`;
@@ -24292,14 +26634,22 @@ function physicsToDOT(thought, includeLabels, includeMetrics) {
   if (thought.fieldTheoryContext) {
     const fieldId = sanitizeId("field_theory");
     const symGroupId = sanitizeId("symmetry_group");
-    builder.addNode({ id: fieldId, label: "Field Theory", shape: "cylinder" }).addNode({ id: symGroupId, label: thought.fieldTheoryContext.symmetryGroup, shape: "diamond" }).addEdge({ source: typeId, target: fieldId }).addEdge({ source: fieldId, target: symGroupId });
+    builder.addNode({ id: fieldId, label: "Field Theory", shape: "cylinder" }).addNode({
+      id: symGroupId,
+      label: thought.fieldTheoryContext.symmetryGroup,
+      shape: "diamond"
+    }).addEdge({ source: typeId, target: fieldId }).addEdge({ source: fieldId, target: symGroupId });
     thought.fieldTheoryContext.fields.forEach((field, index) => {
       const fId = sanitizeId(`field_${index}`);
       builder.addNode({ id: fId, label: field }).addEdge({ source: fieldId, target: fId });
     });
   }
   if (includeMetrics) {
-    builder.addNode({ id: sanitizeId("uncertainty"), label: `${(thought.uncertainty * 100).toFixed(1)}%`, shape: "diamond" });
+    builder.addNode({
+      id: sanitizeId("uncertainty"),
+      label: `${(thought.uncertainty * 100).toFixed(1)}%`,
+      shape: "diamond"
+    });
   }
   return builder.render();
 }
@@ -24308,18 +26658,26 @@ function physicsToASCII(thought) {
 `).addText(`Uncertainty: ${(thought.uncertainty * 100).toFixed(1)}%
 `).addEmptyLine();
   if (thought.tensorProperties) {
-    builder.addSection("Tensor Properties").addText(`  Rank: (${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})
-`).addText(`  Components: ${thought.tensorProperties.components}
+    builder.addSection("Tensor Properties").addText(
+      `  Rank: (${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})
+`
+    ).addText(`  Components: ${thought.tensorProperties.components}
 `).addText(`  LaTeX: ${thought.tensorProperties.latex}
-`).addText(`  Transformation: ${thought.tensorProperties.transformation}
-`);
+`).addText(
+      `  Transformation: ${thought.tensorProperties.transformation}
+`
+    );
     if (thought.tensorProperties.indexStructure) {
-      builder.addText(`  Index Structure: ${thought.tensorProperties.indexStructure}
-`);
+      builder.addText(
+        `  Index Structure: ${thought.tensorProperties.indexStructure}
+`
+      );
     }
     if (thought.tensorProperties.coordinateSystem) {
-      builder.addText(`  Coordinate System: ${thought.tensorProperties.coordinateSystem}
-`);
+      builder.addText(
+        `  Coordinate System: ${thought.tensorProperties.coordinateSystem}
+`
+      );
     }
     if (thought.tensorProperties.symmetries.length > 0) {
       builder.addText("  Symmetries:\n").addNumberedList(thought.tensorProperties.symmetries, 4);
@@ -24345,8 +26703,10 @@ function physicsToASCII(thought) {
     builder.addEmptyLine();
   }
   if (thought.fieldTheoryContext) {
-    builder.addSection("Field Theory Context").addText(`  Symmetry Group: ${thought.fieldTheoryContext.symmetryGroup}
-`);
+    builder.addSection("Field Theory Context").addText(
+      `  Symmetry Group: ${thought.fieldTheoryContext.symmetryGroup}
+`
+    );
     if (thought.fieldTheoryContext.fields.length > 0) {
       builder.addText("  Fields:\n").addNumberedList(thought.fieldTheoryContext.fields, 4);
     }
@@ -24455,7 +26815,10 @@ function physicsToSVG(thought, options) {
   svg += "\n  </g>";
   if (includeMetrics) {
     const metrics = [
-      { label: "Uncertainty", value: `${(thought.uncertainty * 100).toFixed(1)}%` },
+      {
+        label: "Uncertainty",
+        value: `${(thought.uncertainty * 100).toFixed(1)}%`
+      },
       { label: "Assumptions", value: thought.assumptions?.length || 0 }
     ];
     svg += renderMetricsPanel(svgWidth - 180, svgHeight - 110, metrics);
@@ -24649,7 +27012,11 @@ function physicsToGraphML(thought, options) {
   return generateGraphML(nodes, edges, graphmlOptions);
 }
 function physicsToTikZ(thought, options) {
-  const { includeLabels = true, includeMetrics = true, colorScheme = "default" } = options;
+  const {
+    includeLabels = true,
+    includeMetrics = true,
+    colorScheme = "default"
+  } = options;
   const nodes = [];
   const edges = [];
   const typeId = "type";
@@ -24822,10 +27189,16 @@ function physicsToTikZ(thought, options) {
   let tikz = generateTikZ(nodes, edges, tikzOptions);
   if (includeMetrics) {
     const metrics = [
-      { label: "Uncertainty", value: `${(thought.uncertainty * 100).toFixed(1)}%` },
+      {
+        label: "Uncertainty",
+        value: `${(thought.uncertainty * 100).toFixed(1)}%`
+      },
       { label: "Assumptions", value: thought.assumptions?.length || 0 }
     ];
-    tikz = tikz.replace("\\end{tikzpicture}", renderTikZMetrics(8, -8, metrics) + "\n\\end{tikzpicture}");
+    tikz = tikz.replace(
+      "\\end{tikzpicture}",
+      renderTikZMetrics(8, -8, metrics) + "\n\\end{tikzpicture}"
+    );
   }
   return tikz;
 }
@@ -24835,19 +27208,34 @@ function physicsToHTML(thought, options) {
     htmlTitle = "Physics Analysis",
     htmlTheme = "light"
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   html += '<div class="metrics-grid">';
-  html += renderMetricCard("Uncertainty", `${(thought.uncertainty * 100).toFixed(1)}%`, "warning");
+  html += renderMetricCard(
+    "Uncertainty",
+    `${(thought.uncertainty * 100).toFixed(1)}%`,
+    "warning"
+  );
   if (thought.assumptions) {
     html += renderMetricCard("Assumptions", thought.assumptions.length, "info");
   }
   if (thought.tensorProperties) {
-    html += renderMetricCard("Tensor Rank", `(${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`, "primary");
+    html += renderMetricCard(
+      "Tensor Rank",
+      `(${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`,
+      "primary"
+    );
   }
   if (thought.physicalInterpretation?.conservationLaws) {
-    html += renderMetricCard("Conservation Laws", thought.physicalInterpretation.conservationLaws.length, "success");
+    html += renderMetricCard(
+      "Conservation Laws",
+      thought.physicalInterpretation.conservationLaws.length,
+      "success"
+    );
   }
   html += "</div>\n";
   const badges = [];
@@ -24860,16 +27248,25 @@ function physicsToHTML(thought, options) {
   }
   if (thought.tensorProperties) {
     const tensorRows = [
-      ["Rank", `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`],
+      [
+        "Rank",
+        `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`
+      ],
       ["Components", thought.tensorProperties.components],
       ["LaTeX", thought.tensorProperties.latex],
       ["Transformation", thought.tensorProperties.transformation]
     ];
     if (thought.tensorProperties.indexStructure) {
-      tensorRows.push(["Index Structure", thought.tensorProperties.indexStructure]);
+      tensorRows.push([
+        "Index Structure",
+        thought.tensorProperties.indexStructure
+      ]);
     }
     if (thought.tensorProperties.coordinateSystem) {
-      tensorRows.push(["Coordinate System", thought.tensorProperties.coordinateSystem]);
+      tensorRows.push([
+        "Coordinate System",
+        thought.tensorProperties.coordinateSystem
+      ]);
     }
     let tensorContent = renderTable(["Property", "Value"], tensorRows);
     if (thought.tensorProperties.symmetries.length > 0) {
@@ -24952,19 +27349,27 @@ function physicsToHTML(thought, options) {
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
     const assumptionsList = thought.assumptions.map((a) => escapeHTML(a));
-    html += renderSection("Assumptions", `
+    html += renderSection(
+      "Assumptions",
+      `
       <ul class="list-styled">
         ${assumptionsList.map((a) => `<li>${a}</li>`).join("")}
       </ul>
-    `, "\u26A0\uFE0F");
+    `,
+      "\u26A0\uFE0F"
+    );
   }
   if (thought.dependencies && thought.dependencies.length > 0) {
     const depsList = thought.dependencies.map((d) => escapeHTML(d));
-    html += renderSection("Dependencies", `
+    html += renderSection(
+      "Dependencies",
+      `
       <ul class="list-styled">
         ${depsList.map((d) => `<li>${d}</li>`).join("")}
       </ul>
-    `, "\u{1F517}");
+    `,
+      "\u{1F517}"
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -25004,7 +27409,9 @@ function physicsToModelica(thought, options) {
   if (thought.physicalInterpretation) {
     modelica += `    // Physical Interpretation
 `;
-    const quantity = sanitizeModelicaId(thought.physicalInterpretation.quantity);
+    const quantity = sanitizeModelicaId(
+      thought.physicalInterpretation.quantity
+    );
     const units = thought.physicalInterpretation.units;
     modelica += `    Real ${quantity}(unit="${escapeModelicaString(units)}");
 `;
@@ -25024,11 +27431,13 @@ function physicsToModelica(thought, options) {
       modelica += `
     // Constraints
 `;
-      thought.physicalInterpretation.constraints.forEach((constraint, index) => {
-        const constraintVar = sanitizeModelicaId(`constraint_${index + 1}`);
-        modelica += `    parameter String ${constraintVar} = "${escapeModelicaString(constraint)}";
+      thought.physicalInterpretation.constraints.forEach(
+        (constraint, index) => {
+          const constraintVar = sanitizeModelicaId(`constraint_${index + 1}`);
+          modelica += `    parameter String ${constraintVar} = "${escapeModelicaString(constraint)}";
 `;
-      });
+        }
+      );
     }
     if (thought.physicalInterpretation.observables && thought.physicalInterpretation.observables.length > 0) {
       modelica += `
@@ -25093,7 +27502,9 @@ function physicsToModelica(thought, options) {
   modelica += `  equation
 `;
   if (thought.physicalInterpretation) {
-    const quantity = sanitizeModelicaId(thought.physicalInterpretation.quantity);
+    const quantity = sanitizeModelicaId(
+      thought.physicalInterpretation.quantity
+    );
     modelica += `    // Physical evolution (placeholder)
 `;
     modelica += `    der(${quantity}) = 0; // Steady state or define custom dynamics
@@ -25147,8 +27558,12 @@ function physicsToUML(thought, options) {
         `rank: Integer[2] = [${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]}]`,
         `components: String = "${thought.tensorProperties.components.substring(0, 30)}..."`,
         `transformation: String = "${thought.tensorProperties.transformation}"`,
-        ...thought.tensorProperties.symmetries.length > 0 ? [`symmetries: Integer = ${thought.tensorProperties.symmetries.length}`] : [],
-        ...thought.tensorProperties.invariants.length > 0 ? [`invariants: Integer = ${thought.tensorProperties.invariants.length}`] : []
+        ...thought.tensorProperties.symmetries.length > 0 ? [
+          `symmetries: Integer = ${thought.tensorProperties.symmetries.length}`
+        ] : [],
+        ...thought.tensorProperties.invariants.length > 0 ? [
+          `invariants: Integer = ${thought.tensorProperties.invariants.length}`
+        ] : []
       ],
       methods: []
     });
@@ -25169,13 +27584,14 @@ function physicsToUML(thought, options) {
         `quantity: String = "${thought.physicalInterpretation.quantity}"`,
         `units: String = "${thought.physicalInterpretation.units}"`,
         `conservationLaws: Integer = ${thought.physicalInterpretation.conservationLaws.length}`,
-        ...thought.physicalInterpretation.constraints ? [`constraints: Integer = ${thought.physicalInterpretation.constraints.length}`] : [],
-        ...thought.physicalInterpretation.observables ? [`observables: Integer = ${thought.physicalInterpretation.observables.length}`] : []
+        ...thought.physicalInterpretation.constraints ? [
+          `constraints: Integer = ${thought.physicalInterpretation.constraints.length}`
+        ] : [],
+        ...thought.physicalInterpretation.observables ? [
+          `observables: Integer = ${thought.physicalInterpretation.observables.length}`
+        ] : []
       ],
-      methods: [
-        "measure(): Real",
-        "validate(): Boolean"
-      ]
+      methods: ["measure(): Real", "validate(): Boolean"]
     });
     edges.push({
       source: mainId,
@@ -25212,7 +27628,9 @@ function physicsToUML(thought, options) {
         `symmetryGroup: String = "${thought.fieldTheoryContext.symmetryGroup}"`,
         `fields: Integer = ${thought.fieldTheoryContext.fields.length}`,
         `interactions: Integer = ${thought.fieldTheoryContext.interactions.length}`,
-        ...thought.fieldTheoryContext.gaugeSymmetries ? [`gaugeSymmetries: Integer = ${thought.fieldTheoryContext.gaugeSymmetries.length}`] : []
+        ...thought.fieldTheoryContext.gaugeSymmetries ? [
+          `gaugeSymmetries: Integer = ${thought.fieldTheoryContext.gaugeSymmetries.length}`
+        ] : []
       ],
       methods: [
         "computeField(x: Real): Real",
@@ -25463,10 +27881,10 @@ function physicsToMarkdown(thought, options) {
   parts.push(section("Overview", typeContent));
   if (thought.tensorProperties) {
     const tensorContent = keyValueSection({
-      "Rank": `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`,
-      "Components": thought.tensorProperties.components,
-      "LaTeX": thought.tensorProperties.latex,
-      "Transformation": thought.tensorProperties.transformation,
+      Rank: `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`,
+      Components: thought.tensorProperties.components,
+      LaTeX: thought.tensorProperties.latex,
+      Transformation: thought.tensorProperties.transformation,
       ...thought.tensorProperties.indexStructure ? { "Index Structure": thought.tensorProperties.indexStructure } : {},
       ...thought.tensorProperties.coordinateSystem ? { "Coordinate System": thought.tensorProperties.coordinateSystem } : {}
     });
@@ -25481,8 +27899,8 @@ function physicsToMarkdown(thought, options) {
   }
   if (thought.physicalInterpretation) {
     const interpContent = keyValueSection({
-      "Quantity": thought.physicalInterpretation.quantity,
-      "Units": thought.physicalInterpretation.units
+      Quantity: thought.physicalInterpretation.quantity,
+      Units: thought.physicalInterpretation.units
     });
     let interpFull = interpContent;
     if (thought.physicalInterpretation.conservationLaws.length > 0) {
@@ -25514,11 +27932,16 @@ function physicsToMarkdown(thought, options) {
   }
   if (includeMetrics) {
     const metricsContent = keyValueSection({
-      "Uncertainty": `${(thought.uncertainty * 100).toFixed(1)}%`,
-      ...thought.assumptions ? { "Assumptions": thought.assumptions.length } : {},
-      ...thought.dependencies ? { "Dependencies": thought.dependencies.length } : {}
+      Uncertainty: `${(thought.uncertainty * 100).toFixed(1)}%`,
+      ...thought.assumptions ? { Assumptions: thought.assumptions.length } : {},
+      ...thought.dependencies ? { Dependencies: thought.dependencies.length } : {}
     });
-    parts.push(section("Metrics", metricsContent + "\n\n" + progressBar(thought.uncertainty * 100)));
+    parts.push(
+      section(
+        "Metrics",
+        metricsContent + "\n\n" + progressBar(thought.uncertainty * 100)
+      )
+    );
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
     parts.push(section("Assumptions", list(thought.assumptions)));
@@ -25548,7 +27971,12 @@ function exportHybridOrchestration(thought, options) {
   const includeLabels = options.includeLabels !== false;
   switch (format) {
     case "mermaid":
-      return hybridToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return hybridToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return hybridToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -25577,19 +28005,31 @@ function hybridToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
   const builder = new MermaidGraphBuilder().setDirection("TB");
   const hybridId = sanitizeId("hybrid_mode");
-  builder.addNode({ id: hybridId, label: "Hybrid Mode", shape: "double-circle" });
+  builder.addNode({
+    id: hybridId,
+    label: "Hybrid Mode",
+    shape: "double-circle"
+  });
   const primaryId = sanitizeId(`primary_${thought.primaryMode}`);
   const primaryLabel = includeLabels ? thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1) : primaryId;
   builder.addNode({ id: primaryId, label: primaryLabel, shape: "subroutine" });
   builder.addEdge({ source: hybridId, target: primaryId, style: "thick" });
   if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
     const secondaryId = sanitizeId("secondary_features");
-    builder.addNode({ id: secondaryId, label: "Secondary Features", shape: "stadium" });
+    builder.addNode({
+      id: secondaryId,
+      label: "Secondary Features",
+      shape: "stadium"
+    });
     builder.addEdge({ source: hybridId, target: secondaryId });
     thought.secondaryFeatures.forEach((feature, index) => {
       const featureId = sanitizeId(`feature_${index}`);
       const featureLabel = includeLabels ? feature.slice(0, 30) + (feature.length > 30 ? "..." : "") : `Feature ${index + 1}`;
-      builder.addNode({ id: featureId, label: featureLabel, shape: "rectangle" });
+      builder.addNode({
+        id: featureId,
+        label: featureLabel,
+        shape: "rectangle"
+      });
       builder.addEdge({ source: secondaryId, target: featureId });
     });
   }
@@ -25614,12 +28054,20 @@ function hybridToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   if (thought.tensorProperties) {
     const tensorId = sanitizeId("tensor");
     const tensorLabel = `Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`;
-    builder.addNode({ id: tensorId, label: tensorLabel, shape: "parallelogram" });
+    builder.addNode({
+      id: tensorId,
+      label: tensorLabel,
+      shape: "parallelogram"
+    });
     builder.addEdge({ source: primaryId, target: tensorId });
   }
   if (thought.physicalInterpretation) {
     const physId = sanitizeId("physical");
-    builder.addNode({ id: physId, label: thought.physicalInterpretation.quantity, shape: "parallelogram" });
+    builder.addNode({
+      id: physId,
+      label: thought.physicalInterpretation.quantity,
+      shape: "parallelogram"
+    });
     builder.addEdge({ source: primaryId, target: physId });
   }
   if (includeMetrics && thought.uncertainty !== void 0) {
@@ -25629,25 +28077,52 @@ function hybridToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
     const assumptionsId = sanitizeId("assumptions");
-    builder.addNode({ id: assumptionsId, label: `Assumptions: ${thought.assumptions.length}`, shape: "asymmetric" });
+    builder.addNode({
+      id: assumptionsId,
+      label: `Assumptions: ${thought.assumptions.length}`,
+      shape: "asymmetric"
+    });
   }
   if (thought.dependencies && thought.dependencies.length > 0) {
     const depsId = sanitizeId("dependencies");
-    builder.addNode({ id: depsId, label: `Dependencies: ${thought.dependencies.length}`, shape: "asymmetric" });
+    builder.addNode({
+      id: depsId,
+      label: `Dependencies: ${thought.dependencies.length}`,
+      shape: "asymmetric"
+    });
   }
   return builder.setOptions({ colorScheme: scheme }).render();
 }
 function hybridToDOT(thought, includeLabels, includeMetrics) {
   const builder = new DOTGraphBuilder().setGraphName("HybridOrchestration").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   const hybridId = sanitizeId("hybrid_mode");
-  builder.addNode({ id: hybridId, label: "Hybrid Mode", shape: "doubleoctagon" });
+  builder.addNode({
+    id: hybridId,
+    label: "Hybrid Mode",
+    shape: "doubleoctagon"
+  });
   const primaryId = sanitizeId(`primary_${thought.primaryMode}`);
   const primaryLabel = thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1);
-  builder.addNode({ id: primaryId, label: primaryLabel, shape: "box", style: ["filled", "rounded"], fillColor: "lightblue" });
-  builder.addEdge({ source: hybridId, target: primaryId, style: "bold", penWidth: 2 });
+  builder.addNode({
+    id: primaryId,
+    label: primaryLabel,
+    shape: "box",
+    style: ["filled", "rounded"],
+    fillColor: "lightblue"
+  });
+  builder.addEdge({
+    source: hybridId,
+    target: primaryId,
+    style: "bold",
+    penWidth: 2
+  });
   if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
     const secondaryId = sanitizeId("secondary_features");
-    builder.addNode({ id: secondaryId, label: "Secondary Features", shape: "ellipse" });
+    builder.addNode({
+      id: secondaryId,
+      label: "Secondary Features",
+      shape: "ellipse"
+    });
     builder.addEdge({ source: hybridId, target: secondaryId });
     thought.secondaryFeatures.forEach((feature, index) => {
       const featureId = sanitizeId(`feature_${index}`);
@@ -25664,7 +28139,11 @@ function hybridToDOT(thought, includeLabels, includeMetrics) {
   }
   if (thought.stage) {
     const stageId = sanitizeId(`stage_${thought.stage}`);
-    builder.addNode({ id: stageId, label: thought.stage.replace(/_/g, " "), shape: "diamond" });
+    builder.addNode({
+      id: stageId,
+      label: thought.stage.replace(/_/g, " "),
+      shape: "diamond"
+    });
     builder.addEdge({ source: primaryId, target: stageId });
   }
   if (thought.mathematicalModel) {
@@ -25675,23 +28154,37 @@ function hybridToDOT(thought, includeLabels, includeMetrics) {
   }
   if (thought.tensorProperties) {
     const tensorId = sanitizeId("tensor");
-    builder.addNode({ id: tensorId, label: `Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`, shape: "parallelogram" });
+    builder.addNode({
+      id: tensorId,
+      label: `Tensor (${thought.tensorProperties.rank[0]},${thought.tensorProperties.rank[1]})`,
+      shape: "parallelogram"
+    });
     builder.addEdge({ source: primaryId, target: tensorId });
   }
   if (thought.physicalInterpretation) {
     const physId = sanitizeId("physical");
-    builder.addNode({ id: physId, label: thought.physicalInterpretation.quantity, shape: "parallelogram" });
+    builder.addNode({
+      id: physId,
+      label: thought.physicalInterpretation.quantity,
+      shape: "parallelogram"
+    });
     builder.addEdge({ source: primaryId, target: physId });
   }
   if (includeMetrics && thought.uncertainty !== void 0) {
     const uncertId = sanitizeId("uncertainty");
-    builder.addNode({ id: uncertId, label: `${(thought.uncertainty * 100).toFixed(1)}%`, shape: "diamond" });
+    builder.addNode({
+      id: uncertId,
+      label: `${(thought.uncertainty * 100).toFixed(1)}%`,
+      shape: "diamond"
+    });
   }
   return builder.render();
 }
 function hybridToASCII(thought) {
   const builder = new ASCIIDocBuilder().addHeader("Hybrid Mode Orchestration", "equals").addEmptyLine();
-  builder.addText(`Primary Mode: ${thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1)}`);
+  builder.addText(
+    `Primary Mode: ${thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1)}`
+  );
   if (thought.stage) {
     builder.addText(`Current Stage: ${thought.stage.replace(/_/g, " ")}`);
   }
@@ -25717,9 +28210,13 @@ function hybridToASCII(thought) {
   }
   if (thought.tensorProperties) {
     builder.addSection("Tensor Properties").addEmptyLine();
-    builder.addText(`  Rank: (${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`);
+    builder.addText(
+      `  Rank: (${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`
+    );
     builder.addText(`  Components: ${thought.tensorProperties.components}`);
-    builder.addText(`  Transformation: ${thought.tensorProperties.transformation}`);
+    builder.addText(
+      `  Transformation: ${thought.tensorProperties.transformation}`
+    );
     if (thought.tensorProperties.symmetries.length > 0) {
       builder.addText("  Symmetries:");
       thought.tensorProperties.symmetries.forEach((sym, index) => {
@@ -25828,8 +28325,14 @@ function hybridToSVG(thought, options) {
   if (includeMetrics) {
     const metrics = [
       { label: "Primary Mode", value: thought.primaryMode },
-      { label: "Secondary Features", value: thought.secondaryFeatures?.length || 0 },
-      { label: "Uncertainty", value: thought.uncertainty !== void 0 ? `${(thought.uncertainty * 100).toFixed(1)}%` : "N/A" }
+      {
+        label: "Secondary Features",
+        value: thought.secondaryFeatures?.length || 0
+      },
+      {
+        label: "Uncertainty",
+        value: thought.uncertainty !== void 0 ? `${(thought.uncertainty * 100).toFixed(1)}%` : "N/A"
+      }
     ];
     svg += renderMetricsPanel(svgWidth - 200, svgHeight - 120, metrics);
   }
@@ -25976,19 +28479,34 @@ function hybridToHTML(thought, options) {
     htmlTitle = "Hybrid Mode Orchestration",
     htmlTheme = "light"
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   html += '<div class="metrics-grid">';
   html += renderMetricCard("Primary Mode", thought.primaryMode, "primary");
   if (thought.secondaryFeatures) {
-    html += renderMetricCard("Secondary Features", thought.secondaryFeatures.length, "info");
+    html += renderMetricCard(
+      "Secondary Features",
+      thought.secondaryFeatures.length,
+      "info"
+    );
   }
   if (thought.uncertainty !== void 0) {
-    html += renderMetricCard("Uncertainty", `${(thought.uncertainty * 100).toFixed(1)}%`, "warning");
+    html += renderMetricCard(
+      "Uncertainty",
+      `${(thought.uncertainty * 100).toFixed(1)}%`,
+      "warning"
+    );
   }
   if (thought.stage) {
-    html += renderMetricCard("Stage", thought.stage.replace(/_/g, " "), "secondary");
+    html += renderMetricCard(
+      "Stage",
+      thought.stage.replace(/_/g, " "),
+      "secondary"
+    );
   }
   html += "</div>\n";
   const badges = [];
@@ -25999,9 +28517,13 @@ function hybridToHTML(thought, options) {
   html += `<div class="flex gap-1 flex-wrap" style="margin: 1rem 0">${badges.join(" ")}</div>
 `;
   if (thought.switchReason) {
-    html += renderSection("Mode Switch Reason", `
+    html += renderSection(
+      "Mode Switch Reason",
+      `
       <p>${escapeHTML(thought.switchReason)}</p>
-    `, "\u{1F504}");
+    `,
+      "\u{1F504}"
+    );
   }
   if (thought.secondaryFeatures && thought.secondaryFeatures.length > 0) {
     const featuresContent = `
@@ -26021,7 +28543,10 @@ function hybridToHTML(thought, options) {
   }
   if (thought.tensorProperties) {
     const tensorRows = [
-      ["Rank", `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`],
+      [
+        "Rank",
+        `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`
+      ],
       ["Components", thought.tensorProperties.components],
       ["Transformation", thought.tensorProperties.transformation]
     ];
@@ -26054,24 +28579,36 @@ function hybridToHTML(thought, options) {
   }
   if (thought.assumptions && thought.assumptions.length > 0) {
     const assumptionsList = thought.assumptions.map((a) => escapeHTML(a));
-    html += renderSection("Assumptions", `
+    html += renderSection(
+      "Assumptions",
+      `
       <ul class="list-styled">
         ${assumptionsList.map((a) => `<li>${a}</li>`).join("")}
       </ul>
-    `, "\u26A0\uFE0F");
+    `,
+      "\u26A0\uFE0F"
+    );
   }
   if (thought.dependencies && thought.dependencies.length > 0) {
     const depsList = thought.dependencies.map((d) => escapeHTML(d));
-    html += renderSection("Dependencies", `
+    html += renderSection(
+      "Dependencies",
+      `
       <ul class="list-styled">
         ${depsList.map((d) => `<li>${d}</li>`).join("")}
       </ul>
-    `, "\u{1F517}");
+    `,
+      "\u{1F517}"
+    );
   }
   if (thought.revisionReason) {
-    html += renderSection("Revision Reason", `
+    html += renderSection(
+      "Revision Reason",
+      `
       <p>${escapeHTML(thought.revisionReason)}</p>
-    `, "\u270F\uFE0F");
+    `,
+      "\u270F\uFE0F"
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -26175,7 +28712,9 @@ function hybridToModelica(thought, options) {
   if (thought.mathematicalModel) {
     modelica += "  model MathematicalModel\n";
     modelica += '    "Mathematical model integration"\n';
-    const symbolicModel = escapeModelicaString(thought.mathematicalModel.symbolic || "Unknown");
+    const symbolicModel = escapeModelicaString(
+      thought.mathematicalModel.symbolic || "Unknown"
+    );
     modelica += `    parameter String symbolic = "${symbolicModel}" "Symbolic representation";
 `;
     if (thought.mathematicalModel.ascii) {
@@ -26190,10 +28729,14 @@ function hybridToModelica(thought, options) {
     modelica += '    "Tensor analysis integration"\n';
     modelica += `    parameter Integer rank[2] = {${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]}} "Tensor rank";
 `;
-    const components = escapeModelicaString(thought.tensorProperties.components);
+    const components = escapeModelicaString(
+      thought.tensorProperties.components
+    );
     modelica += `    parameter String components = "${components}" "Tensor components";
 `;
-    const transformation = escapeModelicaString(thought.tensorProperties.transformation);
+    const transformation = escapeModelicaString(
+      thought.tensorProperties.transformation
+    );
     modelica += `    parameter String transformation = "${transformation}" "Transformation rule";
 `;
     modelica += "  end TensorProperties;\n\n";
@@ -26201,7 +28744,9 @@ function hybridToModelica(thought, options) {
   if (thought.physicalInterpretation) {
     modelica += "  model PhysicalInterpretation\n";
     modelica += '    "Physical meaning of reasoning"\n';
-    const quantity = escapeModelicaString(thought.physicalInterpretation.quantity);
+    const quantity = escapeModelicaString(
+      thought.physicalInterpretation.quantity
+    );
     modelica += `    parameter String quantity = "${quantity}" "Physical quantity";
 `;
     const units = escapeModelicaString(thought.physicalInterpretation.units);
@@ -26317,7 +28862,9 @@ function hybridToUML(thought, options) {
       label: "Switch Reason",
       shape: "rectangle",
       stereotype: "<<note>>",
-      attributes: [thought.switchReason.substring(0, 50) + (thought.switchReason.length > 50 ? "..." : "")]
+      attributes: [
+        thought.switchReason.substring(0, 50) + (thought.switchReason.length > 50 ? "..." : "")
+      ]
     });
     edges.push({
       source: "hybrid",
@@ -26330,11 +28877,15 @@ function hybridToUML(thought, options) {
 }
 function hybridToJSON(thought, options) {
   const { includeMetrics = true } = options;
-  const graph = createJsonGraph("Hybrid Mode Orchestration", "hybrid_orchestration", {
-    includeMetrics,
-    includeLegend: true,
-    includeLayout: true
-  });
+  const graph = createJsonGraph(
+    "Hybrid Mode Orchestration",
+    "hybrid_orchestration",
+    {
+      includeMetrics,
+      includeLegend: true,
+      includeLayout: true
+    }
+  );
   addNode(graph, {
     id: "hybrid",
     label: "Hybrid Mode",
@@ -26469,7 +29020,11 @@ function hybridToJSON(thought, options) {
   }
   if (includeMetrics) {
     addMetric(graph, "primary_mode", thought.primaryMode);
-    addMetric(graph, "secondary_features_count", thought.secondaryFeatures?.length || 0);
+    addMetric(
+      graph,
+      "secondary_features_count",
+      thought.secondaryFeatures?.length || 0
+    );
     if (thought.uncertainty !== void 0) {
       addMetric(graph, "uncertainty", thought.uncertainty);
     }
@@ -26507,8 +29062,8 @@ function hybridToMarkdown(thought, options) {
   const parts = [];
   const overviewContent = keyValueSection({
     "Primary Mode": thought.primaryMode.charAt(0).toUpperCase() + thought.primaryMode.slice(1),
-    ...thought.stage ? { "Stage": thought.stage.replace(/_/g, " ") } : {},
-    ...thought.uncertainty !== void 0 ? { "Uncertainty": `${(thought.uncertainty * 100).toFixed(1)}%` } : {}
+    ...thought.stage ? { Stage: thought.stage.replace(/_/g, " ") } : {},
+    ...thought.uncertainty !== void 0 ? { Uncertainty: `${(thought.uncertainty * 100).toFixed(1)}%` } : {}
   });
   parts.push(section("Overview", overviewContent));
   if (thought.switchReason) {
@@ -26519,15 +29074,18 @@ function hybridToMarkdown(thought, options) {
   }
   if (thought.mathematicalModel) {
     const mathContent = keyValueSection({
-      "LaTeX": thought.mathematicalModel.latex,
-      "Symbolic": thought.mathematicalModel.symbolic,
-      ...thought.mathematicalModel.ascii ? { "ASCII": thought.mathematicalModel.ascii } : {}
+      LaTeX: thought.mathematicalModel.latex,
+      Symbolic: thought.mathematicalModel.symbolic,
+      ...thought.mathematicalModel.ascii ? { ASCII: thought.mathematicalModel.ascii } : {}
     });
     parts.push(section("Mathematical Model", mathContent));
   }
   if (thought.tensorProperties) {
     const tensorRows = [
-      ["Rank", `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`],
+      [
+        "Rank",
+        `(${thought.tensorProperties.rank[0]}, ${thought.tensorProperties.rank[1]})`
+      ],
       ["Components", thought.tensorProperties.components],
       ["Transformation", thought.tensorProperties.transformation]
     ];
@@ -26539,8 +29097,8 @@ function hybridToMarkdown(thought, options) {
   }
   if (thought.physicalInterpretation) {
     const interpContent = keyValueSection({
-      "Quantity": thought.physicalInterpretation.quantity,
-      "Units": thought.physicalInterpretation.units
+      Quantity: thought.physicalInterpretation.quantity,
+      Units: thought.physicalInterpretation.units
     });
     let interpFull = interpContent;
     if (thought.physicalInterpretation.conservationLaws.length > 0) {
@@ -26591,10 +29149,20 @@ function hybridToMarkdown(thought, options) {
 // src/export/visual/modes/causal.ts
 init_esm_shims();
 function exportCausalGraph(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return causalGraphToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return causalGraphToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return causalGraphToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -26623,7 +29191,11 @@ function causalGraphToMermaid(thought, colorScheme, includeLabels, includeMetric
   const scheme = colorScheme;
   const builder = new MermaidGraphBuilder().setDirection("TB");
   if (!thought.causalGraph || !thought.causalGraph.nodes) {
-    builder.addNode({ id: "NoData", label: "No causal graph data", shape: "rectangle" });
+    builder.addNode({
+      id: "NoData",
+      label: "No causal graph data",
+      shape: "rectangle"
+    });
     return builder.render();
   }
   const causeColor = scheme === "pastel" ? "#e1f5ff" : "#a8d5ff";
@@ -26731,15 +29303,34 @@ function causalGraphToSVG(thought, options) {
     return generateSVGHeader(svgWidth, 200, "Causal Graph") + '\n  <text x="400" y="100" text-anchor="middle" class="subtitle">No causal graph data</text>\n' + generateSVGFooter();
   }
   const causes = thought.causalGraph.nodes.filter((n) => n.type === "cause");
-  const mediators = thought.causalGraph.nodes.filter((n) => n.type === "mediator");
-  const confounders = thought.causalGraph.nodes.filter((n) => n.type === "confounder");
+  const mediators = thought.causalGraph.nodes.filter(
+    (n) => n.type === "mediator"
+  );
+  const confounders = thought.causalGraph.nodes.filter(
+    (n) => n.type === "confounder"
+  );
   const effects = thought.causalGraph.nodes.filter((n) => n.type === "effect");
   const layers = [
-    causes.map((n) => ({ id: n.id, label: includeLabels ? n.name : n.id, type: "cause" })),
-    [...mediators, ...confounders].map((n) => ({ id: n.id, label: includeLabels ? n.name : n.id, type: n.type })),
-    effects.map((n) => ({ id: n.id, label: includeLabels ? n.name : n.id, type: "effect" }))
+    causes.map((n) => ({
+      id: n.id,
+      label: includeLabels ? n.name : n.id,
+      type: "cause"
+    })),
+    [...mediators, ...confounders].map((n) => ({
+      id: n.id,
+      label: includeLabels ? n.name : n.id,
+      type: n.type
+    })),
+    effects.map((n) => ({
+      id: n.id,
+      label: includeLabels ? n.name : n.id,
+      type: "effect"
+    }))
   ].filter((layer) => layer.length > 0);
-  const positions = layoutNodesInLayers(layers, { width: svgWidth, title: "Causal Graph" });
+  const positions = layoutNodesInLayers(layers, {
+    width: svgWidth,
+    title: "Causal Graph"
+  });
   const actualHeight = calculateSVGHeight(positions);
   let svg = generateSVGHeader(svgWidth, actualHeight, "Causal Graph");
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
@@ -26754,7 +29345,10 @@ function causalGraphToSVG(thought, options) {
   svg += "\n  </g>";
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
   for (const [, pos] of positions) {
-    const colors = getNodeColor(pos.type === "cause" ? "primary" : pos.type === "effect" ? "tertiary" : "neutral", colorScheme);
+    const colors = getNodeColor(
+      pos.type === "cause" ? "primary" : pos.type === "effect" ? "tertiary" : "neutral",
+      colorScheme
+    );
     switch (pos.type) {
       case "cause":
         svg += renderStadiumNode(pos, colors);
@@ -26782,8 +29376,16 @@ function causalGraphToSVG(thought, options) {
   const legendItems = [
     { label: "Cause", color: getNodeColor("primary", colorScheme) },
     { label: "Mediator", color: getNodeColor("neutral", colorScheme) },
-    { label: "Confounder", color: getNodeColor("neutral", colorScheme), shape: "diamond" },
-    { label: "Effect", color: getNodeColor("tertiary", colorScheme), shape: "ellipse" }
+    {
+      label: "Confounder",
+      color: getNodeColor("neutral", colorScheme),
+      shape: "diamond"
+    },
+    {
+      label: "Effect",
+      color: getNodeColor("tertiary", colorScheme),
+      shape: "ellipse"
+    }
   ];
   svg += renderLegend(20, actualHeight - 100, legendItems);
   svg += "\n" + generateSVGFooter();
@@ -26822,13 +29424,23 @@ function causalGraphToTikZ(thought, options) {
   const { includeLabels = true, includeMetrics = true } = options;
   if (!thought.causalGraph || !thought.causalGraph.nodes) {
     const emptyNodes = [
-      { id: "no_data", x: 0, y: 0, label: "No causal graph data", shape: "rectangle" }
+      {
+        id: "no_data",
+        x: 0,
+        y: 0,
+        label: "No causal graph data",
+        shape: "rectangle"
+      }
     ];
     return generateTikZ(emptyNodes, [], { title: "Causal Graph" });
   }
   const causes = thought.causalGraph.nodes.filter((n) => n.type === "cause");
-  const mediators = thought.causalGraph.nodes.filter((n) => n.type === "mediator");
-  const confounders = thought.causalGraph.nodes.filter((n) => n.type === "confounder");
+  const mediators = thought.causalGraph.nodes.filter(
+    (n) => n.type === "mediator"
+  );
+  const confounders = thought.causalGraph.nodes.filter(
+    (n) => n.type === "confounder"
+  );
   const effects = thought.causalGraph.nodes.filter((n) => n.type === "effect");
   const nodes = [];
   causes.forEach((node, index) => {
@@ -26890,7 +29502,10 @@ function causalGraphToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   if (!thought.causalGraph || !thought.causalGraph.nodes) {
@@ -26900,11 +29515,21 @@ function causalGraphToHTML(thought, options) {
   }
   if (includeMetrics) {
     const causes = thought.causalGraph.nodes.filter((n) => n.type === "cause");
-    const effects = thought.causalGraph.nodes.filter((n) => n.type === "effect");
-    const mediators = thought.causalGraph.nodes.filter((n) => n.type === "mediator");
-    const confounders2 = thought.causalGraph.nodes.filter((n) => n.type === "confounder");
+    const effects = thought.causalGraph.nodes.filter(
+      (n) => n.type === "effect"
+    );
+    const mediators = thought.causalGraph.nodes.filter(
+      (n) => n.type === "mediator"
+    );
+    const confounders2 = thought.causalGraph.nodes.filter(
+      (n) => n.type === "confounder"
+    );
     html += '<div class="metrics-grid">';
-    html += renderMetricCard("Total Nodes", thought.causalGraph.nodes.length, "primary");
+    html += renderMetricCard(
+      "Total Nodes",
+      thought.causalGraph.nodes.length,
+      "primary"
+    );
     html += renderMetricCard("Edges", thought.causalGraph.edges.length, "info");
     html += renderMetricCard("Causes", causes.length, "success");
     html += renderMetricCard("Effects", effects.length, "warning");
@@ -26923,10 +29548,18 @@ function causalGraphToHTML(thought, options) {
     ) : "-";
     return [node.id, node.name, typeBadge, node.description || "-"];
   });
-  html += renderSection("Nodes", renderTable(
-    ["ID", "Name", "Type", "Description"],
-    nodeRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
-  ), "\u{1F4CA}");
+  html += renderSection(
+    "Nodes",
+    renderTable(
+      ["ID", "Name", "Type", "Description"],
+      nodeRows.map(
+        (row) => row.map(
+          (cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))
+        )
+      )
+    ),
+    "\u{1F4CA}"
+  );
   const edgeRows = thought.causalGraph.edges.map((edge) => {
     const fromNode = thought.causalGraph.nodes.find((n) => n.id === edge.from);
     const toNode = thought.causalGraph.nodes.find((n) => n.id === edge.to);
@@ -26938,24 +29571,34 @@ function causalGraphToHTML(thought, options) {
       edge.mechanism || "-"
     ];
   });
-  html += renderSection("Causal Relationships", renderTable(
-    ["From", "", "To", "Strength", "Mechanism"],
-    edgeRows
-  ), "\u{1F517}");
-  const confounders = thought.causalGraph.nodes.filter((n) => n.type === "confounder");
+  html += renderSection(
+    "Causal Relationships",
+    renderTable(["From", "", "To", "Strength", "Mechanism"], edgeRows),
+    "\u{1F517}"
+  );
+  const confounders = thought.causalGraph.nodes.filter(
+    (n) => n.type === "confounder"
+  );
   if (confounders.length > 0) {
-    html += renderSection("\u26A0\uFE0F Confounding Variables", `
+    html += renderSection(
+      "\u26A0\uFE0F Confounding Variables",
+      `
       <p class="text-warning">The following variables may confound causal inference:</p>
       <ul class="list-styled">
         ${confounders.map((c) => `<li><strong>${escapeHTML(c.name)}</strong>: ${c.description ? escapeHTML(c.description) : "-"}</li>`).join("\n")}
       </ul>
-    `);
+    `
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
 }
 function causalToModelica(thought, options) {
-  const { modelicaPackageName, modelicaIncludeAnnotations = true, includeMetrics = true } = options;
+  const {
+    modelicaPackageName,
+    modelicaIncludeAnnotations = true,
+    includeMetrics = true
+  } = options;
   const packageName = modelicaPackageName || "CausalGraph";
   const lines = [];
   lines.push(`package ${sanitizeModelicaId(packageName)}`);
@@ -26972,8 +29615,12 @@ function causalToModelica(thought, options) {
     for (const cause of causes) {
       const causeId = sanitizeModelicaId(cause.id);
       lines.push(`  record Cause_${causeId}`);
-      lines.push(`    constant String description = "${cause.description ? escapeModelicaString(cause.description) : ""}";`);
-      lines.push(`    constant String name = "${escapeModelicaString(cause.name)}";`);
+      lines.push(
+        `    constant String description = "${cause.description ? escapeModelicaString(cause.description) : ""}";`
+      );
+      lines.push(
+        `    constant String name = "${escapeModelicaString(cause.name)}";`
+      );
       lines.push(`  end Cause_${causeId};`);
       lines.push("");
     }
@@ -26984,8 +29631,12 @@ function causalToModelica(thought, options) {
     for (const effect of effects) {
       const effectId = sanitizeModelicaId(effect.id);
       lines.push(`  record Effect_${effectId}`);
-      lines.push(`    constant String description = "${effect.description ? escapeModelicaString(effect.description) : ""}";`);
-      lines.push(`    constant String name = "${escapeModelicaString(effect.name)}";`);
+      lines.push(
+        `    constant String description = "${effect.description ? escapeModelicaString(effect.description) : ""}";`
+      );
+      lines.push(
+        `    constant String name = "${escapeModelicaString(effect.name)}";`
+      );
       lines.push(`  end Effect_${effectId};`);
       lines.push("");
     }
@@ -26995,16 +29646,24 @@ function causalToModelica(thought, options) {
     for (let i = 0; i < thought.causalGraph.edges.length; i++) {
       const link = thought.causalGraph.edges[i];
       lines.push(`  record Link_${i + 1}`);
-      lines.push(`    constant String cause = "${sanitizeModelicaId(link.from)}";`);
-      lines.push(`    constant String effect = "${sanitizeModelicaId(link.to)}";`);
+      lines.push(
+        `    constant String cause = "${sanitizeModelicaId(link.from)}";`
+      );
+      lines.push(
+        `    constant String effect = "${sanitizeModelicaId(link.to)}";`
+      );
       if (link.strength !== void 0 && includeMetrics) {
         lines.push(`    constant Real strength = ${link.strength.toFixed(3)};`);
       }
       if (link.confidence !== void 0 && includeMetrics) {
-        lines.push(`    constant Real confidence = ${link.confidence.toFixed(3)};`);
+        lines.push(
+          `    constant Real confidence = ${link.confidence.toFixed(3)};`
+        );
       }
       if (link.mechanism) {
-        lines.push(`    constant String mechanism = "${escapeModelicaString(link.mechanism)}";`);
+        lines.push(
+          `    constant String mechanism = "${escapeModelicaString(link.mechanism)}";`
+        );
       }
       lines.push(`  end Link_${i + 1};`);
       lines.push("");
@@ -27025,7 +29684,12 @@ function causalToModelica(thought, options) {
   return lines.join("\n");
 }
 function causalToUML(thought, options) {
-  const { umlTheme, umlDirection, includeLabels = true, includeMetrics = true } = options;
+  const {
+    umlTheme,
+    umlDirection,
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   if (!thought.causalGraph || !thought.causalGraph.nodes) {
     const emptyNodes = [
       { id: "no_data", label: "No causal graph data", shape: "rectangle" }
@@ -27058,7 +29722,9 @@ function causalToUML(thought, options) {
       color: "4FC3F7"
     });
   }
-  const mediators = thought.causalGraph.nodes.filter((n) => n.type === "mediator");
+  const mediators = thought.causalGraph.nodes.filter(
+    (n) => n.type === "mediator"
+  );
   for (const mediator of mediators) {
     const id = sanitizeModelicaId(mediator.id);
     nodes.push({
@@ -27068,7 +29734,9 @@ function causalToUML(thought, options) {
       color: "81C784"
     });
   }
-  const confounders = thought.causalGraph.nodes.filter((n) => n.type === "confounder");
+  const confounders = thought.causalGraph.nodes.filter(
+    (n) => n.type === "confounder"
+  );
   for (const confounder of confounders) {
     const id = sanitizeModelicaId(confounder.id);
     nodes.push({
@@ -27081,8 +29749,12 @@ function causalToUML(thought, options) {
   if (thought.causalGraph.edges) {
     for (const link of thought.causalGraph.edges) {
       const label = includeMetrics && link.strength !== void 0 ? `${link.strength.toFixed(2)}` : void 0;
-      const sourceNode = thought.causalGraph.nodes.find((n) => n.id === link.from);
-      const targetNode = thought.causalGraph.nodes.find((n) => n.id === link.to);
+      const sourceNode = thought.causalGraph.nodes.find(
+        (n) => n.id === link.from
+      );
+      const targetNode = thought.causalGraph.nodes.find(
+        (n) => n.id === link.to
+      );
       const sourcePrefix = sourceNode?.type || "node";
       const targetPrefix = targetNode?.type || "node";
       edges.push({
@@ -27100,7 +29772,11 @@ function causalToUML(thought, options) {
   });
 }
 function causalToJSON(thought, options) {
-  const { jsonPrettyPrint = true, jsonIndent = 2, includeMetrics = true } = options;
+  const {
+    jsonPrettyPrint = true,
+    jsonIndent = 2,
+    includeMetrics = true
+  } = options;
   if (!thought.causalGraph || !thought.causalGraph.nodes) {
     const emptyData = {
       type: "causal",
@@ -27127,18 +29803,11 @@ function causalToJSON(thought, options) {
     confidence: includeMetrics ? l.confidence : void 0,
     mechanism: l.mechanism
   }));
-  return generateCausalJson(
-    "Causal Graph",
-    "causal",
-    causes,
-    effects,
-    links,
-    {
-      prettyPrint: jsonPrettyPrint,
-      indent: jsonIndent,
-      includeMetrics
-    }
-  );
+  return generateCausalJson("Causal Graph", "causal", causes, effects, links, {
+    prettyPrint: jsonPrettyPrint,
+    indent: jsonIndent,
+    includeMetrics
+  });
 }
 function causalToMarkdown(thought, options) {
   const {
@@ -27157,16 +29826,20 @@ function causalToMarkdown(thought, options) {
   }
   const causes = thought.causalGraph.nodes.filter((n) => n.type === "cause");
   const effects = thought.causalGraph.nodes.filter((n) => n.type === "effect");
-  const mediators = thought.causalGraph.nodes.filter((n) => n.type === "mediator");
-  const confounders = thought.causalGraph.nodes.filter((n) => n.type === "confounder");
+  const mediators = thought.causalGraph.nodes.filter(
+    (n) => n.type === "mediator"
+  );
+  const confounders = thought.causalGraph.nodes.filter(
+    (n) => n.type === "confounder"
+  );
   if (includeMetrics) {
     const metricsContent = keyValueSection({
       "Total Nodes": thought.causalGraph.nodes.length,
-      "Edges": thought.causalGraph.edges.length,
-      "Causes": causes.length,
-      "Effects": effects.length,
-      "Mediators": mediators.length,
-      "Confounders": confounders.length
+      Edges: thought.causalGraph.edges.length,
+      Causes: causes.length,
+      Effects: effects.length,
+      Mediators: mediators.length,
+      Confounders: confounders.length
     });
     parts.push(section("Metrics", metricsContent));
   }
@@ -27176,7 +29849,9 @@ function causalToMarkdown(thought, options) {
     node.type ? node.type.toUpperCase() : "-",
     node.description || "-"
   ]);
-  parts.push(section("Nodes", table(["ID", "Name", "Type", "Description"], nodeRows)));
+  parts.push(
+    section("Nodes", table(["ID", "Name", "Type", "Description"], nodeRows))
+  );
   const edgeRows = thought.causalGraph.edges.map((edge) => {
     const fromNode = thought.causalGraph.nodes.find((n) => n.id === edge.from);
     const toNode = thought.causalGraph.nodes.find((n) => n.id === edge.to);
@@ -27187,9 +29862,16 @@ function causalToMarkdown(thought, options) {
       edge.mechanism || "-"
     ];
   });
-  parts.push(section("Causal Relationships", table(["From", "To", "Strength", "Mechanism"], edgeRows)));
+  parts.push(
+    section(
+      "Causal Relationships",
+      table(["From", "To", "Strength", "Mechanism"], edgeRows)
+    )
+  );
   if (confounders.length > 0) {
-    const confounderList = confounders.map((c) => `**${c.name}**: ${c.description || "-"}`);
+    const confounderList = confounders.map(
+      (c) => `**${c.name}**: ${c.description || "-"}`
+    );
     parts.push(section("\u26A0\uFE0F Confounding Variables", list(confounderList)));
   }
   if (markdownIncludeMermaid) {
@@ -27241,7 +29923,12 @@ function exportTemporalTimeline(thought, options) {
 function timelineToMermaidGantt(thought, includeLabels) {
   const builder = new MermaidGanttBuilder().setTitle(thought.timeline?.name || "Timeline").setDateFormat("X").setAxisFormat("%s").addSection("Events");
   if (!thought.events || thought.events.length === 0) {
-    builder.addTask({ id: "empty", label: "No events", start: 0, duration: "0s" });
+    builder.addTask({
+      id: "empty",
+      label: "No events",
+      start: 0,
+      duration: "0s"
+    });
     return builder.render();
   }
   for (const event of thought.events) {
@@ -27249,7 +29936,12 @@ function timelineToMermaidGantt(thought, includeLabels) {
     if (event.type === "instant") {
       builder.addMilestone({ id: event.id, label, start: event.timestamp });
     } else if (event.type === "interval" && event.duration) {
-      builder.addTask({ id: event.id, label, start: event.timestamp, duration: `${event.duration}s` });
+      builder.addTask({
+        id: event.id,
+        label,
+        start: event.timestamp,
+        duration: `${event.duration}s`
+      });
     }
   }
   return builder.render();
@@ -27259,7 +29951,9 @@ function timelineToDOT(thought, includeLabels) {
   if (!thought.events) {
     return builder.render();
   }
-  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedEvents = [...thought.events].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
   for (const event of sortedEvents) {
     const nodeId = sanitizeId(event.id);
     const label = includeLabels ? `${event.name}\\n(t=${event.timestamp})` : nodeId;
@@ -27291,15 +29985,21 @@ function timelineToASCII(thought) {
     builder.addText("No events\n");
     return builder.render();
   }
-  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedEvents = [...thought.events].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
   builder.addSection("Events");
   for (const event of sortedEvents) {
     const marker = event.type === "instant" ? "\u29BF" : "\u2501";
-    builder.addText(`t=${event.timestamp.toString().padStart(4)} ${marker} ${event.name}
-`);
+    builder.addText(
+      `t=${event.timestamp.toString().padStart(4)} ${marker} ${event.name}
+`
+    );
     if (event.duration) {
-      builder.addText(`       ${"\u2514".padStart(5)}\u2192 duration: ${event.duration}
-`);
+      builder.addText(
+        `       ${"\u2514".padStart(5)}\u2192 duration: ${event.duration}
+`
+      );
     }
   }
   return builder.render();
@@ -27311,7 +30011,9 @@ function timelineToGraphML(thought, _options) {
       directed: true
     });
   }
-  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedEvents = [...thought.events].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
   const labels = sortedEvents.map((event) => event.name);
   return createLinearGraphML(labels, {
     graphName: thought.timeline?.name || "Timeline",
@@ -27324,7 +30026,9 @@ function timelineToTikZ(thought, _options) {
       title: thought.timeline?.name || "Timeline"
     });
   }
-  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedEvents = [...thought.events].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
   const labels = sortedEvents.map((event) => event.name);
   return createLinearTikZ(labels, {
     title: thought.timeline?.name || "Timeline"
@@ -27341,7 +30045,9 @@ function timelineToSVG(thought, options) {
   if (!thought.events || thought.events.length === 0) {
     return generateSVGHeader(svgWidth, 200, title) + '\n  <text x="400" y="100" text-anchor="middle" class="subtitle">No events</text>\n' + generateSVGFooter();
   }
-  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedEvents = [...thought.events].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
   const nodes = sortedEvents.map((event) => ({
     id: event.id,
     label: includeLabels ? event.name : event.id,
@@ -27384,7 +30090,11 @@ function timelineToSVG(thought, options) {
   }
   svg += "\n  </g>";
   const legendItems = [
-    { label: "Instant", color: getNodeColor("primary", colorScheme), shape: "ellipse" },
+    {
+      label: "Instant",
+      color: getNodeColor("primary", colorScheme),
+      shape: "ellipse"
+    },
     { label: "Interval", color: getNodeColor("secondary", colorScheme) }
   ];
   svg += renderLegend(20, svgHeight - 60, legendItems);
@@ -27398,7 +30108,10 @@ function timelineToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   if (!thought.events || thought.events.length === 0) {
@@ -27406,7 +30119,9 @@ function timelineToHTML(thought, options) {
     html += generateHTMLFooter(htmlStandalone);
     return html;
   }
-  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedEvents = [...thought.events].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
   if (includeMetrics) {
     const instants = sortedEvents.filter((e) => e.type === "instant");
     const intervals = sortedEvents.filter((e) => e.type === "interval");
@@ -27420,7 +30135,10 @@ function timelineToHTML(thought, options) {
     html += "</div>\n";
   }
   const eventRows = sortedEvents.map((event) => {
-    const typeBadge = renderBadge(event.type, event.type === "instant" ? "info" : "success");
+    const typeBadge = renderBadge(
+      event.type,
+      event.type === "instant" ? "info" : "success"
+    );
     return [
       event.timestamp.toString(),
       event.name,
@@ -27429,10 +30147,18 @@ function timelineToHTML(thought, options) {
       event.description || "-"
     ];
   });
-  html += renderSection("Events", renderTable(
-    ["Timestamp", "Name", "Type", "Duration", "Description"],
-    eventRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
-  ), "\u{1F4C5}");
+  html += renderSection(
+    "Events",
+    renderTable(
+      ["Timestamp", "Name", "Type", "Duration", "Description"],
+      eventRows.map(
+        (row) => row.map(
+          (cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))
+        )
+      )
+    ),
+    "\u{1F4C5}"
+  );
   if (thought.relations && thought.relations.length > 0) {
     const relationRows = thought.relations.map((rel) => {
       const fromEvent = thought.events?.find((e) => e.id === rel.from);
@@ -27443,10 +30169,11 @@ function timelineToHTML(thought, options) {
         toEvent?.name || rel.to
       ];
     });
-    html += renderSection("Temporal Relations", renderTable(
-      ["From", "Relation", "To"],
-      relationRows
-    ), "\u{1F517}");
+    html += renderSection(
+      "Temporal Relations",
+      renderTable(["From", "Relation", "To"], relationRows),
+      "\u{1F517}"
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -27464,7 +30191,9 @@ function temporalToModelica(thought, _options) {
 `;
     return modelica;
   }
-  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedEvents = [...thought.events].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
   modelica += "  // Event Records\n";
   for (const event of sortedEvents) {
     const eventId = sanitizeModelicaId(event.id);
@@ -27514,9 +30243,13 @@ function temporalToModelica(thought, _options) {
 }
 function temporalToUML(thought, _options) {
   if (!thought.events || thought.events.length === 0) {
-    return generateStateDiagram([], [], void 0, { title: thought.timeline?.name || "Timeline" });
+    return generateStateDiagram([], [], void 0, {
+      title: thought.timeline?.name || "Timeline"
+    });
   }
-  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedEvents = [...thought.events].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
   const states = sortedEvents.map((event) => event.name);
   const transitions = [];
   for (let i = 0; i < sortedEvents.length - 1; i++) {
@@ -27535,7 +30268,9 @@ function temporalToUML(thought, _options) {
       });
     }
   }
-  return generateStateDiagram(states, transitions, void 0, { title: thought.timeline?.name || "Timeline" });
+  return generateStateDiagram(states, transitions, void 0, {
+    title: thought.timeline?.name || "Timeline"
+  });
 }
 function temporalToJSON(thought, _options) {
   const graph = createJsonGraph(
@@ -27546,7 +30281,9 @@ function temporalToJSON(thought, _options) {
   if (!thought.events || thought.events.length === 0) {
     return serializeGraph(graph, _options);
   }
-  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedEvents = [...thought.events].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
   for (const event of sortedEvents) {
     addNode(graph, {
       id: event.id,
@@ -27591,7 +30328,11 @@ function temporalToJSON(thought, _options) {
   addMetric(graph, "intervalEvents", intervals.length);
   addMetric(graph, "timeStart", sortedEvents[0].timestamp);
   addMetric(graph, "timeEnd", sortedEvents[sortedEvents.length - 1].timestamp);
-  addMetric(graph, "timeSpan", sortedEvents[sortedEvents.length - 1].timestamp - sortedEvents[0].timestamp);
+  addMetric(
+    graph,
+    "timeSpan",
+    sortedEvents[sortedEvents.length - 1].timestamp - sortedEvents[0].timestamp
+  );
   return serializeGraph(graph, _options);
 }
 function temporalToMarkdown(thought, options) {
@@ -27610,7 +30351,9 @@ function temporalToMarkdown(thought, options) {
       includeTableOfContents: markdownIncludeToc
     });
   }
-  const sortedEvents = [...thought.events].sort((a, b) => a.timestamp - b.timestamp);
+  const sortedEvents = [...thought.events].sort(
+    (a, b) => a.timestamp - b.timestamp
+  );
   const instants = sortedEvents.filter((e) => e.type === "instant");
   const intervals = sortedEvents.filter((e) => e.type === "interval");
   if (includeMetrics) {
@@ -27629,7 +30372,15 @@ function temporalToMarkdown(thought, options) {
     event.duration ? `${event.duration}` : "-",
     event.description || "-"
   ]);
-  parts.push(section("Events", table(["Timestamp", "Name", "Type", "Duration", "Description"], eventRows)));
+  parts.push(
+    section(
+      "Events",
+      table(
+        ["Timestamp", "Name", "Type", "Duration", "Description"],
+        eventRows
+      )
+    )
+  );
   if (thought.relations && thought.relations.length > 0) {
     const relationRows = thought.relations.map((rel) => {
       const fromEvent = thought.events?.find((e) => e.id === rel.from);
@@ -27640,7 +30391,12 @@ function temporalToMarkdown(thought, options) {
         toEvent?.name || rel.to
       ];
     });
-    parts.push(section("Temporal Relations", table(["From", "Relation", "To"], relationRows)));
+    parts.push(
+      section(
+        "Temporal Relations",
+        table(["From", "Relation", "To"], relationRows)
+      )
+    );
   }
   if (markdownIncludeMermaid) {
     const mermaidDiagram = timelineToMermaidGantt(thought, true);
@@ -27688,13 +30444,16 @@ function eventsToMermaidGantt(thought, includeLabels) {
   if (thought.periods && thought.periods.length > 0) {
     for (const period of thought.periods) {
       builder.addSection(period.name);
-      const periodEvents = thought.events?.filter(
-        (e) => period.keyEvents?.includes(e.id)
-      ) || [];
+      const periodEvents = thought.events?.filter((e) => period.keyEvents?.includes(e.id)) || [];
       for (const event of periodEvents) {
         const label = includeLabels ? event.name : event.id;
         const startDate = typeof event.date === "string" ? event.date : event.date.start;
-        builder.addTask({ id: event.id, label, start: startDate, duration: "1d" });
+        builder.addTask({
+          id: event.id,
+          label,
+          start: startDate,
+          duration: "1d"
+        });
       }
     }
   } else {
@@ -27702,7 +30461,12 @@ function eventsToMermaidGantt(thought, includeLabels) {
     for (const event of thought.events || []) {
       const label = includeLabels ? event.name : event.id;
       const startDate = typeof event.date === "string" ? event.date : event.date.start;
-      builder.addTask({ id: event.id, label, start: startDate, duration: "1d" });
+      builder.addTask({
+        id: event.id,
+        label,
+        start: startDate,
+        duration: "1d"
+      });
     }
   }
   return builder.render();
@@ -27813,7 +30577,9 @@ function historicalToASCII(thought) {
     metadata.push(`Analysis Type: ${thought.thoughtType}`);
   }
   if (thought.historiographicalSchool) {
-    metadata.push(`Historiographical School: ${thought.historiographicalSchool}`);
+    metadata.push(
+      `Historiographical School: ${thought.historiographicalSchool}`
+    );
   }
   if (thought.methodology) {
     metadata.push(`Methodology: ${thought.methodology.approach}`);
@@ -27839,7 +30605,9 @@ function historicalToASCII(thought) {
   if (thought.causalChains && thought.causalChains.length > 0) {
     builder.addEmptyLine().addSection("CAUSAL CHAINS");
     for (const chain of thought.causalChains) {
-      builder.addText(`${chain.name} (Confidence: ${Math.round(chain.confidence * 100)}%)`);
+      builder.addText(
+        `${chain.name} (Confidence: ${Math.round(chain.confidence * 100)}%)`
+      );
       const chainSteps = chain.links.map((link) => {
         let step = `${link.cause} \u2192 ${link.effect}`;
         if (link.mechanism) {
@@ -27868,7 +30636,9 @@ function historicalToASCII(thought) {
   if (thought.periods && thought.periods.length > 0) {
     builder.addEmptyLine().addSection("HISTORICAL PERIODS");
     for (const period of thought.periods) {
-      builder.addText(`${period.name}: ${period.startDate} - ${period.endDate}`);
+      builder.addText(
+        `${period.name}: ${period.startDate} - ${period.endDate}`
+      );
       if (period.characteristics.length > 0) {
         builder.addBulletList(period.characteristics);
       }
@@ -27897,7 +30667,9 @@ function historicalToASCII(thought) {
     builder.addBulletList(patternItems);
   }
   if (thought.aggregateReliability !== void 0) {
-    builder.addEmptyLine().addText(`Aggregate Source Reliability: ${Math.round(thought.aggregateReliability * 100)}%`);
+    builder.addEmptyLine().addText(
+      `Aggregate Source Reliability: ${Math.round(thought.aggregateReliability * 100)}%`
+    );
   }
   return builder.render();
 }
@@ -27942,10 +30714,20 @@ function getSignificanceShape(significance) {
 // src/export/visual/modes/counterfactual.ts
 init_esm_shims();
 function exportCounterfactualScenarios(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return counterfactualToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return counterfactualToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return counterfactualToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -27974,24 +30756,44 @@ function counterfactualToMermaid(thought, colorScheme, includeLabels, includeMet
   const scheme = colorScheme;
   const builder = new MermaidGraphBuilder().setDirection("TD");
   const interventionId = "intervention";
-  builder.addNode({ id: interventionId, label: thought.interventionPoint.description, shape: "rectangle" });
+  builder.addNode({
+    id: interventionId,
+    label: thought.interventionPoint.description,
+    shape: "rectangle"
+  });
   const actualId = sanitizeId(thought.actual.id);
   const actualLabel = includeLabels ? `Actual: ${thought.actual.name}` : `Actual: ${actualId}`;
   builder.addNode({ id: actualId, label: actualLabel, shape: "rectangle" });
-  builder.addEdge({ source: interventionId, target: actualId, label: "no change" });
+  builder.addEdge({
+    source: interventionId,
+    target: actualId,
+    label: "no change"
+  });
   for (const scenario of thought.counterfactuals) {
     const scenarioId = sanitizeId(scenario.id);
     const label = includeLabels ? scenario.name : scenarioId;
     const likelihoodLabel = includeMetrics && scenario.likelihood ? ` (${scenario.likelihood.toFixed(2)})` : "";
-    builder.addNode({ id: scenarioId, label: `CF: ${label}${likelihoodLabel}`, shape: "rectangle" });
-    builder.addEdge({ source: interventionId, target: scenarioId, label: "intervene" });
+    builder.addNode({
+      id: scenarioId,
+      label: `CF: ${label}${likelihoodLabel}`,
+      shape: "rectangle"
+    });
+    builder.addEdge({
+      source: interventionId,
+      target: scenarioId,
+      label: "intervene"
+    });
   }
   return builder.setOptions({ colorScheme: scheme }).render();
 }
 function counterfactualToDOT(thought, includeLabels, includeMetrics) {
   const builder = new DOTGraphBuilder().setGraphName("CounterfactualScenarios").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   const interventionId = "intervention";
-  builder.addNode({ id: interventionId, label: thought.interventionPoint.description, shape: "diamond" });
+  builder.addNode({
+    id: interventionId,
+    label: thought.interventionPoint.description,
+    shape: "diamond"
+  });
   const actualId = sanitizeId(thought.actual.id);
   const actualLabel = includeLabels ? thought.actual.name : actualId;
   const filledStyle = ["filled"];
@@ -28001,7 +30803,11 @@ function counterfactualToDOT(thought, includeLabels, includeMetrics) {
     style: filledStyle,
     fillColor: "lightyellow"
   });
-  builder.addEdge({ source: interventionId, target: actualId, label: "no change" });
+  builder.addEdge({
+    source: interventionId,
+    target: actualId,
+    label: "no change"
+  });
   for (const scenario of thought.counterfactuals) {
     const scenarioId = sanitizeId(scenario.id);
     const label = includeLabels ? scenario.name : scenarioId;
@@ -28012,7 +30818,11 @@ function counterfactualToDOT(thought, includeLabels, includeMetrics) {
       style: filledStyle,
       fillColor: "lightblue"
     });
-    builder.addEdge({ source: interventionId, target: scenarioId, label: "intervene" });
+    builder.addEdge({
+      source: interventionId,
+      target: scenarioId,
+      label: "intervene"
+    });
   }
   return builder.render();
 }
@@ -28020,8 +30830,10 @@ function counterfactualToASCII(thought) {
   const builder = new ASCIIDocBuilder().setMaxWidth(60).addHeader("Counterfactual Scenario Tree");
   builder.addSection("Intervention Point").addText(`Description: ${thought.interventionPoint.description}
 `).addText(`Timing: ${thought.interventionPoint.timing}
-`).addText(`Feasibility: ${thought.interventionPoint.feasibility.toFixed(2)}
-`).addEmptyLine();
+`).addText(
+    `Feasibility: ${thought.interventionPoint.feasibility.toFixed(2)}
+`
+  ).addEmptyLine();
   builder.addSection("Actual Scenario").addText(`\u250C\u2500 ${thought.actual.name}
 `).addText(`\u2502  ${thought.actual.description}
 `).addEmptyLine();
@@ -28081,8 +30893,15 @@ function counterfactualToSVG(thought, options) {
       type: "counterfactual"
     });
   });
-  const actualHeight = Math.max(DEFAULT_SVG_OPTIONS.height, cfStartY + (cfCount - 1) * cfSpacing + 150);
-  let svg = generateSVGHeader(svgWidth, actualHeight, "Counterfactual Scenarios");
+  const actualHeight = Math.max(
+    DEFAULT_SVG_OPTIONS.height,
+    cfStartY + (cfCount - 1) * cfSpacing + 150
+  );
+  let svg = generateSVGHeader(
+    svgWidth,
+    actualHeight,
+    "Counterfactual Scenarios"
+  );
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
   const interventionPos = positions.get(interventionId);
   const actualPos = positions.get(actualId);
@@ -28113,12 +30932,19 @@ function counterfactualToSVG(thought, options) {
   if (includeMetrics) {
     const metrics = [
       { label: "Counterfactuals", value: thought.counterfactuals.length },
-      { label: "Feasibility", value: thought.interventionPoint.feasibility.toFixed(2) }
+      {
+        label: "Feasibility",
+        value: thought.interventionPoint.feasibility.toFixed(2)
+      }
     ];
     svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
   }
   const legendItems = [
-    { label: "Intervention", color: interventionColors, shape: "diamond" },
+    {
+      label: "Intervention",
+      color: interventionColors,
+      shape: "diamond"
+    },
     { label: "Actual", color: actualColors },
     { label: "Counterfactual", color: cfColors, shape: "stadium" }
   ];
@@ -28239,28 +31065,51 @@ function counterfactualToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   if (includeMetrics) {
     html += '<div class="metrics-grid">';
-    html += renderMetricCard("Counterfactuals", thought.counterfactuals.length, "primary");
-    html += renderMetricCard("Feasibility", (thought.interventionPoint.feasibility * 100).toFixed(0) + "%", "info");
-    html += renderMetricCard("Expected Impact", (thought.interventionPoint.expectedImpact * 100).toFixed(0) + "%", "success");
+    html += renderMetricCard(
+      "Counterfactuals",
+      thought.counterfactuals.length,
+      "primary"
+    );
+    html += renderMetricCard(
+      "Feasibility",
+      (thought.interventionPoint.feasibility * 100).toFixed(0) + "%",
+      "info"
+    );
+    html += renderMetricCard(
+      "Expected Impact",
+      (thought.interventionPoint.expectedImpact * 100).toFixed(0) + "%",
+      "success"
+    );
     html += "</div>\n";
   }
-  html += renderSection("Intervention Point", `
+  html += renderSection(
+    "Intervention Point",
+    `
     <p><strong>Description:</strong> ${escapeHTML(thought.interventionPoint.description)}</p>
     <p><strong>Timing:</strong> ${escapeHTML(thought.interventionPoint.timing)}</p>
     <p><strong>Feasibility:</strong> ${(thought.interventionPoint.feasibility * 100).toFixed(0)}%</p>
     <p><strong>Expected Impact:</strong> ${(thought.interventionPoint.expectedImpact * 100).toFixed(0)}%</p>
-  `, "\u{1F500}");
-  html += renderSection("Actual Outcome", `
+  `,
+    "\u{1F500}"
+  );
+  html += renderSection(
+    "Actual Outcome",
+    `
     <div class="card">
       <div class="card-header">${escapeHTML(thought.actual.name)}</div>
       <p>${escapeHTML(thought.actual.description)}</p>
     </div>
-  `, "\u2713");
+  `,
+    "\u2713"
+  );
   const cfRows = thought.counterfactuals.map((cf) => {
     const primaryOutcome = cf.outcomes[0];
     return [
@@ -28270,10 +31119,11 @@ function counterfactualToHTML(thought, options) {
       primaryOutcome?.impact || "-"
     ];
   });
-  html += renderSection("Counterfactual Scenarios", renderTable(
-    ["Scenario", "Outcome", "Likelihood", "Impact"],
-    cfRows
-  ), "\u{1F52E}");
+  html += renderSection(
+    "Counterfactual Scenarios",
+    renderTable(["Scenario", "Outcome", "Likelihood", "Impact"], cfRows),
+    "\u{1F52E}"
+  );
   html += generateHTMLFooter(htmlStandalone);
   return html;
 }
@@ -28320,7 +31170,9 @@ function counterfactualToModelica(thought, options) {
     }
     if (scenario.outcomes && scenario.outcomes.length > 0) {
       modelica += `    String outcomes[${scenario.outcomes.length}] = {`;
-      modelica += scenario.outcomes.map((o) => `"${o.description ? escapeModelicaString(o.description) : ""}"`).join(", ");
+      modelica += scenario.outcomes.map(
+        (o) => `"${o.description ? escapeModelicaString(o.description) : ""}"`
+      ).join(", ");
       modelica += "};\n";
     }
     modelica += `  end ${recordName};
@@ -28446,7 +31298,11 @@ function counterfactualToJSON(thought, options) {
   if (includeMetrics) {
     addMetric(graph, "counterfactualCount", thought.counterfactuals.length);
     addMetric(graph, "feasibility", thought.interventionPoint.feasibility);
-    addMetric(graph, "expectedImpact", thought.interventionPoint.expectedImpact);
+    addMetric(
+      graph,
+      "expectedImpact",
+      thought.interventionPoint.expectedImpact
+    );
   }
   return serializeGraph(graph);
 }
@@ -28459,24 +31315,36 @@ function counterfactualToMarkdown(thought, options) {
   } = options;
   const parts = [];
   if (includeMetrics) {
-    parts.push(section("Metrics", keyValueSection({
-      "Counterfactual Scenarios": thought.counterfactuals.length,
-      "Intervention Feasibility": (thought.interventionPoint.feasibility * 100).toFixed(0) + "%",
-      "Expected Impact": (thought.interventionPoint.expectedImpact * 100).toFixed(0) + "%"
-    })));
+    parts.push(
+      section(
+        "Metrics",
+        keyValueSection({
+          "Counterfactual Scenarios": thought.counterfactuals.length,
+          "Intervention Feasibility": (thought.interventionPoint.feasibility * 100).toFixed(0) + "%",
+          "Expected Impact": (thought.interventionPoint.expectedImpact * 100).toFixed(0) + "%"
+        })
+      )
+    );
   }
-  parts.push(section("Intervention Point", keyValueSection({
-    "Description": thought.interventionPoint.description,
-    "Timing": thought.interventionPoint.timing,
-    "Feasibility": (thought.interventionPoint.feasibility * 100).toFixed(0) + "%",
-    "Expected Impact": (thought.interventionPoint.expectedImpact * 100).toFixed(0) + "%"
-  })));
-  parts.push(section(
-    "Actual Scenario",
-    `**Name:** ${thought.actual.name}
+  parts.push(
+    section(
+      "Intervention Point",
+      keyValueSection({
+        Description: thought.interventionPoint.description,
+        Timing: thought.interventionPoint.timing,
+        Feasibility: (thought.interventionPoint.feasibility * 100).toFixed(0) + "%",
+        "Expected Impact": (thought.interventionPoint.expectedImpact * 100).toFixed(0) + "%"
+      })
+    )
+  );
+  parts.push(
+    section(
+      "Actual Scenario",
+      `**Name:** ${thought.actual.name}
 
 **Description:** ${thought.actual.description}`
-  ));
+    )
+  );
   const cfRows = thought.counterfactuals.map((cf) => {
     const primaryOutcome = cf.outcomes[0];
     return [
@@ -28486,28 +31354,48 @@ function counterfactualToMarkdown(thought, options) {
       primaryOutcome?.impact || "-"
     ];
   });
-  parts.push(section("Counterfactual Scenarios", table(
-    ["Name", "Description", "Likelihood", "Impact"],
-    cfRows
-  )));
+  parts.push(
+    section(
+      "Counterfactual Scenarios",
+      table(["Name", "Description", "Likelihood", "Impact"], cfRows)
+    )
+  );
   if (markdownIncludeMermaid) {
-    const mermaid = counterfactualToMermaid(thought, "default", true, includeMetrics);
+    const mermaid = counterfactualToMermaid(
+      thought,
+      "default",
+      true,
+      includeMetrics
+    );
     parts.push(section("Visualization", mermaidBlock(mermaid)));
   }
   return document("Counterfactual Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
     includeTableOfContents: markdownIncludeToc,
-    metadata: { mode: "counterfactual", scenarios: thought.counterfactuals.length }
+    metadata: {
+      mode: "counterfactual",
+      scenarios: thought.counterfactuals.length
+    }
   });
 }
 
 // src/export/visual/modes/bayesian.ts
 init_esm_shims();
 function exportBayesianNetwork(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return bayesianToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return bayesianToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return bayesianToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -28571,7 +31459,11 @@ function bayesianToDOT(thought, _includeLabels, includeMetrics) {
   builder.addNode({ id: "Prior", label: `Prior${priorProb}` });
   builder.addNode({ id: "Hypothesis", label: "Hypothesis", shape: "box" });
   builder.addNode({ id: "Evidence", label: "Evidence" });
-  builder.addNode({ id: "Posterior", label: `Posterior${posteriorProb}`, shape: "doublecircle" });
+  builder.addNode({
+    id: "Posterior",
+    label: `Posterior${posteriorProb}`,
+    shape: "doublecircle"
+  });
   builder.addEdge({ source: "Prior", target: "Hypothesis" });
   builder.addEdge({ source: "Evidence", target: "Hypothesis" });
   builder.addEdge({ source: "Hypothesis", target: "Posterior" });
@@ -28651,27 +31543,54 @@ function bayesianToSVG(thought, options) {
   let svg = generateSVGHeader(svgWidth, svgHeight, "Bayesian Network");
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
   svg += renderEdge(positions.get("prior"), positions.get("hypothesis"), {});
-  svg += renderEdge(positions.get("evidence"), positions.get("hypothesis"), {});
-  svg += renderEdge(positions.get("hypothesis"), positions.get("posterior"), {});
+  svg += renderEdge(
+    positions.get("evidence"),
+    positions.get("hypothesis"),
+    {}
+  );
+  svg += renderEdge(
+    positions.get("hypothesis"),
+    positions.get("posterior"),
+    {}
+  );
   svg += "\n  </g>";
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
-  svg += renderStadiumNode(positions.get("prior"), getNodeColor("primary", colorScheme));
-  svg += renderRectNode(positions.get("evidence"), getNodeColor("info", colorScheme));
-  svg += renderEllipseNode(positions.get("hypothesis"), getNodeColor("neutral", colorScheme));
-  svg += renderStadiumNode(positions.get("posterior"), getNodeColor("success", colorScheme));
+  svg += renderStadiumNode(
+    positions.get("prior"),
+    getNodeColor("primary", colorScheme)
+  );
+  svg += renderRectNode(
+    positions.get("evidence"),
+    getNodeColor("info", colorScheme)
+  );
+  svg += renderEllipseNode(
+    positions.get("hypothesis"),
+    getNodeColor("neutral", colorScheme)
+  );
+  svg += renderStadiumNode(
+    positions.get("posterior"),
+    getNodeColor("success", colorScheme)
+  );
   svg += "\n  </g>";
   if (includeMetrics) {
     const metrics = [
       { label: "Prior", value: thought.prior.probability.toFixed(3) },
       { label: "Posterior", value: thought.posterior.probability.toFixed(3) },
-      { label: "Bayes Factor", value: thought.bayesFactor?.toFixed(2) || "N/A" }
+      {
+        label: "Bayes Factor",
+        value: thought.bayesFactor?.toFixed(2) || "N/A"
+      }
     ];
     svg += renderMetricsPanel(svgWidth - 180, svgHeight - 100, metrics);
   }
   const legendItems = [
     { label: "Prior", color: getNodeColor("primary", colorScheme) },
     { label: "Evidence", color: getNodeColor("info", colorScheme) },
-    { label: "Hypothesis", color: getNodeColor("neutral", colorScheme), shape: "ellipse" },
+    {
+      label: "Hypothesis",
+      color: getNodeColor("neutral", colorScheme),
+      shape: "ellipse"
+    },
     { label: "Posterior", color: getNodeColor("success", colorScheme) }
   ];
   svg += renderLegend(20, svgHeight - 100, legendItems);
@@ -28681,10 +31600,18 @@ function bayesianToSVG(thought, options) {
 function bayesianToGraphML(thought, options) {
   const { includeLabels = true, includeMetrics = true } = options;
   const nodes = [
-    { id: "prior", label: includeLabels ? `Prior: ${thought.prior.probability.toFixed(3)}` : "Prior", type: "prior" },
+    {
+      id: "prior",
+      label: includeLabels ? `Prior: ${thought.prior.probability.toFixed(3)}` : "Prior",
+      type: "prior"
+    },
     { id: "hypothesis", label: "Hypothesis", type: "hypothesis" },
     { id: "evidence", label: "Evidence", type: "evidence" },
-    { id: "posterior", label: includeLabels ? `Posterior: ${thought.posterior.probability.toFixed(3)}` : "Posterior", type: "posterior" }
+    {
+      id: "posterior",
+      label: includeLabels ? `Posterior: ${thought.posterior.probability.toFixed(3)}` : "Posterior",
+      type: "posterior"
+    }
   ];
   const edges = [
     { id: "e1", source: "prior", target: "hypothesis" },
@@ -28698,12 +31625,44 @@ function bayesianToGraphML(thought, options) {
   });
 }
 function bayesianToTikZ(thought, options) {
-  const { includeLabels = true, includeMetrics = true, colorScheme = "default" } = options;
+  const {
+    includeLabels = true,
+    includeMetrics = true,
+    colorScheme = "default"
+  } = options;
   const nodes = [
-    { id: "prior", label: includeLabels ? `Prior: ${thought.prior.probability.toFixed(3)}` : "Prior", x: 0, y: 0, type: "primary", shape: "stadium" },
-    { id: "evidence", label: "Evidence", x: 4, y: 0, type: "info", shape: "rectangle" },
-    { id: "hypothesis", label: "Hypothesis", x: 2, y: -2, type: "neutral", shape: "ellipse" },
-    { id: "posterior", label: includeLabels ? `Posterior: ${thought.posterior.probability.toFixed(3)}` : "Posterior", x: 2, y: -4, type: "success", shape: "stadium" }
+    {
+      id: "prior",
+      label: includeLabels ? `Prior: ${thought.prior.probability.toFixed(3)}` : "Prior",
+      x: 0,
+      y: 0,
+      type: "primary",
+      shape: "stadium"
+    },
+    {
+      id: "evidence",
+      label: "Evidence",
+      x: 4,
+      y: 0,
+      type: "info",
+      shape: "rectangle"
+    },
+    {
+      id: "hypothesis",
+      label: "Hypothesis",
+      x: 2,
+      y: -2,
+      type: "neutral",
+      shape: "ellipse"
+    },
+    {
+      id: "posterior",
+      label: includeLabels ? `Posterior: ${thought.posterior.probability.toFixed(3)}` : "Posterior",
+      x: 2,
+      y: -4,
+      type: "success",
+      shape: "stadium"
+    }
   ];
   const edges = [
     { source: "prior", target: "hypothesis", directed: true },
@@ -28724,19 +31683,38 @@ function bayesianToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
-  html += renderSection("Hypothesis", `
+  html += renderSection(
+    "Hypothesis",
+    `
     <p><strong>${escapeHTML(thought.hypothesis.statement)}</strong></p>
     ${thought.hypothesis.alternatives && thought.hypothesis.alternatives.length > 0 ? `<p class="text-secondary">Alternatives: ${thought.hypothesis.alternatives.join(", ")}</p>` : ""}
-  `, "\u{1F3AF}");
+  `,
+    "\u{1F3AF}"
+  );
   if (includeMetrics) {
     html += '<div class="metrics-grid">';
-    html += renderMetricCard("Prior", (thought.prior.probability * 100).toFixed(1) + "%", "primary");
-    html += renderMetricCard("Posterior", (thought.posterior.probability * 100).toFixed(1) + "%", "success");
+    html += renderMetricCard(
+      "Prior",
+      (thought.prior.probability * 100).toFixed(1) + "%",
+      "primary"
+    );
+    html += renderMetricCard(
+      "Posterior",
+      (thought.posterior.probability * 100).toFixed(1) + "%",
+      "success"
+    );
     if (thought.bayesFactor !== void 0) {
-      html += renderMetricCard("Bayes Factor", thought.bayesFactor.toFixed(2), "info");
+      html += renderMetricCard(
+        "Bayes Factor",
+        thought.bayesFactor.toFixed(2),
+        "info"
+      );
     }
     html += "</div>\n";
     html += '<div class="card">';
@@ -28757,15 +31735,18 @@ function bayesianToHTML(thought, options) {
       ev.likelihoodGivenHypothesis?.toFixed(3) || "-",
       ev.likelihoodGivenNotHypothesis?.toFixed(3) || "-"
     ]);
-    html += renderSection("Evidence", renderTable(
-      ["#", "Description", "P(E|H)", "P(E|\xACH)"],
-      evidenceRows
-    ), "\u{1F4CA}");
+    html += renderSection(
+      "Evidence",
+      renderTable(["#", "Description", "P(E|H)", "P(E|\xACH)"], evidenceRows),
+      "\u{1F4CA}"
+    );
   }
   const change = thought.posterior.probability - thought.prior.probability;
   const changeDirection = change > 0 ? "increased" : change < 0 ? "decreased" : "unchanged";
   const changeClass = change > 0 ? "text-success" : change < 0 ? "text-danger" : "text-secondary";
-  html += renderSection("Interpretation", `
+  html += renderSection(
+    "Interpretation",
+    `
     <p>The posterior probability has <span class="${changeClass}"><strong>${changeDirection}</strong></span>
     by ${Math.abs(change * 100).toFixed(1)} percentage points from the prior.</p>
     ${thought.bayesFactor !== void 0 ? `
@@ -28773,35 +31754,53 @@ function bayesianToHTML(thought, options) {
       ${thought.bayesFactor > 3 ? "substantial" : thought.bayesFactor > 1 ? "weak" : "evidence against"}
       support for the hypothesis.</p>
     ` : ""}
-  `, "\u{1F4A1}");
+  `,
+    "\u{1F4A1}"
+  );
   html += generateHTMLFooter(htmlStandalone);
   return html;
 }
 function bayesianToModelica(thought, options) {
-  const { modelicaPackageName, modelicaIncludeAnnotations = true, includeMetrics = true } = options;
+  const {
+    modelicaPackageName,
+    modelicaIncludeAnnotations = true,
+    includeMetrics = true
+  } = options;
   const packageName = modelicaPackageName || "BayesianNetwork";
   const lines = [];
   lines.push(`package ${sanitizeModelicaId(packageName)}`);
   lines.push(`  "Bayesian network analysis"`);
   lines.push("");
   lines.push("  record Hypothesis");
-  lines.push(`    constant String statement = "${escapeModelicaString(thought.hypothesis.statement)}";`);
+  lines.push(
+    `    constant String statement = "${escapeModelicaString(thought.hypothesis.statement)}";`
+  );
   if (thought.hypothesis.alternatives && thought.hypothesis.alternatives.length > 0) {
-    lines.push(`    constant Integer alternativeCount = ${thought.hypothesis.alternatives.length};`);
+    lines.push(
+      `    constant Integer alternativeCount = ${thought.hypothesis.alternatives.length};`
+    );
   }
   lines.push("  end Hypothesis;");
   lines.push("");
   lines.push("  // Probability parameters");
-  lines.push(`  parameter Real prior = ${thought.prior.probability.toFixed(6)} "Prior probability";`);
-  lines.push(`  parameter Real posterior = ${thought.posterior.probability.toFixed(6)} "Posterior probability";`);
+  lines.push(
+    `  parameter Real prior = ${thought.prior.probability.toFixed(6)} "Prior probability";`
+  );
+  lines.push(
+    `  parameter Real posterior = ${thought.posterior.probability.toFixed(6)} "Posterior probability";`
+  );
   if (thought.bayesFactor !== void 0) {
-    lines.push(`  parameter Real bayesFactor = ${thought.bayesFactor.toFixed(6)} "Bayes factor";`);
+    lines.push(
+      `  parameter Real bayesFactor = ${thought.bayesFactor.toFixed(6)} "Bayes factor";`
+    );
   }
   lines.push("");
   if (includeMetrics) {
     lines.push("  // Computed metrics");
     lines.push(`  final parameter Real probabilityChange = posterior - prior;`);
-    lines.push(`  final parameter Real updateRatio = posterior / max(prior, 1e-10);`);
+    lines.push(
+      `  final parameter Real updateRatio = posterior / max(prior, 1e-10);`
+    );
     lines.push("");
   }
   if (thought.evidence && thought.evidence.length > 0) {
@@ -28809,12 +31808,18 @@ function bayesianToModelica(thought, options) {
     for (let i = 0; i < thought.evidence.length; i++) {
       const ev = thought.evidence[i];
       lines.push(`  record Evidence_${i + 1}`);
-      lines.push(`    constant String description = "${ev.description ? escapeModelicaString(ev.description) : ""}";`);
+      lines.push(
+        `    constant String description = "${ev.description ? escapeModelicaString(ev.description) : ""}";`
+      );
       if (ev.likelihoodGivenHypothesis !== void 0) {
-        lines.push(`    constant Real likelihoodGivenH = ${ev.likelihoodGivenHypothesis.toFixed(6)};`);
+        lines.push(
+          `    constant Real likelihoodGivenH = ${ev.likelihoodGivenHypothesis.toFixed(6)};`
+        );
       }
       if (ev.likelihoodGivenNotHypothesis !== void 0) {
-        lines.push(`    constant Real likelihoodGivenNotH = ${ev.likelihoodGivenNotHypothesis.toFixed(6)};`);
+        lines.push(
+          `    constant Real likelihoodGivenNotH = ${ev.likelihoodGivenNotHypothesis.toFixed(6)};`
+        );
       }
       lines.push(`  end Evidence_${i + 1};`);
       lines.push("");
@@ -28823,8 +31828,12 @@ function bayesianToModelica(thought, options) {
   if (modelicaIncludeAnnotations) {
     lines.push("  annotation(");
     lines.push('    Documentation(info="<html>');
-    lines.push(`      <p><b>Prior:</b> ${(thought.prior.probability * 100).toFixed(1)}%</p>`);
-    lines.push(`      <p><b>Posterior:</b> ${(thought.posterior.probability * 100).toFixed(1)}%</p>`);
+    lines.push(
+      `      <p><b>Prior:</b> ${(thought.prior.probability * 100).toFixed(1)}%</p>`
+    );
+    lines.push(
+      `      <p><b>Posterior:</b> ${(thought.posterior.probability * 100).toFixed(1)}%</p>`
+    );
     lines.push("      <p>Generated by DeepThinking MCP v8.3.1</p>");
     lines.push('    </html>")');
     lines.push("  );");
@@ -28905,12 +31914,22 @@ function bayesianToMarkdown(thought, options) {
       ...thought.bayesFactor !== void 0 ? { "Bayes Factor": thought.bayesFactor.toFixed(2) } : {}
     });
     parts.push(section("Probabilities", metricsContent));
-    parts.push(section("Prior", `${progressBar(thought.prior.probability * 100)}
+    parts.push(
+      section(
+        "Prior",
+        `${progressBar(thought.prior.probability * 100)}
 
-${thought.prior.justification || "-"}`));
-    parts.push(section("Posterior", `${progressBar(thought.posterior.probability * 100)}
+${thought.prior.justification || "-"}`
+      )
+    );
+    parts.push(
+      section(
+        "Posterior",
+        `${progressBar(thought.posterior.probability * 100)}
 
-${thought.posterior.calculation || "-"}`));
+${thought.posterior.calculation || "-"}`
+      )
+    );
   }
   if (thought.evidence && thought.evidence.length > 0) {
     const evidenceRows = thought.evidence.map((ev, i) => [
@@ -28919,7 +31938,12 @@ ${thought.posterior.calculation || "-"}`));
       ev.likelihoodGivenHypothesis?.toFixed(3) || "-",
       ev.likelihoodGivenNotHypothesis?.toFixed(3) || "-"
     ]);
-    parts.push(section("Evidence", table(["#", "Description", "P(E|H)", "P(E|\xACH)"], evidenceRows)));
+    parts.push(
+      section(
+        "Evidence",
+        table(["#", "Description", "P(E|H)", "P(E|\xACH)"], evidenceRows)
+      )
+    );
   }
   const change = thought.posterior.probability - thought.prior.probability;
   const changeDirection = change > 0 ? "increased" : change < 0 ? "decreased" : "unchanged";
@@ -28929,7 +31953,9 @@ Bayes Factor of ${thought.bayesFactor.toFixed(2)} indicates ${thought.bayesFacto
   parts.push(section("Interpretation", interpretation));
   if (markdownIncludeMermaid) {
     const mermaidDiagram = bayesianToMermaid(thought, "default", true, true);
-    parts.push(section("Bayesian Network Diagram", mermaidBlock(mermaidDiagram)));
+    parts.push(
+      section("Bayesian Network Diagram", mermaidBlock(mermaidDiagram))
+    );
   }
   return document("Bayesian Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
@@ -28945,10 +31971,20 @@ Bayes Factor of ${thought.bayesFactor.toFixed(2)} indicates ${thought.bayesFacto
 // src/export/visual/modes/evidential.ts
 init_esm_shims();
 function exportEvidentialBeliefs(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return evidentialToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return evidentialToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return evidentialToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -28976,7 +32012,11 @@ function exportEvidentialBeliefs(thought, options) {
 function evidentialToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
   const builder = new MermaidGraphBuilder().setDirection("TD");
-  builder.addNode({ id: "Frame", label: "Frame of Discernment", shape: "rectangle" });
+  builder.addNode({
+    id: "Frame",
+    label: "Frame of Discernment",
+    shape: "rectangle"
+  });
   if (thought.frameOfDiscernment) {
     for (const hypothesis of thought.frameOfDiscernment) {
       const hypId = sanitizeId(hypothesis);
@@ -28996,7 +32036,11 @@ function evidentialToMermaid(thought, colorScheme, includeLabels, includeMetrics
 }
 function evidentialToDOT(thought, includeLabels, includeMetrics) {
   const builder = new DOTGraphBuilder().setGraphName("EvidentialBeliefs").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
-  builder.addNode({ id: "Frame", label: "Frame of Discernment", shape: "ellipse" });
+  builder.addNode({
+    id: "Frame",
+    label: "Frame of Discernment",
+    shape: "ellipse"
+  });
   if (thought.frameOfDiscernment) {
     for (const hypothesis of thought.frameOfDiscernment) {
       const hypId = sanitizeId(hypothesis);
@@ -29027,15 +32071,21 @@ function evidentialToASCII(thought) {
   if (thought.massAssignments && thought.massAssignments.length > 0) {
     builder.addText("Mass Assignments:");
     for (const mass of thought.massAssignments) {
-      builder.addText(`  m({${mass.subset.join(", ")}}) = ${mass.mass.toFixed(3)}`);
+      builder.addText(
+        `  m({${mass.subset.join(", ")}}) = ${mass.mass.toFixed(3)}`
+      );
     }
     builder.addEmptyLine();
   }
   if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
-    builder.addText(`Belief Functions: ${thought.beliefFunctions.length} defined`);
+    builder.addText(
+      `Belief Functions: ${thought.beliefFunctions.length} defined`
+    );
   }
   if (thought.plausibilityFunction) {
-    builder.addText(`Plausibility: ${thought.plausibilityFunction.toFixed(3)}`);
+    builder.addText(
+      `Plausibility: ${thought.plausibilityFunction.toFixed(3)}`
+    );
   }
   return builder.render();
 }
@@ -29061,7 +32111,10 @@ function evidentialToSVG(thought, options) {
     height: nodeHeight,
     type: "frame"
   });
-  const hypSpacing = Math.min(200, svgWidth / (thought.frameOfDiscernment.length + 1));
+  const hypSpacing = Math.min(
+    200,
+    svgWidth / (thought.frameOfDiscernment.length + 1)
+  );
   const hypStartX = (svgWidth - (thought.frameOfDiscernment.length - 1) * hypSpacing) / 2;
   thought.frameOfDiscernment.forEach((hypothesis, index) => {
     const hypId = sanitizeId(hypothesis);
@@ -29099,7 +32152,10 @@ function evidentialToSVG(thought, options) {
   if (includeMetrics) {
     const metrics = [
       { label: "Hypotheses", value: thought.frameOfDiscernment.length },
-      { label: "Belief Functions", value: thought.beliefFunctions?.length || 0 }
+      {
+        label: "Belief Functions",
+        value: thought.beliefFunctions?.length || 0
+      }
     ];
     svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
   }
@@ -29140,7 +32196,9 @@ function evidentialToGraphML(thought, options) {
         metadata: belief.conflictMass !== void 0 ? { conflictMass: belief.conflictMass } : void 0
       });
       if (thought.evidence && thought.evidence.length > 0) {
-        const sourceEvidence = thought.evidence.find((e) => e.id === belief.source);
+        const sourceEvidence = thought.evidence.find(
+          (e) => e.id === belief.source
+        );
         if (sourceEvidence) {
           edges.push({
             id: `e${edgeId++}`,
@@ -29180,7 +32238,11 @@ function evidentialToGraphML(thought, options) {
   });
 }
 function evidentialToTikZ(thought, options) {
-  const { includeLabels = true, includeMetrics = true, colorScheme = "default" } = options;
+  const {
+    includeLabels = true,
+    includeMetrics = true,
+    colorScheme = "default"
+  } = options;
   const nodes = [];
   const edges = [];
   if (thought.evidence && thought.evidence.length > 0) {
@@ -29216,7 +32278,9 @@ function evidentialToTikZ(thought, options) {
         shape: "ellipse"
       });
       if (thought.evidence && thought.evidence.length > 0) {
-        const sourceEvidence = thought.evidence.find((e) => e.id === belief.source);
+        const sourceEvidence = thought.evidence.find(
+          (e) => e.id === belief.source
+        );
         if (sourceEvidence) {
           edges.push({
             source: sourceEvidence.id,
@@ -29271,16 +32335,23 @@ function evidentialToHTML(thought, options) {
     htmlTitle = "Evidential Reasoning Analysis",
     htmlTheme = "light"
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   if (thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
-    html += renderSection("Frame of Discernment", `
+    html += renderSection(
+      "Frame of Discernment",
+      `
       <p>Hypotheses under consideration:</p>
       <ul class="list-styled">
         ${thought.frameOfDiscernment.map((h) => `<li>${escapeHTML(h)}</li>`).join("\n")}
       </ul>
-    `, "\u{1F3AF}");
+    `,
+      "\u{1F3AF}"
+    );
   }
   if (thought.evidence && thought.evidence.length > 0) {
     const evRows = thought.evidence.map((ev) => [
@@ -29289,10 +32360,11 @@ function evidentialToHTML(thought, options) {
       ev.reliability.toFixed(2),
       ev.source || "-"
     ]);
-    html += renderSection("Evidence", renderTable(
-      ["ID", "Description", "Reliability", "Source"],
-      evRows
-    ), "\u{1F4CA}");
+    html += renderSection(
+      "Evidence",
+      renderTable(["ID", "Description", "Reliability", "Source"], evRows),
+      "\u{1F4CA}"
+    );
   }
   if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
     const bfContent = thought.beliefFunctions.map((bf) => {
@@ -29316,13 +32388,17 @@ function evidentialToHTML(thought, options) {
     const massRows = thought.combinedBelief.massAssignments.map(
       (ma) => `<tr><td>{${ma.hypothesisSet.join(", ")}}</td><td>${ma.mass.toFixed(3)}</td><td>${ma.justification ? escapeHTML(ma.justification) : "-"}</td></tr>`
     ).join("\n");
-    html += renderSection("Combined Belief", `
+    html += renderSection(
+      "Combined Belief",
+      `
       <table class="table">
         <thead><tr><th>Hypothesis Set</th><th>Mass</th><th>Justification</th></tr></thead>
         <tbody>${massRows}</tbody>
       </table>
       ${thought.combinedBelief.conflictMass ? `<p><strong>Conflict Mass:</strong> ${thought.combinedBelief.conflictMass.toFixed(3)}</p>` : ""}
-    `, "\u{1F52E}");
+    `,
+      "\u{1F52E}"
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -29399,7 +32475,9 @@ function evidentialToModelica(thought, options) {
   if (thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
     modelica += "  // Frame of Discernment\n";
     modelica += "  type Hypothesis = enumeration(\n";
-    const hypEnums = thought.frameOfDiscernment.map((h) => `    ${sanitizeModelicaId(h)}`);
+    const hypEnums = thought.frameOfDiscernment.map(
+      (h) => `    ${sanitizeModelicaId(h)}`
+    );
     modelica += hypEnums.join(",\n");
     modelica += "\n  );\n\n";
   }
@@ -29412,11 +32490,11 @@ function evidentialToUML(thought, options) {
   const edges = [];
   if (thought.evidence && thought.evidence.length > 0) {
     for (const evidence of thought.evidence) {
-      const attributes = [
-        `reliability: Real = ${evidence.reliability}`
-      ];
+      const attributes = [`reliability: Real = ${evidence.reliability}`];
       if (includeLabels) {
-        attributes.unshift(`description: String = "${evidence.description.substring(0, 30)}${evidence.description.length > 30 ? "..." : ""}"`);
+        attributes.unshift(
+          `description: String = "${evidence.description.substring(0, 30)}${evidence.description.length > 30 ? "..." : ""}"`
+        );
       }
       if (evidence.source) {
         attributes.push(`source: String = "${evidence.source}"`);
@@ -29440,7 +32518,9 @@ function evidentialToUML(thought, options) {
         }
       }
       if (belief.conflictMass !== void 0 && includeMetrics) {
-        attributes.push(`conflictMass: Real = ${belief.conflictMass.toFixed(3)}`);
+        attributes.push(
+          `conflictMass: Real = ${belief.conflictMass.toFixed(3)}`
+        );
       }
       nodes.push({
         id: belief.id,
@@ -29450,7 +32530,9 @@ function evidentialToUML(thought, options) {
         attributes
       });
       if (thought.evidence && thought.evidence.length > 0) {
-        const sourceEvidence = thought.evidence.find((e) => e.id === belief.source);
+        const sourceEvidence = thought.evidence.find(
+          (e) => e.id === belief.source
+        );
         if (sourceEvidence) {
           edges.push({
             source: sourceEvidence.id,
@@ -29471,7 +32553,9 @@ function evidentialToUML(thought, options) {
       }
     }
     if (thought.combinedBelief.conflictMass !== void 0) {
-      attributes.push(`conflictMass: Real = ${thought.combinedBelief.conflictMass.toFixed(3)}`);
+      attributes.push(
+        `conflictMass: Real = ${thought.combinedBelief.conflictMass.toFixed(3)}`
+      );
     }
     nodes.push({
       id: "combined_belief",
@@ -29541,7 +32625,9 @@ function evidentialToJSON(thought, options) {
         metadata
       });
       if (thought.evidence && thought.evidence.length > 0) {
-        const sourceEvidence = thought.evidence.find((e) => e.id === belief.source);
+        const sourceEvidence = thought.evidence.find(
+          (e) => e.id === belief.source
+        );
         if (sourceEvidence) {
           addEdge(graph, {
             id: `edge_${sourceEvidence.id}_${belief.id}`,
@@ -29560,11 +32646,13 @@ function evidentialToJSON(thought, options) {
   if (thought.combinedBelief) {
     const metadata = {};
     if (includeMetrics && thought.combinedBelief.massAssignments) {
-      metadata.massAssignments = thought.combinedBelief.massAssignments.map((ma) => ({
-        hypothesisSet: ma.hypothesisSet,
-        mass: ma.mass,
-        justification: ma.justification
-      }));
+      metadata.massAssignments = thought.combinedBelief.massAssignments.map(
+        (ma) => ({
+          hypothesisSet: ma.hypothesisSet,
+          mass: ma.mass,
+          justification: ma.justification
+        })
+      );
     }
     if (thought.combinedBelief.conflictMass !== void 0) {
       metadata.conflictMass = thought.combinedBelief.conflictMass;
@@ -29621,17 +32709,21 @@ function evidentialToMarkdown(thought, options) {
   } = options;
   const parts = [];
   if (includeMetrics) {
-    parts.push(section("Metrics", keyValueSection({
-      "Hypotheses": thought.frameOfDiscernment?.length || 0,
-      "Evidence Items": thought.evidence?.length || 0,
-      "Belief Functions": thought.beliefFunctions?.length || 0
-    })));
+    parts.push(
+      section(
+        "Metrics",
+        keyValueSection({
+          Hypotheses: thought.frameOfDiscernment?.length || 0,
+          "Evidence Items": thought.evidence?.length || 0,
+          "Belief Functions": thought.beliefFunctions?.length || 0
+        })
+      )
+    );
   }
   if (thought.frameOfDiscernment && thought.frameOfDiscernment.length > 0) {
-    parts.push(section(
-      "Frame of Discernment",
-      list(thought.frameOfDiscernment)
-    ));
+    parts.push(
+      section("Frame of Discernment", list(thought.frameOfDiscernment))
+    );
   }
   if (thought.evidence && thought.evidence.length > 0) {
     const evRows = thought.evidence.map((ev) => [
@@ -29640,10 +32732,12 @@ function evidentialToMarkdown(thought, options) {
       ev.reliability.toFixed(2),
       ev.source || "-"
     ]);
-    parts.push(section("Evidence", table(
-      ["ID", "Description", "Reliability", "Source"],
-      evRows
-    )));
+    parts.push(
+      section(
+        "Evidence",
+        table(["ID", "Description", "Reliability", "Source"], evRows)
+      )
+    );
   }
   if (thought.beliefFunctions && thought.beliefFunctions.length > 0) {
     const beliefContent = [];
@@ -29651,18 +32745,19 @@ function evidentialToMarkdown(thought, options) {
       beliefContent.push(`**Source:** ${bf.source}
 `);
       if (bf.conflictMass !== void 0) {
-        beliefContent.push(`**Conflict Mass:** ${bf.conflictMass.toFixed(3)}
-`);
+        beliefContent.push(
+          `**Conflict Mass:** ${bf.conflictMass.toFixed(3)}
+`
+        );
       }
       const massRows = bf.massAssignments.map((ma) => [
         `{${ma.hypothesisSet.join(", ")}}`,
         ma.mass.toFixed(3),
         ma.justification
       ]);
-      beliefContent.push(table(
-        ["Hypothesis Set", "Mass", "Justification"],
-        massRows
-      ));
+      beliefContent.push(
+        table(["Hypothesis Set", "Mass", "Justification"], massRows)
+      );
       beliefContent.push("\n");
     }
     parts.push(section("Belief Functions", beliefContent.join("")));
@@ -29685,7 +32780,12 @@ function evidentialToMarkdown(thought, options) {
     parts.push(section("Combined Belief", combinedContent));
   }
   if (markdownIncludeMermaid) {
-    const mermaid = evidentialToMermaid(thought, "default", true, includeMetrics);
+    const mermaid = evidentialToMermaid(
+      thought,
+      "default",
+      true,
+      includeMetrics
+    );
     parts.push(section("Visualization", mermaidBlock(mermaid)));
   }
   return document("Evidential Reasoning Analysis", parts.join("\n"), {
@@ -29701,10 +32801,20 @@ function evidentialToMarkdown(thought, options) {
 // src/export/visual/modes/game-theory.ts
 init_esm_shims();
 function exportGameTree(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return gameTreeToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return gameTreeToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return gameTreeToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -29733,7 +32843,11 @@ function gameTreeToMermaid(thought, colorScheme, includeLabels, includeMetrics) 
   const scheme = colorScheme;
   const builder = new MermaidGraphBuilder().setDirection("TD");
   if (!thought.game) {
-    builder.addNode({ id: "root", label: "No game defined", shape: "rectangle" });
+    builder.addNode({
+      id: "root",
+      label: "No game defined",
+      shape: "rectangle"
+    });
     return builder.setOptions({ colorScheme: scheme }).render();
   }
   if (thought.gameTree && thought.gameTree.nodes) {
@@ -29748,9 +32862,15 @@ function gameTreeToMermaid(thought, colorScheme, includeLabels, includeMetrics) 
         for (const childId of node.childNodes) {
           const fromId = sanitizeId(node.id);
           const toId = sanitizeId(childId);
-          const childNode = thought.gameTree.nodes.find((n) => n.id === childId);
+          const childNode = thought.gameTree.nodes.find(
+            (n) => n.id === childId
+          );
           if (includeMetrics && childNode?.action) {
-            builder.addEdge({ source: fromId, target: toId, label: childNode.action });
+            builder.addEdge({
+              source: fromId,
+              target: toId,
+              label: childNode.action
+            });
           } else {
             builder.addEdge({ source: fromId, target: toId });
           }
@@ -29762,7 +32882,11 @@ function gameTreeToMermaid(thought, colorScheme, includeLabels, includeMetrics) 
     if (thought.strategies) {
       for (const strategy of thought.strategies.slice(0, 5)) {
         const stratId = sanitizeId(strategy.id);
-        builder.addNode({ id: stratId, label: strategy.name, shape: "rectangle" });
+        builder.addNode({
+          id: stratId,
+          label: strategy.name,
+          shape: "rectangle"
+        });
         builder.addEdge({ source: "root", target: stratId });
       }
     }
@@ -29787,9 +32911,15 @@ function gameTreeToDOT(thought, includeLabels, includeMetrics) {
         for (const childId of node.childNodes) {
           const fromId = sanitizeId(node.id);
           const toId = sanitizeId(childId);
-          const childNode = thought.gameTree.nodes.find((n) => n.id === childId);
+          const childNode = thought.gameTree.nodes.find(
+            (n) => n.id === childId
+          );
           if (includeMetrics && childNode?.action) {
-            builder.addEdge({ source: fromId, target: toId, label: childNode.action });
+            builder.addEdge({
+              source: fromId,
+              target: toId,
+              label: childNode.action
+            });
           } else {
             builder.addEdge({ source: fromId, target: toId });
           }
@@ -29837,7 +32967,9 @@ function gameTreeToSVG(thought, options) {
   if (thought.gameTree && thought.gameTree.nodes) {
     const nodeDepths = /* @__PURE__ */ new Map();
     const rootNodes = thought.gameTree.nodes.filter((n) => !n.parentNode);
-    const queue = rootNodes.map((n) => ({ nodeId: n.id, depth: 0 }));
+    const queue = rootNodes.map(
+      (n) => ({ nodeId: n.id, depth: 0 })
+    );
     while (queue.length > 0) {
       const { nodeId, depth } = queue.shift();
       nodeDepths.set(nodeId, depth);
@@ -29950,7 +33082,11 @@ function gameTreeToSVG(thought, options) {
   }
   const legendItems = [
     { label: "Decision", color: getNodeColor("neutral", colorScheme) },
-    { label: "Terminal", color: getNodeColor("success", colorScheme), shape: "ellipse" }
+    {
+      label: "Terminal",
+      color: getNodeColor("success", colorScheme),
+      shape: "ellipse"
+    }
   ];
   svg += renderLegend(20, svgHeight - 60, legendItems);
   svg += "\n" + generateSVGFooter();
@@ -29959,7 +33095,9 @@ function gameTreeToSVG(thought, options) {
 function gameTreeToGraphML(thought, options) {
   const { includeLabels = true } = options;
   if (!thought.game) {
-    const nodes2 = [{ id: "root", label: "No game defined", type: "root" }];
+    const nodes2 = [
+      { id: "root", label: "No game defined", type: "root" }
+    ];
     return generateGraphML(nodes2, [], { graphName: "Empty Game Tree" });
   }
   if (thought.gameTree && thought.gameTree.nodes && thought.gameTree.nodes.length > 0) {
@@ -29977,7 +33115,9 @@ function gameTreeToGraphML(thought, options) {
     for (const node of thought.gameTree.nodes) {
       if (node.childNodes && node.childNodes.length > 0) {
         for (const childId of node.childNodes) {
-          const childNode = thought.gameTree.nodes.find((n) => n.id === childId);
+          const childNode = thought.gameTree.nodes.find(
+            (n) => n.id === childId
+          );
           edges.push({
             id: `e${edgeCount++}`,
             source: sanitizeId(node.id),
@@ -29988,7 +33128,9 @@ function gameTreeToGraphML(thought, options) {
         }
       }
     }
-    return generateGraphML(nodes2, edges, { graphName: thought.game?.name || "Game Tree" });
+    return generateGraphML(nodes2, edges, {
+      graphName: thought.game?.name || "Game Tree"
+    });
   } else if (thought.strategies && thought.strategies.length > 0) {
     const root = {
       id: "root",
@@ -29998,21 +33140,38 @@ function gameTreeToGraphML(thought, options) {
         label: strategy.name
       }))
     };
-    return createTreeGraphML(root, { graphName: thought.game?.name || "Game Tree" });
+    return createTreeGraphML(root, {
+      graphName: thought.game?.name || "Game Tree"
+    });
   }
-  const nodes = [{ id: "root", label: "No game tree", type: "root" }];
-  return generateGraphML(nodes, [], { graphName: thought.game?.name || "Game Tree" });
+  const nodes = [
+    { id: "root", label: "No game tree", type: "root" }
+  ];
+  return generateGraphML(nodes, [], {
+    graphName: thought.game?.name || "Game Tree"
+  });
 }
 function gameTreeToTikZ(thought, options) {
   const { includeLabels = true, colorScheme = "default" } = options;
   if (!thought.game) {
-    const nodes2 = [{ id: "root", label: "No game defined", x: 4, y: 0, type: "root", shape: "rectangle" }];
+    const nodes2 = [
+      {
+        id: "root",
+        label: "No game defined",
+        x: 4,
+        y: 0,
+        type: "root",
+        shape: "rectangle"
+      }
+    ];
     return generateTikZ(nodes2, [], { title: "Empty Game Tree", colorScheme });
   }
   if (thought.gameTree && thought.gameTree.nodes && thought.gameTree.nodes.length > 0) {
     const nodeDepths = /* @__PURE__ */ new Map();
     const rootNodes = thought.gameTree.nodes.filter((n) => !n.parentNode);
-    const queue = rootNodes.map((n) => ({ nodeId: n.id, depth: 0 }));
+    const queue = rootNodes.map(
+      (n) => ({ nodeId: n.id, depth: 0 })
+    );
     while (queue.length > 0) {
       const { nodeId, depth } = queue.shift();
       nodeDepths.set(nodeId, depth);
@@ -30055,7 +33214,9 @@ function gameTreeToTikZ(thought, options) {
     for (const node of thought.gameTree.nodes) {
       if (node.childNodes && node.childNodes.length > 0) {
         for (const childId of node.childNodes) {
-          const childNode = thought.gameTree.nodes.find((n) => n.id === childId);
+          const childNode = thought.gameTree.nodes.find(
+            (n) => n.id === childId
+          );
           edges.push({
             source: sanitizeId(node.id),
             target: sanitizeId(childId),
@@ -30065,7 +33226,10 @@ function gameTreeToTikZ(thought, options) {
         }
       }
     }
-    return generateTikZ(nodes2, edges, { title: thought.game?.name || "Game Tree", colorScheme });
+    return generateTikZ(nodes2, edges, {
+      title: thought.game?.name || "Game Tree",
+      colorScheme
+    });
   } else if (thought.strategies && thought.strategies.length > 0) {
     const root = {
       id: "root",
@@ -30075,10 +33239,25 @@ function gameTreeToTikZ(thought, options) {
         label: strategy.name
       }))
     };
-    return createTreeTikZ(root, { title: thought.game?.name || "Game Tree", colorScheme });
+    return createTreeTikZ(root, {
+      title: thought.game?.name || "Game Tree",
+      colorScheme
+    });
   }
-  const nodes = [{ id: "root", label: "No game tree", x: 4, y: 0, type: "root", shape: "rectangle" }];
-  return generateTikZ(nodes, [], { title: thought.game?.name || "Game Tree", colorScheme });
+  const nodes = [
+    {
+      id: "root",
+      label: "No game tree",
+      x: 4,
+      y: 0,
+      type: "root",
+      shape: "rectangle"
+    }
+  ];
+  return generateTikZ(nodes, [], {
+    title: thought.game?.name || "Game Tree",
+    colorScheme
+  });
 }
 function gameTreeToHTML(thought, options) {
   const {
@@ -30087,7 +33266,10 @@ function gameTreeToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   if (!thought.game) {
@@ -30095,35 +33277,61 @@ function gameTreeToHTML(thought, options) {
     html += generateHTMLFooter(htmlStandalone);
     return html;
   }
-  html += renderSection("Game Information", `
+  html += renderSection(
+    "Game Information",
+    `
     <p><strong>Type:</strong> ${thought.game.type ? escapeHTML(thought.game.type) : "-"}</p>
     <p><strong>Players:</strong> ${thought.players ? thought.players.map((p) => p.name ? escapeHTML(p.name) : "-").join(", ") : thought.game.numPlayers}</p>
     ${thought.game.description ? `<p>${escapeHTML(thought.game.description)}</p>` : ""}
-  `, "\u{1F3AE}");
+  `,
+    "\u{1F3AE}"
+  );
   if (includeMetrics) {
     html += '<div class="metrics-grid">';
-    html += renderMetricCard("Players", thought.players ? thought.players.length : thought.game.numPlayers, "primary");
-    html += renderMetricCard("Strategies", thought.strategies?.length || 0, "info");
-    html += renderMetricCard("Equilibria", thought.nashEquilibria?.length || 0, "success");
+    html += renderMetricCard(
+      "Players",
+      thought.players ? thought.players.length : thought.game.numPlayers,
+      "primary"
+    );
+    html += renderMetricCard(
+      "Strategies",
+      thought.strategies?.length || 0,
+      "info"
+    );
+    html += renderMetricCard(
+      "Equilibria",
+      thought.nashEquilibria?.length || 0,
+      "success"
+    );
     html += "</div>\n";
   }
   if (thought.strategies && thought.strategies.length > 0) {
     const strategyRows = thought.strategies.map((strategy) => {
-      const typeBadge = renderBadge(strategy.isPure ? "Pure" : "Mixed", strategy.isPure ? "success" : "info");
-      return [
-        strategy.name,
-        typeBadge,
-        strategy.description || "-"
-      ];
+      const typeBadge = renderBadge(
+        strategy.isPure ? "Pure" : "Mixed",
+        strategy.isPure ? "success" : "info"
+      );
+      return [strategy.name, typeBadge, strategy.description || "-"];
     });
-    html += renderSection("Strategies", renderTable(
-      ["Name", "Type", "Description"],
-      strategyRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
-    ), "\u{1F4CB}");
+    html += renderSection(
+      "Strategies",
+      renderTable(
+        ["Name", "Type", "Description"],
+        strategyRows.map(
+          (row) => row.map(
+            (cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))
+          )
+        )
+      ),
+      "\u{1F4CB}"
+    );
   }
   if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
     const eqRows = thought.nashEquilibria.map((eq) => {
-      const typeBadge = renderBadge(eq.type, eq.type === "pure" ? "success" : "info");
+      const typeBadge = renderBadge(
+        eq.type,
+        eq.type === "pure" ? "success" : "info"
+      );
       return [
         typeBadge,
         eq.strategyProfile.join(", "),
@@ -30131,15 +33339,27 @@ function gameTreeToHTML(thought, options) {
         eq.isStrict ? "Yes" : "No"
       ];
     });
-    html += renderSection("Nash Equilibria", renderTable(
-      ["Type", "Strategy Profile", "Payoffs", "Strict"],
-      eqRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
-    ), "\u2696\uFE0F");
+    html += renderSection(
+      "Nash Equilibria",
+      renderTable(
+        ["Type", "Strategy Profile", "Payoffs", "Strict"],
+        eqRows.map(
+          (row) => row.map(
+            (cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))
+          )
+        )
+      ),
+      "\u2696\uFE0F"
+    );
   }
   if (thought.payoffMatrix) {
-    html += renderSection("Payoff Matrix", `
+    html += renderSection(
+      "Payoff Matrix",
+      `
       <p class="text-secondary">Payoff matrix visualization available in other formats.</p>
-    `, "\u{1F4CA}");
+    `,
+      "\u{1F4CA}"
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -30173,7 +33393,9 @@ function gameTheoryToModelica(thought, options) {
   }
   if (thought.strategies && thought.strategies.length > 0) {
     modelica += "  type StrategyType = enumeration(\n";
-    const strategyNames = thought.strategies.map((s) => sanitizeModelicaId(s.name));
+    const strategyNames = thought.strategies.map(
+      (s) => sanitizeModelicaId(s.name)
+    );
     modelica += strategyNames.map((name) => `    ${name}`).join(",\n");
     modelica += '\n  ) "Available strategies";\n\n';
     modelica += "  record Strategy\n";
@@ -30183,7 +33405,9 @@ function gameTheoryToModelica(thought, options) {
     modelica += '    Boolean isPure "Whether strategy is pure or mixed";\n';
     modelica += "  end Strategy;\n\n";
     for (const strategy of thought.strategies) {
-      const stratId = sanitizeModelicaId(strategy.id || strategy.name || "strategy");
+      const stratId = sanitizeModelicaId(
+        strategy.id || strategy.name || "strategy"
+      );
       modelica += `  constant Strategy ${stratId} = Strategy(
 `;
       modelica += `    id="${strategy.id ? escapeModelicaString(strategy.id) : ""}",
@@ -30417,7 +33641,11 @@ function gameTheoryToJSON(thought, options) {
     }
   }
   if (includeMetrics) {
-    addMetric(graph, "Players", thought.players?.length || thought.game?.numPlayers || 0);
+    addMetric(
+      graph,
+      "Players",
+      thought.players?.length || thought.game?.numPlayers || 0
+    );
     addMetric(graph, "Strategies", thought.strategies?.length || 0);
     addMetric(graph, "Nash Equilibria", thought.nashEquilibria?.length || 0);
   }
@@ -30445,15 +33673,15 @@ function gameTheoryToMarkdown(thought, options) {
   }
   const gameInfo = keyValueSection({
     "Game Name": thought.game.name || "Untitled",
-    "Type": thought.game.type,
-    "Players": thought.players ? thought.players.map((p) => p.name).join(", ") : String(thought.game.numPlayers),
-    ...thought.game.description ? { "Description": thought.game.description } : {}
+    Type: thought.game.type,
+    Players: thought.players ? thought.players.map((p) => p.name).join(", ") : String(thought.game.numPlayers),
+    ...thought.game.description ? { Description: thought.game.description } : {}
   });
   parts.push(section("Game Information", gameInfo));
   if (includeMetrics) {
     const metricsContent = keyValueSection({
-      "Players": thought.players?.length || thought.game.numPlayers,
-      "Strategies": thought.strategies?.length || 0,
+      Players: thought.players?.length || thought.game.numPlayers,
+      Strategies: thought.strategies?.length || 0,
       "Nash Equilibria": thought.nashEquilibria?.length || 0
     });
     parts.push(section("Metrics", metricsContent));
@@ -30464,7 +33692,12 @@ function gameTheoryToMarkdown(thought, options) {
       strategy.isPure ? "Pure" : "Mixed",
       strategy.description || "-"
     ]);
-    parts.push(section("Strategies", table(["Name", "Type", "Description"], strategyRows)));
+    parts.push(
+      section(
+        "Strategies",
+        table(["Name", "Type", "Description"], strategyRows)
+      )
+    );
   }
   if (thought.nashEquilibria && thought.nashEquilibria.length > 0) {
     const eqRows = thought.nashEquilibria.map((eq) => [
@@ -30473,30 +33706,49 @@ function gameTheoryToMarkdown(thought, options) {
       `[${eq.payoffs.join(", ")}]`,
       eq.isStrict ? "Yes" : "No"
     ]);
-    parts.push(section("Nash Equilibria", table(["Type", "Strategy Profile", "Payoffs", "Strict"], eqRows)));
+    parts.push(
+      section(
+        "Nash Equilibria",
+        table(["Type", "Strategy Profile", "Payoffs", "Strict"], eqRows)
+      )
+    );
   }
   if (markdownIncludeMermaid) {
     const mermaidDiagram = gameTreeToMermaid(thought, "default", true, true);
     parts.push(section("Game Tree Diagram", mermaidBlock(mermaidDiagram)));
   }
-  return document(`Game Theory Analysis: ${thought.game.name || "Untitled"}`, parts.join("\n"), {
-    includeFrontmatter: markdownIncludeFrontmatter,
-    includeTableOfContents: markdownIncludeToc,
-    metadata: {
-      mode: "game-theory",
-      gameType: thought.game.type,
-      playerCount: thought.players?.length || thought.game.numPlayers
+  return document(
+    `Game Theory Analysis: ${thought.game.name || "Untitled"}`,
+    parts.join("\n"),
+    {
+      includeFrontmatter: markdownIncludeFrontmatter,
+      includeTableOfContents: markdownIncludeToc,
+      metadata: {
+        mode: "game-theory",
+        gameType: thought.game.type,
+        playerCount: thought.players?.length || thought.game.numPlayers
+      }
     }
-  });
+  );
 }
 
 // src/export/visual/modes/optimization.ts
 init_esm_shims();
 function exportOptimizationSolution(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return optimizationToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return optimizationToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return optimizationToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -30535,7 +33787,11 @@ function optimizationToMermaid(thought, colorScheme, includeLabels, includeMetri
       varNodeIds.push(varId);
       const label = includeLabels ? variable.name : varId;
       const domainLabel = includeMetrics && variable.domain ? ` [${variable.domain.lowerBound},${variable.domain.upperBound}]` : "";
-      builder.addNode({ id: varId, label: `${label}${domainLabel}`, shape: "rectangle" });
+      builder.addNode({
+        id: varId,
+        label: `${label}${domainLabel}`,
+        shape: "rectangle"
+      });
     }
     builder.addSubgraph("Variables", "Decision Variables", varNodeIds);
   }
@@ -30558,7 +33814,11 @@ function optimizationToMermaid(thought, colorScheme, includeLabels, includeMetri
   }
   if (thought.solution) {
     const qualityLabel = includeMetrics && thought.solution.quality ? ` (quality: ${thought.solution.quality.toFixed(2)})` : "";
-    builder.addNode({ id: "Solution", label: `Solution${qualityLabel}`, shape: "rectangle" });
+    builder.addNode({
+      id: "Solution",
+      label: `Solution${qualityLabel}`,
+      shape: "rectangle"
+    });
     if (thought.objectives) {
       for (const objective of thought.objectives) {
         const objId = sanitizeId(objective.id);
@@ -30572,8 +33832,12 @@ function optimizationToDOT(thought, includeLabels, includeMetrics) {
   const builder = new DOTGraphBuilder().setGraphName("Optimization").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   if (thought.problem) {
     const label = includeLabels ? thought.problem.name : "Problem";
-    builder.addNode({ id: "Problem", label: `Problem:
-${label}`, shape: "ellipse" });
+    builder.addNode({
+      id: "Problem",
+      label: `Problem:
+${label}`,
+      shape: "ellipse"
+    });
   }
   if (thought.variables && thought.variables.length > 0) {
     for (const variable of thought.variables) {
@@ -30632,7 +33896,9 @@ function optimizationToASCII(thought) {
       const varType = variable.type || "unknown";
       builder.addText(`  ${variable.name} (${varType})`);
       if (variable.domain) {
-        builder.addText(`    Domain: [${variable.domain.lowerBound}, ${variable.domain.upperBound}]`);
+        builder.addText(
+          `    Domain: [${variable.domain.lowerBound}, ${variable.domain.upperBound}]`
+        );
       }
     }
     builder.addEmptyLine();
@@ -30765,9 +34031,15 @@ function optimizationToSVG(thought, options) {
   if (includeMetrics) {
     const metrics = [
       { label: "Variables", value: thought.variables?.length || 0 },
-      { label: "Constraints", value: thought.optimizationConstraints?.length || 0 },
+      {
+        label: "Constraints",
+        value: thought.optimizationConstraints?.length || 0
+      },
       { label: "Objectives", value: thought.objectives?.length || 0 },
-      { label: "Quality", value: thought.solution?.quality?.toFixed(2) || "N/A" }
+      {
+        label: "Quality",
+        value: thought.solution?.quality?.toFixed(2) || "N/A"
+      }
     ];
     svg += renderMetricsPanel(svgWidth - 180, svgHeight - 150, metrics);
   }
@@ -30851,7 +34123,11 @@ function optimizationToGraphML(thought, options) {
   });
 }
 function optimizationToTikZ(thought, options) {
-  const { colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   const nodes = [];
   const edges = [];
   let yOffset = 0;
@@ -30933,7 +34209,10 @@ function optimizationToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   if (thought.problem) {
@@ -30946,10 +34225,26 @@ function optimizationToHTML(thought, options) {
   }
   if (includeMetrics) {
     html += '<div class="metrics-grid">\n';
-    html += renderMetricCard("Variables", thought.variables?.length || 0, "primary");
-    html += renderMetricCard("Constraints", thought.optimizationConstraints?.length || 0, "warning");
-    html += renderMetricCard("Objectives", thought.objectives?.length || 0, "info");
-    html += renderMetricCard("Quality", thought.solution?.quality?.toFixed(2) || "N/A", "success");
+    html += renderMetricCard(
+      "Variables",
+      thought.variables?.length || 0,
+      "primary"
+    );
+    html += renderMetricCard(
+      "Constraints",
+      thought.optimizationConstraints?.length || 0,
+      "warning"
+    );
+    html += renderMetricCard(
+      "Objectives",
+      thought.objectives?.length || 0,
+      "info"
+    );
+    html += renderMetricCard(
+      "Quality",
+      thought.solution?.quality?.toFixed(2) || "N/A",
+      "success"
+    );
     html += "</div>\n";
   }
   if (thought.variables && thought.variables.length > 0) {
@@ -31325,7 +34620,11 @@ function optimizationToJSON(thought, options) {
   }
   if (includeMetrics) {
     addMetric(graph, "variable_count", thought.variables?.length || 0);
-    addMetric(graph, "constraint_count", thought.optimizationConstraints?.length || 0);
+    addMetric(
+      graph,
+      "constraint_count",
+      thought.optimizationConstraints?.length || 0
+    );
     addMetric(graph, "objective_count", thought.objectives?.length || 0);
     if (thought.solution?.quality !== void 0) {
       addMetric(graph, "solution_quality", thought.solution.quality);
@@ -31343,18 +34642,18 @@ function optimizationToMarkdown(thought, options) {
   const parts = [];
   if (thought.problem) {
     const problemContent = keyValueSection({
-      "Name": thought.problem.name,
-      "Type": thought.problem.type,
-      "Description": thought.problem.description
+      Name: thought.problem.name,
+      Type: thought.problem.type,
+      Description: thought.problem.description
     });
     parts.push(section("Problem", problemContent));
   }
   if (includeMetrics) {
     const metricsContent = keyValueSection({
-      "Variables": thought.variables?.length || 0,
-      "Constraints": thought.optimizationConstraints?.length || 0,
-      "Objectives": thought.objectives?.length || 0,
-      "Quality": thought.solution?.quality?.toFixed(2) || "N/A"
+      Variables: thought.variables?.length || 0,
+      Constraints: thought.optimizationConstraints?.length || 0,
+      Objectives: thought.objectives?.length || 0,
+      Quality: thought.solution?.quality?.toFixed(2) || "N/A"
     });
     parts.push(section("Metrics", metricsContent));
   }
@@ -31409,7 +34708,12 @@ function optimizationToMarkdown(thought, options) {
     parts.push(section("Solution", solutionContent));
   }
   if (markdownIncludeMermaid) {
-    const mermaidDiagram = optimizationToMermaid(thought, "default", true, true);
+    const mermaidDiagram = optimizationToMermaid(
+      thought,
+      "default",
+      true,
+      true
+    );
     parts.push(section("Optimization Diagram", mermaidBlock(mermaidDiagram)));
   }
   return document("Optimization Analysis", parts.join("\n"), {
@@ -31422,10 +34726,20 @@ function optimizationToMarkdown(thought, options) {
 // src/export/visual/modes/abductive.ts
 init_esm_shims();
 function exportAbductiveHypotheses(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return abductiveToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return abductiveToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return abductiveToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -31508,8 +34822,10 @@ function abductiveToASCII(thought) {
   const builder = new ASCIIDocBuilder().setMaxWidth(60).addHeader("Abductive Hypothesis Comparison");
   builder.addSection("Observations");
   for (const obs of thought.observations) {
-    builder.addText(`  \u2022 ${obs.description} (confidence: ${obs.confidence.toFixed(2)})
-`);
+    builder.addText(
+      `  \u2022 ${obs.description} (confidence: ${obs.confidence.toFixed(2)})
+`
+    );
   }
   builder.addEmptyLine();
   builder.addSection("Hypotheses");
@@ -31580,7 +34896,10 @@ function abductiveToSVG(thought, options) {
   }
   svg += "\n  </g>";
   svg += '\n\n  <!-- Nodes -->\n  <g class="nodes">';
-  svg += renderEllipseNode(positions.get("observations"), getNodeColor("info", colorScheme));
+  svg += renderEllipseNode(
+    positions.get("observations"),
+    getNodeColor("info", colorScheme)
+  );
   for (const hypothesis of thought.hypotheses) {
     const pos = positions.get(hypothesis.id);
     const isBest = thought.bestExplanation?.id === hypothesis.id;
@@ -31596,12 +34915,19 @@ function abductiveToSVG(thought, options) {
     const metrics = [
       { label: "Hypotheses", value: thought.hypotheses.length },
       { label: "Observations", value: thought.observations.length },
-      { label: "Best Score", value: thought.bestExplanation?.score.toFixed(2) || "N/A" }
+      {
+        label: "Best Score",
+        value: thought.bestExplanation?.score.toFixed(2) || "N/A"
+      }
     ];
     svg += renderMetricsPanel(svgWidth - 180, svgHeight - 100, metrics);
   }
   const legendItems = [
-    { label: "Observations", color: getNodeColor("info", colorScheme), shape: "ellipse" },
+    {
+      label: "Observations",
+      color: getNodeColor("info", colorScheme),
+      shape: "ellipse"
+    },
     { label: "Hypothesis", color: getNodeColor("neutral", colorScheme) },
     { label: "Best", color: getNodeColor("success", colorScheme) }
   ];
@@ -31655,7 +34981,11 @@ function abductiveToGraphML(thought, options) {
   });
 }
 function abductiveToTikZ(thought, options) {
-  const { includeLabels = true, includeMetrics = true, colorScheme = "default" } = options;
+  const {
+    includeLabels = true,
+    includeMetrics = true,
+    colorScheme = "default"
+  } = options;
   const nodes = [];
   const edges = [];
   const hypCount = thought.hypotheses.length;
@@ -31678,7 +35008,10 @@ function abductiveToTikZ(thought, options) {
   }
   if (thought.observations && thought.observations.length > 0) {
     const obsCount = thought.observations.length;
-    const obsSpacing = Math.min(spacing, totalWidth / Math.max(1, obsCount - 1));
+    const obsSpacing = Math.min(
+      spacing,
+      totalWidth / Math.max(1, obsCount - 1)
+    );
     const obsStartX = 4 - (obsCount - 1) * obsSpacing / 2;
     for (let i = 0; i < thought.observations.length; i++) {
       const obs = thought.observations[i];
@@ -31713,15 +35046,30 @@ function abductiveToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   if (includeMetrics) {
     html += '<div class="metrics-grid">';
-    html += renderMetricCard("Observations", thought.observations.length, "info");
-    html += renderMetricCard("Hypotheses", thought.hypotheses.length, "primary");
+    html += renderMetricCard(
+      "Observations",
+      thought.observations.length,
+      "info"
+    );
+    html += renderMetricCard(
+      "Hypotheses",
+      thought.hypotheses.length,
+      "primary"
+    );
     if (thought.bestExplanation) {
-      html += renderMetricCard("Best Score", thought.bestExplanation.score.toFixed(2), "success");
+      html += renderMetricCard(
+        "Best Score",
+        thought.bestExplanation.score.toFixed(2),
+        "success"
+      );
     }
     html += "</div>\n";
   }
@@ -31731,10 +35079,11 @@ function abductiveToHTML(thought, options) {
     obs.confidence.toFixed(2),
     obs.timestamp || "-"
   ]);
-  html += renderSection("Observations", renderTable(
-    ["#", "Description", "Confidence", "Time"],
-    obsRows
-  ), "\u{1F441}\uFE0F");
+  html += renderSection(
+    "Observations",
+    renderTable(["#", "Description", "Confidence", "Time"], obsRows),
+    "\u{1F441}\uFE0F"
+  );
   const hypRows = thought.hypotheses.map((hyp) => {
     const isBest = thought.bestExplanation?.id === hyp.id;
     const badge = isBest ? renderBadge("Best", "success") : "";
@@ -31745,12 +35094,22 @@ function abductiveToHTML(thought, options) {
       hyp.assumptions.slice(0, 3).join(", ") + (hyp.assumptions.length > 3 ? "..." : "")
     ];
   });
-  html += renderSection("Hypotheses", renderTable(
-    ["Explanation", "Score", "Status", "Key Assumptions"],
-    hypRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
-  ), "\u{1F4A1}");
+  html += renderSection(
+    "Hypotheses",
+    renderTable(
+      ["Explanation", "Score", "Status", "Key Assumptions"],
+      hypRows.map(
+        (row) => row.map(
+          (cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))
+        )
+      )
+    ),
+    "\u{1F4A1}"
+  );
   if (thought.bestExplanation) {
-    html += renderSection("Best Explanation", `
+    html += renderSection(
+      "Best Explanation",
+      `
       <div class="card">
         <div class="card-header">${escapeHTML(thought.bestExplanation.explanation)}</div>
         <p><strong>Score:</strong> ${thought.bestExplanation.score.toFixed(2)}</p>
@@ -31759,7 +35118,9 @@ function abductiveToHTML(thought, options) {
           ${thought.bestExplanation.assumptions.map((a) => `<li>${escapeHTML(a)}</li>`).join("\n")}
         </ul>
       </div>
-    `, "\u2B50");
+    `,
+      "\u2B50"
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -31782,7 +35143,12 @@ function abductiveToModelica(thought, options) {
   );
 }
 function abductiveToUML(thought, options) {
-  const { umlTheme, umlDirection, includeLabels = true, includeMetrics = true } = options;
+  const {
+    umlTheme,
+    umlDirection,
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   const nodes = [
     {
       id: "observations",
@@ -31815,7 +35181,11 @@ function abductiveToUML(thought, options) {
   });
 }
 function abductiveToJSON(thought, options) {
-  const { jsonPrettyPrint = true, jsonIndent = 2, includeMetrics = true } = options;
+  const {
+    jsonPrettyPrint = true,
+    jsonIndent = 2,
+    includeMetrics = true
+  } = options;
   const children = thought.hypotheses.map((h) => ({
     id: sanitizeId(h.id),
     label: h.explanation.substring(0, 60),
@@ -31844,7 +35214,11 @@ function abductiveToJSON(thought, options) {
       graph.metadata.bestHypothesisId = thought.bestExplanation.id;
       graph.metadata.bestScore = thought.bestExplanation.score;
     }
-    json = JSON.stringify(graph, null, jsonPrettyPrint !== false ? jsonIndent : 0);
+    json = JSON.stringify(
+      graph,
+      null,
+      jsonPrettyPrint !== false ? jsonIndent : 0
+    );
   }
   return json;
 }
@@ -31857,11 +35231,16 @@ function abductiveToMarkdown(thought, options) {
   } = options;
   const parts = [];
   if (includeMetrics) {
-    parts.push(section("Metrics", keyValueSection({
-      "Total Hypotheses": thought.hypotheses.length,
-      "Total Observations": thought.observations.length,
-      "Best Hypothesis Score": thought.bestExplanation?.score.toFixed(2) || "N/A"
-    })));
+    parts.push(
+      section(
+        "Metrics",
+        keyValueSection({
+          "Total Hypotheses": thought.hypotheses.length,
+          "Total Observations": thought.observations.length,
+          "Best Hypothesis Score": thought.bestExplanation?.score.toFixed(2) || "N/A"
+        })
+      )
+    );
   }
   const obsRows = thought.observations.map((obs) => [
     obs.id,
@@ -31869,34 +35248,45 @@ function abductiveToMarkdown(thought, options) {
     obs.confidence.toFixed(2),
     obs.timestamp || "-"
   ]);
-  parts.push(section("Observations", table(
-    ["ID", "Description", "Confidence", "Timestamp"],
-    obsRows
-  )));
+  parts.push(
+    section(
+      "Observations",
+      table(["ID", "Description", "Confidence", "Timestamp"], obsRows)
+    )
+  );
   const hypRows = thought.hypotheses.map((hyp) => [
     hyp.id,
     hyp.explanation.substring(0, 60) + (hyp.explanation.length > 60 ? "..." : ""),
     hyp.score.toFixed(2),
     thought.bestExplanation?.id === hyp.id ? "\u2605 Best" : ""
   ]);
-  parts.push(section("Hypotheses", table(
-    ["ID", "Explanation", "Score", "Status"],
-    hypRows
-  )));
+  parts.push(
+    section(
+      "Hypotheses",
+      table(["ID", "Explanation", "Score", "Status"], hypRows)
+    )
+  );
   if (thought.bestExplanation) {
     const assumptions = list(thought.bestExplanation.assumptions);
-    parts.push(section(
-      "Best Explanation",
-      `**Score:** ${thought.bestExplanation.score.toFixed(2)}
+    parts.push(
+      section(
+        "Best Explanation",
+        `**Score:** ${thought.bestExplanation.score.toFixed(2)}
 
 **Explanation:** ${thought.bestExplanation.explanation}
 
 **Assumptions:**
 ${assumptions}`
-    ));
+      )
+    );
   }
   if (markdownIncludeMermaid) {
-    const mermaid = abductiveToMermaid(thought, "default", true, includeMetrics);
+    const mermaid = abductiveToMermaid(
+      thought,
+      "default",
+      true,
+      includeMetrics
+    );
     parts.push(section("Visualization", mermaidBlock(mermaid)));
   }
   return document("Abductive Reasoning Analysis", parts.join("\n"), {
@@ -31909,10 +35299,20 @@ ${assumptions}`
 // src/export/visual/modes/analogical.ts
 init_esm_shims();
 function exportAnalogicalMapping(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return analogicalToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return analogicalToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return analogicalToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -32004,19 +35404,29 @@ function analogicalToDOT(thought, includeLabels, includeMetrics) {
 }
 function analogicalToASCII(thought) {
   const builder = new ASCIIDocBuilder().setMaxWidth(60).addHeader("Analogical Domain Mapping");
-  builder.addSection("Source Domain").addText(`${thought.sourceDomain.name}
+  builder.addSection("Source Domain").addText(
+    `${thought.sourceDomain.name}
 ${thought.sourceDomain.description}
-`).addEmptyLine();
-  builder.addSection("Target Domain").addText(`${thought.targetDomain.name}
+`
+  ).addEmptyLine();
+  builder.addSection("Target Domain").addText(
+    `${thought.targetDomain.name}
 ${thought.targetDomain.description}
-`).addEmptyLine();
+`
+  ).addEmptyLine();
   builder.addSection("Mappings");
   for (const mapping of thought.mapping) {
-    const srcEntity = thought.sourceDomain.entities.find((e) => e.id === mapping.sourceEntityId);
-    const tgtEntity = thought.targetDomain.entities.find((e) => e.id === mapping.targetEntityId);
+    const srcEntity = thought.sourceDomain.entities.find(
+      (e) => e.id === mapping.sourceEntityId
+    );
+    const tgtEntity = thought.targetDomain.entities.find(
+      (e) => e.id === mapping.targetEntityId
+    );
     if (srcEntity && tgtEntity) {
-      builder.addText(`${srcEntity.name} \u2190\u2192 ${tgtEntity.name} (confidence: ${mapping.confidence.toFixed(2)})
-`);
+      builder.addText(
+        `${srcEntity.name} \u2190\u2192 ${tgtEntity.name} (confidence: ${mapping.confidence.toFixed(2)})
+`
+      );
       builder.addText(`  ${mapping.justification}
 `);
     }
@@ -32065,9 +35475,16 @@ function analogicalToSVG(thought, options) {
   });
   const actualHeight = Math.max(
     DEFAULT_SVG_OPTIONS.height,
-    Math.max(thought.sourceDomain.entities.length, thought.targetDomain.entities.length) * entitySpacing + 150
+    Math.max(
+      thought.sourceDomain.entities.length,
+      thought.targetDomain.entities.length
+    ) * entitySpacing + 150
   );
-  let svg = generateSVGHeader(svgWidth, actualHeight, "Analogical Domain Mapping");
+  let svg = generateSVGHeader(
+    svgWidth,
+    actualHeight,
+    "Analogical Domain Mapping"
+  );
   svg += '\n  <!-- Mappings -->\n  <g class="edges">';
   for (const mapping of thought.mapping) {
     const srcPos = positions.get("src_" + mapping.sourceEntityId);
@@ -32152,7 +35569,11 @@ function analogicalToGraphML(thought, options) {
   return generateGraphML(nodes, edges, graphmlOptions);
 }
 function analogicalToTikZ(thought, options) {
-  const { includeLabels = true, includeMetrics = true, colorScheme = "default" } = options;
+  const {
+    includeLabels = true,
+    includeMetrics = true,
+    colorScheme = "default"
+  } = options;
   const nodes = [];
   thought.sourceDomain.entities.forEach((entity, index) => {
     nodes.push({
@@ -32196,8 +35617,14 @@ function analogicalToTikZ(thought, options) {
     const metrics = [
       { label: "Analogy Strength", value: thought.analogyStrength.toFixed(2) },
       { label: "Mappings", value: thought.mapping.length.toString() },
-      { label: "Source Entities", value: thought.sourceDomain.entities.length.toString() },
-      { label: "Target Entities", value: thought.targetDomain.entities.length.toString() }
+      {
+        label: "Source Entities",
+        value: thought.sourceDomain.entities.length.toString()
+      },
+      {
+        label: "Target Entities",
+        value: thought.targetDomain.entities.length.toString()
+      }
     ];
     tikz = tikz.replace(
       /\\end\{tikzpicture\}/,
@@ -32223,28 +35650,55 @@ function analogicalToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   if (includeMetrics) {
     html += '<div class="metrics-grid">';
-    html += renderMetricCard("Analogy Strength", (thought.analogyStrength * 100).toFixed(0) + "%", "primary");
+    html += renderMetricCard(
+      "Analogy Strength",
+      (thought.analogyStrength * 100).toFixed(0) + "%",
+      "primary"
+    );
     html += renderMetricCard("Mappings", thought.mapping.length, "info");
-    html += renderMetricCard("Source Entities", thought.sourceDomain.entities.length, "success");
-    html += renderMetricCard("Target Entities", thought.targetDomain.entities.length, "warning");
+    html += renderMetricCard(
+      "Source Entities",
+      thought.sourceDomain.entities.length,
+      "success"
+    );
+    html += renderMetricCard(
+      "Target Entities",
+      thought.targetDomain.entities.length,
+      "warning"
+    );
     html += "</div>\n";
     html += renderProgressBar(thought.analogyStrength * 100, "primary");
   }
-  const srcRows = thought.sourceDomain.entities.map((e) => [e.id, e.name, e.type || "-", e.description || "-"]);
-  html += renderSection("Source Domain: " + thought.sourceDomain.name, renderTable(
-    ["ID", "Name", "Type", "Description"],
-    srcRows
-  ), "\u{1F4D8}");
-  const tgtRows = thought.targetDomain.entities.map((e) => [e.id, e.name, e.type || "-", e.description || "-"]);
-  html += renderSection("Target Domain: " + thought.targetDomain.name, renderTable(
-    ["ID", "Name", "Type", "Description"],
-    tgtRows
-  ), "\u{1F4D7}");
+  const srcRows = thought.sourceDomain.entities.map((e) => [
+    e.id,
+    e.name,
+    e.type || "-",
+    e.description || "-"
+  ]);
+  html += renderSection(
+    "Source Domain: " + thought.sourceDomain.name,
+    renderTable(["ID", "Name", "Type", "Description"], srcRows),
+    "\u{1F4D8}"
+  );
+  const tgtRows = thought.targetDomain.entities.map((e) => [
+    e.id,
+    e.name,
+    e.type || "-",
+    e.description || "-"
+  ]);
+  html += renderSection(
+    "Target Domain: " + thought.targetDomain.name,
+    renderTable(["ID", "Name", "Type", "Description"], tgtRows),
+    "\u{1F4D7}"
+  );
   const mapRows = thought.mapping.map((m) => [
     m.sourceEntityId,
     "\u2192",
@@ -32252,10 +35706,14 @@ function analogicalToHTML(thought, options) {
     (m.confidence * 100).toFixed(0) + "%",
     m.justification || "-"
   ]);
-  html += renderSection("Entity Mappings", renderTable(
-    ["Source", "", "Target", "Confidence", "Justification"],
-    mapRows
-  ), "\u{1F517}");
+  html += renderSection(
+    "Entity Mappings",
+    renderTable(
+      ["Source", "", "Target", "Confidence", "Justification"],
+      mapRows
+    ),
+    "\u{1F517}"
+  );
   if (thought.inferences && thought.inferences.length > 0) {
     const infRows = thought.inferences.map((inf, i) => [
       (i + 1).toString(),
@@ -32263,10 +35721,14 @@ function analogicalToHTML(thought, options) {
       inf.targetPrediction,
       (inf.confidence * 100).toFixed(0) + "%"
     ]);
-    html += renderSection("Inferences", renderTable(
-      ["#", "Source Pattern", "Target Prediction", "Confidence"],
-      infRows
-    ), "\u{1F4A1}");
+    html += renderSection(
+      "Inferences",
+      renderTable(
+        ["#", "Source Pattern", "Target Prediction", "Confidence"],
+        infRows
+      ),
+      "\u{1F4A1}"
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -32514,31 +35976,40 @@ function analogicalToMarkdown(thought, options) {
   } = options;
   const parts = [];
   if (includeMetrics) {
-    parts.push(section("Metrics", keyValueSection({
-      "Analogy Strength": (thought.analogyStrength * 100).toFixed(0) + "%",
-      "Mappings": thought.mapping.length,
-      "Source Entities": thought.sourceDomain.entities.length,
-      "Target Entities": thought.targetDomain.entities.length
-    })));
+    parts.push(
+      section(
+        "Metrics",
+        keyValueSection({
+          "Analogy Strength": (thought.analogyStrength * 100).toFixed(0) + "%",
+          Mappings: thought.mapping.length,
+          "Source Entities": thought.sourceDomain.entities.length,
+          "Target Entities": thought.targetDomain.entities.length
+        })
+      )
+    );
   }
-  parts.push(section(
-    "Source Domain",
-    `**Name:** ${thought.sourceDomain.name}
+  parts.push(
+    section(
+      "Source Domain",
+      `**Name:** ${thought.sourceDomain.name}
 
 **Description:** ${thought.sourceDomain.description || "N/A"}
 
 **Entities:**
 ${list(thought.sourceDomain.entities.map((e) => `${e.name}: ${e.description || "N/A"}`))}`
-  ));
-  parts.push(section(
-    "Target Domain",
-    `**Name:** ${thought.targetDomain.name}
+    )
+  );
+  parts.push(
+    section(
+      "Target Domain",
+      `**Name:** ${thought.targetDomain.name}
 
 **Description:** ${thought.targetDomain.description || "N/A"}
 
 **Entities:**
 ${list(thought.targetDomain.entities.map((e) => `${e.name}: ${e.description || "N/A"}`))}`
-  ));
+    )
+  );
   const mapRows = thought.mapping.map((m) => [
     m.sourceEntityId,
     "\u2192",
@@ -32546,23 +36017,32 @@ ${list(thought.targetDomain.entities.map((e) => `${e.name}: ${e.description || "
     (m.confidence * 100).toFixed(0) + "%",
     m.justification || "-"
   ]);
-  parts.push(section("Entity Mappings", table(
-    ["Source", "", "Target", "Confidence", "Justification"],
-    mapRows
-  )));
+  parts.push(
+    section(
+      "Entity Mappings",
+      table(["Source", "", "Target", "Confidence", "Justification"], mapRows)
+    )
+  );
   if (thought.inferences && thought.inferences.length > 0) {
     const infRows = thought.inferences.map((inf) => [
       inf.sourcePattern,
       inf.targetPrediction,
       (inf.confidence * 100).toFixed(0) + "%"
     ]);
-    parts.push(section("Inferences", table(
-      ["Source Pattern", "Target Prediction", "Confidence"],
-      infRows
-    )));
+    parts.push(
+      section(
+        "Inferences",
+        table(["Source Pattern", "Target Prediction", "Confidence"], infRows)
+      )
+    );
   }
   if (markdownIncludeMermaid) {
-    const mermaid = analogicalToMermaid(thought, "default", true, includeMetrics);
+    const mermaid = analogicalToMermaid(
+      thought,
+      "default",
+      true,
+      includeMetrics
+    );
     parts.push(section("Visualization", mermaidBlock(mermaid)));
   }
   return document("Analogical Reasoning Analysis", parts.join("\n"), {
@@ -32579,10 +36059,20 @@ ${list(thought.targetDomain.entities.map((e) => `${e.name}: ${e.description || "
 // src/export/visual/modes/first-principles.ts
 init_esm_shims();
 function exportFirstPrinciplesDerivation(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return firstPrinciplesToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return firstPrinciplesToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return firstPrinciplesToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -32610,7 +36100,11 @@ function exportFirstPrinciplesDerivation(thought, options) {
 function firstPrinciplesToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
   const builder = new MermaidGraphBuilder().setDirection("TD");
-  builder.addNode({ id: "Q", label: `Question: ${thought.question}`, shape: "rectangle" });
+  builder.addNode({
+    id: "Q",
+    label: `Question: ${thought.question}`,
+    shape: "rectangle"
+  });
   const getShapeForType = (type) => {
     switch (type) {
       case "axiom":
@@ -32630,7 +36124,11 @@ function firstPrinciplesToMermaid(thought, colorScheme, includeLabels, includeMe
   for (const principle of thought.principles) {
     const principleId = sanitizeId(principle.id);
     const label = includeLabels ? `${principle.type.toUpperCase()}: ${principle.statement.substring(0, 50)}...` : principleId;
-    builder.addNode({ id: principleId, label, shape: getShapeForType(principle.type) });
+    builder.addNode({
+      id: principleId,
+      label,
+      shape: getShapeForType(principle.type)
+    });
     if (principle.dependsOn) {
       for (const depId of principle.dependsOn) {
         builder.addEdge({ source: sanitizeId(depId), target: principleId });
@@ -32642,9 +36140,19 @@ function firstPrinciplesToMermaid(thought, colorScheme, includeLabels, includeMe
     const principleId = sanitizeId(step.principle);
     const label = includeLabels ? `Step ${step.stepNumber}: ${step.inference.substring(0, 50)}...` : stepId;
     builder.addNode({ id: stepId, label, shape: "rectangle" });
-    builder.addEdge({ source: principleId, target: stepId, style: "dotted", label: "applies" });
+    builder.addEdge({
+      source: principleId,
+      target: stepId,
+      style: "dotted",
+      label: "applies"
+    });
     if (includeMetrics && step.confidence !== void 0) {
-      builder.addEdge({ source: stepId, target: stepId, style: "dotted", label: `conf: ${step.confidence.toFixed(2)}` });
+      builder.addEdge({
+        source: stepId,
+        target: stepId,
+        style: "dotted",
+        label: `conf: ${step.confidence.toFixed(2)}`
+      });
     }
   }
   const conclusionLabel = includeLabels ? `Conclusion: ${thought.conclusion.statement.substring(0, 50)}...` : "Conclusion";
@@ -32653,7 +36161,12 @@ function firstPrinciplesToMermaid(thought, colorScheme, includeLabels, includeMe
     builder.addEdge({ source: `Step${stepNum}`, target: "C" });
   }
   if (includeMetrics) {
-    builder.addEdge({ source: "C", target: "C", style: "dotted", label: `certainty: ${thought.conclusion.certainty.toFixed(2)}` });
+    builder.addEdge({
+      source: "C",
+      target: "C",
+      style: "dotted",
+      label: `certainty: ${thought.conclusion.certainty.toFixed(2)}`
+    });
   }
   return builder.setOptions({ colorScheme: scheme }).render();
 }
@@ -32707,7 +36220,12 @@ ${step.inference.substring(0, 60)}...` : stepId;
     const confidenceLabel = includeMetrics ? `
 conf: ${step.confidence.toFixed(2)}` : "";
     builder.addNode({ id: stepId, label: `${label}${confidenceLabel}` });
-    builder.addEdge({ source: principleId, target: stepId, style: "dashed", label: "applies" });
+    builder.addEdge({
+      source: principleId,
+      target: stepId,
+      style: "dashed",
+      label: "applies"
+    });
   }
   const conclusionLabel = includeLabels ? `Conclusion:
 ${thought.conclusion.statement.substring(0, 60)}...` : "Conclusion";
@@ -32744,7 +36262,9 @@ function firstPrinciplesToASCII(thought) {
   }
   builder.addSection("Derivation Chain");
   for (const step of thought.derivationSteps) {
-    builder.addText(`Step ${step.stepNumber} (using principle: ${step.principle})`);
+    builder.addText(
+      `Step ${step.stepNumber} (using principle: ${step.principle})`
+    );
     builder.addText(`  Inference: ${step.inference}`);
     if (step.logicalForm) {
       builder.addText(`  Logical form: ${step.logicalForm}`);
@@ -32754,7 +36274,9 @@ function firstPrinciplesToASCII(thought) {
   }
   builder.addSection("Conclusion");
   builder.addText(thought.conclusion.statement);
-  builder.addText(`Derivation chain: Steps [${thought.conclusion.derivationChain.join(", ")}]`);
+  builder.addText(
+    `Derivation chain: Steps [${thought.conclusion.derivationChain.join(", ")}]`
+  );
   builder.addText(`Certainty: ${thought.conclusion.certainty.toFixed(2)}`);
   if (thought.conclusion.limitations && thought.conclusion.limitations.length > 0) {
     builder.addEmptyLine();
@@ -32779,7 +36301,10 @@ function firstPrinciplesToSVG(thought, options) {
   const nodeWidth = 150;
   const nodeHeight = 40;
   const principleY = 100;
-  const principleSpacing = Math.min(180, svgWidth / (thought.principles.length + 1));
+  const principleSpacing = Math.min(
+    180,
+    svgWidth / (thought.principles.length + 1)
+  );
   const principleStartX = (svgWidth - (thought.principles.length - 1) * principleSpacing) / 2;
   thought.principles.forEach((p, index) => {
     positions.set(p.id, {
@@ -32815,13 +36340,20 @@ function firstPrinciplesToSVG(thought, options) {
     type: "conclusion"
   });
   const actualHeight = calculateSVGHeight(positions);
-  let svg = generateSVGHeader(svgWidth, actualHeight, "First Principles Derivation");
+  let svg = generateSVGHeader(
+    svgWidth,
+    actualHeight,
+    "First Principles Derivation"
+  );
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
   for (const step of thought.derivationSteps) {
     const principlePos = positions.get(step.principle);
     const stepPos = positions.get(`Step${step.stepNumber}`);
     if (principlePos && stepPos) {
-      svg += renderEdge(principlePos, stepPos, { style: "dashed", label: "applies" });
+      svg += renderEdge(principlePos, stepPos, {
+        style: "dashed",
+        label: "applies"
+      });
     }
   }
   const conclusionPos = positions.get("conclusion");
@@ -33016,19 +36548,41 @@ function firstPrinciplesToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
-  html += renderSection("Question", `<p class="text-primary"><strong>${escapeHTML(thought.question)}</strong></p>`, "\u2753");
+  html += renderSection(
+    "Question",
+    `<p class="text-primary"><strong>${escapeHTML(thought.question)}</strong></p>`,
+    "\u2753"
+  );
   if (includeMetrics) {
     html += '<div class="metrics-grid">';
-    html += renderMetricCard("Principles", thought.principles.length, "primary");
-    html += renderMetricCard("Derivation Steps", thought.derivationSteps.length, "info");
-    html += renderMetricCard("Certainty", (thought.conclusion.certainty * 100).toFixed(0) + "%", "success");
+    html += renderMetricCard(
+      "Principles",
+      thought.principles.length,
+      "primary"
+    );
+    html += renderMetricCard(
+      "Derivation Steps",
+      thought.derivationSteps.length,
+      "info"
+    );
+    html += renderMetricCard(
+      "Certainty",
+      (thought.conclusion.certainty * 100).toFixed(0) + "%",
+      "success"
+    );
     html += "</div>\n";
   }
   const principleRows = thought.principles.map((p) => {
-    const typeBadge = renderBadge(p.type, p.type === "axiom" ? "primary" : p.type === "observation" ? "info" : "secondary");
+    const typeBadge = renderBadge(
+      p.type,
+      p.type === "axiom" ? "primary" : p.type === "observation" ? "info" : "secondary"
+    );
     return [
       p.id,
       typeBadge,
@@ -33036,21 +36590,32 @@ function firstPrinciplesToHTML(thought, options) {
       p.confidence !== void 0 ? (p.confidence * 100).toFixed(0) + "%" : "N/A"
     ];
   });
-  html += renderSection("First Principles", renderTable(
-    ["ID", "Type", "Statement", "Confidence"],
-    principleRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
-  ), "\u{1F3DB}\uFE0F");
+  html += renderSection(
+    "First Principles",
+    renderTable(
+      ["ID", "Type", "Statement", "Confidence"],
+      principleRows.map(
+        (row) => row.map(
+          (cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))
+        )
+      )
+    ),
+    "\u{1F3DB}\uFE0F"
+  );
   const stepRows = thought.derivationSteps.map((s) => [
     s.stepNumber.toString(),
     s.principle,
     s.inference,
     s.logicalForm || "-"
   ]);
-  html += renderSection("Derivation Chain", renderTable(
-    ["Step", "Principle", "Inference", "Logical Form"],
-    stepRows
-  ), "\u{1F517}");
-  html += renderSection("Conclusion", `
+  html += renderSection(
+    "Derivation Chain",
+    renderTable(["Step", "Principle", "Inference", "Logical Form"], stepRows),
+    "\u{1F517}"
+  );
+  html += renderSection(
+    "Conclusion",
+    `
     <div class="card">
       <div class="card-header">${escapeHTML(thought.conclusion.statement)}</div>
       <p><strong>Certainty:</strong> ${(thought.conclusion.certainty * 100).toFixed(0)}%</p>
@@ -33060,7 +36625,9 @@ function firstPrinciplesToHTML(thought, options) {
         ${renderList(thought.conclusion.limitations)}
       ` : ""}
     </div>
-  `, "\u2713");
+  `,
+    "\u2713"
+  );
   html += generateHTMLFooter(htmlStandalone);
   return html;
 }
@@ -33074,10 +36641,26 @@ function firstPrinciplesToModelica(thought, options) {
   modelica += "  // Fundamental Principles\n";
   for (const principle of thought.principles) {
     const fields = [
-      { name: "id", type: "String", value: `"${escapeModelicaString(principle.id)}"` },
-      { name: "principleType", type: "String", value: `"${escapeModelicaString(principle.type)}"` },
-      { name: "statement", type: "String", value: `"${escapeModelicaString(principle.statement)}"` },
-      { name: "justification", type: "String", value: `"${principle.justification ? escapeModelicaString(principle.justification) : ""}"` }
+      {
+        name: "id",
+        type: "String",
+        value: `"${escapeModelicaString(principle.id)}"`
+      },
+      {
+        name: "principleType",
+        type: "String",
+        value: `"${escapeModelicaString(principle.type)}"`
+      },
+      {
+        name: "statement",
+        type: "String",
+        value: `"${escapeModelicaString(principle.statement)}"`
+      },
+      {
+        name: "justification",
+        type: "String",
+        value: `"${principle.justification ? escapeModelicaString(principle.justification) : ""}"`
+      }
     ];
     if (includeMetrics && principle.confidence !== void 0) {
       fields.push({
@@ -33158,7 +36741,10 @@ function firstPrinciplesToModelica(thought, options) {
   modelica += "    );\n";
   modelica += "  end Derivation;\n";
   modelica += "\n";
-  modelica += generateModelicaPackageFooter(packageName, { includeAnnotations: true, version: "7.1.0" });
+  modelica += generateModelicaPackageFooter(packageName, {
+    includeAnnotations: true,
+    version: "7.1.0"
+  });
   return modelica;
 }
 function firstPrinciplesToUML(thought, options) {
@@ -33221,10 +36807,14 @@ function firstPrinciplesToUML(thought, options) {
     `derivationChain: [${thought.conclusion.derivationChain.join(", ")}]`
   ];
   if (includeMetrics) {
-    conclusionAttributes.push(`certainty: ${thought.conclusion.certainty.toFixed(2)}`);
+    conclusionAttributes.push(
+      `certainty: ${thought.conclusion.certainty.toFixed(2)}`
+    );
   }
   if (thought.conclusion.limitations && thought.conclusion.limitations.length > 0) {
-    conclusionAttributes.push(`limitations: ${thought.conclusion.limitations.length} items`);
+    conclusionAttributes.push(
+      `limitations: ${thought.conclusion.limitations.length} items`
+    );
   }
   nodes.push({
     id: "Conclusion",
@@ -33248,7 +36838,9 @@ function firstPrinciplesToUML(thought, options) {
 
 `;
   uml += "' Principles\n";
-  for (const node of nodes.filter((n) => !n.id.startsWith("Step") && n.id !== "Conclusion")) {
+  for (const node of nodes.filter(
+    (n) => !n.id.startsWith("Step") && n.id !== "Conclusion"
+  )) {
     uml += renderUmlNode(node) + "\n";
   }
   uml += "\n' Derivation Steps\n";
@@ -33394,9 +36986,21 @@ function firstPrinciplesToJSON(thought, options) {
     addMetric(graph, "principleCount", thought.principles.length);
     addMetric(graph, "derivationStepCount", thought.derivationSteps.length);
     addMetric(graph, "certainty", thought.conclusion.certainty);
-    addMetric(graph, "axiomCount", thought.principles.filter((p) => p.type === "axiom").length);
-    addMetric(graph, "definitionCount", thought.principles.filter((p) => p.type === "definition").length);
-    addMetric(graph, "observationCount", thought.principles.filter((p) => p.type === "observation").length);
+    addMetric(
+      graph,
+      "axiomCount",
+      thought.principles.filter((p) => p.type === "axiom").length
+    );
+    addMetric(
+      graph,
+      "definitionCount",
+      thought.principles.filter((p) => p.type === "definition").length
+    );
+    addMetric(
+      graph,
+      "observationCount",
+      thought.principles.filter((p) => p.type === "observation").length
+    );
   }
   if (graph.legend) {
     addLegendItem(graph, "Axiom", "#a8d5ff", "ellipse");
@@ -33419,14 +37023,21 @@ function firstPrinciplesToMarkdown(thought, options) {
   const parts = [];
   parts.push(section("Question", thought.question));
   if (includeMetrics) {
-    parts.push(section("Metrics", keyValueSection({
-      "Principles": thought.principles.length,
-      "Derivation Steps": thought.derivationSteps.length,
-      "Certainty": (thought.conclusion.certainty * 100).toFixed(0) + "%",
-      "Axioms": thought.principles.filter((p) => p.type === "axiom").length,
-      "Definitions": thought.principles.filter((p) => p.type === "definition").length,
-      "Observations": thought.principles.filter((p) => p.type === "observation").length
-    })));
+    parts.push(
+      section(
+        "Metrics",
+        keyValueSection({
+          Principles: thought.principles.length,
+          "Derivation Steps": thought.derivationSteps.length,
+          Certainty: (thought.conclusion.certainty * 100).toFixed(0) + "%",
+          Axioms: thought.principles.filter((p) => p.type === "axiom").length,
+          Definitions: thought.principles.filter((p) => p.type === "definition").length,
+          Observations: thought.principles.filter(
+            (p) => p.type === "observation"
+          ).length
+        })
+      )
+    );
   }
   const principleRows = thought.principles.map((p) => [
     p.id,
@@ -33435,10 +37046,15 @@ function firstPrinciplesToMarkdown(thought, options) {
     p.dependsOn?.join(", ") || "-",
     p.confidence !== void 0 ? (p.confidence * 100).toFixed(0) + "%" : "N/A"
   ]);
-  parts.push(section("Foundational Principles", table(
-    ["ID", "Type", "Statement", "Depends On", "Confidence"],
-    principleRows
-  )));
+  parts.push(
+    section(
+      "Foundational Principles",
+      table(
+        ["ID", "Type", "Statement", "Depends On", "Confidence"],
+        principleRows
+      )
+    )
+  );
   const stepRows = thought.derivationSteps.map((s) => [
     s.stepNumber.toString(),
     s.principle,
@@ -33446,10 +37062,15 @@ function firstPrinciplesToMarkdown(thought, options) {
     s.logicalForm || "-",
     (s.confidence * 100).toFixed(0) + "%"
   ]);
-  parts.push(section("Derivation Chain", table(
-    ["Step", "Principle", "Inference", "Logical Form", "Confidence"],
-    stepRows
-  )));
+  parts.push(
+    section(
+      "Derivation Chain",
+      table(
+        ["Step", "Principle", "Inference", "Logical Form", "Confidence"],
+        stepRows
+      )
+    )
+  );
   let conclusionContent = `**Statement:** ${thought.conclusion.statement}
 
 `;
@@ -33465,10 +37086,20 @@ ${list(thought.conclusion.limitations)}`;
   }
   parts.push(section("Conclusion", conclusionContent));
   if (thought.alternativeInterpretations && thought.alternativeInterpretations.length > 0) {
-    parts.push(section("Alternative Interpretations", list(thought.alternativeInterpretations)));
+    parts.push(
+      section(
+        "Alternative Interpretations",
+        list(thought.alternativeInterpretations)
+      )
+    );
   }
   if (markdownIncludeMermaid) {
-    const mermaid = firstPrinciplesToMermaid(thought, "default", true, includeMetrics);
+    const mermaid = firstPrinciplesToMermaid(
+      thought,
+      "default",
+      true,
+      includeMetrics
+    );
     parts.push(section("Visualization", mermaidBlock(mermaid)));
   }
   return document("First Principles Analysis", parts.join("\n"), {
@@ -33485,10 +37116,20 @@ ${list(thought.conclusion.limitations)}`;
 // src/export/visual/modes/metareasoning.ts
 init_esm_shims();
 function exportMetaReasoningVisualization(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return metaReasoningToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return metaReasoningToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return metaReasoningToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -33520,16 +37161,40 @@ function metaReasoningToMermaid(thought, colorScheme, includeLabels, includeMetr
   const currentId = sanitizeId("current_strategy");
   const evalId = sanitizeId("evaluation");
   const recId = sanitizeId("recommendation");
-  builder.addNode({ id: metaId, label: "Meta-Reasoning", shape: "circle" }).addNode({ id: currentId, label: includeLabels ? thought.currentStrategy.approach : "Current Strategy", shape: "subroutine" }).addNode({ id: sanitizeId("current_mode"), label: `Mode: ${thought.currentStrategy.mode}`, shape: "stadium" }).addNode({ id: evalId, label: `Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`, shape: "hexagon" }).addEdge({ source: metaId, target: currentId, label: "", style: "thick" }).addEdge({ source: currentId, target: sanitizeId("current_mode") }).addEdge({ source: currentId, target: evalId });
+  builder.addNode({ id: metaId, label: "Meta-Reasoning", shape: "circle" }).addNode({
+    id: currentId,
+    label: includeLabels ? thought.currentStrategy.approach : "Current Strategy",
+    shape: "subroutine"
+  }).addNode({
+    id: sanitizeId("current_mode"),
+    label: `Mode: ${thought.currentStrategy.mode}`,
+    shape: "stadium"
+  }).addNode({
+    id: evalId,
+    label: `Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`,
+    shape: "hexagon"
+  }).addEdge({ source: metaId, target: currentId, label: "", style: "thick" }).addEdge({ source: currentId, target: sanitizeId("current_mode") }).addEdge({ source: currentId, target: evalId });
   if (thought.strategyEvaluation.issues.length > 0) {
-    builder.addNode({ id: sanitizeId("issues"), label: `Issues: ${thought.strategyEvaluation.issues.length}`, shape: "asymmetric" }).addEdge({ source: evalId, target: sanitizeId("issues") });
+    builder.addNode({
+      id: sanitizeId("issues"),
+      label: `Issues: ${thought.strategyEvaluation.issues.length}`,
+      shape: "asymmetric"
+    }).addEdge({ source: evalId, target: sanitizeId("issues") });
   }
   if (thought.strategyEvaluation.strengths.length > 0) {
-    builder.addNode({ id: sanitizeId("strengths"), label: `Strengths: ${thought.strategyEvaluation.strengths.length}`, shape: "asymmetric" }).addEdge({ source: evalId, target: sanitizeId("strengths") });
+    builder.addNode({
+      id: sanitizeId("strengths"),
+      label: `Strengths: ${thought.strategyEvaluation.strengths.length}`,
+      shape: "asymmetric"
+    }).addEdge({ source: evalId, target: sanitizeId("strengths") });
   }
   if (thought.alternativeStrategies.length > 0) {
     const altsId = sanitizeId("alternatives");
-    builder.addNode({ id: altsId, label: "Alternative Strategies", shape: "stadium" }).addEdge({ source: metaId, target: altsId });
+    builder.addNode({
+      id: altsId,
+      label: "Alternative Strategies",
+      shape: "stadium"
+    }).addEdge({ source: metaId, target: altsId });
     thought.alternativeStrategies.forEach((alt, index) => {
       const altId = sanitizeId(`alt_${index}`);
       const altLabel = includeLabels ? `${alt.mode}: ${(alt.recommendationScore * 100).toFixed(0)}%` : `Alt ${index + 1}`;
@@ -33539,9 +37204,37 @@ function metaReasoningToMermaid(thought, colorScheme, includeLabels, includeMetr
   const recLabel = `${thought.recommendation.action}${thought.recommendation.targetMode ? ` \u2192 ${thought.recommendation.targetMode}` : ""}`;
   builder.addNode({ id: recId, label: recLabel, shape: "parallelogram" }).addEdge({ source: metaId, target: recId, label: "", style: "thick" });
   if (includeMetrics) {
-    builder.addNode({ id: sanitizeId("rec_confidence"), label: `Confidence: ${(thought.recommendation.confidence * 100).toFixed(0)}%`, shape: "hexagon" }).addNode({ id: sanitizeId("quality"), label: `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`, shape: "hexagon" }).addEdge({ source: recId, target: sanitizeId("rec_confidence") }).addEdge({ source: metaId, target: sanitizeId("quality"), style: "dotted" });
+    builder.addNode({
+      id: sanitizeId("rec_confidence"),
+      label: `Confidence: ${(thought.recommendation.confidence * 100).toFixed(0)}%`,
+      shape: "hexagon"
+    }).addNode({
+      id: sanitizeId("quality"),
+      label: `Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`,
+      shape: "hexagon"
+    }).addEdge({ source: recId, target: sanitizeId("rec_confidence") }).addEdge({
+      source: metaId,
+      target: sanitizeId("quality"),
+      style: "dotted"
+    });
   }
-  builder.addNode({ id: sanitizeId("resources"), label: `Complexity: ${thought.resourceAllocation.complexityLevel}`, shape: "cylinder" }).addNode({ id: sanitizeId("session"), label: `Thoughts: ${thought.sessionContext.totalThoughts}`, shape: "asymmetric" }).addEdge({ source: metaId, target: sanitizeId("resources"), style: "dotted" }).addEdge({ source: metaId, target: sanitizeId("session"), style: "dotted" });
+  builder.addNode({
+    id: sanitizeId("resources"),
+    label: `Complexity: ${thought.resourceAllocation.complexityLevel}`,
+    shape: "cylinder"
+  }).addNode({
+    id: sanitizeId("session"),
+    label: `Thoughts: ${thought.sessionContext.totalThoughts}`,
+    shape: "asymmetric"
+  }).addEdge({
+    source: metaId,
+    target: sanitizeId("resources"),
+    style: "dotted"
+  }).addEdge({
+    source: metaId,
+    target: sanitizeId("session"),
+    style: "dotted"
+  });
   return builder.setOptions({ colorScheme: scheme }).render();
 }
 function metaReasoningToDOT(thought, includeLabels, includeMetrics) {
@@ -33552,9 +37245,17 @@ function metaReasoningToDOT(thought, includeLabels, includeMetrics) {
   builder.addNode({
     id: currentId,
     label: includeLabels ? thought.currentStrategy.approach.slice(0, 30).replace(/"/g, '\\"') : "Current Strategy"
-  }).addNode({ id: modeId, label: thought.currentStrategy.mode, shape: "ellipse" }).addEdge({ source: currentId, target: modeId });
+  }).addNode({
+    id: modeId,
+    label: thought.currentStrategy.mode,
+    shape: "ellipse"
+  }).addEdge({ source: currentId, target: modeId });
   if (includeMetrics) {
-    builder.addNode({ id: sanitizeId("evaluation"), label: `Eff: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`, shape: "diamond" }).addEdge({ source: currentId, target: sanitizeId("evaluation") });
+    builder.addNode({
+      id: sanitizeId("evaluation"),
+      label: `Eff: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`,
+      shape: "diamond"
+    }).addEdge({ source: currentId, target: sanitizeId("evaluation") });
   }
   builder.addSubgraph({
     id: "cluster_current",
@@ -33566,7 +37267,10 @@ function metaReasoningToDOT(thought, includeLabels, includeMetrics) {
   if (thought.alternativeStrategies.length > 0) {
     const altIds = thought.alternativeStrategies.map((alt, index) => {
       const altId = sanitizeId(`alt_${index}`);
-      builder.addNode({ id: altId, label: `${alt.mode}\\n${(alt.recommendationScore * 100).toFixed(0)}%` });
+      builder.addNode({
+        id: altId,
+        label: `${alt.mode}\\n${(alt.recommendationScore * 100).toFixed(0)}%`
+      });
       return altId;
     });
     builder.addSubgraph({
@@ -33607,17 +37311,31 @@ function metaReasoningToASCII(thought) {
     builder.addText("Progress Indicators:\n").addNumberedList(thought.currentStrategy.progressIndicators);
   }
   builder.addEmptyLine();
-  builder.addSection("STRATEGY EVALUATION").addText(`Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%
-`).addText(`Efficiency: ${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%
-`).addText(`Confidence: ${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%
-`).addText(`Progress Rate: ${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought
-`).addText(`Quality Score: ${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%
-`);
+  builder.addSection("STRATEGY EVALUATION").addText(
+    `Effectiveness: ${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%
+`
+  ).addText(
+    `Efficiency: ${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%
+`
+  ).addText(
+    `Confidence: ${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%
+`
+  ).addText(
+    `Progress Rate: ${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought
+`
+  ).addText(
+    `Quality Score: ${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%
+`
+  );
   if (thought.strategyEvaluation.strengths.length > 0) {
-    builder.addText("Strengths:\n").addBulletList(thought.strategyEvaluation.strengths.map((s, i) => `+ ${i + 1}. ${s}`));
+    builder.addText("Strengths:\n").addBulletList(
+      thought.strategyEvaluation.strengths.map((s, i) => `+ ${i + 1}. ${s}`)
+    );
   }
   if (thought.strategyEvaluation.issues.length > 0) {
-    builder.addText("Issues:\n").addBulletList(thought.strategyEvaluation.issues.map((s, i) => `- ${i + 1}. ${s}`));
+    builder.addText("Issues:\n").addBulletList(
+      thought.strategyEvaluation.issues.map((s, i) => `- ${i + 1}. ${s}`)
+    );
   }
   builder.addEmptyLine();
   if (thought.alternativeStrategies.length > 0) {
@@ -33626,9 +37344,13 @@ function metaReasoningToASCII(thought) {
       builder.addText(`[${index + 1}] ${alt.mode}
 `).addText(`    Reasoning: ${alt.reasoning}
 `).addText(`    Expected Benefit: ${alt.expectedBenefit}
-`).addText(`    Switching Cost: ${(alt.switchingCost * 100).toFixed(0)}%
-`).addText(`    Recommendation Score: ${(alt.recommendationScore * 100).toFixed(0)}%
-`);
+`).addText(
+        `    Switching Cost: ${(alt.switchingCost * 100).toFixed(0)}%
+`
+      ).addText(
+        `    Recommendation Score: ${(alt.recommendationScore * 100).toFixed(0)}%
+`
+      );
     });
     builder.addEmptyLine();
   }
@@ -33639,22 +37361,38 @@ function metaReasoningToASCII(thought) {
 `);
   }
   builder.addText(`Justification: ${thought.recommendation.justification}
-`).addText(`Confidence: ${(thought.recommendation.confidence * 100).toFixed(1)}%
-`).addText(`Expected Improvement: ${thought.recommendation.expectedImprovement}
-`).addEmptyLine();
+`).addText(
+    `Confidence: ${(thought.recommendation.confidence * 100).toFixed(1)}%
+`
+  ).addText(
+    `Expected Improvement: ${thought.recommendation.expectedImprovement}
+`
+  ).addEmptyLine();
   builder.addSection("RESOURCE ALLOCATION").addText(`Time Spent: ${thought.resourceAllocation.timeSpent}ms
-`).addText(`Thoughts Remaining: ${thought.resourceAllocation.thoughtsRemaining}
-`).addText(`Complexity: ${thought.resourceAllocation.complexityLevel}
+`).addText(
+    `Thoughts Remaining: ${thought.resourceAllocation.thoughtsRemaining}
+`
+  ).addText(`Complexity: ${thought.resourceAllocation.complexityLevel}
 `).addText(`Urgency: ${thought.resourceAllocation.urgency}
 `).addText(`Recommendation: ${thought.resourceAllocation.recommendation}
 `).addEmptyLine();
-  builder.addSection("QUALITY METRICS").addText(`Logical Consistency: ${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%
-`).addText(`Evidence Quality: ${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%
-`).addText(`Completeness: ${(thought.qualityMetrics.completeness * 100).toFixed(1)}%
-`).addText(`Originality: ${(thought.qualityMetrics.originality * 100).toFixed(1)}%
-`).addText(`Clarity: ${(thought.qualityMetrics.clarity * 100).toFixed(1)}%
-`).addText(`Overall Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%
-`).addEmptyLine();
+  builder.addSection("QUALITY METRICS").addText(
+    `Logical Consistency: ${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%
+`
+  ).addText(
+    `Evidence Quality: ${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%
+`
+  ).addText(
+    `Completeness: ${(thought.qualityMetrics.completeness * 100).toFixed(1)}%
+`
+  ).addText(
+    `Originality: ${(thought.qualityMetrics.originality * 100).toFixed(1)}%
+`
+  ).addText(`Clarity: ${(thought.qualityMetrics.clarity * 100).toFixed(1)}%
+`).addText(
+    `Overall Quality: ${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%
+`
+  ).addEmptyLine();
   builder.addSection("SESSION CONTEXT").addText(`Session ID: ${thought.sessionContext.sessionId}
 `).addText(`Total Thoughts: ${thought.sessionContext.totalThoughts}
 `).addText(`Mode Switches: ${thought.sessionContext.modeSwitches}
@@ -33662,8 +37400,10 @@ function metaReasoningToASCII(thought) {
 `).addText(`Modes Used: ${thought.sessionContext.modesUsed.join(", ")}
 `);
   if (thought.sessionContext.historicalEffectiveness !== void 0) {
-    builder.addText(`Historical Effectiveness: ${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%
-`);
+    builder.addText(
+      `Historical Effectiveness: ${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%
+`
+    );
   }
   return builder.render();
 }
@@ -33757,16 +37497,29 @@ function metaReasoningToSVG(thought, options) {
   svg += "\n  </g>";
   if (includeMetrics) {
     const metrics = [
-      { label: "Effectiveness", value: `${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%` },
-      { label: "Quality", value: `${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%` },
+      {
+        label: "Effectiveness",
+        value: `${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`
+      },
+      {
+        label: "Quality",
+        value: `${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`
+      },
       { label: "Alternatives", value: thought.alternativeStrategies.length },
-      { label: "Rec Confidence", value: `${(thought.recommendation.confidence * 100).toFixed(0)}%` }
+      {
+        label: "Rec Confidence",
+        value: `${(thought.recommendation.confidence * 100).toFixed(0)}%`
+      }
     ];
     svg += renderMetricsPanel(svgWidth - 190, svgHeight - 140, metrics);
   }
   const legendItems = [
     { label: "Meta-Reasoning", color: metaColors, shape: "ellipse" },
-    { label: "Current Strategy", color: currentColors, shape: "stadium" },
+    {
+      label: "Current Strategy",
+      color: currentColors,
+      shape: "stadium"
+    },
     { label: "Recommendation", color: recColors, shape: "stadium" },
     { label: "Alternative", color: altColors }
   ];
@@ -33922,7 +37675,11 @@ function metaReasoningToGraphML(thought, options) {
   return generateGraphML(nodes, edges, graphmlOptions);
 }
 function metaReasoningToTikZ(thought, options) {
-  const { includeLabels = true, includeMetrics = true, colorScheme = "default" } = options;
+  const {
+    includeLabels = true,
+    includeMetrics = true,
+    colorScheme = "default"
+  } = options;
   const nodes = [];
   const edges = [];
   nodes.push({
@@ -34029,14 +37786,33 @@ function metaReasoningToHTML(thought, options) {
     htmlTitle = "Meta-Reasoning Analysis",
     htmlTheme = "light"
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   html += '<div class="metrics-grid">';
-  html += renderMetricCard("Effectiveness", `${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`, "primary");
-  html += renderMetricCard("Quality", `${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`, "success");
-  html += renderMetricCard("Alternatives", thought.alternativeStrategies.length, "info");
-  html += renderMetricCard("Confidence", `${(thought.recommendation.confidence * 100).toFixed(0)}%`, "warning");
+  html += renderMetricCard(
+    "Effectiveness",
+    `${(thought.strategyEvaluation.effectiveness * 100).toFixed(0)}%`,
+    "primary"
+  );
+  html += renderMetricCard(
+    "Quality",
+    `${(thought.qualityMetrics.overallQuality * 100).toFixed(0)}%`,
+    "success"
+  );
+  html += renderMetricCard(
+    "Alternatives",
+    thought.alternativeStrategies.length,
+    "info"
+  );
+  html += renderMetricCard(
+    "Confidence",
+    `${(thought.recommendation.confidence * 100).toFixed(0)}%`,
+    "warning"
+  );
   html += "</div>\n";
   const strategyContent = `
     <p><strong>Mode:</strong> ${renderBadge(thought.currentStrategy.mode, "primary")}</p>
@@ -34051,15 +37827,33 @@ function metaReasoningToHTML(thought, options) {
   `;
   html += renderSection("Current Strategy", strategyContent, "\u{1F3AF}");
   const evalRows = [
-    ["Effectiveness", `${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%`],
-    ["Efficiency", `${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%`],
-    ["Confidence", `${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%`],
-    ["Progress Rate", `${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought`],
-    ["Quality Score", `${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%`]
+    [
+      "Effectiveness",
+      `${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%`
+    ],
+    [
+      "Efficiency",
+      `${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%`
+    ],
+    [
+      "Confidence",
+      `${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%`
+    ],
+    [
+      "Progress Rate",
+      `${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought`
+    ],
+    [
+      "Quality Score",
+      `${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%`
+    ]
   ];
   let evalContent = renderTable(["Metric", "Value"], evalRows);
   evalContent += '<p style="margin-top: 1rem"><strong>Effectiveness:</strong></p>';
-  evalContent += renderProgressBar(thought.strategyEvaluation.effectiveness * 100, "primary");
+  evalContent += renderProgressBar(
+    thought.strategyEvaluation.effectiveness * 100,
+    "primary"
+  );
   if (thought.strategyEvaluation.strengths.length > 0) {
     evalContent += '<p style="margin-top: 1rem"><strong>Strengths:</strong></p>';
     evalContent += '<ul class="list-styled">';
@@ -34078,7 +37872,8 @@ function metaReasoningToHTML(thought, options) {
   }
   html += renderSection("Strategy Evaluation", evalContent, "\u{1F4CA}");
   if (thought.alternativeStrategies.length > 0) {
-    const altsContent = thought.alternativeStrategies.map((alt) => `
+    const altsContent = thought.alternativeStrategies.map(
+      (alt) => `
       <div class="card">
         <div class="card-header">
           ${renderBadge(alt.mode, "info")}
@@ -34091,7 +37886,8 @@ function metaReasoningToHTML(thought, options) {
         <p style="margin-top: 0.5rem"><strong>Recommendation Score:</strong></p>
         ${renderProgressBar(alt.recommendationScore * 100, "success")}
       </div>
-    `).join("");
+    `
+    ).join("");
     html += renderSection("Alternative Strategies", altsContent, "\u{1F500}");
   }
   const recContent = `
@@ -34113,16 +37909,34 @@ function metaReasoningToHTML(thought, options) {
   resourceContent += `<p style="margin-top: 1rem"><strong>Recommendation:</strong> ${escapeHTML(thought.resourceAllocation.recommendation)}</p>`;
   html += renderSection("Resource Allocation", resourceContent, "\u26A1");
   const qualityRows = [
-    ["Logical Consistency", `${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%`],
-    ["Evidence Quality", `${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%`],
-    ["Completeness", `${(thought.qualityMetrics.completeness * 100).toFixed(1)}%`],
-    ["Originality", `${(thought.qualityMetrics.originality * 100).toFixed(1)}%`],
+    [
+      "Logical Consistency",
+      `${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%`
+    ],
+    [
+      "Evidence Quality",
+      `${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%`
+    ],
+    [
+      "Completeness",
+      `${(thought.qualityMetrics.completeness * 100).toFixed(1)}%`
+    ],
+    [
+      "Originality",
+      `${(thought.qualityMetrics.originality * 100).toFixed(1)}%`
+    ],
     ["Clarity", `${(thought.qualityMetrics.clarity * 100).toFixed(1)}%`],
-    ["Overall Quality", `${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%`]
+    [
+      "Overall Quality",
+      `${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%`
+    ]
   ];
   let qualityContent = renderTable(["Metric", "Value"], qualityRows);
   qualityContent += '<p style="margin-top: 1rem"><strong>Overall Quality:</strong></p>';
-  qualityContent += renderProgressBar(thought.qualityMetrics.overallQuality * 100, "success");
+  qualityContent += renderProgressBar(
+    thought.qualityMetrics.overallQuality * 100,
+    "success"
+  );
   html += renderSection("Quality Metrics", qualityContent, "\u2B50");
   const sessionRows = [
     ["Session ID", thought.sessionContext.sessionId],
@@ -34131,7 +37945,10 @@ function metaReasoningToHTML(thought, options) {
     ["Problem Type", thought.sessionContext.problemType]
   ];
   if (thought.sessionContext.historicalEffectiveness !== void 0) {
-    sessionRows.push(["Historical Effectiveness", `${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%`]);
+    sessionRows.push([
+      "Historical Effectiveness",
+      `${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%`
+    ]);
   }
   let sessionContent = renderTable(["Property", "Value"], sessionRows);
   if (thought.sessionContext.modesUsed.length > 0) {
@@ -34564,7 +38381,11 @@ function metaReasoningToJSON(thought, options) {
     });
     addMetric(graph, "effectiveness", thought.strategyEvaluation.effectiveness);
     addMetric(graph, "overallQuality", thought.qualityMetrics.overallQuality);
-    addMetric(graph, "recommendationConfidence", thought.recommendation.confidence);
+    addMetric(
+      graph,
+      "recommendationConfidence",
+      thought.recommendation.confidence
+    );
   }
   addNode(graph, {
     id: "resources",
@@ -34606,8 +38427,8 @@ function metaReasoningToMarkdown(thought, options) {
   } = options;
   const parts = [];
   const strategyContent = keyValueSection({
-    "Mode": thought.currentStrategy.mode,
-    "Approach": thought.currentStrategy.approach,
+    Mode: thought.currentStrategy.mode,
+    Approach: thought.currentStrategy.approach,
     "Thoughts Spent": thought.currentStrategy.thoughtsSpent
   });
   let strategyFull = strategyContent;
@@ -34617,11 +38438,26 @@ function metaReasoningToMarkdown(thought, options) {
   parts.push(section("Current Strategy", strategyFull));
   if (includeMetrics) {
     const evalRows = [
-      ["Effectiveness", `${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%`],
-      ["Efficiency", `${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%`],
-      ["Confidence", `${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%`],
-      ["Progress Rate", `${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought`],
-      ["Quality Score", `${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%`]
+      [
+        "Effectiveness",
+        `${(thought.strategyEvaluation.effectiveness * 100).toFixed(1)}%`
+      ],
+      [
+        "Efficiency",
+        `${(thought.strategyEvaluation.efficiency * 100).toFixed(1)}%`
+      ],
+      [
+        "Confidence",
+        `${(thought.strategyEvaluation.confidence * 100).toFixed(1)}%`
+      ],
+      [
+        "Progress Rate",
+        `${thought.strategyEvaluation.progressRate.toFixed(2)} insights/thought`
+      ],
+      [
+        "Quality Score",
+        `${(thought.strategyEvaluation.qualityScore * 100).toFixed(1)}%`
+      ]
     ];
     let evalContent = table(["Metric", "Value"], evalRows);
     evalContent += "\n\n**Effectiveness:**\n\n" + progressBar(thought.strategyEvaluation.effectiveness * 100);
@@ -34641,15 +38477,20 @@ function metaReasoningToMarkdown(thought, options) {
       `${(alt.switchingCost * 100).toFixed(0)}%`,
       `${(alt.recommendationScore * 100).toFixed(0)}%`
     ]);
-    parts.push(section("Alternative Strategies", table(
-      ["Mode", "Reasoning", "Expected Benefit", "Switching Cost", "Score"],
-      altRows
-    )));
+    parts.push(
+      section(
+        "Alternative Strategies",
+        table(
+          ["Mode", "Reasoning", "Expected Benefit", "Switching Cost", "Score"],
+          altRows
+        )
+      )
+    );
   }
   const recContent = keyValueSection({
-    "Action": thought.recommendation.action,
+    Action: thought.recommendation.action,
     ...thought.recommendation.targetMode ? { "Target Mode": thought.recommendation.targetMode } : {},
-    "Confidence": `${(thought.recommendation.confidence * 100).toFixed(1)}%`,
+    Confidence: `${(thought.recommendation.confidence * 100).toFixed(1)}%`,
     "Expected Improvement": thought.recommendation.expectedImprovement
   });
   let recFull = recContent;
@@ -34660,18 +38501,33 @@ function metaReasoningToMarkdown(thought, options) {
     "Time Spent": `${thought.resourceAllocation.timeSpent}ms`,
     "Thoughts Remaining": thought.resourceAllocation.thoughtsRemaining,
     "Complexity Level": thought.resourceAllocation.complexityLevel,
-    "Urgency": thought.resourceAllocation.urgency,
-    "Recommendation": thought.resourceAllocation.recommendation
+    Urgency: thought.resourceAllocation.urgency,
+    Recommendation: thought.resourceAllocation.recommendation
   });
   parts.push(section("Resource Allocation", resourceContent));
   if (includeMetrics) {
     const qualityRows = [
-      ["Logical Consistency", `${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%`],
-      ["Evidence Quality", `${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%`],
-      ["Completeness", `${(thought.qualityMetrics.completeness * 100).toFixed(1)}%`],
-      ["Originality", `${(thought.qualityMetrics.originality * 100).toFixed(1)}%`],
+      [
+        "Logical Consistency",
+        `${(thought.qualityMetrics.logicalConsistency * 100).toFixed(1)}%`
+      ],
+      [
+        "Evidence Quality",
+        `${(thought.qualityMetrics.evidenceQuality * 100).toFixed(1)}%`
+      ],
+      [
+        "Completeness",
+        `${(thought.qualityMetrics.completeness * 100).toFixed(1)}%`
+      ],
+      [
+        "Originality",
+        `${(thought.qualityMetrics.originality * 100).toFixed(1)}%`
+      ],
       ["Clarity", `${(thought.qualityMetrics.clarity * 100).toFixed(1)}%`],
-      ["Overall Quality", `${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%`]
+      [
+        "Overall Quality",
+        `${(thought.qualityMetrics.overallQuality * 100).toFixed(1)}%`
+      ]
     ];
     let qualityContent = table(["Metric", "Value"], qualityRows);
     qualityContent += "\n\n**Overall Quality:**\n\n" + progressBar(thought.qualityMetrics.overallQuality * 100);
@@ -34683,11 +38539,18 @@ function metaReasoningToMarkdown(thought, options) {
     "Mode Switches": thought.sessionContext.modeSwitches,
     "Problem Type": thought.sessionContext.problemType,
     "Modes Used": thought.sessionContext.modesUsed.join(", "),
-    ...thought.sessionContext.historicalEffectiveness !== void 0 ? { "Historical Effectiveness": `${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%` } : {}
+    ...thought.sessionContext.historicalEffectiveness !== void 0 ? {
+      "Historical Effectiveness": `${(thought.sessionContext.historicalEffectiveness * 100).toFixed(1)}%`
+    } : {}
   });
   parts.push(section("Session Context", sessionContent));
   if (markdownIncludeMermaid) {
-    const mermaidDiagram = metaReasoningToMermaid(thought, "default", true, true);
+    const mermaidDiagram = metaReasoningToMermaid(
+      thought,
+      "default",
+      true,
+      true
+    );
     parts.push(section("Visualization", mermaidBlock(mermaidDiagram)));
   }
   return document("Meta-Reasoning Analysis", parts.join("\n"), {
@@ -34705,10 +38568,20 @@ function metaReasoningToMarkdown(thought, options) {
 // src/export/visual/modes/systems-thinking.ts
 init_esm_shims();
 function exportSystemsThinkingCausalLoops(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return systemsThinkingToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return systemsThinkingToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return systemsThinkingToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -34737,7 +38610,11 @@ function systemsThinkingToMermaid(thought, colorScheme, includeLabels, includeMe
   const scheme = colorScheme;
   const builder = new MermaidGraphBuilder().setDirection("TB");
   if (thought.system) {
-    builder.addNode({ id: "System", label: thought.system.name, shape: "rectangle" });
+    builder.addNode({
+      id: "System",
+      label: thought.system.name,
+      shape: "rectangle"
+    });
   }
   if (thought.components && thought.components.length > 0) {
     for (const component of thought.components) {
@@ -34752,10 +38629,17 @@ function systemsThinkingToMermaid(thought, colorScheme, includeLabels, includeMe
       const loopComponents = loop.components;
       for (let i = 0; i < loopComponents.length; i++) {
         const fromId = sanitizeId(loopComponents[i]);
-        const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
+        const toId = sanitizeId(
+          loopComponents[(i + 1) % loopComponents.length]
+        );
         const edgeLabel = includeMetrics ? `${loop.type} (${loop.strength.toFixed(2)})` : loop.type;
         const edgeStyle = loop.type === "reinforcing" ? "arrow" : "dotted";
-        builder.addEdge({ source: fromId, target: toId, label: edgeLabel, style: edgeStyle });
+        builder.addEdge({
+          source: fromId,
+          target: toId,
+          label: edgeLabel,
+          style: edgeStyle
+        });
       }
     }
   }
@@ -34776,10 +38660,17 @@ function systemsThinkingToDOT(thought, includeLabels, includeMetrics) {
       const loopComponents = loop.components;
       for (let i = 0; i < loopComponents.length; i++) {
         const fromId = sanitizeId(loopComponents[i]);
-        const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
+        const toId = sanitizeId(
+          loopComponents[(i + 1) % loopComponents.length]
+        );
         const edgeLabel = includeMetrics ? `${loop.type} (${loop.strength.toFixed(2)})` : loop.type;
         const edgeStyle = loop.type === "reinforcing" ? "solid" : "dashed";
-        builder.addEdge({ source: fromId, target: toId, label: edgeLabel, style: edgeStyle });
+        builder.addEdge({
+          source: fromId,
+          target: toId,
+          label: edgeLabel,
+          style: edgeStyle
+        });
       }
     }
   }
@@ -34796,8 +38687,10 @@ ${thought.system.description}
     builder.addSection("Components");
     for (const component of thought.components) {
       const typeIcon = component.type === "stock" ? "[\u25A0]" : "(\u25CB)";
-      builder.addText(`${typeIcon} ${component.name}: ${component.description}
-`);
+      builder.addText(
+        `${typeIcon} ${component.name}: ${component.description}
+`
+      );
     }
     builder.addEmptyLine();
   }
@@ -34817,8 +38710,10 @@ ${thought.system.description}
   if (thought.leveragePoints && thought.leveragePoints.length > 0) {
     builder.addSection("Leverage Points");
     for (const point of thought.leveragePoints) {
-      builder.addText(`\u2605 ${point.location} (effectiveness: ${point.effectiveness.toFixed(2)})
-`);
+      builder.addText(
+        `\u2605 ${point.location} (effectiveness: ${point.effectiveness.toFixed(2)})
+`
+      );
       builder.addText(`  ${point.description}
 `);
     }
@@ -34925,7 +38820,9 @@ function systemsThinkingToGraphML(thought, options) {
       const loopComponents = loop.components;
       for (let i = 0; i < loopComponents.length; i++) {
         const fromId = sanitizeId(loopComponents[i]);
-        const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
+        const toId = sanitizeId(
+          loopComponents[(i + 1) % loopComponents.length]
+        );
         const label = includeLabels && includeMetrics ? `${loop.type} (${loop.strength.toFixed(2)})` : includeLabels ? loop.type : void 0;
         edges.push({
           id: `e${edgeCount++}`,
@@ -34951,7 +38848,11 @@ function systemsThinkingToGraphML(thought, options) {
   });
 }
 function systemsThinkingToTikZ(thought, options) {
-  const { colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   const nodes = [];
   const edges = [];
   if (thought.components && thought.components.length > 0) {
@@ -34976,7 +38877,9 @@ function systemsThinkingToTikZ(thought, options) {
       const loopComponents = loop.components;
       for (let i = 0; i < loopComponents.length; i++) {
         const fromId = sanitizeId(loopComponents[i]);
-        const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
+        const toId = sanitizeId(
+          loopComponents[(i + 1) % loopComponents.length]
+        );
         const label = includeLabels && includeMetrics ? `${loop.type[0].toUpperCase()} (${loop.strength.toFixed(2)})` : includeLabels ? loop.type[0].toUpperCase() : void 0;
         const style = loop.type === "reinforcing" ? "solid" : "dashed";
         const bend = loop.type === "reinforcing" ? "left" : "right";
@@ -35005,7 +38908,10 @@ function systemsThinkingToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   if (thought.system) {
@@ -35017,9 +38923,21 @@ function systemsThinkingToHTML(thought, options) {
   }
   if (includeMetrics) {
     html += '<div class="metrics-grid">\n';
-    html += renderMetricCard("Components", thought.components?.length || 0, "primary");
-    html += renderMetricCard("Feedback Loops", thought.feedbackLoops?.length || 0, "info");
-    html += renderMetricCard("Leverage Points", thought.leveragePoints?.length || 0, "success");
+    html += renderMetricCard(
+      "Components",
+      thought.components?.length || 0,
+      "primary"
+    );
+    html += renderMetricCard(
+      "Feedback Loops",
+      thought.feedbackLoops?.length || 0,
+      "info"
+    );
+    html += renderMetricCard(
+      "Leverage Points",
+      thought.leveragePoints?.length || 0,
+      "success"
+    );
     html += "</div>\n";
   }
   if (thought.components && thought.components.length > 0) {
@@ -35196,7 +39114,9 @@ function systemsThinkingToUML(thought, options) {
       const loopComponents = loop.components;
       for (let i = 0; i < loopComponents.length; i++) {
         const fromId = sanitizeId(loopComponents[i]);
-        const toId = sanitizeId(loopComponents[(i + 1) % loopComponents.length]);
+        const toId = sanitizeId(
+          loopComponents[(i + 1) % loopComponents.length]
+        );
         const label = includeLabels && includeMetrics ? `${loop.type} (${loop.strength.toFixed(2)})` : includeLabels ? loop.type : void 0;
         const edgeType = loop.type === "reinforcing" ? "association" : "dependency";
         edges.push({
@@ -35213,9 +39133,13 @@ function systemsThinkingToUML(thought, options) {
 }
 function systemsThinkingToJSON(thought, options) {
   const { includeMetrics = true } = options;
-  const graph = createJsonGraph("Systems Thinking Causal Loop Diagram", "systems-thinking", {
-    includeMetrics
-  });
+  const graph = createJsonGraph(
+    "Systems Thinking Causal Loop Diagram",
+    "systems-thinking",
+    {
+      includeMetrics
+    }
+  );
   if (thought.system) {
     graph.metadata.systemName = thought.system.name;
     graph.metadata.systemDescription = thought.system.description;
@@ -35266,11 +39190,19 @@ function systemsThinkingToJSON(thought, options) {
     addMetric(graph, "leveragePoints", thought.leveragePoints?.length || 0);
     if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
       const avgStrength = thought.feedbackLoops.reduce((sum, loop) => sum + loop.strength, 0) / thought.feedbackLoops.length;
-      addMetric(graph, "averageLoopStrength", parseFloat(avgStrength.toFixed(3)));
+      addMetric(
+        graph,
+        "averageLoopStrength",
+        parseFloat(avgStrength.toFixed(3))
+      );
     }
     if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
-      const reinforcingCount = thought.feedbackLoops.filter((l) => l.type === "reinforcing").length;
-      const balancingCount = thought.feedbackLoops.filter((l) => l.type === "balancing").length;
+      const reinforcingCount = thought.feedbackLoops.filter(
+        (l) => l.type === "reinforcing"
+      ).length;
+      const balancingCount = thought.feedbackLoops.filter(
+        (l) => l.type === "balancing"
+      ).length;
       addMetric(graph, "reinforcingLoops", reinforcingCount);
       addMetric(graph, "balancingLoops", balancingCount);
     }
@@ -35298,14 +39230,14 @@ function systemsThinkingToMarkdown(thought, options) {
   const parts = [];
   if (thought.system) {
     const systemContent = keyValueSection({
-      "Name": thought.system.name,
-      "Description": thought.system.description
+      Name: thought.system.name,
+      Description: thought.system.description
     });
     parts.push(section("System Overview", systemContent));
   }
   if (includeMetrics) {
     const metricsContent = keyValueSection({
-      "Components": thought.components?.length || 0,
+      Components: thought.components?.length || 0,
       "Feedback Loops": thought.feedbackLoops?.length || 0,
       "Leverage Points": thought.leveragePoints?.length || 0
     });
@@ -35347,7 +39279,12 @@ function systemsThinkingToMarkdown(thought, options) {
     parts.push(section("Leverage Points", leverageTable));
   }
   if (markdownIncludeMermaid) {
-    const mermaidDiagram = systemsThinkingToMermaid(thought, "default", true, true);
+    const mermaidDiagram = systemsThinkingToMermaid(
+      thought,
+      "default",
+      true,
+      true
+    );
     parts.push(section("Causal Loop Diagram", mermaidBlock(mermaidDiagram)));
   }
   return document("Systems Thinking Analysis", parts.join("\n"), {
@@ -35360,10 +39297,20 @@ function systemsThinkingToMarkdown(thought, options) {
 // src/export/visual/modes/scientific-method.ts
 init_esm_shims();
 function exportScientificMethodExperiment(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return scientificMethodToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return scientificMethodToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return scientificMethodToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -35432,7 +39379,11 @@ function scientificMethodToMermaid(thought, colorScheme, includeLabels, includeM
     }
   }
   if (thought.analysis) {
-    builder.addNode({ id: "Stats", label: "Statistical Analysis", shape: "rectangle" });
+    builder.addNode({
+      id: "Stats",
+      label: "Statistical Analysis",
+      shape: "rectangle"
+    });
     if (thought.data) {
       builder.addEdge({ source: "Data", target: "Stats" });
     }
@@ -35454,8 +39405,12 @@ function scientificMethodToDOT(thought, includeLabels, includeMetrics) {
   const builder = new DOTGraphBuilder().setGraphName("ScientificMethod").setRankDir("TB").setNodeDefaults({ shape: "box", style: "rounded" });
   if (thought.researchQuestion) {
     const label = includeLabels ? thought.researchQuestion.question.substring(0, 60) + "..." : "RQ";
-    builder.addNode({ id: "RQ", label: `Research Question:
-${label}`, shape: "ellipse" });
+    builder.addNode({
+      id: "RQ",
+      label: `Research Question:
+${label}`,
+      shape: "ellipse"
+    });
   }
   if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
     for (const hypothesis of thought.scientificHypotheses) {
@@ -35497,8 +39452,12 @@ Samples: ${thought.experiment?.sampleSize || 0}` : "";
     const label = includeLabels ? thought.conclusion.statement.substring(0, 50) + "..." : "Conclusion";
     const confLabel = includeMetrics && thought.conclusion.confidence ? `
 conf: ${thought.conclusion.confidence.toFixed(2)}` : "";
-    builder.addNode({ id: "Conclusion", label: `Conclusion:
-${label}${confLabel}`, shape: "doubleoctagon" });
+    builder.addNode({
+      id: "Conclusion",
+      label: `Conclusion:
+${label}${confLabel}`,
+      shape: "doubleoctagon"
+    });
     if (thought.analysis) {
       builder.addEdge({ source: "Stats", target: "Conclusion" });
     }
@@ -35531,12 +39490,18 @@ function scientificMethodToASCII(thought) {
   }
   if (thought.data) {
     builder.addSection("Data Collection").addEmptyLine();
-    builder.addText(`  Sample Size: ${thought.experiment?.sampleSize || 0}`);
+    builder.addText(
+      `  Sample Size: ${thought.experiment?.sampleSize || 0}`
+    );
     builder.addText(`  Method: ${thought.data.method}`);
     if (thought.data.dataQuality) {
       builder.addText("  Quality:");
-      builder.addText(`    Completeness: ${thought.data.dataQuality.completeness.toFixed(2)}`);
-      builder.addText(`    Reliability: ${thought.data.dataQuality.reliability.toFixed(2)}`);
+      builder.addText(
+        `    Completeness: ${thought.data.dataQuality.completeness.toFixed(2)}`
+      );
+      builder.addText(
+        `    Reliability: ${thought.data.dataQuality.reliability.toFixed(2)}`
+      );
     }
     builder.addEmptyLine();
   }
@@ -35544,7 +39509,9 @@ function scientificMethodToASCII(thought) {
     builder.addSection("Statistical Tests").addEmptyLine();
     for (const test of thought.analysis.tests) {
       builder.addText(`  \u2022 ${test.name}`);
-      builder.addText(`    p-value: ${test.pValue.toFixed(4)}, \u03B1: ${test.alpha}`);
+      builder.addText(
+        `    p-value: ${test.pValue.toFixed(4)}, \u03B1: ${test.alpha}`
+      );
       builder.addText(`    Result: ${test.result}`);
     }
     builder.addEmptyLine();
@@ -35553,10 +39520,14 @@ function scientificMethodToASCII(thought) {
     builder.addSection("Conclusion").addEmptyLine();
     builder.addText(thought.conclusion.statement);
     if (thought.conclusion.supportedHypotheses) {
-      builder.addText(`Supported hypotheses: ${thought.conclusion.supportedHypotheses.join(", ")}`);
+      builder.addText(
+        `Supported hypotheses: ${thought.conclusion.supportedHypotheses.join(", ")}`
+      );
     }
     if (thought.conclusion.confidence) {
-      builder.addText(`Confidence: ${thought.conclusion.confidence.toFixed(2)}`);
+      builder.addText(
+        `Confidence: ${thought.conclusion.confidence.toFixed(2)}`
+      );
     }
   }
   return builder.render();
@@ -35647,9 +39618,20 @@ function scientificMethodToSVG(thought, options) {
     });
   }
   const actualHeight = Math.max(DEFAULT_SVG_OPTIONS.height, currentY + 100);
-  let svg = generateSVGHeader(svgWidth, actualHeight, "Scientific Method Process");
+  let svg = generateSVGHeader(
+    svgWidth,
+    actualHeight,
+    "Scientific Method Process"
+  );
   svg += '\n  <!-- Edges -->\n  <g class="edges">';
-  const nodeIds = ["RQ", ...thought.scientificHypotheses?.map((h) => h.id) || [], "Exp", "Data", "Stats", "Conclusion"];
+  const nodeIds = [
+    "RQ",
+    ...thought.scientificHypotheses?.map((h) => h.id) || [],
+    "Exp",
+    "Data",
+    "Stats",
+    "Conclusion"
+  ];
   for (let i = 0; i < nodeIds.length - 1; i++) {
     const fromPos = positions.get(nodeIds[i]);
     const toPos = positions.get(nodeIds[i + 1]);
@@ -35678,12 +39660,19 @@ function scientificMethodToSVG(thought, options) {
   if (includeMetrics) {
     const metrics = [
       { label: "Hypotheses", value: thought.scientificHypotheses?.length || 0 },
-      { label: "Confidence", value: thought.conclusion?.confidence?.toFixed(2) || "N/A" }
+      {
+        label: "Confidence",
+        value: thought.conclusion?.confidence?.toFixed(2) || "N/A"
+      }
     ];
     svg += renderMetricsPanel(svgWidth - 180, actualHeight - 110, metrics);
   }
   const legendItems = [
-    { label: "Research Question", color: questionColors, shape: "ellipse" },
+    {
+      label: "Research Question",
+      color: questionColors,
+      shape: "ellipse"
+    },
     { label: "Hypothesis", color: hypothesisColors },
     { label: "Conclusion", color: conclusionColors, shape: "stadium" }
   ];
@@ -35856,7 +39845,10 @@ function scientificMethodToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   if (thought.researchQuestion) {
@@ -35869,16 +39861,31 @@ function scientificMethodToHTML(thought, options) {
   }
   if (includeMetrics) {
     html += '<div class="metrics-grid">\n';
-    html += renderMetricCard("Hypotheses", thought.scientificHypotheses?.length || 0, "primary");
-    html += renderMetricCard("Tests", thought.analysis?.tests?.length || 0, "info");
-    html += renderMetricCard("Confidence", thought.conclusion?.confidence?.toFixed(2) || "N/A", "success");
+    html += renderMetricCard(
+      "Hypotheses",
+      thought.scientificHypotheses?.length || 0,
+      "primary"
+    );
+    html += renderMetricCard(
+      "Tests",
+      thought.analysis?.tests?.length || 0,
+      "info"
+    );
+    html += renderMetricCard(
+      "Confidence",
+      thought.conclusion?.confidence?.toFixed(2) || "N/A",
+      "success"
+    );
     html += "</div>\n";
   }
   if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
     let hypothesesContent = "";
     for (const hypothesis of thought.scientificHypotheses) {
       const typeColor = hypothesis.type === "null" ? "secondary" : "primary";
-      const badge = renderBadge(hypothesis.type.toUpperCase(), typeColor);
+      const badge = renderBadge(
+        hypothesis.type.toUpperCase(),
+        typeColor
+      );
       hypothesesContent += `
         <div class="card">
           <div class="card-header">${badge} ${escapeHTML(hypothesis.statement)}</div>
@@ -35945,7 +39952,8 @@ function scientificMethodToModelica(thought, options) {
   lines.push("");
   const stages2 = [];
   if (thought.researchQuestion) stages2.push("ResearchQuestion");
-  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) stages2.push("Hypothesis");
+  if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0)
+    stages2.push("Hypothesis");
   if (thought.experiment) stages2.push("Experiment");
   if (thought.data) stages2.push("DataCollection");
   if (thought.analysis) stages2.push("Analysis");
@@ -35962,10 +39970,16 @@ function scientificMethodToModelica(thought, options) {
   if (thought.researchQuestion) {
     lines.push("  record ResearchQuestionData");
     lines.push('    "Research question information"');
-    lines.push(`    parameter String question = "${escapeModelicaString(thought.researchQuestion.question)}";`);
-    lines.push(`    parameter String background = "${escapeModelicaString(thought.researchQuestion.background)}";`);
+    lines.push(
+      `    parameter String question = "${escapeModelicaString(thought.researchQuestion.question)}";`
+    );
+    lines.push(
+      `    parameter String background = "${escapeModelicaString(thought.researchQuestion.background)}";`
+    );
     if (thought.researchQuestion.significance) {
-      lines.push(`    parameter String significance = "${escapeModelicaString(thought.researchQuestion.significance)}";`);
+      lines.push(
+        `    parameter String significance = "${escapeModelicaString(thought.researchQuestion.significance)}";`
+      );
     }
     lines.push("  end ResearchQuestionData;");
     lines.push("");
@@ -35973,17 +39987,27 @@ function scientificMethodToModelica(thought, options) {
   if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
     lines.push("  record HypothesisData");
     lines.push('    "Hypothesis information"');
-    lines.push(`    parameter Integer count = ${thought.scientificHypotheses.length};`);
-    lines.push(`    parameter String primaryHypothesis = "${escapeModelicaString(thought.scientificHypotheses[0].statement)}";`);
-    lines.push(`    parameter String hypothesisType = "${thought.scientificHypotheses[0].type}";`);
+    lines.push(
+      `    parameter Integer count = ${thought.scientificHypotheses.length};`
+    );
+    lines.push(
+      `    parameter String primaryHypothesis = "${escapeModelicaString(thought.scientificHypotheses[0].statement)}";`
+    );
+    lines.push(
+      `    parameter String hypothesisType = "${thought.scientificHypotheses[0].type}";`
+    );
     lines.push("  end HypothesisData;");
     lines.push("");
   }
   if (thought.experiment) {
     lines.push("  record ExperimentData");
     lines.push('    "Experiment design information"');
-    lines.push(`    parameter String experimentType = "${escapeModelicaString(thought.experiment.type)}";`);
-    lines.push(`    parameter String design = "${escapeModelicaString(thought.experiment.design)}";`);
+    lines.push(
+      `    parameter String experimentType = "${escapeModelicaString(thought.experiment.type)}";`
+    );
+    lines.push(
+      `    parameter String design = "${escapeModelicaString(thought.experiment.design)}";`
+    );
     const sampleSize = thought.experiment?.sampleSize || 0;
     if (sampleSize > 0) {
       lines.push(`    parameter Integer sampleSize = ${sampleSize};`);
@@ -35994,10 +40018,16 @@ function scientificMethodToModelica(thought, options) {
   if (thought.data) {
     lines.push("  record DataCollectionInfo");
     lines.push('    "Data collection and quality metrics"');
-    lines.push(`    parameter String method = "${escapeModelicaString(thought.data.method.join(", "))}";`);
+    lines.push(
+      `    parameter String method = "${escapeModelicaString(thought.data.method.join(", "))}";`
+    );
     if (thought.data.dataQuality) {
-      lines.push(`    parameter Real completeness = ${thought.data.dataQuality.completeness.toFixed(3)};`);
-      lines.push(`    parameter Real reliability = ${thought.data.dataQuality.reliability.toFixed(3)};`);
+      lines.push(
+        `    parameter Real completeness = ${thought.data.dataQuality.completeness.toFixed(3)};`
+      );
+      lines.push(
+        `    parameter Real reliability = ${thought.data.dataQuality.reliability.toFixed(3)};`
+      );
     }
     lines.push("  end DataCollectionInfo;");
     lines.push("");
@@ -36005,10 +40035,16 @@ function scientificMethodToModelica(thought, options) {
   if (thought.analysis && thought.analysis.tests) {
     lines.push("  record AnalysisData");
     lines.push('    "Statistical analysis results"');
-    lines.push(`    parameter Integer testCount = ${thought.analysis.tests.length};`);
+    lines.push(
+      `    parameter Integer testCount = ${thought.analysis.tests.length};`
+    );
     if (thought.analysis.tests.length > 0) {
-      lines.push(`    parameter String primaryTest = "${escapeModelicaString(thought.analysis.tests[0].name)}";`);
-      lines.push(`    parameter Real primaryPValue = ${thought.analysis.tests[0].pValue.toFixed(4)};`);
+      lines.push(
+        `    parameter String primaryTest = "${escapeModelicaString(thought.analysis.tests[0].name)}";`
+      );
+      lines.push(
+        `    parameter Real primaryPValue = ${thought.analysis.tests[0].pValue.toFixed(4)};`
+      );
     }
     lines.push("  end AnalysisData;");
     lines.push("");
@@ -36016,9 +40052,13 @@ function scientificMethodToModelica(thought, options) {
   if (thought.conclusion) {
     lines.push("  record ConclusionData");
     lines.push('    "Final conclusion and confidence"');
-    lines.push(`    parameter String statement = "${escapeModelicaString(thought.conclusion.statement)}";`);
+    lines.push(
+      `    parameter String statement = "${escapeModelicaString(thought.conclusion.statement)}";`
+    );
     if (thought.conclusion.confidence) {
-      lines.push(`    parameter Real confidence = ${thought.conclusion.confidence.toFixed(3)};`);
+      lines.push(
+        `    parameter Real confidence = ${thought.conclusion.confidence.toFixed(3)};`
+      );
     }
     lines.push("  end ConclusionData;");
     lines.push("");
@@ -36028,7 +40068,9 @@ function scientificMethodToModelica(thought, options) {
     lines.push("  // Progress metrics");
     lines.push(`  parameter Integer totalStages = ${stages2.length};`);
     lines.push(`  parameter Integer completedStages = ${currentStageIndex};`);
-    lines.push(`  parameter Real progress = ${(currentStageIndex / stages2.length).toFixed(3)};`);
+    lines.push(
+      `  parameter Real progress = ${(currentStageIndex / stages2.length).toFixed(3)};`
+    );
     lines.push("");
   }
   lines.push("  annotation(");
@@ -36037,10 +40079,14 @@ function scientificMethodToModelica(thought, options) {
   if (includeMetrics) {
     lines.push(`      <p>Stages: ${stages2.length}</p>`);
     if (thought.scientificHypotheses) {
-      lines.push(`      <p>Hypotheses: ${thought.scientificHypotheses.length}</p>`);
+      lines.push(
+        `      <p>Hypotheses: ${thought.scientificHypotheses.length}</p>`
+      );
     }
     if (thought.conclusion?.confidence) {
-      lines.push(`      <p>Confidence: ${(thought.conclusion.confidence * 100).toFixed(0)}%</p>`);
+      lines.push(
+        `      <p>Confidence: ${(thought.conclusion.confidence * 100).toFixed(0)}%</p>`
+      );
     }
   }
   lines.push("      <p>Generated by DeepThinking MCP v8.3.1</p>");
@@ -36084,7 +40130,11 @@ function scientificMethodToUML(thought, options) {
 }
 function scientificMethodToJSON(thought, options) {
   const { includeMetrics = true } = options;
-  const graph = createJsonGraph("Scientific Method Experiment", "scientific-method", options);
+  const graph = createJsonGraph(
+    "Scientific Method Experiment",
+    "scientific-method",
+    options
+  );
   if (graph.layout) {
     graph.layout.type = "linear";
     graph.layout.direction = "TB";
@@ -36215,7 +40265,11 @@ function scientificMethodToJSON(thought, options) {
     addMetric(graph, "totalStages", nodeIds.length);
     addMetric(graph, "completedStages", nodeIds.length);
     addMetric(graph, "progress", 1);
-    addMetric(graph, "hypothesisCount", thought.scientificHypotheses?.length || 0);
+    addMetric(
+      graph,
+      "hypothesisCount",
+      thought.scientificHypotheses?.length || 0
+    );
     if (thought.conclusion?.confidence) {
       addMetric(graph, "confidence", thought.conclusion.confidence);
     }
@@ -36235,17 +40289,17 @@ function scientificMethodToMarkdown(thought, options) {
   const parts = [];
   if (thought.researchQuestion) {
     const questionContent = keyValueSection({
-      "Question": thought.researchQuestion.question,
-      "Background": thought.researchQuestion.background,
-      "Significance": thought.researchQuestion.significance || "N/A"
+      Question: thought.researchQuestion.question,
+      Background: thought.researchQuestion.background,
+      Significance: thought.researchQuestion.significance || "N/A"
     });
     parts.push(section("Research Question", questionContent));
   }
   if (includeMetrics) {
     const metricsContent = keyValueSection({
-      "Hypotheses": thought.scientificHypotheses?.length || 0,
-      "Tests": thought.analysis?.tests?.length || 0,
-      "Confidence": thought.conclusion?.confidence?.toFixed(2) || "N/A"
+      Hypotheses: thought.scientificHypotheses?.length || 0,
+      Tests: thought.analysis?.tests?.length || 0,
+      Confidence: thought.conclusion?.confidence?.toFixed(2) || "N/A"
     });
     parts.push(section("Metrics", metricsContent));
   }
@@ -36258,17 +40312,17 @@ function scientificMethodToMarkdown(thought, options) {
   }
   if (thought.experiment) {
     const experimentContent = keyValueSection({
-      "Type": thought.experiment.type,
-      "Design": thought.experiment.design,
+      Type: thought.experiment.type,
+      Design: thought.experiment.design,
       "Sample Size": thought.experiment?.sampleSize || "N/A"
     });
     parts.push(section("Experiment", experimentContent));
   }
   if (thought.data) {
     const dataContent = keyValueSection({
-      "Method": thought.data.method.join(", "),
-      "Completeness": thought.data.dataQuality ? `${(thought.data.dataQuality.completeness * 100).toFixed(0)}%` : "N/A",
-      "Reliability": thought.data.dataQuality ? `${(thought.data.dataQuality.reliability * 100).toFixed(0)}%` : "N/A"
+      Method: thought.data.method.join(", "),
+      Completeness: thought.data.dataQuality ? `${(thought.data.dataQuality.completeness * 100).toFixed(0)}%` : "N/A",
+      Reliability: thought.data.dataQuality ? `${(thought.data.dataQuality.reliability * 100).toFixed(0)}%` : "N/A"
     });
     parts.push(section("Data Collection", dataContent));
   }
@@ -36279,24 +40333,28 @@ function scientificMethodToMarkdown(thought, options) {
       test.alpha.toString(),
       test.result
     ]);
-    const testsTable = table(
-      ["Test", "p-value", "\u03B1", "Result"],
-      testRows
-    );
+    const testsTable = table(["Test", "p-value", "\u03B1", "Result"], testRows);
     parts.push(section("Statistical Analysis", testsTable));
   }
   if (thought.conclusion) {
     const conclusionContent = `${thought.conclusion.statement}
 
 ` + keyValueSection({
-      "Confidence": thought.conclusion.confidence ? `${(thought.conclusion.confidence * 100).toFixed(0)}%` : "N/A",
+      Confidence: thought.conclusion.confidence ? `${(thought.conclusion.confidence * 100).toFixed(0)}%` : "N/A",
       "Supported Hypotheses": thought.conclusion.supportedHypotheses?.join(", ") || "N/A"
     });
     parts.push(section("Conclusion", conclusionContent));
   }
   if (markdownIncludeMermaid) {
-    const mermaidDiagram = scientificMethodToMermaid(thought, "default", true, true);
-    parts.push(section("Experiment Flow Diagram", mermaidBlock(mermaidDiagram)));
+    const mermaidDiagram = scientificMethodToMermaid(
+      thought,
+      "default",
+      true,
+      true
+    );
+    parts.push(
+      section("Experiment Flow Diagram", mermaidBlock(mermaidDiagram))
+    );
   }
   return document("Scientific Method Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
@@ -36308,10 +40366,20 @@ function scientificMethodToMarkdown(thought, options) {
 // src/export/visual/modes/formal-logic.ts
 init_esm_shims();
 function exportFormalLogicProof(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   switch (format) {
     case "mermaid":
-      return formalLogicToMermaid(thought, colorScheme, includeLabels, includeMetrics);
+      return formalLogicToMermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
       return formalLogicToDOT(thought, includeLabels, includeMetrics);
     case "ascii":
@@ -36363,11 +40431,22 @@ function formalLogicToMermaid(thought, colorScheme, includeLabels, includeMetric
       }
     }
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
-    builder.addEdge({ source: `Step${lastStep.stepNumber}`, target: "Theorem" });
+    builder.addEdge({
+      source: `Step${lastStep.stepNumber}`,
+      target: "Theorem"
+    });
     if (includeMetrics) {
       const completeness = (thought.proof.completeness * 100).toFixed(0);
-      builder.addNode({ id: "Completeness", label: `Completeness: ${completeness}%`, shape: "rectangle" });
-      builder.addEdge({ source: "Completeness", target: "Theorem", style: "dotted" });
+      builder.addNode({
+        id: "Completeness",
+        label: `Completeness: ${completeness}%`,
+        shape: "rectangle"
+      });
+      builder.addEdge({
+        source: "Completeness",
+        target: "Theorem",
+        style: "dotted"
+      });
     }
   }
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
@@ -36419,10 +40498,17 @@ ${thought.proof.theorem.substring(0, 50)}...`,
       }
     }
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
-    builder.addEdge({ source: `Step${lastStep.stepNumber}`, target: "Theorem" });
+    builder.addEdge({
+      source: `Step${lastStep.stepNumber}`,
+      target: "Theorem"
+    });
     if (includeMetrics) {
       const completeness = (thought.proof.completeness * 100).toFixed(0);
-      builder.addNode({ id: "Completeness", label: `Completeness: ${completeness}%`, shape: "note" });
+      builder.addNode({
+        id: "Completeness",
+        label: `Completeness: ${completeness}%`,
+        shape: "note"
+      });
     }
   }
   if (thought.logicalInferences && thought.logicalInferences.length > 0) {
@@ -36465,7 +40551,9 @@ function formalLogicToASCII(thought) {
   if (thought.proof) {
     builder.addText(`Proof: ${thought.proof.theorem}`);
     builder.addText(`Technique: ${thought.proof.technique}`);
-    builder.addText(`Completeness: ${(thought.proof.completeness * 100).toFixed(0)}%`);
+    builder.addText(
+      `Completeness: ${(thought.proof.completeness * 100).toFixed(0)}%`
+    );
     builder.addEmptyLine();
     if (thought.proof.steps && thought.proof.steps.length > 0) {
       builder.addSection("Proof Steps").addEmptyLine();
@@ -36481,9 +40569,15 @@ function formalLogicToASCII(thought) {
   if (thought.truthTable) {
     builder.addEmptyLine();
     builder.addSection("Truth Table").addEmptyLine();
-    builder.addText(`  Tautology: ${thought.truthTable.isTautology ? "\u2713" : "\u2717"}`);
-    builder.addText(`  Contradiction: ${thought.truthTable.isContradiction ? "\u2713" : "\u2717"}`);
-    builder.addText(`  Contingent: ${thought.truthTable.isContingent ? "\u2713" : "\u2717"}`);
+    builder.addText(
+      `  Tautology: ${thought.truthTable.isTautology ? "\u2713" : "\u2717"}`
+    );
+    builder.addText(
+      `  Contradiction: ${thought.truthTable.isContradiction ? "\u2713" : "\u2717"}`
+    );
+    builder.addText(
+      `  Contingent: ${thought.truthTable.isContingent ? "\u2713" : "\u2717"}`
+    );
   }
   return builder.render();
 }
@@ -36499,7 +40593,10 @@ function formalLogicToSVG(thought, options) {
   const nodeWidth = 150;
   const nodeHeight = 40;
   if (thought.propositions) {
-    const propSpacing = Math.min(180, svgWidth / (thought.propositions.length + 1));
+    const propSpacing = Math.min(
+      180,
+      svgWidth / (thought.propositions.length + 1)
+    );
     const propStartX = (svgWidth - (thought.propositions.length - 1) * propSpacing) / 2;
     thought.propositions.forEach((prop, index) => {
       positions.set(prop.id, {
@@ -36579,7 +40676,10 @@ function formalLogicToSVG(thought, options) {
     const metrics = [
       { label: "Propositions", value: thought.propositions?.length || 0 },
       { label: "Proof Steps", value: thought.proof?.steps?.length || 0 },
-      { label: "Completeness", value: thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : "N/A" }
+      {
+        label: "Completeness",
+        value: thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : "N/A"
+      }
     ];
     svg += renderMetricsPanel(svgWidth - 180, svgHeight - 110, metrics);
   }
@@ -36680,7 +40780,7 @@ function formalLogicToGraphML(thought, options) {
     });
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
     edges.push({
-      id: `e${edgeCount++}`,
+      id: `e${edgeCount}`,
       source: `Step${lastStep.stepNumber}`,
       target: "Theorem",
       directed: true,
@@ -36790,7 +40890,10 @@ function formalLogicToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   if (thought.proof) {
@@ -36806,10 +40909,26 @@ function formalLogicToHTML(thought, options) {
   }
   if (includeMetrics) {
     html += '<div class="metrics-grid">\n';
-    html += renderMetricCard("Propositions", thought.propositions?.length || 0, "primary");
-    html += renderMetricCard("Inferences", thought.logicalInferences?.length || 0, "info");
-    html += renderMetricCard("Proof Steps", thought.proof?.steps?.length || 0, "secondary");
-    html += renderMetricCard("Completeness", thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : "N/A", "success");
+    html += renderMetricCard(
+      "Propositions",
+      thought.propositions?.length || 0,
+      "primary"
+    );
+    html += renderMetricCard(
+      "Inferences",
+      thought.logicalInferences?.length || 0,
+      "info"
+    );
+    html += renderMetricCard(
+      "Proof Steps",
+      thought.proof?.steps?.length || 0,
+      "secondary"
+    );
+    html += renderMetricCard(
+      "Completeness",
+      thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : "N/A",
+      "success"
+    );
     html += "</div>\n";
   }
   if (thought.propositions && thought.propositions.length > 0) {
@@ -36895,14 +41014,18 @@ function formalLogicToModelica(thought, options) {
     modelica += "  // Inference Rules\n";
     for (const inference of thought.logicalInferences) {
       const ruleStr = inference.rule || "Inference";
-      const ruleName = sanitizeModelicaId(ruleStr.replace(/[^a-zA-Z0-9]/g, "_"));
+      const ruleName = sanitizeModelicaId(
+        ruleStr.replace(/[^a-zA-Z0-9]/g, "_")
+      );
       modelica += `  function ${ruleName}
 `;
       modelica += `    "${escapeModelicaString(ruleStr)}"
 `;
       if (inference.premises && inference.premises.length > 0) {
         for (let i = 0; i < inference.premises.length; i++) {
-          const premiseId = sanitizeModelicaId(inference.premises[i] || `premise${i + 1}`);
+          const premiseId = sanitizeModelicaId(
+            inference.premises[i] || `premise${i + 1}`
+          );
           modelica += `    input Boolean premise${i + 1} "${escapeModelicaString(premiseId)}";
 `;
         }
@@ -37088,7 +41211,9 @@ function formalLogicToUML(thought, options) {
 }
 function formalLogicToJSON(thought, options) {
   const { includeLabels = true, includeMetrics = true } = options;
-  const graph = createJsonGraph("Formal Logic Proof", "formal-logic", { includeMetrics });
+  const graph = createJsonGraph("Formal Logic Proof", "formal-logic", {
+    includeMetrics
+  });
   if (thought.propositions && thought.propositions.length > 0) {
     for (const proposition of thought.propositions) {
       addNode(graph, {
@@ -37180,7 +41305,7 @@ function formalLogicToJSON(thought, options) {
     });
     const lastStep = thought.proof.steps[thought.proof.steps.length - 1];
     addEdge(graph, {
-      id: `edge_${edgeId++}`,
+      id: `edge_${edgeId}`,
       source: `Step${lastStep.stepNumber}`,
       target: "Theorem",
       label: "proves",
@@ -37213,19 +41338,19 @@ function formalLogicToMarkdown(thought, options) {
   const parts = [];
   if (thought.proof) {
     const proofContent = keyValueSection({
-      "Theorem": thought.proof.theorem,
-      "Technique": thought.proof.technique,
-      "Valid": thought.proof.valid ? "Yes" : "No",
-      "Completeness": `${(thought.proof.completeness * 100).toFixed(0)}%`
+      Theorem: thought.proof.theorem,
+      Technique: thought.proof.technique,
+      Valid: thought.proof.valid ? "Yes" : "No",
+      Completeness: `${(thought.proof.completeness * 100).toFixed(0)}%`
     });
     parts.push(section("Proof", proofContent));
   }
   if (includeMetrics) {
     const metricsContent = keyValueSection({
-      "Propositions": thought.propositions?.length || 0,
-      "Inferences": thought.logicalInferences?.length || 0,
+      Propositions: thought.propositions?.length || 0,
+      Inferences: thought.logicalInferences?.length || 0,
       "Proof Steps": thought.proof?.steps?.length || 0,
-      "Completeness": thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : "N/A"
+      Completeness: thought.proof ? `${(thought.proof.completeness * 100).toFixed(0)}%` : "N/A"
     });
     parts.push(section("Metrics", metricsContent));
   }
@@ -37267,9 +41392,9 @@ function formalLogicToMarkdown(thought, options) {
   }
   if (thought.truthTable) {
     const truthTableContent = keyValueSection({
-      "Tautology": thought.truthTable.isTautology ? "Yes" : "No",
-      "Contradiction": thought.truthTable.isContradiction ? "Yes" : "No",
-      "Contingent": thought.truthTable.isContingent ? "Yes" : "No"
+      Tautology: thought.truthTable.isTautology ? "Yes" : "No",
+      Contradiction: thought.truthTable.isContradiction ? "Yes" : "No",
+      Contingent: thought.truthTable.isContingent ? "Yes" : "No"
     });
     parts.push(section("Truth Table", truthTableContent));
   }
@@ -37318,7 +41443,13 @@ function exportEngineeringAnalysis(thought, options) {
 function engineeringToMermaid(thought, options) {
   const { includeLabels = true, includeMetrics = true } = options;
   const builder = new MermaidGraphBuilder().setDirection("TB");
-  builder.addNode({ id: "title", label: `\u{1F527} ${thought.analysisType.toUpperCase()} Analysis` }).addNode({ id: "challenge", label: thought.designChallenge.slice(0, 50) + (thought.designChallenge.length > 50 ? "..." : "") }).addEdge({ source: "title", target: "challenge" });
+  builder.addNode({
+    id: "title",
+    label: `\u{1F527} ${thought.analysisType.toUpperCase()} Analysis`
+  }).addNode({
+    id: "challenge",
+    label: thought.designChallenge.slice(0, 50) + (thought.designChallenge.length > 50 ? "..." : "")
+  }).addEdge({ source: "title", target: "challenge" });
   if (thought.requirements?.requirements.length) {
     const reqIds = [];
     for (const req of thought.requirements.requirements.slice(0, 5)) {
@@ -37329,7 +41460,10 @@ function engineeringToMermaid(thought, options) {
       reqIds.push(id);
     }
     if (thought.requirements.requirements.length > 5) {
-      builder.addNode({ id: "reqMore", label: `... +${thought.requirements.requirements.length - 5} more` });
+      builder.addNode({
+        id: "reqMore",
+        label: `... +${thought.requirements.requirements.length - 5} more`
+      });
       reqIds.push("reqMore");
     }
     builder.addSubgraph("Requirements", "\u{1F4CB} Requirements", reqIds);
@@ -37345,7 +41479,10 @@ function engineeringToMermaid(thought, options) {
       altIds.push(id);
     }
     if (thought.tradeStudy.alternatives.length > 4) {
-      builder.addNode({ id: "altMore", label: `... +${thought.tradeStudy.alternatives.length - 4} more` });
+      builder.addNode({
+        id: "altMore",
+        label: `... +${thought.tradeStudy.alternatives.length - 4} more`
+      });
       altIds.push("altMore");
     }
     builder.addSubgraph("TradeStudy", "\u2696\uFE0F Trade Study", altIds);
@@ -37353,7 +41490,9 @@ function engineeringToMermaid(thought, options) {
   }
   if (thought.fmea?.failureModes.length) {
     const fmIds = [];
-    const sortedModes = [...thought.fmea.failureModes].sort((a, b) => b.rpn - a.rpn);
+    const sortedModes = [...thought.fmea.failureModes].sort(
+      (a, b) => b.rpn - a.rpn
+    );
     for (const fm of sortedModes.slice(0, 4)) {
       const id = sanitizeId(fm.id);
       const risk = fm.rpn >= thought.fmea.rpnThreshold ? "\u{1F534}" : fm.rpn >= 100 ? "\u{1F7E1}" : "\u{1F7E2}";
@@ -37362,7 +41501,10 @@ function engineeringToMermaid(thought, options) {
       fmIds.push(id);
     }
     if (thought.fmea.failureModes.length > 4) {
-      builder.addNode({ id: "fmMore", label: `... +${thought.fmea.failureModes.length - 4} more` });
+      builder.addNode({
+        id: "fmMore",
+        label: `... +${thought.fmea.failureModes.length - 4} more`
+      });
       fmIds.push("fmMore");
     }
     builder.addSubgraph("FMEA", "\u26A0\uFE0F Failure Modes", fmIds);
@@ -37378,14 +41520,20 @@ function engineeringToMermaid(thought, options) {
       decIds.push(id);
     }
     if (thought.designDecisions.decisions.length > 4) {
-      builder.addNode({ id: "decMore", label: `... +${thought.designDecisions.decisions.length - 4} more` });
+      builder.addNode({
+        id: "decMore",
+        label: `... +${thought.designDecisions.decisions.length - 4} more`
+      });
       decIds.push("decMore");
     }
     builder.addSubgraph("Decisions", "\u{1F4DD} Design Decisions", decIds);
     builder.addEdge({ source: "challenge", target: "Decisions" });
   }
   if (includeMetrics && thought.assessment) {
-    builder.addNode({ id: "metrics", label: `\u{1F4CA} Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%` });
+    builder.addNode({
+      id: "metrics",
+      label: `\u{1F4CA} Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%`
+    });
     builder.addEdge({ source: "challenge", target: "metrics" });
   }
   return builder.render();
@@ -37415,7 +41563,10 @@ function engineeringToDOT(thought, options) {
       style: "filled",
       fillColor: "lightyellow"
     });
-    builder.addEdge({ source: "challenge", target: sanitizeId(thought.requirements.requirements[0]?.id || "req") });
+    builder.addEdge({
+      source: "challenge",
+      target: sanitizeId(thought.requirements.requirements[0]?.id || "req")
+    });
   }
   if (thought.tradeStudy) {
     for (const alt of thought.tradeStudy.alternatives) {
@@ -37433,7 +41584,10 @@ function engineeringToDOT(thought, options) {
       style: "filled",
       fillColor: "lightgreen"
     });
-    builder.addEdge({ source: "challenge", target: sanitizeId(thought.tradeStudy.alternatives[0]?.id || "alt") });
+    builder.addEdge({
+      source: "challenge",
+      target: sanitizeId(thought.tradeStudy.alternatives[0]?.id || "alt")
+    });
   }
   if (thought.fmea?.failureModes.length) {
     for (const fm of thought.fmea.failureModes) {
@@ -37451,7 +41605,10 @@ function engineeringToDOT(thought, options) {
       style: "filled",
       fillColor: "mistyrose"
     });
-    builder.addEdge({ source: "challenge", target: sanitizeId(thought.fmea.failureModes[0]?.id || "fm") });
+    builder.addEdge({
+      source: "challenge",
+      target: sanitizeId(thought.fmea.failureModes[0]?.id || "fm")
+    });
   }
   if (thought.designDecisions?.decisions.length) {
     for (const dec of thought.designDecisions.decisions) {
@@ -37468,7 +41625,10 @@ function engineeringToDOT(thought, options) {
       style: "filled",
       fillColor: "lavender"
     });
-    builder.addEdge({ source: "challenge", target: sanitizeId(thought.designDecisions.decisions[0]?.id || "dec") });
+    builder.addEdge({
+      source: "challenge",
+      target: sanitizeId(thought.designDecisions.decisions[0]?.id || "dec")
+    });
   }
   return builder.render();
 }
@@ -37483,11 +41643,15 @@ function engineeringToASCII(thought) {
     });
     builder.addBulletList(reqItems, "asciiBullet");
     if (thought.requirements.requirements.length > 5) {
-      builder.addText(`   ... +${thought.requirements.requirements.length - 5} more
-`);
+      builder.addText(
+        `   ... +${thought.requirements.requirements.length - 5} more
+`
+      );
     }
-    builder.addText(`   Coverage: ${thought.requirements.coverage.verified}/${thought.requirements.coverage.total} verified
-`);
+    builder.addText(
+      `   Coverage: ${thought.requirements.coverage.verified}/${thought.requirements.coverage.total} verified
+`
+    );
     builder.addEmptyLine();
   }
   if (thought.tradeStudy) {
@@ -37503,7 +41667,9 @@ function engineeringToASCII(thought) {
   }
   if (thought.fmea?.failureModes.length) {
     builder.addSection("\u26A0\uFE0F FAILURE MODES (FMEA)");
-    const sortedModes = [...thought.fmea.failureModes].sort((a, b) => b.rpn - a.rpn);
+    const sortedModes = [...thought.fmea.failureModes].sort(
+      (a, b) => b.rpn - a.rpn
+    );
     const fmItems = sortedModes.slice(0, 5).map((fm) => {
       const risk = fm.rpn >= thought.fmea.rpnThreshold ? "\u{1F534}" : fm.rpn >= 100 ? "\u{1F7E1}" : "\u{1F7E2}";
       return `${risk} ${fm.failureMode.slice(0, 35)} RPN:${fm.rpn}`;
@@ -37513,8 +41679,10 @@ function engineeringToASCII(thought) {
       builder.addText(`   ... +${thought.fmea.failureModes.length - 5} more
 `);
     }
-    builder.addText(`   Critical: ${thought.fmea.summary.criticalModes} modes above threshold
-`);
+    builder.addText(
+      `   Critical: ${thought.fmea.summary.criticalModes} modes above threshold
+`
+    );
     builder.addEmptyLine();
   }
   if (thought.designDecisions?.decisions.length) {
@@ -37525,28 +41693,38 @@ function engineeringToASCII(thought) {
     });
     builder.addBulletList(decItems, "asciiBullet");
     if (thought.designDecisions.decisions.length > 5) {
-      builder.addText(`   ... +${thought.designDecisions.decisions.length - 5} more
-`);
+      builder.addText(
+        `   ... +${thought.designDecisions.decisions.length - 5} more
+`
+      );
     }
     builder.addEmptyLine();
   }
   if (thought.assessment) {
     builder.addSection("\u{1F4CA} ASSESSMENT");
-    builder.addText(`   Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%
-`);
+    builder.addText(
+      `   Confidence: ${(thought.assessment.confidence * 100).toFixed(0)}%
+`
+    );
     if (thought.assessment.keyRisks.length > 0) {
       builder.addText(`   Key Risks: ${thought.assessment.keyRisks.length}
 `);
     }
     if (thought.assessment.openIssues.length > 0) {
-      builder.addText(`   Open Issues: ${thought.assessment.openIssues.length}
-`);
+      builder.addText(
+        `   Open Issues: ${thought.assessment.openIssues.length}
+`
+      );
     }
   }
   return builder.render();
 }
 function engineeringToSVG(thought, options) {
-  const { colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   const svgOptions = { ...DEFAULT_SVG_OPTIONS, ...options };
   const nodePositions = /* @__PURE__ */ new Map();
   let currentY = 60;
@@ -37596,7 +41774,11 @@ function engineeringToSVG(thought, options) {
     startX += sectionWidth + 20;
   }
   const svgHeight = currentY + 120;
-  let svg = generateSVGHeader(svgOptions.svgWidth || 800, svgHeight, `Engineering: ${thought.analysisType}`);
+  let svg = generateSVGHeader(
+    svgOptions.svgWidth || 800,
+    svgHeight,
+    `Engineering: ${thought.analysisType}`
+  );
   const challengeColors = getNodeColor("primary", colorScheme);
   svg += renderStadiumNode(challengePos, challengeColors);
   for (const section2 of sections) {
@@ -37607,7 +41789,10 @@ function engineeringToSVG(thought, options) {
   }
   if (includeMetrics && thought.assessment) {
     const metrics = [
-      { label: "Confidence", value: `${(thought.assessment.confidence * 100).toFixed(0)}%` },
+      {
+        label: "Confidence",
+        value: `${(thought.assessment.confidence * 100).toFixed(0)}%`
+      },
       { label: "Key Risks", value: thought.assessment.keyRisks.length },
       { label: "Open Issues", value: thought.assessment.openIssues.length }
     ];
@@ -37739,7 +41924,10 @@ function engineeringToGraphML(thought, options) {
       }
     }
   }
-  return generateGraphML(nodes, edges, { graphName: "Engineering Analysis", directed: true });
+  return generateGraphML(nodes, edges, {
+    graphName: "Engineering Analysis",
+    directed: true
+  });
 }
 function engineeringToTikZ(thought, options) {
   const { includeLabels = true, includeMetrics = true } = options;
@@ -37812,9 +42000,16 @@ function engineeringToTikZ(thought, options) {
       type: "success",
       shape: "ellipse"
     });
-    edges.push({ source: "challenge", target: "assessment", style: "dashed", directed: true });
+    edges.push({
+      source: "challenge",
+      target: "assessment",
+      style: "dashed",
+      directed: true
+    });
   }
-  return generateTikZ(nodes, edges, { title: `Engineering: ${thought.analysisType}` });
+  return generateTikZ(nodes, edges, {
+    title: `Engineering: ${thought.analysisType}`
+  });
 }
 function sanitizeModelicaId2(id) {
   let sanitized = id.replace(/[-\s]/g, "_");
@@ -37828,29 +42023,47 @@ function escapeModelicaString2(str) {
   return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t");
 }
 function engineeringToModelica(thought, options) {
-  const { includeMetrics = true, modelicaPackageName, modelicaIncludeAnnotations = true } = options;
+  const {
+    includeMetrics = true,
+    modelicaPackageName,
+    modelicaIncludeAnnotations = true
+  } = options;
   const packageName = modelicaPackageName || sanitizeModelicaId2(thought.designChallenge.slice(0, 30)) || "EngineeringAnalysis";
   const lines = [];
   lines.push(`package ${packageName}`);
-  lines.push(`  "Engineering Analysis: ${escapeModelicaString2(thought.designChallenge)}"`);
+  lines.push(
+    `  "Engineering Analysis: ${escapeModelicaString2(thought.designChallenge)}"`
+  );
   lines.push("");
   if (thought.requirements && thought.requirements.requirements.length > 0) {
-    lines.push("  // ==========================================================================");
+    lines.push(
+      "  // =========================================================================="
+    );
     lines.push("  // Requirements Traceability");
-    lines.push("  // ==========================================================================");
+    lines.push(
+      "  // =========================================================================="
+    );
     lines.push("");
     lines.push("  record Requirements");
-    lines.push(`    "Requirements traceability for ${escapeModelicaString2(thought.designChallenge)}"`);
+    lines.push(
+      `    "Requirements traceability for ${escapeModelicaString2(thought.designChallenge)}"`
+    );
     lines.push("");
     for (const req of thought.requirements.requirements) {
       const reqId = sanitizeModelicaId2(req.id);
       const priority = req.priority.toUpperCase();
       const status = req.status;
       lines.push(`    // ${req.id}: ${escapeModelicaString2(req.title)}`);
-      lines.push(`    parameter Boolean ${reqId}_satisfied = ${status === "verified" || status === "implemented" ? "true" : "false"}`);
+      lines.push(
+        `    parameter Boolean ${reqId}_satisfied = ${status === "verified" || status === "implemented" ? "true" : "false"}`
+      );
       if (modelicaIncludeAnnotations) {
-        lines.push(`      annotation(Dialog(group="${priority}", tab="Requirements"),`);
-        lines.push(`               Documentation(info="<html><p>${escapeModelicaString2(req.description)}</p></html>"));`);
+        lines.push(
+          `      annotation(Dialog(group="${priority}", tab="Requirements"),`
+        );
+        lines.push(
+          `               Documentation(info="<html><p>${escapeModelicaString2(req.description)}</p></html>"));`
+        );
       } else {
         lines.push("      ;");
       }
@@ -37859,43 +42072,63 @@ function engineeringToModelica(thought, options) {
     if (includeMetrics) {
       const cov = thought.requirements.coverage;
       lines.push(`    // Coverage Metrics`);
-      lines.push(`    final parameter Integer totalRequirements = ${cov.total};`);
-      lines.push(`    final parameter Integer verifiedRequirements = ${cov.verified};`);
-      lines.push(`    final parameter Real coverageRatio = ${(cov.verified / Math.max(cov.total, 1)).toFixed(3)};`);
+      lines.push(
+        `    final parameter Integer totalRequirements = ${cov.total};`
+      );
+      lines.push(
+        `    final parameter Integer verifiedRequirements = ${cov.verified};`
+      );
+      lines.push(
+        `    final parameter Real coverageRatio = ${(cov.verified / Math.max(cov.total, 1)).toFixed(3)};`
+      );
       lines.push("");
     }
     lines.push("  end Requirements;");
     lines.push("");
   }
   if (thought.tradeStudy) {
-    lines.push("  // ==========================================================================");
+    lines.push(
+      "  // =========================================================================="
+    );
     lines.push("  // Trade Study");
-    lines.push("  // ==========================================================================");
+    lines.push(
+      "  // =========================================================================="
+    );
     lines.push("");
     lines.push("  model TradeStudy");
     lines.push(`    "${escapeModelicaString2(thought.tradeStudy.title)}"`);
     lines.push("");
-    const altIds = thought.tradeStudy.alternatives.map((a) => sanitizeModelicaId2(a.id));
+    const altIds = thought.tradeStudy.alternatives.map(
+      (a) => sanitizeModelicaId2(a.id)
+    );
     lines.push(`    type Alternative = enumeration(`);
     for (let i = 0; i < altIds.length; i++) {
       const alt = thought.tradeStudy.alternatives[i];
       const comma = i < altIds.length - 1 ? "," : "";
-      lines.push(`      ${altIds[i]} "${escapeModelicaString2(alt.name)}"${comma}`);
+      lines.push(
+        `      ${altIds[i]} "${escapeModelicaString2(alt.name)}"${comma}`
+      );
     }
     lines.push("    );");
     lines.push("");
     const recId = sanitizeModelicaId2(thought.tradeStudy.recommendation);
-    lines.push(`    parameter Alternative selectedAlternative = Alternative.${recId}`);
+    lines.push(
+      `    parameter Alternative selectedAlternative = Alternative.${recId}`
+    );
     lines.push(`      "Selected alternative based on trade study";`);
     lines.push("");
     lines.push("    // Criteria Weights (sum to 1.0)");
     for (const crit of thought.tradeStudy.criteria) {
       const critId = sanitizeModelicaId2(crit.id);
-      lines.push(`    parameter Real weight_${critId} = ${crit.weight.toFixed(3)} "${escapeModelicaString2(crit.name)}";`);
+      lines.push(
+        `    parameter Real weight_${critId} = ${crit.weight.toFixed(3)} "${escapeModelicaString2(crit.name)}";`
+      );
     }
     lines.push("");
     lines.push("    // Scores for selected alternative");
-    const recScores = thought.tradeStudy.scores.filter((s) => s.alternativeId === thought.tradeStudy.recommendation);
+    const recScores = thought.tradeStudy.scores.filter(
+      (s) => s.alternativeId === thought.tradeStudy.recommendation
+    );
     for (const score of recScores) {
       const critId = sanitizeModelicaId2(score.criteriaId);
       lines.push(`    final parameter Real score_${critId} = ${score.score};`);
@@ -37903,22 +42136,32 @@ function engineeringToModelica(thought, options) {
     lines.push("");
     if (modelicaIncludeAnnotations) {
       lines.push('    annotation(Documentation(info="<html>');
-      lines.push(`      <h3>Objective</h3><p>${escapeModelicaString2(thought.tradeStudy.objective)}</p>`);
-      lines.push(`      <h3>Justification</h3><p>${escapeModelicaString2(thought.tradeStudy.justification)}</p>`);
+      lines.push(
+        `      <h3>Objective</h3><p>${escapeModelicaString2(thought.tradeStudy.objective)}</p>`
+      );
+      lines.push(
+        `      <h3>Justification</h3><p>${escapeModelicaString2(thought.tradeStudy.justification)}</p>`
+      );
       lines.push('    </html>"));');
     }
     lines.push("  end TradeStudy;");
     lines.push("");
   }
   if (thought.fmea && thought.fmea.failureModes.length > 0) {
-    lines.push("  // ==========================================================================");
+    lines.push(
+      "  // =========================================================================="
+    );
     lines.push("  // Failure Mode and Effects Analysis (FMEA)");
-    lines.push("  // ==========================================================================");
+    lines.push(
+      "  // =========================================================================="
+    );
     lines.push("");
     lines.push("  model FMEA");
     lines.push(`    "FMEA for ${escapeModelicaString2(thought.fmea.system)}"`);
     lines.push("");
-    lines.push(`    parameter Integer rpnThreshold = ${thought.fmea.rpnThreshold} "Action required above this RPN";`);
+    lines.push(
+      `    parameter Integer rpnThreshold = ${thought.fmea.rpnThreshold} "Action required above this RPN";`
+    );
     lines.push("");
     for (const fm of thought.fmea.failureModes) {
       const fmId = sanitizeModelicaId2(fm.id);
@@ -37926,16 +42169,32 @@ function engineeringToModelica(thought, options) {
       lines.push(`    // Failure Mode: ${fm.id}`);
       lines.push(`    record ${fmId}`);
       lines.push(`      "${escapeModelicaString2(fm.failureMode)}"`);
-      lines.push(`      constant String component = "${escapeModelicaString2(fm.component)}";`);
-      lines.push(`      constant String cause = "${escapeModelicaString2(fm.cause)}";`);
-      lines.push(`      constant String effect = "${escapeModelicaString2(fm.effect)}";`);
-      lines.push(`      constant Integer severity = ${fm.severity} "1-10 scale";`);
-      lines.push(`      constant Integer occurrence = ${fm.occurrence} "1-10 scale";`);
-      lines.push(`      constant Integer detection = ${fm.detection} "1-10 scale";`);
-      lines.push(`      constant Integer rpn = ${fm.rpn} "Risk Priority Number";`);
+      lines.push(
+        `      constant String component = "${escapeModelicaString2(fm.component)}";`
+      );
+      lines.push(
+        `      constant String cause = "${escapeModelicaString2(fm.cause)}";`
+      );
+      lines.push(
+        `      constant String effect = "${escapeModelicaString2(fm.effect)}";`
+      );
+      lines.push(
+        `      constant Integer severity = ${fm.severity} "1-10 scale";`
+      );
+      lines.push(
+        `      constant Integer occurrence = ${fm.occurrence} "1-10 scale";`
+      );
+      lines.push(
+        `      constant Integer detection = ${fm.detection} "1-10 scale";`
+      );
+      lines.push(
+        `      constant Integer rpn = ${fm.rpn} "Risk Priority Number";`
+      );
       lines.push(`      constant Boolean isCritical = ${isCritical};`);
       if (fm.mitigation) {
-        lines.push(`      constant String mitigation = "${escapeModelicaString2(fm.mitigation)}";`);
+        lines.push(
+          `      constant String mitigation = "${escapeModelicaString2(fm.mitigation)}";`
+        );
       }
       lines.push(`    end ${fmId};`);
       lines.push("");
@@ -37944,8 +42203,12 @@ function engineeringToModelica(thought, options) {
       const sum = thought.fmea.summary;
       lines.push("    // Summary Statistics");
       lines.push(`    final parameter Integer totalModes = ${sum.totalModes};`);
-      lines.push(`    final parameter Integer criticalModes = ${sum.criticalModes};`);
-      lines.push(`    final parameter Real averageRpn = ${sum.averageRpn.toFixed(1)};`);
+      lines.push(
+        `    final parameter Integer criticalModes = ${sum.criticalModes};`
+      );
+      lines.push(
+        `    final parameter Real averageRpn = ${sum.averageRpn.toFixed(1)};`
+      );
       lines.push(`    final parameter Integer maxRpn = ${sum.maxRpn};`);
       lines.push("");
     }
@@ -37953,13 +42216,19 @@ function engineeringToModelica(thought, options) {
     lines.push("");
   }
   if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
-    lines.push("  // ==========================================================================");
+    lines.push(
+      "  // =========================================================================="
+    );
     lines.push("  // Design Decision Records");
-    lines.push("  // ==========================================================================");
+    lines.push(
+      "  // =========================================================================="
+    );
     lines.push("");
     lines.push("  package DesignDecisions");
     if (thought.designDecisions.projectName) {
-      lines.push(`    "Design decisions for ${escapeModelicaString2(thought.designDecisions.projectName)}"`);
+      lines.push(
+        `    "Design decisions for ${escapeModelicaString2(thought.designDecisions.projectName)}"`
+      );
     }
     lines.push("");
     for (const dec of thought.designDecisions.decisions) {
@@ -37967,14 +42236,22 @@ function engineeringToModelica(thought, options) {
       lines.push(`    record ${decId}`);
       lines.push(`      "${escapeModelicaString2(dec.title)}"`);
       lines.push(`      constant String status = "${dec.status}";`);
-      lines.push(`      constant String context = "${escapeModelicaString2(dec.context.slice(0, 200))}";`);
-      lines.push(`      constant String decision = "${escapeModelicaString2(dec.decision.slice(0, 200))}";`);
-      lines.push(`      constant String rationale = "${escapeModelicaString2(dec.rationale.slice(0, 200))}";`);
+      lines.push(
+        `      constant String context = "${escapeModelicaString2(dec.context.slice(0, 200))}";`
+      );
+      lines.push(
+        `      constant String decision = "${escapeModelicaString2(dec.decision.slice(0, 200))}";`
+      );
+      lines.push(
+        `      constant String rationale = "${escapeModelicaString2(dec.rationale.slice(0, 200))}";`
+      );
       if (dec.date) {
         lines.push(`      constant String date = "${dec.date}";`);
       }
       if (dec.supersededBy) {
-        lines.push(`      constant String supersededBy = "${sanitizeModelicaId2(dec.supersededBy)}";`);
+        lines.push(
+          `      constant String supersededBy = "${sanitizeModelicaId2(dec.supersededBy)}";`
+        );
       }
       if (modelicaIncludeAnnotations && dec.consequences.length > 0) {
         lines.push('      annotation(Documentation(info="<html>');
@@ -37991,15 +42268,25 @@ function engineeringToModelica(thought, options) {
     lines.push("");
   }
   if (thought.assessment && includeMetrics) {
-    lines.push("  // ==========================================================================");
+    lines.push(
+      "  // =========================================================================="
+    );
     lines.push("  // Assessment");
-    lines.push("  // ==========================================================================");
+    lines.push(
+      "  // =========================================================================="
+    );
     lines.push("");
     lines.push("  record Assessment");
     lines.push('    "Overall engineering assessment"');
-    lines.push(`    constant Real confidence = ${thought.assessment.confidence.toFixed(3)};`);
-    lines.push(`    constant Integer keyRisksCount = ${thought.assessment.keyRisks.length};`);
-    lines.push(`    constant Integer openIssuesCount = ${thought.assessment.openIssues.length};`);
+    lines.push(
+      `    constant Real confidence = ${thought.assessment.confidence.toFixed(3)};`
+    );
+    lines.push(
+      `    constant Integer keyRisksCount = ${thought.assessment.keyRisks.length};`
+    );
+    lines.push(
+      `    constant Integer openIssuesCount = ${thought.assessment.openIssues.length};`
+    );
     if (modelicaIncludeAnnotations) {
       lines.push('    annotation(Documentation(info="<html>');
       if (thought.assessment.keyRisks.length > 0) {
@@ -38024,8 +42311,12 @@ function engineeringToModelica(thought, options) {
   if (modelicaIncludeAnnotations) {
     lines.push(`  annotation(`);
     lines.push(`    Documentation(info="<html>`);
-    lines.push(`      <h2>Engineering Analysis: ${escapeModelicaString2(thought.analysisType)}</h2>`);
-    lines.push(`      <p><b>Design Challenge:</b> ${escapeModelicaString2(thought.designChallenge)}</p>`);
+    lines.push(
+      `      <h2>Engineering Analysis: ${escapeModelicaString2(thought.analysisType)}</h2>`
+    );
+    lines.push(
+      `      <p><b>Design Challenge:</b> ${escapeModelicaString2(thought.designChallenge)}</p>`
+    );
     lines.push(`      <p>Generated by DeepThinking MCP v8.3.1</p>`);
     lines.push(`    </html>"),`);
     lines.push(`    version="1.0.0"`);
@@ -38041,15 +42332,22 @@ function engineeringToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   const typeBadge = renderBadge(thought.analysisType, "primary");
   html += `<p>Analysis Type: ${typeBadge}</p>
 `;
-  html += renderSection("Design Challenge", `
+  html += renderSection(
+    "Design Challenge",
+    `
     <p class="text-primary"><strong>${escapeHTML(thought.designChallenge)}</strong></p>
-  `, "\u{1F527}");
+  `,
+    "\u{1F527}"
+  );
   if (thought.requirements && thought.requirements.requirements.length > 0) {
     if (includeMetrics) {
       const cov = thought.requirements.coverage;
@@ -38071,54 +42369,83 @@ function engineeringToHTML(thought, options) {
         req.priority,
         req.priority === "must" ? "danger" : req.priority === "should" ? "warning" : "secondary"
       );
-      return [
-        req.id,
-        req.title,
-        priorityBadge,
-        statusBadge,
-        req.source
-      ];
+      return [req.id, req.title, priorityBadge, statusBadge, req.source];
     });
-    html += renderSection("Requirements Traceability", renderTable(
-      ["ID", "Title", "Priority", "Status", "Source"],
-      reqRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
-    ), "\u{1F4CB}");
+    html += renderSection(
+      "Requirements Traceability",
+      renderTable(
+        ["ID", "Title", "Priority", "Status", "Source"],
+        reqRows.map(
+          (row) => row.map(
+            (cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))
+          )
+        )
+      ),
+      "\u{1F4CB}"
+    );
   }
   if (thought.tradeStudy) {
-    html += renderSection("Trade Study: " + thought.tradeStudy.title, `
+    html += renderSection(
+      "Trade Study: " + thought.tradeStudy.title,
+      `
       <p><strong>Objective:</strong> ${escapeHTML(thought.tradeStudy.objective)}</p>
       <h4>Criteria</h4>
     ` + renderTable(
-      ["Criterion", "Weight", "Description"],
-      thought.tradeStudy.criteria.map((c) => [c.name, (c.weight * 100).toFixed(0) + "%", c.description || "-"])
-    ) + `
+        ["Criterion", "Weight", "Description"],
+        thought.tradeStudy.criteria.map((c) => [
+          c.name,
+          (c.weight * 100).toFixed(0) + "%",
+          c.description || "-"
+        ])
+      ) + `
       <h4>Alternatives</h4>
     ` + renderTable(
-      ["Alternative", "Description", "Risk Level"],
-      thought.tradeStudy.alternatives.map((a) => [
-        a.id === thought.tradeStudy.recommendation ? "\u2B50 " + a.name : a.name,
-        a.description,
-        a.riskLevel || "-"
-      ])
-    ) + `
+        ["Alternative", "Description", "Risk Level"],
+        thought.tradeStudy.alternatives.map((a) => [
+          a.id === thought.tradeStudy.recommendation ? "\u2B50 " + a.name : a.name,
+          a.description,
+          a.riskLevel || "-"
+        ])
+      ) + `
       <div class="card" style="margin-top: 1rem; border-color: var(--success-color);">
         <div class="card-header text-success">Recommendation: ${escapeHTML(thought.tradeStudy.recommendation)}</div>
         <p>${escapeHTML(thought.tradeStudy.justification)}</p>
       </div>
-    `, "\u2696\uFE0F");
+    `,
+      "\u2696\uFE0F"
+    );
   }
   if (thought.fmea && thought.fmea.failureModes.length > 0) {
     if (includeMetrics) {
       html += '<div class="metrics-grid">';
-      html += renderMetricCard("Failure Modes", thought.fmea.summary.totalModes, "primary");
-      html += renderMetricCard("Critical Modes", thought.fmea.summary.criticalModes, "danger");
-      html += renderMetricCard("Average RPN", thought.fmea.summary.averageRpn.toFixed(1), "warning");
-      html += renderMetricCard("Max RPN", thought.fmea.summary.maxRpn, "danger");
+      html += renderMetricCard(
+        "Failure Modes",
+        thought.fmea.summary.totalModes,
+        "primary"
+      );
+      html += renderMetricCard(
+        "Critical Modes",
+        thought.fmea.summary.criticalModes,
+        "danger"
+      );
+      html += renderMetricCard(
+        "Average RPN",
+        thought.fmea.summary.averageRpn.toFixed(1),
+        "warning"
+      );
+      html += renderMetricCard(
+        "Max RPN",
+        thought.fmea.summary.maxRpn,
+        "danger"
+      );
       html += "</div>\n";
     }
     const fmeaRows = thought.fmea.failureModes.map((fm) => {
       const isCritical = fm.rpn >= thought.fmea.rpnThreshold;
-      const rpnBadge = renderBadge(fm.rpn.toString(), isCritical ? "danger" : "warning");
+      const rpnBadge = renderBadge(
+        fm.rpn.toString(),
+        isCritical ? "danger" : "warning"
+      );
       return [
         fm.component,
         fm.failureMode.substring(0, 40) + (fm.failureMode.length > 40 ? "..." : ""),
@@ -38129,12 +42456,20 @@ function engineeringToHTML(thought, options) {
         fm.mitigation ? "\u2713" : "-"
       ];
     });
-    html += renderSection("Failure Mode Analysis (FMEA)", `
+    html += renderSection(
+      "Failure Mode Analysis (FMEA)",
+      `
       <p><strong>System:</strong> ${escapeHTML(thought.fmea.system)} | <strong>RPN Threshold:</strong> ${thought.fmea.rpnThreshold}</p>
     ` + renderTable(
-      ["Component", "Failure Mode", "S", "O", "D", "RPN", "Mitigation"],
-      fmeaRows.map((row) => row.map((cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))))
-    ), "\u26A0\uFE0F");
+        ["Component", "Failure Mode", "S", "O", "D", "RPN", "Mitigation"],
+        fmeaRows.map(
+          (row) => row.map(
+            (cell) => typeof cell === "string" && cell.startsWith("<") ? cell : escapeHTML(String(cell))
+          )
+        )
+      ),
+      "\u26A0\uFE0F"
+    );
   }
   if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
     const decisionsContent = thought.designDecisions.decisions.map((dec) => {
@@ -38160,7 +42495,9 @@ function engineeringToHTML(thought, options) {
     html += renderSection("Design Decisions", decisionsContent, "\u{1F4DD}");
   }
   if (thought.assessment && includeMetrics) {
-    html += renderSection("Assessment", `
+    html += renderSection(
+      "Assessment",
+      `
       <div class="metrics-grid">
         ${renderMetricCard("Confidence", (thought.assessment.confidence * 100).toFixed(0) + "%", "primary")}
         ${renderMetricCard("Key Risks", thought.assessment.keyRisks.length, "danger")}
@@ -38179,13 +42516,20 @@ function engineeringToHTML(thought, options) {
           ${thought.assessment.nextSteps.map((s) => `<li>${escapeHTML(s)}</li>`).join("")}
         </ul>
       ` : ""}
-    `, "\u{1F4CA}");
+    `,
+      "\u{1F4CA}"
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
 }
 function engineeringToUML(thought, options) {
-  const { umlTheme, umlDirection, includeLabels = true, includeMetrics = true } = options;
+  const {
+    umlTheme,
+    umlDirection,
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   const nodes = [];
   const edges = [];
   nodes.push({
@@ -38295,10 +42639,18 @@ function engineeringToUML(thought, options) {
   });
 }
 function engineeringToJSON(thought, options) {
-  const { jsonPrettyPrint = true, jsonIndent = 2, includeMetrics = true } = options;
-  const graph = createJsonGraph(`Engineering: ${thought.analysisType}`, "engineering", {
-    includeMetrics
-  });
+  const {
+    jsonPrettyPrint = true,
+    jsonIndent = 2,
+    includeMetrics = true
+  } = options;
+  const graph = createJsonGraph(
+    `Engineering: ${thought.analysisType}`,
+    "engineering",
+    {
+      includeMetrics
+    }
+  );
   graph.metadata.analysisType = thought.analysisType;
   graph.metadata.designChallenge = thought.designChallenge;
   addNode(graph, {
@@ -38447,11 +42799,23 @@ function engineeringToJSON(thought, options) {
   if (includeMetrics && graph.metrics) {
     addMetric(graph, "analysisType", thought.analysisType);
     if (thought.requirements) {
-      addMetric(graph, "requirementCount", thought.requirements.requirements.length);
-      addMetric(graph, "verifiedRequirements", thought.requirements.coverage.verified);
+      addMetric(
+        graph,
+        "requirementCount",
+        thought.requirements.requirements.length
+      );
+      addMetric(
+        graph,
+        "verifiedRequirements",
+        thought.requirements.coverage.verified
+      );
     }
     if (thought.tradeStudy) {
-      addMetric(graph, "alternativeCount", thought.tradeStudy.alternatives.length);
+      addMetric(
+        graph,
+        "alternativeCount",
+        thought.tradeStudy.alternatives.length
+      );
       addMetric(graph, "recommendation", thought.tradeStudy.recommendation);
     }
     if (thought.fmea) {
@@ -38460,14 +42824,21 @@ function engineeringToJSON(thought, options) {
       addMetric(graph, "maxRpn", thought.fmea.summary.maxRpn);
     }
     if (thought.designDecisions) {
-      addMetric(graph, "decisionCount", thought.designDecisions.decisions.length);
+      addMetric(
+        graph,
+        "decisionCount",
+        thought.designDecisions.decisions.length
+      );
     }
     if (thought.assessment) {
       addMetric(graph, "confidence", thought.assessment.confidence);
       addMetric(graph, "riskCount", thought.assessment.keyRisks.length);
     }
   }
-  return serializeGraph(graph, { prettyPrint: jsonPrettyPrint, indent: jsonIndent });
+  return serializeGraph(graph, {
+    prettyPrint: jsonPrettyPrint,
+    indent: jsonIndent
+  });
 }
 function engineeringToMarkdown(thought, options) {
   const {
@@ -38490,16 +42861,19 @@ function engineeringToMarkdown(thought, options) {
       req.status,
       req.source
     ]);
-    let reqContent = table(["ID", "Title", "Priority", "Status", "Source"], reqRows);
+    let reqContent = table(
+      ["ID", "Title", "Priority", "Status", "Source"],
+      reqRows
+    );
     if (includeMetrics) {
       const cov = thought.requirements.coverage;
       const coveragePercent = cov.verified / Math.max(cov.total, 1) * 100;
       reqContent += "\n\n" + keyValueSection({
         "Total Requirements": cov.total,
-        "Verified": cov.verified,
+        Verified: cov.verified,
         "Traced to Source": cov.tracedToSource,
         "Allocated to Design": cov.allocatedToDesign,
-        "Coverage": `${coveragePercent.toFixed(1)}%`
+        Coverage: `${coveragePercent.toFixed(1)}%`
       });
       reqContent += "\n\n**Verification Progress:**\n\n" + progressBar(coveragePercent);
     }
@@ -38523,10 +42897,15 @@ function engineeringToMarkdown(thought, options) {
     tradeContent += "### Criteria\n\n";
     tradeContent += table(["Criterion", "Weight", "Description"], criteriaRows);
     tradeContent += "\n\n### Alternatives\n\n";
-    tradeContent += table(["Alternative", "Description", "Risk Level", "Cost"], altRows);
+    tradeContent += table(
+      ["Alternative", "Description", "Risk Level", "Cost"],
+      altRows
+    );
     tradeContent += "\n\n**Recommendation:** " + thought.tradeStudy.recommendation;
     tradeContent += "\n\n**Justification:**\n\n" + thought.tradeStudy.justification;
-    parts.push(section("Trade Study: " + thought.tradeStudy.title, tradeContent));
+    parts.push(
+      section("Trade Study: " + thought.tradeStudy.title, tradeContent)
+    );
   }
   if (thought.fmea && thought.fmea.failureModes.length > 0) {
     const fmeaRows = thought.fmea.failureModes.map((fm) => {
@@ -38558,7 +42937,9 @@ function engineeringToMarkdown(thought, options) {
         "RPN Threshold": thought.fmea.rpnThreshold
       });
     }
-    parts.push(section("Failure Mode and Effects Analysis (FMEA)", fmeaContent));
+    parts.push(
+      section("Failure Mode and Effects Analysis (FMEA)", fmeaContent)
+    );
   }
   if (thought.designDecisions && thought.designDecisions.decisions.length > 0) {
     let decisionsContent = "";
@@ -38567,8 +42948,8 @@ function engineeringToMarkdown(thought, options) {
 
 `;
       decisionsContent += keyValueSection({
-        "Status": dec.status,
-        "Date": dec.date || "-"
+        Status: dec.status,
+        Date: dec.date || "-"
       });
       decisionsContent += "\n\n**Context:**\n\n" + dec.context;
       decisionsContent += "\n\n**Decision:**\n\n" + dec.decision;
@@ -38587,7 +42968,7 @@ function engineeringToMarkdown(thought, options) {
   }
   if (thought.assessment) {
     let assessmentContent = keyValueSection({
-      "Confidence": `${(thought.assessment.confidence * 100).toFixed(1)}%`,
+      Confidence: `${(thought.assessment.confidence * 100).toFixed(1)}%`,
       "Key Risks": thought.assessment.keyRisks.length,
       "Open Issues": thought.assessment.openIssues.length
     });
@@ -38607,15 +42988,19 @@ function engineeringToMarkdown(thought, options) {
     const mermaidDiagram = engineeringToMermaid(thought, options);
     parts.push(section("Visualization", mermaidBlock(mermaidDiagram)));
   }
-  return document(`Engineering Analysis: ${thought.analysisType}`, parts.join("\n"), {
-    includeFrontmatter: markdownIncludeFrontmatter,
-    includeTableOfContents: markdownIncludeToc,
-    metadata: {
-      mode: "engineering",
-      analysisType: thought.analysisType,
-      ...thought.assessment?.confidence !== void 0 ? { confidence: thought.assessment.confidence } : {}
+  return document(
+    `Engineering Analysis: ${thought.analysisType}`,
+    parts.join("\n"),
+    {
+      includeFrontmatter: markdownIncludeFrontmatter,
+      includeTableOfContents: markdownIncludeToc,
+      metadata: {
+        mode: "engineering",
+        analysisType: thought.analysisType,
+        ...thought.assessment?.confidence !== void 0 ? { confidence: thought.assessment.confidence } : {}
+      }
     }
-  });
+  );
 }
 
 // src/export/visual/modes/computability.ts
@@ -38648,24 +43033,41 @@ function exportComputability(thought, options) {
 function computabilityToMermaid(thought, options) {
   const { includeLabels = true } = options;
   if (thought.currentMachine || thought.machines && thought.machines.length > 0) {
-    return turingMachineToMermaid(thought.currentMachine || thought.machines[0], includeLabels);
+    return turingMachineToMermaid(
+      thought.currentMachine || thought.machines[0],
+      includeLabels
+    );
   }
   if (thought.reductions && thought.reductions.length > 0) {
-    return reductionChainToMermaid(thought.reductions, thought.reductionChain, includeLabels);
+    return reductionChainToMermaid(
+      thought.reductions,
+      thought.reductionChain,
+      includeLabels
+    );
   }
   if (thought.decidabilityProof) {
     return decidabilityProofToMermaid(thought);
   }
   const builder = new MermaidGraphBuilder().setDirection("TD");
-  builder.addNode({ id: "type", label: thought.thoughtType || "Computability", shape: "rectangle" });
+  builder.addNode({
+    id: "type",
+    label: thought.thoughtType || "Computability",
+    shape: "rectangle"
+  });
   if (thought.keyInsight) {
-    builder.addNode({ id: "insight", label: `${thought.keyInsight.substring(0, 50)}...`, shape: "rectangle" });
+    builder.addNode({
+      id: "insight",
+      label: `${thought.keyInsight.substring(0, 50)}...`,
+      shape: "rectangle"
+    });
     builder.addEdge({ source: "type", target: "insight" });
   }
   return builder.render();
 }
 function turingMachineToMermaid(machine, includeLabels) {
-  const builder = new MermaidStateDiagramBuilder().setInitialState(machine.initialState);
+  const builder = new MermaidStateDiagramBuilder().setInitialState(
+    machine.initialState
+  );
   for (const state of machine.states) {
     builder.addState({ id: state, label: state });
   }
@@ -38684,7 +43086,9 @@ function reductionChainToMermaid(reductions, chain, includeLabels) {
     for (let i = 0; i < chain.length - 1; i++) {
       const from = sanitizeId(chain[i]);
       const to = sanitizeId(chain[i + 1]);
-      const reduction = reductions.find((r) => r.fromProblem === chain[i] && r.toProblem === chain[i + 1]);
+      const reduction = reductions.find(
+        (r) => r.fromProblem === chain[i] && r.toProblem === chain[i + 1]
+      );
       const label = includeLabels && reduction ? `\u2264${reduction.type === "polynomial_time" ? "p" : "m"}` : void 0;
       builder.addNode({ id: from, label: chain[i], shape: "rectangle" });
       builder.addNode({ id: to, label: chain[i + 1], shape: "rectangle" });
@@ -38705,9 +43109,21 @@ function reductionChainToMermaid(reductions, chain, includeLabels) {
 function decidabilityProofToMermaid(thought, _includeLabels) {
   const proof = thought.decidabilityProof;
   const builder = new MermaidGraphBuilder().setDirection("TD");
-  builder.addNode({ id: "problem", label: `Problem: ${proof.problem}`, shape: "rectangle" });
-  builder.addNode({ id: "method", label: `Method: ${proof.method}`, shape: "rectangle" });
-  builder.addNode({ id: "conclusion", label: proof.conclusion.toUpperCase(), shape: "rectangle" });
+  builder.addNode({
+    id: "problem",
+    label: `Problem: ${proof.problem}`,
+    shape: "rectangle"
+  });
+  builder.addNode({
+    id: "method",
+    label: `Method: ${proof.method}`,
+    shape: "rectangle"
+  });
+  builder.addNode({
+    id: "conclusion",
+    label: proof.conclusion.toUpperCase(),
+    shape: "rectangle"
+  });
   builder.addEdge({ source: "problem", target: "method" });
   builder.addEdge({ source: "method", target: "conclusion" });
   return builder.render();
@@ -38715,30 +43131,53 @@ function decidabilityProofToMermaid(thought, _includeLabels) {
 function computabilityToDOT(thought, options) {
   const { includeLabels = true } = options;
   if (thought.currentMachine || thought.machines && thought.machines.length > 0) {
-    return turingMachineToDOT(thought.currentMachine || thought.machines[0], includeLabels);
+    return turingMachineToDOT(
+      thought.currentMachine || thought.machines[0],
+      includeLabels
+    );
   }
   if (thought.reductions && thought.reductions.length > 0) {
-    return reductionChainToDOT(thought.reductions, thought.reductionChain, includeLabels);
+    return reductionChainToDOT(
+      thought.reductions,
+      thought.reductionChain,
+      includeLabels
+    );
   }
   const builder = new DOTGraphBuilder().setGraphName("Computability").setRankDir("TB");
-  builder.addNode({ id: "type", label: thought.thoughtType || "Computability" });
+  builder.addNode({
+    id: "type",
+    label: thought.thoughtType || "Computability"
+  });
   return builder.render();
 }
 function turingMachineToDOT(machine, includeLabels) {
   const builder = new DOTGraphBuilder().setGraphName("TuringMachine").setRankDir("LR").setNodeDefaults({ shape: "circle" });
   builder.addNode({ id: "start", shape: "point" });
-  builder.addEdge({ source: "start", target: sanitizeId(machine.initialState) });
+  builder.addEdge({
+    source: "start",
+    target: sanitizeId(machine.initialState)
+  });
   for (const state of machine.states) {
     const isAccept = machine.acceptStates.includes(state);
     const isReject = machine.rejectStates.includes(state);
     const shape = isAccept ? "doublecircle" : "circle";
     const style = isReject ? ["filled"] : void 0;
     const fillColor = isReject ? "lightgray" : void 0;
-    builder.addNode({ id: sanitizeId(state), label: state, shape, style, fillColor });
+    builder.addNode({
+      id: sanitizeId(state),
+      label: state,
+      shape,
+      style,
+      fillColor
+    });
   }
   for (const t of machine.transitions) {
     const label = includeLabels ? `${t.readSymbol}/${t.writeSymbol},${t.direction}` : void 0;
-    builder.addEdge({ source: sanitizeId(t.fromState), target: sanitizeId(t.toState), label });
+    builder.addEdge({
+      source: sanitizeId(t.fromState),
+      target: sanitizeId(t.toState),
+      label
+    });
   }
   return builder.render();
 }
@@ -38754,7 +43193,11 @@ function reductionChainToDOT(reductions, _chain, includeLabels) {
   }
   for (const r of reductions) {
     const label = includeLabels ? `\u2264${r.type === "polynomial_time" ? "p" : "m"}` : void 0;
-    builder.addEdge({ source: sanitizeId(r.fromProblem), target: sanitizeId(r.toProblem), label });
+    builder.addEdge({
+      source: sanitizeId(r.fromProblem),
+      target: sanitizeId(r.toProblem),
+      label
+    });
   }
   return builder.render();
 }
@@ -38783,8 +43226,10 @@ function computabilityToASCII(thought) {
 `);
     for (const step of trace.steps.slice(0, 5)) {
       const head = " ".repeat(step.headPosition) + "v";
-      builder.addText(`[${step.stepNumber}] ${step.state}: ${step.tapeContents}
-`);
+      builder.addText(
+        `[${step.stepNumber}] ${step.state}: ${step.tapeContents}
+`
+      );
       builder.addText(`     ${head}
 `);
     }
@@ -38812,8 +43257,10 @@ function computabilityToASCII(thought) {
   if (thought.reductions && thought.reductions.length > 0) {
     builder.addSection("Reductions");
     for (const r of thought.reductions) {
-      builder.addText(`${r.fromProblem} \u2264${r.type === "polynomial_time" ? "p" : "m"} ${r.toProblem}
-`);
+      builder.addText(
+        `${r.fromProblem} \u2264${r.type === "polynomial_time" ? "p" : "m"} ${r.toProblem}
+`
+      );
     }
     builder.addEmptyLine();
   }
@@ -38836,7 +43283,12 @@ function computabilityToSVG(thought, options) {
   } = options;
   const title = thought.currentMachine?.name || "Computability Analysis";
   if (thought.currentMachine) {
-    return turingMachineToSVG(thought.currentMachine, { ...options, colorScheme, svgWidth, svgHeight });
+    return turingMachineToSVG(thought.currentMachine, {
+      ...options,
+      colorScheme,
+      svgWidth,
+      svgHeight
+    });
   }
   const positions = /* @__PURE__ */ new Map();
   positions.set("type", {
@@ -38893,7 +43345,9 @@ function turingMachineToSVG(machine, options) {
     const fromPos = positions.get(t.fromState);
     const toPos = positions.get(t.toState);
     if (fromPos && toPos) {
-      svg += renderEdge(fromPos, toPos, { label: `${t.readSymbol}/${t.writeSymbol}` });
+      svg += renderEdge(fromPos, toPos, {
+        label: `${t.readSymbol}/${t.writeSymbol}`
+      });
     }
   }
   svg += "\n  </g>";
@@ -38965,9 +43419,19 @@ function computabilityToTikZ(thought, options) {
         directed: true
       });
     }
-    return generateTikZ(nodes, edges, { title: m.name, colorScheme: options.colorScheme });
+    return generateTikZ(nodes, edges, {
+      title: m.name,
+      colorScheme: options.colorScheme
+    });
   }
-  nodes.push({ id: "root", label: thought.thoughtType, x: 0, y: 0, shape: "rectangle", type: "primary" });
+  nodes.push({
+    id: "root",
+    label: thought.thoughtType,
+    x: 0,
+    y: 0,
+    shape: "rectangle",
+    type: "primary"
+  });
   return generateTikZ(nodes, edges, { title: "Computability Analysis" });
 }
 function computabilityToHTML(thought, options) {
@@ -38977,7 +43441,10 @@ function computabilityToHTML(thought, options) {
     htmlTheme = "light",
     includeMetrics = true
   } = options;
-  let html = generateHTMLHeader(htmlTitle, { standalone: htmlStandalone, theme: htmlTheme });
+  let html = generateHTMLHeader(htmlTitle, {
+    standalone: htmlStandalone,
+    theme: htmlTheme
+  });
   html += `<h1>${escapeHTML(htmlTitle)}</h1>
 `;
   const typeBadge = renderBadge(thought.thoughtType, "primary");
@@ -38986,7 +43453,11 @@ function computabilityToHTML(thought, options) {
   if (includeMetrics) {
     html += '<div class="metrics-grid">';
     html += renderMetricCard("Thought Type", thought.thoughtType, "primary");
-    html += renderMetricCard("Uncertainty", thought.uncertainty.toFixed(2), "info");
+    html += renderMetricCard(
+      "Uncertainty",
+      thought.uncertainty.toFixed(2),
+      "info"
+    );
     if (thought.machines) {
       html += renderMetricCard("Machines", thought.machines.length, "info");
     }
@@ -38997,14 +43468,18 @@ function computabilityToHTML(thought, options) {
   }
   if (thought.currentMachine) {
     const m = thought.currentMachine;
-    html += renderSection("Turing Machine", `
+    html += renderSection(
+      "Turing Machine",
+      `
       <p><strong>Name:</strong> ${escapeHTML(m.name)}</p>
       <p><strong>Type:</strong> ${escapeHTML(m.type)}</p>
       <p><strong>States:</strong> {${m.states.map((s) => escapeHTML(s)).join(", ")}}</p>
       <p><strong>Initial State:</strong> ${escapeHTML(m.initialState)}</p>
       <p><strong>Accept States:</strong> {${m.acceptStates.map((s) => escapeHTML(s)).join(", ")}}</p>
       <p><strong>Transitions:</strong> ${m.transitions.length}</p>
-    `, "\u{1F916}");
+    `,
+      "\u{1F916}"
+    );
   }
   if (thought.decidabilityProof) {
     const proof = thought.decidabilityProof;
@@ -39012,12 +43487,16 @@ function computabilityToHTML(thought, options) {
       proof.conclusion.toUpperCase(),
       proof.conclusion === "decidable" ? "success" : proof.conclusion === "undecidable" ? "danger" : "warning"
     );
-    html += renderSection("Decidability Analysis", `
+    html += renderSection(
+      "Decidability Analysis",
+      `
       <p><strong>Problem:</strong> ${escapeHTML(proof.problem)}</p>
       <p><strong>Method:</strong> ${escapeHTML(proof.method)}</p>
       <p><strong>Conclusion:</strong> ${conclusionBadge}</p>
       ${proof.proofSteps.length > 0 ? renderList(proof.proofSteps) : ""}
-    `, "\u{1F4CA}");
+    `,
+      "\u{1F4CA}"
+    );
   }
   if (thought.reductions && thought.reductions.length > 0) {
     const rows = thought.reductions.map((r) => [
@@ -39025,10 +43504,18 @@ function computabilityToHTML(thought, options) {
       `\u2264${r.type === "polynomial_time" ? "p" : "m"}`,
       escapeHTML(r.toProblem)
     ]);
-    html += renderSection("Reductions", renderTable(["From", "Type", "To"], rows), "\u{1F517}");
+    html += renderSection(
+      "Reductions",
+      renderTable(["From", "Type", "To"], rows),
+      "\u{1F517}"
+    );
   }
   if (thought.keyInsight) {
-    html += renderSection("Key Insight", `<p>${escapeHTML(thought.keyInsight)}</p>`, "\u{1F4A1}");
+    html += renderSection(
+      "Key Insight",
+      `<p>${escapeHTML(thought.keyInsight)}</p>`,
+      "\u{1F4A1}"
+    );
   }
   html += generateHTMLFooter(htmlStandalone);
   return html;
@@ -39105,22 +43592,32 @@ function computabilityToMarkdown(thought, options) {
   } = options;
   const parts = [];
   if (includeMetrics) {
-    parts.push(section("Analysis", keyValueSection({
-      "Type": thought.thoughtType,
-      "Uncertainty": thought.uncertainty.toFixed(2),
-      ...thought.keyInsight ? { "Key Insight": thought.keyInsight } : {}
-    })));
+    parts.push(
+      section(
+        "Analysis",
+        keyValueSection({
+          Type: thought.thoughtType,
+          Uncertainty: thought.uncertainty.toFixed(2),
+          ...thought.keyInsight ? { "Key Insight": thought.keyInsight } : {}
+        })
+      )
+    );
   }
   if (thought.currentMachine) {
     const m = thought.currentMachine;
-    parts.push(section("Turing Machine", keyValueSection({
-      "Name": m.name,
-      "Type": m.type,
-      "States": `{${m.states.join(", ")}}`,
-      "Initial State": m.initialState,
-      "Accept States": `{${m.acceptStates.join(", ")}}`,
-      "Transitions": m.transitions.length.toString()
-    })));
+    parts.push(
+      section(
+        "Turing Machine",
+        keyValueSection({
+          Name: m.name,
+          Type: m.type,
+          States: `{${m.states.join(", ")}}`,
+          "Initial State": m.initialState,
+          "Accept States": `{${m.acceptStates.join(", ")}}`,
+          Transitions: m.transitions.length.toString()
+        })
+      )
+    );
     if (m.transitions.length > 0) {
       const transitionRows = m.transitions.map((t) => [
         t.fromState,
@@ -39129,21 +43626,36 @@ function computabilityToMarkdown(thought, options) {
         t.writeSymbol,
         t.direction
       ]);
-      parts.push(section("Transition Function", table(
-        ["From State", "Read", "To State", "Write", "Move"],
-        transitionRows
-      )));
+      parts.push(
+        section(
+          "Transition Function",
+          table(
+            ["From State", "Read", "To State", "Write", "Move"],
+            transitionRows
+          )
+        )
+      );
     }
   }
   if (thought.decidabilityProof) {
     const proof = thought.decidabilityProof;
-    parts.push(section("Decidability Analysis", keyValueSection({
-      "Problem": proof.problem,
-      "Method": proof.method,
-      "Conclusion": `**${proof.conclusion.toUpperCase()}**`
-    })));
+    parts.push(
+      section(
+        "Decidability Analysis",
+        keyValueSection({
+          Problem: proof.problem,
+          Method: proof.method,
+          Conclusion: `**${proof.conclusion.toUpperCase()}**`
+        })
+      )
+    );
     if (proof.proofSteps.length > 0) {
-      parts.push(section("Proof Steps", list(proof.proofSteps.map((s, i) => `${i + 1}. ${s}`))));
+      parts.push(
+        section(
+          "Proof Steps",
+          list(proof.proofSteps.map((s, i) => `${i + 1}. ${s}`))
+        )
+      );
     }
   }
   if (thought.reductions && thought.reductions.length > 0) {
@@ -39152,19 +43664,30 @@ function computabilityToMarkdown(thought, options) {
       `\u2264${r.type === "polynomial_time" ? "p" : "m"}`,
       r.toProblem
     ]);
-    parts.push(section("Reductions", table(["From Problem", "Reduction", "To Problem"], reductionRows)));
+    parts.push(
+      section(
+        "Reductions",
+        table(["From Problem", "Reduction", "To Problem"], reductionRows)
+      )
+    );
   }
   if (thought.diagonalization) {
     const d = thought.diagonalization;
-    parts.push(section("Diagonalization Argument", keyValueSection({
-      "Pattern": d.pattern,
-      "Enumeration": d.enumeration.description,
-      "Diagonal Construction": d.diagonalConstruction.description,
-      "Contradiction": d.contradiction.impossibility
-    })));
+    parts.push(
+      section(
+        "Diagonalization Argument",
+        keyValueSection({
+          Pattern: d.pattern,
+          Enumeration: d.enumeration.description,
+          "Diagonal Construction": d.diagonalConstruction.description,
+          Contradiction: d.contradiction.impossibility
+        })
+      )
+    );
   }
   if (markdownIncludeMermaid) {
-    const mermaidDiagram = computabilityToMermaid(thought, { ...options});
+    const mermaidDiagram = computabilityToMermaid(thought, {
+      ...options});
     parts.push(section("Diagram", mermaidBlock(mermaidDiagram)));
   }
   return document("Computability Analysis", parts.join("\n"), {
@@ -39192,13 +43715,30 @@ function exportProofDecomposition(decomposition, options) {
   } = options;
   switch (format) {
     case "mermaid":
-      return proofDecompositionToMermaid(decomposition, colorScheme, includeLabels, includeMetrics);
+      return proofDecompositionToMermaid(
+        decomposition,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
     case "dot":
-      return proofDecompositionToDOT(decomposition, includeLabels, includeMetrics);
+      return proofDecompositionToDOT(
+        decomposition,
+        includeLabels,
+        includeMetrics
+      );
     case "ascii":
       return proofDecompositionToASCII(decomposition);
     case "svg":
-      return proofDecompositionToSVG(decomposition, colorScheme, includeLabels, includeMetrics, svgWidth, svgHeight, nodeSpacing);
+      return proofDecompositionToSVG(
+        decomposition,
+        colorScheme,
+        includeLabels,
+        includeMetrics,
+        svgWidth,
+        svgHeight,
+        nodeSpacing
+      );
     case "html":
       return proofDecompositionToHTML(decomposition, options);
     case "modelica":
@@ -39218,8 +43758,12 @@ function proofDecompositionToMermaid(decomposition, colorScheme, includeLabels, 
   const builder = new MermaidGraphBuilder().setDirection("TD");
   const axioms = decomposition.atoms.filter((a) => a.type === "axiom");
   const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
-  const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
-  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  const derived = decomposition.atoms.filter(
+    (a) => a.type === "derived" || a.type === "lemma"
+  );
+  const conclusions = decomposition.atoms.filter(
+    (a) => a.type === "conclusion"
+  );
   const getLabel = (atom) => includeLabels ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? "..." : "") : atom.id;
   const typeToShape = (type) => {
     switch (type) {
@@ -39250,32 +43794,57 @@ function proofDecompositionToMermaid(decomposition, colorScheme, includeLabels, 
     return colors[type] || colors.derived;
   };
   if (decomposition.theorem) {
-    builder.addNode({ id: "title", label: `Proof: ${decomposition.theorem.substring(0, 50)}...` });
+    builder.addNode({
+      id: "title",
+      label: `Proof: ${decomposition.theorem.substring(0, 50)}...`
+    });
   }
   const axiomIds = [];
   for (const atom of axioms) {
     const nodeId = sanitizeId(atom.id);
-    builder.addNode({ id: nodeId, label: getLabel(atom), shape: typeToShape(atom.type), style: getNodeStyle(atom.type) });
+    builder.addNode({
+      id: nodeId,
+      label: getLabel(atom),
+      shape: typeToShape(atom.type),
+      style: getNodeStyle(atom.type)
+    });
     axiomIds.push(nodeId);
   }
   if (axiomIds.length > 0) builder.addSubgraph("Axioms", "Axioms", axiomIds);
   const hypIds = [];
   for (const atom of hypotheses) {
     const nodeId = sanitizeId(atom.id);
-    builder.addNode({ id: nodeId, label: getLabel(atom), shape: typeToShape(atom.type), style: getNodeStyle(atom.type) });
+    builder.addNode({
+      id: nodeId,
+      label: getLabel(atom),
+      shape: typeToShape(atom.type),
+      style: getNodeStyle(atom.type)
+    });
     hypIds.push(nodeId);
   }
-  if (hypIds.length > 0) builder.addSubgraph("Hypotheses", "Hypotheses", hypIds);
+  if (hypIds.length > 0)
+    builder.addSubgraph("Hypotheses", "Hypotheses", hypIds);
   for (const atom of derived) {
-    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: typeToShape(atom.type), style: getNodeStyle(atom.type) });
+    builder.addNode({
+      id: sanitizeId(atom.id),
+      label: getLabel(atom),
+      shape: typeToShape(atom.type),
+      style: getNodeStyle(atom.type)
+    });
   }
   const concIds = [];
   for (const atom of conclusions) {
     const nodeId = sanitizeId(atom.id);
-    builder.addNode({ id: nodeId, label: getLabel(atom), shape: "rhombus", style: getNodeStyle(atom.type) });
+    builder.addNode({
+      id: nodeId,
+      label: getLabel(atom),
+      shape: "rhombus",
+      style: getNodeStyle(atom.type)
+    });
     concIds.push(nodeId);
   }
-  if (concIds.length > 0) builder.addSubgraph("Conclusions", "Conclusions", concIds);
+  if (concIds.length > 0)
+    builder.addSubgraph("Conclusions", "Conclusions", concIds);
   if (decomposition.dependencies?.edges) {
     for (const edge of decomposition.dependencies.edges) {
       builder.addEdge({
@@ -39289,16 +43858,34 @@ function proofDecompositionToMermaid(decomposition, colorScheme, includeLabels, 
     const gapIds = [];
     for (const gap of decomposition.gaps) {
       const gapId = sanitizeId(gap.id);
-      builder.addNode({ id: gapId, label: gap.description.substring(0, 30) + "..." });
-      builder.addEdge({ source: sanitizeId(gap.location.from), target: gapId, label: "gap", style: "dotted" });
-      builder.addEdge({ source: gapId, target: sanitizeId(gap.location.to), style: "dotted" });
+      builder.addNode({
+        id: gapId,
+        label: gap.description.substring(0, 30) + "..."
+      });
+      builder.addEdge({
+        source: sanitizeId(gap.location.from),
+        target: gapId,
+        label: "gap",
+        style: "dotted"
+      });
+      builder.addEdge({
+        source: gapId,
+        target: sanitizeId(gap.location.to),
+        style: "dotted"
+      });
       gapIds.push(gapId);
     }
     builder.addSubgraph("Gaps", "Identified Gaps", gapIds);
   }
   if (includeMetrics) {
     const metricIds = ["m1", "m2", "m3", "m4"];
-    builder.addNode({ id: "m1", label: `Completeness: ${(decomposition.completeness * 100).toFixed(0)}%` }).addNode({ id: "m2", label: `Rigor: ${decomposition.rigorLevel}` }).addNode({ id: "m3", label: `Atoms: ${decomposition.atomCount}` }).addNode({ id: "m4", label: `Depth: ${decomposition.maxDependencyDepth}` }).addSubgraph("Metrics", "Metrics", metricIds);
+    builder.addNode({
+      id: "m1",
+      label: `Completeness: ${(decomposition.completeness * 100).toFixed(0)}%`
+    }).addNode({ id: "m2", label: `Rigor: ${decomposition.rigorLevel}` }).addNode({ id: "m3", label: `Atoms: ${decomposition.atomCount}` }).addNode({
+      id: "m4",
+      label: `Depth: ${decomposition.maxDependencyDepth}`
+    }).addSubgraph("Metrics", "Metrics", metricIds);
   }
   return builder.setOptions({ colorScheme: scheme }).render();
 }
@@ -39324,47 +43911,119 @@ function proofDecompositionToDOT(decomposition, includeLabels, includeMetrics) {
   const builder = new DOTGraphBuilder().setGraphName("ProofDecomposition").setRankDir("TB").setNodeDefaults({ style: ["rounded", "filled"], fontName: "Arial" }).setEdgeDefaults({});
   const axioms = decomposition.atoms.filter((a) => a.type === "axiom");
   const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
-  const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
-  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  const derived = decomposition.atoms.filter(
+    (a) => a.type === "derived" || a.type === "lemma"
+  );
+  const conclusions = decomposition.atoms.filter(
+    (a) => a.type === "conclusion"
+  );
   const getLabel = (atom) => includeLabels ? atom.statement.substring(0, 40).replace(/"/g, '\\"') : atom.id;
   for (const atom of axioms) {
-    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: getDOTShape(atom.type), fillColor: "#81c784" });
+    builder.addNode({
+      id: sanitizeId(atom.id),
+      label: getLabel(atom),
+      shape: getDOTShape(atom.type),
+      fillColor: "#81c784"
+    });
   }
   if (axioms.length > 0) {
-    builder.addSubgraph({ id: "cluster_axioms", label: "Axioms", nodes: axioms.map((a) => sanitizeId(a.id)), style: "filled", color: "#e8f5e9" });
+    builder.addSubgraph({
+      id: "cluster_axioms",
+      label: "Axioms",
+      nodes: axioms.map((a) => sanitizeId(a.id)),
+      style: "filled",
+      color: "#e8f5e9"
+    });
   }
   for (const atom of hypotheses) {
-    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: getDOTShape(atom.type), fillColor: "#64b5f6" });
+    builder.addNode({
+      id: sanitizeId(atom.id),
+      label: getLabel(atom),
+      shape: getDOTShape(atom.type),
+      fillColor: "#64b5f6"
+    });
   }
   if (hypotheses.length > 0) {
-    builder.addSubgraph({ id: "cluster_hypotheses", label: "Hypotheses", nodes: hypotheses.map((a) => sanitizeId(a.id)), style: "filled", color: "#e3f2fd" });
+    builder.addSubgraph({
+      id: "cluster_hypotheses",
+      label: "Hypotheses",
+      nodes: hypotheses.map((a) => sanitizeId(a.id)),
+      style: "filled",
+      color: "#e3f2fd"
+    });
   }
   for (const atom of derived) {
     const color = atom.type === "lemma" ? "#ffd54f" : "#bdbdbd";
-    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: getDOTShape(atom.type), fillColor: color });
+    builder.addNode({
+      id: sanitizeId(atom.id),
+      label: getLabel(atom),
+      shape: getDOTShape(atom.type),
+      fillColor: color
+    });
   }
   for (const atom of conclusions) {
-    builder.addNode({ id: sanitizeId(atom.id), label: getLabel(atom), shape: getDOTShape(atom.type), fillColor: "#9575cd" });
+    builder.addNode({
+      id: sanitizeId(atom.id),
+      label: getLabel(atom),
+      shape: getDOTShape(atom.type),
+      fillColor: "#9575cd"
+    });
   }
   if (conclusions.length > 0) {
-    builder.addSubgraph({ id: "cluster_conclusions", label: "Conclusions", nodes: conclusions.map((a) => sanitizeId(a.id)), style: "filled", color: "#ede7f6" });
+    builder.addSubgraph({
+      id: "cluster_conclusions",
+      label: "Conclusions",
+      nodes: conclusions.map((a) => sanitizeId(a.id)),
+      style: "filled",
+      color: "#ede7f6"
+    });
   }
   if (decomposition.dependencies?.edges) {
     for (const edge of decomposition.dependencies.edges) {
-      builder.addEdge({ source: sanitizeId(edge.from), target: sanitizeId(edge.to), label: edge.inferenceRule });
+      builder.addEdge({
+        source: sanitizeId(edge.from),
+        target: sanitizeId(edge.to),
+        label: edge.inferenceRule
+      });
     }
   }
   if (decomposition.gaps?.length) {
     for (const gap of decomposition.gaps) {
       const gapId = sanitizeId(gap.id);
-      builder.addNode({ id: gapId, label: gap.description.substring(0, 30).replace(/"/g, '\\"'), shape: "note", fillColor: "#ffcdd2", style: "dashed" });
-      builder.addEdge({ source: sanitizeId(gap.location.from), target: gapId, style: "dashed", color: "red" });
-      builder.addEdge({ source: gapId, target: sanitizeId(gap.location.to), style: "dashed", color: "red" });
+      builder.addNode({
+        id: gapId,
+        label: gap.description.substring(0, 30).replace(/"/g, '\\"'),
+        shape: "note",
+        fillColor: "#ffcdd2",
+        style: "dashed"
+      });
+      builder.addEdge({
+        source: sanitizeId(gap.location.from),
+        target: gapId,
+        style: "dashed",
+        color: "red"
+      });
+      builder.addEdge({
+        source: gapId,
+        target: sanitizeId(gap.location.to),
+        style: "dashed",
+        color: "red"
+      });
     }
   }
   if (includeMetrics) {
-    builder.addNode({ id: "metrics", label: `Completeness: ${(decomposition.completeness * 100).toFixed(0)}%\\nRigor: ${decomposition.rigorLevel}\\nAtoms: ${decomposition.atomCount}\\nDepth: ${decomposition.maxDependencyDepth}`, shape: "note" });
-    builder.addSubgraph({ id: "cluster_metrics", label: "Metrics", nodes: ["metrics"], style: "filled", color: "#f5f5f5" });
+    builder.addNode({
+      id: "metrics",
+      label: `Completeness: ${(decomposition.completeness * 100).toFixed(0)}%\\nRigor: ${decomposition.rigorLevel}\\nAtoms: ${decomposition.atomCount}\\nDepth: ${decomposition.maxDependencyDepth}`,
+      shape: "note"
+    });
+    builder.addSubgraph({
+      id: "cluster_metrics",
+      label: "Metrics",
+      nodes: ["metrics"],
+      style: "filled",
+      color: "#f5f5f5"
+    });
   }
   return builder.render();
 }
@@ -39374,8 +44033,10 @@ function proofDecompositionToASCII(decomposition) {
     builder.addText(`Theorem: ${decomposition.theorem}
 `).addEmptyLine();
   }
-  builder.addSection("METRICS").addText(`Completeness: ${(decomposition.completeness * 100).toFixed(0)}%
-`).addText(`Rigor Level:  ${decomposition.rigorLevel}
+  builder.addSection("METRICS").addText(
+    `Completeness: ${(decomposition.completeness * 100).toFixed(0)}%
+`
+  ).addText(`Rigor Level:  ${decomposition.rigorLevel}
 `).addText(`Atom Count:   ${decomposition.atomCount}
 `).addText(`Max Depth:    ${decomposition.maxDependencyDepth}
 `).addEmptyLine();
@@ -39397,14 +44058,18 @@ function proofDecompositionToASCII(decomposition) {
     }
     builder.addEmptyLine();
   }
-  const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
+  const derived = decomposition.atoms.filter(
+    (a) => a.type === "derived" || a.type === "lemma"
+  );
   if (derived.length > 0) {
     builder.addSection("DERIVATION CHAIN");
     for (const atom of derived) {
       const marker = atom.type === "lemma" ? "\u25C7" : "\u25CB";
       const deps = atom.derivedFrom?.length ? ` \u2190 [${atom.derivedFrom.join(", ")}]` : "";
-      builder.addText(`${marker} [${atom.id}] ${atom.statement.substring(0, 45)}${deps}
-`);
+      builder.addText(
+        `${marker} [${atom.id}] ${atom.statement.substring(0, 45)}${deps}
+`
+      );
       if (atom.usedInferenceRule) {
         builder.addText(`   \u2514\u2500 Rule: ${atom.usedInferenceRule}
 `);
@@ -39412,13 +44077,17 @@ function proofDecompositionToASCII(decomposition) {
     }
     builder.addEmptyLine();
   }
-  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  const conclusions = decomposition.atoms.filter(
+    (a) => a.type === "conclusion"
+  );
   if (conclusions.length > 0) {
     builder.addSection("CONCLUSIONS");
     for (const atom of conclusions) {
       const deps = atom.derivedFrom?.length ? ` \u2190 [${atom.derivedFrom.join(", ")}]` : "";
-      builder.addText(`\u2605 [${atom.id}] ${atom.statement.substring(0, 45)}${deps}
-`);
+      builder.addText(
+        `\u2605 [${atom.id}] ${atom.statement.substring(0, 45)}${deps}
+`
+      );
     }
     builder.addEmptyLine();
   }
@@ -39426,10 +44095,14 @@ function proofDecompositionToASCII(decomposition) {
     builder.addSection("GAPS (Missing Steps)");
     for (const gap of decomposition.gaps) {
       const severityIcon = gap.severity === "critical" ? "\u26A0" : gap.severity === "significant" ? "!" : "?";
-      builder.addText(`${severityIcon} [${gap.type}] ${gap.description.substring(0, 50)}
-`);
-      builder.addText(`   Between: ${gap.location.from} \u2192 ${gap.location.to}
-`);
+      builder.addText(
+        `${severityIcon} [${gap.type}] ${gap.description.substring(0, 50)}
+`
+      );
+      builder.addText(
+        `   Between: ${gap.location.from} \u2192 ${gap.location.to}
+`
+      );
       if (gap.suggestedFix) {
         builder.addText(`   Fix: ${gap.suggestedFix.substring(0, 50)}
 `);
@@ -39598,8 +44271,12 @@ function proofDecompositionToSVG(decomposition, colorScheme, includeLabels, incl
   const layerSpacing = nodeSpacing;
   const axioms = decomposition.atoms.filter((a) => a.type === "axiom");
   const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
-  const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
-  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  const derived = decomposition.atoms.filter(
+    (a) => a.type === "derived" || a.type === "lemma"
+  );
+  const conclusions = decomposition.atoms.filter(
+    (a) => a.type === "conclusion"
+  );
   const nodePositions = /* @__PURE__ */ new Map();
   let currentY = padding;
   const layer1 = [...axioms, ...hypotheses];
@@ -39695,7 +44372,13 @@ function proofDecompositionToSVG(decomposition, colorScheme, includeLabels, incl
       const fromPos = nodePositions.get(gap.location.from);
       const toPos = nodePositions.get(gap.location.to);
       if (fromPos && toPos) {
-        svg += renderSVGEdge(fromPos, toPos, "GAP: " + truncateText2(gap.description, 20), true, "#e53935");
+        svg += renderSVGEdge(
+          fromPos,
+          toPos,
+          "GAP: " + truncateText2(gap.description, 20),
+          true,
+          "#e53935"
+        );
       }
     }
     svg += "\n  </g>\n";
@@ -39738,9 +44421,16 @@ function proofDecompositionToSVG(decomposition, colorScheme, includeLabels, incl
   return svg;
 }
 function proofDecompositionToHTML(decomposition, options) {
-  const { colorScheme = "default", includeLabels = true, includeMetrics = true } = options;
+  const {
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
   const theme = colorScheme === "monochrome" ? "light" : "light";
-  let html = generateHTMLHeader("Proof Decomposition", { standalone: true, theme });
+  let html = generateHTMLHeader("Proof Decomposition", {
+    standalone: true,
+    theme
+  });
   if (decomposition.theorem) {
     html += renderSection(
       "Theorem",
@@ -39766,7 +44456,11 @@ function proofDecompositionToHTML(decomposition, options) {
       includeLabels ? atom.statement : atom.id,
       atom.type
     ]);
-    html += renderSection("Axioms", renderTable(["ID", "Statement", "Type"], axiomsRows), "success");
+    html += renderSection(
+      "Axioms",
+      renderTable(["ID", "Statement", "Type"], axiomsRows),
+      "success"
+    );
   }
   const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
   if (hypotheses.length > 0) {
@@ -39775,9 +44469,15 @@ function proofDecompositionToHTML(decomposition, options) {
       includeLabels ? atom.statement : atom.id,
       atom.type
     ]);
-    html += renderSection("Hypotheses", renderTable(["ID", "Statement", "Type"], hypothesesRows), "info");
+    html += renderSection(
+      "Hypotheses",
+      renderTable(["ID", "Statement", "Type"], hypothesesRows),
+      "info"
+    );
   }
-  const derived = decomposition.atoms.filter((a) => a.type === "derived" || a.type === "lemma");
+  const derived = decomposition.atoms.filter(
+    (a) => a.type === "derived" || a.type === "lemma"
+  );
   if (derived.length > 0) {
     const derivedRows = derived.map((atom) => {
       const deps = atom.derivedFrom && atom.derivedFrom.length > 0 ? atom.derivedFrom.join(", ") : "None";
@@ -39792,10 +44492,15 @@ function proofDecompositionToHTML(decomposition, options) {
     });
     html += renderSection(
       "Derivation Chain",
-      renderTable(["ID", "Statement", "Type", "Derived From", "Inference Rule"], derivedRows)
+      renderTable(
+        ["ID", "Statement", "Type", "Derived From", "Inference Rule"],
+        derivedRows
+      )
     );
   }
-  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  const conclusions = decomposition.atoms.filter(
+    (a) => a.type === "conclusion"
+  );
   if (conclusions.length > 0) {
     const conclusionsRows = conclusions.map((atom) => {
       const deps = atom.derivedFrom && atom.derivedFrom.length > 0 ? atom.derivedFrom.join(", ") : "None";
@@ -39806,7 +44511,11 @@ function proofDecompositionToHTML(decomposition, options) {
         deps
       ];
     });
-    html += renderSection("Conclusions", renderTable(["ID", "Statement", "Type", "Derived From"], conclusionsRows), "primary");
+    html += renderSection(
+      "Conclusions",
+      renderTable(["ID", "Statement", "Type", "Derived From"], conclusionsRows),
+      "primary"
+    );
   }
   if (decomposition.dependencies && decomposition.dependencies.edges && decomposition.dependencies.edges.length > 0) {
     const depsRows = decomposition.dependencies.edges.map((edge) => [
@@ -39814,7 +44523,10 @@ function proofDecompositionToHTML(decomposition, options) {
       edge.to,
       edge.inferenceRule ? edge.inferenceRule : "Direct"
     ]);
-    html += renderSection("Dependencies", renderTable(["From", "To", "Inference Rule"], depsRows));
+    html += renderSection(
+      "Dependencies",
+      renderTable(["From", "To", "Inference Rule"], depsRows)
+    );
   }
   if (decomposition.gaps && decomposition.gaps.length > 0) {
     const gapsRows = decomposition.gaps.map((gap) => [
@@ -39825,16 +44537,32 @@ function proofDecompositionToHTML(decomposition, options) {
       `${gap.location.from} \u2192 ${gap.location.to}`,
       gap.suggestedFix ? gap.suggestedFix : "N/A"
     ]);
-    html += renderSection("Gaps (Missing Steps)", renderTable(["ID", "Type", "Severity", "Description", "Location", "Suggested Fix"], gapsRows), "danger");
+    html += renderSection(
+      "Gaps (Missing Steps)",
+      renderTable(
+        ["ID", "Type", "Severity", "Description", "Location", "Suggested Fix"],
+        gapsRows
+      ),
+      "danger"
+    );
   }
   if (decomposition.implicitAssumptions && decomposition.implicitAssumptions.length > 0) {
-    const assumptionsRows = decomposition.implicitAssumptions.map((assumption) => [
-      assumption.type,
-      assumption.statement,
-      assumption.shouldBeExplicit ? "Yes" : "No",
-      assumption.suggestedFormulation || "N/A"
-    ]);
-    html += renderSection("Implicit Assumptions", renderTable(["Type", "Statement", "Should Be Explicit", "Suggested Formulation"], assumptionsRows), "warning");
+    const assumptionsRows = decomposition.implicitAssumptions.map(
+      (assumption) => [
+        assumption.type,
+        assumption.statement,
+        assumption.shouldBeExplicit ? "Yes" : "No",
+        assumption.suggestedFormulation || "N/A"
+      ]
+    );
+    html += renderSection(
+      "Implicit Assumptions",
+      renderTable(
+        ["Type", "Statement", "Should Be Explicit", "Suggested Formulation"],
+        assumptionsRows
+      ),
+      "warning"
+    );
   }
   html += generateHTMLFooter(true);
   return html;
@@ -39879,7 +44607,9 @@ function proofDecompositionToModelica(decomposition, options) {
   const hypotheses = decomposition.atoms.filter((a) => a.type === "hypothesis");
   const lemmas = decomposition.atoms.filter((a) => a.type === "lemma");
   const derived = decomposition.atoms.filter((a) => a.type === "derived");
-  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  const conclusions = decomposition.atoms.filter(
+    (a) => a.type === "conclusion"
+  );
   if (axioms.length > 0) {
     modelica += `  // Axioms (${axioms.length})
 `;
@@ -40042,7 +44772,7 @@ function proofDecompositionToUML(decomposition, options) {
   const edges = [];
   for (const atom of decomposition.atoms) {
     const label = includeLabels ? atom.statement.substring(0, 40) + (atom.statement.length > 40 ? "..." : "") : atom.id;
-    let stereotype = "";
+    let stereotype;
     switch (atom.type) {
       case "axiom":
         stereotype = "\xABaxiom\xBB";
@@ -40187,12 +44917,14 @@ function proofDecompositionToJSON(decomposition, options) {
     addMetric(graph, "maxDependencyDepth", decomposition.maxDependencyDepth);
   }
   if (decomposition.implicitAssumptions && decomposition.implicitAssumptions.length > 0) {
-    graph.metadata.implicitAssumptions = decomposition.implicitAssumptions.map((assumption) => ({
-      type: assumption.type,
-      statement: assumption.statement,
-      shouldBeExplicit: assumption.shouldBeExplicit || false,
-      suggestedFormulation: assumption.suggestedFormulation || null
-    }));
+    graph.metadata.implicitAssumptions = decomposition.implicitAssumptions.map(
+      (assumption) => ({
+        type: assumption.type,
+        statement: assumption.statement,
+        shouldBeExplicit: assumption.shouldBeExplicit || false,
+        suggestedFormulation: assumption.suggestedFormulation || null
+      })
+    );
   }
   if (decomposition.gaps && decomposition.gaps.length > 0) {
     graph.metadata.gaps = decomposition.gaps.map((gap) => ({
@@ -40219,7 +44951,7 @@ function proofDecompositionToMarkdown(decomposition, options) {
   }
   if (includeMetrics) {
     const metricsContent = keyValueSection({
-      "Completeness": `${(decomposition.completeness * 100).toFixed(0)}%`,
+      Completeness: `${(decomposition.completeness * 100).toFixed(0)}%`,
       "Rigor Level": decomposition.rigorLevel,
       "Atom Count": decomposition.atomCount,
       "Max Dependency Depth": decomposition.maxDependencyDepth
@@ -40242,15 +44974,21 @@ function proofDecompositionToMarkdown(decomposition, options) {
       atom.id,
       atom.statement.substring(0, 100) + (atom.statement.length > 100 ? "..." : "")
     ]);
-    parts.push(section("Hypotheses", table(["ID", "Statement"], hypothesesRows)));
+    parts.push(
+      section("Hypotheses", table(["ID", "Statement"], hypothesesRows))
+    );
   }
-  const definitions = decomposition.atoms.filter((a) => a.type === "definition");
+  const definitions = decomposition.atoms.filter(
+    (a) => a.type === "definition"
+  );
   if (definitions.length > 0) {
     const definitionsRows = definitions.map((atom) => [
       atom.id,
       atom.statement.substring(0, 100) + (atom.statement.length > 100 ? "..." : "")
     ]);
-    parts.push(section("Definitions", table(["ID", "Statement"], definitionsRows)));
+    parts.push(
+      section("Definitions", table(["ID", "Statement"], definitionsRows))
+    );
   }
   const lemmas = decomposition.atoms.filter((a) => a.type === "lemma");
   if (lemmas.length > 0) {
@@ -40260,7 +44998,12 @@ function proofDecompositionToMarkdown(decomposition, options) {
       atom.derivedFrom ? atom.derivedFrom.join(", ") : "-",
       atom.usedInferenceRule || "-"
     ]);
-    parts.push(section("Lemmas", table(["ID", "Statement", "Derived From", "Rule"], lemmasRows)));
+    parts.push(
+      section(
+        "Lemmas",
+        table(["ID", "Statement", "Derived From", "Rule"], lemmasRows)
+      )
+    );
   }
   const derived = decomposition.atoms.filter((a) => a.type === "derived");
   if (derived.length > 0) {
@@ -40270,16 +45013,28 @@ function proofDecompositionToMarkdown(decomposition, options) {
       atom.derivedFrom ? atom.derivedFrom.join(", ") : "-",
       atom.usedInferenceRule || "-"
     ]);
-    parts.push(section("Derived Statements", table(["ID", "Statement", "Derived From", "Rule"], derivedRows)));
+    parts.push(
+      section(
+        "Derived Statements",
+        table(["ID", "Statement", "Derived From", "Rule"], derivedRows)
+      )
+    );
   }
-  const conclusions = decomposition.atoms.filter((a) => a.type === "conclusion");
+  const conclusions = decomposition.atoms.filter(
+    (a) => a.type === "conclusion"
+  );
   if (conclusions.length > 0) {
     const conclusionsRows = conclusions.map((atom) => [
       atom.id,
       atom.statement.substring(0, 100) + (atom.statement.length > 100 ? "..." : ""),
       atom.derivedFrom ? atom.derivedFrom.join(", ") : "-"
     ]);
-    parts.push(section("Conclusions", table(["ID", "Statement", "Derived From"], conclusionsRows)));
+    parts.push(
+      section(
+        "Conclusions",
+        table(["ID", "Statement", "Derived From"], conclusionsRows)
+      )
+    );
   }
   if (decomposition.dependencies && decomposition.dependencies.edges && decomposition.dependencies.edges.length > 0) {
     const depsRows = decomposition.dependencies.edges.map((edge) => [
@@ -40287,7 +45042,12 @@ function proofDecompositionToMarkdown(decomposition, options) {
       edge.to,
       edge.inferenceRule || "Direct"
     ]);
-    parts.push(section("Dependencies", table(["From", "To", "Inference Rule"], depsRows)));
+    parts.push(
+      section(
+        "Dependencies",
+        table(["From", "To", "Inference Rule"], depsRows)
+      )
+    );
   }
   if (decomposition.gaps && decomposition.gaps.length > 0) {
     const gapsRows = decomposition.gaps.map((gap) => [
@@ -40298,26 +45058,52 @@ function proofDecompositionToMarkdown(decomposition, options) {
       `${gap.location.from} \u2192 ${gap.location.to}`,
       gap.suggestedFix ? gap.suggestedFix.substring(0, 40) : "-"
     ]);
-    parts.push(section("Identified Gaps", table(
-      ["ID", "Type", "Severity", "Description", "Location", "Suggested Fix"],
-      gapsRows
-    )));
+    parts.push(
+      section(
+        "Identified Gaps",
+        table(
+          [
+            "ID",
+            "Type",
+            "Severity",
+            "Description",
+            "Location",
+            "Suggested Fix"
+          ],
+          gapsRows
+        )
+      )
+    );
   }
   if (decomposition.implicitAssumptions && decomposition.implicitAssumptions.length > 0) {
-    const assumptionsRows = decomposition.implicitAssumptions.map((assumption) => [
-      assumption.type,
-      assumption.statement.substring(0, 80) + (assumption.statement.length > 80 ? "..." : ""),
-      assumption.shouldBeExplicit ? "Yes" : "No",
-      assumption.suggestedFormulation ? assumption.suggestedFormulation.substring(0, 50) : "-"
-    ]);
-    parts.push(section("Implicit Assumptions", table(
-      ["Type", "Statement", "Should Be Explicit", "Suggested Formulation"],
-      assumptionsRows
-    )));
+    const assumptionsRows = decomposition.implicitAssumptions.map(
+      (assumption) => [
+        assumption.type,
+        assumption.statement.substring(0, 80) + (assumption.statement.length > 80 ? "..." : ""),
+        assumption.shouldBeExplicit ? "Yes" : "No",
+        assumption.suggestedFormulation ? assumption.suggestedFormulation.substring(0, 50) : "-"
+      ]
+    );
+    parts.push(
+      section(
+        "Implicit Assumptions",
+        table(
+          ["Type", "Statement", "Should Be Explicit", "Suggested Formulation"],
+          assumptionsRows
+        )
+      )
+    );
   }
   if (markdownIncludeMermaid) {
-    const mermaidDiagram = proofDecompositionToMermaid(decomposition, "default", true, true);
-    parts.push(section("Proof Structure Diagram", mermaidBlock(mermaidDiagram)));
+    const mermaidDiagram = proofDecompositionToMermaid(
+      decomposition,
+      "default",
+      true,
+      true
+    );
+    parts.push(
+      section("Proof Structure Diagram", mermaidBlock(mermaidDiagram))
+    );
   }
   return document("Proof Decomposition Analysis", parts.join("\n"), {
     includeFrontmatter: markdownIncludeFrontmatter,
@@ -40423,7 +45209,9 @@ function sanitizeString(input, maxLength = MAX_LENGTHS.STRING_FIELD, fieldName =
     throw new Error(`${fieldName} cannot be empty`);
   }
   if (trimmed.length > maxLength) {
-    throw new Error(`${fieldName} exceeds maximum length of ${maxLength} characters`);
+    throw new Error(
+      `${fieldName} exceeds maximum length of ${maxLength} characters`
+    );
   }
   if (trimmed.includes("\0")) {
     throw new Error(`${fieldName} contains invalid null bytes`);
@@ -40438,7 +45226,11 @@ function validateSessionId(sessionId) {
   return sessionId;
 }
 function sanitizeThoughtContent(content) {
-  return sanitizeString(content, MAX_LENGTHS.THOUGHT_CONTENT, "thought content");
+  return sanitizeString(
+    content,
+    MAX_LENGTHS.THOUGHT_CONTENT,
+    "thought content"
+  );
 }
 function escapeHtml(text) {
   const htmlEscapeMap = {
@@ -40449,18 +45241,18 @@ function escapeHtml(text) {
     "'": "&#39;",
     "/": "&#x2F;"
   };
-  return text.replace(/[&<>"'\/]/g, (char) => htmlEscapeMap[char] || char);
+  return text.replace(/[&<>"'/]/g, (char) => htmlEscapeMap[char] || char);
 }
 function escapeLatex2(text) {
   const latexEscapeMap = {
     "\\": "\\textbackslash{}",
     "{": "\\{",
     "}": "\\}",
-    "$": "\\$",
+    $: "\\$",
     "&": "\\&",
     "%": "\\%",
     "#": "\\#",
-    "_": "\\_",
+    _: "\\_",
     "~": "\\textasciitilde{}",
     "^": "\\textasciicircum{}"
   };
@@ -40495,7 +45287,11 @@ var ExportService = class {
    */
   exportSession(session, format) {
     const startTime = Date.now();
-    this.logger.debug("Export started", { sessionId: session.id, format, thoughtCount: session.thoughts.length });
+    this.logger.debug("Export started", {
+      sessionId: session.id,
+      format,
+      thoughtCount: session.thoughts.length
+    });
     if (format === "mermaid" || format === "dot" || format === "ascii" || format === "svg" || format === "graphml" || format === "tikz" || format === "modelica" || format === "html" || format === "uml" || format === "visual-json" || format === "visual-markdown") {
       const visualFormat = format === "visual-json" ? "json" : format === "visual-markdown" ? "markdown" : format;
       const result2 = this.exportVisual(session, visualFormat);
@@ -40556,18 +45352,24 @@ var ExportService = class {
       return this.exportSessionWithThoughtDetails(session, format);
     }
     if (lastThought.mode === "causal" && "causalGraph" in lastThought) {
-      return this.visualExporter.exportCausalGraph(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportCausalGraph(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "temporal" && "timeline" in lastThought) {
-      return this.visualExporter.exportTemporalTimeline(lastThought, {
-        format,
-        includeLabels: true
-      });
+      return this.visualExporter.exportTemporalTimeline(
+        lastThought,
+        {
+          format,
+          includeLabels: true
+        }
+      );
     }
     if (isHistoricalThought(lastThought)) {
       return this.visualExporter.exportHistoricalTimeline(lastThought, {
@@ -40578,146 +45380,200 @@ var ExportService = class {
       });
     }
     if (lastThought.mode === "gametheory" && "game" in lastThought) {
-      return this.visualExporter.exportGameTree(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportGameTree(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "bayesian" && "hypothesis" in lastThought) {
-      return this.visualExporter.exportBayesianNetwork(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportBayesianNetwork(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "firstprinciples" /* FIRSTPRINCIPLES */ && "question" in lastThought) {
-      return this.visualExporter.exportFirstPrinciplesDerivation(lastThought, {
-        format,
-        colorScheme: "default"
-      });
+      return this.visualExporter.exportFirstPrinciplesDerivation(
+        lastThought,
+        {
+          format,
+          colorScheme: "default"
+        }
+      );
     }
     if (lastThought.mode === "sequential" /* SEQUENTIAL */ && "buildUpon" in lastThought) {
-      return this.visualExporter.exportSequentialDependencyGraph(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportSequentialDependencyGraph(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "shannon" /* SHANNON */ && "stage" in lastThought) {
-      return this.visualExporter.exportShannonStageFlow(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportShannonStageFlow(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "abductive" /* ABDUCTIVE */ && "hypotheses" in lastThought) {
-      return this.visualExporter.exportAbductiveHypotheses(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportAbductiveHypotheses(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "counterfactual" /* COUNTERFACTUAL */ && "scenarios" in lastThought) {
-      return this.visualExporter.exportCounterfactualScenarios(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportCounterfactualScenarios(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "analogical" /* ANALOGICAL */ && "sourceAnalogy" in lastThought) {
-      return this.visualExporter.exportAnalogicalMapping(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportAnalogicalMapping(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "evidential" /* EVIDENTIAL */ && "frameOfDiscernment" in lastThought) {
-      return this.visualExporter.exportEvidentialBeliefs(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportEvidentialBeliefs(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "systemsthinking" /* SYSTEMSTHINKING */ && "systemComponents" in lastThought) {
-      return this.visualExporter.exportSystemsThinkingCausalLoops(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportSystemsThinkingCausalLoops(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "scientificmethod" /* SCIENTIFICMETHOD */ && "hypothesis" in lastThought) {
-      return this.visualExporter.exportScientificMethodExperiment(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportScientificMethodExperiment(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "optimization" /* OPTIMIZATION */ && "objectiveFunction" in lastThought) {
-      return this.visualExporter.exportOptimizationSolution(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportOptimizationSolution(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "formallogic" /* FORMALLOGIC */ && "premises" in lastThought) {
-      return this.visualExporter.exportFormalLogicProof(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportFormalLogicProof(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "mathematics" /* MATHEMATICS */ && "proofStrategy" in lastThought) {
-      return this.visualExporter.exportMathematicsDerivation(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportMathematicsDerivation(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "physics" /* PHYSICS */ && "tensorProperties" in lastThought) {
-      return this.visualExporter.exportPhysicsVisualization(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportPhysicsVisualization(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "hybrid" /* HYBRID */ && "primaryMode" in lastThought) {
-      return this.visualExporter.exportHybridOrchestration(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportHybridOrchestration(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "metareasoning" /* METAREASONING */ && "currentStrategy" in lastThought) {
-      return this.visualExporter.exportMetaReasoningVisualization(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportMetaReasoningVisualization(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     if (lastThought.mode === "engineering" /* ENGINEERING */ && "analysisType" in lastThought) {
-      return this.visualExporter.exportEngineeringAnalysis(lastThought, {
-        format,
-        colorScheme: "default",
-        includeLabels: true,
-        includeMetrics: true
-      });
+      return this.visualExporter.exportEngineeringAnalysis(
+        lastThought,
+        {
+          format,
+          colorScheme: "default",
+          includeLabels: true,
+          includeMetrics: true
+        }
+      );
     }
     return this.exportGenericThoughtSequence(session, format);
   }
@@ -40801,11 +45657,9 @@ var ExportService = class {
 `;
       return ascii;
     }
-    const thoughtsText = thoughts.map(
-      (t, i) => `Thought ${i + 1} (${t.mode}):
+    const thoughtsText = thoughts.map((t, i) => `Thought ${i + 1} (${t.mode}):
 ${t.content}
-`
-    ).join("\n");
+`).join("\n");
     return `Session: ${title}
 Mode: ${mode}
 
@@ -40993,12 +45847,21 @@ ${thoughtsText}`;
           const revisedNum = thoughtMap.get(t.revisesThought);
           if (revisedNum) {
             ascii += `\u2551      \u21B3 revises T${revisedNum}                                         \u2551
-`.substring(0, 64) + "\u2551\n";
+`.substring(
+              0,
+              64
+            ) + "\u2551\n";
           }
         }
         if (i < thoughts.length - 1) {
-          ascii += "\u2551     \u2502                                                            \u2551\n".substring(0, 64) + "\u2551\n";
-          ascii += "\u2551     \u25BC                                                            \u2551\n".substring(0, 64) + "\u2551\n";
+          ascii += "\u2551     \u2502                                                            \u2551\n".substring(
+            0,
+            64
+          ) + "\u2551\n";
+          ascii += "\u2551     \u25BC                                                            \u2551\n".substring(
+            0,
+            64
+          ) + "\u2551\n";
         }
       }
       ascii += `\u255A${bar}\u255D
@@ -41812,7 +46675,9 @@ var DeepThinkingError = class extends Error {
 };
 var SessionNotFoundError = class extends DeepThinkingError {
   constructor(sessionId) {
-    super(`Session not found: ${sessionId}`, "SESSION_NOT_FOUND", { sessionId });
+    super(`Session not found: ${sessionId}`, "SESSION_NOT_FOUND", {
+      sessionId
+    });
   }
 };
 
@@ -42277,11 +47142,16 @@ var SessionMetricsCalculator = class {
         metrics.customMetrics.set("timelineUnit", thought.timeline.timeUnit);
       }
       if (thought.relations) {
-        const causalRelations = thought.relations.filter((r) => r.relationType === "causes");
+        const causalRelations = thought.relations.filter(
+          (r) => r.relationType === "causes"
+        );
         metrics.customMetrics.set("causalRelations", causalRelations.length);
       }
       if (thought.constraints) {
-        metrics.customMetrics.set("temporalConstraints", thought.constraints.length);
+        metrics.customMetrics.set(
+          "temporalConstraints",
+          thought.constraints.length
+        );
       }
       if (thought.intervals) {
         metrics.customMetrics.set("timeIntervals", thought.intervals.length);
@@ -42297,12 +47167,20 @@ var SessionMetricsCalculator = class {
         metrics.customMetrics.set("mixedStrategies", mixedStrategies.length);
       }
       if (thought.nashEquilibria) {
-        metrics.customMetrics.set("nashEquilibria", thought.nashEquilibria.length);
-        const pureEquilibria = thought.nashEquilibria.filter((e) => e.type === "pure");
+        metrics.customMetrics.set(
+          "nashEquilibria",
+          thought.nashEquilibria.length
+        );
+        const pureEquilibria = thought.nashEquilibria.filter(
+          (e) => e.type === "pure"
+        );
         metrics.customMetrics.set("pureNashEquilibria", pureEquilibria.length);
       }
       if (thought.dominantStrategies) {
-        metrics.customMetrics.set("dominantStrategies", thought.dominantStrategies.length);
+        metrics.customMetrics.set(
+          "dominantStrategies",
+          thought.dominantStrategies.length
+        );
       }
       if (thought.game) {
         metrics.customMetrics.set("gameType", thought.game.type);
@@ -42319,12 +47197,18 @@ var SessionMetricsCalculator = class {
         metrics.customMetrics.set("avgEvidenceReliability", avgReliability);
       }
       if (thought.beliefFunctions) {
-        metrics.customMetrics.set("beliefFunctions", thought.beliefFunctions.length);
+        metrics.customMetrics.set(
+          "beliefFunctions",
+          thought.beliefFunctions.length
+        );
       }
       if (thought.combinedBelief) {
         metrics.customMetrics.set("hasCombinedBelief", true);
         if (thought.combinedBelief.conflictMass !== void 0) {
-          metrics.customMetrics.set("conflictMass", thought.combinedBelief.conflictMass);
+          metrics.customMetrics.set(
+            "conflictMass",
+            thought.combinedBelief.conflictMass
+          );
         }
       }
       if (thought.decisions) {
@@ -42419,9 +47303,15 @@ var SessionManager = class {
         if (this.storage && session.config.enableAutoSave) {
           try {
             await this.storage.saveSession(session);
-            this.logger.debug("Evicted session saved to storage", { sessionId: key });
+            this.logger.debug("Evicted session saved to storage", {
+              sessionId: key
+            });
           } catch (error) {
-            this.logger.error("Failed to save evicted session", error, { sessionId: key });
+            this.logger.error(
+              "Failed to save evicted session",
+              error,
+              { sessionId: key }
+            );
           }
         }
         this.clearMetaSession(key);
@@ -42491,7 +47381,9 @@ var SessionManager = class {
         await this.storage.saveSession(session);
         this.logger.debug("Session persisted to storage", { sessionId });
       } catch (error) {
-        this.logger.error("Failed to persist session", error, { sessionId });
+        this.logger.error("Failed to persist session", error, {
+          sessionId
+        });
       }
     }
     this.startMetaStrategy(sessionId, session.mode);
@@ -42533,7 +47425,11 @@ var SessionManager = class {
           this.logger.debug("Session loaded from storage", { sessionId });
         }
       } catch (error) {
-        this.logger.error("Failed to load session from storage", error, { sessionId });
+        this.logger.error(
+          "Failed to load session from storage",
+          error,
+          { sessionId }
+        );
       }
     }
     return session || null;
@@ -42591,9 +47487,13 @@ var SessionManager = class {
     if (this.storage && session.config.enableAutoSave) {
       try {
         await this.storage.saveSession(session);
-        this.logger.debug("Session persisted after thought added", { sessionId });
+        this.logger.debug("Session persisted after thought added", {
+          sessionId
+        });
       } catch (error) {
-        this.logger.error("Failed to persist session", error, { sessionId });
+        this.logger.error("Failed to persist session", error, {
+          sessionId
+        });
       }
     }
     this.logger.debug("Thought added", {
@@ -42640,7 +47540,9 @@ var SessionManager = class {
         await this.storage.saveSession(session);
         this.logger.debug("Session persisted after mode switch", { sessionId });
       } catch (error) {
-        this.logger.error("Failed to persist session", error, { sessionId });
+        this.logger.error("Failed to persist session", error, {
+          sessionId
+        });
       }
     }
     this.logger.info("Session mode switched", {
@@ -42669,15 +47571,17 @@ var SessionManager = class {
    * ```
    */
   async listSessions(includeStoredSessions = true) {
-    const memoryMetadata = Array.from(this.activeSessions.values()).map((session) => ({
-      id: session.id,
-      title: session.title,
-      createdAt: session.createdAt,
-      updatedAt: session.updatedAt,
-      thoughtCount: session.thoughts.length,
-      mode: session.mode,
-      isComplete: session.isComplete
-    }));
+    const memoryMetadata = Array.from(this.activeSessions.values()).map(
+      (session) => ({
+        id: session.id,
+        title: session.title,
+        createdAt: session.createdAt,
+        updatedAt: session.updatedAt,
+        thoughtCount: session.thoughts.length,
+        mode: session.mode,
+        isComplete: session.isComplete
+      })
+    );
     if (!this.storage || !includeStoredSessions) {
       return memoryMetadata;
     }
@@ -42717,7 +47621,11 @@ var SessionManager = class {
         await this.storage.deleteSession(sessionId);
         this.logger.debug("Session deleted from storage", { sessionId });
       } catch (error) {
-        this.logger.error("Failed to delete session from storage", error, { sessionId });
+        this.logger.error(
+          "Failed to delete session from storage",
+          error,
+          { sessionId }
+        );
       }
     }
     if (deletedFromMemory && session) {
@@ -42727,7 +47635,9 @@ var SessionManager = class {
         thoughtCount: session.thoughts.length
       });
     } else {
-      this.logger.warn("Attempted to delete non-existent session from memory", { sessionId });
+      this.logger.warn("Attempted to delete non-existent session from memory", {
+        sessionId
+      });
     }
   }
   /**
@@ -42869,12 +47779,18 @@ var SessionManager = class {
     const progressMade = strategy.progressIndicators.length;
     const issuesCount = strategy.issuesEncountered.length;
     const timeElapsed = (/* @__PURE__ */ new Date()).getTime() - strategy.startTime.getTime();
-    const effectiveness = Math.min(1, progressMade / Math.max(1, thoughtsSpent));
+    const effectiveness = Math.min(
+      1,
+      progressMade / Math.max(1, thoughtsSpent)
+    );
     const MILLIS_PER_MINUTE = 6e4;
     const efficiency = timeElapsed > 0 ? Math.min(1, progressMade / (timeElapsed / MILLIS_PER_MINUTE)) : 0.5;
     const ISSUE_PENALTY = 0.15;
     const MIN_CONFIDENCE = 0.1;
-    const confidence = Math.max(MIN_CONFIDENCE, 1 - issuesCount * ISSUE_PENALTY);
+    const confidence = Math.max(
+      MIN_CONFIDENCE,
+      1 - issuesCount * ISSUE_PENALTY
+    );
     const progressRate = thoughtsSpent > 0 ? progressMade / thoughtsSpent : 0;
     const EFFECTIVENESS_WEIGHT = 0.4;
     const EFFICIENCY_WEIGHT = 0.2;
@@ -42950,11 +47866,17 @@ var SessionManager = class {
     const ISSUE_CONSISTENCY_PENALTY = 0.1;
     const MIN_CONSISTENCY = 0.1;
     const issuesCount = strategy?.issuesEncountered.length || 0;
-    const logicalConsistency = Math.max(MIN_CONSISTENCY, 1 - issuesCount * ISSUE_CONSISTENCY_PENALTY);
+    const logicalConsistency = Math.max(
+      MIN_CONSISTENCY,
+      1 - issuesCount * ISSUE_CONSISTENCY_PENALTY
+    );
     const avgUncertainty = history.reduce((sum, entry) => sum + (entry.uncertainty || 0.5), 0) / history.length;
     const evidenceQuality = 1 - avgUncertainty;
     const COMPLETENESS_NORMALIZATION = 5;
-    const completeness = Math.min(1, history.length / COMPLETENESS_NORMALIZATION);
+    const completeness = Math.min(
+      1,
+      history.length / COMPLETENESS_NORMALIZATION
+    );
     const ORIGINALITY_NORMALIZATION = 3;
     const uniqueModes = new Set(history.map((h) => h.mode)).size;
     const originality = Math.min(1, uniqueModes / ORIGINALITY_NORMALIZATION);
@@ -43010,6 +47932,19 @@ var SessionManager = class {
   getActiveMetaSessions() {
     return Array.from(this.sessionHistory.keys());
   }
+  /**
+   * Get statistics for the in-memory active-sessions LRU cache
+   * (hits, misses, hit rate, evictions, etc).
+   *
+   * Exposes {@link LRUCache.getStats} so callers/tests can assert on
+   * observable cache behavior (e.g. hit count) instead of wall-clock
+   * timing, which is unreliable on shared/loaded machines.
+   *
+   * @returns Current cache statistics snapshot
+   */
+  getSessionCacheStats() {
+    return this.activeSessions.getStats();
+  }
 };
 
 // src/session/storage/file-store.ts
@@ -43053,6 +47988,27 @@ var DEFAULT_OPTIONS = {
   type: "exclusive"
 };
 var INSTANCE_ID = `${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+var attemptCounter = 0;
+function nextAttemptId() {
+  attemptCounter += 1;
+  return `${INSTANCE_ID}-${attemptCounter}`;
+}
+var inProcessLockQueues = /* @__PURE__ */ new Map();
+function runExclusiveInProcess(key, task) {
+  const previous = inProcessLockQueues.get(key) ?? Promise.resolve();
+  const result = previous.then(task, task);
+  const tracked = result.then(
+    () => void 0,
+    () => void 0
+  );
+  inProcessLockQueues.set(key, tracked);
+  void tracked.then(() => {
+    if (inProcessLockQueues.get(key) === tracked) {
+      inProcessLockQueues.delete(key);
+    }
+  });
+  return result;
+}
 function getLockPath(filePath) {
   return `${filePath}.lock`;
 }
@@ -43062,7 +48018,7 @@ function getSharedLockDir(filePath) {
 function createLockInfo(type) {
   return {
     pid: process.pid,
-    hostname: __require("os").hostname(),
+    hostname: os2.hostname(),
     timestamp: Date.now(),
     type,
     instanceId: INSTANCE_ID
@@ -43081,7 +48037,7 @@ async function readLockInfo(lockPath) {
   }
 }
 async function writeLockInfo(lockPath, lockInfo) {
-  const tempPath = `${lockPath}.${INSTANCE_ID}.tmp`;
+  const tempPath = `${lockPath}.${nextAttemptId()}.tmp`;
   try {
     await promises.writeFile(tempPath, JSON.stringify(lockInfo), { flag: "wx" });
     await promises.rename(tempPath, lockPath);
@@ -43096,18 +48052,21 @@ async function writeLockInfo(lockPath, lockInfo) {
 }
 async function acquireExclusiveLock(filePath, options) {
   const lockPath = getLockPath(filePath);
+  return runExclusiveInProcess(
+    lockPath,
+    () => acquireExclusiveLockAttempt(filePath, lockPath, options)
+  );
+}
+async function acquireExclusiveLockAttempt(filePath, lockPath, options) {
   const sharedLockDir = getSharedLockDir(filePath);
   const startTime = Date.now();
   while (Date.now() - startTime < options.timeout) {
     const existingLock = await readLockInfo(lockPath);
     if (existingLock) {
-      if (existingLock.instanceId === INSTANCE_ID) {
-        return async () => {
-          await promises.unlink(lockPath).catch((err) => handleUnlinkError(err, lockPath, "exclusive lock"));
-        };
-      }
       if (isLockStale(existingLock, options.staleThreshold)) {
-        await promises.unlink(lockPath).catch((err) => handleUnlinkError(err, lockPath, "stale exclusive lock"));
+        await promises.unlink(lockPath).catch(
+          (err) => handleUnlinkError(err, lockPath, "stale exclusive lock")
+        );
       } else {
         await sleep(options.retryInterval);
         continue;
@@ -43122,7 +48081,9 @@ async function acquireExclusiveLock(filePath, options) {
         if (sharedLockInfo && !isLockStale(sharedLockInfo, options.staleThreshold)) {
           validSharedLocks.push(sharedLockInfo);
         } else {
-          await promises.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, "stale shared lock"));
+          await promises.unlink(sharedLockPath).catch(
+            (err) => handleUnlinkError(err, sharedLockPath, "stale shared lock")
+          );
         }
       }
       if (validSharedLocks.length > 0) {
@@ -43142,18 +48103,22 @@ async function acquireExclusiveLock(filePath, options) {
     }
     await sleep(options.retryInterval);
   }
-  throw new Error(`Timeout acquiring exclusive lock on ${filePath} after ${options.timeout}ms`);
+  throw new Error(
+    `Timeout acquiring exclusive lock on ${filePath} after ${options.timeout}ms`
+  );
 }
 async function acquireSharedLock(filePath, options) {
   const exclusiveLockPath = getLockPath(filePath);
   const sharedLockDir = getSharedLockDir(filePath);
-  const sharedLockPath = path4.join(sharedLockDir, `${INSTANCE_ID}.lock`);
+  const sharedLockPath = path4.join(sharedLockDir, `${nextAttemptId()}.lock`);
   const startTime = Date.now();
   while (Date.now() - startTime < options.timeout) {
     const exclusiveLock = await readLockInfo(exclusiveLockPath);
     if (exclusiveLock) {
       if (isLockStale(exclusiveLock, options.staleThreshold)) {
-        await promises.unlink(exclusiveLockPath).catch((err) => handleUnlinkError(err, exclusiveLockPath, "stale exclusive lock"));
+        await promises.unlink(exclusiveLockPath).catch(
+          (err) => handleUnlinkError(err, exclusiveLockPath, "stale exclusive lock")
+        );
       } else {
         await sleep(options.retryInterval);
         continue;
@@ -43162,15 +48127,21 @@ async function acquireSharedLock(filePath, options) {
     await promises.mkdir(sharedLockDir, { recursive: true });
     const lockInfo = createLockInfo("shared");
     try {
-      await promises.writeFile(sharedLockPath, JSON.stringify(lockInfo), { flag: "wx" });
+      await promises.writeFile(sharedLockPath, JSON.stringify(lockInfo), {
+        flag: "wx"
+      });
       const recheck = await readLockInfo(exclusiveLockPath);
       if (recheck && !isLockStale(recheck, options.staleThreshold)) {
-        await promises.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, "shared lock rollback"));
+        await promises.unlink(sharedLockPath).catch(
+          (err) => handleUnlinkError(err, sharedLockPath, "shared lock rollback")
+        );
         await sleep(options.retryInterval);
         continue;
       }
       return async () => {
-        await promises.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, "shared lock"));
+        await promises.unlink(sharedLockPath).catch(
+          (err) => handleUnlinkError(err, sharedLockPath, "shared lock")
+        );
         try {
           const remaining = await promises.readdir(sharedLockDir);
           if (remaining.length === 0) {
@@ -43182,13 +48153,17 @@ async function acquireSharedLock(filePath, options) {
     } catch (error) {
       if (error.code === "EEXIST") {
         return async () => {
-          await promises.unlink(sharedLockPath).catch((err) => handleUnlinkError(err, sharedLockPath, "existing shared lock"));
+          await promises.unlink(sharedLockPath).catch(
+            (err) => handleUnlinkError(err, sharedLockPath, "existing shared lock")
+          );
         };
       }
       throw error;
     }
   }
-  throw new Error(`Timeout acquiring shared lock on ${filePath} after ${options.timeout}ms`);
+  throw new Error(
+    `Timeout acquiring shared lock on ${filePath} after ${options.timeout}ms`
+  );
 }
 function sleep(ms) {
   return new Promise((resolve2) => setTimeout(resolve2, ms));
@@ -43201,7 +48176,10 @@ async function acquireLock(filePath, options) {
   return acquireExclusiveLock(filePath, opts);
 }
 async function withLock(filePath, fn, options) {
-  const release = await acquireLock(filePath, { ...options, type: "exclusive" });
+  const release = await acquireLock(filePath, {
+    ...options,
+    type: "exclusive"
+  });
   try {
     return await fn();
   } finally {
@@ -43265,9 +48243,13 @@ var FileSessionStore = class {
         config: this.config
       });
     } catch (error) {
-      logger.error("Failed to initialize FileSessionStore", error instanceof Error ? error : new Error(String(error)), {
-        baseDir: this.baseDir
-      });
+      logger.error(
+        "Failed to initialize FileSessionStore",
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          baseDir: this.baseDir
+        }
+      );
       throw error;
     }
   }
@@ -43280,17 +48262,28 @@ var FileSessionStore = class {
     validateSessionId(session.id);
     const sessionPath = this.getSessionPath(session.id);
     try {
-      await withLock(sessionPath, async () => {
-        const serializable = this.prepareForSerialization(session);
-        const json = this.config.serialization?.prettyPrint ? JSON.stringify(serializable, null, 2) : JSON.stringify(serializable);
-        await promises.writeFile(sessionPath, json, "utf-8");
-      }, this.lockOptions);
+      await withLock(
+        sessionPath,
+        async () => {
+          const serializable = this.prepareForSerialization(session);
+          const json = this.config.serialization?.prettyPrint ? JSON.stringify(serializable, null, 2) : JSON.stringify(serializable);
+          await promises.writeFile(sessionPath, json, "utf-8");
+        },
+        this.lockOptions
+      );
       await this.updateMetadata(session);
-      logger.debug("Session saved", { sessionId: session.id, path: sessionPath });
-    } catch (error) {
-      logger.error("Failed to save session", error instanceof Error ? error : new Error(String(error)), {
-        sessionId: session.id
+      logger.debug("Session saved", {
+        sessionId: session.id,
+        path: sessionPath
       });
+    } catch (error) {
+      logger.error(
+        "Failed to save session",
+        error instanceof Error ? error : new Error(String(error)),
+        {
+          sessionId: session.id
+        }
+      );
       throw error;
     }
   }
@@ -43308,15 +48301,23 @@ var FileSessionStore = class {
       } catch {
         return null;
       }
-      const session = await withSharedLock(sessionPath, async () => {
-        const json = await promises.readFile(sessionPath, "utf-8");
-        const parsed = JSON.parse(json);
-        return this.restoreFromSerialization(parsed);
-      }, this.lockOptions);
+      const session = await withSharedLock(
+        sessionPath,
+        async () => {
+          const json = await promises.readFile(sessionPath, "utf-8");
+          const parsed = JSON.parse(json);
+          return this.restoreFromSerialization(parsed);
+        },
+        this.lockOptions
+      );
       logger.debug("Session loaded", { sessionId });
       return session;
     } catch (error) {
-      logger.error("Failed to load session", error instanceof Error ? error : new Error(String(error)), { sessionId });
+      logger.error(
+        "Failed to load session",
+        error instanceof Error ? error : new Error(String(error)),
+        { sessionId }
+      );
       return null;
     }
   }
@@ -43334,15 +48335,23 @@ var FileSessionStore = class {
       } catch {
         return false;
       }
-      await withLock(sessionPath, async () => {
-        await promises.unlink(sessionPath);
-      }, this.lockOptions);
+      await withLock(
+        sessionPath,
+        async () => {
+          await promises.unlink(sessionPath);
+        },
+        this.lockOptions
+      );
       this.metadataCache.delete(sessionId);
       await this.saveMetadataIndex();
       logger.info("Session deleted", { sessionId });
       return true;
     } catch (error) {
-      logger.error("Failed to delete session", error instanceof Error ? error : new Error(String(error)), { sessionId });
+      logger.error(
+        "Failed to delete session",
+        error instanceof Error ? error : new Error(String(error)),
+        { sessionId }
+      );
       return false;
     }
   }
@@ -43465,13 +48474,17 @@ var FileSessionStore = class {
   async loadMetadataIndex() {
     try {
       await promises.access(this.metadataFile);
-      const metadata = await withSharedLock(this.metadataFile, async () => {
-        const json = await promises.readFile(this.metadataFile, "utf-8");
-        const parsed = JSON.parse(json);
-        return parsed.map(
-          (item) => this.restoreFromSerialization(item)
-        );
-      }, this.lockOptions);
+      const metadata = await withSharedLock(
+        this.metadataFile,
+        async () => {
+          const json = await promises.readFile(this.metadataFile, "utf-8");
+          const parsed = JSON.parse(json);
+          return parsed.map(
+            (item) => this.restoreFromSerialization(item)
+          );
+        },
+        this.lockOptions
+      );
       this.metadataCache.clear();
       for (const meta of metadata) {
         this.metadataCache.set(meta.id, meta);
@@ -43506,12 +48519,18 @@ var FileSessionStore = class {
       }
     } catch {
     }
-    await withLock(this.metadataFile, async () => {
-      const metadata = Array.from(this.metadataCache.values());
-      const serializable = metadata.map((item) => this.prepareForSerialization(item));
-      const json = JSON.stringify(serializable, null, 2);
-      await promises.writeFile(this.metadataFile, json, "utf-8");
-    }, this.lockOptions);
+    await withLock(
+      this.metadataFile,
+      async () => {
+        const metadata = Array.from(this.metadataCache.values());
+        const serializable = metadata.map(
+          (item) => this.prepareForSerialization(item)
+        );
+        const json = JSON.stringify(serializable, null, 2);
+        await promises.writeFile(this.metadataFile, json, "utf-8");
+      },
+      this.lockOptions
+    );
   }
   /**
    * Ensure storage is initialized
@@ -43667,7 +48686,12 @@ var baseThoughtProperties = {
     description: "Key assumptions made in this thought"
   }
 };
-var baseThoughtRequired = ["thought", "thoughtNumber", "totalThoughts", "nextThoughtNeeded"];
+var baseThoughtRequired = [
+  "thought",
+  "thoughtNumber",
+  "totalThoughts",
+  "nextThoughtNeeded"
+];
 var deepthinking_core_schema = {
   name: "deepthinking_core",
   description: "Core reasoning: inductive, deductive, abductive",
@@ -43777,7 +48801,13 @@ var deepthinking_standard_schema = {
       },
       stage: {
         type: "string",
-        enum: ["problem_definition", "constraints", "model", "proof", "implementation"],
+        enum: [
+          "problem_definition",
+          "constraints",
+          "model",
+          "proof",
+          "implementation"
+        ],
         description: "Shannon methodology stage (only for shannon mode)"
       },
       activeModes: {
@@ -43822,7 +48852,13 @@ var deepthinking_mathematics_schema = {
         properties: {
           type: {
             type: "string",
-            enum: ["direct", "contradiction", "induction", "construction", "contrapositive"],
+            enum: [
+              "direct",
+              "contradiction",
+              "induction",
+              "construction",
+              "contrapositive"
+            ],
             description: "Type of mathematical proof"
           },
           steps: {
@@ -43870,7 +48906,10 @@ var deepthinking_mathematics_schema = {
       physicalInterpretation: {
         type: "object",
         properties: {
-          quantity: { type: "string", description: "Physical quantity being described" },
+          quantity: {
+            type: "string",
+            description: "Physical quantity being described"
+          },
           units: { type: "string", description: "Units of the quantity" },
           conservationLaws: {
             type: "array",
@@ -43889,10 +48928,23 @@ var deepthinking_mathematics_schema = {
         items: {
           type: "object",
           properties: {
-            stepNumber: { type: "integer", minimum: 1, description: "Step number in the proof" },
-            statement: { type: "string", description: "The statement being made" },
-            justification: { type: "string", description: "Justification for this step" },
-            latex: { type: "string", description: "LaTeX representation of the statement" },
+            stepNumber: {
+              type: "integer",
+              minimum: 1,
+              description: "Step number in the proof"
+            },
+            statement: {
+              type: "string",
+              description: "The statement being made"
+            },
+            justification: {
+              type: "string",
+              description: "Justification for this step"
+            },
+            latex: {
+              type: "string",
+              description: "LaTeX representation of the statement"
+            },
             referencesSteps: {
               type: "array",
               items: { type: "integer" },
@@ -43945,7 +48997,13 @@ var deepthinking_temporal_schema = {
       // Historical-specific properties
       thoughtType: {
         type: "string",
-        enum: ["event_analysis", "source_evaluation", "pattern_identification", "causal_chain", "periodization"],
+        enum: [
+          "event_analysis",
+          "source_evaluation",
+          "pattern_identification",
+          "causal_chain",
+          "periodization"
+        ],
         description: "Type of historical analysis (historical mode only)"
       },
       historicalEvents: {
@@ -43963,7 +49021,18 @@ var deepthinking_temporal_schema = {
                   properties: {
                     start: { type: "string" },
                     end: { type: "string" },
-                    precision: { type: "string", enum: ["exact", "approximate", "century", "decade", "year", "month", "day"] }
+                    precision: {
+                      type: "string",
+                      enum: [
+                        "exact",
+                        "approximate",
+                        "century",
+                        "decade",
+                        "year",
+                        "month",
+                        "day"
+                      ]
+                    }
                   },
                   required: ["start", "end"]
                 }
@@ -43971,11 +49040,30 @@ var deepthinking_temporal_schema = {
             },
             location: { type: "string" },
             description: { type: "string" },
-            actors: { type: "array", items: { type: "string" }, description: "Actor IDs involved" },
-            causes: { type: "array", items: { type: "string" }, description: "Cause event IDs" },
-            effects: { type: "array", items: { type: "string" }, description: "Effect event IDs" },
-            significance: { type: "string", enum: ["minor", "moderate", "major", "transformative"] },
-            sources: { type: "array", items: { type: "string" }, description: "Source IDs" },
+            actors: {
+              type: "array",
+              items: { type: "string" },
+              description: "Actor IDs involved"
+            },
+            causes: {
+              type: "array",
+              items: { type: "string" },
+              description: "Cause event IDs"
+            },
+            effects: {
+              type: "array",
+              items: { type: "string" },
+              description: "Effect event IDs"
+            },
+            significance: {
+              type: "string",
+              enum: ["minor", "moderate", "major", "transformative"]
+            },
+            sources: {
+              type: "array",
+              items: { type: "string" },
+              description: "Source IDs"
+            },
             tags: { type: "array", items: { type: "string" } }
           },
           required: ["id", "name", "date", "significance"]
@@ -43989,21 +49077,58 @@ var deepthinking_temporal_schema = {
           properties: {
             id: { type: "string" },
             title: { type: "string" },
-            type: { type: "string", enum: ["primary", "secondary", "tertiary"] },
-            subtype: { type: "string", enum: ["document", "artifact", "oral", "visual", "archaeological", "statistical"] },
+            type: {
+              type: "string",
+              enum: ["primary", "secondary", "tertiary"]
+            },
+            subtype: {
+              type: "string",
+              enum: [
+                "document",
+                "artifact",
+                "oral",
+                "visual",
+                "archaeological",
+                "statistical"
+              ]
+            },
             author: { type: "string" },
             date: { type: "string" },
-            reliability: { type: "number", minimum: 0, maximum: 1, description: "Reliability score 0-1" },
+            reliability: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+              description: "Reliability score 0-1"
+            },
             bias: {
               type: "object",
               properties: {
-                type: { type: "string", enum: ["political", "religious", "cultural", "economic", "nationalistic", "ideological", "personal"] },
+                type: {
+                  type: "string",
+                  enum: [
+                    "political",
+                    "religious",
+                    "cultural",
+                    "economic",
+                    "nationalistic",
+                    "ideological",
+                    "personal"
+                  ]
+                },
                 direction: { type: "string" },
                 severity: { type: "number", minimum: 0, maximum: 1 }
               }
             },
-            corroboratedBy: { type: "array", items: { type: "string" }, description: "Corroborating source IDs" },
-            contradictedBy: { type: "array", items: { type: "string" }, description: "Contradicting source IDs" }
+            corroboratedBy: {
+              type: "array",
+              items: { type: "string" },
+              description: "Corroborating source IDs"
+            },
+            contradictedBy: {
+              type: "array",
+              items: { type: "string" },
+              description: "Contradicting source IDs"
+            }
           },
           required: ["id", "title", "type", "reliability"]
         },
@@ -44019,8 +49144,16 @@ var deepthinking_temporal_schema = {
             startDate: { type: "string" },
             endDate: { type: "string" },
             characteristics: { type: "array", items: { type: "string" } },
-            keyEvents: { type: "array", items: { type: "string" }, description: "Key event IDs" },
-            keyActors: { type: "array", items: { type: "string" }, description: "Key actor IDs" },
+            keyEvents: {
+              type: "array",
+              items: { type: "string" },
+              description: "Key event IDs"
+            },
+            keyActors: {
+              type: "array",
+              items: { type: "string" },
+              description: "Key actor IDs"
+            },
             themes: { type: "array", items: { type: "string" } }
           },
           required: ["id", "name", "startDate", "endDate", "characteristics"]
@@ -44043,13 +49176,25 @@ var deepthinking_temporal_schema = {
                   effect: { type: "string", description: "Effect event ID" },
                   mechanism: { type: "string" },
                   confidence: { type: "number", minimum: 0, maximum: 1 },
-                  evidence: { type: "array", items: { type: "string" }, description: "Evidence source IDs" }
+                  evidence: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "Evidence source IDs"
+                  }
                 },
                 required: ["cause", "effect", "confidence"]
               }
             },
-            confidence: { type: "number", minimum: 0, maximum: 1, description: "Aggregate chain confidence" },
-            alternativeExplanations: { type: "array", items: { type: "string" } }
+            confidence: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+              description: "Aggregate chain confidence"
+            },
+            alternativeExplanations: {
+              type: "array",
+              items: { type: "string" }
+            }
           },
           required: ["id", "name", "links", "confidence"]
         },
@@ -44062,7 +49207,17 @@ var deepthinking_temporal_schema = {
           properties: {
             id: { type: "string" },
             name: { type: "string" },
-            type: { type: "string", enum: ["individual", "group", "institution", "nation", "movement", "class"] },
+            type: {
+              type: "string",
+              enum: [
+                "individual",
+                "group",
+                "institution",
+                "nation",
+                "movement",
+                "class"
+              ]
+            },
             period: { type: "string", description: "Period ID" },
             roles: { type: "array", items: { type: "string" } },
             motivations: { type: "array", items: { type: "string" } },
@@ -44072,13 +49227,28 @@ var deepthinking_temporal_schema = {
                 type: "object",
                 properties: {
                   actorId: { type: "string" },
-                  type: { type: "string", enum: ["ally", "rival", "subordinate", "superior", "colleague", "influenced_by", "mentor", "successor"] },
+                  type: {
+                    type: "string",
+                    enum: [
+                      "ally",
+                      "rival",
+                      "subordinate",
+                      "superior",
+                      "colleague",
+                      "influenced_by",
+                      "mentor",
+                      "successor"
+                    ]
+                  },
                   description: { type: "string" }
                 },
                 required: ["actorId", "type"]
               }
             },
-            significance: { type: "string", enum: ["minor", "moderate", "major", "transformative"] }
+            significance: {
+              type: "string",
+              enum: ["minor", "moderate", "major", "transformative"]
+            }
           },
           required: ["id", "name", "type"]
         },
@@ -44095,7 +49265,15 @@ var deepthinking_temporal_schema = {
           name: { type: "string", description: "Timeline name" },
           timeUnit: {
             type: "string",
-            enum: ["milliseconds", "seconds", "minutes", "hours", "days", "months", "years"],
+            enum: [
+              "milliseconds",
+              "seconds",
+              "minutes",
+              "hours",
+              "days",
+              "months",
+              "years"
+            ],
             description: "Time unit"
           },
           events: {
@@ -44103,8 +49281,14 @@ var deepthinking_temporal_schema = {
             items: { type: "string" },
             description: "Event IDs in this timeline"
           },
-          startTime: { type: "number", description: "Timeline start time (optional)" },
-          endTime: { type: "number", description: "Timeline end time (optional)" }
+          startTime: {
+            type: "number",
+            description: "Timeline start time (optional)"
+          },
+          endTime: {
+            type: "number",
+            description: "Timeline end time (optional)"
+          }
         },
         required: ["id", "name", "timeUnit", "events"],
         additionalProperties: false,
@@ -44118,13 +49302,19 @@ var deepthinking_temporal_schema = {
             id: { type: "string" },
             name: { type: "string" },
             description: { type: "string" },
-            timestamp: { type: "number", description: "Event timestamp as number" },
+            timestamp: {
+              type: "number",
+              description: "Event timestamp as number"
+            },
             type: {
               type: "string",
               enum: ["instant", "interval"],
               description: "Event type"
             },
-            duration: { type: "number", description: "Event duration (optional)" },
+            duration: {
+              type: "number",
+              description: "Event duration (optional)"
+            },
             properties: {
               type: "object",
               additionalProperties: true,
@@ -44149,7 +49339,12 @@ var deepthinking_temporal_schema = {
             },
             subject: { type: "string", description: "Subject event ID" },
             object: { type: "string", description: "Object event ID" },
-            confidence: { type: "number", minimum: 0, maximum: 1, description: "Confidence in constraint" }
+            confidence: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+              description: "Confidence in constraint"
+            }
           },
           required: ["id", "type", "subject", "object", "confidence"],
           additionalProperties: false
@@ -44191,10 +49386,25 @@ var deepthinking_temporal_schema = {
             to: { type: "string", description: "Target event ID" },
             relationType: {
               type: "string",
-              enum: ["before", "after", "during", "overlaps", "meets", "starts", "finishes", "equals", "causes"],
+              enum: [
+                "before",
+                "after",
+                "during",
+                "overlaps",
+                "meets",
+                "starts",
+                "finishes",
+                "equals",
+                "causes"
+              ],
               description: "Relation type (Allen's interval algebra)"
             },
-            strength: { type: "number", minimum: 0, maximum: 1, description: "Relation strength" },
+            strength: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+              description: "Relation strength"
+            },
             delay: { type: "number", description: "Temporal delay (optional)" }
           },
           required: ["id", "from", "to", "relationType", "strength"],
@@ -44388,7 +49598,10 @@ var deepthinking_strategic_schema = {
           properties: {
             id: { type: "string" },
             name: { type: "string" },
-            isRational: { type: "boolean", description: "Whether player is rational" },
+            isRational: {
+              type: "boolean",
+              description: "Whether player is rational"
+            },
             availableStrategies: {
               type: "array",
               items: { type: "string" },
@@ -44407,11 +49620,25 @@ var deepthinking_strategic_schema = {
           type: "object",
           properties: {
             id: { type: "string" },
-            playerId: { type: "string", description: "ID of the player using this strategy" },
+            playerId: {
+              type: "string",
+              description: "ID of the player using this strategy"
+            },
             name: { type: "string", description: "Strategy name" },
-            description: { type: "string", description: "Strategy description" },
-            isPure: { type: "boolean", description: "Whether this is a pure strategy" },
-            probability: { type: "number", minimum: 0, maximum: 1, description: "Probability for mixed strategies" }
+            description: {
+              type: "string",
+              description: "Strategy description"
+            },
+            isPure: {
+              type: "boolean",
+              description: "Whether this is a pure strategy"
+            },
+            probability: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+              description: "Probability for mixed strategies"
+            }
           },
           required: ["id", "playerId", "name", "description", "isPure"],
           additionalProperties: false
@@ -44496,7 +49723,12 @@ var deepthinking_analytical_schema = {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["analogical", "firstprinciples", "metareasoning", "cryptanalytic"],
+        enum: [
+          "analogical",
+          "firstprinciples",
+          "metareasoning",
+          "cryptanalytic"
+        ],
         description: "Analytical reasoning mode"
       },
       sourceAnalogy: {
@@ -44705,7 +49937,10 @@ var deepthinking_engineering_schema = {
           severity: { type: "integer", minimum: 1, maximum: 10 },
           occurrence: { type: "integer", minimum: 1, maximum: 10 },
           detection: { type: "integer", minimum: 1, maximum: 10 },
-          rpn: { type: "integer", description: "Risk Priority Number = S * O * D" }
+          rpn: {
+            type: "integer",
+            description: "Risk Priority Number = S * O * D"
+          }
         },
         additionalProperties: false,
         description: "FMEA analysis entry"
@@ -44717,14 +49952,28 @@ var deepthinking_engineering_schema = {
       },
       designPattern: {
         type: "string",
-        enum: ["divide-and-conquer", "dynamic-programming", "greedy", "backtracking", "branch-and-bound", "randomized", "approximation"],
+        enum: [
+          "divide-and-conquer",
+          "dynamic-programming",
+          "greedy",
+          "backtracking",
+          "branch-and-bound",
+          "randomized",
+          "approximation"
+        ],
         description: "Algorithm design pattern"
       },
       complexityAnalysis: {
         type: "object",
         properties: {
-          timeComplexity: { type: "string", description: "Time complexity (e.g., O(n log n))" },
-          spaceComplexity: { type: "string", description: "Space complexity (e.g., O(n))" },
+          timeComplexity: {
+            type: "string",
+            description: "Time complexity (e.g., O(n log n))"
+          },
+          spaceComplexity: {
+            type: "string",
+            description: "Space complexity (e.g., O(n))"
+          },
           bestCase: { type: "string" },
           averageCase: { type: "string" },
           worstCase: { type: "string" }
@@ -44788,7 +50037,10 @@ var deepthinking_academic_schema = {
             description: { type: "string" },
             sourceIds: { type: "array", items: { type: "string" } },
             strength: { type: "number", minimum: 0, maximum: 1 },
-            consensus: { type: "string", enum: ["strong", "moderate", "weak", "contested"] }
+            consensus: {
+              type: "string",
+              enum: ["strong", "moderate", "weak", "contested"]
+            }
           },
           required: ["id", "name"]
         },
@@ -44806,8 +50058,20 @@ var deepthinking_academic_schema = {
           properties: {
             id: { type: "string" },
             description: { type: "string" },
-            type: { type: "string", enum: ["empirical", "theoretical", "methodological", "population", "contextual"] },
-            importance: { type: "string", enum: ["critical", "significant", "moderate", "minor"] }
+            type: {
+              type: "string",
+              enum: [
+                "empirical",
+                "theoretical",
+                "methodological",
+                "population",
+                "contextual"
+              ]
+            },
+            importance: {
+              type: "string",
+              enum: ["critical", "significant", "moderate", "minor"]
+            }
           },
           required: ["id", "description"]
         },
@@ -44821,8 +50085,14 @@ var deepthinking_academic_schema = {
           properties: {
             id: { type: "string" },
             statement: { type: "string" },
-            type: { type: "string", enum: ["fact", "value", "policy", "definition", "cause"] },
-            strength: { type: "string", enum: ["strong", "moderate", "tentative"] }
+            type: {
+              type: "string",
+              enum: ["fact", "value", "policy", "definition", "cause"]
+            },
+            strength: {
+              type: "string",
+              enum: ["strong", "moderate", "tentative"]
+            }
           },
           required: ["id", "statement"]
         },
@@ -44834,7 +50104,17 @@ var deepthinking_academic_schema = {
           type: "object",
           properties: {
             id: { type: "string" },
-            type: { type: "string", enum: ["empirical", "statistical", "testimonial", "analogical", "logical", "textual"] },
+            type: {
+              type: "string",
+              enum: [
+                "empirical",
+                "statistical",
+                "testimonial",
+                "analogical",
+                "logical",
+                "textual"
+              ]
+            },
             content: { type: "string" },
             source: { type: "string" },
             reliability: { type: "number", minimum: 0, maximum: 1 }
@@ -44850,7 +50130,17 @@ var deepthinking_academic_schema = {
           properties: {
             id: { type: "string" },
             statement: { type: "string" },
-            type: { type: "string", enum: ["generalization", "analogy", "causal", "authority", "principle", "definition"] },
+            type: {
+              type: "string",
+              enum: [
+                "generalization",
+                "analogy",
+                "causal",
+                "authority",
+                "principle",
+                "definition"
+              ]
+            },
             groundsIds: { type: "array", items: { type: "string" } },
             claimId: { type: "string" }
           },
@@ -44865,7 +50155,16 @@ var deepthinking_academic_schema = {
           properties: {
             id: { type: "string" },
             objection: { type: "string" },
-            type: { type: "string", enum: ["factual", "logical", "ethical", "practical", "definitional"] },
+            type: {
+              type: "string",
+              enum: [
+                "factual",
+                "logical",
+                "ethical",
+                "practical",
+                "definitional"
+              ]
+            },
             strength: { type: "string", enum: ["strong", "moderate", "weak"] },
             response: { type: "string" }
           },
@@ -44911,12 +50210,29 @@ var deepthinking_academic_schema = {
       // Analysis-specific properties
       analysisMethod: {
         type: "string",
-        enum: ["thematic", "grounded-theory", "discourse", "content", "narrative", "phenomenological"],
+        enum: [
+          "thematic",
+          "grounded-theory",
+          "discourse",
+          "content",
+          "narrative",
+          "phenomenological"
+        ],
         description: "Qualitative analysis method (simplified)"
       },
       methodology: {
         type: "string",
-        enum: ["thematic_analysis", "grounded_theory", "discourse_analysis", "content_analysis", "phenomenological", "narrative_analysis", "framework_analysis", "template_analysis", "mixed_qualitative"],
+        enum: [
+          "thematic_analysis",
+          "grounded_theory",
+          "discourse_analysis",
+          "content_analysis",
+          "phenomenological",
+          "narrative_analysis",
+          "framework_analysis",
+          "template_analysis",
+          "mixed_qualitative"
+        ],
         description: "Qualitative analysis methodology"
       },
       dataSources: {
@@ -44941,7 +50257,20 @@ var deepthinking_academic_schema = {
             id: { type: "string" },
             label: { type: "string" },
             definition: { type: "string" },
-            type: { type: "string", enum: ["descriptive", "in_vivo", "process", "initial", "focused", "axial", "theoretical", "emotion", "value"] },
+            type: {
+              type: "string",
+              enum: [
+                "descriptive",
+                "in_vivo",
+                "process",
+                "initial",
+                "focused",
+                "axial",
+                "theoretical",
+                "emotion",
+                "value"
+              ]
+            },
             frequency: { type: "integer" },
             examples: { type: "array", items: { type: "string" } }
           },
@@ -44955,7 +50284,17 @@ var deepthinking_academic_schema = {
           type: "object",
           properties: {
             id: { type: "string" },
-            type: { type: "string", enum: ["analytical", "theoretical", "methodological", "reflexive", "code", "operational"] },
+            type: {
+              type: "string",
+              enum: [
+                "analytical",
+                "theoretical",
+                "methodological",
+                "reflexive",
+                "code",
+                "operational"
+              ]
+            },
             content: { type: "string" },
             relatedCodes: { type: "array", items: { type: "string" } }
           },
@@ -44993,17 +50332,40 @@ var deepthinking_session_schema = {
       },
       action: {
         type: "string",
-        enum: ["summarize", "export", "export_all", "get_session", "switch_mode", "recommend_mode", "delete_session"],
+        enum: [
+          "summarize",
+          "export",
+          "export_all",
+          "get_session",
+          "switch_mode",
+          "recommend_mode",
+          "delete_session"
+        ],
         description: "Session action to perform"
       },
       exportFormat: {
         type: "string",
-        enum: ["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"],
+        enum: [
+          "markdown",
+          "latex",
+          "json",
+          "html",
+          "jupyter",
+          "mermaid",
+          "dot",
+          "ascii"
+        ],
         description: "Export format (for export action)"
       },
       exportProfile: {
         type: "string",
-        enum: ["academic", "presentation", "documentation", "archive", "minimal"],
+        enum: [
+          "academic",
+          "presentation",
+          "documentation",
+          "archive",
+          "minimal"
+        ],
         description: "Pre-configured export bundle. academic: LaTeX+Mermaid+JSON, presentation: Mermaid+HTML+ASCII, documentation: Markdown+HTML+JSON, archive: all formats, minimal: Markdown+JSON"
       },
       includeContent: {
@@ -45040,15 +50402,47 @@ var deepthinking_session_schema = {
             enum: ["low", "medium", "high"],
             description: "Uncertainty level"
           },
-          timeDependent: { type: "boolean", description: "Whether problem involves time" },
-          multiAgent: { type: "boolean", description: "Whether problem involves multiple agents" },
-          requiresProof: { type: "boolean", description: "Whether formal proof is needed" },
-          requiresQuantification: { type: "boolean", description: "Whether quantitative analysis is needed" },
-          hasIncompleteInfo: { type: "boolean", description: "Whether information is incomplete" },
-          requiresExplanation: { type: "boolean", description: "Whether explanation is needed" },
-          hasAlternatives: { type: "boolean", description: "Whether alternative scenarios exist" }
+          timeDependent: {
+            type: "boolean",
+            description: "Whether problem involves time"
+          },
+          multiAgent: {
+            type: "boolean",
+            description: "Whether problem involves multiple agents"
+          },
+          requiresProof: {
+            type: "boolean",
+            description: "Whether formal proof is needed"
+          },
+          requiresQuantification: {
+            type: "boolean",
+            description: "Whether quantitative analysis is needed"
+          },
+          hasIncompleteInfo: {
+            type: "boolean",
+            description: "Whether information is incomplete"
+          },
+          requiresExplanation: {
+            type: "boolean",
+            description: "Whether explanation is needed"
+          },
+          hasAlternatives: {
+            type: "boolean",
+            description: "Whether alternative scenarios exist"
+          }
         },
-        required: ["domain", "complexity", "uncertainty", "timeDependent", "multiAgent", "requiresProof", "requiresQuantification", "hasIncompleteInfo", "requiresExplanation", "hasAlternatives"],
+        required: [
+          "domain",
+          "complexity",
+          "uncertainty",
+          "timeDependent",
+          "multiAgent",
+          "requiresProof",
+          "requiresQuantification",
+          "hasIncompleteInfo",
+          "requiresExplanation",
+          "hasAlternatives"
+        ],
         additionalProperties: false,
         description: "Detailed problem characteristics for comprehensive recommendation"
       },
@@ -45091,7 +50485,13 @@ handles conflicts between perspectives, and produces a synthesized conclusion.
       },
       preset: {
         type: "string",
-        enum: ["comprehensive_analysis", "hypothesis_testing", "decision_making", "root_cause", "future_planning"],
+        enum: [
+          "comprehensive_analysis",
+          "hypothesis_testing",
+          "decision_making",
+          "root_cause",
+          "future_planning"
+        ],
         description: "Pre-defined mode combination preset"
       },
       customModes: {
@@ -45136,7 +50536,13 @@ handles conflicts between perspectives, and produces a synthesized conclusion.
       },
       mergeStrategy: {
         type: "string",
-        enum: ["union", "intersection", "weighted", "hierarchical", "dialectical"],
+        enum: [
+          "union",
+          "intersection",
+          "weighted",
+          "hierarchical",
+          "dialectical"
+        ],
         default: "union",
         description: "Strategy for merging insights from different modes"
       },
@@ -45249,7 +50655,11 @@ var TemporalRelationEnum = z.enum([
   "causes"
 ]);
 var EventTypeEnum = z.enum(["instant", "interval"]);
-var TransformationEnum = z.enum(["covariant", "contravariant", "mixed"]);
+var TransformationEnum = z.enum([
+  "covariant",
+  "contravariant",
+  "mixed"
+]);
 var ShannonStageEnum = z.enum([
   "problem_definition",
   "constraints",
@@ -45333,11 +50743,13 @@ var CoreModeSchema = BaseThoughtSchema.extend({
   validityCheck: z.boolean().optional(),
   soundnessCheck: z.boolean().optional(),
   // Abductive properties
-  hypotheses: z.array(z.object({
-    id: z.string(),
-    explanation: z.string(),
-    score: z.number().optional()
-  })).optional(),
+  hypotheses: z.array(
+    z.object({
+      id: z.string(),
+      explanation: z.string(),
+      score: z.number().optional()
+    })
+  ).optional(),
   bestExplanation: z.object({
     id: z.string(),
     explanation: z.string(),
@@ -45413,7 +50825,15 @@ var HistoricalEventSchema = z.object({
   tags: z.array(z.string()).optional()
 });
 var SourceBiasSchema = z.object({
-  type: z.enum(["political", "religious", "cultural", "economic", "nationalistic", "ideological", "personal"]),
+  type: z.enum([
+    "political",
+    "religious",
+    "cultural",
+    "economic",
+    "nationalistic",
+    "ideological",
+    "personal"
+  ]),
   direction: z.string().optional(),
   severity: z.number().min(0).max(1).optional()
 });
@@ -45421,7 +50841,14 @@ var HistoricalSourceSchema = z.object({
   id: z.string(),
   title: z.string(),
   type: z.enum(["primary", "secondary", "tertiary"]),
-  subtype: z.enum(["document", "artifact", "oral", "visual", "archaeological", "statistical"]).optional(),
+  subtype: z.enum([
+    "document",
+    "artifact",
+    "oral",
+    "visual",
+    "archaeological",
+    "statistical"
+  ]).optional(),
   author: z.string().optional(),
   date: z.string().optional(),
   reliability: z.number().min(0).max(1),
@@ -45455,13 +50882,29 @@ var CausalChainSchema = z.object({
 });
 var ActorRelationshipSchema = z.object({
   actorId: z.string(),
-  type: z.enum(["ally", "rival", "subordinate", "superior", "colleague", "influenced_by", "mentor", "successor"]),
+  type: z.enum([
+    "ally",
+    "rival",
+    "subordinate",
+    "superior",
+    "colleague",
+    "influenced_by",
+    "mentor",
+    "successor"
+  ]),
   description: z.string().optional()
 });
 var HistoricalActorSchema = z.object({
   id: z.string(),
   name: z.string(),
-  type: z.enum(["individual", "group", "institution", "nation", "movement", "class"]),
+  type: z.enum([
+    "individual",
+    "group",
+    "institution",
+    "nation",
+    "movement",
+    "class"
+  ]),
   period: z.string().optional(),
   roles: z.array(z.string()).optional(),
   motivations: z.array(z.string()).optional(),
@@ -45601,10 +51044,12 @@ var CausalSchema = BaseThoughtSchema.extend({
   interventions: z.array(InterventionSchema).optional(),
   // Observations for abductive reasoning
   observations: z.array(z.string()).optional(),
-  explanations: z.array(z.object({
-    hypothesis: z.string(),
-    plausibility: z.number().min(0).max(1).optional()
-  })).optional()
+  explanations: z.array(
+    z.object({
+      hypothesis: z.string(),
+      plausibility: z.number().min(0).max(1).optional()
+    })
+  ).optional()
 });
 
 // src/tools/schemas/modes/strategic.ts
@@ -45663,7 +51108,12 @@ var MappingSchema = z.object({
   confidence: ConfidenceSchema.optional()
 });
 var AnalyticalSchema = BaseThoughtSchema.extend({
-  mode: z.enum(["analogical", "firstprinciples", "metareasoning", "cryptanalytic"]),
+  mode: z.enum([
+    "analogical",
+    "firstprinciples",
+    "metareasoning",
+    "cryptanalytic"
+  ]),
   // Analogical reasoning
   sourceAnalogy: DomainSchema.optional(),
   targetAnalogy: DomainSchema.optional(),
@@ -45760,7 +51210,12 @@ var EngineeringSchema = BaseThoughtSchema.extend({
 
 // src/tools/schemas/modes/academic.ts
 init_esm_shims();
-var AcademicModeEnum = z.enum(["synthesis", "argumentation", "critique", "analysis"]);
+var AcademicModeEnum = z.enum([
+  "synthesis",
+  "argumentation",
+  "critique",
+  "analysis"
+]);
 var SourceSchema = z.object({
   id: z.string(),
   type: z.string().optional(),
@@ -45782,7 +51237,13 @@ var ThemeSchema = z.object({
 var GapSchema = z.object({
   id: z.string(),
   description: z.string(),
-  type: z.enum(["empirical", "theoretical", "methodological", "population", "contextual"]).optional(),
+  type: z.enum([
+    "empirical",
+    "theoretical",
+    "methodological",
+    "population",
+    "contextual"
+  ]).optional(),
   importance: z.enum(["critical", "significant", "moderate", "minor"]).optional()
 });
 var ClaimSchema = z.object({
@@ -45793,7 +51254,14 @@ var ClaimSchema = z.object({
 });
 var GroundsSchema = z.object({
   id: z.string(),
-  type: z.enum(["empirical", "statistical", "testimonial", "analogical", "logical", "textual"]).optional(),
+  type: z.enum([
+    "empirical",
+    "statistical",
+    "testimonial",
+    "analogical",
+    "logical",
+    "textual"
+  ]).optional(),
   content: z.string(),
   source: z.string().optional(),
   reliability: ConfidenceSchema.optional()
@@ -45801,7 +51269,14 @@ var GroundsSchema = z.object({
 var WarrantSchema = z.object({
   id: z.string(),
   statement: z.string(),
-  type: z.enum(["generalization", "analogy", "causal", "authority", "principle", "definition"]).optional(),
+  type: z.enum([
+    "generalization",
+    "analogy",
+    "causal",
+    "authority",
+    "principle",
+    "definition"
+  ]).optional(),
   groundsIds: z.array(z.string()).optional(),
   claimId: z.string().optional()
 });
@@ -45824,13 +51299,30 @@ var CodeSchema = z.object({
   id: z.string(),
   label: z.string(),
   definition: z.string().optional(),
-  type: z.enum(["descriptive", "in_vivo", "process", "initial", "focused", "axial", "theoretical", "emotion", "value"]).optional(),
+  type: z.enum([
+    "descriptive",
+    "in_vivo",
+    "process",
+    "initial",
+    "focused",
+    "axial",
+    "theoretical",
+    "emotion",
+    "value"
+  ]).optional(),
   frequency: z.number().int().optional(),
   examples: z.array(z.string()).optional()
 });
 var MemoSchema = z.object({
   id: z.string(),
-  type: z.enum(["analytical", "theoretical", "methodological", "reflexive", "code", "operational"]).optional(),
+  type: z.enum([
+    "analytical",
+    "theoretical",
+    "methodological",
+    "reflexive",
+    "code",
+    "operational"
+  ]).optional(),
   content: z.string(),
   relatedCodes: z.array(z.string()).optional()
 });
@@ -45864,12 +51356,14 @@ var AcademicSchema = BaseThoughtSchema.extend({
     "template_analysis",
     "mixed_qualitative"
   ]).optional(),
-  dataSources: z.array(z.object({
-    id: z.string(),
-    type: z.string(),
-    description: z.string().optional(),
-    participantId: z.string().optional()
-  })).optional(),
+  dataSources: z.array(
+    z.object({
+      id: z.string(),
+      type: z.string(),
+      description: z.string().optional(),
+      participantId: z.string().optional()
+    })
+  ).optional(),
   codes: z.array(CodeSchema).optional(),
   memos: z.array(MemoSchema).optional(),
   saturationReached: z.boolean().optional(),
@@ -45881,7 +51375,9 @@ var AcademicSchema = BaseThoughtSchema.extend({
 init_esm_shims();
 var analyzeInputSchema = z.object({
   /** The thought or problem to analyze */
-  thought: z.string().min(1, "Thought is required").describe("The thought, problem, or question to analyze using multiple reasoning modes"),
+  thought: z.string().min(1, "Thought is required").describe(
+    "The thought, problem, or question to analyze using multiple reasoning modes"
+  ),
   /** Optional preset combination to use */
   preset: z.enum([
     "comprehensive_analysis",
@@ -45935,9 +51431,13 @@ var analyzeInputSchema = z.object({
   /** Optional session ID for tracking */
   sessionId: z.string().optional().describe("Session ID to associate this analysis with an existing session"),
   /** Optional context for the analysis */
-  context: z.string().optional().describe("Additional context or background information to consider during analysis"),
+  context: z.string().optional().describe(
+    "Additional context or background information to consider during analysis"
+  ),
   /** Optional timeout per mode in milliseconds */
-  timeoutPerMode: z.number().int().min(1e3).max(12e4).optional().default(3e4).describe("Maximum time in milliseconds to spend on each mode (default: 30000, max: 120000)")
+  timeoutPerMode: z.number().int().min(1e3).max(12e4).optional().default(3e4).describe(
+    "Maximum time in milliseconds to spend on each mode (default: 30000, max: 120000)"
+  )
 });
 z.object({
   /** Whether the analysis succeeded */
@@ -46083,7 +51583,9 @@ async function getSessionManager() {
         const storage = new FileSessionStore(sessionDir);
         await storage.initialize();
         _sessionManager = new SessionManager({}, void 0, storage);
-        console.error(`[deepthinking-mcp] Using file-based session storage: ${sessionDir}`);
+        console.error(
+          `[deepthinking-mcp] Using file-based session storage: ${sessionDir}`
+        );
       } else {
         _sessionManager = new SessionManager();
       }
@@ -46122,7 +51624,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const deprecationWarning = '\u26A0\uFE0F DEPRECATED: The "deepthinking" tool is deprecated. Use the focused tools instead: deepthinking_core, deepthinking_mathematics, deepthinking_temporal, deepthinking_probabilistic, deepthinking_causal, deepthinking_strategic, deepthinking_analytical, deepthinking_scientific, deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.\n\n';
       switch (input.action) {
         case "add_thought": {
-          const result = await handleAddThought(input, modeToToolMap[input.mode || "hybrid"] || "deepthinking_core");
+          const result = await handleAddThought(
+            input,
+            modeToToolMap[input.mode || "hybrid"] || "deepthinking_core"
+          );
           return prependWarning(result, deprecationWarning);
         }
         case "summarize":
@@ -46167,7 +51672,10 @@ async function handleAddThought(input, _toolName) {
     });
     sessionId = session2.id;
   }
-  const thought = thoughtFactory.createThought({ ...input, action: "add_thought" }, sessionId);
+  const thought = thoughtFactory.createThought(
+    { ...input, action: "add_thought" },
+    sessionId
+  );
   const session = await sessionManager.addThought(sessionId, thought);
   const hasHandler = thoughtFactory.hasSpecializedHandler(thought.mode);
   const modeStatus = {
@@ -46260,7 +51768,9 @@ async function handleExport(input) {
     const { getExportProfile: getExportProfile2 } = await Promise.resolve().then(() => (init_profiles(), profiles_exports));
     const profile = getExportProfile2(exportProfile);
     if (!profile) {
-      throw new Error(`Unknown export profile: ${exportProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`);
+      throw new Error(
+        `Unknown export profile: ${exportProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`
+      );
     }
     if (outputDir) {
       const { createFileExporter: createFileExporter2 } = await Promise.resolve().then(() => (init_file_exporter(), file_exporter_exports));
@@ -46271,24 +51781,30 @@ async function handleExport(input) {
       const formats = profile.formats.filter((f) => f !== "svg");
       const batchResult = await fileExporter.exportToFiles(session, formats);
       return {
-        content: [{
-          type: "text",
-          text: JSON.stringify({
-            mode: "file",
-            profile: { id: profile.id, name: profile.name },
-            outputDir: batchResult.outputDir,
-            successCount: batchResult.successCount,
-            failureCount: batchResult.failureCount,
-            totalSize: batchResult.totalSize,
-            files: batchResult.results.map((r) => ({
-              format: r.format,
-              path: r.filePath,
-              success: r.success,
-              size: r.size,
-              error: r.error
-            }))
-          }, null, 2)
-        }]
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                mode: "file",
+                profile: { id: profile.id, name: profile.name },
+                outputDir: batchResult.outputDir,
+                successCount: batchResult.successCount,
+                failureCount: batchResult.failureCount,
+                totalSize: batchResult.totalSize,
+                files: batchResult.results.map((r) => ({
+                  format: r.format,
+                  path: r.filePath,
+                  success: r.success,
+                  size: r.size,
+                  error: r.error
+                }))
+              },
+              null,
+              2
+            )
+          }
+        ]
       };
     }
     const results = [];
@@ -46325,10 +51841,12 @@ async function handleExport(input) {
       }))
     };
     return {
-      content: [{
-        type: "text",
-        text: JSON.stringify(output, null, 2)
-      }]
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(output, null, 2)
+        }
+      ]
     };
   }
   const format = input.exportFormat || "json";
@@ -46340,25 +51858,33 @@ async function handleExport(input) {
     );
     const result = await fileExporter.exportToFile(session, format);
     return {
-      content: [{
-        type: "text",
-        text: JSON.stringify({
-          mode: "file",
-          format: result.format,
-          path: result.filePath,
-          success: result.success,
-          size: result.size,
-          error: result.error
-        }, null, 2)
-      }]
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              mode: "file",
+              format: result.format,
+              path: result.filePath,
+              success: result.success,
+              size: result.size,
+              error: result.error
+            },
+            null,
+            2
+          )
+        }
+      ]
     };
   }
   const exported = exportService.exportSession(session, format);
   return {
-    content: [{
-      type: "text",
-      text: exported
-    }]
+    content: [
+      {
+        type: "text",
+        text: exported
+      }
+    ]
   };
 }
 async function handleExportAll(input) {
@@ -46379,13 +51905,24 @@ async function handleExportAll(input) {
     outputDir = resolveSandboxedOutputDir2(requestedOutputDir, config.exportDir);
   }
   const overwrite = input.overwrite ?? config.exportOverwrite;
-  let formats = ["markdown", "latex", "json", "html", "jupyter", "mermaid", "dot", "ascii"];
+  let formats = [
+    "markdown",
+    "latex",
+    "json",
+    "html",
+    "jupyter",
+    "mermaid",
+    "dot",
+    "ascii"
+  ];
   const exportAllProfile = input.exportProfile;
   if (exportAllProfile) {
     const { getExportProfile: getExportProfile2 } = await Promise.resolve().then(() => (init_profiles(), profiles_exports));
     const profile = getExportProfile2(exportAllProfile);
     if (!profile) {
-      throw new Error(`Unknown export profile: ${exportAllProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`);
+      throw new Error(
+        `Unknown export profile: ${exportAllProfile}. Valid profiles: academic, presentation, documentation, archive, minimal`
+      );
     }
     formats = profile.formats.filter((f) => f !== "svg");
   }
@@ -46395,27 +51932,36 @@ async function handleExportAll(input) {
       { outputDir, overwrite, createDir: true },
       (s, f) => exportService.exportSession(s, f)
     );
-    const batchResult = await fileExporter.exportToFiles(session, formats);
+    const batchResult = await fileExporter.exportToFiles(
+      session,
+      formats
+    );
     return {
-      content: [{
-        type: "text",
-        text: JSON.stringify({
-          mode: "file",
-          sessionId: input.sessionId,
-          outputDir: batchResult.outputDir,
-          successCount: batchResult.successCount,
-          failureCount: batchResult.failureCount,
-          totalSize: batchResult.totalSize,
-          exportedAt: batchResult.exportedAt.toISOString(),
-          files: batchResult.results.map((r) => ({
-            format: r.format,
-            path: r.filePath,
-            success: r.success,
-            size: r.size,
-            error: r.error
-          }))
-        }, null, 2)
-      }]
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify(
+            {
+              mode: "file",
+              sessionId: input.sessionId,
+              outputDir: batchResult.outputDir,
+              successCount: batchResult.successCount,
+              failureCount: batchResult.failureCount,
+              totalSize: batchResult.totalSize,
+              exportedAt: batchResult.exportedAt.toISOString(),
+              files: batchResult.results.map((r) => ({
+                format: r.format,
+                path: r.filePath,
+                success: r.success,
+                size: r.size,
+                error: r.error
+              }))
+            },
+            null,
+            2
+          )
+        }
+      ]
     };
   }
   const results = [];
@@ -46453,17 +51999,21 @@ async function handleExportAll(input) {
       }
     }
     return {
-      content: [{
-        type: "text",
-        text: JSON.stringify({ ...summary, exports: contentMap }, null, 2)
-      }]
+      content: [
+        {
+          type: "text",
+          text: JSON.stringify({ ...summary, exports: contentMap }, null, 2)
+        }
+      ]
     };
   }
   return {
-    content: [{
-      type: "text",
-      text: JSON.stringify(summary, null, 2)
-    }]
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(summary, null, 2)
+      }
+    ]
   };
 }
 async function handleSwitchMode(input) {
@@ -46503,14 +52053,18 @@ async function handleGetSession(input) {
     content: [
       {
         type: "text",
-        text: JSON.stringify({
-          id: session.id,
-          title: session.title,
-          mode: session.mode,
-          thoughtCount: session.thoughts.length,
-          isComplete: session.isComplete,
-          metrics: metricsWithCustom
-        }, null, 2)
+        text: JSON.stringify(
+          {
+            id: session.id,
+            title: session.title,
+            mode: session.mode,
+            thoughtCount: session.thoughts.length,
+            isComplete: session.isComplete,
+            metrics: metricsWithCustom
+          },
+          null,
+          2
+        )
       }
     ]
   };
@@ -46527,10 +52081,12 @@ async function handleRecommendMode(input) {
 
 For more detailed recommendations, provide problemCharacteristics.`;
     return {
-      content: [{
-        type: "text",
-        text: response
-      }]
+      content: [
+        {
+          type: "text",
+          text: response
+        }
+      ]
     };
   }
   if (problemCharacteristics) {
@@ -46588,13 +52144,17 @@ For more detailed recommendations, provide problemCharacteristics.`;
       }
     }
     return {
-      content: [{
-        type: "text",
-        text: response
-      }]
+      content: [
+        {
+          type: "text",
+          text: response
+        }
+      ]
     };
   }
-  throw new Error("Please provide either problemType or problemCharacteristics for mode recommendations.");
+  throw new Error(
+    "Please provide either problemType or problemCharacteristics for mode recommendations."
+  );
 }
 async function handleDeleteSession(input) {
   if (!input.sessionId) {
@@ -46659,7 +52219,10 @@ ${response.analysis.primaryInsights.map((i) => `- [${i.sourceMode}] ${i.content}
     nextThoughtNeeded: false,
     mode: "hybrid" /* HYBRID */
   };
-  await sessionManager.addThought(session.id, hybridThought);
+  await sessionManager.addThought(
+    session.id,
+    hybridThought
+  );
   const sessionId = session.id;
   const result = {
     success: response.success,

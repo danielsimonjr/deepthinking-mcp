@@ -231,6 +231,33 @@ The server provides 13 focused tools:
 2. Add handler in `src/index.ts`
 3. Implement logic in appropriate service
 
+## Claude Code plugin packaging
+
+This repo is a `local-marketplace` plugin: `.claude-plugin/plugin.json` + `.mcp.json`.
+
+**`.mcp.json` runs the published npm package via `npx -y deepthinking-mcp@<version>`, not a
+committed bundle — and that is deliberate.** Bump the pinned version in `.mcp.json` on every
+release, the same way the sibling servers bump their `_RETRY` key.
+
+> ### Do not try to replace this with a committed `bundle/index.mjs`
+>
+> The sibling `*-mcp` plugins ship a self-contained esbuild bundle. **That approach does not work
+> here**, and it fails in two different ways that both look like success:
+>
+> 1. **Flattening zod v4 into one module breaks it.** The bundled server dies on startup with
+>    `TypeError: Class2 is not a constructor` — zod's `ZodCustom` is still undefined when a
+>    top-level consumer calls `z.custom()`. Verified against esbuild ESM, ESM without tree-shaking,
+>    ESM with `keepNames`, `target: node22`, CJS (with an `import.meta.url` shim), and tsup with
+>    `noExternal: [/.*/]`. All six fail identically. This is why tsup's own config leaves zod
+>    external and why `dist/index.js` never hit it.
+> 2. **A wrapper entry that imports zod first gets tree-shaken away.** `package.json` sets
+>    `"sideEffects": false`, so esbuild reduces a side-effect-only entry to a **0.1 KB empty file
+>    that exits 0** — indistinguishable from a healthy start unless you complete a real MCP
+>    handshake. A bare `import "zod"` inside `src/index.ts` is dropped for the same reason.
+>
+> If you do revisit this: **verify with a real `initialize` + `tools/list` handshake**, never with
+> "the process didn't crash". Both failure modes above exit 0.
+
 ## MCP Configuration
 
 ```json
