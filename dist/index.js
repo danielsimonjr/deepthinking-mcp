@@ -319,6 +319,123 @@ var init_config = __esm({
     CONFIG = getConfig();
   }
 });
+function boundedArray(item, maxItems = MAX_LENGTHS.ARRAY_ITEMS) {
+  return z.array(item).max(maxItems);
+}
+function boundedRecord(key, value, maxEntries = MAX_LENGTHS.ARRAY_ITEMS) {
+  return z.record(key, value).superRefine((val, ctx) => {
+    const size = Object.keys(val ?? {}).length;
+    if (size > maxEntries) {
+      ctx.addIssue({
+        code: "too_big",
+        origin: "record",
+        maximum: maxEntries,
+        inclusive: true,
+        message: `Too big: expected at most ${maxEntries} entries, received ${size}`
+      });
+    }
+  });
+}
+var ConfidenceSchema, PositiveIntSchema, IdSchema, NameSchema, TextSchema, ThoughtTextSchema, IdArraySchema, TextArraySchema, LevelEnum, ExportFormatEnum, SessionActionEnum, ExportProfileEnum, ProofTypeEnum, TimeUnitEnum, TemporalConstraintEnum, TemporalRelationEnum, EventTypeEnum, TransformationEnum, ShannonStageEnum, EntitySchema;
+var init_shared = __esm({
+  "src/tools/schemas/shared.ts"() {
+    init_esm_shims();
+    init_sanitization();
+    ConfidenceSchema = z.number().min(0).max(1);
+    PositiveIntSchema = z.number().int().min(1);
+    IdSchema = z.string().max(MAX_LENGTHS.STRING_FIELD);
+    NameSchema = z.string().max(MAX_LENGTHS.TITLE);
+    TextSchema = z.string().max(MAX_LENGTHS.DESCRIPTION);
+    ThoughtTextSchema = z.string().max(MAX_LENGTHS.THOUGHT_CONTENT);
+    IdArraySchema = boundedArray(IdSchema);
+    TextArraySchema = boundedArray(TextSchema);
+    LevelEnum = z.enum(["low", "medium", "high"]);
+    z.enum(["positive", "negative", "neutral"]);
+    ExportFormatEnum = z.enum([
+      "markdown",
+      "latex",
+      "json",
+      "html",
+      "jupyter",
+      "mermaid",
+      "dot",
+      "ascii"
+    ]);
+    SessionActionEnum = z.enum([
+      "summarize",
+      "export",
+      "export_all",
+      "get_session",
+      "switch_mode",
+      "recommend_mode",
+      "delete_session"
+    ]);
+    ExportProfileEnum = z.enum([
+      "academic",
+      "presentation",
+      "documentation",
+      "archive",
+      "minimal"
+    ]);
+    ProofTypeEnum = z.enum([
+      "direct",
+      "contradiction",
+      "induction",
+      "construction",
+      "contrapositive"
+    ]);
+    TimeUnitEnum = z.enum([
+      "milliseconds",
+      "seconds",
+      "minutes",
+      "hours",
+      "days",
+      "months",
+      "years"
+    ]);
+    TemporalConstraintEnum = z.enum([
+      "before",
+      "after",
+      "during",
+      "overlaps",
+      "meets",
+      "starts",
+      "finishes",
+      "equals"
+    ]);
+    TemporalRelationEnum = z.enum([
+      "before",
+      "after",
+      "during",
+      "overlaps",
+      "meets",
+      "starts",
+      "finishes",
+      "equals",
+      "causes"
+    ]);
+    EventTypeEnum = z.enum(["instant", "interval"]);
+    TransformationEnum = z.enum([
+      "covariant",
+      "contravariant",
+      "mixed"
+    ]);
+    ShannonStageEnum = z.enum([
+      "problem_definition",
+      "constraints",
+      "model",
+      "proof",
+      "implementation"
+    ]);
+    EntitySchema = z.object({
+      id: IdSchema,
+      name: NameSchema
+    });
+    EntitySchema.extend({
+      description: TextSchema
+    });
+  }
+});
 
 // src/tools/thinking.ts
 var thinking_exports = {};
@@ -331,6 +448,7 @@ var init_thinking = __esm({
   "src/tools/thinking.ts"() {
     init_esm_shims();
     init_sanitization();
+    init_shared();
     ThinkingToolSchema = z.object({
       sessionId: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
       mode: z.enum([
@@ -689,7 +807,7 @@ var init_thinking = __esm({
           timestamp: z.number(),
           duration: z.number().optional(),
           type: z.enum(["instant", "interval"]),
-          properties: z.record(z.string().max(MAX_LENGTHS.DESCRIPTION), z.any())
+          properties: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.any())
         })
       ).optional(),
       intervals: z.array(
@@ -1142,8 +1260,8 @@ var init_thinking = __esm({
           "unbounded",
           "approximate"
         ]),
-        variableValues: z.record(z.string().max(MAX_LENGTHS.DESCRIPTION), z.union([z.number(), z.string().max(MAX_LENGTHS.DESCRIPTION)])),
-        objectiveValues: z.record(z.string().max(MAX_LENGTHS.DESCRIPTION), z.number()),
+        variableValues: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.union([z.number(), z.string().max(MAX_LENGTHS.DESCRIPTION)])),
+        objectiveValues: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.number()),
         quality: z.number().min(0).max(1),
         computationTime: z.number().optional(),
         iterations: z.number().optional(),
@@ -1154,7 +1272,7 @@ var init_thinking = __esm({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
         robustness: z.number().min(0).max(1),
         criticalConstraints: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
-        shadowPrices: z.record(z.string().max(MAX_LENGTHS.DESCRIPTION), z.number()).optional(),
+        shadowPrices: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.number()).optional(),
         recommendations: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS)
       }).optional(),
       // Formal Logic properties (Phase 4, v3.2.0)
@@ -1237,7 +1355,7 @@ var init_thinking = __esm({
         rows: z.array(
           z.object({
             rowNumber: z.number().int().positive(),
-            assignments: z.record(z.string().max(MAX_LENGTHS.DESCRIPTION), z.boolean()),
+            assignments: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.boolean()),
             result: z.boolean()
           })
         ),
@@ -1249,7 +1367,7 @@ var init_thinking = __esm({
         id: z.string().max(MAX_LENGTHS.DESCRIPTION),
         formula: z.string().max(MAX_LENGTHS.DESCRIPTION),
         satisfiable: z.boolean(),
-        model: z.record(z.string().max(MAX_LENGTHS.DESCRIPTION), z.boolean()).optional(),
+        model: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.boolean()).optional(),
         method: z.enum(["dpll", "cdcl", "resolution", "truth_table", "other"]),
         complexity: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
         explanation: z.string().max(MAX_LENGTHS.DESCRIPTION)
@@ -47347,6 +47465,16 @@ var SessionManager = class {
               { sessionId: key }
             );
           }
+        } else {
+          this.logger.warn(
+            "Session evicted from memory with no persistence configured; its thoughts are discarded",
+            {
+              sessionId: key,
+              thoughtCount: session.thoughts.length,
+              maxActiveSessions: getConfig().maxActiveSessions,
+              hint: "Set SESSION_DIR to persist sessions, or raise MCP_MAX_SESSIONS."
+            }
+          );
         }
         this.clearMetaSession(key);
       }
@@ -47455,6 +47583,13 @@ var SessionManager = class {
       try {
         session = await this.storage.loadSession(sessionId) ?? void 0;
         if (session) {
+          if (this.isSessionExpired(session)) {
+            this.logger.debug("Expired session not restored from storage", {
+              sessionId,
+              sessionTimeoutMs: getConfig().sessionTimeoutMs
+            });
+            return null;
+          }
           this.activeSessions.set(sessionId, session);
           this.logger.debug("Session loaded from storage", { sessionId });
         }
@@ -47621,7 +47756,7 @@ var SessionManager = class {
    * ```
    */
   async listSessions(includeStoredSessions = true) {
-    const memoryMetadata = Array.from(this.activeSessions.values()).map(
+    const memoryMetadata = Array.from(this.activeSessions.values()).filter((session) => !this.isSessionExpired(session)).map(
       (session) => ({
         id: session.id,
         title: session.title,
@@ -50682,108 +50817,7 @@ var jsonSchemas = [
 
 // src/tools/schemas/base.ts
 init_esm_shims();
-
-// src/tools/schemas/shared.ts
-init_esm_shims();
-init_sanitization();
-var ConfidenceSchema = z.number().min(0).max(1);
-var PositiveIntSchema = z.number().int().min(1);
-var IdSchema = z.string().max(MAX_LENGTHS.STRING_FIELD);
-var NameSchema = z.string().max(MAX_LENGTHS.TITLE);
-var TextSchema = z.string().max(MAX_LENGTHS.DESCRIPTION);
-var ThoughtTextSchema = z.string().max(MAX_LENGTHS.THOUGHT_CONTENT);
-function boundedArray(item, maxItems = MAX_LENGTHS.ARRAY_ITEMS) {
-  return z.array(item).max(maxItems);
-}
-var IdArraySchema = boundedArray(IdSchema);
-var TextArraySchema = boundedArray(TextSchema);
-var LevelEnum = z.enum(["low", "medium", "high"]);
-z.enum(["positive", "negative", "neutral"]);
-var ExportFormatEnum = z.enum([
-  "markdown",
-  "latex",
-  "json",
-  "html",
-  "jupyter",
-  "mermaid",
-  "dot",
-  "ascii"
-]);
-var SessionActionEnum = z.enum([
-  "summarize",
-  "export",
-  "export_all",
-  "get_session",
-  "switch_mode",
-  "recommend_mode",
-  "delete_session"
-]);
-var ExportProfileEnum = z.enum([
-  "academic",
-  "presentation",
-  "documentation",
-  "archive",
-  "minimal"
-]);
-var ProofTypeEnum = z.enum([
-  "direct",
-  "contradiction",
-  "induction",
-  "construction",
-  "contrapositive"
-]);
-var TimeUnitEnum = z.enum([
-  "milliseconds",
-  "seconds",
-  "minutes",
-  "hours",
-  "days",
-  "months",
-  "years"
-]);
-var TemporalConstraintEnum = z.enum([
-  "before",
-  "after",
-  "during",
-  "overlaps",
-  "meets",
-  "starts",
-  "finishes",
-  "equals"
-]);
-var TemporalRelationEnum = z.enum([
-  "before",
-  "after",
-  "during",
-  "overlaps",
-  "meets",
-  "starts",
-  "finishes",
-  "equals",
-  "causes"
-]);
-var EventTypeEnum = z.enum(["instant", "interval"]);
-var TransformationEnum = z.enum([
-  "covariant",
-  "contravariant",
-  "mixed"
-]);
-var ShannonStageEnum = z.enum([
-  "problem_definition",
-  "constraints",
-  "model",
-  "proof",
-  "implementation"
-]);
-var EntitySchema = z.object({
-  id: IdSchema,
-  name: NameSchema
-});
-EntitySchema.extend({
-  description: TextSchema
-});
-
-// src/tools/schemas/base.ts
+init_shared();
 var BaseThoughtSchema = z.object({
   sessionId: IdSchema.optional(),
   thought: ThoughtTextSchema.min(1),
@@ -50830,6 +50864,7 @@ var SessionActionSchema = z.object({
 
 // src/tools/schemas/modes/core.ts
 init_esm_shims();
+init_shared();
 init_sanitization();
 var StandardSchema = BaseThoughtSchema.extend({
   mode: z.enum(["sequential", "shannon", "hybrid"]),
@@ -50868,6 +50903,7 @@ var CoreModeSchema = BaseThoughtSchema.extend({
 
 // src/tools/schemas/modes/mathematics.ts
 init_esm_shims();
+init_shared();
 init_sanitization();
 var ProofStrategySchema = z.object({
   type: ProofTypeEnum,
@@ -50916,6 +50952,7 @@ var MathSchema = BaseThoughtSchema.extend({
 
 // src/tools/schemas/modes/temporal.ts
 init_esm_shims();
+init_shared();
 init_sanitization();
 var DateRangeSchema = z.object({
   start: IdSchema,
@@ -51089,6 +51126,7 @@ var TemporalSchema = BaseThoughtSchema.extend({
 
 // src/tools/schemas/modes/probabilistic.ts
 init_esm_shims();
+init_shared();
 init_sanitization();
 var HypothesisSchema = z.object({
   id: IdSchema,
@@ -51118,6 +51156,7 @@ var ProbabilisticSchema = BaseThoughtSchema.extend({
 
 // src/tools/schemas/modes/causal.ts
 init_esm_shims();
+init_shared();
 init_sanitization();
 var CausalNodeSchema = z.object({
   id: IdSchema,
@@ -51167,6 +51206,7 @@ var CausalSchema = BaseThoughtSchema.extend({
 
 // src/tools/schemas/modes/strategic.ts
 init_esm_shims();
+init_shared();
 init_sanitization();
 var PlayerSchema = z.object({
   id: IdSchema,
@@ -51211,6 +51251,7 @@ var StrategicSchema = BaseThoughtSchema.extend({
 
 // src/tools/schemas/modes/analytical.ts
 init_esm_shims();
+init_shared();
 init_sanitization();
 var DomainSchema = z.object({
   domain: IdSchema,
@@ -51240,6 +51281,7 @@ var AnalyticalSchema = BaseThoughtSchema.extend({
 
 // src/tools/schemas/modes/scientific.ts
 init_esm_shims();
+init_shared();
 init_sanitization();
 var ExperimentSchema = z.object({
   id: IdSchema,
@@ -51278,6 +51320,7 @@ var ScientificSchema = BaseThoughtSchema.extend({
 
 // src/tools/schemas/modes/engineering.ts
 init_esm_shims();
+init_shared();
 var TradeStudySchema = z.object({
   options: IdArraySchema,
   criteria: IdArraySchema,
@@ -51326,6 +51369,7 @@ var EngineeringSchema = BaseThoughtSchema.extend({
 
 // src/tools/schemas/modes/academic.ts
 init_esm_shims();
+init_shared();
 init_sanitization();
 var AcademicModeEnum = z.enum([
   "synthesis",

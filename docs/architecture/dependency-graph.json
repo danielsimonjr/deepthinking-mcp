@@ -1,11 +1,11 @@
 {
   "metadata": {
     "name": "deepthinking-mcp",
-    "version": "9.2.0",
+    "version": "9.3.0",
     "lastUpdated": "2026-08-03",
-    "totalFiles": 237,
-    "totalModules": 15,
-    "totalExports": 1276
+    "totalFiles": 234,
+    "totalModules": 14,
+    "totalExports": 1280
   },
   "entryPoints": [
     {
@@ -4521,12 +4521,6 @@
             ]
           },
           {
-            "file": "./tools/thinking.js",
-            "imports": [
-              "thinkingTool"
-            ]
-          },
-          {
             "file": "./types/index.js",
             "imports": [
               "ThinkingMode",
@@ -8522,96 +8516,6 @@
         ]
       }
     },
-    "search": {
-      "src/search/index.ts": {
-        "description": "Search Index (v3.4.0)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../types/index.js",
-            "imports": [
-              "ThinkingSession",
-              "ThinkingMode"
-            ],
-            "typeOnly": true
-          },
-          {
-            "file": "./types.js",
-            "imports": [
-              "SearchIndexEntry",
-              "SearchStats"
-            ],
-            "typeOnly": true
-          },
-          {
-            "file": "./tokenizer.js",
-            "imports": [
-              "Tokenizer"
-            ]
-          },
-          {
-            "file": "../taxonomy/classifier.js",
-            "imports": [
-              "TaxonomyClassifier"
-            ]
-          }
-        ],
-        "exports": [
-          "SearchIndex"
-        ],
-        "classes": [
-          "SearchIndex"
-        ]
-      },
-      "src/search/tokenizer.ts": {
-        "description": "Text Tokenizer (v3.4.0)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [],
-        "exports": [
-          "DEFAULT_TOKENIZER_OPTIONS",
-          "Tokenizer"
-        ],
-        "classes": [
-          "Tokenizer"
-        ],
-        "interfaces": [
-          "TokenizerOptions"
-        ],
-        "constants": [
-          "DEFAULT_TOKENIZER_OPTIONS"
-        ]
-      },
-      "src/search/types.ts": {
-        "description": "Search and Query Types (v3.4.0)",
-        "externalDependencies": [],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../types/index.js",
-            "imports": [
-              "ThinkingSession",
-              "ThinkingMode"
-            ],
-            "typeOnly": true
-          }
-        ],
-        "exports": [],
-        "interfaces": [
-          "SearchQuery",
-          "SortOptions",
-          "PaginationOptions",
-          "SearchResult",
-          "SearchHighlight",
-          "SearchResults",
-          "SearchIndexEntry",
-          "SearchStats",
-          "AdvancedQuery",
-          "FacetedResults"
-        ]
-      }
-    },
     "services": {
       "src/services/ExportService.ts": {
         "description": "Export Service (v9.1.0)",
@@ -8805,7 +8709,8 @@
           {
             "file": "../utils/errors.js",
             "imports": [
-              "SessionNotFoundError"
+              "SessionNotFoundError",
+              "ResourceLimitError"
             ]
           },
           {
@@ -8853,6 +8758,12 @@
             "file": "./SessionMetricsCalculator.js",
             "imports": [
               "SessionMetricsCalculator"
+            ]
+          },
+          {
+            "file": "../config/index.js",
+            "imports": [
+              "getConfig"
             ]
           },
           {
@@ -8963,6 +8874,12 @@
             "file": "../../utils/sanitization.js",
             "imports": [
               "validateSessionId"
+            ]
+          },
+          {
+            "file": "../../utils/errors.js",
+            "imports": [
+              "StorageError"
             ]
           }
         ],
@@ -9328,7 +9245,14 @@
           }
         ],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
+            ]
+          }
+        ],
         "exports": [
           "analyzeInputSchema",
           "analyzeOutputSchema",
@@ -9364,7 +9288,11 @@
               "SessionActionEnum",
               "ExportFormatEnum",
               "ExportProfileEnum",
-              "LevelEnum"
+              "LevelEnum",
+              "IdSchema",
+              "TextSchema",
+              "ThoughtTextSchema",
+              "IdArraySchema"
             ]
           }
         ],
@@ -9523,7 +9451,17 @@
           {
             "file": "../shared.js",
             "imports": [
-              "ConfidenceSchema"
+              "ConfidenceSchema",
+              "IdSchema",
+              "NameSchema",
+              "TextSchema",
+              "IdArraySchema"
+            ]
+          },
+          {
+            "file": "../../../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
             ]
           }
         ],
@@ -9557,7 +9495,15 @@
           {
             "file": "../shared.js",
             "imports": [
-              "ConfidenceSchema"
+              "ConfidenceSchema",
+              "IdSchema",
+              "IdArraySchema"
+            ]
+          },
+          {
+            "file": "../../../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
             ]
           }
         ],
@@ -9584,6 +9530,21 @@
             "file": "../base.js",
             "imports": [
               "BaseThoughtSchema"
+            ]
+          },
+          {
+            "file": "../shared.js",
+            "imports": [
+              "IdSchema",
+              "NameSchema",
+              "TextSchema",
+              "IdArraySchema"
+            ]
+          },
+          {
+            "file": "../../../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
             ]
           }
         ],
@@ -9615,7 +9576,17 @@
           {
             "file": "../shared.js",
             "imports": [
-              "ShannonStageEnum"
+              "ShannonStageEnum",
+              "IdSchema",
+              "TextSchema",
+              "IdArraySchema",
+              "TextArraySchema"
+            ]
+          },
+          {
+            "file": "../../../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
             ]
           }
         ],
@@ -9646,6 +9617,15 @@
             "file": "../base.js",
             "imports": [
               "BaseThoughtSchema"
+            ]
+          },
+          {
+            "file": "../shared.js",
+            "imports": [
+              "IdSchema",
+              "NameSchema",
+              "TextSchema",
+              "IdArraySchema"
             ]
           }
         ],
@@ -9809,7 +9789,16 @@
             "file": "../shared.js",
             "imports": [
               "ProofTypeEnum",
-              "TransformationEnum"
+              "TransformationEnum",
+              "IdSchema",
+              "TextSchema",
+              "IdArraySchema"
+            ]
+          },
+          {
+            "file": "../../../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
             ]
           }
         ],
@@ -9841,7 +9830,16 @@
           {
             "file": "../shared.js",
             "imports": [
-              "ConfidenceSchema"
+              "ConfidenceSchema",
+              "IdSchema",
+              "TextSchema",
+              "IdArraySchema"
+            ]
+          },
+          {
+            "file": "../../../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
             ]
           }
         ],
@@ -9868,6 +9866,21 @@
             "file": "../base.js",
             "imports": [
               "BaseThoughtSchema"
+            ]
+          },
+          {
+            "file": "../shared.js",
+            "imports": [
+              "IdSchema",
+              "NameSchema",
+              "TextSchema",
+              "IdArraySchema"
+            ]
+          },
+          {
+            "file": "../../../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
             ]
           }
         ],
@@ -9899,7 +9912,17 @@
           {
             "file": "../shared.js",
             "imports": [
-              "ConfidenceSchema"
+              "ConfidenceSchema",
+              "IdSchema",
+              "NameSchema",
+              "TextSchema",
+              "IdArraySchema"
+            ]
+          },
+          {
+            "file": "../../../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
             ]
           }
         ],
@@ -9935,7 +9958,17 @@
               "TimeUnitEnum",
               "TemporalConstraintEnum",
               "TemporalRelationEnum",
-              "EventTypeEnum"
+              "EventTypeEnum",
+              "IdSchema",
+              "NameSchema",
+              "TextSchema",
+              "IdArraySchema"
+            ]
+          },
+          {
+            "file": "../../../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
             ]
           }
         ],
@@ -9957,10 +9990,23 @@
           }
         ],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
+            ]
+          }
+        ],
         "exports": [
           "ConfidenceSchema",
           "PositiveIntSchema",
+          "IdSchema",
+          "NameSchema",
+          "TextSchema",
+          "ThoughtTextSchema",
+          "IdArraySchema",
+          "TextArraySchema",
           "LevelEnum",
           "ImpactEnum",
           "ExportFormatEnum",
@@ -9974,11 +10020,21 @@
           "TransformationEnum",
           "ShannonStageEnum",
           "EntitySchema",
-          "DescribedEntitySchema"
+          "DescribedEntitySchema",
+          "boundedArray"
+        ],
+        "functions": [
+          "boundedArray"
         ],
         "constants": [
           "ConfidenceSchema",
           "PositiveIntSchema",
+          "IdSchema",
+          "NameSchema",
+          "TextSchema",
+          "ThoughtTextSchema",
+          "IdArraySchema",
+          "TextArraySchema",
           "LevelEnum",
           "ImpactEnum",
           "ExportFormatEnum",
@@ -10006,7 +10062,14 @@
           }
         ],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
+            ]
+          }
+        ],
         "exports": [
           "ThinkingToolSchema",
           "thinkingTool"
@@ -15560,14 +15623,6 @@
         ]
       },
       {
-        "name": "Search",
-        "files": [
-          "src/search/index.ts",
-          "src/search/tokenizer.ts",
-          "src/search/types.ts"
-        ]
-      },
-      {
         "name": "Services",
         "files": [
           "src/services/ExportService.ts",
@@ -15722,21 +15777,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 237,
-    "totalModules": 15,
-    "totalLinesOfCode": 115713,
-    "totalExports": 1276,
-    "totalClasses": 145,
-    "totalInterfaces": 536,
-    "totalFunctions": 429,
+    "totalTypeScriptFiles": 234,
+    "totalModules": 14,
+    "totalLinesOfCode": 115132,
+    "totalExports": 1280,
+    "totalClasses": 143,
+    "totalInterfaces": 525,
+    "totalFunctions": 430,
     "totalTypeGuards": 87,
     "totalEnums": 3,
-    "totalConstants": 144,
+    "totalConstants": 149,
     "totalReExports": 571,
-    "totalTypeOnlyImports": 316,
+    "totalTypeOnlyImports": 313,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 57,
     "unusedFilesCount": 16,
-    "unusedExportsCount": 479
+    "unusedExportsCount": 466
   }
 }

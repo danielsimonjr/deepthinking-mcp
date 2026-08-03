@@ -40,13 +40,13 @@ DeepThinking MCP is a Model Context Protocol (MCP) server that provides advanced
         │                                  │
         └──────────────┬───────────────────┘
                        │
-        ┌──────────────┼───────────────┐
-        │              │               │
-   ┌────▼──────┐  ┌────▼──────┐  ┌────▼─────────┐
-   │  Search   │  │ Validation │  │  Type System │
-   │   Index   │  │   Layer    │  │  (33 Modes)  │
-   └───────────┘  │ (Lazy Load)│  └──────────────┘
-                  └────────────┘
+              ┌────────┴────────┐
+              │                 │
+        ┌─────▼──────┐   ┌──────▼───────┐
+        │ Validation │   │  Type System │
+        │   Layer    │   │  (33 Modes)  │
+        │ (Lazy Load)│   └──────────────┘
+        └────────────┘
 ```
 
 ## Core Components
@@ -169,20 +169,7 @@ Centralized validation enums and helpers:
 - `validateRequired()` - Required field validation
 - `validateNonEmptyArray()` - Array validation
 
-### 6. Search System (`src/search/`)
-
-#### SearchIndex (`src/search/index.ts`)
-- **Role**: In-memory search index with TF-IDF scoring
-- **Capabilities**:
-  - Text search with tokenization
-  - Multi-dimensional filtering (mode, author, domain, taxonomy, dates)
-  - Taxonomy-based classification
-  - Relevance scoring with TF-IDF
-- **Components**:
-  - `SearchIndex`: Main index class
-  - `Tokenizer`: Text tokenization and frequency analysis
-
-### 7. Tools & Schema System (`src/tools/`)
+### 6. Tools & Schema System (`src/tools/`)
 
 #### Lazy Schema Loader (`src/tools/lazy-loader.ts`)
 - On-demand schema loading
@@ -200,7 +187,7 @@ src/tools/schemas/
 └── modes/        # Mode-specific schemas (8 files)
 ```
 
-### 8. Taxonomy System (`src/taxonomy/`)
+### 7. Taxonomy System (`src/taxonomy/`)
 
 #### Components:
 - **TaxonomyClassifier**: Classify thoughts by reasoning type
@@ -210,7 +197,7 @@ src/tools/schemas/
 
 Provides 69 reasoning types (110 planned) organized across 12 categories.
 
-### 9. Type System (`src/types/`)
+### 8. Type System (`src/types/`)
 
 #### Organized by Domain:
 - **core.ts**: Base types, ThinkingMode enum (33 modes), Thought union type (29 types)
@@ -302,16 +289,10 @@ Response with updated session
 - **Caching**: Loaded validators cached for reuse
 - **Preloading**: Optional preload for known high-use modes
 
-### Search
-- **Indexing**: O(n) where n = number of thoughts
-- **Search**: TF-IDF scoring with O(n) complexity
-- **Filtering**: Multi-dimensional filtering by mode, taxonomy, dates
-
 ## Scalability Considerations
 
 ### Current Limitations
 - In-memory session cache (limited by RAM)
-- In-memory search index
 - Single-process architecture
 
 ### Future Enhancements

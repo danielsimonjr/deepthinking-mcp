@@ -8,7 +8,7 @@ This document describes the purpose and organization of each directory in the De
 
 ## Overview
 
-The codebase is organized into **15 modules** with **233 TypeScript files** totaling approximately **100,600 lines of code**.
+The codebase is organized into **14 modules** with **233 TypeScript files** totaling approximately **100,600 lines of code**.
 
 ```
 src/
@@ -20,7 +20,6 @@ src/
 ├── modes/             # Advanced reasoning implementations (52 files)
 │   └── handlers/      # Mode-specific handlers (36 files)
 ├── proof/             # Proof decomposition & analysis (13 files)
-├── search/            # Full-text search engine (3 files)
 ├── services/          # Business logic layer (2 files)
 ├── session/           # Session management (4 files)
 │   └── storage/       # Storage adapters
@@ -127,15 +126,6 @@ One file per reasoning mode providing Mermaid, DOT, and ASCII diagram generation
 - `index.ts` - Barrel exports
 - `types.ts` - Proof-specific types
 - `patterns/warnings.ts` - Common proof anti-patterns
-
----
-
-### `search/` - Full-Text Search
-**Files**: 3 | **Purpose**: Session and thought search with faceted filtering
-
-- `index.ts` - SearchIndex class with TF-IDF scoring
-- `tokenizer.ts` - Text tokenization and normalization
-- `types.ts` - Search query and result types
 
 ---
 
@@ -281,7 +271,6 @@ graph TD
 
     subgraph "Features"
         EXPORT[export/]
-        SEARCH[search/]
         TAXONOMY[taxonomy/]
         PROOF[proof/]
         MODES[modes/]
@@ -307,7 +296,6 @@ graph TD
     SESSION --> CACHE
 
     EXPORT --> TYPES
-    SEARCH --> TYPES
     TAXONOMY --> TYPES
     PROOF --> TYPES
     MODES --> TYPES
@@ -322,7 +310,7 @@ graph TD
 | Metric | Value |
 |--------|-------|
 | Total TypeScript files | 233 |
-| Total modules | 15 |
+| Total modules | 14 |
 | Lines of code | ~100,600 |
 | Reasoning modes | 33 (29 with thought types) |
 | Specialized handlers | 36 (all modes covered) |

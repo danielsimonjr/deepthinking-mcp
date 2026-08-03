@@ -248,55 +248,6 @@ updateCacheStats(session): void
 
 ---
 
-## Search Components
-
-### `src/search/index.ts` - Search Index
-
-**Purpose**: In-memory search index with TF-IDF scoring
-
-**Key Methods**:
-```typescript
-indexSession(session): void
-removeSession(sessionId): boolean
-searchByText(query): Map<string, number>
-filterByModes(modes): Set<string>
-filterByTaxonomyCategories(categories): Set<string>
-getStats(): SearchStats
-```
-
-**Search Capabilities**:
-- **Text Search**: Tokenization with TF-IDF scoring
-- **Mode Filtering**: Filter by thinking modes
-- **Taxonomy Filtering**: Categories and types
-- **Author/Domain**: Substring match filtering
-- **Date Range**: createdAfter/createdBefore
-- **Completion Status**: Filter by completed sessions
-
-**Features**:
-- In-memory inverted index for fast queries
-- Title match boosting (1.5x)
-- Minimum score threshold for matches
-
----
-
-### `src/search/tokenizer.ts` - Tokenizer
-
-**Purpose**: Text processing for search
-
-**Key Methods**:
-```typescript
-tokenize(text): string[]
-getTokenFrequency(text): Map<string, number>
-getUniqueTokens(text): Set<string>
-```
-
-**Features**:
-- Word tokenization
-- Case normalization
-- Configurable options
-
----
-
 ## Validation & Security Components
 
 ### `src/validation/constants.ts` - Validation Constants (v4.3.0)
@@ -789,9 +740,6 @@ index.ts
 └── SessionManager
     └── SessionMetricsCalculator
 
-SearchIndex
-└── Tokenizer
-
 TaxonomySystem
 ├── TaxonomyClassifier
 ├── TaxonomyNavigator
@@ -866,10 +814,6 @@ TaxonomySystem
 - **Lazy Loading**: Validators and exporters loaded on-demand
 - **Incremental Metrics**: O(1) updates instead of O(n) recalculation
 
-### Search
-- **In-Memory Index**: Fast TF-IDF scoring
-- **Multi-filter Support**: Taxonomy, mode, date filtering
-
 ---
 
 ## Testing Strategy
@@ -877,7 +821,6 @@ TaxonomySystem
 ### Unit Tests
 - **Service Layer**: ThoughtFactory, ExportService
 - **Session Management**: SessionManager, SessionMetricsCalculator
-- **Search**: SearchIndex, Tokenizer
 - **Validation**: All 35 mode validators
 - **Mode Handlers**: All 36 specialized handlers
 

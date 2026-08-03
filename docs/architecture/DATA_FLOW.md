@@ -134,10 +134,6 @@ Client                    Server                    Storage
   │                         │   └─ MetricsCalculator  │
   │                         │       .update()         │
   │                         │                         │
-  │                         ├─ SearchIndex           │
-  │                         │   .index()              │
-  │                         │   (update index)        │
-  │                         │                         │
   │◄────────────────────────┤                         │
   │  {                      │                         │
   │    id: "uuid",          │                         │
@@ -158,8 +154,7 @@ Client                    Server                    Storage
    - Otherwise: falls back to switch statement
 4. SessionManager adds thought to session
 5. SessionMetricsCalculator updates metrics incrementally (O(1))
-6. SearchIndex updates index for search
-7. Response contains updated session
+6. Response contains updated session
 
 **Data Transformations**:
 - Input: Flat thought parameters
@@ -172,7 +167,6 @@ Client                    Server                    Storage
 **Performance**:
 - O(1) thought addition
 - O(1) metrics update (incremental)
-- O(n) search reindexing (n = thoughts in session)
 
 ---
 
@@ -287,62 +281,6 @@ Client                    Server                    Storage
 - Systems Thinking: Components, feedback loops, archetypes
 
 **No Storage Write**: Export is read-only operation
-
----
-
-### 5. Search
-
-```
-Client                    Server                    Memory
-  │                         │                         │
-  ├─ (separate API) ────────►                        │
-  │   {                     │                         │
-  │     query: "quantum",   │                         │
-  │     modes: ["physics"], │                         │
-  │     limit: 10           │                         │
-  │   }                     │                         │
-  │                         │                         │
-  │                         ├─ SearchIndex           │
-  │                         │   .search()             │
-  │                         │   │                     │
-  │                         │   ├─ Normalize query    │
-  │                         │   ├─ Text search        │
-  │                         │   │   (inverted index)  │
-  │                         │   ├─ Mode filter        │
-  │                         │   ├─ Date filter        │
-  │                         │   ├─ Score results      │
-  │                         │   │   (TF-IDF)          │
-  │                         │   ├─ Sort by relevance  │
-  │                         │   └─ Paginate           │
-  │                         │                         │
-  │◄────────────────────────┤                         │
-  │  {                      │                         │
-  │    sessions: [          │                         │
-  │      {session1},        │                         │
-  │      {session2}         │                         │
-  │    ],                   │                         │
-  │    total: 2,            │                         │
-  │    hasMore: false       │                         │
-  │  }                      │                         │
-```
-
-**Search Pipeline**:
-1. **Query Normalization**: Convert alias fields (query→text, mode→modes)
-2. **Text Processing**: Tokenize, stem, lowercase
-3. **Index Lookup**: Check inverted index for matching sessions
-4. **Filtering**: Apply mode, date, taxonomy, author filters
-5. **Scoring**: Calculate relevance using TF-IDF
-6. **Sorting**: Order by relevance, date, or title
-7. **Pagination**: Apply offset and limit
-8. **Facets** (optional): Aggregate counts by mode, author, domain
-
-**Performance**:
-- O(log n) text search (inverted index)
-- O(1) for each filter (attribute indexes)
-- O(k log k) sorting (k = result count)
-- O(1) pagination
-
-**Memory**: All search data kept in memory for speed
 
 ---
 
@@ -603,9 +541,8 @@ Return error response to client
 
 1. **LRU Cache**: O(1) session access for hot data
 2. **Incremental Metrics**: O(1) updates vs O(n) recalculation
-3. **Inverted Index**: O(log n) search vs O(n) scan
-4. **Async Persistence**: Non-blocking saves
-5. **Lazy Loading**: Only load what's needed
+3. **Async Persistence**: Non-blocking saves
+4. **Lazy Loading**: Only load what's needed
 
 ### Bottlenecks & Solutions
 
@@ -613,7 +550,6 @@ Return error response to client
 |------------|--------|----------|
 | Large sessions | Memory | Compression, lazy thought loading |
 | Many sessions | Memory | LRU eviction, pagination |
-| Search | CPU | Inverted index, filters before search |
 | Export | CPU | Stream large exports, worker threads |
 | Storage I/O | Latency | Async writes, write coalescing |
 

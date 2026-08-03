@@ -43,7 +43,6 @@ deepthinking-mcp/
 │   ├── validation/         # Zod schemas & validators (35 mode validators)
 │   ├── export/             # Export system (8 formats)
 │   ├── taxonomy/           # 69 reasoning types (110 planned)
-│   ├── search/             # Full-text search engine (SearchIndex, Tokenizer)
 │   ├── cache/              # LRU caching
 │   ├── config/             # Server configuration
 │   ├── modes/              # Mode implementations & handlers (36 handlers)
@@ -286,12 +285,6 @@ The server supports 33 reasoning modes organized into categories:
 | `src/validation/validators/base.ts` | Reusable validation methods |
 | `src/validation/validators/registry.ts` | Lazy-loading validator registry |
 
-### Search
-| File | Purpose |
-|------|---------|
-| `src/search/index.ts` | SearchIndex with TF-IDF scoring |
-| `src/search/tokenizer.ts` | Tokenizer for text processing |
-
 ---
 
 ## Architecture Patterns
@@ -349,7 +342,7 @@ Configured in `tsconfig.json`:
 - `@/*` → `src/*`
 - `@types/*` → `src/types/*`
 - `@validation/*` → `src/validation/*`
-- `@session/*`, `@search/*`, `@batch/*`, `@export/*`, `@taxonomy/*`
+- `@session/*`, `@batch/*`, `@export/*`, `@taxonomy/*`
 
 ---
 

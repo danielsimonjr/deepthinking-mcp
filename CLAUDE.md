@@ -162,7 +162,6 @@ src/
 │   ├── verifier.ts
 │   ├── strategy-recommender.ts
 │   └── warnings.ts
-├── search/            # Full-text search engine with faceted filtering
 ├── cache/             # LRU/LFU/FIFO caching strategies
 ├── modes/             # Advanced reasoning mode implementations
 │   ├── handlers/      # Strategy pattern handlers (37 total)
@@ -202,7 +201,7 @@ Configured in `tsconfig.json`:
 - `@types/*` → `src/types/*`
 - `@utils/*` → `src/utils/*`
 - `@validation/*` → `src/validation/*`
-- `@modes/*`, `@session/*`, `@search/*`, `@cache/*`, `@export/*`, `@taxonomy/*`
+- `@modes/*`, `@session/*`, `@cache/*`, `@export/*`, `@taxonomy/*`
 
 ## MCP Tools
 
@@ -332,7 +331,6 @@ For parallel reasoning or handling multiple concurrent sessions:
 | `src/session/manager.ts` | SessionManager lifecycle management |
 | `src/services/ThoughtFactory.ts` | Thought creation and validation |
 | `src/taxonomy/reasoning-types.ts` | All 69 reasoning type definitions |
-| `src/search/index.ts` | Full-text search (SearchIndex class) |
 | `src/proof/decomposer.ts` | Proof decomposition engine |
 | `src/modes/handlers/ModeHandler.ts` | Handler interface definition |
 | `src/modes/registry.ts` | ModeHandlerRegistry singleton |

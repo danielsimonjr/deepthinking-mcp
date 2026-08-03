@@ -77,7 +77,7 @@ A comprehensive Model Context Protocol (MCP) server featuring **34 reasoning mod
 - **Taxonomy Classifier** - 69 reasoning types across 12 categories for intelligent task classification (110 planned)
 - **Visual Exports** - Generate Mermaid diagrams, DOT graphs, ASCII art, SVG graphics, and LaTeX documents
 - **File Export System** - Export sessions to files with configurable output directory and profiles
-- **Production-Ready** - Search engine, session management, caching, multi-instance support
+- **Production-Ready** - Session management, caching, multi-instance support
 - **Enterprise Security** - Input validation (Zod), path sanitization, PII redaction
 - **High Performance** - LRU caching with auto-eviction, async I/O
 - **Type-Safe** - 100% TypeScript with comprehensive type coverage
@@ -795,10 +795,6 @@ Advanced mathematical reasoning with proof analysis:
 - **InconsistencyDetector**: Find circular dependencies and contradictions
 - **Native SVG Export**: Generate proof visualizations without external tools
 
-### Search Engine
-
-Full-text search with faceted filtering and relevance ranking. Used internally to search across reasoning sessions by mode, tags, date ranges, and content.
-
 ### Template System
 
 Pre-built templates for common reasoning patterns, accessible through session creation.
@@ -972,7 +968,6 @@ src/
 │   │   ├── utils/                  # 14 builder classes
 │   │   └── modes/                  # 22 mode-specific exporters
 │   └── latex.ts       # LaTeX document generation
-├── search/            # Full-text search with TF-IDF (3 files)
 ├── cache/             # LRU caching strategies (3 files)
 ├── validation/        # Zod schemas (44 files, 35 validators)
 └── utils/             # Utility functions (6 files)

@@ -47,7 +47,6 @@ deepthinking-mcp/
 §18validation/         # Zod schemas & validators
 §18export/             # Export system (8 formats)
 §18taxonomy/           # 110+§12types
-§18search/             # Full-text search engine
 §18batch/              # Batch processing
 §18backup/             # Backup & recovery
 §18cache/              # Caching strategies
@@ -255,10 +254,9 @@ The server supports 33§12modes organized into categories:
 §l
 | `src/validation/constants§1d| Centralized§vconstants |
 | `src/validation/validators/base§1d| Reusable§vmethods |
-| `src/validation/validators/registry§1d| Lazy-loading validator registry §17 Search & Batch
+| `src/validation/validators/registry§1d| Lazy-loading validator registry §17 Batch
 |§1c|§16|
 §l
-| `src/search/engine§1d| Full-text search with TF-IDF |
 | `src/batch/processor§1d| Batch job execution §17 Storage
 |§1c|§16|
 §l
@@ -318,7 +316,7 @@ Configured in `tsconfig.json`:
 - `@/*` → `src/*`
 - `@types/*` → `src/types/*`
 - `@validation/*` → `src/validation/*`
-- `@session/*`, `@search/*`, `@batch/*`, `@export/*`, `@taxonomy/*`
+- `@session/*`, `@batch/*`, `@export/*`, `@taxonomy/*`
 
 §15MCP Integration
 
