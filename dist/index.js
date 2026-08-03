@@ -26,7 +26,7 @@ var __export = (target, all) => {
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 var init_esm_shims = __esm({
-  "../../../node_modules/tsup/assets/esm_shims.js"() {
+  "node_modules/tsup/assets/esm_shims.js"() {
   }
 });
 
@@ -46696,6 +46696,20 @@ var SessionNotFoundError = class extends DeepThinkingError {
     });
   }
 };
+var ResourceLimitError = class extends DeepThinkingError {
+  constructor(resource, limit, actual) {
+    super(
+      `Resource limit exceeded for ${resource}: ${actual} > ${limit}`,
+      "RESOURCE_LIMIT_EXCEEDED",
+      { resource, limit, actual }
+    );
+  }
+};
+var StorageError = class extends DeepThinkingError {
+  constructor(message, context) {
+    super(message, "STORAGE_ERROR", context);
+  }
+};
 
 // src/session/manager.ts
 init_sanitization();
@@ -47262,6 +47276,7 @@ var SessionMetricsCalculator = class {
 };
 
 // src/session/manager.ts
+init_config();
 var DEFAULT_CONFIG2 = {
   modeConfig: {
     mode: "hybrid" /* HYBRID */,
@@ -47316,7 +47331,7 @@ var SessionManager = class {
    */
   constructor(config, logger3, storage) {
     this.activeSessions = new LRUCache({
-      maxSize: 1e3,
+      maxSize: getConfig().maxActiveSessions,
       enableStats: true,
       onEvict: async (key, session) => {
         if (this.storage && session.config.enableAutoSave) {
@@ -47435,7 +47450,7 @@ var SessionManager = class {
    */
   async getSession(sessionId) {
     validateSessionId(sessionId);
-    let session = this.activeSessions.get(sessionId);
+    let session = this.getLiveSession(sessionId);
     if (!session && this.storage) {
       try {
         session = await this.storage.loadSession(sessionId) ?? void 0;
@@ -47480,10 +47495,26 @@ var SessionManager = class {
    */
   async addThought(sessionId, thought) {
     validateSessionId(sessionId);
-    const session = this.activeSessions.get(sessionId);
+    const session = this.getLiveSession(sessionId);
     if (!session) {
       this.logger.error("Session not found", void 0, { sessionId });
       throw new SessionNotFoundError(sessionId);
+    }
+    const thoughtCap = session.config.maxThoughtsInMemory;
+    if (typeof thoughtCap === "number" && thoughtCap > 0 && session.thoughts.length >= thoughtCap) {
+      this.logger.warn(
+        "Session reached configured maxThoughtsInMemory; rejecting new thought",
+        {
+          sessionId,
+          maxThoughtsInMemory: thoughtCap,
+          currentThoughtCount: session.thoughts.length
+        }
+      );
+      throw new ResourceLimitError(
+        "thoughts",
+        thoughtCap,
+        session.thoughts.length + 1
+      );
     }
     if (thought.content) {
       thought.content = sanitizeThoughtContent(thought.content);
@@ -47545,7 +47576,7 @@ var SessionManager = class {
    */
   async switchMode(sessionId, newMode, reason) {
     validateSessionId(sessionId);
-    const session = this.activeSessions.get(sessionId);
+    const session = this.getLiveSession(sessionId);
     if (!session) {
       this.logger.error("Session not found", void 0, { sessionId });
       throw new SessionNotFoundError(sessionId);
@@ -47635,6 +47666,7 @@ var SessionManager = class {
     validateSessionId(sessionId);
     const session = this.activeSessions.get(sessionId);
     const deletedFromMemory = this.activeSessions.delete(sessionId);
+    this.clearMetaSession(sessionId);
     if (this.storage) {
       try {
         await this.storage.deleteSession(sessionId);
@@ -47685,7 +47717,7 @@ var SessionManager = class {
    */
   async generateSummary(sessionId) {
     validateSessionId(sessionId);
-    const session = this.activeSessions.get(sessionId);
+    const session = this.getLiveSession(sessionId);
     if (!session) {
       throw new SessionNotFoundError(sessionId);
     }
@@ -47720,6 +47752,45 @@ var SessionManager = class {
       ...this.config,
       ...userConfig
     };
+  }
+  // ============================================
+  // Session expiry (audit 2026-08-03, M-1)
+  //
+  // sessionTimeoutMs (MCP_SESSION_TIMEOUT_MS) was previously parsed,
+  // validated, and never consumed anywhere — a session never expired
+  // regardless of the configured value. This implements lazy expiry: a
+  // session older than sessionTimeoutMs (measured from its last update) is
+  // evicted the next time it is *accessed*, not via a background timer, to
+  // avoid holding a process-lifetime interval/timeout handle.
+  // ============================================
+  /**
+   * Whether a session has exceeded the configured sessionTimeoutMs.
+   * A timeout of 0 (the default) means "no timeout" and always returns false.
+   */
+  isSessionExpired(session) {
+    const timeoutMs = getConfig().sessionTimeoutMs;
+    if (!timeoutMs || timeoutMs <= 0) {
+      return false;
+    }
+    return Date.now() - session.updatedAt.getTime() > timeoutMs;
+  }
+  /**
+   * Get a session from the in-memory LRU cache, transparently evicting (and
+   * clearing its meta-monitoring state) if it has expired per
+   * sessionTimeoutMs. Returns undefined for both "not present" and "expired".
+   */
+  getLiveSession(sessionId) {
+    const session = this.activeSessions.get(sessionId);
+    if (session && this.isSessionExpired(session)) {
+      this.activeSessions.delete(sessionId);
+      this.clearMetaSession(sessionId);
+      this.logger.debug("Session expired and evicted", {
+        sessionId,
+        sessionTimeoutMs: getConfig().sessionTimeoutMs
+      });
+      return void 0;
+    }
+    return session;
   }
   // ============================================
   // Meta-Monitoring Methods (merged from MetaMonitor)
@@ -48263,14 +48334,21 @@ var FileSessionStore = class {
         config: this.config
       });
     } catch (error) {
-      logger.error(
-        "Failed to initialize FileSessionStore",
-        error instanceof Error ? error : new Error(String(error)),
+      const cause = error instanceof Error ? error : new Error(String(error));
+      logger.error("Failed to initialize FileSessionStore", cause, {
+        baseDir: this.baseDir
+      });
+      const code = typeof cause.code === "string" ? cause.code : void 0;
+      throw new StorageError(
+        `Failed to initialize session storage at "${this.baseDir}" (configured via the SESSION_DIR environment variable). Check that the path's drive/parent exists and that the process has permission to create directories there. Original error: ${cause.message}`,
         {
-          baseDir: this.baseDir
+          baseDir: this.baseDir,
+          sessionsDir: this.sessionsDir,
+          metadataDir: path4.dirname(this.metadataFile),
+          code,
+          cause: cause.message
         }
       );
-      throw error;
     }
   }
   /**

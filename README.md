@@ -9,7 +9,7 @@
 >
 > | Surface | What you get |
 > |---|---|
-> | **MCP server** | 14 tools (`deepthinking_core`, `deepthinking_causal`, …) across 34 modes, session management, proof decomposition |
+> | **MCP server** | 13 tools (`deepthinking_core`, `deepthinking_causal`, …) across 34 modes, session management, proof decomposition |
 > | **Slash commands** | `/think` and `/think-render` (canonically `/deepthinking-mcp:think`) |
 > | **Skills** | 14 reasoning skills covering **46 modes**, including the `think-frameworks` set the server does not implement — SWOT, decision matrix, 5 Whys, fishbone, PESTLE, force-field, Pareto, stakeholder, gap/risk analysis, cost-benefit |
 > | **Subagent** | `visual-exporter` — renders a thought to 11 diagram/document formats, plus an interactive HTML dashboard |
@@ -151,7 +151,7 @@ Configure the server with environment variables:
 ### MCP Tool Usage
 
 DeepThinking MCP provides 13 focused tools for different reasoning domains, plus a deprecated
-legacy `deepthinking` tool kept for backward compatibility (14 tools total on `tools/list`):
+legacy `deepthinking` tool kept callable for backward compatibility but hidden from `tools/list` (13 tools listed):
 
 | Tool | Modes | Description |
 |------|-------|-------------|

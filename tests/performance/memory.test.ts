@@ -7,6 +7,8 @@
  * Phase 11 Sprint 11: Integration Scenarios & Performance
  */
 
+import v8 from 'node:v8';
+import vm from 'node:vm';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { SessionManager } from '../../src/session/manager.js';
 import { ThoughtFactory } from '../../src/services/ThoughtFactory.js';
@@ -44,9 +46,24 @@ describe('Memory Performance Tests', () => {
   }
 
   function forceGC(): void {
-    if (typeof global !== 'undefined' && (global as any).gc) {
-      (global as any).gc();
+    const g = global as unknown as { gc?: () => void };
+    if (!g.gc) {
+      // These tests compare heapUsed deltas, which are meaningless without a
+      // real collection between samples. This helper used to be guarded by
+      // `if (global.gc)` while nothing ever set --expose-gc, so it was a
+      // permanent no-op and T-PRF-011 asserted against raw allocator noise --
+      // that is why it flaked. Passing --expose-gc through vitest poolOptions
+      // does not work either: worker_threads rejects the flag. So acquire gc
+      // directly from V8 at runtime.
+      try {
+        v8.setFlagsFromString('--expose_gc');
+        g.gc = vm.runInNewContext('gc') as () => void;
+      } finally {
+        // Leave the flag off so unrelated code can't call gc() as a side effect.
+        v8.setFlagsFromString('--no-expose_gc');
+      }
     }
+    g.gc?.();
   }
 
   // ===========================================================================
@@ -114,8 +131,18 @@ describe('Memory Performance Tests', () => {
         sessionSizes.push(after - before);
       }
 
-      // Memory growth per session should be relatively consistent
-      // Note: GC timing is non-deterministic, so we only verify if we have meaningful data
+      // Precondition, asserted rather than assumed: this test is only
+      // meaningful when GC can actually be forced. vitest.config.ts passes
+      // --expose-gc for exactly this. Before that was wired, forceGC() was a
+      // silent no-op and the guard below skipped the assertion whenever the
+      // first delta happened to be <= 0 -- a test that could pass without
+      // checking anything. Fail loudly instead of self-disabling.
+      expect(
+        typeof (global as unknown as { gc?: () => void }).gc,
+        'global.gc unavailable - vitest must run with --expose-gc (see vitest.config.ts poolOptions)',
+      ).toBe('function');
+
+      // Memory growth per session should be relatively consistent.
       if (sessionSizes[0] > 0) {
         const avgSize = sessionSizes.reduce((a, b) => a + b, 0) / sessionSizes.length;
         const positiveAvg = Math.max(avgSize, 1); // Avoid division issues with small values

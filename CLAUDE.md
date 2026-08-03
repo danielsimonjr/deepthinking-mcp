@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types + 4 advanced runtime) with taxonomy-based classification (69 implemented reasoning types across 12 categories), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 9.2.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
+**Version**: 9.3.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
 
 ## Project Metrics
 
@@ -21,7 +21,7 @@ hand-editing the numbers below — they have drifted from source repeatedly.
 | Total Exports | 1,276 (571 re-exports) |
 | Passing Tests | 5,065 (177 test files) |
 | Reasoning Modes | 34 (30 with dedicated types + 4 advanced runtime) |
-| MCP Tools | 14 (13 in `jsonSchemas` + legacy `deepthinking`, see below) |
+| MCP Tools | 13 listed (legacy `deepthinking` still callable but hidden, see below) |
 | Export Formats | 8 + native SVG + file export |
 | Visual Exporters | 42 files (24 mode-specific, 15 utils, 3 root) |
 | Specialized Handlers | 37 (34 modes + GenericModeHandler + CustomHandler + utility) |
@@ -206,9 +206,14 @@ Configured in `tsconfig.json`:
 
 ## MCP Tools
 
-The server provides 14 tools: 13 focused tools in `jsonSchemas`, plus a legacy `deepthinking` tool
-(`src/index.ts:159`) kept for backward compatibility. A live `tools/list` handshake returns all 14;
-`.claude-plugin/plugin.json` correctly says 14.
+The server lists **13** tools. A live `tools/list` handshake returns exactly these 13.
+
+The legacy `deepthinking` tool is **hidden from `tools/list`** as of the 2026-08-03 audit (L-2) — it
+advertised itself as deprecated to every client on every session — but its `CallToolRequestSchema`
+handler is retained, so callers that already hardcode the name keep working and still receive the
+deprecation warning. Its input schema (`src/tools/thinking.ts`) is bounded to the same limits as the
+focused tools; leaving it unbounded would have let a caller bypass the H-2 input caps entirely via
+the old tool name.
 
 | Tool | Modes/Functions |
 |------|-----------------|
@@ -225,7 +230,6 @@ The server provides 14 tools: 13 focused tools in `jsonSchemas`, plus a legacy `
 | `deepthinking_academic` | synthesis, argumentation, critique, analysis |
 | `deepthinking_session` | Session management (create, list, delete, export, get_session, switch_mode, recommend_mode) |
 | `deepthinking_analyze` | Multi-mode analysis with presets and merge strategies |
-| `deepthinking` | **Deprecated** legacy catch-all tool, superseded by the 13 focused tools above (see `docs/migration/v4.0-tool-splitting.md`) |
 
 ## Adding New Features
 
