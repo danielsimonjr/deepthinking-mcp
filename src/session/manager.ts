@@ -23,7 +23,7 @@ import {
   QualityMetrics,
   SessionContext,
 } from "../types/modes/metareasoning.js";
-import { SessionNotFoundError } from "../utils/errors.js";
+import { SessionNotFoundError, ResourceLimitError } from "../utils/errors.js";
 import {
   sanitizeString,
   sanitizeThoughtContent,
@@ -36,6 +36,7 @@ import { SessionStorage } from "./storage/interface.js";
 import { LRUCache } from "../cache/lru.js";
 import type { CacheStats } from "../cache/types.js";
 import { SessionMetricsCalculator } from "./SessionMetricsCalculator.js";
+import { getConfig } from "../config/index.js";
 
 /**
  * Session history entry for meta-monitoring
@@ -62,6 +63,22 @@ interface StrategyPerformance {
 
 /**
  * Default session configuration
+ *
+ * NOTE (audit 2026-08-03, H-3): `maxThoughtsInMemory` is now enforced —
+ * `addThought()` rejects (throws `ResourceLimitError`) once a session
+ * already holds `maxThoughtsInMemory` thoughts, rather than silently
+ * accepting unbounded growth. Enforcement REJECTS new thoughts; it does not
+ * drop or summarize old ones. Dropping the oldest thought (the audit's other
+ * suggested option) was rejected because many downstream consumers
+ * (metrics, exporters, proof decomposition) assume `id`/`thoughtNumber`
+ * cross-references (`revisesThought`, `buildUpon`, `dependencies`) stay
+ * resolvable — silently deleting history could corrupt those without a
+ * fuller audit of every consumer, which is out of scope for `src/session/**`
+ * alone. See `SessionManager.addThought()` for the enforcement point.
+ *
+ * `compressionThreshold` remains unenforced: no compression logic exists
+ * anywhere in `src/session/`, and none was added here — see CLAUDE.md's
+ * environment variable table.
  */
 const DEFAULT_CONFIG: SessionConfig = {
   modeConfig: {
@@ -145,9 +162,13 @@ export class SessionManager {
     logger?: ILogger | LogLevel,
     storage?: SessionStorage,
   ) {
-    // Initialize LRU cache for sessions (max 1000 sessions, ~10-50MB)
+    // Initialize LRU cache for sessions. maxSize is threaded from
+    // getConfig().maxActiveSessions (MCP_MAX_SESSIONS, default 100) — audit
+    // 2026-08-03 M-1: this used to be hardcoded to 1000 regardless of config,
+    // so the documented env var did nothing and the real cap was 10x higher
+    // than advertised.
     this.activeSessions = new LRUCache<ThinkingSession>({
-      maxSize: 1000,
+      maxSize: getConfig().maxActiveSessions,
       enableStats: true,
       onEvict: async (key: string, session: ThinkingSession) => {
         // Auto-save evicted sessions to persistent storage if available
@@ -301,8 +322,8 @@ export class SessionManager {
     // Security: Validate session ID format to prevent path traversal attacks
     validateSessionId(sessionId);
 
-    // Check memory first
-    let session = this.activeSessions.get(sessionId);
+    // Check memory first (evicts and treats as absent if past sessionTimeoutMs)
+    let session = this.getLiveSession(sessionId);
 
     // If not in memory and storage is available, try loading from storage
     if (!session && this.storage) {
@@ -357,10 +378,36 @@ export class SessionManager {
     // Validate session ID
     validateSessionId(sessionId);
 
-    const session = this.activeSessions.get(sessionId);
+    const session = this.getLiveSession(sessionId);
     if (!session) {
       this.logger.error("Session not found", undefined, { sessionId });
       throw new SessionNotFoundError(sessionId);
+    }
+
+    // Audit 2026-08-03 H-3: maxThoughtsInMemory is enforced for real. Reject
+    // BEFORE any mutation once the session is already at capacity, rather
+    // than dropping/summarizing old thoughts (see DEFAULT_CONFIG comment
+    // above for why a hard drop was rejected). A rejection has no side
+    // effects: no push, no metrics update, no auto-save attempt.
+    const thoughtCap = session.config.maxThoughtsInMemory;
+    if (
+      typeof thoughtCap === "number" &&
+      thoughtCap > 0 &&
+      session.thoughts.length >= thoughtCap
+    ) {
+      this.logger.warn(
+        "Session reached configured maxThoughtsInMemory; rejecting new thought",
+        {
+          sessionId,
+          maxThoughtsInMemory: thoughtCap,
+          currentThoughtCount: session.thoughts.length,
+        },
+      );
+      throw new ResourceLimitError(
+        "thoughts",
+        thoughtCap,
+        session.thoughts.length + 1,
+      );
     }
 
     // Validate thought content
@@ -446,7 +493,7 @@ export class SessionManager {
     // Validate session ID
     validateSessionId(sessionId);
 
-    const session = this.activeSessions.get(sessionId);
+    const session = this.getLiveSession(sessionId);
     if (!session) {
       this.logger.error("Session not found", undefined, { sessionId });
       throw new SessionNotFoundError(sessionId);
@@ -555,6 +602,13 @@ export class SessionManager {
     const session = this.activeSessions.get(sessionId);
     const deletedFromMemory = this.activeSessions.delete(sessionId);
 
+    // Audit 2026-08-03 M-2: this used to be missing, so sessionHistory,
+    // currentStrategies, and modeTransitions retained an entry for every
+    // explicitly-deleted session forever (only the LRU's onEvict path called
+    // this). Clear unconditionally — a no-op Map.delete() on an id that was
+    // never tracked (or already cleared) is harmless.
+    this.clearMetaSession(sessionId);
+
     // Also delete from storage if available
     if (this.storage) {
       try {
@@ -610,7 +664,7 @@ export class SessionManager {
     // Validate session ID
     validateSessionId(sessionId);
 
-    const session = this.activeSessions.get(sessionId);
+    const session = this.getLiveSession(sessionId);
     if (!session) {
       throw new SessionNotFoundError(sessionId);
     }
@@ -640,6 +694,48 @@ export class SessionManager {
       ...this.config,
       ...userConfig,
     } as SessionConfig;
+  }
+
+  // ============================================
+  // Session expiry (audit 2026-08-03, M-1)
+  //
+  // sessionTimeoutMs (MCP_SESSION_TIMEOUT_MS) was previously parsed,
+  // validated, and never consumed anywhere — a session never expired
+  // regardless of the configured value. This implements lazy expiry: a
+  // session older than sessionTimeoutMs (measured from its last update) is
+  // evicted the next time it is *accessed*, not via a background timer, to
+  // avoid holding a process-lifetime interval/timeout handle.
+  // ============================================
+
+  /**
+   * Whether a session has exceeded the configured sessionTimeoutMs.
+   * A timeout of 0 (the default) means "no timeout" and always returns false.
+   */
+  private isSessionExpired(session: ThinkingSession): boolean {
+    const timeoutMs = getConfig().sessionTimeoutMs;
+    if (!timeoutMs || timeoutMs <= 0) {
+      return false;
+    }
+    return Date.now() - session.updatedAt.getTime() > timeoutMs;
+  }
+
+  /**
+   * Get a session from the in-memory LRU cache, transparently evicting (and
+   * clearing its meta-monitoring state) if it has expired per
+   * sessionTimeoutMs. Returns undefined for both "not present" and "expired".
+   */
+  private getLiveSession(sessionId: string): ThinkingSession | undefined {
+    const session = this.activeSessions.get(sessionId);
+    if (session && this.isSessionExpired(session)) {
+      this.activeSessions.delete(sessionId);
+      this.clearMetaSession(sessionId);
+      this.logger.debug("Session expired and evicted", {
+        sessionId,
+        sessionTimeoutMs: getConfig().sessionTimeoutMs,
+      });
+      return undefined;
+    }
+    return session;
   }
 
   // ============================================

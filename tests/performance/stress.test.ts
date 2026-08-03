@@ -79,7 +79,14 @@ describe('Stress Tests', () => {
     });
 
     it('should maintain data integrity with 10,000 thoughts', async () => {
-      const session = await manager.createSession();
+      // Audit 2026-08-03 H-3: SessionManager now enforces maxThoughtsInMemory
+      // (default 1000) for real, rejecting once a session is at capacity.
+      // This test's intent — "the system can hold and retrieve 10,000
+      // thoughts" — is unchanged; it now declares that precondition
+      // explicitly instead of relying on the previous absence of any limit.
+      const session = await manager.createSession({
+        config: { maxThoughtsInMemory: 10000 },
+      });
 
       for (let i = 1; i <= 10000; i++) {
         const thought = factory.createThought(createValidInput({
