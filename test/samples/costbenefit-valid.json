@@ -1,0 +1,18 @@
+{
+  "mode": "costbenefit",
+  "option": "Migrate the production database cluster from self-managed PostgreSQL on EC2 to a managed RDS/Aurora offering",
+  "costs": [
+    {"item": "Migration engineering effort (6 weeks, 3 engineers @ $150/hr blended)", "amount": 108000},
+    {"item": "Managed service premium over self-hosted (annual, first year)", "amount": 42000},
+    {"item": "Team training and runbook rewrite", "amount": 15000}
+  ],
+  "benefits": [
+    {"item": "Reduced on-call incident hours (est. 120 hrs/yr saved @ $150/hr)", "amount": 18000},
+    {"item": "Eliminated self-managed cluster maintenance (2 FTE-months/yr @ $12,500/mo)", "amount": 25000},
+    {"item": "Infrastructure savings from managed autoscaling and reserved capacity", "amount": 37000}
+  ],
+  "npv": null,
+  "roi": 45.5,
+  "paybackPeriod": "~2.1 years",
+  "recommendation": "Total costs are $165,000 ($108,000 + $42,000 + $15,000), against total first-year benefits of $80,000/year ($18,000 + $25,000 + $37,000). At $80,000/year recurring, payback is $165,000 / $80,000 ≈ 2.1 years, and the 3-year ROI is (3×$80,000 − $165,000) / $165,000 ≈ 45.5%. Recommend proceeding: the migration pays for itself within roughly two years and continues generating $80,000/year in savings and reduced on-call burden thereafter."
+}

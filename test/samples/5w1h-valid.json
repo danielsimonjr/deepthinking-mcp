@@ -1,0 +1,10 @@
+{
+  "mode": "5w1h",
+  "who": ["On-call engineer Priya Patel", "Payments platform team", "~1,200 affected checkout sessions"],
+  "what": "Checkout API returned HTTP 500 for all card payments, blocking order completion",
+  "when": "2026-07-06 14:32 UTC through 15:10 UTC (38 minutes)",
+  "where": "us-east-1 region, checkout-api service calling the payment-gateway microservice",
+  "why": ["A scheduled credential-rotation deploy at 14:30 UTC rotated the payment gateway API key without invalidating checkout-api's cached copy of the old key"],
+  "how": ["The rotation deploy updated payment-gateway's accepted key set, but checkout-api kept using its cached (now-invalid) key, so every gateway call returned 401, which checkout-api's error handler mapped to a generic 500 for the caller"],
+  "summary": "A credential-rotation deploy at 14:30 UTC broke checkout for 38 minutes because checkout-api's cached gateway secret was not invalidated in lockstep with the rotation; incident scoped to us-east-1 card payments only."
+}

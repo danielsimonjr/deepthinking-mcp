@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ForceFieldThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "change",
+    "drivingForces",
+    "restrainingForces"
+  ],
+  "properties": {
+    "mode": {
+      "const": "forcefield"
+    },
+    "change": {
+      "type": "string"
+    },
+    "drivingForces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "force",
+          "strength"
+        ],
+        "properties": {
+          "force": {
+            "type": "string"
+          },
+          "strength": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "restrainingForces": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "force",
+          "strength"
+        ],
+        "properties": {
+          "force": {
+            "type": "string"
+          },
+          "strength": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "netAssessment": {
+      "type": "string"
+    },
+    "recommendation": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

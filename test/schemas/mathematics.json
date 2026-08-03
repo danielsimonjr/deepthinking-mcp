@@ -1,0 +1,280 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MathematicsThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "thoughtType",
+    "dependencies",
+    "assumptions",
+    "uncertainty"
+  ],
+  "properties": {
+    "mode": {
+      "const": "mathematics"
+    },
+    "thoughtType": {
+      "type": "string",
+      "enum": [
+        "theorem_statement",
+        "proof_construction",
+        "gap_identification",
+        "symbolic_computation",
+        "model_definition",
+        "assumption_analysis",
+        "consistency_check"
+      ]
+    },
+    "theorems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "statement",
+          "hypotheses",
+          "conclusion"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "hypotheses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "conclusion": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "proofStrategy": {
+      "type": "object",
+      "required": [
+        "type",
+        "steps",
+        "completeness"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "direct",
+            "contradiction",
+            "induction",
+            "contrapositive",
+            "construction",
+            "exhaustion"
+          ]
+        },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "completeness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "logicalForm": {
+      "type": "object",
+      "required": [
+        "premises",
+        "conclusion",
+        "inferenceRule",
+        "rules"
+      ],
+      "properties": {
+        "premises": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "conclusion": {
+          "type": "string"
+        },
+        "inferenceRule": {
+          "type": "string"
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "gapAnalysis": {
+      "type": "object",
+      "required": [
+        "completeness",
+        "gaps",
+        "implicitAssumptions",
+        "unjustifiedSteps",
+        "suggestions"
+      ],
+      "properties": {
+        "completeness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "type",
+              "location",
+              "description",
+              "severity",
+              "suggestedFix"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "missing_step",
+                  "unjustified_leap",
+                  "implicit_assumption",
+                  "undefined_term",
+                  "scope_error"
+                ]
+              },
+              "location": {
+                "type": "object",
+                "required": [
+                  "from",
+                  "to"
+                ],
+                "properties": {
+                  "from": {
+                    "type": "string"
+                  },
+                  "to": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": true
+              },
+              "description": {
+                "type": "string"
+              },
+              "severity": {
+                "type": "string",
+                "enum": [
+                  "minor",
+                  "major",
+                  "critical"
+                ]
+              },
+              "suggestedFix": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "implicitAssumptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "statement",
+              "type",
+              "usedInStep",
+              "shouldBeExplicit",
+              "suggestedFormulation"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "statement": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "domain_assumption",
+                  "existence_assumption",
+                  "uniqueness_assumption",
+                  "continuity_assumption",
+                  "finiteness_assumption",
+                  "well_ordering"
+                ]
+              },
+              "usedInStep": {
+                "type": "string"
+              },
+              "shouldBeExplicit": {
+                "type": "boolean"
+              },
+              "suggestedFormulation": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "unjustifiedSteps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "suggestions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "uncertainty": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

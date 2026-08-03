@@ -1,0 +1,175 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PhysicsThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "thoughtType",
+    "dependencies",
+    "assumptions",
+    "uncertainty"
+  ],
+  "properties": {
+    "mode": {
+      "const": "physics"
+    },
+    "thoughtType": {
+      "type": "string",
+      "enum": [
+        "tensor_formulation",
+        "symmetry_analysis",
+        "gauge_theory",
+        "conservation_law",
+        "dimensional_analysis",
+        "physical_interpretation",
+        "field_equation"
+      ]
+    },
+    "tensorProperties": {
+      "type": "object",
+      "required": [
+        "rank",
+        "components",
+        "latex",
+        "symmetries",
+        "invariants",
+        "transformation"
+      ],
+      "properties": {
+        "rank": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "components": {
+          "type": "string"
+        },
+        "latex": {
+          "type": "string"
+        },
+        "symmetries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "invariants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "transformation": {
+          "type": "string",
+          "enum": [
+            "covariant",
+            "contravariant",
+            "mixed"
+          ]
+        },
+        "indexStructure": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "coordinateSystem": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "physicalInterpretation": {
+      "type": "object",
+      "required": [
+        "quantity",
+        "units",
+        "conservationLaws"
+      ],
+      "properties": {
+        "quantity": {
+          "type": "string"
+        },
+        "units": {
+          "type": "string"
+        },
+        "conservationLaws": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "observables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "fieldTheoryContext": {
+      "type": "object",
+      "required": [
+        "fields",
+        "interactions",
+        "symmetryGroup"
+      ],
+      "properties": {
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "interactions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "symmetryGroup": {
+          "type": "string"
+        },
+        "gaugeSymmetries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "uncertainty": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  },
+  "additionalProperties": false
+}

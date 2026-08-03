@@ -1,0 +1,216 @@
+{
+  "mode": "argumentation",
+  "claim": {
+    "id": "c1",
+    "statement": "Engineering teams should gate all new production features behind feature flags as a standard release practice",
+    "type": "policy",
+    "scope": "general",
+    "strength": "strong",
+    "contested": true
+  },
+  "grounds": [
+    {
+      "id": "g1",
+      "type": "statistical",
+      "content": "Teams using feature flags reduce Mean Time To Recovery (MTTR) by ~60% on average, because a bad release can be killed in seconds without a rollback deploy",
+      "source": "LaunchDarkly State of Feature Management Report, 2023",
+      "reliability": 0.78,
+      "relevance": 0.95,
+      "sufficiency": "partial"
+    },
+    {
+      "id": "g2",
+      "type": "empirical",
+      "content": "Facebook, Netflix, Google, and GitHub have all adopted feature flags as standard engineering practice, decoupling deployment (code in production) from release (code visible to users)",
+      "source": "Industry engineering blogs: Meta Engineering, Netflix Tech Blog, GitHub Engineering",
+      "reliability": 0.85,
+      "relevance": 0.88,
+      "sufficiency": "partial"
+    },
+    {
+      "id": "g3",
+      "type": "statistical",
+      "content": "DORA's 2023 State of DevOps Report identifies trunk-based development with feature toggles as a key differentiator of elite-performing engineering organizations (4\u00d7 more frequent deployments, 5\u00d7 lower change-failure rate)",
+      "source": "DORA State of DevOps Report, 2023",
+      "reliability": 0.88,
+      "relevance": 0.92,
+      "sufficiency": "partial"
+    },
+    {
+      "id": "g4",
+      "type": "logical",
+      "content": "Canary releases enabled by flags limit blast radius: a defective feature can be exposed to 1% of traffic before full rollout, mathematically bounding the number of affected users to a controllable subset",
+      "source": "Continuous Delivery (Humble & Farley, 2011); Google SRE Workbook",
+      "reliability": 0.92,
+      "relevance": 0.94,
+      "sufficiency": "sufficient"
+    },
+    {
+      "id": "g5",
+      "type": "testimonial",
+      "content": "Etsy's engineering team reported that moving to feature flags allowed them to ship 50+ deploys per day without increasing incident rate, attributing the safety to controlled exposure windows",
+      "source": "Etsy Engineering Blog, 'Quantum of Deployment', 2014",
+      "reliability": 0.72,
+      "relevance": 0.85,
+      "sufficiency": "partial"
+    }
+  ],
+  "warrants": [
+    {
+      "id": "w1",
+      "statement": "Any engineering practice that demonstrably reduces MTTR and limits blast radius should be standardized by teams that have reliability goals, because recovery speed and fault isolation are the primary levers of production safety",
+      "type": "principle",
+      "implicit": false,
+      "strength": 0.9,
+      "groundsIds": [
+        "g1",
+        "g4"
+      ],
+      "claimId": "c1"
+    },
+    {
+      "id": "w2",
+      "statement": "When the highest-performing engineering organizations converge on a practice, teams seeking similar performance outcomes should adopt that practice \u2014 assuming comparable constraints \u2014 because adoption is evidence of net positive trade-off",
+      "type": "analogy",
+      "implicit": false,
+      "strength": 0.8,
+      "groundsIds": [
+        "g2",
+        "g3"
+      ],
+      "claimId": "c1"
+    },
+    {
+      "id": "w3",
+      "statement": "Decoupling deployment from release is causally responsible for higher deploy frequency and lower failure rates because it removes the all-or-nothing risk that makes teams afraid to ship, thereby changing team behavior toward smaller, safer changes",
+      "type": "causal",
+      "implicit": false,
+      "strength": 0.85,
+      "groundsIds": [
+        "g3",
+        "g5"
+      ],
+      "claimId": "c1"
+    }
+  ],
+  "backings": [
+    {
+      "id": "b1",
+      "content": "Google's Site Reliability Engineering (SRE) discipline formally defines MTTR and error-budget burn rate as the two canonical reliability KPIs; any tool that reduces them is a first-class reliability investment",
+      "type": "authoritative",
+      "warrantId": "w1",
+      "credibility": 0.92
+    },
+    {
+      "id": "b2",
+      "content": "Humble & Farley's 'Continuous Delivery' (2011) \u2014 the foundational text of the modern DevOps movement \u2014 explicitly categorizes release toggles as a core continuous delivery pattern, validated by a decade of industry adoption since publication",
+      "type": "theoretical",
+      "warrantId": "w2",
+      "credibility": 0.9
+    },
+    {
+      "id": "b3",
+      "content": "DORA's four-year longitudinal research program (2019\u20132023) is the largest empirical study of software delivery performance; it controls for org size, domain, and tech stack, making its findings on trunk-based development + toggles broadly generalizable",
+      "type": "empirical",
+      "warrantId": "w3",
+      "credibility": 0.88
+    },
+    {
+      "id": "b4",
+      "content": "Psychological safety research (Edmondson, 1999; Westrum, 2004) shows that teams ship more frequently when the consequences of failure are bounded; feature flags operationalize bounded failure at the tooling layer",
+      "type": "theoretical",
+      "warrantId": "w3",
+      "credibility": 0.82
+    }
+  ],
+  "qualifiers": [
+    {
+      "id": "q1",
+      "term": "generally",
+      "certainty": 0.8,
+      "conditions": [
+        "The team has adopted (or can adopt) a flag management platform (e.g., LaunchDarkly, Unleash, Flipt, or in-house)",
+        "Flags are tracked in a registry and have defined TTLs with owner-enforced cleanup",
+        "The team has at least weekly production deployments, making flag infrastructure worthwhile"
+      ]
+    },
+    {
+      "id": "q2",
+      "term": "in most cases",
+      "certainty": 0.72,
+      "conditions": [
+        "Applies to application-layer features; infrastructure-level changes (e.g., DB schema migrations, protocol upgrades) require additional strategies beyond flags alone",
+        "Teams operating in highly regulated environments (e.g., FDA Class III medical devices) may face compliance constraints that limit flag-driven toggling without audit trails"
+      ]
+    }
+  ],
+  "rebuttals": [
+    {
+      "id": "r1",
+      "objection": "Feature flags accumulate as technical debt: stale flags create dead-code paths, increase test-matrix complexity, and make the codebase harder to reason about over time",
+      "type": "practical",
+      "strength": "strong",
+      "targetElement": "claim",
+      "targetId": "c1",
+      "response": {
+        "strategy": "qualify",
+        "content": "Flag debt is a real and serious risk \u2014 but it is a process failure, not a failure of the practice itself. The fix is lifecycle discipline: every flag must have an owner, a TTL, and a cleanup ticket created at flag-creation time. The accumulated complexity cost of well-managed flags is still lower than the cost of a single all-traffic production incident. The qualifier q1 already conditions adoption on establishing this cleanup hygiene.",
+        "effectiveness": 0.82
+      }
+    },
+    {
+      "id": "r2",
+      "objection": "Not all features can be hidden behind a flag \u2014 infrastructure migrations, API contract changes, and database schema alterations cannot be toggled off without additional complexity (e.g., dual-write patterns)",
+      "type": "factual",
+      "strength": "moderate",
+      "targetElement": "grounds",
+      "targetId": "g4",
+      "response": {
+        "strategy": "concede",
+        "content": "This objection is partially correct, and qualifier q2 reflects it. The claim is that flags should be standard practice for new releases, not that flags are the only tool. Database migrations and protocol changes require complementary patterns (expand-contract, dual-write, API versioning). Feature flags remain the right tool for the vast majority of application-layer feature work, which constitutes most engineering output.",
+        "effectiveness": 0.78
+      }
+    },
+    {
+      "id": "r3",
+      "objection": "Feature flag infrastructure adds operational overhead and cost: teams must pay for SaaS platforms or maintain an in-house system, adding maintenance burden to already stretched engineering teams",
+      "type": "practical",
+      "strength": "moderate",
+      "targetElement": "warrant",
+      "targetId": "w1",
+      "response": {
+        "strategy": "outweigh",
+        "content": "The cost of one P0 production incident \u2014 in engineering-hours, SLA penalties, customer trust, and on-call fatigue \u2014 typically exceeds the annual cost of flag infrastructure by an order of magnitude. Open-source options (Unleash, Flagsmith, Flipt) reduce the cost floor significantly. The ROI calculus heavily favors adoption even for small teams. DORA data confirms elite organizations spend more on tooling and less on firefighting.",
+        "effectiveness": 0.86
+      }
+    },
+    {
+      "id": "r4",
+      "objection": "Feature flags create a false sense of safety: teams may under-test behind the flag, relying on runtime toggling as a substitute for proper QA, leading to worse overall quality",
+      "type": "logical",
+      "strength": "moderate",
+      "targetElement": "warrant",
+      "targetId": "w3",
+      "response": {
+        "strategy": "reframe",
+        "content": "Flags are a deployment safety net, not a testing substitute \u2014 the two are orthogonal. A mature flag practice pairs flags with pre-production test environments where the flag is enabled by default, ensuring full test coverage. The risk of complacency is a cultural and process risk, not inherent to the tool. Framing flags correctly in team norms ('flags protect production; tests protect correctness') resolves the confusion.",
+        "effectiveness": 0.8
+      }
+    },
+    {
+      "id": "r5",
+      "objection": "Requiring flags for ALL releases is too prescriptive; trivial bug fixes, documentation updates, and minor refactors shouldn't require flag overhead",
+      "type": "logical",
+      "strength": "moderate",
+      "targetElement": "claim",
+      "targetId": "c1",
+      "response": {
+        "strategy": "qualify",
+        "content": "The claim targets 'new production features,' not every commit. The policy should be: any change that introduces or modifies user-visible behavior, or that touches a hot path, requires a flag. Bug fixes that restore prior behavior and internal refactors with no external surface change are reasonable carve-outs. A lightweight decision rubric (e.g., 'does this change affect what users see or do?') keeps the overhead proportional.",
+        "effectiveness": 0.84
+      }
+    }
+  ],
+  "argumentStrength": 0.82,
+  "keyInsight": "The deepest value of feature flags is not risk reduction per se \u2014 it is the behavioral change they induce: when teams know they can turn off a feature in milliseconds, they stop treating 'deploy' as a high-stakes ceremony and start shipping smaller changes more frequently, which is itself the primary driver of both quality and velocity. Flags don't just make releases safer; they make the fear of releasing disappear."
+}

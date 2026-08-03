@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "FiveW1HThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "who",
+    "what",
+    "when",
+    "where",
+    "why",
+    "how"
+  ],
+  "properties": {
+    "mode": {
+      "const": "5w1h"
+    },
+    "who": {
+      "type": ["string", "array"],
+      "items": {
+        "type": "string"
+      }
+    },
+    "what": {
+      "type": ["string", "array"],
+      "items": {
+        "type": "string"
+      }
+    },
+    "when": {
+      "type": ["string", "array"],
+      "items": {
+        "type": "string"
+      }
+    },
+    "where": {
+      "type": ["string", "array"],
+      "items": {
+        "type": "string"
+      }
+    },
+    "why": {
+      "type": ["string", "array"],
+      "items": {
+        "type": "string"
+      }
+    },
+    "how": {
+      "type": ["string", "array"],
+      "items": {
+        "type": "string"
+      }
+    },
+    "summary": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

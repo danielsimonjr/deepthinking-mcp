@@ -1,0 +1,99 @@
+{
+  "mode": "firstprinciples",
+  "question": "From first principles, what does 'authentication' actually require?",
+  "principles": [
+    {
+      "id": "p1",
+      "type": "definition",
+      "statement": "Authentication is the process of verifying that an entity is who or what it claims to be",
+      "justification": "Standard definitional baseline — not a technical assumption"
+    },
+    {
+      "id": "p2",
+      "type": "axiom",
+      "statement": "A verifier can only distinguish identities it has prior knowledge of",
+      "justification": "If the verifier has no prior record of an identity, it cannot confirm it — logically unavoidable"
+    },
+    {
+      "id": "p3",
+      "type": "axiom",
+      "statement": "Proof of identity requires presenting something the verifier can check against stored knowledge",
+      "justification": "Without a checkable artifact, the claim is unfalsifiable and therefore unverifiable"
+    },
+    {
+      "id": "p4",
+      "type": "observation",
+      "statement": "The verifiable artifact falls into three categories: something you know (secret), something you have (token), something you are (biometric)",
+      "justification": "Exhaustive classification validated across decades of identity literature",
+      "confidence": 0.95
+    },
+    {
+      "id": "p5",
+      "type": "assumption",
+      "statement": "The channel between prover and verifier may be adversarial (intercepted or replayed)",
+      "justification": "Network threat model; not guaranteed but must be handled in production systems",
+      "confidence": 0.90
+    },
+    {
+      "id": "p6",
+      "type": "axiom",
+      "statement": "A secret shared with a third party is no longer fully secret",
+      "justification": "Information-theoretic: the more parties hold a secret, the higher the probability of leakage"
+    }
+  ],
+  "derivationSteps": [
+    {
+      "stepNumber": 1,
+      "principle": "p1",
+      "inference": "Authentication is fundamentally a binary decision: the claimed identity either matches reality or it does not",
+      "logicalForm": "auth(entity, claim) → {match, no-match}",
+      "confidence": 1.0
+    },
+    {
+      "stepNumber": 2,
+      "principle": "p2",
+      "inference": "Authentication requires prior enrollment — the verifier must have stored a reference for the claimed identity before the authentication attempt",
+      "logicalForm": "verify(claim) requires stored(reference) — enrollment is not optional",
+      "confidence": 1.0
+    },
+    {
+      "stepNumber": 3,
+      "principle": "p3",
+      "inference": "The prover must present a checkable artifact; claims without artifacts cannot be verified",
+      "logicalForm": "verify(claim) requires present(artifact) ∧ check(artifact, stored_reference)",
+      "confidence": 1.0
+    },
+    {
+      "stepNumber": 4,
+      "principle": "p4",
+      "inference": "The artifact must fall into at least one of three categories: knowledge, possession, or inherent trait; any authentication scheme is a combination of these",
+      "confidence": 0.95
+    },
+    {
+      "stepNumber": 5,
+      "principle": "p5",
+      "inference": "The artifact must be presented in a form that cannot be replayed or intercepted and reused without detection",
+      "logicalForm": "secure_auth requires artifact ∧ freshness_proof (e.g., nonce, timestamp, challenge-response)",
+      "confidence": 0.90
+    },
+    {
+      "stepNumber": 6,
+      "principle": "p6",
+      "inference": "Schemes relying on shared secrets (passwords) have inherent leakage risk; asymmetric schemes where the verifier holds only a public key reduce this risk",
+      "confidence": 0.88
+    }
+  ],
+  "conclusion": {
+    "statement": "At minimum, authentication requires: (1) prior enrollment of a reference, (2) presentation of a checkable artifact in one of the three canonical categories, (3) a freshness mechanism to prevent replay attacks, and (4) preferably an asymmetric design so the verifier never holds the full secret. Anything labeled 'authentication' that omits any of these four is not actually verifying identity — it is accepting a claim on trust.",
+    "derivationChain": [1, 2, 3, 4, 5, 6],
+    "certainty": 0.88,
+    "limitations": [
+      "Physical presence proofs (e.g., face-to-face verification) bypass the replay concern but are out of scope for network protocols",
+      "Anonymous credentials (zero-knowledge proofs of attribute possession) satisfy these requirements without revealing identity — the framework holds but the implementation differs"
+    ]
+  },
+  "alternativeInterpretations": [
+    "Authorization is often conflated with authentication; this derivation deliberately excludes 'what are you allowed to do' — that is a separate problem",
+    "Continuous authentication (re-verifying throughout a session) extends step 5 but does not change the fundamental requirements"
+  ]
+}

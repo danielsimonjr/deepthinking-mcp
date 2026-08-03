@@ -1,0 +1,46 @@
+{
+  "mode": "inductive",
+  "observations": [
+    "Week 1 A/B test: variant A +3.2% conversion vs control, n=1000 per arm",
+    "Week 2 A/B test: variant A +4.8% conversion vs control, n=1500 per arm",
+    "Week 3 A/B test: variant A +0.4% conversion vs control, n=2000 per arm",
+    "Week 4 A/B test: variant A -1.7% conversion vs control, n=2500 per arm"
+  ],
+  "pattern": "Early positive signal in weeks 1-2 decayed to zero by week 3 and reversed by week 4, with each week's sample larger than the last",
+  "generalization": "Variant A showed no sustained improvement over control; the early positive signal in weeks 1-2 was a novelty effect that decayed as user adaptation set in over weeks 3-4",
+  "confidence": 0.82,
+  "sampleSize": 7000,
+  "counterexamples": [
+    "A strictly weeks-1-2 analysis would still support the original positive conclusion — the reversal is visible only when the full 4-week window is considered"
+  ],
+  "inductionSteps": [
+    {
+      "stepNumber": 1,
+      "observationsUsed": [0],
+      "stepsUsed": [],
+      "intermediateGeneralization": "Variant A appears to improve conversion by roughly 3% relative to control, based on one week of data",
+      "inductionMethod": "bayesianUpdate (weak prior)"
+    },
+    {
+      "stepNumber": 2,
+      "observationsUsed": [1],
+      "stepsUsed": [1],
+      "intermediateGeneralization": "Variant A's advantage is reinforced by week 2 and is now around 4-5% relative to control; the signal is strengthening with a larger sample",
+      "inductionMethod": "bayesianUpdate (reinforced)"
+    },
+    {
+      "stepNumber": 3,
+      "observationsUsed": [2],
+      "stepsUsed": [1, 2],
+      "intermediateGeneralization": "Variant A's advantage is weakening — week 3 shows effectively no difference at the largest sample size so far; either the effect is noisy or it is beginning to reverse",
+      "inductionMethod": "bayesianUpdate (revising)"
+    },
+    {
+      "stepNumber": 4,
+      "observationsUsed": [3],
+      "stepsUsed": [1, 2, 3],
+      "intermediateGeneralization": "Variant A showed no sustained improvement over control; the early positive signal in weeks 1-2 was a novelty effect that decayed as user adaptation set in over weeks 3-4",
+      "inductionMethod": "bayesianUpdate (reversal)"
+    }
+  ]
+}

@@ -1,0 +1,279 @@
+Using **analogical** reasoning as explicitly invoked, extending the standard single-source schema to a dual-source comparison since the question explicitly asks to evaluate and contrast two candidate analogies for the same target domain.
+
+```json
+{
+  "mode": "analogical",
+  "note": "Dual-source extension: two candidate source domains are mapped and compared against a single target domain.",
+
+  "sourceDomains": [
+    {
+      "id": "cpu-cache",
+      "name": "CPU Cache (L1/L2/L3 Hardware)",
+      "description": "Hardware cache hierarchy sitting between CPU registers and main memory, managed automatically by the processor using LRU-family eviction and spatial-locality prefetching.",
+      "entities": [
+        { "id": "c1", "name": "Cache Line", "type": "unit", "description": "Fixed-size block (typically 64 bytes) fetched atomically; spatial locality determines efficiency" },
+        { "id": "c2", "name": "LRU / pseudo-LRU Eviction", "type": "policy", "description": "Least-recently-used entry is discarded when the cache is full; implemented deterministically in hardware" },
+        { "id": "c3", "name": "Cache Miss", "type": "event", "description": "Requested data absent; processor fetches from the next slower tier (L2 → L3 → RAM)" },
+        { "id": "c4", "name": "Hit Rate", "type": "metric", "description": "Fraction of accesses served from cache; high hit rate = low effective latency" },
+        { "id": "c5", "name": "Write-back / Write-through", "type": "policy", "description": "Governs whether writes flush immediately to memory (write-through, always consistent) or are deferred (write-back, fast but risks stale reads on crash)" },
+        { "id": "c6", "name": "CLFLUSH / Cache Invalidation", "type": "operation", "description": "Explicit instruction that evicts a specific cache line, forcing the next access to reload from memory" },
+        { "id": "c7", "name": "Hardware Prefetcher", "type": "mechanism", "description": "Speculatively loads cache lines before they are requested, based on detected sequential or strided access patterns" },
+        { "id": "c8", "name": "Cold Start (Post Power-On)", "type": "state", "description": "Immediately after boot, the cache is fully empty; every access is a miss until the working set is loaded" }
+      ],
+      "relations": [
+        { "id": "rc1", "type": "triggers", "from": "c3", "to": "c2", "description": "A miss under full capacity triggers eviction of the LRU line before loading the new one" },
+        { "id": "rc2", "type": "mitigates", "from": "c7", "to": "c3", "description": "Prefetcher reduces miss rate for predictable sequential access patterns" }
+      ],
+      "properties": [
+        "Hardware-managed — no application code participates",
+        "Deterministic eviction (not approximate or sampled)",
+        "Fixed total capacity at chip design time",
+        "Nanosecond access latency (L1 ~1ns, L2 ~5ns, L3 ~40ns)",
+        "Co-located with computation — no network hop"
+      ]
+    },
+    {
+      "id": "cdn",
+      "name": "CDN (Content Delivery Network)",
+      "description": "Globally distributed network of edge servers that cache content geographically close to end users, reducing origin load and cross-region latency.",
+      "entities": [
+        { "id": "d1", "name": "Edge Node / PoP", "type": "infrastructure", "description": "Regional cache server close to the user; serves cached content without reaching the origin" },
+        { "id": "d2", "name": "Origin Server", "type": "authoritative-store", "description": "Canonical source of truth; consulted only on cache miss or TTL expiry" },
+        { "id": "d3", "name": "TTL / Cache-Control (max-age)", "type": "policy", "description": "Time-based expiry: content is considered fresh until TTL elapses, then re-validated or re-fetched from origin" },
+        { "id": "d4", "name": "Cache Hit / Miss", "type": "event", "description": "Hit: served from edge without touching origin. Miss: edge fetches from origin (or shield tier)" },
+        { "id": "d5", "name": "Cache Purge API", "type": "operation", "description": "Active invalidation call that removes or refreshes content at edge nodes; propagation is asynchronous" },
+        { "id": "d6", "name": "Eventual Consistency / Propagation Lag", "type": "consistency-model", "description": "After a purge or update, edge PoPs may serve stale content for seconds-to-minutes while propagation completes" },
+        { "id": "d7", "name": "stale-while-revalidate", "type": "policy", "description": "Serve stale content immediately while asynchronously refreshing from origin — keeps p99 latency flat during revalidation" },
+        { "id": "d8", "name": "Geographic Routing (Anycast / DNS)", "type": "mechanism", "description": "Users are automatically routed to their nearest PoP via Anycast or DNS-based geolocation" }
+      ],
+      "relations": [
+        { "id": "rd1", "type": "falls-through", "from": "d4", "to": "d2", "description": "On miss, edge fetches from origin and caches the response" },
+        { "id": "rd2", "type": "propagates-to", "from": "d5", "to": "d6", "description": "Purge events propagate asynchronously across PoPs, inducing a transient inconsistency window" }
+      ],
+      "properties": [
+        "Software-managed via HTTP headers and API",
+        "TTL-driven (time-based) expiration as the primary eviction mechanism",
+        "Horizontally scalable by adding PoPs",
+        "Geographically distributed across network hops",
+        "Eventual consistency is a first-class design property, not a failure mode"
+      ]
+    }
+  ],
+
+  "targetDomain": {
+    "id": "app-cache",
+    "name": "Application Caching Layer (Redis / Memcached)",
+    "description": "In-memory key-value store between application servers and the primary database; absorbs read traffic, reduces DB load, and lowers response latency. May run as a single node or a distributed cluster/replica set.",
+    "entities": [
+      { "id": "t0", "name": "Primary Database", "type": "authoritative-store", "description": "Canonical source of truth; consulted on cache miss or after TTL expiry" },
+      { "id": "t1", "name": "Cache Entry (key-value pair)", "type": "unit", "description": "Atomic unit of cached data; variable size, application-defined key, optional TTL" },
+      { "id": "t2", "name": "TTL / EXPIRE", "type": "policy", "description": "Time-based expiry: key is deleted when TTL elapses; next read is a miss" },
+      { "id": "t3", "name": "LRU / allkeys-lru Eviction", "type": "policy", "description": "Least-recently-used key is evicted under memory pressure; Redis uses approximate (sampled) LRU, not exact" },
+      { "id": "t4", "name": "Cache Miss Fallthrough", "type": "event", "description": "Key absent from cache → application queries the database and optionally repopulates (cache-aside pattern)" },
+      { "id": "t5", "name": "Hit Rate", "type": "metric", "description": "Percentage of reads served from cache without a DB query; primary performance KPI" },
+      { "id": "t6", "name": "Explicit Invalidation (DEL / UNLINK)", "type": "operation", "description": "Application actively removes or overwrites a key when underlying data changes" },
+      { "id": "t7", "name": "Cache Warming / Preloading", "type": "mechanism", "description": "Proactively populating the cache before live traffic to avoid a cold-start miss storm" },
+      { "id": "t8", "name": "Replication / Cluster Sharding", "type": "architecture", "description": "Redis replicas or cluster shards distribute data; introduces propagation lag between primary and replicas" }
+    ],
+    "relations": [
+      { "id": "tr1", "type": "triggers", "from": "t4", "to": "t3", "description": "Under memory pressure, loading a new key on miss may trigger eviction of the LRU key" },
+      { "id": "tr2", "type": "expires-into", "from": "t2", "to": "t4", "description": "TTL expiry converts a previously cached key into a miss on the next access" }
+    ],
+    "properties": [
+      "Software-managed — application code owns key lifecycle",
+      "Both TTL expiry and LRU eviction configurable simultaneously",
+      "Variable entry size (bytes to megabytes)",
+      "Microsecond to low-millisecond access latency (TCP round-trip)",
+      "Single-node or distributed cluster — topology varies by deployment",
+      "No automatic coherence — application must manage consistency explicitly"
+    ]
+  },
+
+  "mappings": [
+    {
+      "sourceId": "cpu-cache",
+      "sourceEntityId": "c3",
+      "targetEntityId": "t4",
+      "justification": "Structurally identical event: the fast tier fails to satisfy a request, requiring fallback to the slower authoritative store. Miss semantics, miss rate, and miss cost all transfer directly.",
+      "confidence": 0.97
+    },
+    {
+      "sourceId": "cpu-cache",
+      "sourceEntityId": "c2",
+      "targetEntityId": "t3",
+      "justification": "Both use LRU to decide which entry to discard under capacity pressure. The policy intent is identical; Redis approximates it via sampled LRU rather than exact tracking.",
+      "confidence": 0.89
+    },
+    {
+      "sourceId": "cpu-cache",
+      "sourceEntityId": "c4",
+      "targetEntityId": "t5",
+      "justification": "Hit rate is the primary performance indicator in both systems; the formula, interpretation, and optimization goal are identical.",
+      "confidence": 0.96
+    },
+    {
+      "sourceId": "cpu-cache",
+      "sourceEntityId": "c1",
+      "targetEntityId": "t1",
+      "justification": "Both are atomic units of stored data. Locality benefits transfer (related keys co-loaded = cache efficiency). However, cache lines are fixed-size (64 bytes); cache entries are variable (bytes to MB) — a meaningful asymmetry.",
+      "confidence": 0.65
+    },
+    {
+      "sourceId": "cpu-cache",
+      "sourceEntityId": "c5",
+      "targetEntityId": "t6",
+      "justification": "Write-back maps to deferred/async invalidation; write-through maps to synchronous cache update on every write. The logical tradeoff (consistency vs. write performance) is the same.",
+      "confidence": 0.74
+    },
+    {
+      "sourceId": "cpu-cache",
+      "sourceEntityId": "c6",
+      "targetEntityId": "t6",
+      "justification": "CLFLUSH (hardware cache line eviction) maps directly to DEL/UNLINK — both are active invalidation operations that force a reload on the next access.",
+      "confidence": 0.85
+    },
+    {
+      "sourceId": "cpu-cache",
+      "sourceEntityId": "c7",
+      "targetEntityId": "t7",
+      "justification": "Hardware prefetching (speculative loading based on access patterns) maps to cache warming (proactive population before live traffic). Both are strategies to avoid cold-start latency.",
+      "confidence": 0.72
+    },
+    {
+      "sourceId": "cpu-cache",
+      "sourceEntityId": "c8",
+      "targetEntityId": "t7",
+      "justification": "CPU cold start (all-empty cache post power-on) maps directly to Redis cold start after a restart or failover — the warm-up problem is structurally identical.",
+      "confidence": 0.91
+    },
+    {
+      "sourceId": "cdn",
+      "sourceEntityId": "d2",
+      "targetEntityId": "t0",
+      "justification": "Origin server is the authoritative source of truth fronted by the CDN, exactly as the primary database is the authoritative source fronted by the app cache.",
+      "confidence": 0.94
+    },
+    {
+      "sourceId": "cdn",
+      "sourceEntityId": "d3",
+      "targetEntityId": "t2",
+      "justification": "TTL-based expiry is structurally identical in both systems. CDN uses Cache-Control: max-age; Redis uses EXPIRE/TTL commands. The semantic model of 'freshness window' transfers completely.",
+      "confidence": 0.95
+    },
+    {
+      "sourceId": "cdn",
+      "sourceEntityId": "d4",
+      "targetEntityId": "t4",
+      "justification": "Hit/miss dynamics are the same: miss → fetch from next tier → cache the response. The flow structure is isomorphic.",
+      "confidence": 0.93
+    },
+    {
+      "sourceId": "cdn",
+      "sourceEntityId": "d5",
+      "targetEntityId": "t6",
+      "justification": "CDN cache purge API maps directly to Redis DEL/UNLINK — both are explicit, active invalidation operations initiated by the application when data changes.",
+      "confidence": 0.87
+    },
+    {
+      "sourceId": "cdn",
+      "sourceEntityId": "d6",
+      "targetEntityId": "t8",
+      "justification": "CDN eventual consistency (propagation lag across PoPs after a purge) maps to Redis replication lag between primary and replicas after a write. Same failure mode, different scale.",
+      "confidence": 0.74
+    },
+    {
+      "sourceId": "cdn",
+      "sourceEntityId": "d7",
+      "targetEntityId": "t4",
+      "justification": "stale-while-revalidate (serve stale + async refresh) maps weakly to a 'soft TTL' or 'background refresh' pattern in Redis — not native but implementable in application code.",
+      "confidence": 0.58
+    },
+    {
+      "sourceId": "cdn",
+      "sourceEntityId": "d8",
+      "targetEntityId": "t8",
+      "justification": "Geographic routing (users auto-directed to nearest PoP) maps very weakly — only applies if the app cache is deployed multi-region. Single-region Redis has no routing concept.",
+      "confidence": 0.31
+    }
+  ],
+
+  "analogyComparison": {
+    "cpuCacheStrength": 0.84,
+    "cdnStrength": 0.67,
+    "verdict": "The CPU cache is the stronger primary analogy for eviction policy, hit-rate tuning, object granularity, and warm-up planning. The CDN is the stronger analogy for TTL freshness modeling, invalidation semantics, and multi-region consistency design. Neither alone is complete — use CPU cache as the default mental model and CDN when reasoning about time-based freshness or distributed propagation."
+  },
+
+  "insights": [
+    {
+      "description": "Plan a mandatory warm-up period after every Redis restart — this is the application-layer equivalent of CPU cold-start after power-on.",
+      "sourceEvidence": "A CPU cache starts fully empty after boot; every access pays the full RAM latency penalty until the working set is loaded. Cache performance is noticeably degraded for a measurable warm-up period.",
+      "targetApplication": "Run a pre-heat script (replay a hot-key log or synthetic read workload) before routing live traffic to any restarted or newly added Redis node. Track hit rate during warm-up and gate traffic promotion on a hit-rate threshold.",
+      "novelty": 0.72,
+      "sourceId": "cpu-cache"
+    },
+    {
+      "description": "Object granularity matters as much as eviction policy: caching oversized blobs is the app-cache equivalent of cache-line false sharing.",
+      "sourceEvidence": "In CPU caches, false sharing occurs when unrelated data co-locates on the same 64-byte line — writes to one word invalidate the entire line for other CPUs, causing hidden coherence overhead.",
+      "targetApplication": "Cache data at the appropriate granularity. A 2 MB JSON blob evicted by LRU under memory pressure takes many smaller hot keys with it. Prefer caching individual objects over aggregate payloads; use separate keys for independent data.",
+      "novelty": 0.78,
+      "sourceId": "cpu-cache"
+    },
+    {
+      "description": "Model TTLs as freshness windows, not just expiry timers — the CDN Cache-Control mental model is more precise than a bare countdown.",
+      "sourceEvidence": "CDNs express freshness via max-age (time content is unconditionally fresh), stale-while-revalidate (serve stale; refresh async), and stale-if-error (serve stale if origin is down). Each directive answers a different operational question.",
+      "targetApplication": "Design Redis TTLs with three explicit questions: (1) When is data guaranteed fresh? (2) Is serving slightly stale data acceptable while refreshing? (3) What should happen if the DB is unavailable? Implement stale-while-revalidate as a 'soft TTL' background refresh pattern in your application layer.",
+      "novelty": 0.80,
+      "sourceId": "cdn"
+    },
+    {
+      "description": "Treat cache invalidation across a Redis cluster as an asynchronous broadcast with a propagation window, not a synchronous guarantee.",
+      "sourceEvidence": "CDN purge propagation across global PoPs takes seconds to minutes by design. CDN operators accept and explicitly design for this window — they use version stamps, surrogate keys, and stale-read tolerances.",
+      "targetApplication": "In Redis Cluster or replica setups, write paths that DEL a key on the primary may not be visible to replica reads for up to hundreds of milliseconds. Design read paths to tolerate this window: use version stamps in cached values, or read-from-primary for consistency-critical paths.",
+      "novelty": 0.82,
+      "sourceId": "cdn"
+    }
+  ],
+
+  "inferences": [
+    {
+      "sourcePattern": "CPU caches with a working set near 100% of cache capacity experience severe thrashing — competing data continuously evicts each other, causing hit rate collapse.",
+      "targetPrediction": "Redis maxmemory utilization above ~80% will show sharply elevated eviction rates and hit-rate degradation. Monitor evicted_keys/s as an early warning signal — do not wait for hit_rate to drop before scaling.",
+      "confidence": 0.90,
+      "needsVerification": false,
+      "sourceId": "cpu-cache"
+    },
+    {
+      "sourcePattern": "Hardware prefetching is most effective for sequential, predictable access patterns. Random-access workloads defeat the prefetcher entirely.",
+      "targetPrediction": "Cache warming will yield the highest ROI for predictable, repeating access patterns (e.g., daily top-N products, user dashboards). Warm-up is largely wasted effort for uniform-random or highly personalized access distributions.",
+      "confidence": 0.76,
+      "needsVerification": true,
+      "sourceId": "cpu-cache"
+    },
+    {
+      "sourcePattern": "CDN stale-while-revalidate keeps p99 latency flat during cache revalidation storms by decoupling the response path from the refresh path.",
+      "targetPrediction": "Implementing a soft-TTL pattern in Redis (return cached value + trigger async background refresh when TTL falls below a threshold) should reduce p99 latency spikes during coordinated expiry events (cache stampede). The improvement will be most pronounced when many keys share the same TTL.",
+      "confidence": 0.80,
+      "needsVerification": true,
+      "sourceId": "cdn"
+    }
+  ],
+
+  "limitations": [
+    "CPU Cache — Fixed capacity: CPU cache size is fixed at chip design time. Redis can scale horizontally by adding nodes. Capacity planning based on the CPU cache mental model will cause you to under-estimate your scaling options and may bias you toward over-provisioning a single node.",
+    "CPU Cache — Deterministic vs. approximate eviction: CPU cache eviction is hardware-enforced and exact. Redis allkeys-lru uses sampled LRU (5 random keys, evict the worst). Do not assume precision guarantees — hot keys can and will be evicted if they're unlucky in the sample. Tune maxmemory-samples if this matters.",
+    "CPU Cache — No network hop: CPU caches are co-located with the CPU at nanosecond latency. Redis access involves a TCP round-trip (μs to low ms). The analogy breaks for latency modeling — app-cache latency is three to four orders of magnitude higher than L1 cache latency.",
+    "CPU Cache — No automatic coherence protocol: Multi-core CPUs have hardware cache coherence (MESI/MOESI). Distributed Redis instances have no automatic coherence — explicit application-level invalidation is required. Assuming 'the cache stays consistent' because the CPU cache does is a critical category error.",
+    "CPU Cache — Object size heterogeneity: Cache lines are fixed at 64 bytes; Redis values range from bytes to 512 MB. The 'unit of storage' model does not transfer for memory planning or eviction impact analysis.",
+    "CDN — Geographic distribution precondition: CDN's defining purpose is reducing cross-region latency. A single-region Redis deployment has no geographic distribution. Most of the CDN analogy's unique value (PoPs, Anycast routing, multi-region consistency) evaporates for single-region or local deployments.",
+    "CDN — Protocol mismatch: CDNs operate on HTTP with declarative Cache-Control headers; Redis is imperative — application code constructs and manages every key. The CDN mental model of 'the server declares freshness rules' does not transfer without deliberate re-implementation in application logic.",
+    "CDN — Content type assumptions: CDNs are optimized for static or semi-static, user-agnostic content (HTML, images, JS bundles). App caches frequently serve highly dynamic, user-specific data (session state, personalized feeds). The CDN staleness-tolerance assumptions do not carry over for user-specific data.",
+    "CDN — Propagation time scale: CDN purge propagation is designed to take seconds to minutes; Redis replication lag is typically sub-millisecond on healthy networks. The CDN mental model may cause you to over-engineer for propagation windows that are effectively instantaneous in your Redis topology."
+  ],
+
+  "analogyStrength": 0.78
+}
+```
+
+**Both analogies are genuinely useful, but for different design decisions.** The **CPU cache analogy is stronger overall (0.84)** — it maps cleanly to eviction policy (LRU is LRU), hit-rate optimization, object granularity, and warm-up planning after restarts; treat your Redis cold-start exactly as you'd treat a CPU boot: route pre-heat traffic before opening the gates. The **CDN analogy is more useful for freshness design (0.67)** — think in terms of `max-age`, `stale-while-revalidate`, and asynchronous invalidation propagation windows when setting TTLs and designing write-path consistency.
+
+**The biggest breakdown points**: the CPU cache analogy fails you the moment you think about distributed topology (Redis can scale out; L2 caches cannot) or assume automatic coherence (Redis has none). The CDN analogy fails you if your deployment is single-region (its core value proposition simply doesn't exist) or if you're designing for user-specific data (CDN assumes user-agnostic content). The most dangerous transfer error: assuming Redis invalidation is synchronous across replicas because CPU CLFLUSH is synchronous — it is not.

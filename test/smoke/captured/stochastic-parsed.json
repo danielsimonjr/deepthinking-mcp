@@ -1,0 +1,185 @@
+{
+  "mode": "stochastic",
+  "processType": "queueing",
+  "stepCount": 0,
+  "states": [
+    {
+      "id": "n0",
+      "name": "Empty System (n=0)",
+      "description": "No tickets in system; server idle. Stationary weight \u03c0\u2080 = 1\u2212\u03c1 = 1/6 \u2248 16.67% of the time.",
+      "isAbsorbing": false,
+      "isTransient": false
+    },
+    {
+      "id": "n1",
+      "name": "1 Ticket in System (n=1)",
+      "description": "One ticket in service, queue empty. \u03c0\u2081 = (1\u2212\u03c1)\u03c1 = 5/36 \u2248 13.89%.",
+      "isAbsorbing": false,
+      "isTransient": false
+    },
+    {
+      "id": "n2",
+      "name": "2 Tickets in System (n=2)",
+      "description": "One in service, one waiting. \u03c0\u2082 = (1\u2212\u03c1)\u03c1\u00b2 = 25/216 \u2248 11.57%.",
+      "isAbsorbing": false,
+      "isTransient": false
+    },
+    {
+      "id": "n3p",
+      "name": "3+ Tickets in System (n\u22653)",
+      "description": "Queue growing: one in service, two or more waiting. Lumped absorbing state: \u03c0_{3+} = \u03c1\u00b3 = 125/216 \u2248 57.87%. High \u03c1 means the queue spends the majority of time here.",
+      "isAbsorbing": false,
+      "isTransient": false
+    }
+  ],
+  "transitions": [
+    {
+      "from": "n0",
+      "to": "n0",
+      "probability": 0.5455
+    },
+    {
+      "from": "n0",
+      "to": "n1",
+      "probability": 0.4545
+    },
+    {
+      "from": "n1",
+      "to": "n0",
+      "probability": 0.5455
+    },
+    {
+      "from": "n1",
+      "to": "n2",
+      "probability": 0.4545
+    },
+    {
+      "from": "n2",
+      "to": "n1",
+      "probability": 0.5455
+    },
+    {
+      "from": "n2",
+      "to": "n3p",
+      "probability": 0.4545
+    },
+    {
+      "from": "n3p",
+      "to": "n2",
+      "probability": 0.0909
+    },
+    {
+      "from": "n3p",
+      "to": "n3p",
+      "probability": 0.9091
+    }
+  ],
+  "markovChain": {
+    "id": "mm1_tickets_lambda10_mu12",
+    "states": [
+      "n0",
+      "n1",
+      "n2",
+      "n3p"
+    ],
+    "transitionMatrix": [
+      [
+        0.5455,
+        0.4545,
+        0.0,
+        0.0
+      ],
+      [
+        0.5455,
+        0.0,
+        0.4545,
+        0.0
+      ],
+      [
+        0.0,
+        0.5455,
+        0.0,
+        0.4545
+      ],
+      [
+        0.0,
+        0.0,
+        0.0909,
+        0.9091
+      ]
+    ],
+    "initialDistribution": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "stationaryDistribution": [
+      0.1667,
+      0.1389,
+      0.1157,
+      0.5787
+    ],
+    "isIrreducible": true,
+    "isAperiodic": true,
+    "isErgodic": true
+  },
+  "randomVariables": [
+    {
+      "id": "rv_interarrival",
+      "name": "Inter-arrival time A \u2014 Poisson process, \u03bb=10/hr",
+      "distribution": "Exponential",
+      "parameters": {
+        "rate": 10,
+        "unit": "per_hr"
+      },
+      "mean": 0.1,
+      "variance": 0.01
+    },
+    {
+      "id": "rv_service",
+      "name": "Service time S per ticket \u2014 \u03bc=12/hr (\u22485 min/ticket)",
+      "distribution": "Exponential",
+      "parameters": {
+        "rate": 12,
+        "unit": "per_hr"
+      },
+      "mean": 0.0833,
+      "variance": 0.00694
+    },
+    {
+      "id": "rv_sojourn",
+      "name": "Sojourn time W \u2014 total time in system (wait + service). W ~ Exp(\u03bc\u2212\u03bb). E[W] = 1/(\u03bc\u2212\u03bb) = 0.5 hr = 30 min. P(W>t) = e^{\u22122t}. P90 \u2248 69 min, P95 \u2248 90 min.",
+      "distribution": "Exponential",
+      "parameters": {
+        "rate": 2,
+        "formula": "\u03bc \u2212 \u03bb = 12 \u2212 10 = 2/hr"
+      },
+      "mean": 0.5,
+      "variance": 0.25
+    },
+    {
+      "id": "rv_wait",
+      "name": "Queue wait time Wq \u2014 time before service begins. Mixed distribution: P(Wq=0) = 1\u2212\u03c1 = 1/6 \u2248 16.7% (no wait); P(Wq>t) = \u03c1\u00b7e^{\u2212(\u03bc\u2212\u03bb)t} for t>0. E[Wq] = \u03c1/(\u03bc\u2212\u03bb) = 5/12 hr \u2248 25 min.",
+      "distribution": "Exponential",
+      "parameters": {
+        "rate": 2,
+        "mass_at_zero": 0.1667,
+        "note": "Wq is zero with prob 1\u2212\u03c1; Exp(2) conditional on Wq>0"
+      },
+      "mean": 0.4167,
+      "variance": 0.2431
+    },
+    {
+      "id": "rv_system_length",
+      "name": "System length L \u2014 total tickets in system. P(L=n) = (1\u2212\u03c1)\u03c1\u207f. E[L] = \u03c1/(1\u2212\u03c1) = 5 tickets. E[Lq] = \u03c1\u00b2/(1\u2212\u03c1) = 25/6 \u2248 4.17 tickets waiting.",
+      "distribution": "Geometric",
+      "parameters": {
+        "success_prob": 0.1667,
+        "note": "Number of failures before first success (0-indexed); p = 1\u2212\u03c1 = 1/6"
+      },
+      "mean": 5.0,
+      "variance": 30.0
+    }
+  ]
+}

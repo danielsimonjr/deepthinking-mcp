@@ -1,0 +1,190 @@
+Using **computability** mode with **diagonalization** method — this is Turing's original 1936 self-referential argument proving HALT_TM is undecidable.
+
+```json
+{
+  "mode": "computability",
+  "thoughtType": "diagonalization",
+  "currentProblem": {
+    "id": "HALT_TM",
+    "name": "The Halting Problem",
+    "description": "Given encoding ⟨M, w⟩ of a Turing machine M and string w, determine whether M halts on input w.",
+    "inputFormat": "⟨M, w⟩ — finite encoding of TM M paired with input string w ∈ Σ*",
+    "question": "Does M halt on input w?",
+    "yesInstances": [
+      "⟨M_accept_ε, ε⟩ — machine that immediately accepts halts on empty input",
+      "⟨M_identity, 0110⟩ — machine that copies its input and halts"
+    ],
+    "noInstances": [
+      "⟨M_loop_forever, ε⟩ — machine that moves right indefinitely never halts",
+      "⟨M_loop_on_0, 0⟩ — machine that loops whenever it reads a 0"
+    ],
+    "decidabilityStatus": "semi_decidable",
+    "complexityClass": null,
+    "reducesTo": [],
+    "reducesFrom": ["ATM"]
+  },
+  "currentMachine": {
+    "id": "D",
+    "name": "Diagonalizer — the self-refuting machine",
+    "description": "Constructed to derive a contradiction from the assumption that a halting decider H exists. On input ⟨M⟩ (any TM encoding), D constructs the pair ⟨M, ⟨M⟩⟩ and invokes the assumed decider H on it. D then does the OPPOSITE of what H predicts: if H says M halts on ⟨M⟩, D loops forever; if H says M loops on ⟨M⟩, D halts and accepts. This inversion is the diagonal move.",
+    "states": [
+      "q_start",
+      "q_construct_pair",
+      "q_invoke_H",
+      "q_H_said_halts_so_loop",
+      "q_accept"
+    ],
+    "inputAlphabet": ["TM encoding symbols over {0,1}"],
+    "tapeAlphabet": ["TM encoding symbols over {0,1}", "⊔ (blank)"],
+    "blankSymbol": "⊔",
+    "transitions": [
+      {
+        "fromState": "q_start",
+        "readSymbol": "⟨M⟩",
+        "toState": "q_construct_pair",
+        "writeSymbol": "⟨M⟩",
+        "direction": "S"
+      },
+      {
+        "fromState": "q_construct_pair",
+        "readSymbol": "⟨M⟩",
+        "toState": "q_invoke_H",
+        "writeSymbol": "⟨M, ⟨M⟩⟩",
+        "direction": "S"
+      },
+      {
+        "fromState": "q_invoke_H",
+        "readSymbol": "H_output=accept",
+        "toState": "q_H_said_halts_so_loop",
+        "writeSymbol": "H_output=accept",
+        "direction": "S"
+      },
+      {
+        "fromState": "q_invoke_H",
+        "readSymbol": "H_output=reject",
+        "toState": "q_accept",
+        "writeSymbol": "H_output=reject",
+        "direction": "S"
+      },
+      {
+        "fromState": "q_H_said_halts_so_loop",
+        "readSymbol": "*",
+        "toState": "q_H_said_halts_so_loop",
+        "writeSymbol": "*",
+        "direction": "R"
+      }
+    ],
+    "initialState": "q_start",
+    "acceptStates": ["q_accept"],
+    "rejectStates": [],
+    "type": "deterministic"
+  },
+  "computationTrace": {
+    "machine": "D on input ⟨D⟩ — both cases lead to contradiction",
+    "input": "⟨D⟩ (the encoding of the diagonalizer itself)",
+    "steps": [
+      {
+        "stepNumber": 1,
+        "state": "q_start",
+        "tapeContents": "⟨D⟩",
+        "headPosition": 0
+      },
+      {
+        "stepNumber": 2,
+        "state": "q_construct_pair",
+        "tapeContents": "⟨D, ⟨D⟩⟩",
+        "headPosition": 0
+      },
+      {
+        "stepNumber": 3,
+        "state": "q_invoke_H",
+        "tapeContents": "⟨D, ⟨D⟩⟩ — H now runs on this input",
+        "headPosition": 0
+      },
+      {
+        "stepNumber": 4,
+        "state": "CASE A — H outputs accept (claims D halts on ⟨D⟩)",
+        "tapeContents": "D transitions to q_H_said_halts_so_loop → D now LOOPS",
+        "headPosition": 0
+      },
+      {
+        "stepNumber": 5,
+        "state": "CASE A — CONTRADICTION",
+        "tapeContents": "H said D halts on ⟨D⟩, but D actually loops on ⟨D⟩. H is wrong.",
+        "headPosition": 0
+      },
+      {
+        "stepNumber": 4,
+        "state": "CASE B — H outputs reject (claims D loops on ⟨D⟩)",
+        "tapeContents": "D transitions to q_accept → D now HALTS",
+        "headPosition": 0
+      },
+      {
+        "stepNumber": 5,
+        "state": "CASE B — CONTRADICTION",
+        "tapeContents": "H said D loops on ⟨D⟩, but D actually halts on ⟨D⟩. H is wrong.",
+        "headPosition": 0
+      }
+    ],
+    "result": "loop",
+    "totalSteps": 5,
+    "spaceUsed": 1,
+    "isTerminating": false,
+    "terminationReason": "Both possible outcomes produce a logical contradiction. No behavior D could exhibit is consistent with H's prediction. Therefore H cannot exist."
+  },
+  "decidabilityProof": {
+    "id": "halt_diagonalization_1936",
+    "problem": "The Halting Problem (HALT_TM)",
+    "conclusion": "undecidable",
+    "method": "diagonalization",
+    "knownUndecidableProblem": null
+  },
+  "diagonalization": {
+    "id": "turing_diagonal_1936",
+    "enumeration": {
+      "description": "Enumerate all Turing machines in lexicographic order by their encoding: M₁, M₂, M₃, … This is possible because every TM has a finite description over a finite alphabet, so TMs are countably infinite. Imagine an infinite boolean matrix T where T[i][j] = 1 if Mᵢ halts on input ⟨Mⱼ⟩, and 0 if Mᵢ loops on ⟨Mⱼ⟩. The DIAGONAL of this matrix — entries T[i][i] — records whether each machine halts on its OWN encoding. Machine D is constructed to INVERT every diagonal entry: D on ⟨Mᵢ⟩ does the opposite of what T[i][i] says. When D itself is in the enumeration at index k, entry T[k][k] must simultaneously equal both 0 and 1 — a contradiction. The matrix cannot exist, and neither can H.",
+      "indexSet": "ℕ (countably infinite — TM encodings are finite strings over {0,1}*)",
+      "enumeratedObjects": "All Turing machines M₁, M₂, M₃, … indexed by their canonical encoding"
+    }
+  },
+  "reductions": [
+    {
+      "id": "ATM_to_HALT",
+      "fromProblem": "ATM (does M accept w?)",
+      "toProblem": "HALT_TM (does M halt on w?)",
+      "type": "many_one",
+      "reductionFunction": {
+        "description": "Supplement the ATM undecidability result: if HALT_TM were decidable, we could decide ATM by first checking if M halts on w, then simulating M. This shows HALT_TM is at least as hard as ATM.",
+        "inputTransformation": "From ⟨M, w⟩ for ATM, construct ⟨M', w⟩ where M' simulates M but converts reject into a loop (so M' halts iff M accepts).",
+        "outputInterpretation": "HALT_TM(M', w) = accept iff ATM(M, w) = accept.",
+        "preserves": "yes/no answers — membership in ATM iff membership in modified HALT_TM instance"
+      }
+    }
+  ],
+  "reductionChain": ["ATM", "HALT_TM"],
+  "classicProblems": ["HALT_TM", "ATM"],
+  "dependencies": [
+    "Turing (1936) — 'On Computable Numbers, with an Application to the Entscheidungsproblem'",
+    "Church-Turing thesis — TMs capture all effective computation",
+    "Universal Turing Machine (UTM) — a TM that simulates any other TM on any input",
+    "TM encodings are countable — every TM has a finite description; Σ* is countable",
+    "Definition of a decider — a TM that halts on ALL inputs (not just yes-instances)",
+    "Cantor's diagonalization technique (1891) — the logical ancestor of Turing's argument"
+  ],
+  "assumptions": [
+    "Church-Turing thesis: every effectively computable function is computable by some Turing machine",
+    "Every Turing machine has a finite, canonical encoding over a finite alphabet",
+    "A decider must halt on EVERY input and always output accept or reject — looping is not allowed",
+    "Self-reference is syntactically valid: feeding ⟨M⟩ as input to M is a legal TM computation",
+    "The assumed decider H, if it existed, would be a total (always-halting) TM"
+  ],
+  "uncertainty": 0.01,
+  "keyInsight": "The proof is a proof by contradiction structured as a diagonalization. Assume total decider H for HALT_TM exists. Construct D: on ⟨M⟩, run H on ⟨M, ⟨M⟩⟩ and do the opposite (loop if H says halt; halt if H says loop). Now ask: what does D do on ⟨D⟩? D halts on ⟨D⟩ ⟺ H rejects ⟨D, ⟨D⟩⟩ ⟺ D loops on ⟨D⟩. Contradiction in both directions. The diagonal move — disagreeing with every machine on its own encoding — guarantees D cannot appear in any decision table, proving H cannot exist. Note: HALT_TM is still SEMI-decidable (a UTM accepts ⟨M,w⟩ when M halts, but loops forever when M loops), so 'undecidable' ≠ 'no insight is ever possible.'"
+}
+```
+
+---
+
+**Summary for humans:** The Halting Problem is proven undecidable by Turing's 1936 diagonalization: assume a total decider **H** exists that always correctly answers "does M halt on w?" We then construct machine **D** that takes any TM encoding ⟨M⟩, asks H whether M halts on its own encoding, and does the *opposite* — looping if H says halt, accepting if H says loop. Running D on its own encoding ⟨D⟩ forces a logical paradox in both directions: D halts ↔ D doesn't halt. The contradiction is structural and inescapable, so H cannot exist.
+
+The argument's architecture mirrors **Cantor's diagonal argument** (1891): by inverting the diagonal of a hypothetical decision matrix, D guarantees it cannot be any row of the matrix, proving the enumeration is impossible. Importantly, HALT_TM is still **semi-decidable** — a Universal Turing Machine *accepts* whenever M does halt, it just loops forever on non-halting inputs — so undecidability means "no total algorithm," not "no information."

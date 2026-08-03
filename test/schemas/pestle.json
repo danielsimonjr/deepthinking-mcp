@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PESTLEThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "political",
+    "economic",
+    "social",
+    "technological",
+    "legal",
+    "environmental"
+  ],
+  "properties": {
+    "mode": {
+      "const": "pestle"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "political": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "economic": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "social": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "technological": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "legal": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "environmental": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "keyFactors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false
+}

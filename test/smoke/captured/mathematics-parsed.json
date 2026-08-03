@@ -1,0 +1,109 @@
+{
+  "mode": "mathematics",
+  "thoughtType": "proof_construction",
+  "theorems": [
+    {
+      "name": "Irrationality of \u221a2",
+      "statement": "The square root of 2 is not a rational number (\u221a2 \u2209 \u211a)",
+      "hypotheses": [
+        "\u221a2 is expressible as p/q where p, q \u2208 \u2124, q \u2260 0, and gcd(p, q) = 1 (fraction in lowest terms)"
+      ],
+      "conclusion": "The hypothesis leads to a logical contradiction; therefore no such representation exists and \u221a2 \u2209 \u211a"
+    },
+    {
+      "name": "Parity Lemma (auxiliary)",
+      "statement": "For any integer n, if n\u00b2 is even then n is even",
+      "hypotheses": [
+        "n \u2208 \u2124"
+      ],
+      "conclusion": "n\u00b2 even \u27f9 n even (equivalently, by contrapositive: n odd \u27f9 n\u00b2 odd)"
+    }
+  ],
+  "proofStrategy": {
+    "type": "contradiction",
+    "steps": [
+      "Step 1 \u2014 Assume for contradiction: \u221a2 = p/q with p, q \u2208 \u2124, q \u2260 0, gcd(p, q) = 1 (lowest-terms representation exists by the well-ordering of \u2124)",
+      "Step 2 \u2014 Square both sides: (\u221a2)\u00b2 = (p/q)\u00b2 \u27f9 2 = p\u00b2/q\u00b2 \u27f9 p\u00b2 = 2q\u00b2",
+      "Step 3 \u2014 Parity cascade (part A): p\u00b2 = 2q\u00b2 means p\u00b2 is even. By the Parity Lemma, p must be even. Write p = 2k for some k \u2208 \u2124.",
+      "Step 4 \u2014 Substitute p = 2k into p\u00b2 = 2q\u00b2: (2k)\u00b2 = 2q\u00b2 \u27f9 4k\u00b2 = 2q\u00b2 \u27f9 q\u00b2 = 2k\u00b2",
+      "Step 5 \u2014 Parity cascade (part B): q\u00b2 = 2k\u00b2 means q\u00b2 is even. By the Parity Lemma, q must be even.",
+      "Step 6 \u2014 Contradiction: both p and q are even, so 2 | gcd(p, q). This contradicts the hypothesis that gcd(p, q) = 1.",
+      "Step 7 \u2014 Conclusion: The assumption that \u221a2 \u2208 \u211a is false; therefore \u221a2 \u2209 \u211a."
+    ],
+    "completeness": 0.97
+  },
+  "logicalForm": {
+    "premises": [
+      "\u2200n \u2208 \u2124: n\u00b2 even \u27f9 n even  (Parity Lemma)",
+      "Every rational number has a unique representation p/q with gcd(p, q) = 1",
+      "2 is a prime number"
+    ],
+    "conclusion": "\u221a2 \u2209 \u211a",
+    "inferenceRule": "proof_by_contradiction",
+    "rules": [
+      "Reductio ad absurdum: assume P, derive \u22a5, conclude \u00acP",
+      "Modus ponens (parity lemma applied twice)",
+      "Algebraic substitution (p = 2k)",
+      "Divisibility: 2 | p and 2 | q \u27f9 2 | gcd(p, q)"
+    ]
+  },
+  "gapAnalysis": {
+    "completeness": 0.97,
+    "gaps": [
+      {
+        "id": "gap_01",
+        "type": "missing_step",
+        "location": {
+          "from": "Step 2",
+          "to": "Step 3"
+        },
+        "description": "The Parity Lemma itself (n\u00b2 even \u27f9 n even) is invoked but not proved inline. A complete proof requires its justification.",
+        "severity": "minor",
+        "suggestedFix": "Prove by contrapositive: assume n is odd, so n = 2m + 1. Then n\u00b2 = 4m\u00b2 + 4m + 1 = 2(2m\u00b2 + 2m) + 1, which is odd. Therefore n\u00b2 odd \u27fa n odd, equivalently n\u00b2 even \u27fa n even."
+      }
+    ],
+    "implicitAssumptions": [
+      {
+        "id": "ia_01",
+        "statement": "Every non-zero rational number can be written in lowest terms p/q with gcd(p, q) = 1",
+        "type": "existence_assumption",
+        "usedInStep": "Step 1",
+        "shouldBeExplicit": true,
+        "suggestedFormulation": "By the Well-Ordering Principle applied to |q| > 0, every rational has a least-denominator representation; dividing numerator and denominator by their GCD yields the lowest-terms form."
+      },
+      {
+        "id": "ia_02",
+        "statement": "The integers \u2124 are closed under multiplication and the notion of 'even' (divisible by 2) is well-defined",
+        "type": "domain_assumption",
+        "usedInStep": "Steps 3\u20135",
+        "shouldBeExplicit": false,
+        "suggestedFormulation": "Standard property of \u2124 under ring axioms; no further elaboration needed at this level."
+      }
+    ],
+    "unjustifiedSteps": [
+      "Parity Lemma used without proof at Step 3 and Step 5 \u2014 minor gap addressable by the contrapositive sub-proof noted above"
+    ],
+    "suggestions": [
+      "State the Parity Lemma as an explicit sub-theorem before the main proof",
+      "For full formality, cite the Fundamental Theorem of Arithmetic (prime factorization) as an alternative basis: 2 | p\u00b2 \u27f9 2 | p because 2 is prime"
+    ]
+  },
+  "dependencies": [
+    "Definition of rational number (\u211a = { p/q | p, q \u2208 \u2124, q \u2260 0 })",
+    "Parity Lemma: n\u00b2 even \u27f9 n even (provable by contrapositive)",
+    "Well-Ordering Principle of \u2124 (guarantees lowest-terms representation exists)",
+    "Definition of gcd and the property gcd(p, q) = 1 \u27f9 p and q share no common factor > 1",
+    "Divisibility: a | b and a | c \u27f9 a | gcd(b, c)"
+  ],
+  "assumptions": [
+    "Integers are well-ordered (Well-Ordering Principle)",
+    "gcd is well-defined for all pairs of non-zero integers",
+    "2 is a prime integer (used to justify the Parity Lemma via Euclid's Lemma as an alternative)"
+  ],
+  "uncertainty": 0.03,
+  "references": [
+    "Euclid, Elements Book X (attributed c. 300 BCE) \u2014 earliest recorded proof of irrationality",
+    "Hardy & Wright, An Introduction to the Theory of Numbers (1938), Chapter 4",
+    "Apostol, Introduction to Analytic Number Theory (1976), \u00a71.1"
+  ]
+}

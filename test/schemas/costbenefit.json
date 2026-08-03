@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CostBenefitThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "option",
+    "costs",
+    "benefits",
+    "recommendation"
+  ],
+  "properties": {
+    "mode": {
+      "const": "costbenefit"
+    },
+    "option": {
+      "type": "string"
+    },
+    "costs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "item",
+          "amount"
+        ],
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "benefits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "item",
+          "amount"
+        ],
+        "properties": {
+          "item": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "npv": {
+      "type": ["number", "string", "null"]
+    },
+    "roi": {
+      "type": ["number", "string", "null"]
+    },
+    "paybackPeriod": {
+      "type": ["number", "string", "null"]
+    },
+    "recommendation": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

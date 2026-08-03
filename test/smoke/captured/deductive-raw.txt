@@ -1,0 +1,34 @@
+Using **deductive** reasoning — explicitly requested — to chain two modus-ponens applications from universal domain rules down to a specific conclusion about post P.
+
+```json
+{
+  "mode": "deductive",
+  "premises": [
+    "Every published blog post must have an author",
+    "Every author must be a registered user account",
+    "Post P was just published"
+  ],
+  "conclusion": "Post P has an author, and that author is a registered user account",
+  "logicForm": "chained modus ponens",
+  "derivationSteps": [
+    {
+      "stepNumber": 1,
+      "premisesUsed": [0, 2],
+      "stepsUsed": [],
+      "intermediateConclusion": "Post P must have an author",
+      "inferenceRule": "modus ponens"
+    },
+    {
+      "stepNumber": 2,
+      "premisesUsed": [1],
+      "stepsUsed": [1],
+      "intermediateConclusion": "Post P has an author, and that author is a registered user account",
+      "inferenceRule": "modus ponens"
+    }
+  ],
+  "validityCheck": true,
+  "soundnessCheck": true
+}
+```
+
+**Step 1** applies premise [0] ("every published post → has an author") to premise [2] ("post P was published") via **modus ponens**, yielding the intermediate fact: *post P must have an author*. **Step 2** applies premise [1] ("every author → registered user account") to that intermediate fact — also via **modus ponens** — yielding the final conclusion: *post P has an author who is a registered user account*. The argument is **valid** (the conclusion is logically forced by the form) and **sound** within the stated domain rules (all three premises are given as stipulated invariants, so real-world truth is granted by assumption). No weaker claim is possible; the chain is tight with zero logical gaps.

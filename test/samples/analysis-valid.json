@@ -1,0 +1,153 @@
+{
+  "mode": "analysis",
+  "subject": "Authentication service failure modes",
+  "scope": {
+    "inScope": [
+      "Login and token-issuance flow",
+      "Session validation middleware",
+      "Password reset flow",
+      "Token expiry and refresh"
+    ],
+    "outOfScope": [
+      "Authorization (what authenticated users can do)",
+      "User registration flow",
+      "Third-party OAuth provider reliability"
+    ],
+    "justification": "Scoping to authentication (identity verification) rather than authorization (permission enforcement) to keep the analysis tractable for a single session"
+  },
+  "layers": {
+    "surface": {
+      "observations": [
+        "Login endpoint returns 200 with a valid JWT on successful authentication",
+        "Failed logins return 401 with a generic error message",
+        "Password reset sends an email link valid for 60 minutes",
+        "JWT access tokens expire in 15 minutes; refresh tokens expire in 7 days",
+        "No observable rate limiting on the login endpoint in the staging environment"
+      ],
+      "coverage": 0.75
+    },
+    "structural": {
+      "components": [
+        {
+          "id": "c1",
+          "name": "Login Handler",
+          "role": "Validates credentials, issues JWT access token and refresh token",
+          "dependencies": ["c2", "c3"]
+        },
+        {
+          "id": "c2",
+          "name": "User Store (PostgreSQL)",
+          "role": "Stores hashed passwords and user metadata",
+          "dependencies": []
+        },
+        {
+          "id": "c3",
+          "name": "Token Service",
+          "role": "Signs and verifies JWTs using RS256",
+          "dependencies": ["c4"]
+        },
+        {
+          "id": "c4",
+          "name": "Key Management (env var)",
+          "role": "Holds the RSA private key for token signing",
+          "dependencies": []
+        },
+        {
+          "id": "c5",
+          "name": "Session Middleware",
+          "role": "Validates JWT on each protected request; rejects expired or tampered tokens",
+          "dependencies": ["c3"]
+        },
+        {
+          "id": "c6",
+          "name": "Password Reset Flow",
+          "role": "Generates a time-limited reset token, emails it, validates it on submission",
+          "dependencies": ["c2", "c7"]
+        },
+        {
+          "id": "c7",
+          "name": "Email Service",
+          "role": "Delivers password reset and verification emails",
+          "dependencies": []
+        }
+      ],
+      "relationships": [
+        { "from": "c1", "to": "c2", "type": "calls", "description": "Login handler reads hashed password from user store to validate credentials" },
+        { "from": "c1", "to": "c3", "type": "calls", "description": "Login handler calls token service to sign and return JWT" },
+        { "from": "c3", "to": "c4", "type": "depends_on", "description": "Token signing requires access to the RSA private key" },
+        { "from": "c5", "to": "c3", "type": "calls", "description": "Session middleware calls token service to verify each incoming JWT" },
+        { "from": "c6", "to": "c7", "type": "calls", "description": "Password reset flow calls email service to deliver the reset link" }
+      ],
+      "coverage": 0.80
+    },
+    "patterns": [
+      {
+        "id": "p1",
+        "name": "Key stored as environment variable",
+        "description": "The RSA private key is stored in an environment variable rather than a secrets manager — this is a secret-sprawl pattern where the key is potentially logged, visible in process listings, and hard to rotate without a deployment",
+        "type": "failure_mode",
+        "evidence": ["c4"],
+        "significance": "high"
+      },
+      {
+        "id": "p2",
+        "name": "No rate limiting on login endpoint",
+        "description": "The login endpoint has no observable rate limiting in staging — credential stuffing and brute-force attacks can proceed unimpeded",
+        "type": "absence",
+        "evidence": ["c1"],
+        "significance": "high"
+      },
+      {
+        "id": "p3",
+        "name": "Email as single authentication factor for reset",
+        "description": "Password reset relies entirely on email deliverability — if the email service is down or the link is stolen, account takeover is possible without any other control",
+        "type": "failure_mode",
+        "evidence": ["c6", "c7"],
+        "significance": "high"
+      },
+      {
+        "id": "p4",
+        "name": "Token service is a single point of failure",
+        "description": "Both login and session validation depend on the token service — if it fails or its key is rotated incorrectly, all authenticated sessions fail simultaneously",
+        "type": "failure_mode",
+        "evidence": ["c1", "c3", "c5"],
+        "significance": "medium"
+      }
+    ],
+    "synthesis": {
+      "insights": [
+        {
+          "id": "i1",
+          "insight": "Three of the four identified patterns are high-severity failure modes — this authentication service has a high concentration of risk in key management, brute-force protection, and email-based account takeover",
+          "basis": ["p1", "p2", "p3"],
+          "confidence": 0.85
+        },
+        {
+          "id": "i2",
+          "insight": "The key-in-env-var pattern and the single-point-of-failure pattern create correlated risk: an attacker who compromises the environment can both steal the signing key and disable all sessions simultaneously — these should be treated as a combined threat scenario, not two independent issues",
+          "basis": ["p1", "p4"],
+          "confidence": 0.78
+        }
+      ],
+      "recommendations": [
+        "Migrate RSA private key from environment variable to AWS Secrets Manager or HashiCorp Vault with automatic rotation",
+        "Implement rate limiting on the login endpoint: 5 failed attempts per account per 15 minutes with exponential backoff",
+        "Add a second factor to the password reset flow for accounts flagged as sensitive",
+        "Document and test token service failover: what happens when the token service is unavailable for 60 seconds during peak traffic?"
+      ]
+    }
+  },
+  "coverage": {
+    "layersCovered": ["surface", "structural", "patterns", "synthesis"],
+    "estimatedCompleteness": 0.65,
+    "blindSpots": [
+      "Session invalidation logic — what happens when a user logs out or when an admin forces a session revocation?",
+      "Concurrent login handling — is there a race condition between session creation and token issuance under high concurrency?",
+      "Audit logging — are failed authentication attempts logged with sufficient detail for incident investigation?"
+    ],
+    "wouldChangeAnalysisIf": [
+      "Confirmation that rate limiting exists at the infrastructure layer (e.g., WAF) rather than in the application — this would lower the severity of p2",
+      "The key rotation procedure — if automated key rotation with zero-downtime is already implemented, p1 is significantly less severe"
+    ]
+  }
+}

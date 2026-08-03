@@ -2,6 +2,23 @@
 
 [![Status](https://img.shields.io/badge/STATUS-ACTIVE-brightgreen.svg?style=for-the-badge)](CHANGELOG.md)
 
+> ### One plugin, two delivery paths (2026-08-03)
+>
+> `deepthinking-plugin` has been **merged into this repo and archived**. Everything ships from here
+> now, as a single Claude Code plugin:
+>
+> | Surface | What you get |
+> |---|---|
+> | **MCP server** | 14 tools (`deepthinking_core`, `deepthinking_causal`, …) across 34 modes, session management, proof decomposition |
+> | **Slash commands** | `/think` and `/think-render` (canonically `/deepthinking-mcp:think`) |
+> | **Skills** | 14 reasoning skills covering **46 modes**, including the `think-frameworks` set the server does not implement — SWOT, decision matrix, 5 Whys, fishbone, PESTLE, force-field, Pareto, stakeholder, gap/risk analysis, cost-benefit |
+> | **Subagent** | `visual-exporter` — renders a thought to 11 diagram/document formats, plus an interactive HTML dashboard |
+>
+> Splitting these across two repos was the wrong shape; the reasoning methodology and the server
+> that serves it belong together.
+
+---
+
 > ### The 2026-04-12 deprecation has been reversed (2026-08-03)
 >
 > `deepthinking-mcp` is **active and supported again**. It was briefly deprecated in favour of

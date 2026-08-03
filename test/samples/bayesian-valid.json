@@ -1,0 +1,35 @@
+{
+  "mode": "bayesian",
+  "hypothesis": {
+    "id": "h1",
+    "statement": "The memory leak is caused by the caching layer",
+    "alternatives": ["connection pool exhaustion", "log file accumulation"]
+  },
+  "prior": {
+    "probability": 0.3,
+    "justification": "Historical incidents: 30% of memory issues traced to caching layer over the past 18 months"
+  },
+  "likelihood": {
+    "probability": 0.85,
+    "description": "If cache is the cause, we expect elevated heap usage concentrated in cache objects"
+  },
+  "evidence": [
+    {
+      "id": "e1",
+      "description": "Heap dump shows 40% of memory occupied by cache objects",
+      "likelihoodGivenHypothesis": 0.9,
+      "likelihoodGivenNotHypothesis": 0.2,
+      "timestamp": "2026-04-11T10:30:00Z"
+    }
+  ],
+  "posterior": {
+    "probability": 0.66,
+    "calculation": "P(H|E) = (0.9 × 0.3) / ((0.9 × 0.3) + (0.2 × 0.7)) = 0.27 / (0.27 + 0.14) = 0.27 / 0.41 = 0.66",
+    "confidence": 0.7
+  },
+  "bayesFactor": 4.5,
+  "sensitivity": {
+    "priorRange": [0.1, 0.5],
+    "posteriorRange": [0.33, 0.82]
+  }
+}

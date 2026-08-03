@@ -1,0 +1,45 @@
+{
+  "mode": "gametheory",
+  "game": {
+    "name": "Cache TTL Competition",
+    "type": "non_cooperative",
+    "isZeroSum": false,
+    "description": "Two streaming services choosing cache TTL strategy to compete for users"
+  },
+  "players": [
+    { "id": "alpha", "name": "Alpha Streaming", "strategies": ["short_ttl", "long_ttl"] },
+    { "id": "beta",  "name": "Beta Streaming",  "strategies": ["short_ttl", "long_ttl"] }
+  ],
+  "payoffMatrix": {
+    "description": "Net profit index (higher = better). Short TTL costs 3 units; competitive differentiation earns 5 units.",
+    "entries": [
+      { "strategies": ["short_ttl", "short_ttl"], "payoffs": [-2, -2] },
+      { "strategies": ["short_ttl", "long_ttl"],  "payoffs": [3, -5] },
+      { "strategies": ["long_ttl",  "short_ttl"], "payoffs": [-5, 3] },
+      { "strategies": ["long_ttl",  "long_ttl"],  "payoffs": [1, 1] }
+    ]
+  },
+  "nashEquilibria": [
+    {
+      "strategyProfile": ["short_ttl", "short_ttl"],
+      "payoffs": [-2, -2],
+      "type": "pure",
+      "isStrict": false
+    }
+  ],
+  "dominantStrategies": [
+    {
+      "playerId": "alpha",
+      "strategy": "short_ttl",
+      "type": "strictly_dominant",
+      "justification": "If Beta plays short_ttl: -2 > -5. If Beta plays long_ttl: 3 > 1. Short dominates in both cases."
+    },
+    {
+      "playerId": "beta",
+      "strategy": "short_ttl",
+      "type": "strictly_dominant",
+      "justification": "Symmetric payoff structure — short_ttl strictly dominates for Beta as well."
+    }
+  ],
+  "analysis": "This game has a Prisoner's Dilemma structure. Short TTL is strictly dominant for both players, yielding the Nash equilibrium (short, short) with payoffs (-2, -2). Yet the mutually beneficial outcome (long, long) at (1, 1) is Pareto superior and is blocked purely by the competitive incentive to differentiate. Neither service can unilaterally switch to long TTL without losing users to the other. Resolution requires a binding coordination mechanism — e.g., a platform-level commitment or regulatory standard — which would reframe the problem as a cooperative game."
+}

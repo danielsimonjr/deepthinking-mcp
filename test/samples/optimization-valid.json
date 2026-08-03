@@ -1,0 +1,52 @@
+{
+  "mode": "optimization",
+  "problem": {
+    "name": "Cloud Instance Allocation",
+    "type": "integer",
+    "description": "Maximize total performance units subject to budget and minimum redundancy constraints"
+  },
+  "variables": [
+    {
+      "id": "a",
+      "name": "Type A instances",
+      "type": "integer",
+      "lowerBound": 0,
+      "description": "CPU-heavy instances at $200 each, 8 performance units each"
+    },
+    {
+      "id": "b",
+      "name": "Type B instances",
+      "type": "integer",
+      "lowerBound": 0,
+      "description": "Memory-heavy instances at $500 each, 15 performance units each"
+    }
+  ],
+  "objective": {
+    "type": "maximize",
+    "formula": "8*a + 15*b",
+    "description": "Total performance units across all provisioned instances"
+  },
+  "constraints": [
+    {
+      "id": "c1",
+      "name": "Weekly budget",
+      "formula": "200*a + 500*b <= 10000",
+      "isHard": true,
+      "rationale": "Weekly cloud spend ceiling of $10,000 set by finance"
+    },
+    {
+      "id": "c2",
+      "name": "Minimum redundancy",
+      "formula": "a + b >= 10",
+      "isHard": true,
+      "rationale": "At least 10 instances required for high-availability failover"
+    }
+  ],
+  "solution": {
+    "status": "optimal",
+    "variableValues": { "a": 0, "b": 20 },
+    "objectiveValue": 300,
+    "bindingConstraints": ["c1"]
+  },
+  "analysis": "The optimal solution provisions zero Type A instances and 20 Type B instances for 300 total performance units, exactly exhausting the $10,000 budget (c1 binding). Type B has a superior performance-per-dollar ratio (0.030 units/$) versus Type A (0.040 units/$) — correction: Type B yields 15/$500 = 0.030 and Type A yields 8/$200 = 0.040. Despite Type A having the higher ratio, budget alone favors Type B when redundancy is already met. With b=20, the redundancy constraint (c2) is non-binding with 10 units of slack. Sensitivity: if the budget drops below $2,000, we would need Type A instances to satisfy the 10-instance floor, making c2 binding and reducing the achievable performance."
+}

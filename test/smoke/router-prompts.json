@@ -1,0 +1,62 @@
+[
+  {
+    "prompt": "Prove that the sum of any two consecutive Fibonacci numbers is strictly less than their product for all n >= 4.",
+    "expected_modes": ["mathematics", "formallogic"],
+    "reason": "Formal proof request — mathematics (algebraic) or formallogic (natural deduction) both fit"
+  },
+  {
+    "prompt": "Given these three incidents on Monday, Wednesday, and Friday all with the same DB timeout symptom, what pattern do they share?",
+    "expected_modes": ["inductive"],
+    "reason": "Multiple concrete observations provided in the prompt, asking for a pattern"
+  },
+  {
+    "prompt": "If all users in admin can edit, and Alice is in admin, can Alice edit?",
+    "expected_modes": ["deductive", "formallogic"],
+    "reason": "Explicit premises, formal inference"
+  },
+  {
+    "prompt": "Update my belief about the new cache config being the root cause given a 40% increase in 502 errors following deployment.",
+    "expected_modes": ["bayesian"],
+    "reason": "Explicit belief update from new evidence"
+  },
+  {
+    "prompt": "Why did latency spike after we changed the config last Tuesday?",
+    "expected_modes": ["causal", "sequential"],
+    "reason": "Cause-effect tracing; sequential if the router wants to gather data first"
+  },
+  {
+    "prompt": "What would have happened if we had used PostgreSQL instead of MySQL for this workload?",
+    "expected_modes": ["counterfactual"],
+    "reason": "Hypothetical alternative history — canonical counterfactual"
+  },
+  {
+    "prompt": "How should we price our SaaS tier given that our main competitor is likely to react?",
+    "expected_modes": ["gametheory"],
+    "reason": "Multi-agent strategic interaction with interdependent payoffs"
+  },
+  {
+    "prompt": "Decompose and plan the migration of our Postgres database to a new region step by step.",
+    "expected_modes": ["sequential", "shannon"],
+    "reason": "Step-by-step decomposition — sequential or shannon"
+  },
+  {
+    "prompt": "Synthesize findings from three studies on remote work productivity that report conflicting results.",
+    "expected_modes": ["synthesis"],
+    "reason": "Literature integration with multiple sources"
+  },
+  {
+    "prompt": "Argue the case for adopting feature flags for all new releases with claim, warrant, backing, and rebuttal.",
+    "expected_modes": ["argumentation"],
+    "reason": "Explicit Toulmin structure requested"
+  },
+  {
+    "prompt": "Why does adding more engineers to the team keep slowing down delivery?",
+    "expected_modes": ["systemsthinking", "causal"],
+    "reason": "Feedback-loop pattern — systemsthinking archetype, or causal chain"
+  },
+  {
+    "prompt": "Design an experiment to test whether GC pauses are causing our p99 latency spikes.",
+    "expected_modes": ["scientificmethod"],
+    "reason": "Hypothesis + experiment design"
+  }
+]

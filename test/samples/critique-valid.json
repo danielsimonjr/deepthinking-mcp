@@ -1,0 +1,89 @@
+{
+  "mode": "critique",
+  "work": {
+    "id": "w1",
+    "title": "Microservices Migration Proposal v1.2",
+    "type": "proposal",
+    "claimedContribution": "Decompose the legacy monolith into 47 microservices to improve scalability and team velocity, delivering by Q3 2026",
+    "audience": "Engineering leadership and the 5-person migration team"
+  },
+  "strengths": [
+    {
+      "id": "s1",
+      "description": "The proposal correctly identifies that the monolith's shared-state coupling is the root cause of deployment bottlenecks — this diagnosis is accurate and well-evidenced with incident data",
+      "significance": "high",
+      "evidence": "Section 2.1 cites 14 deployment incidents caused by shared-state race conditions in Q1 2026"
+    },
+    {
+      "id": "s2",
+      "description": "Domain boundaries are clearly drawn using Domain-Driven Design bounded contexts — this is better methodology than the typical 'one service per table' decomposition",
+      "significance": "medium",
+      "evidence": "Appendix A contains the domain map with bounded context definitions for each of the 47 services"
+    },
+    {
+      "id": "s3",
+      "description": "The rollback plan identifies specific circuit-breaker trigger conditions, which is more rigorous than most migration proposals",
+      "significance": "medium",
+      "evidence": "Section 6.3 specifies error-rate thresholds that trigger automated rollback"
+    }
+  ],
+  "weaknesses": [
+    {
+      "id": "wk1",
+      "description": "The shared PostgreSQL database negates most of the decoupling benefit — services with shared tables are not truly independent; a schema change in any service requires coordinated deployment across all services that touch that table",
+      "severity": "critical",
+      "evidence": "Architecture diagram in §4.1 shows all 47 services pointing to one database cluster",
+      "improvement": "Either introduce per-service databases (with eventual consistency where needed) or reduce scope to a subset of genuinely independent services that can have their own data stores"
+    },
+    {
+      "id": "wk2",
+      "description": "47 services decomposed by a team of 5 in 6 months is 9.4 service-completions per engineer — no velocity data justifies this pace; industry benchmarks suggest 2-4 services per engineer per quarter for greenfield",
+      "severity": "critical",
+      "evidence": "Section 3 (timeline) assumes parallel progress with no dependency graph or critical path",
+      "improvement": "Build a dependency graph of the 47 services and identify the minimum viable decomposition (the 8-10 services that provide the most coupling relief) — deliver those first and re-evaluate"
+    },
+    {
+      "id": "wk3",
+      "description": "No observability strategy is included — 47 services communicating via REST generates distributed tracing requirements that the current monitoring stack cannot meet",
+      "severity": "significant",
+      "evidence": "Section 5 (operations) mentions 'logging remains unchanged' with no mention of distributed tracing",
+      "improvement": "Add a phase-zero observability sprint: instrument OpenTelemetry traces before migrating any service, so you can see cross-service call graphs from day one"
+    }
+  ],
+  "socraticQuestions": [
+    {
+      "type": "clarification",
+      "question": "What exactly do you mean by '47 microservices'? Are these all independently deployable, or do some share a release cycle? The definition of 'microservice' is doing a lot of work in the scope estimate.",
+      "target": "Service count and independence claim in §1"
+    },
+    {
+      "type": "assumptions",
+      "question": "You assume the 5-person team can operate 47 services in production — what is the operational burden per service, and have you modeled the steady-state on-call load for a 47-service distributed system?",
+      "target": "Team capacity assumption in §3"
+    },
+    {
+      "type": "evidence",
+      "question": "The proposal claims that decomposition will 'improve team velocity' — what is the current measured velocity, and which specific deployment bottlenecks in the post-decomposition architecture will no longer exist?",
+      "target": "Velocity improvement claim in §1"
+    },
+    {
+      "type": "alternative_viewpoints",
+      "question": "Have you considered the Strangler Fig pattern as an alternative to big-bang decomposition — extract one domain boundary at a time over 18 months rather than 47 simultaneously over 6 months?",
+      "target": "Migration strategy in §3"
+    },
+    {
+      "type": "implications",
+      "question": "If the shared PostgreSQL database remains in place, what happens when Service A's schema migration breaks Service B's read queries — how does your rollback plan handle a cascading schema failure across 47 services?",
+      "target": "Shared database assumption in §4"
+    }
+  ],
+  "verdict": {
+    "overallAssessment": "The problem diagnosis is correct but the proposed solution has two critical structural flaws (shared database, unrealistic scope) that must be resolved before the plan is actionable",
+    "strongestClaim": "The DDD-based domain decomposition is methodologically sound and provides a defensible service boundary model",
+    "criticalLimitation": "A shared PostgreSQL database among 47 services reproduces the coupling problem in data-layer form, defeating the primary motivation for decomposition",
+    "recommendation": "major_revisions"
+  },
+  "strengthsIdentified": 3,
+  "weaknessesIdentified": 3,
+  "balanceRatio": 0.5
+}

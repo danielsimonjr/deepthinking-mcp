@@ -1,0 +1,58 @@
+{
+  "mode": "bayesian",
+  "hypothesis": {
+    "id": "h1",
+    "statement": "The 502 error rate increase is caused by the new cache configuration",
+    "alternatives": [
+      "Upstream service degradation coinciding with the deployment window (external failure)",
+      "Traffic spike or load pattern change overwhelming the origin",
+      "Unrelated infrastructure failure \u2014 network, DNS, or TLS certificate expiry",
+      "Database saturation cascading to the proxy/gateway layer"
+    ]
+  },
+  "prior": {
+    "probability": 0.4,
+    "justification": "SRE literature places configuration changes as the leading cause of production incidents (~35\u201345% across cloud environments). A prior of 0.40 is moderately generous: it acknowledges that a newly deployed config is the most plausible single candidate when errors appear near a deployment, but leaves 0.60 mass for external failures, traffic anomalies, and pure coincidence. It is deliberately not set higher to avoid anchoring on the post-hoc temporal observation that is itself one of the evidence items."
+  },
+  "likelihood": {
+    "probability": 0.86,
+    "description": "If the cache config is the cause, we expect three observable signatures: errors begin at or shortly after the config push, the error code is 502 specifically (Bad Gateway \u2014 consistent with cache misconfig blocking upstream connections to origin servers), and no other concurrent change can serve as an alternative explanation. The joint likelihood of all three is high if H is true."
+  },
+  "evidence": [
+    {
+      "id": "e1",
+      "description": "(a) Temporal correlation: 502 error rate spike onset aligns with the cache config deployment timestamp; no elevated error rate was observed in the preceding baseline window",
+      "likelihoodGivenHypothesis": 0.95,
+      "likelihoodGivenNotHypothesis": 0.15
+    },
+    {
+      "id": "e2",
+      "description": "(b) Error code specificity: errors are precisely 502 Bad Gateway \u2014 consistent with cache misconfiguration causing invalid or refused upstream connections to origin servers; not 500 (application error), 503 (service unavailable), or 504 (gateway timeout)",
+      "likelihoodGivenHypothesis": 0.8,
+      "likelihoodGivenNotHypothesis": 0.25
+    },
+    {
+      "id": "e3",
+      "description": "(c) Isolated change window: independently verified that no other deployments, infrastructure updates, certificate rotations, or config mutations occurred during the incident window \u2014 the cache config is the sole candidate change",
+      "likelihoodGivenHypothesis": 0.9,
+      "likelihoodGivenNotHypothesis": 0.25
+    }
+  ],
+  "posterior": {
+    "probability": 0.98,
+    "calculation": "Sequential update \u2014 each posterior becomes the prior for the next step.\n\n\u2500\u2500 Step 1: Temporal correlation (e1), prior = 0.40 \u2500\u2500\nP(H|e1) = (0.95 \u00d7 0.40) / ((0.95 \u00d7 0.40) + (0.15 \u00d7 0.60))\n         = 0.3800 / (0.3800 + 0.0900)\n         = 0.3800 / 0.4700\n         = 0.809\n         [BF\u2081 = 0.95 / 0.15 = 6.33 \u2014 moderate-to-strong evidence]\n\n\u2500\u2500 Step 2: Error code specificity (e2), prior = 0.809 \u2500\u2500\nP(H|e2) = (0.80 \u00d7 0.809) / ((0.80 \u00d7 0.809) + (0.25 \u00d7 0.191))\n         = 0.6472 / (0.6472 + 0.04775)\n         = 0.6472 / 0.69495\n         = 0.931\n         [BF\u2082 = 0.80 / 0.25 = 3.20 \u2014 moderate evidence]\n\n\u2500\u2500 Step 3: Isolated change window (e3), prior = 0.931 \u2500\u2500\nP(H|e3) = (0.90 \u00d7 0.931) / ((0.90 \u00d7 0.931) + (0.25 \u00d7 0.069))\n         = 0.8379 / (0.8379 + 0.01725)\n         = 0.8379 / 0.85515\n         = 0.980\n         [BF\u2083 = 0.90 / 0.25 = 3.60 \u2014 moderate evidence]\n\n\u2500\u2500 Combined Bayes Factor \u2500\u2500\nBF_combined = BF\u2081 \u00d7 BF\u2082 \u00d7 BF\u2083 = 6.33 \u00d7 3.20 \u00d7 3.60 = 72.9\n(Overwhelmingly strong; BF > 30 = 'very strong' by Kass-Raftery scale)",
+    "confidence": 0.78
+  },
+  "bayesFactor": 72.9,
+  "sensitivity": {
+    "priorRange": [
+      0.2,
+      0.6
+    ],
+    "posteriorRange": [
+      0.948,
+      0.991
+    ],
+    "note": "Skeptical prior (0.20): posterior converges to 0.948. Generous prior (0.60): posterior reaches 0.991. The conclusion is robust to prior uncertainty \u2014 even the most skeptical starting point yields >94% posterior after all three evidence items. The combined BF of 72.9 dominates the prior."
+  }
+}

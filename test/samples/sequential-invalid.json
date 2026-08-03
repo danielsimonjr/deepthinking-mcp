@@ -1,0 +1,6 @@
+{
+  "thoughtNumber": 1,
+  "totalThoughts": 3,
+  "content": "Missing mode field — should fail validation",
+  "nextThoughtNeeded": true
+}

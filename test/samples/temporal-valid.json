@@ -1,0 +1,75 @@
+{
+  "mode": "temporal",
+  "thoughtType": "causality_timeline",
+  "timeline": {
+    "id": "incident_timeline",
+    "name": "502 Error Incident — 2026-04-11",
+    "timeUnit": "minutes",
+    "startTime": 0,
+    "endTime": 10,
+    "events": ["dep_complete", "errors_502", "cpu_alert"]
+  },
+  "events": [
+    {
+      "id": "dep_complete",
+      "name": "Upstream deployment completes",
+      "description": "Upstream dependency v2.3.1 deployment finishes at T+0",
+      "timestamp": 0,
+      "duration": null,
+      "type": "instant",
+      "properties": { "service": "upstream-api", "version": "v2.3.1" }
+    },
+    {
+      "id": "errors_502",
+      "name": "502 errors begin",
+      "description": "Our service starts returning 502 Bad Gateway responses",
+      "timestamp": 4,
+      "duration": null,
+      "type": "instant",
+      "properties": { "errorRate": "high", "statusCode": 502 }
+    },
+    {
+      "id": "cpu_alert",
+      "name": "CPU alert fires",
+      "description": "Monitoring alert triggers on CPU threshold breach",
+      "timestamp": 8,
+      "duration": null,
+      "type": "instant",
+      "properties": { "threshold": "80%", "alerting": "pagerduty" }
+    }
+  ],
+  "relations": [
+    {
+      "id": "r1",
+      "from": "dep_complete",
+      "to": "errors_502",
+      "relationType": "causes",
+      "strength": 0.82,
+      "delay": 4
+    },
+    {
+      "id": "r2",
+      "from": "errors_502",
+      "to": "cpu_alert",
+      "relationType": "enables",
+      "strength": 0.6,
+      "delay": 4
+    }
+  ],
+  "constraints": [
+    {
+      "id": "tc1",
+      "type": "before",
+      "subject": "dep_complete",
+      "object": "errors_502",
+      "confidence": 1.0
+    },
+    {
+      "id": "tc2",
+      "type": "before",
+      "subject": "errors_502",
+      "object": "cpu_alert",
+      "confidence": 1.0
+    }
+  ]
+}

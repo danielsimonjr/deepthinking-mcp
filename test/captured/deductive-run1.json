@@ -1,0 +1,11 @@
+{
+  "mode": "deductive",
+  "premises": [
+    "All users in the admin group can edit posts",
+    "Alice is in the admin group"
+  ],
+  "conclusion": "Alice can edit posts",
+  "logicForm": "modus ponens (via universal instantiation)",
+  "validityCheck": true,
+  "soundnessCheck": true
+}

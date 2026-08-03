@@ -1,0 +1,86 @@
+{
+  "mode": "historical",
+  "thoughtType": "pattern_analysis",
+  "events": [
+    {
+      "id": "incident_2024",
+      "name": "Production DB migration failure 2024",
+      "date": "2024-03-15",
+      "significance": "major",
+      "description": "Live schema migration on 500 GB users table caused 47 min downtime due to table lock contention",
+      "causes": ["no_maintenance_window", "missing_lock_timeout"],
+      "effects": ["table_lock_contention", "service_outage_47min"],
+      "sources": ["postmortem_2024", "runbook_v3"],
+      "tags": ["database", "migration", "outage"]
+    },
+    {
+      "id": "migration_2026",
+      "name": "Planned 2026 DB migration",
+      "date": "2026-04-18",
+      "significance": "moderate",
+      "description": "Planned migration of 12 GB orders table with read replica promotion during maintenance window",
+      "causes": [],
+      "effects": [],
+      "sources": ["migration_plan_v2"],
+      "tags": ["database", "migration", "planned"]
+    }
+  ],
+  "sources": [
+    {
+      "id": "postmortem_2024",
+      "title": "Postmortem: DB Migration Outage 2024-03-15",
+      "type": "primary",
+      "reliability": 0.92,
+      "corroboratedBy": ["runbook_v3"]
+    },
+    {
+      "id": "runbook_v3",
+      "title": "DB Migration Runbook v3 (updated post-incident)",
+      "type": "secondary",
+      "reliability": 0.85,
+      "corroboratedBy": ["postmortem_2024"]
+    },
+    {
+      "id": "migration_plan_v2",
+      "title": "2026 Migration Plan v2",
+      "type": "primary",
+      "reliability": 0.80,
+      "corroboratedBy": []
+    }
+  ],
+  "patterns": [
+    {
+      "id": "p1",
+      "name": "Live schema migration without lock timeout causes table-level lock contention",
+      "type": "structural",
+      "episodes": ["incident_2024"],
+      "matchingFeatures": ["schema ALTER on production table", "database under live write traffic"],
+      "loadBearingDifferences": [
+        "2026 plan uses dedicated maintenance window",
+        "table is 12 GB vs 500 GB — 40x smaller",
+        "read replica promotion eliminates write traffic during ALTER"
+      ],
+      "verdictApplies": false,
+      "verdictRationale": "The structural failure mode (live migration without lock_timeout) is not present in the 2026 plan. Load-bearing differences eliminate the known failure mechanism."
+    }
+  ],
+  "causalChains": [
+    {
+      "id": "cc1",
+      "name": "2024 failure causal chain",
+      "links": [
+        {
+          "cause": "no_maintenance_window",
+          "effect": "table_lock_contention",
+          "mechanism": "ALTER TABLE acquires exclusive lock; concurrent writes queue indefinitely without lock_timeout",
+          "confidence": 0.93,
+          "timelag": "immediate",
+          "evidence": ["postmortem_2024"]
+        }
+      ],
+      "confidence": 0.93,
+      "alternativeExplanations": ["Underlying disk I/O saturation may have prolonged lock hold time"]
+    }
+  ],
+  "aggregateReliability": 0.85
+}

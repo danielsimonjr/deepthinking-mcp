@@ -1,0 +1,141 @@
+{
+  "mode": "abductive",
+  "observations": [
+    {
+      "id": "o1",
+      "description": "Analytics dashboard returns 503 errors exclusively on Tuesday mornings between 9:00 AM and 10:00 AM",
+      "confidence": 0.97
+    },
+    {
+      "id": "o2",
+      "description": "Error rate returns to zero by 10:05 AM with no manual intervention",
+      "confidence": 0.95
+    },
+    {
+      "id": "o3",
+      "description": "Affected endpoint is /api/reports/dashboard — other API endpoints remain healthy during the same window",
+      "confidence": 0.92
+    },
+    {
+      "id": "o4",
+      "description": "Database CPU spikes to 95% during the 9–10 AM Tuesday window; normal the rest of the week",
+      "confidence": 0.88
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "h1",
+      "explanation": "A weekly scheduled ETL job runs at 9 AM every Tuesday and saturates the database, crowding out dashboard queries",
+      "assumptions": [
+        "A cron job or scheduler fires at 09:00 on Tuesdays specifically",
+        "The job issues heavy read/write queries that compete with dashboard query traffic",
+        "The connection pool is shared between the scheduled job and the dashboard API"
+      ],
+      "predictions": [
+        "Cron job logs show a Tuesday 09:00 entry corresponding to a long-running query",
+        "Disabling or rescheduling the job would eliminate the 503 window",
+        "Database slow-query logs show the same tables used by both the job and the dashboard"
+      ],
+      "score": 0.82
+    },
+    {
+      "id": "h2",
+      "explanation": "The weekly BI report pipeline materializes results at Tuesday 9 AM, causing write-heavy lock contention on the reports table",
+      "assumptions": [
+        "BI report materialization writes to the same reports table the dashboard reads from",
+        "Table-level or row-level locks are held during materialization",
+        "The dashboard's SELECT queries time out waiting for the lock to release"
+      ],
+      "predictions": [
+        "Database lock-wait logs show contention on the reports table between 09:00 and 10:00 on Tuesdays",
+        "Shifting the BI pipeline to run at 6 AM would move or eliminate the 503 window",
+        "Adding a read replica and routing dashboard reads there would bypass the lock"
+      ],
+      "score": 0.71
+    },
+    {
+      "id": "h3",
+      "explanation": "Application cache is flushed every Monday night, causing a cache cold-start stampede on Tuesday morning when users hit the dashboard simultaneously",
+      "assumptions": [
+        "The dashboard relies on a cache layer that is cleared on Monday nights",
+        "User traffic surges at 9 AM Tuesday (start of business week)",
+        "Cache misses fall through to expensive database queries, overwhelming the DB"
+      ],
+      "predictions": [
+        "Cache hit-rate metrics show near-zero Tuesday 9–9:30 AM, recovering by 9:45 AM",
+        "Pre-warming the cache before 9 AM Tuesday would reduce or eliminate the errors"
+      ],
+      "score": 0.34
+    }
+  ],
+  "evaluationCriteria": {
+    "parsimony": 0.75,
+    "explanatoryPower": 0.88,
+    "plausibility": 0.82,
+    "testability": true
+  },
+  "evidence": [
+    {
+      "hypothesisId": "h1",
+      "type": "supporting",
+      "description": "Application logs show a `weekly_etl_job` entry starting at 09:00:02 every Tuesday for the past six weeks",
+      "strength": 0.85
+    },
+    {
+      "hypothesisId": "h2",
+      "type": "supporting",
+      "description": "Database slow-query log shows a 47-minute INSERT … SELECT on the `report_snapshots` table starting at 09:00 every Tuesday",
+      "strength": 0.78
+    },
+    {
+      "hypothesisId": "h3",
+      "type": "contradicting",
+      "description": "Cache monitoring shows hit rates are normal (>90%) at 9 AM Tuesday — no evidence of a cold-start stampede",
+      "strength": 0.72
+    }
+  ],
+  "bestExplanation": {
+    "id": "h1",
+    "explanation": "A weekly scheduled ETL job runs at 9 AM every Tuesday and saturates the database, crowding out dashboard queries",
+    "assumptions": [
+      "A cron job or scheduler fires at 09:00 on Tuesdays specifically",
+      "The job issues heavy read/write queries that compete with dashboard query traffic",
+      "The connection pool is shared between the scheduled job and the dashboard API"
+    ],
+    "predictions": [
+      "Cron job logs show a Tuesday 09:00 entry corresponding to a long-running query",
+      "Disabling or rescheduling the job would eliminate the 503 window",
+      "Database slow-query logs show the same tables used by both the job and the dashboard"
+    ],
+    "score": 0.82
+  },
+  "abductionSteps": [
+    {
+      "stepNumber": 1,
+      "stepSummary": "Triggered by the Tuesday-only 503 window (o1) and the narrow temporal pattern (o2). Reasoned backward from the observed pattern to enumerate the plausible root-cause classes: compute contention (ETL saturation), lock contention (BI materialization), and cold-start (cache flush).",
+      "abductionMethod": "retroduction",
+      "triggerObservation": "o1",
+      "hypothesesGenerated": ["h1", "h2", "h3"],
+      "hypothesesEliminated": [],
+      "stepsUsed": []
+    },
+    {
+      "stepNumber": 2,
+      "stepSummary": "Checked cache monitoring dashboards for the predicted cold-start signature on a Tuesday morning. Hit rates were normal (>90%) — the prediction that h3 relies on is falsified, so h3 is ruled out as the primary cause.",
+      "abductionMethod": "hypothetico-deductive",
+      "triggerObservation": null,
+      "hypothesesGenerated": [],
+      "hypothesesEliminated": ["h3"],
+      "stepsUsed": [1]
+    },
+    {
+      "stepNumber": 3,
+      "stepSummary": "With h3 eliminated, compared h1 (ETL job) and h2 (BI lock contention). Both are supported by direct log evidence, but h1's log entry aligns with the exact 09:00:02 Tuesday start and the database CPU spike timing (o4) while h2's lock-wait signature would produce a different metric profile. h1 is the best explanation — commit.",
+      "abductionMethod": "ibe",
+      "triggerObservation": "o4",
+      "hypothesesGenerated": [],
+      "hypothesesEliminated": [],
+      "stepsUsed": [1, 2]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SWOTThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "strengths",
+    "weaknesses",
+    "opportunities",
+    "threats"
+  ],
+  "properties": {
+    "mode": {
+      "const": "swot"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "strengths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "weaknesses": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "opportunities": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "threats": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommendation": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

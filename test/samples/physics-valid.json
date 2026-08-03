@@ -1,0 +1,45 @@
+{
+  "mode": "physics",
+  "thoughtType": "tensor_formulation",
+  "tensorProperties": {
+    "rank": [0, 2],
+    "components": "F_{μν} = ∂_μA_ν - ∂_νA_μ",
+    "latex": "F_{\\mu\\nu} = \\partial_\\mu A_\\nu - \\partial_\\nu A_\\mu",
+    "symmetries": [
+      "antisymmetric: F_{μν} = -F_{νμ}",
+      "6 independent components in 4D Minkowski spacetime"
+    ],
+    "invariants": [
+      "F_{μν}F^{μν} = 2(B² - E²/c²) (Lorentz scalar)",
+      "F_{μν}*F^{μν} ∝ E·B (pseudoscalar)"
+    ],
+    "transformation": "covariant",
+    "indexStructure": "(0,2) antisymmetric tensor",
+    "coordinateSystem": "Minkowski"
+  },
+  "physicalInterpretation": {
+    "quantity": "electromagnetic field tensor",
+    "units": "V/m = kg·m·A⁻¹·s⁻³ (SI)",
+    "conservationLaws": [
+      "∂_μF^{μν} = μ₀J^ν (inhomogeneous Maxwell equations)",
+      "∂_{[μ}F_{νρ]} = 0 (homogeneous Maxwell / Bianchi identity)"
+    ],
+    "constraints": [
+      "gauge freedom: A_μ → A_μ + ∂_μλ leaves F_{μν} unchanged"
+    ],
+    "observables": [
+      "electric field E^i = F^{0i}",
+      "magnetic field B^i = -½ε^{ijk}F_{jk}"
+    ]
+  },
+  "dependencies": [
+    "Maxwell equations in covariant form",
+    "definition of vector potential A_μ",
+    "Minkowski metric η_{μν}"
+  ],
+  "assumptions": [
+    "flat spacetime (special relativity, no gravity)",
+    "SI units throughout"
+  ],
+  "uncertainty": 0.02
+}

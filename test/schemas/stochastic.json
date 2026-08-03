@@ -1,0 +1,320 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "StochasticThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "processType",
+    "stepCount"
+  ],
+  "properties": {
+    "mode": {
+      "const": "stochastic"
+    },
+    "processType": {
+      "type": "string",
+      "enum": [
+        "discrete_markov_chain",
+        "continuous_markov_chain",
+        "random_walk",
+        "monte_carlo",
+        "queueing"
+      ]
+    },
+    "stepCount": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "currentState": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "stateHistory": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "isAbsorbing",
+          "isTransient"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "probability": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "isAbsorbing": {
+            "type": "boolean"
+          },
+          "isTransient": {
+            "type": "boolean"
+          },
+          "expectedTime": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "transitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "probability"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "minLength": 1
+          },
+          "to": {
+            "type": "string",
+            "minLength": 1
+          },
+          "probability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "rate": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "condition": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "markovChain": {
+      "type": "object",
+      "required": [
+        "id",
+        "states",
+        "transitionMatrix",
+        "initialDistribution",
+        "isIrreducible",
+        "isAperiodic",
+        "isErgodic"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "states": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "transitionMatrix": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "initialDistribution": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "stationaryDistribution": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "isIrreducible": {
+          "type": "boolean"
+        },
+        "isAperiodic": {
+          "type": "boolean"
+        },
+        "isErgodic": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "randomVariables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "distribution",
+          "parameters"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "distribution": {
+            "type": "string",
+            "enum": [
+              "Exponential",
+              "Poisson",
+              "Normal",
+              "Uniform",
+              "Binomial",
+              "Geometric",
+              "Gamma",
+              "Beta",
+              "Bernoulli"
+            ]
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "samples": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "mean": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "variance": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "simulations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "runNumber",
+          "steps",
+          "finalState",
+          "stateHistory",
+          "statistics"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "runNumber": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "steps": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "finalState": {
+            "type": "string"
+          },
+          "stateHistory": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statistics": {
+            "type": "object",
+            "required": [
+              "meanTime",
+              "variance",
+              "confidence95"
+            ],
+            "properties": {
+              "meanTime": {
+                "type": "number"
+              },
+              "variance": {
+                "type": "number"
+              },
+              "confidence95": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "convergenceRate": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

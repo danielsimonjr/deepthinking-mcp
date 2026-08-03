@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ScientificMethodThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "question",
+    "nullHypothesis",
+    "alternativeHypothesis",
+    "falsifiable",
+    "experimentType",
+    "independentVariables",
+    "dependentVariables",
+    "controlVariables",
+    "procedure",
+    "successCriteria"
+  ],
+  "properties": {
+    "mode": {
+      "const": "scientificmethod"
+    },
+    "question": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nullHypothesis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "alternativeHypothesis": {
+      "type": "string",
+      "minLength": 1
+    },
+    "falsifiable": {
+      "type": "boolean"
+    },
+    "experimentType": {
+      "type": "string",
+      "enum": [
+        "experimental",
+        "quasi_experimental",
+        "observational",
+        "correlational"
+      ]
+    },
+    "independentVariables": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "dependentVariables": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "controlVariables": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "procedure": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "successCriteria": {
+      "type": "string",
+      "minLength": 1
+    },
+    "result": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "conclusion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "confidence": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "falsificationCriteria": {
+      "type": [
+        "string",
+        "object",
+        "array",
+        "null"
+      ],
+      "description": "What observation would falsify the hypothesis"
+    }
+  },
+  "additionalProperties": false
+}

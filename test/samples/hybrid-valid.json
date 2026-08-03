@@ -1,0 +1,18 @@
+{
+  "mode": "hybrid",
+  "thoughtNumber": 1,
+  "totalThoughts": 4,
+  "content": "This decision requires three incommensurable lenses. (1) Causal: will rewriting in Rust actually cause the safety and performance outcomes we expect, or are the failure modes in our auth system elsewhere? (2) Bayesian: given our team's current Rust proficiency, what is the posterior probability of shipping on time without regressions? (3) Shannon/constraints: what are the hard constraints—migration window, zero-downtime requirement, backward compatibility of JWTs—that any solution must satisfy regardless of language? Selecting primaryMode=sequential to frame the overall decision chain; secondaryFeatures draws on causal and bayesian lenses at each step.",
+  "nextThoughtNeeded": true,
+  "primaryMode": "sequential",
+  "secondaryFeatures": ["causal", "bayesian", "shannon"],
+  "thoughtType": "mode_selection",
+  "uncertainty": 0.65,
+  "dependencies": [],
+  "assumptions": [
+    "team has 2 engineers with production Rust experience",
+    "current auth system has documented failure modes",
+    "migration must be zero-downtime and backward-compatible"
+  ],
+  "switchReason": "The rewrite decision spans safety (causal), probability of success (bayesian), and hard constraints (shannon); no single mode is sufficient."
+}

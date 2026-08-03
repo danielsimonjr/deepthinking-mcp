@@ -1,0 +1,67 @@
+{
+  "mode": "analogical",
+  "sourceDomain": {
+    "id": "cpu-cache",
+    "name": "CPU Cache",
+    "description": "L1/L2/L3 cache hierarchy in modern CPUs — small, fast memory sitting between registers and RAM",
+    "entities": [
+      { "id": "e1", "name": "Cache Miss", "type": "event", "description": "Requested data not in cache — must fetch from slower memory" },
+      { "id": "e2", "name": "Eviction Policy", "type": "policy", "description": "LRU — the least-recently-used entry is evicted when cache is full" },
+      { "id": "e3", "name": "Cache Hit Rate", "type": "metric", "description": "Fraction of requests served from cache; high rate means low latency" },
+      { "id": "e4", "name": "Cache Line", "type": "unit", "description": "Fixed-size block fetched atomically; locality of reference boosts efficiency" }
+    ],
+    "relations": [
+      { "id": "r1", "type": "triggers", "from": "e1", "to": "e2", "description": "A miss may trigger eviction if space must be made" }
+    ],
+    "properties": []
+  },
+  "targetDomain": {
+    "id": "app-cache",
+    "name": "Application Cache Layer",
+    "description": "Redis/Memcached layer serving a web application — sits between app servers and the primary database",
+    "entities": [
+      { "id": "t1", "name": "Cache Miss", "type": "event", "description": "Key not found in Redis — application falls through to the database" },
+      { "id": "t2", "name": "TTL / Eviction Policy", "type": "policy", "description": "maxmemory-policy (allkeys-lru) — expired or least-recently-used keys evicted on memory pressure" },
+      { "id": "t3", "name": "Hit Rate", "type": "metric", "description": "Percentage of requests answered from cache without hitting the DB" },
+      { "id": "t4", "name": "Cache Granularity", "type": "unit", "description": "Size of cached objects; over-large objects waste memory; too-small objects cause excess chatter" }
+    ],
+    "relations": [
+      { "id": "tr1", "type": "triggers", "from": "t1", "to": "t2", "description": "Cache miss under memory pressure triggers eviction of LRU entries" }
+    ],
+    "properties": []
+  },
+  "mappings": [
+    { "sourceEntityId": "e1", "targetEntityId": "t1", "justification": "Both represent the failure to find the requested item in fast storage, forcing a slower retrieval", "confidence": 0.97 },
+    { "sourceEntityId": "e2", "targetEntityId": "t2", "justification": "Both use an LRU-based policy to decide which data to discard when capacity is exhausted", "confidence": 0.90 },
+    { "sourceEntityId": "e3", "targetEntityId": "t3", "justification": "Hit rate is the primary performance indicator in both systems — high rate = low latency overhead", "confidence": 0.95 },
+    { "sourceEntityId": "e4", "targetEntityId": "t4", "justification": "Both have a fundamental unit of data transfer; locality-of-reference benefits translate across domains", "confidence": 0.75 }
+  ],
+  "insights": [
+    {
+      "description": "Warming the cache after deployment is the app-layer equivalent of a CPU cache cold-start after power-on",
+      "sourceEvidence": "CPU caches start cold; the first round of instructions pays full memory-access penalty",
+      "targetApplication": "Plan for a warm-up period after Redis restarts; route a pre-heat script before live traffic",
+      "novelty": 0.65
+    },
+    {
+      "description": "Caching objects larger than optimal granularity wastes capacity just as large cache lines can waste CPU bandwidth",
+      "sourceEvidence": "Cache-line pollution is a known CPU performance pitfall when accessing sparse fields of a large struct",
+      "targetApplication": "Store fine-grained cache keys (per-entity) rather than serializing entire result sets unless they are always accessed together",
+      "novelty": 0.70
+    }
+  ],
+  "inferences": [
+    {
+      "sourcePattern": "Prefetching adjacent cache lines improves throughput when access is sequential",
+      "targetPrediction": "Pre-warming related keys (e.g., the next page of paginated results) should improve P99 latency for browsing users",
+      "confidence": 0.72,
+      "needsVerification": true
+    }
+  ],
+  "limitations": [
+    "CPU caches are hardware-managed and deterministic; Redis eviction is heuristic and approximate",
+    "CPU cache size is fixed at chip design time; Redis can be scaled horizontally — the analogy breaks down for capacity planning",
+    "Cache coherence across multiple CPUs has no clean analogue in single-node Redis; distributed caching needs a separate model"
+  ],
+  "analogyStrength": 0.83
+}

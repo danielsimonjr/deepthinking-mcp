@@ -1,0 +1,92 @@
+{
+  "mode": "metareasoning",
+  "currentStrategy": {
+    "mode": "sequential",
+    "approach": "Iterative step-by-step decomposition with revision, cycling through the problem space in linear order",
+    "thoughtsSpent": 6,
+    "progressIndicators": [
+      "6 thoughts elapsed without reaching a stable conclusion or narrowing to a single answer",
+      "No convergence signal detected \u2014 thoughts have not collapsed hypothesis space",
+      "Likely symptom: revisiting similar sub-conclusions or generating competing explanations without discriminating between them",
+      "Sequential mode has exhausted initial structural decomposition; additional steps would produce diminishing returns"
+    ]
+  },
+  "strategyEvaluation": {
+    "effectiveness": 0.38,
+    "efficiency": 0.32,
+    "confidence": 0.42,
+    "progressRate": 0.28,
+    "qualityScore": 0.4,
+    "issues": [
+      "Six thoughts without convergence exceeds the rule-of-thumb threshold (N \u2265 6 for complex problems) \u2014 this is a confirmed stall",
+      "Sequential mode enumerates breadth but does not force discriminating comparisons between competing explanations",
+      "Linear step-by-step structure cannot score rival hypotheses against each other \u2014 it treats them as additive rather than exclusive",
+      "If the problem has hidden feedback loops or causal entanglement, sequential framing may be structurally incorrect for this domain"
+    ],
+    "strengths": [
+      "Sequential mode will have produced a comprehensive inventory of candidate causes or considerations \u2014 this work is not wasted",
+      "Step-by-step decomposition has likely ruled out some low-probability branches",
+      "The trace of 6 thoughts provides a structured record of what has been considered"
+    ]
+  },
+  "alternativeStrategies": [
+    {
+      "mode": "abductive",
+      "reasoning": "If two or more competing explanations have emerged from sequential enumeration, abductive mode is structurally the correct next step \u2014 it forces generation of discriminating predictions per hypothesis and explicit scoring, which is precisely what sequential mode cannot do",
+      "expectedBenefit": "Convergence to a single best-supported explanation within 2\u20134 thoughts, with explicit evidence scores replacing open-ended enumeration",
+      "switchingCost": 0.2,
+      "recommendationScore": 0.9
+    },
+    {
+      "mode": "shannon",
+      "reasoning": "If the problem has not produced any competing hypotheses at all, the failure mode may be under-scoped uncertainty \u2014 Shannon information-theoretic decomposition forces explicit tracking of which unknowns remain and how much each reduces entropy, preventing aimless enumeration",
+      "expectedBenefit": "Converts vague exploration into a directed reduction of the highest-uncertainty variables, making progress measurable",
+      "switchingCost": 0.3,
+      "recommendationScore": 0.72
+    },
+    {
+      "mode": "causal",
+      "reasoning": "If the problem involves multiple interacting factors whose relationships have been unclear throughout, causal mode builds an explicit directed graph of cause-effect relationships \u2014 eliminating false correlations and surfacing the actual intervention point",
+      "expectedBenefit": "Identifies root mechanisms rather than surface symptoms; halts circular revisiting of co-occurring effects",
+      "switchingCost": 0.4,
+      "recommendationScore": 0.65
+    },
+    {
+      "mode": "hybrid",
+      "reasoning": "If the problem has genuinely orthogonal dimensions (e.g., technical + strategic + ethical) that sequential mode conflated into a single thread, hybrid mode explicitly runs sub-modes in parallel lanes, preventing cross-contamination of reasoning types",
+      "expectedBenefit": "Each dimension converges independently; prevents one dimension's uncertainty from blocking another's resolution",
+      "switchingCost": 0.5,
+      "recommendationScore": 0.55
+    }
+  ],
+  "recommendation": {
+    "action": "SWITCH",
+    "targetMode": "abductive",
+    "justification": "Six sequential thoughts without convergence is the canonical failure signal documented in the metareasoning trigger criteria. The most common structural cause is that sequential enumeration has surfaced 2+ competing explanations that require direct discriminating comparison \u2014 which sequential mode cannot perform. Abductive mode is purpose-built for this exact structure: it assigns each hypothesis testable predictions, collects evidence, and forces an explicit best-explanation verdict. If no competing hypotheses emerged (pure uncertainty), fall back to shannon instead.",
+    "confidence": 0.84,
+    "expectedImprovement": "A well-formed abductive run over the existing candidate inventory should reach a scored conclusion within 2\u20134 thoughts rather than continuing to enumerate. The candidate list from 6 sequential thoughts becomes free input to abductive \u2014 no rework required."
+  },
+  "resourceAllocation": {
+    "thoughtsRemaining": 6,
+    "complexityLevel": "medium",
+    "urgency": "medium",
+    "recommendation": "Stop sequential immediately \u2014 past thought 4, additional sequential steps on a stalled problem add noise, not signal. Switch to abductive using the existing candidate inventory as pre-filled hypotheses. If abductive stalls after 3 thoughts (rare), escalate to hybrid or causal \u2014 do not return to sequential."
+  },
+  "qualityMetrics": {
+    "logicalConsistency": 0.72,
+    "evidenceQuality": 0.5,
+    "completeness": 0.55,
+    "originality": 0.38,
+    "clarity": 0.68,
+    "overallQuality": 0.57
+  },
+  "sessionContext": {
+    "sessionId": "sess-metareasoning-2026-04-12",
+    "totalThoughts": 6,
+    "modesUsed": [
+      "sequential"
+    ],
+    "modeSwitches": 0,
+    "problemType": "reasoning-mode-self-audit"
+  }
+}

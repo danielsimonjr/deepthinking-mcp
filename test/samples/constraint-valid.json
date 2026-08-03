@@ -1,0 +1,56 @@
+{
+  "mode": "constraint",
+  "problem": "Assign three engineers to three project roles with hard eligibility and specialization constraints",
+  "variables": [
+    { "id": "alice", "name": "Alice's role", "domain": ["frontend", "backend", "devops"] },
+    { "id": "bob",   "name": "Bob's role",   "domain": ["frontend", "backend", "devops"] },
+    { "id": "carol", "name": "Carol's role", "domain": ["frontend", "backend", "devops"] }
+  ],
+  "constraints": [
+    {
+      "id": "c1",
+      "type": "not_in",
+      "variables": ["alice"],
+      "expression": "alice != devops",
+      "description": "Alice lacks DevOps certification and cannot be assigned that role"
+    },
+    {
+      "id": "c2",
+      "type": "equals",
+      "variables": ["bob"],
+      "expression": "bob == backend",
+      "description": "Bob is the only engineer with the required database specialization"
+    },
+    {
+      "id": "c3",
+      "type": "alldiff",
+      "variables": ["alice", "bob", "carol"],
+      "expression": "alldiff(alice, bob, carol)",
+      "description": "Each person must receive exactly one distinct role"
+    }
+  ],
+  "propagation": {
+    "method": "arc_consistency",
+    "reducedDomains": {
+      "alice": ["frontend"],
+      "bob":   ["backend"],
+      "carol": ["devops"]
+    },
+    "steps": [
+      "c2 fixes bob=backend; bob's domain reduced to [backend]",
+      "c3 alldiff removes 'backend' from alice and carol's domains",
+      "c1 removes 'devops' from alice's domain; alice's domain = [frontend]",
+      "c3 alldiff removes 'frontend' from carol's domain; carol's domain = [devops]"
+    ]
+  },
+  "solution": {
+    "status": "found",
+    "assignments": {
+      "alice": "frontend",
+      "bob":   "backend",
+      "carol": "devops"
+    },
+    "backtracks": 0
+  },
+  "analysis": "Arc consistency alone fully solved this CSP without any backtracking. The equality constraint on Bob (c2) immediately fixed his value, which propagated through the alldiff constraint (c3) to eliminate 'backend' from Alice and Carol's domains. Combined with Alice's ineligibility for DevOps (c1), only one valid assignment remained. The solution is unique — no alternative satisfies all three constraints. This is a feasibility result only: if Carol prefers Frontend over DevOps, that preference cannot be honored without violating c1 or c2, and an Optimization model with soft constraints would be needed to explore that tradeoff."
+}

@@ -1,0 +1,15 @@
+{
+  "mode": "abductive",
+  "observations": [
+    { "id": "o1", "description": "Error appears Tuesday mornings only", "confidence": 0.95 }
+  ],
+  "hypotheses": [
+    {
+      "id": "h1",
+      "explanation": "Weekly ETL job saturates DB",
+      "assumptions": ["job runs Tuesday 9 AM"],
+      "predictions": ["DB CPU spike at 09:00"],
+      "score": 0.85
+    }
+  ]
+}

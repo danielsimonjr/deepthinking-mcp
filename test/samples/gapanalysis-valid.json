@@ -1,0 +1,34 @@
+{
+  "mode": "gapanalysis",
+  "currentState": "On-call incident response is ad hoc: alerts page whoever is awake via a shared Slack channel, there are no written runbooks, and postmortems happen inconsistently (roughly 1 in 4 incidents gets one) with no tracked follow-up actions.",
+  "desiredState": "A mature incident response process: alerts route through a formal on-call rotation with escalation policies, every recurring incident type has a written runbook, every SEV1/SEV2 incident gets a blameless postmortem within 5 business days, and postmortem action items are tracked to closure.",
+  "gaps": [
+    {
+      "dimension": "Alerting and escalation",
+      "current": "Alerts post to a shared Slack channel with no defined owner or escalation path",
+      "desired": "Formal on-call rotation with tiered escalation policies and paging SLAs",
+      "gap": "No ownership model or escalation tooling exists today",
+      "action": "Adopt a paging tool (e.g., PagerDuty or Opsgenie) and define a rotation with 2 escalation tiers within one quarter"
+    },
+    {
+      "dimension": "Runbooks",
+      "current": "Zero written runbooks; tribal knowledge lives in senior engineers' heads",
+      "desired": "Every recurring incident type (top 10 by frequency) has a written, tested runbook",
+      "gap": "10 runbooks need to be authored and validated against real incidents",
+      "action": "Mine the last 6 months of incidents for the top 10 recurring types and assign one runbook per engineer per sprint"
+    },
+    {
+      "dimension": "Postmortem discipline",
+      "current": "Only ~25% of incidents get a postmortem, and none have tracked follow-up actions",
+      "desired": "100% of SEV1/SEV2 incidents get a blameless postmortem within 5 business days, with action items tracked to closure",
+      "gap": "No enforced postmortem trigger and no action-item tracking system",
+      "action": "Make postmortems a mandatory exit criterion for closing a SEV1/SEV2 incident ticket, and track action items in the existing issue tracker with a due date"
+    }
+  ],
+  "actionPlan": [
+    "Quarter 1: stand up the paging tool and on-call rotation with 2 escalation tiers",
+    "Quarter 1-2: author and validate the top 10 runbooks, one per engineer per sprint",
+    "Quarter 1: make postmortems mandatory for SEV1/SEV2 closure and start tracking action items in the issue tracker",
+    "Quarter 2: audit postmortem completion rate and action-item closure rate; target 100% and 90% respectively"
+  ]
+}

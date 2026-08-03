@@ -1,0 +1,48 @@
+{
+  "mode": "computability",
+  "thoughtType": "decidability_proof",
+  "currentProblem": {
+    "id": "halting_problem",
+    "name": "The Halting Problem (HALT_TM)",
+    "description": "Given an encoding of a Turing machine M and a string w, does M halt on input w?",
+    "inputFormat": "Encoding ⟨M, w⟩ where M is a Turing machine and w is a string over M's input alphabet",
+    "question": "Does M halt on input w?",
+    "yesInstances": [
+      "⟨M_accept_all, ε⟩ where M_accept_all transitions immediately to qaccept",
+      "⟨M_palindrome, 'aba'⟩ where M_palindrome decides palindromes and 'aba' is one"
+    ],
+    "noInstances": [
+      "⟨M_loop, ε⟩ where M_loop has no accepting transitions and loops forever",
+      "⟨M_count, '10'⟩ where M_count loops on inputs that are not powers of 2"
+    ],
+    "decidabilityStatus": "semi_decidable",
+    "reducesTo": [],
+    "reducesFrom": ["ATM"]
+  },
+  "decidabilityProof": {
+    "id": "halt_undecidability_proof",
+    "problem": "The Halting Problem (HALT_TM)",
+    "conclusion": "undecidable",
+    "method": "diagonalization"
+  },
+  "diagonalization": {
+    "id": "turing_1936",
+    "enumeration": {
+      "description": "Enumerate all Turing machines M₁, M₂, M₃, … using a standard encoding",
+      "indexSet": "ℕ (natural numbers used as machine indices)",
+      "enumeratedObjects": "All Turing machines over a fixed alphabet Σ"
+    }
+  },
+  "dependencies": [
+    "definition of Turing machine",
+    "existence of universal Turing machine (UTM)",
+    "Church-Turing thesis",
+    "ability to enumerate all Turing machines"
+  ],
+  "assumptions": [
+    "Turing machine model captures all effective computation (Church-Turing thesis)",
+    "A Turing machine can be encoded as a string over a finite alphabet"
+  ],
+  "uncertainty": 0.01,
+  "keyInsight": "Assume decider H exists for HALT_TM. Construct D: on input ⟨M⟩, run H on ⟨M, ⟨M⟩⟩; if H says M halts on ⟨M⟩ then loop, else accept. Running D on ⟨D⟩ yields: D halts iff D does not halt — contradiction. Therefore H cannot exist and HALT_TM is undecidable."
+}

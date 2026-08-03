@@ -1,0 +1,170 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ConstraintThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "problem",
+    "variables",
+    "constraints",
+    "solution",
+    "analysis"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "mode": {
+      "const": "constraint"
+    },
+    "problem": {
+      "type": "string",
+      "minLength": 1
+    },
+    "variables": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "domain"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "domain": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": [
+                "string",
+                "number"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "variables",
+          "expression",
+          "description"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1
+          },
+          "variables": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "expression": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "propagation": {
+      "type": "object",
+      "required": [
+        "method",
+        "reducedDomains"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "arc_consistency",
+            "forward_checking",
+            "full_lookahead",
+            "none"
+          ]
+        },
+        "reducedDomains": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": [
+                "string",
+                "number"
+              ]
+            }
+          }
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "solution": {
+      "type": "object",
+      "required": [
+        "status",
+        "assignments",
+        "backtracks"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "found",
+            "infeasible",
+            "searching",
+            "timeout"
+          ]
+        },
+        "assignments": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number"
+            ]
+          }
+        },
+        "backtracks": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "analysis": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

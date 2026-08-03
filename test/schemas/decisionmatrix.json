@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "DecisionMatrixThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "options",
+    "criteria",
+    "scores",
+    "recommendation"
+  ],
+  "properties": {
+    "mode": {
+      "const": "decisionmatrix"
+    },
+    "options": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "string"
+      }
+    },
+    "criteria": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "weight"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "scores": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "option",
+          "perCriterion",
+          "total"
+        ],
+        "properties": {
+          "option": {
+            "type": "string"
+          },
+          "perCriterion": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          },
+          "total": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "recommendation": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

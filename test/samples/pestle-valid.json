@@ -1,0 +1,33 @@
+{
+  "mode": "pestle",
+  "subject": "Expanding our grocery delivery service from the US into the EU market",
+  "political": [
+    "EU digital services regulation (DSA) imposes new content-moderation and marketplace-transparency obligations not present in the US",
+    "Several target countries have strong labor unions with historical influence over gig-economy delivery worker classification"
+  ],
+  "economic": [
+    "Euro-to-dollar exchange rate volatility over the past 18 months complicates unit-economics forecasting",
+    "Fuel and last-mile delivery costs are structurally higher in dense European city centers than in US suburban markets"
+  ],
+  "social": [
+    "European consumers show stronger existing loyalty to established local grocery delivery incumbents",
+    "Sustainability and packaging-waste concerns are a larger purchase driver among EU shoppers than US shoppers"
+  ],
+  "technological": [
+    "GDPR-compliant data infrastructure must be stood up before any EU customer data is processed",
+    "Our current routing algorithm was tuned for US grid-style city layouts and underperforms in older European street networks"
+  ],
+  "legal": [
+    "EU gig-worker classification rules (the Platform Work Directive) may require reclassifying delivery drivers as employees rather than contractors",
+    "Country-by-country VAT registration is required before invoicing customers in each EU member state"
+  ],
+  "environmental": [
+    "Several target cities have low-emission zones that restrict combustion-engine delivery vehicles from entering city centers",
+    "EU packaging regulations require a higher proportion of recyclable materials in delivery packaging than current US suppliers provide"
+  ],
+  "keyFactors": [
+    "GDPR-compliant infrastructure and country-by-country VAT registration are hard prerequisites before any EU launch",
+    "Gig-worker classification risk under the Platform Work Directive could materially change the delivery-driver cost model",
+    "Low-emission zone restrictions require an EV or bicycle-courier fleet strategy in city centers, not a straight port of the US vehicle mix"
+  ]
+}

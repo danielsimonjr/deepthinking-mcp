@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.2.0] - 2026-08-03
+
+### Added
+
+- **Absorbed `deepthinking-plugin` — this is now one plugin, not two.** Splitting the reasoning
+  methodology across an MCP server and a separate skills plugin was the wrong shape; both halves
+  now ship from here. Transferred in full:
+  - **2 slash commands** — `/think` and `/think-render` (`commands/`)
+  - **14 reasoning skills covering 46 modes** (`skills/`, 38 files), including the
+    `think-frameworks` set the MCP server never implemented (SWOT, decision matrix, 5 Whys,
+    fishbone, PESTLE, force-field, Pareto, stakeholder, gap/risk analysis, cost-benefit)
+  - **1 subagent** — `visual-exporter` (`agents/`)
+  - **2 render scripts** — `render-diagram.py`, `render-html-dashboard.py` (`scripts/`)
+  - **106 reference files** (`reference/`) — 46 per-mode visual grammars, 11 format grammars,
+    46 output-format specs, the taxonomy, and the HTML dashboard template
+  - **186 test files** (`test/`) — the Python harness, skill-invariant/frontmatter/grammar checks,
+    and the mode smoke runners
+  - Plugin design docs under `docs/skills/`, plus its CHANGELOG preserved as
+    `docs/skills/CHANGELOG-deepthinking-plugin.md`
+
+  Everything kept its original **top-level path** deliberately: `agents/visual-exporter.md` and
+  `commands/think-render.md` resolve `reference/visual-grammar/<mode>.md` and
+  `scripts/render-diagram.py` by relative path, so relocating them under a subdirectory would have
+  broken every visual export silently. Verified post-move: all 46 mode grammars, 11 format
+  grammars and both scripts resolve.
+
+### Changed
+
+- **Slash commands are now namespaced `/deepthinking-mcp:*`** (was `/deepthinking-plugin:*`).
+  The smoke runners under `test/smoke/` were updated accordingly. A personal alias keeps bare
+  `/think` and `/think-render` working.
+- `.claude-plugin/plugin.json` gained the `author`/`license`/`keywords`/`repository` fields that
+  the transferred `test/test_plugin_json.py` enforces — those tests now guard this manifest too.
+
 ## [9.1.4] - 2026-08-03
 
 ### Changed

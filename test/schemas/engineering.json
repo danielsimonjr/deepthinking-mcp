@@ -1,0 +1,573 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EngineeringThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "analysisType",
+    "designChallenge"
+  ],
+  "properties": {
+    "mode": {
+      "const": "engineering"
+    },
+    "analysisType": {
+      "type": "string",
+      "enum": [
+        "requirements",
+        "trade-study",
+        "fmea",
+        "decision"
+      ]
+    },
+    "designChallenge": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requirements": {
+      "type": "object",
+      "required": [
+        "requirements",
+        "coverage"
+      ],
+      "properties": {
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title",
+              "description",
+              "source",
+              "priority",
+              "status"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string",
+                "enum": [
+                  "stakeholder",
+                  "regulatory",
+                  "technical",
+                  "derived"
+                ]
+              },
+              "priority": {
+                "type": "string",
+                "enum": [
+                  "must",
+                  "should",
+                  "could",
+                  "wont"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "draft",
+                  "approved",
+                  "deprecated",
+                  "deleted"
+                ]
+              },
+              "rationale": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "verificationMethod": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "inspection",
+                  "analysis",
+                  "demonstration",
+                  "test"
+                ]
+              },
+              "verificationCriteria": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "tracesTo": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "satisfiedBy": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "relatedTo": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "coverage": {
+          "type": "object",
+          "required": [
+            "total",
+            "verified",
+            "tracedToSource",
+            "allocatedToDesign"
+          ],
+          "properties": {
+            "total": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "verified": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tracedToSource": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "allocatedToDesign": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "tradeStudy": {
+      "type": "object",
+      "required": [
+        "title",
+        "objective",
+        "alternatives",
+        "criteria",
+        "scores",
+        "recommendation",
+        "justification"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "objective": {
+          "type": "string"
+        },
+        "alternatives": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "description"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "pros": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "cons": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "estimatedCost": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "riskLevel": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "low",
+                  "medium",
+                  "high"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "criteria": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "weight"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "description": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "weight": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "unit": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "higherIsBetter": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "scores": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "alternativeId",
+              "criteriaId",
+              "score",
+              "rationale"
+            ],
+            "properties": {
+              "alternativeId": {
+                "type": "string"
+              },
+              "criteriaId": {
+                "type": "string"
+              },
+              "score": {
+                "type": "number",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "weightedScore": {
+                "type": [
+                  "number",
+                  "null"
+                ]
+              },
+              "rationale": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "recommendation": {
+          "type": "string"
+        },
+        "justification": {
+          "type": "string"
+        },
+        "sensitivityNotes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "fmea": {
+      "type": "object",
+      "required": [
+        "title",
+        "system",
+        "failureModes",
+        "rpnThreshold",
+        "summary"
+      ],
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "system": {
+          "type": "string"
+        },
+        "failureModes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "component",
+              "failureMode",
+              "cause",
+              "effect",
+              "severity",
+              "occurrence",
+              "detection",
+              "rpn"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "component": {
+                "type": "string"
+              },
+              "function": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "failureMode": {
+                "type": "string"
+              },
+              "cause": {
+                "type": "string"
+              },
+              "effect": {
+                "type": "string"
+              },
+              "systemEffect": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "severity": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "occurrence": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "detection": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 10
+              },
+              "rpn": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000
+              },
+              "currentControls": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "mitigation": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "responsible": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "targetDate": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "mitigationStatus": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "open",
+                  "in-progress",
+                  "completed",
+                  "verified"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "rpnThreshold": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "summary": {
+          "type": "object",
+          "required": [
+            "totalModes",
+            "criticalModes",
+            "averageRpn",
+            "maxRpn"
+          ],
+          "properties": {
+            "totalModes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "criticalModes": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "averageRpn": {
+              "type": "number"
+            },
+            "maxRpn": {
+              "type": "integer"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": true
+    },
+    "designDecisions": {
+      "type": "object",
+      "properties": {
+        "decisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "title",
+              "status",
+              "context",
+              "decision",
+              "rationale"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "title": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "proposed",
+                  "accepted",
+                  "deprecated",
+                  "superseded"
+                ]
+              },
+              "context": {
+                "type": "string"
+              },
+              "decision": {
+                "type": "string"
+              },
+              "rationale": {
+                "type": "string"
+              },
+              "consequences": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "alternatives": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "assessment": {
+      "type": "object",
+      "required": [
+        "confidence",
+        "keyRisks",
+        "nextSteps",
+        "openIssues"
+      ],
+      "properties": {
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "keyRisks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "nextSteps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "openIssues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

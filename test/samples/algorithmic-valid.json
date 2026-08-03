@@ -1,0 +1,97 @@
+{
+  "mode": "algorithmic",
+  "thoughtType": "algorithm_selection",
+  "designPattern": "greedy",
+  "clrsCategory": "sorting_order_statistics",
+  "clrsAlgorithm": "heap_select",
+  "algorithm": {
+    "id": "top_k_heap",
+    "name": "Top-K with Min-Heap",
+    "description": "Maintain a min-heap of exactly K elements. For each of N items, push if heap size < K; otherwise compare with heap minimum and swap if new item is larger. Final heap contains top-K.",
+    "category": "Order Statistics",
+    "designPattern": "greedy",
+    "input": {
+      "description": "Stream of N items each with a comparable timestamp",
+      "constraints": ["N = 1,000,000", "K << N (K = 100)", "Items arrive in arbitrary order"],
+      "dataStructure": "Array (streaming)"
+    },
+    "output": {
+      "description": "K items with the largest timestamps",
+      "properties": ["Exactly K items returned", "Items are globally top-K by timestamp"]
+    },
+    "pseudocode": "TOP-K(items, K):\n  h = empty min-heap\n  for each item in items:\n    if |h| < K:\n      HEAP-INSERT(h, item)\n    elif item.timestamp > HEAP-MIN(h).timestamp:\n      HEAP-EXTRACT-MIN(h)\n      HEAP-INSERT(h, item)\n  return h",
+    "timeComplexity": {
+      "bestCase": "Θ(N)",
+      "averageCase": "Θ(N log K)",
+      "worstCase": "O(N log K)",
+      "recurrence": "T(N) = N * O(log K)"
+    },
+    "spaceComplexity": {
+      "auxiliary": "O(K)",
+      "total": "O(N + K)",
+      "inPlace": false
+    },
+    "practical": {
+      "cacheEfficient": true,
+      "parallelizable": false,
+      "stable": false,
+      "deterministic": true
+    },
+    "clrsReference": {
+      "chapter": 9,
+      "section": 1
+    }
+  },
+  "dataStructure": {
+    "name": "Binary Min-Heap",
+    "description": "Fixed-capacity heap of size K tracking the K largest timestamps seen so far",
+    "operations": [
+      { "name": "peek-min", "complexity": "O(1)", "description": "Inspect smallest timestamp in current top-K set" },
+      { "name": "push", "complexity": "O(log K)", "description": "Insert new item and sift up to restore heap property" },
+      { "name": "pop-min", "complexity": "O(log K)", "description": "Remove root (smallest item) and sift down" }
+    ]
+  },
+  "timeComplexity": {
+    "bestCase": "Ω(N)",
+    "averageCase": "Θ(N log K)",
+    "worstCase": "O(N log K)",
+    "amortized": null
+  },
+  "spaceComplexity": {
+    "auxiliary": "O(K)",
+    "total": "O(N + K)",
+    "inPlace": false
+  },
+  "comparison": {
+    "alternatives": [
+      {
+        "name": "Full Sort then slice",
+        "timeComplexity": "O(N log N)",
+        "spaceComplexity": "O(N)",
+        "reason": "Sorts all N items including those that will never appear in output; wasteful when K << N"
+      },
+      {
+        "name": "Quickselect (randomized)",
+        "timeComplexity": "O(N) expected, O(N^2) worst",
+        "spaceComplexity": "O(log N) stack",
+        "reason": "Finds K-th largest in expected O(N) but does not return sorted top-K; poor worst-case without median-of-medians"
+      },
+      {
+        "name": "Max-Heap over all N items",
+        "timeComplexity": "O(N + K log N)",
+        "spaceComplexity": "O(N)",
+        "reason": "Heapify in O(N) then extract-max K times; better when K > N / log N but uses O(N) space"
+      }
+    ],
+    "winner": "top_k_heap",
+    "justification": "For K=100 and N=1M, O(N log K) = O(7N) vs. O(N log N) = O(20N) for full sort — roughly 3x fewer comparisons. Space usage is O(K)=O(100) vs. O(N)=O(1M), critical when items are large objects. Quickselect has better asymptotic time but requires modification to return all K items in order."
+  },
+  "dependencies": [],
+  "assumptions": [
+    "K is known in advance and is small relative to N",
+    "Timestamps are comparable with < operator",
+    "Items can be processed one at a time (streaming acceptable)"
+  ],
+  "uncertainty": 0.05,
+  "keyInsight": "A min-heap lets you evict the smallest of your current top-K candidates in O(log K) per item — you never need to see the full dataset at once and never sort more elements than necessary."
+}

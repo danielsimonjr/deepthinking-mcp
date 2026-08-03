@@ -1,0 +1,119 @@
+```json
+{
+  "mode": "optimization",
+  "problem": {
+    "name": "CPU Core Allocation Across 5 Services",
+    "type": "linear",
+    "description": "Allocate exactly 100 CPU cores across services A–E to maximize total throughput (modeled as T = sum of cores utilized), subject to per-service minimums and a 2:1 capacity ratio between Service A and Service B."
+  },
+  "variables": [
+    {
+      "id": "a",
+      "name": "Cores for Service A",
+      "type": "continuous",
+      "lowerBound": 8,
+      "description": "Must equal 2b by the ratio constraint; effective floor is max(8, 2*b_min) = 16"
+    },
+    {
+      "id": "b",
+      "name": "Cores for Service B",
+      "type": "continuous",
+      "lowerBound": 8,
+      "description": "Drives Service A allocation; a = 2b is always binding"
+    },
+    {
+      "id": "c",
+      "name": "Cores for Service C",
+      "type": "continuous",
+      "lowerBound": 8,
+      "description": "Independent service with only a minimum-cores floor"
+    },
+    {
+      "id": "d",
+      "name": "Cores for Service D",
+      "type": "continuous",
+      "lowerBound": 8,
+      "description": "Independent service with only a minimum-cores floor"
+    },
+    {
+      "id": "e",
+      "name": "Cores for Service E",
+      "type": "continuous",
+      "lowerBound": 8,
+      "description": "Independent service with only a minimum-cores floor"
+    }
+  ],
+  "objective": {
+    "type": "maximize",
+    "formula": "a + b + c + d + e",
+    "description": "Total throughput across all services, modeled as proportional to total cores deployed (T_total = sum of x_i); maximized by using the full 100-core budget"
+  },
+  "constraints": [
+    {
+      "id": "c_budget",
+      "name": "Total core budget",
+      "formula": "a + b + c + d + e <= 100",
+      "isHard": true,
+      "rationale": "The cluster has exactly 100 CPU cores; unused cores contribute zero throughput"
+    },
+    {
+      "id": "c_ratio",
+      "name": "A-to-B ratio",
+      "formula": "a = 2 * b",
+      "isHard": true,
+      "rationale": "Service A has twice the throughput demand of Service B, requiring twice the cores"
+    },
+    {
+      "id": "c_a_min",
+      "name": "Service A minimum",
+      "formula": "a >= 8",
+      "isHard": true,
+      "rationale": "Satisfied automatically when b >= 8 and a = 2b; a >= 16 at the b-minimum"
+    },
+    {
+      "id": "c_b_min",
+      "name": "Service B minimum",
+      "formula": "b >= 8",
+      "isHard": true,
+      "rationale": "Service B requires at least 8 cores for baseline operation"
+    },
+    {
+      "id": "c_c_min",
+      "name": "Service C minimum",
+      "formula": "c >= 8",
+      "isHard": true,
+      "rationale": "Service C requires at least 8 cores for baseline operation"
+    },
+    {
+      "id": "c_d_min",
+      "name": "Service D minimum",
+      "formula": "d >= 8",
+      "isHard": true,
+      "rationale": "Service D requires at least 8 cores for baseline operation"
+    },
+    {
+      "id": "c_e_min",
+      "name": "Service E minimum",
+      "formula": "e >= 8",
+      "isHard": true,
+      "rationale": "Service E requires at least 8 cores for baseline operation"
+    }
+  ],
+  "solution": {
+    "status": "optimal",
+    "variableValues": {
+      "a": 16,
+      "b": 8,
+      "c": 25.33,
+      "d": 25.33,
+      "e": 25.33
+    },
+    "objectiveValue": 100,
+    "bindingConstraints": ["c_budget", "c_ratio", "c_b_min"],
+    "note": "With linear throughput T = sum(x_i), every feasible allocation using all 100 cores is equally optimal (degenerate objective). Canonical solution minimizes b to its floor (8), sets a=16, and distributes remaining 76 cores equally over C/D/E. For integer allocation: a=16, b=8, c=25, d=25, e=26 (total=100). Feasibility ceiling: if the per-service minimum m is raised, infeasibility hits at m > 100/6 ≈ 16.67, where the six minimum-core slots (2m + m + m + m + m = 6m) would exceed the 100-core budget."
+  },
+  "analysis": "Three constraints are binding at the optimum. (1) c_budget: all 100 cores are deployed — any idle core wastes throughput. (2) c_ratio: a=2b is a hard structural requirement, always binding. (3) c_b_min: b is pinned to its floor of 8, making a=16; relaxing b's minimum would not improve the objective since the total is already 100. The effective minimum sum is 2m + m + 3m = 6m (where m=8), giving a minimum feasible total of 48 cores — well below 100, so the feasible region is non-empty with 52 cores of free slack distributed across services. The feasibility boundary is m ≤ 100/6 ≈ 16.67: if operational minimums were raised to 17 cores per service, the problem would become infeasible (6×17=102 > 100). Sensitivity note: the linear objective (T = sum of cores) makes the problem degenerate — all feasible allocations summing to 100 are co-optimal. If services have heterogeneous throughput coefficients (e.g., Service A yields 3 units/core, B yields 2/core, C/D/E yield 1/core), the optimizer would push cores toward the highest-coefficient service and the current canonical solution would no longer be optimal. In that case, re-solve as a weighted LP: maximize 3a + 2b + c + d + e subject to the same constraints."
+}
+```
+
+**The core insight is that this is a degenerate linear program.** Since throughput is proportional to cores and the total is fixed at 100, *every* feasible allocation using the full budget is equally optimal — the constraints are doing all the interesting structural work, not the objective. The canonical solution sets Service B to its minimum of 8 cores (making A = 16 via the ratio), then splits the remaining 76 cores equally across C, D, and E (~25.33 each). The system hits infeasibility only if per-service minimums are pushed above ≈16.67 cores (where 6 × floor > 100). If you have actual throughput coefficients per service (e.g., Service A delivers 3× throughput per core), provide them and the problem collapses to a non-degenerate LP with a unique interior optimum.

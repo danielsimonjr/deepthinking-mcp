@@ -1,0 +1,64 @@
+{
+  "mode": "formallogic",
+  "theorem": "¬Q → ¬P  (given P → Q)",
+  "propositions": [
+    {
+      "id": "P",
+      "symbol": "P",
+      "statement": "The deployment passed all integration tests",
+      "type": "atomic"
+    },
+    {
+      "id": "Q",
+      "symbol": "Q",
+      "statement": "The deployment is safe to release to production",
+      "type": "atomic"
+    },
+    {
+      "id": "PQ",
+      "symbol": "P→Q",
+      "statement": "If the deployment passed all integration tests, it is safe to release to production",
+      "type": "compound",
+      "formula": "P → Q",
+      "latex": "P \\rightarrow Q"
+    },
+    {
+      "id": "notQ",
+      "symbol": "¬Q",
+      "statement": "The deployment is NOT safe to release to production",
+      "type": "compound",
+      "formula": "¬Q",
+      "latex": "\\neg Q"
+    }
+  ],
+  "proof": {
+    "technique": "direct",
+    "steps": [
+      {
+        "step": 1,
+        "statement": "P → Q",
+        "formula": "P → Q",
+        "justification": "Premise",
+        "refs": []
+      },
+      {
+        "step": 2,
+        "statement": "¬Q",
+        "formula": "¬Q",
+        "justification": "Premise",
+        "refs": []
+      },
+      {
+        "step": 3,
+        "statement": "¬P",
+        "formula": "¬P",
+        "justification": "Modus Tollens",
+        "refs": [1, 2]
+      }
+    ],
+    "conclusion": "¬P  — The deployment did NOT pass all integration tests",
+    "valid": true
+  },
+  "validityCheck": true,
+  "soundnessCheck": null
+}

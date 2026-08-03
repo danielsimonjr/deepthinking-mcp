@@ -1,0 +1,270 @@
+{
+  "mode": "evidential",
+  "thoughtType": "evidence_combination",
+  "frameOfDiscernment": [
+    "Vehicle",
+    "Pedestrian",
+    "Other"
+  ],
+  "hypotheses": [
+    {
+      "id": "h1",
+      "name": "Vehicle",
+      "description": "Motorized vehicle (car, truck, motorcycle, or similar large metallic object)",
+      "mutuallyExclusive": true
+    },
+    {
+      "id": "h2",
+      "name": "Pedestrian",
+      "description": "Person on foot",
+      "mutuallyExclusive": true
+    },
+    {
+      "id": "h3",
+      "name": "Other",
+      "description": "Cyclist, animal, debris, or otherwise unclassifiable object",
+      "mutuallyExclusive": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e1",
+      "description": "Radar signature consistent with a large metallic reflective object; reported as Vehicle",
+      "source": "radar",
+      "reliability": 0.7,
+      "timestamp": 1744588800,
+      "supports": [
+        "h1"
+      ],
+      "contradicts": [
+        "h2",
+        "h3"
+      ]
+    },
+    {
+      "id": "e2",
+      "description": "Camera detects human-proportioned silhouette with bipedal motion profile; reported as Pedestrian",
+      "source": "camera",
+      "reliability": 0.6,
+      "timestamp": 1744588800,
+      "supports": [
+        "h2"
+      ],
+      "contradicts": [
+        "h1",
+        "h3"
+      ]
+    },
+    {
+      "id": "e3",
+      "description": "LiDAR point cloud pattern does not match Vehicle or Pedestrian templates; reported as Unknown/Other",
+      "source": "lidar",
+      "reliability": 0.4,
+      "timestamp": 1744588800,
+      "supports": [
+        "h3"
+      ],
+      "contradicts": []
+    }
+  ],
+  "beliefFunctions": [
+    {
+      "id": "bf1",
+      "source": "e1",
+      "massAssignments": [
+        {
+          "hypothesisSet": [
+            "h1"
+          ],
+          "mass": 0.7,
+          "justification": "Radar stated confidence 0.7 \u2192 direct focal mass on {Vehicle}"
+        },
+        {
+          "hypothesisSet": [
+            "h1",
+            "h2",
+            "h3"
+          ],
+          "mass": 0.3,
+          "justification": "Residual ignorance: 1 \u2212 0.7 = 0.3 assigned to full frame \u03a9"
+        }
+      ]
+    },
+    {
+      "id": "bf2",
+      "source": "e2",
+      "massAssignments": [
+        {
+          "hypothesisSet": [
+            "h2"
+          ],
+          "mass": 0.6,
+          "justification": "Camera stated confidence 0.6 \u2192 direct focal mass on {Pedestrian}"
+        },
+        {
+          "hypothesisSet": [
+            "h1",
+            "h2",
+            "h3"
+          ],
+          "mass": 0.4,
+          "justification": "Residual ignorance: 1 \u2212 0.6 = 0.4 assigned to full frame \u03a9"
+        }
+      ]
+    },
+    {
+      "id": "bf3",
+      "source": "e3",
+      "massAssignments": [
+        {
+          "hypothesisSet": [
+            "h3"
+          ],
+          "mass": 0.4,
+          "justification": "LiDAR 'unknown' at 0.4 confidence maps to {Other}; this is an active non-match classification, not pure ignorance"
+        },
+        {
+          "hypothesisSet": [
+            "h1",
+            "h2",
+            "h3"
+          ],
+          "mass": 0.6,
+          "justification": "Residual ignorance: 1 \u2212 0.4 = 0.6 assigned to full frame \u03a9; LiDAR has low confidence in its own classification"
+        }
+      ]
+    },
+    {
+      "id": "bf12",
+      "source": "e1+e2 (intermediate: Dempster combination of bf1 \u2295 bf2)",
+      "massAssignments": [
+        {
+          "hypothesisSet": [
+            "h1"
+          ],
+          "mass": 0.4828,
+          "justification": "m1({V})\u00d7m2(\u03a9) = 0.7\u00d70.4 = 0.28; K12 = m1({V})\u00d7m2({P}) = 0.42; normalizer = 0.58; 0.28/0.58 \u2248 0.4828"
+        },
+        {
+          "hypothesisSet": [
+            "h2"
+          ],
+          "mass": 0.3103,
+          "justification": "m1(\u03a9)\u00d7m2({P}) = 0.3\u00d70.6 = 0.18; 0.18/0.58 \u2248 0.3103"
+        },
+        {
+          "hypothesisSet": [
+            "h1",
+            "h2",
+            "h3"
+          ],
+          "mass": 0.2069,
+          "justification": "m1(\u03a9)\u00d7m2(\u03a9) = 0.3\u00d70.4 = 0.12; 0.12/0.58 \u2248 0.2069"
+        }
+      ],
+      "conflictMass": 0.42
+    }
+  ],
+  "combinedBelief": {
+    "id": "combined",
+    "source": "combined",
+    "massAssignments": [
+      {
+        "hypothesisSet": [
+          "h1"
+        ],
+        "mass": 0.4242,
+        "justification": "Direct 3-way Dempster: only non-\u2205 path = m1({V})\u00d7m2(\u03a9)\u00d7m3(\u03a9) = 0.7\u00d70.4\u00d70.6 = 0.168; K_total = 0.604; 0.168/0.396 \u2248 0.4242"
+      },
+      {
+        "hypothesisSet": [
+          "h2"
+        ],
+        "mass": 0.2727,
+        "justification": "m1(\u03a9)\u00d7m2({P})\u00d7m3(\u03a9) = 0.3\u00d70.6\u00d70.6 = 0.108; 0.108/0.396 \u2248 0.2727"
+      },
+      {
+        "hypothesisSet": [
+          "h3"
+        ],
+        "mass": 0.1212,
+        "justification": "m1(\u03a9)\u00d7m2(\u03a9)\u00d7m3({O}) = 0.3\u00d70.4\u00d70.4 = 0.048; 0.048/0.396 \u2248 0.1212"
+      },
+      {
+        "hypothesisSet": [
+          "h1",
+          "h2",
+          "h3"
+        ],
+        "mass": 0.1818,
+        "justification": "m1(\u03a9)\u00d7m2(\u03a9)\u00d7m3(\u03a9) = 0.3\u00d70.4\u00d70.6 = 0.072; 0.072/0.396 \u2248 0.1818 (residual ignorance after normalization)"
+      }
+    ],
+    "conflictMass": 0.604
+  },
+  "plausibility": {
+    "id": "pl1",
+    "assignments": [
+      {
+        "hypothesisSet": [
+          "h1"
+        ],
+        "plausibility": 0.6061,
+        "belief": 0.4242,
+        "uncertaintyInterval": [
+          0.4242,
+          0.6061
+        ]
+      },
+      {
+        "hypothesisSet": [
+          "h2"
+        ],
+        "plausibility": 0.4545,
+        "belief": 0.2727,
+        "uncertaintyInterval": [
+          0.2727,
+          0.4545
+        ]
+      },
+      {
+        "hypothesisSet": [
+          "h3"
+        ],
+        "plausibility": 0.303,
+        "belief": 0.1212,
+        "uncertaintyInterval": [
+          0.1212,
+          0.303
+        ]
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "id": "d1",
+      "name": "Object classification for AV response planning",
+      "selectedHypothesis": [
+        "h1"
+      ],
+      "confidence": 0.52,
+      "reasoning": "Vehicle holds the highest belief (0.4242) AND highest plausibility (0.6061) across all three hypotheses. Radar's 0.7 confidence advantage over camera's 0.6 means it contributes more mass to its focal set; after Dempster normalization radar dominates. The radar-camera conflict (K12 = 0.42) is substantial but survives normalization intact because no third source overrides it\u2014LiDAR's 'Other' adds further conflict (K_total = 0.604) but does not redirect the plurality. Confidence is capped at 0.52 (midpoint of uncertainty interval [0.42, 0.61]) rather than the full plausibility because the extreme conflict mass (0.604 > 0.5) signals sensors are fundamentally disagreeing: the system should apply cautious, vehicle-class avoidance protocols and request additional frames before committing.",
+      "alternatives": [
+        {
+          "hypothesis": [
+            "h2"
+          ],
+          "expectedUtility": 0.27,
+          "risk": 0.73
+        },
+        {
+          "hypothesis": [
+            "h3"
+          ],
+          "expectedUtility": 0.12,
+          "risk": 0.3
+        }
+      ]
+    }
+  ]
+}

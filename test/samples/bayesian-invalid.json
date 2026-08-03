@@ -1,0 +1,21 @@
+{
+  "mode": "bayesian",
+  "hypothesis": {
+    "id": "h1",
+    "statement": "The cache is the cause"
+  },
+  "prior": {
+    "probability": 1.3,
+    "justification": "This prior is out of range — tests that the schema enforces 0..1 bounds"
+  },
+  "likelihood": {
+    "probability": 0.8,
+    "description": "P(E|H)"
+  },
+  "evidence": [],
+  "posterior": {
+    "probability": 0.5,
+    "calculation": "...",
+    "confidence": 0.5
+  }
+}

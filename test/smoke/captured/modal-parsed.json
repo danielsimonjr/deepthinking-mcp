@@ -1,0 +1,224 @@
+{
+  "mode": "modal",
+  "modalDomain": "deontic",
+  "logicSystem": "S5",
+  "actualWorld": "w1",
+  "possibleWorlds": [
+    {
+      "id": "w1",
+      "name": "Admin Role Assigned (Actual)",
+      "description": "Alice currently holds ADMIN_ROLE in the RBAC system. Role policy directly entails obligatory admin access.",
+      "isActual": true,
+      "truths": [
+        "alice_has_admin_role",
+        "ADMIN_ROLE \u2192 O(admin_access)",
+        "alice_has_admin_access"
+      ]
+    },
+    {
+      "id": "w2",
+      "name": "Superadmin Role Assigned",
+      "description": "Alice holds SUPERADMIN_ROLE \u2014 a strict superset of ADMIN_ROLE. Policy entails admin access obligatorily.",
+      "isActual": false,
+      "truths": [
+        "alice_has_superadmin_role",
+        "SUPERADMIN_ROLE \u2192 O(admin_access)",
+        "alice_has_admin_access"
+      ]
+    },
+    {
+      "id": "w3",
+      "name": "Developer + Exceptional Grant",
+      "description": "Alice holds DEVELOPER_ROLE with a time-bounded exceptional admin grant approved by the security team. Grant makes admin access permitted, not obligatory.",
+      "isActual": false,
+      "truths": [
+        "alice_has_developer_role",
+        "exceptional_admin_grant_active",
+        "(DEVELOPER_ROLE \u2227 exceptional_grant) \u2192 P(admin_access)",
+        "alice_has_admin_access"
+      ]
+    },
+    {
+      "id": "w4",
+      "name": "Developer, No Exception",
+      "description": "Alice holds DEVELOPER_ROLE but no exceptional grant has been issued. No entitlement to admin access exists.",
+      "isActual": false,
+      "truths": [
+        "alice_has_developer_role",
+        "no_exceptional_admin_grant",
+        "alice_lacks_admin_access"
+      ]
+    },
+    {
+      "id": "w5",
+      "name": "Viewer Role Only",
+      "description": "Alice holds VIEWER_ROLE only \u2014 scoped to read-only access. Policy explicitly forbids admin access for this role.",
+      "isActual": false,
+      "truths": [
+        "alice_has_viewer_role",
+        "VIEWER_ROLE \u2192 F(admin_access)",
+        "alice_lacks_admin_access",
+        "admin_access_prohibited"
+      ]
+    },
+    {
+      "id": "w6",
+      "name": "Account Deactivated",
+      "description": "Alice's account is deactivated (offboarding, suspension, or role revocation). All access permissions are rescinded by policy.",
+      "isActual": false,
+      "truths": [
+        "alice_account_deactivated",
+        "deactivated \u2192 F(admin_access)",
+        "alice_lacks_admin_access",
+        "admin_access_prohibited"
+      ]
+    }
+  ],
+  "accessibilityRelations": [
+    {
+      "from": "w1",
+      "to": "w1",
+      "type": "reflexive"
+    },
+    {
+      "from": "w1",
+      "to": "w2",
+      "type": "euclidean"
+    },
+    {
+      "from": "w1",
+      "to": "w3",
+      "type": "euclidean"
+    },
+    {
+      "from": "w1",
+      "to": "w4",
+      "type": "euclidean"
+    },
+    {
+      "from": "w1",
+      "to": "w5",
+      "type": "euclidean"
+    },
+    {
+      "from": "w1",
+      "to": "w6",
+      "type": "euclidean"
+    },
+    {
+      "from": "*",
+      "to": "*",
+      "type": "transitive",
+      "note": "S5 frame: reflexivity + euclidean property \u2192 equivalence class. All six worlds are mutually accessible."
+    }
+  ],
+  "propositions": [
+    {
+      "id": "p1",
+      "content": "\u25a1(alice_has_admin_access) \u2014 Alice MUST have admin access unconditionally",
+      "operator": "necessity",
+      "truthValue": false,
+      "justification": "Falsified by countermodels w4, w5, and w6. In all three accessible worlds, alice_has_admin_access is false (developer without grant, viewer role, deactivated account). Unconditional deontic necessity fails: O(admin_access) does not hold across the full Kripke frame."
+    },
+    {
+      "id": "p2",
+      "content": "\u25c7(alice_has_admin_access) \u2014 Alice COULD have admin access",
+      "operator": "possibility",
+      "truthValue": true,
+      "justification": "Witnessed in w1, w2, and w3. alice_has_admin_access is true in at least one accessible world (three, in fact). Deontic permission holds: P(admin_access) is satisfied. Alice's admin access is permitted but not universally obligated."
+    },
+    {
+      "id": "p3",
+      "content": "\u25a1(alice_has_admin_access | alice_has_admin_role \u2228 alice_has_superadmin_role) \u2014 Alice MUST have admin access given a role-level entitlement",
+      "operator": "necessity",
+      "truthValue": true,
+      "justification": "In every world within the sub-frame {w1, w2} \u2014 the role-entitlement worlds \u2014 alice_has_admin_access holds. Role policy acts as a deontic axiom: ADMIN_ROLE \u2192 O(admin_access). Conditional necessity is satisfied; the obligation is role-triggered, not universal. This is the 'MUST' answer: Alice's obligation is role-relative."
+    },
+    {
+      "id": "p4",
+      "content": "\u25c7(alice_has_admin_access | alice_has_developer_role) \u2014 Alice COULD have admin access while a developer",
+      "operator": "possibility",
+      "truthValue": true,
+      "justification": "Witnessed by w3 (developer + exceptional grant). However, w4 (developer, no grant) falsifies necessity. Therefore: developer role alone permits admin access only when an exceptional grant is active. P(admin_access | developer \u2227 exceptional_grant) holds; O(admin_access | developer) does not."
+    },
+    {
+      "id": "p5",
+      "content": "\u25a1\u00ac(alice_has_admin_access | alice_account_deactivated) \u2014 Alice MUST NOT have admin access when deactivated",
+      "operator": "necessity",
+      "truthValue": true,
+      "justification": "In all worlds accessible from w6 (and w6 itself in S5), alice_lacks_admin_access holds. Deontic prohibition is a necessity over negation: F(admin_access) = O(\u00acadmin_access) = \u25a1\u00acadmin_access in the deactivated sub-frame. Granting admin access to a deactivated account would be a deontic violation."
+    },
+    {
+      "id": "p6",
+      "content": "\u25a1\u00ac(alice_has_admin_access | alice_has_viewer_role) \u2014 Alice MUST NOT have admin access as a viewer",
+      "operator": "necessity",
+      "truthValue": true,
+      "justification": "In w5, VIEWER_ROLE \u2192 F(admin_access) is a hard policy constraint. No accessible world from w5 permits admin access for the viewer role. This is a role-ceiling prohibition: the role cap forecloses even exceptional grants."
+    },
+    {
+      "id": "p7",
+      "content": "\u25c7\u00ac(alice_has_admin_access) \u2014 It is possible (permitted by the frame) that Alice lacks admin access",
+      "operator": "possibility",
+      "truthValue": true,
+      "justification": "Witnessed by w4, w5, and w6. This is the dual confirmation of p1's failure: since \u25a1(admin_access) is false, \u25c7\u00ac(admin_access) must be true (S5 duality). The RBAC system permits states where Alice has no admin access."
+    }
+  ],
+  "inferences": [
+    {
+      "id": "inf1",
+      "premises": [
+        "ADMIN_ROLE \u2208 alice_roles \u2192 O(admin_access) [RBAC role-entailment axiom]",
+        "O(P) \u2192 P is true in all deontically accessible worlds [Necessitation in deontic D/S5]"
+      ],
+      "conclusion": "In worlds w1 and w2, Alice MUST (is obligated to) have admin access. This is conditional necessity: \u25a1(admin_access) restricted to the sub-frame {w1, w2}.",
+      "valid": true,
+      "justification": "Necessitation rule: if P follows from the normative axioms of the frame (here, the RBAC role policy), then O(P) holds. The role policy is a deontic axiom, so it necessitates the permission in all role-bearing worlds."
+    },
+    {
+      "id": "inf2",
+      "premises": [
+        "w4 is accessible from w1 [S5 mutual accessibility]",
+        "alice_has_admin_access is false in w4",
+        "w5 is accessible from w1",
+        "alice_has_admin_access is false in w5",
+        "w6 is accessible from w1",
+        "alice_has_admin_access is false in w6"
+      ],
+      "conclusion": "Unconditional \u25a1(alice_has_admin_access) is FALSE. Three independent countermodels exist. The access obligation is not a universal truth of the RBAC frame \u2014 it is role-gated.",
+      "valid": true,
+      "justification": "Countermodel argument: \u25a1P is false iff there exists at least one accessible world where P is false. Here three such worlds exist, decisively ruling out unconditional necessity."
+    },
+    {
+      "id": "inf3",
+      "premises": [
+        "alice_has_developer_role \u2227 exceptional_admin_grant_active [w3]",
+        "alice_has_admin_access is true in w3",
+        "alice_has_admin_access is false in w4 (developer, no grant)"
+      ],
+      "conclusion": "P(admin_access | developer_role) is true (w3 witnesses it), but O(admin_access | developer_role) is false (w4 is a countermodel). Developer admin access is permissible under exceptional grant, not obligatory.",
+      "valid": true,
+      "justification": "S5 T-axiom applied to sub-frame: \u25c7P is true if P holds in one accessible world (w3). Necessity fails because the full developer sub-frame {w3, w4} contains a falsifying world (w4). This grounds the distinction between permission and obligation."
+    },
+    {
+      "id": "inf4",
+      "premises": [
+        "Deontic axiom D: O(P) \u2192 P(P) [obligation entails permission]",
+        "In w1 and w2: O(admin_access) holds"
+      ],
+      "conclusion": "In worlds w1 and w2, Alice's admin access is both obligatory AND permitted. The system must grant it and Alice is entitled to it. Refusing to grant admin in these worlds is a deontic violation of the RBAC policy.",
+      "valid": true,
+      "justification": "Axiom D (the defining axiom of deontic logic): \u25a1P \u2192 \u25c7P. Obligation implies permission. This rules out deontic inconsistency \u2014 we cannot simultaneously obligate P and forbid P."
+    },
+    {
+      "id": "inf5",
+      "premises": [
+        "alice_account_deactivated [w6]",
+        "deactivated \u2192 F(admin_access) = \u25a1\u00ac(admin_access) [policy prohibition]",
+        "O(P) and F(P) are jointly inconsistent in deontic logic [\u00ac(O(P) \u2227 O(\u00acP))]"
+      ],
+      "conclusion": "If Alice's account is deactivated, granting admin access is a deontic contradiction. No role assignment in a deactivated state can create an obligation to grant admin. Deactivation is a deontic ceiling that overrides all role-based obligations.",
+      "valid": true,
+      "justification": "Deontic consistency: O(P) \u2227 O(\u00acP) is inconsistent in any standard deontic system (D, S5). Since deactivation imposes O(\u00acadmin), no simultaneous O(admin) can hold. The prohibition takes precedence by policy supremacy."
+    }
+  ]
+}

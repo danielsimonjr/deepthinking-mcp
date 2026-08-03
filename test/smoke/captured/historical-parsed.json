@@ -1,0 +1,188 @@
+{
+  "mode": "historical",
+  "thoughtType": "pattern_analysis",
+  "temporalSpan": {
+    "start": "2024",
+    "end": "2026-04-13",
+    "precision": "year"
+  },
+  "events": [
+    {
+      "id": "incident_2024",
+      "name": "Cross-region Postgres migration \u2014 4-hour outage",
+      "date": "2024",
+      "significance": "major",
+      "description": "A cross-region Postgres migration resulted in approximately 4 hours of service downtime. Exact root cause unspecified in query, but consistent with the canonical cross-region migration failure cluster: replication lag accumulation, live-traffic cutover without write freeze, connection pool mis-routing to old primary, or DNS propagation delay after cutover.",
+      "actors": [
+        "engineering_team",
+        "postgres_primary",
+        "source_region"
+      ],
+      "causes": [
+        "replication_lag_accumulation",
+        "live_traffic_during_cutover",
+        "insufficient_cutover_controls"
+      ],
+      "effects": [
+        "4h_service_downtime",
+        "delayed_data_sync_to_target_region"
+      ],
+      "sources": [
+        "postmortem_2024"
+      ],
+      "tags": [
+        "postgres",
+        "cross-region",
+        "migration",
+        "outage",
+        "downtime"
+      ],
+      "context": "Cross-region migrations expose a specific failure surface: WAL shipping must traverse inter-region latency, write volume can cause the replica to fall behind faster than it can catch up, and cutover timing is tightly coupled to lag draining to near-zero."
+    },
+    {
+      "id": "migration_2026",
+      "name": "Planned 2026 cross-region Postgres migration",
+      "date": "2026-04-13",
+      "significance": "major",
+      "description": "Planned cross-region migration of Postgres database. Specific operational controls \u2014 maintenance window, replication strategy (logical vs. physical), connection routing abstraction, rollback procedure, staging validation \u2014 are not confirmed in the query.",
+      "actors": [
+        "engineering_team",
+        "postgres_primary",
+        "source_region",
+        "target_region"
+      ],
+      "causes": [],
+      "effects": [],
+      "sources": [
+        "migration_plan_2026"
+      ],
+      "tags": [
+        "postgres",
+        "cross-region",
+        "migration",
+        "planned"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "postmortem_2024",
+      "title": "Post-Incident Report: Cross-Region Postgres Migration Outage 2024",
+      "type": "primary",
+      "subtype": "document",
+      "reliability": 0.82,
+      "bias": {
+        "type": "personal",
+        "direction": "Organizational retrospective bias \u2014 teams may understate contributing factors outside their immediate scope; root cause may be oversimplified",
+        "severity": 0.2,
+        "evidence": [
+          "Single organizational perspective; no independent third-party review referenced in query"
+        ]
+      },
+      "corroboratedBy": [],
+      "contradictedBy": [],
+      "limitations": [
+        "Root cause specifics not stated in user query \u2014 exact failure mechanism is inferred, not confirmed",
+        "Uncorroborated by external sources or separate runbook",
+        "Reliability degraded slightly for absent corroboration"
+      ]
+    },
+    {
+      "id": "migration_plan_2026",
+      "title": "2026 Cross-Region Postgres Migration Plan",
+      "type": "primary",
+      "subtype": "document",
+      "reliability": 0.6,
+      "bias": {
+        "type": "personal",
+        "direction": "Planning documents trend optimistic \u2014 mitigations are listed as intended, not as validated through staging",
+        "severity": 0.3,
+        "evidence": [
+          "Forward-looking document; no staging test results referenced",
+          "No mention of whether 2024 postmortem items are explicitly addressed"
+        ]
+      },
+      "corroboratedBy": [],
+      "contradictedBy": [],
+      "limitations": [
+        "Capped at 0.60 \u2014 single uncorroborated primary source per reliability guide",
+        "Specific mitigations not confirmed in query",
+        "Optimism bias in planning artifacts well-documented in post-incident literature"
+      ]
+    }
+  ],
+  "patterns": [
+    {
+      "id": "p1",
+      "name": "Cross-region Postgres migration without explicit operational controls causes multi-hour downtime",
+      "type": "structural",
+      "episodes": [
+        "incident_2024"
+      ],
+      "matchingFeatures": [
+        "Identical database engine: Postgres",
+        "Identical topology change class: cross-region migration",
+        "Identical risk surface: WAL shipping lag, connection routing, DNS TTL, write-freeze timing",
+        "Same production scope and consequence severity"
+      ],
+      "loadBearingDifferences": [
+        "UNKNOWN \u2014 Maintenance window: Does 2026 plan include a write-freeze window? Without one, live writes continue during cutover and replication lag cannot drain, recreating the 2024 failure condition.",
+        "UNKNOWN \u2014 Replication strategy: Is logical replication with continuous lag monitoring used (allowing cutover when lag <N seconds), or physical replication with less granular visibility?",
+        "UNKNOWN \u2014 Connection routing abstraction: Do application connection strings target a load balancer, PgBouncer endpoint, or DNS CNAME (updatable at cutover), vs. hardcoded regional endpoints that require app-tier restarts?",
+        "UNKNOWN \u2014 Rollback validation: Has the rollback path been executed in staging? Untested rollbacks under 4-hour pressure are a compounding failure mode.",
+        "UNKNOWN \u2014 2024 postmortem traceability: Is the specific root cause from 2024 explicitly listed as an action item in the 2026 runbook with a named owner?"
+      ],
+      "verdictApplies": false,
+      "verdictRationale": "The surface analogy is structurally valid \u2014 both events share the same engine, topology class, and failure surface. However, verdictApplies is false because the load-bearing differences are all currently UNKNOWN. The precedent is conditionally applicable: if any of the five unknowns are unmitigated in the 2026 plan, the 2024 failure mode can recur with high confidence. If all five are addressed, the precedent degrades to a useful checklist rather than a prediction. The question cannot be answered definitively without inspecting the 2026 runbook against the 2024 postmortem root cause."
+    }
+  ],
+  "causalChains": [
+    {
+      "id": "cc1",
+      "name": "Hypothesized 2024 failure chain \u2014 replication-lag path (most probable)",
+      "links": [
+        {
+          "cause": "cross_region_network_latency",
+          "effect": "replication_lag_accumulation",
+          "mechanism": "WAL records traverse inter-region network under load; high write volume causes the standby receiver to process records slower than the primary generates them, growing lag continuously",
+          "confidence": 0.72,
+          "timelag": "minutes to hours depending on write volume",
+          "evidence": [
+            "postmortem_2024"
+          ]
+        },
+        {
+          "cause": "replication_lag_accumulation",
+          "effect": "cutover_window_extends",
+          "mechanism": "Cutover requires replica to reach near-zero lag before promoting; with live writes still accepted and lag growing, the window becomes indefinite without an explicit write freeze or lag ceiling enforcement",
+          "confidence": 0.75,
+          "timelag": "variable; can reach hours at high write throughput",
+          "evidence": [
+            "postmortem_2024"
+          ]
+        },
+        {
+          "cause": "cutover_window_extends",
+          "effect": "4h_service_downtime",
+          "mechanism": "Service held in degraded or frozen state awaiting replica promotion; manual intervention required once automated path stalls; recovery time bounded by operator response and replay speed",
+          "confidence": 0.7,
+          "timelag": "4 hours total observed",
+          "evidence": [
+            "postmortem_2024"
+          ]
+        }
+      ],
+      "confidence": 0.68,
+      "alternativeExplanations": [
+        "DNS propagation delay: app tier continued routing to old primary after cutover because DNS TTL (e.g., 300s) had not expired on all client resolvers",
+        "Connection pool mis-routing: PgBouncer or application pool held persistent connections to old-region primary; pool flush was not part of cutover procedure",
+        "Missing lock_timeout on schema ALTER operations run as part of migration setup, causing table-level lock contention on the source",
+        "Failover automation failure: automated promotion script hit an unexpected condition (e.g., timeline ID mismatch) and required hours of manual recovery"
+      ],
+      "historiographicalDebate": "Without reading the 2024 postmortem directly, the root cause is uncertain. The replication-lag path is most probable for a 4-hour outage (shorter failures suggest DNS or connection issues), but the causal chain should be verified against the actual postmortem before anchoring the 2026 mitigation plan to it."
+    }
+  ],
+  "aggregateReliability": 0.6,
+  "methodology": "Precedent analysis with load-bearing difference identification. Aggregate reliability is capped at 0.60 because the migration_plan_2026 source is uncorroborated and the 2024 root cause mechanism is inferred rather than confirmed from the query. The full analysis requires reading both the 2024 postmortem and the 2026 migration runbook side-by-side.",
+  "historiographicalSchool": "Structural-contingent \u2014 examining both the structural risk surface shared by all cross-region Postgres migrations (which is real and significant) and the contingent operational decisions (maintenance windows, connection abstraction, rollback testing) that determine whether structural risk materializes into actual downtime"
+}

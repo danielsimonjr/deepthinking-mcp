@@ -1,0 +1,179 @@
+{
+  "mode": "gametheory",
+  "game": {
+    "name": "Microservice Cache TTL \u2014 Shared Backend Commons",
+    "type": "non_cooperative",
+    "isZeroSum": false,
+    "description": "Two microservices independently select a cache TTL (short \u2248 30 s, long \u2248 5 min) for calls to a shared backend. Short TTL produces fresher data but inflicts backend load that harms both services; long TTL conserves backend capacity but risks stale responses. Neither service can observe or bind the other's choice before deciding. This is a non-cooperative normal-form game."
+  },
+  "players": [
+    {
+      "id": "svc_a",
+      "name": "Service A",
+      "strategies": [
+        "short_ttl",
+        "long_ttl"
+      ]
+    },
+    {
+      "id": "svc_b",
+      "name": "Service B",
+      "strategies": [
+        "short_ttl",
+        "long_ttl"
+      ]
+    }
+  ],
+  "payoffMatrix": {
+    "description": "Net operational utility per service (arbitrary units, higher = better). Components: freshness gain from short TTL = +3; backend saturation penalty when BOTH use short TTL = \u22125 each (timeouts, latency spikes, circuit-breaker trips); single-service backend load spillover cost = \u22121 per service (even the non-short-TTL service experiences degraded backend response when the other hammers it); staleness penalty for long TTL = \u22122; backend health bonus when BOTH use long TTL = +3 (healthy shared infra lifts throughput and tail-latency for everyone, more than offsetting the mild staleness penalty).",
+    "entries": [
+      {
+        "strategies": [
+          "short_ttl",
+          "short_ttl"
+        ],
+        "payoffs": [
+          -2,
+          -2
+        ],
+        "narrative": "Both hammer the backend. Each gets fresh data (+3) but the backend saturates (\u22125). Net: \u22122 each."
+      },
+      {
+        "strategies": [
+          "short_ttl",
+          "long_ttl"
+        ],
+        "payoffs": [
+          2,
+          -3
+        ],
+        "narrative": "A free-rides: gets freshness (+3) while load stays light with only A using short (\u22121). B bears staleness (\u22122) AND A's backend spillover (\u22121): net \u22123. A earns +2."
+      },
+      {
+        "strategies": [
+          "long_ttl",
+          "short_ttl"
+        ],
+        "payoffs": [
+          -3,
+          2
+        ],
+        "narrative": "Symmetric to (SL). B free-rides at +2; A bears staleness + spillover at \u22123."
+      },
+      {
+        "strategies": [
+          "long_ttl",
+          "long_ttl"
+        ],
+        "payoffs": [
+          1,
+          1
+        ],
+        "narrative": "Both accept mild staleness (\u22122) but the backend stays healthy, conferring a shared throughput bonus (+3). Net: +1 each."
+      }
+    ]
+  },
+  "nashEquilibria": [
+    {
+      "strategyProfile": [
+        "short_ttl",
+        "short_ttl"
+      ],
+      "payoffs": [
+        -2,
+        -2
+      ],
+      "type": "pure",
+      "isStrict": true,
+      "verification": "If B plays short_ttl: A earns \u22122 (short) vs \u22123 (long) \u2192 A will NOT switch to long (\u22122 > \u22123). If A plays short_ttl: B earns \u22122 (short) vs \u22123 (long) \u2192 B will NOT switch to long (\u22122 > \u22123). Neither player can improve by unilateral deviation. The equilibrium is STRICT because both inequalities are strict (no indifference). No other pure-strategy profile survives the same check: from (long, long), A gains +1 by switching to short (+2 > +1), so it is not a Nash equilibrium."
+    }
+  ],
+  "dominantStrategies": [
+    {
+      "playerId": "svc_a",
+      "strategy": "short_ttl",
+      "type": "strictly_dominant",
+      "justification": "Regardless of B's choice: if B plays short_ttl, A earns \u22122 (short) > \u22123 (long); if B plays long_ttl, A earns +2 (short) > +1 (long). Short TTL strictly dominates for A in both scenarios."
+    },
+    {
+      "playerId": "svc_b",
+      "strategy": "short_ttl",
+      "type": "strictly_dominant",
+      "justification": "By the game's symmetry the payoffs are identical. If A plays short_ttl: B earns \u22122 (short) > \u22123 (long). If A plays long_ttl: B earns +2 (short) > +1 (long). Short TTL strictly dominates for B in both scenarios."
+    }
+  ],
+  "paretoAnalysis": {
+    "nashOutcome": {
+      "profile": [
+        "short_ttl",
+        "short_ttl"
+      ],
+      "payoffs": [
+        -2,
+        -2
+      ]
+    },
+    "paretoDominatedBy": {
+      "profile": [
+        "long_ttl",
+        "long_ttl"
+      ],
+      "payoffs": [
+        1,
+        1
+      ]
+    },
+    "dominanceMagnitude": "+3 units for each player \u2014 mutual long TTL strictly Pareto-dominates the Nash equilibrium",
+    "paretoFrontier": [
+      {
+        "profile": [
+          "short_ttl",
+          "long_ttl"
+        ],
+        "payoffs": [
+          2,
+          -3
+        ],
+        "note": "A's individual maximum, but B is worst off"
+      },
+      {
+        "profile": [
+          "long_ttl",
+          "short_ttl"
+        ],
+        "payoffs": [
+          -3,
+          2
+        ],
+        "note": "B's individual maximum, but A is worst off"
+      },
+      {
+        "profile": [
+          "long_ttl",
+          "long_ttl"
+        ],
+        "payoffs": [
+          1,
+          1
+        ],
+        "note": "Jointly optimal; no player can be made better off without harming the other from this point"
+      }
+    ],
+    "conclusion": "The Nash equilibrium (\u22122, \u22122) is strictly Pareto-dominated. Both services would prefer the cooperative outcome but rational self-interest prevents it without an external coordination mechanism."
+  },
+  "structuralComparison": {
+    "canonicalGame": "Prisoner's Dilemma (also: Tragedy of the Commons)",
+    "mapping": {
+      "short_ttl": "Defect \u2014 exploit the shared backend commons",
+      "long_ttl": "Cooperate \u2014 restrain usage for mutual benefit"
+    },
+    "payoffOrdering": "For each player: (short | other=long) > (long | other=long) > (short | other=short) > (long | other=short), i.e., T > R > P > S = 2 > 1 > \u22122 > \u22123. This satisfies the Prisoner's Dilemma conditions T > R > P > S and 2R > T + S.",
+    "resolutionMechanisms": [
+      "Platform-enforced TTL policy via service mesh or config management \u2014 converts the non-cooperative game into a cooperative one with binding rules",
+      "Shared rate-limiter / adaptive TTL controller on the backend \u2014 makes the load cost immediately visible and penalizes overuse in real time (internalizes the externality)",
+      "Circuit-breaker feedback loop \u2014 when backend degrades, both services are forced to long TTL, approximating the cooperative outcome emergently",
+      "Iterated game with reputation \u2014 if the services interact repeatedly and can observe each other's behavior, tit-for-tat strategies can sustain (long, long) as an equilibrium via the Folk Theorem"
+    ]
+  },
+  "analysis": "Yes \u2014 there is a unique Nash equilibrium: both services choose short TTL, yielding payoffs (\u22122, \u22122). Short TTL is a strictly dominant strategy for each service independently: no matter what the other service does, a service earns more by refreshing its cache aggressively. The tragedy is that this rational individual choice is collectively self-defeating. Mutual long TTL at (+1, +1) is strictly Pareto-superior \u2014 both services would be objectively better off \u2014 yet neither can unilaterally adopt long TTL without being exploited (earning \u22123 instead of \u22122). The game is a Prisoner's Dilemma over shared backend infrastructure, structurally identical to the Tragedy of the Commons. The Nash equilibrium is stable but inefficient. Breaking out requires a coordination mechanism external to the game: a service mesh TTL policy, an adaptive circuit breaker that makes backend load costs visible and immediate, or repeated-game dynamics with observable behavior that allow tit-for-tat strategies to stabilize mutual restraint."
+}

@@ -1,0 +1,243 @@
+{
+  "mode": "cryptanalytic",
+  "thoughtType": "evidence_accumulation",
+  "ciphertext": "50 auth failures / 24 h / 3 distinct usernames / 47 distinct source IPs",
+  "assumptions": [
+    "The 50 failures are a complete log of the window, not a sampled subset",
+    "Legitimate users in this environment access from 1\u20134 distinct IPs (home, office, mobile, VPN)",
+    "A credential-stuffing or password-spray tool rotates IPs via a proxy pool or residential botnet to evade per-IP rate limiting",
+    "No password-policy change, SSO migration, or authentication-UI update occurred in the prior 24 hours",
+    "The 3 target usernames have not been shared publicly in a way that would explain focused manual attempts"
+  ],
+  "dependencies": [],
+  "uncertainty": 0.18,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "description": "Automated distributed attack \u2014 targeted password spray or credential stuffing using a proxy pool to cycle source IPs while iterating passwords against 3 known target accounts",
+      "priorProbability": 0.35,
+      "posteriorProbability": 0.97,
+      "decibanScore": 17.3,
+      "evidence": [
+        {
+          "observation": "47 distinct source IPs across 50 attempts \u2014 IP-uniqueness ratio 0.94",
+          "decibans": 19.0,
+          "likelihoodRatio": 79.4,
+          "source": "statistical",
+          "confidence": 0.95,
+          "explanation": "P(0.94 IP uniqueness | automated botnet/proxy pool) \u2248 0.80; P(0.94 IP uniqueness | 3 forgetful users) \u2248 0.01. Three legitimate users working from home, office, and mobile yield at most 9\u201318 distinct IPs. Reaching 47 requires a distributed tool. This is the dominant evidence signal."
+        },
+        {
+          "observation": "50 failures across 3 usernames \u2248 16.7 attempts per account per day",
+          "decibans": 3.4,
+          "likelihoodRatio": 2.2,
+          "source": "statistical",
+          "confidence": 0.75,
+          "explanation": "P(\u226516 failures/account/day | attack) \u2248 0.55; P(\u226516 failures/account/day | user error) \u2248 0.25. Empirically, confused users attempt 2\u20135 logins then call support or reset. Sixteen-plus attempts per account per day signals systematic password iteration, not confusion."
+        },
+        {
+          "observation": "Only 3 distinct usernames \u2014 atypical of classic broad-sweep credential stuffing",
+          "decibans": -5.1,
+          "likelihoodRatio": 0.308,
+          "source": "structural",
+          "confidence": 0.8,
+          "explanation": "P(3-account focus | classic credential stuffing) \u2248 0.20; P(3-account focus | user error) \u2248 0.65. Classic stuffing sweeps hundreds of accounts using a full breached-credential list. Three-account focus refutes classic stuffing but is fully consistent with a targeted password spray against known high-value accounts \u2014 still an attack, just a narrower variant."
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "h2",
+      "description": "User forgetfulness \u2014 3 legitimate users having authentication difficulty, retrying from multiple devices and locations after a forgotten password or session expiry",
+      "priorProbability": 0.65,
+      "posteriorProbability": 0.03,
+      "decibanScore": -17.3,
+      "evidence": [
+        {
+          "observation": "47 distinct IPs \u2014 structurally impossible for 3-user legitimate scenario",
+          "decibans": -19.0,
+          "likelihoodRatio": 0.013,
+          "source": "statistical",
+          "confidence": 0.95,
+          "explanation": "P(47 unique IPs | 3 users) \u2248 0.01; P(47 unique IPs | distributed tool) \u2248 0.80. LR = 0.013. This is the single observation that nearly eliminates H2 on its own, delivering \u221219.0 dB \u2014 just 1 dB shy of the refutation threshold by itself."
+        },
+        {
+          "observation": "16.7 average failures per account \u2014 exceeds typical user retry budget",
+          "decibans": -3.4,
+          "likelihoodRatio": 0.455,
+          "source": "statistical",
+          "confidence": 0.75,
+          "explanation": "P(16+ retries | user error) \u2248 0.25; P(16+ retries | attack) \u2248 0.55. Legitimate users self-triage after 3\u20135 failures. Sustained retries imply a systematic process."
+        },
+        {
+          "observation": "Narrow 3-account focus \u2014 consistent with 3 users struggling with their own accounts",
+          "decibans": 5.1,
+          "likelihoodRatio": 3.25,
+          "source": "structural",
+          "confidence": 0.8,
+          "explanation": "P(3-account focus | user error) \u2248 0.65; P(3-account focus | credential stuffing) \u2248 0.20. The only observation that favors H2. Partially offsets the IP-diversity devastation but cannot overcome it."
+        }
+      ],
+      "status": "active"
+    }
+  ],
+  "currentHypothesis": {
+    "id": "h1",
+    "description": "Automated distributed password spray or targeted credential attack cycling through ~1 IP per request",
+    "priorProbability": 0.35,
+    "posteriorProbability": 0.97,
+    "decibanScore": 17.3,
+    "evidence": [
+      {
+        "observation": "47/50 distinct source IPs (IP-uniqueness ratio 0.94)",
+        "decibans": 19.0,
+        "likelihoodRatio": 79.4,
+        "source": "statistical",
+        "confidence": 0.95,
+        "explanation": "Near-unity IP-per-request ratio is the diagnostic signature of proxy-pool or residential-botnet tooling."
+      },
+      {
+        "observation": "~16.7 attempts per target username",
+        "decibans": 3.4,
+        "likelihoodRatio": 2.2,
+        "source": "statistical",
+        "confidence": 0.75,
+        "explanation": "High per-account volume supports systematic password iteration over organic user retry."
+      },
+      {
+        "observation": "Only 3 usernames targeted (counter-signal against classic stuffing)",
+        "decibans": -5.1,
+        "likelihoodRatio": 0.308,
+        "source": "structural",
+        "confidence": 0.8,
+        "explanation": "Narrows H1 sub-type: not classic broad-sweep stuffing, but a targeted spray against 3 specific accounts."
+      }
+    ],
+    "status": "active"
+  },
+  "evidenceChains": [
+    {
+      "hypothesis": "H1: Automated distributed attack (credential stuffing / targeted password spray)",
+      "observations": [
+        {
+          "observation": "47 of 50 attempts from distinct IPs \u2014 IP-uniqueness ratio 0.94",
+          "decibans": 19.0,
+          "likelihoodRatio": 79.4,
+          "source": "statistical",
+          "confidence": 0.95,
+          "explanation": "LR = P(0.94 uniqueness | tool) / P(0.94 uniqueness | users) = 0.80 / 0.01 = 79.4"
+        },
+        {
+          "observation": "50 failures / 3 accounts = 16.7 attempts per account",
+          "decibans": 3.4,
+          "likelihoodRatio": 2.2,
+          "source": "statistical",
+          "confidence": 0.75,
+          "explanation": "LR = P(16+ retries/account | attack) / P(16+ retries/account | user error) = 0.55 / 0.25 = 2.2"
+        },
+        {
+          "observation": "3-account concentration \u2014 atypical for broad credential stuffing",
+          "decibans": -5.1,
+          "likelihoodRatio": 0.308,
+          "source": "structural",
+          "confidence": 0.8,
+          "explanation": "LR = P(3 accounts | stuffing) / P(3 accounts | user error) = 0.20 / 0.65 = 0.308"
+        }
+      ],
+      "totalDecibans": 17.3,
+      "oddsRatio": 53.7,
+      "conclusion": "inconclusive",
+      "confirmationThreshold": 20,
+      "refutationThreshold": -20
+    },
+    {
+      "hypothesis": "H2: User forgetfulness (3 legitimate users struggling with authentication)",
+      "observations": [
+        {
+          "observation": "47 distinct IPs far exceeds realistic IP footprint of 3 users",
+          "decibans": -19.0,
+          "likelihoodRatio": 0.013,
+          "source": "statistical",
+          "confidence": 0.95,
+          "explanation": "LR = P(47 IPs | 3 users) / P(47 IPs | tool) = 0.01 / 0.80 = 0.013; nearly single-handedly refutes H2"
+        },
+        {
+          "observation": "16+ failures per account exceeds typical user retry threshold",
+          "decibans": -3.4,
+          "likelihoodRatio": 0.455,
+          "source": "statistical",
+          "confidence": 0.75,
+          "explanation": "LR = P(16+ retries | user error) / P(16+ retries | attack) = 0.25 / 0.55 = 0.455"
+        },
+        {
+          "observation": "Narrow 3-account focus consistent with 3 users' own accounts",
+          "decibans": 5.1,
+          "likelihoodRatio": 3.25,
+          "source": "structural",
+          "confidence": 0.8,
+          "explanation": "LR = P(3 accounts | user error) / P(3 accounts | stuffing) = 0.65 / 0.20 = 3.25 \u2014 the only favorable signal for H2"
+        }
+      ],
+      "totalDecibans": -17.3,
+      "oddsRatio": 0.019,
+      "conclusion": "inconclusive",
+      "confirmationThreshold": 20,
+      "refutationThreshold": -20
+    }
+  ],
+  "frequencyAnalysis": {
+    "observed": {
+      "distinct_IPs_per_attempt": 0.94,
+      "distinct_usernames": 3,
+      "attempts_per_username": 16.7,
+      "attempts_per_distinct_IP": 1.06
+    },
+    "expected": {
+      "distinct_IPs_per_attempt_H2_user_error": 0.22,
+      "distinct_IPs_per_attempt_H1_automated": 0.85,
+      "attempts_per_username_user_error": 3.5,
+      "distinct_usernames_credential_stuffing": 25.0
+    },
+    "chiSquared": 43.8,
+    "degreesOfFreedom": 3,
+    "pValue": 2e-05,
+    "significantDeviations": [
+      {
+        "character": "IP_uniqueness_ratio",
+        "observed": 0.94,
+        "expected": 0.22,
+        "deviation": 4.27,
+        "isSignificant": true
+      },
+      {
+        "character": "attempts_per_username",
+        "observed": 16.7,
+        "expected": 3.5,
+        "deviation": 3.77,
+        "isSignificant": true
+      },
+      {
+        "character": "distinct_usernames_targeted",
+        "observed": 3,
+        "expected": 25.0,
+        "deviation": -2.2,
+        "isSignificant": true
+      }
+    ]
+  },
+  "patterns": [
+    {
+      "pattern": "near-unity IP-per-request ratio (0.94)",
+      "positions": [],
+      "suggestion": "Proxy pool or residential botnet cycling a fresh IP per request to defeat per-IP rate limiting \u2014 the defining behavioral signature of modern automated credential attacks",
+      "decibanContribution": 19.0
+    },
+    {
+      "pattern": "3-account hyperfocus with high per-account volume",
+      "positions": [],
+      "suggestion": "Inconsistent with classic credential stuffing (broad sweep of a breached list). Consistent with a targeted password spray against 3 known high-value or high-privilege accounts \u2014 a more deliberate and dangerous attack class",
+      "decibanContribution": -1.7
+    }
+  ],
+  "keyInsight": "At +17.3 decibans (cumulative LR \u2248 54:1, posterior P(attack) \u2248 0.97), the automated-attack hypothesis is 2.7 dB short of formal confirmation \u2014 but the operational decision is clear. The IP-diversity observation alone contributes +19.0 dB and nearly single-handedly refutes user error. Critically, the narrow 3-account focus refutes *classic credential stuffing* (\u22125.1 dB) but does NOT favor user error; it fingerprints this as a targeted password spray or distributed brute force against 3 specific accounts. To cross the 20 dB threshold, collect ONE more independent signal: (a) verify that the 3 usernames correspond to admin/service/privileged accounts (would add \u2248 +4 dB), or (b) cross-reference the username+IP metadata against a known threat-intel feed. Immediate mitigations without waiting: (1) emergency account lockout / CAPTCHA gate for the 3 usernames, (2) block or challenge all 47 source IPs, (3) force MFA re-enrollment for the targeted accounts. The cost of a false positive (inconveniencing potentially 3 real users) is far lower than the cost of a false negative under 54:1 attack odds."
+}

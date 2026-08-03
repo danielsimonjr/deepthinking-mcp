@@ -1,0 +1,128 @@
+{
+  "mode": "constraint",
+  "problem": "Assign 4 engineers (Alice, Bob, Carol, Dave) to 4 distinct roles (backend, frontend, devops, qa). Each engineer gets exactly one role and each role goes to exactly one engineer. Three hard eligibility constraints restrict the assignment.",
+  "variables": [
+    {
+      "id": "alice",
+      "name": "Alice's role",
+      "domain": [
+        "backend",
+        "frontend",
+        "devops",
+        "qa"
+      ]
+    },
+    {
+      "id": "bob",
+      "name": "Bob's role",
+      "domain": [
+        "backend",
+        "frontend",
+        "devops",
+        "qa"
+      ]
+    },
+    {
+      "id": "carol",
+      "name": "Carol's role",
+      "domain": [
+        "backend",
+        "frontend",
+        "devops",
+        "qa"
+      ]
+    },
+    {
+      "id": "dave",
+      "name": "Dave's role",
+      "domain": [
+        "backend",
+        "frontend",
+        "devops",
+        "qa"
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "id": "c1",
+      "type": "not_in",
+      "variables": [
+        "alice"
+      ],
+      "expression": "alice != devops",
+      "description": "Alice cannot do DevOps"
+    },
+    {
+      "id": "c2",
+      "type": "custom",
+      "variables": [
+        "bob"
+      ],
+      "expression": "bob \u2208 {backend, frontend}",
+      "description": "Bob must be assigned backend or frontend"
+    },
+    {
+      "id": "c3",
+      "type": "not_in",
+      "variables": [
+        "carol"
+      ],
+      "expression": "carol != qa",
+      "description": "Carol refuses the QA role"
+    },
+    {
+      "id": "c4",
+      "type": "alldiff",
+      "variables": [
+        "alice",
+        "bob",
+        "carol",
+        "dave"
+      ],
+      "expression": "alldiff(alice, bob, carol, dave)",
+      "description": "Each engineer gets exactly one distinct role (bijective assignment)"
+    }
+  ],
+  "propagation": {
+    "method": "arc_consistency",
+    "reducedDomains": {
+      "alice": [
+        "frontend",
+        "qa"
+      ],
+      "bob": [
+        "backend"
+      ],
+      "carol": [
+        "devops"
+      ],
+      "dave": [
+        "qa"
+      ]
+    },
+    "steps": [
+      "c1 removes devops from alice \u2192 alice: {backend, frontend, qa}",
+      "c2 removes devops and qa from bob \u2192 bob: {backend, frontend}",
+      "c3 removes qa from carol \u2192 carol: {backend, frontend, devops}",
+      "MRV: pick bob (size 2). Try bob = backend.",
+      "c4 (alldiff): remove backend from alice, carol, dave \u2192 alice: {frontend, qa}, carol: {frontend, devops}, dave: {frontend, devops, qa}",
+      "MRV: pick alice (size 2). Try alice = frontend.",
+      "c4 (alldiff): remove frontend from carol, dave \u2192 carol: {devops} (size 1, forced), dave: {devops, qa}",
+      "carol = devops (unit propagation).",
+      "c4 (alldiff): remove devops from dave \u2192 dave: {qa} (size 1, forced).",
+      "dave = qa. All domains are singletons \u2014 solution complete."
+    ]
+  },
+  "solution": {
+    "status": "found",
+    "assignments": {
+      "alice": "frontend",
+      "bob": "backend",
+      "carol": "devops",
+      "dave": "qa"
+    },
+    "backtracks": 0
+  },
+  "analysis": "Arc consistency propagation, guided by the Minimum Remaining Values (MRV) heuristic, solved this CSP entirely without backtracking. Fixing bob=backend via MRV cascaded through alldiff to shrink all other domains; alice's selection of frontend then forced carol\u2192devops and dave\u2192qa by unit propagation. Verification: alice=frontend satisfies c1 (\u2260devops) \u2713; bob=backend satisfies c2 (\u2208{backend,frontend}) \u2713; carol=devops satisfies c3 (\u2260qa) \u2713; all four values are distinct, satisfying c4 \u2713. Note: this is a feasibility result only \u2014 the assignment is not claimed to be 'optimal'. If preferences existed (e.g., prefer Carol on frontend), this should be reformulated as an Optimization problem with a soft-constraint objective."
+}

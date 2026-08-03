@@ -1,0 +1,46 @@
+{
+  "mode": "mathematics",
+  "thoughtType": "proof_construction",
+  "theorems": [
+    {
+      "name": "Irrationality of √2",
+      "statement": "The square root of 2 is not a rational number",
+      "hypotheses": [
+        "√2 can be written as p/q with p, q ∈ ℤ, q ≠ 0, and gcd(p, q) = 1"
+      ],
+      "conclusion": "The hypothesis leads to a contradiction; therefore √2 ∉ ℚ"
+    }
+  ],
+  "proofStrategy": {
+    "type": "contradiction",
+    "steps": [
+      "Assume for contradiction that √2 = p/q with gcd(p, q) = 1 (fraction in lowest terms)",
+      "Square both sides: 2 = p²/q², hence p² = 2q²",
+      "Therefore p² is even; since the square of an odd number is odd, p must be even",
+      "Write p = 2k for some integer k; substitute: (2k)² = 2q² → 4k² = 2q² → q² = 2k²",
+      "Therefore q² is even, hence q is even",
+      "Both p and q are even, contradicting gcd(p, q) = 1",
+      "The assumption is false; √2 is irrational"
+    ],
+    "completeness": 0.97
+  },
+  "logicalForm": {
+    "premises": [
+      "Assume √2 = p/q in lowest terms",
+      "p² = 2q² (algebraic consequence)"
+    ],
+    "conclusion": "p and q are both even, contradicting gcd(p,q) = 1",
+    "inferenceRule": "proof_by_contradiction",
+    "rules": ["parity of squares", "definition of even integer", "substitution"]
+  },
+  "dependencies": [
+    "definition of rational number",
+    "fundamental theorem of arithmetic",
+    "parity lemma: n² even implies n even"
+  ],
+  "assumptions": [
+    "integers are well-ordered",
+    "every rational number has a representation in lowest terms"
+  ],
+  "uncertainty": 0.03
+}

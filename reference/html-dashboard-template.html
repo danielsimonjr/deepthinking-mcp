@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="{{MODE}}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepThinking Dashboard — {{MODE_DISPLAY}}</title>
+<!-- Mermaid pinned to an exact version to prevent CDN tag-hijacking attacks.
+     Bump the version in scripts/render-html-dashboard.py's template lockstep.
+     Optional: add `integrity="sha384-..."` for subresource integrity. -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<style>
+:root {
+  --bg: #ffffff;
+  --fg: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #3b82f6;
+  --panel: #f8fafc;
+  --code-bg: #f1f5f9;
+  --ok: #22c55e;
+  --warn: #f59e0b;
+  --bad: #ef4444;
+  --radius: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f172a;
+    --fg: #f1f5f9;
+    --muted: #94a3b8;
+    --border: #1e293b;
+    --accent: #60a5fa;
+    --panel: #1e293b;
+    --code-bg: #0b1220;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.5;
+}
+header {
+  padding: 1.2rem 2rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+header h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  flex-grow: 1;
+}
+.mode-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.timestamp {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+main {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem 2rem;
+}
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; }
+}
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  min-width: 0;
+}
+.panel h2 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.05rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.mermaid-holder {
+  overflow: auto;
+  max-width: 100%;
+}
+.mermaid {
+  font-family: inherit;
+}
+pre {
+  background: var(--code-bg);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow: auto;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  max-height: 60vh;
+}
+code { font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace; }
+details { margin-top: 0.75rem; }
+summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+}
+footer {
+  padding: 1rem 2rem 2rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.85rem;
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.btn {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--fg);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+}
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.error-banner {
+  background: var(--bad);
+  color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: none;
+}
+</style>
+</head>
+<body>
+<header>
+<h1>
+<span class="mode-badge">{{MODE}}</span>
+{{MODE_DISPLAY}}
+</h1>
+<div class="timestamp">Generated {{TIMESTAMP}}</div>
+</header>
+
+<main>
+<section class="panel" id="diagram-panel">
+<h2>Visualization</h2>
+<div id="mermaid-error" class="error-banner"></div>
+<div class="mermaid-holder">
+<pre class="mermaid" id="mermaid-source">{{MERMAID_SOURCE}}</pre>
+</div>
+</section>
+
+<section class="panel" id="thought-panel">
+<h2>Thought</h2>
+<pre><code id="thought-json">{{THOUGHT_JSON}}</code></pre>
+<details>
+<summary>Raw JSON</summary>
+<pre><code>{{THOUGHT_JSON_RAW}}</code></pre>
+</details>
+</section>
+</main>
+
+<footer>
+<button class="btn" onclick="copyJson()">Copy JSON</button>
+<button class="btn" onclick="downloadJson()">Download JSON</button>
+<button class="btn" onclick="window.print()">Print</button>
+<div style="width: 100%;">deepthinking-plugin dashboard</div>
+</footer>
+
+<script>
+// Mode slug is injected as a JSON literal by the renderer (never interpolated
+// directly into a JS string context) so it cannot break out of the literal.
+const MODE_SLUG = {{MODE_JSON}};
+
+function showBanner(msg) {
+  const banner = document.getElementById('mermaid-error');
+  banner.textContent = msg;
+  banner.style.display = 'block';
+}
+
+if (typeof mermaid !== 'undefined') {
+  try {
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default',
+      // strict mode: no click-handlers, no HTML in labels. Defense against
+      // malicious mermaid source that may arrive via prompt injection.
+      securityLevel: 'strict',
+      parseError: (err, hash) => {
+        showBanner('Mermaid parse error: ' + (err.str || err.message || String(err)));
+      }
+    });
+  } catch (e) {
+    showBanner('Mermaid init failed: ' + e.message);
+  }
+} else {
+  showBanner('Mermaid library failed to load (offline or CDN blocked). The diagram source is still shown below.');
+}
+
+window.addEventListener('error', (e) => {
+  // Surface any uncaught errors; more permissive than the old substring match.
+  showBanner('Page error: ' + (e.message || 'unknown'));
+});
+
+function getThoughtJson() {
+  return document.getElementById('thought-json').textContent;
+}
+
+function copyJson() {
+  const text = getThoughtJson();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(
+      () => alert('Thought JSON copied to clipboard.'),
+      (err) => alert('Copy failed: ' + err)
+    );
+    return;
+  }
+  // Fallback for file:// origins where navigator.clipboard is undefined:
+  // select the JSON <pre> and prompt the user to Ctrl+C.
+  const node = document.getElementById('thought-json');
+  const range = document.createRange();
+  range.selectNode(node);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  alert('Clipboard API unavailable on this origin. The JSON is selected — press Ctrl+C (Cmd+C on macOS) to copy.');
+}
+
+function downloadJson() {
+  const blob = new Blob([getThoughtJson()], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  // Sanitize the mode slug for the download filename to avoid any path
+  // characters, even though the renderer has already validated it.
+  const safeMode = MODE_SLUG.replace(/[^a-zA-Z0-9_-]/g, '_');
+  a.download = safeMode + '-thought.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{
+  "mode": "fishbone",
+  "effect": "Customer support ticket backlog grew from ~200 to ~950 open tickets over the last quarter",
+  "categories": [
+    {
+      "name": "Manpower",
+      "causes": [
+        "Two senior support engineers left in the same month without backfill",
+        "New hires require 6 weeks of ramp-up before handling tickets independently"
+      ]
+    },
+    {
+      "name": "Method",
+      "causes": [
+        "No triage tiering — every ticket is worked in raw first-in-first-out order regardless of severity",
+        "Escalation path to engineering requires a manual Slack ping instead of a defined SLA-backed process"
+      ]
+    },
+    {
+      "name": "Machine",
+      "causes": [
+        "Ticketing system search is slow, adding ~2 minutes per ticket to find related past cases",
+        "No automated canned-response suggestions for the top 20 recurring issue types"
+      ]
+    },
+    {
+      "name": "Material",
+      "causes": [
+        "Internal knowledge-base articles are outdated, sending agents back to engineering for basic questions"
+      ]
+    },
+    {
+      "name": "Measurement",
+      "causes": [
+        "No per-agent throughput dashboard, so overload on individual agents goes unnoticed until backlog is already large"
+      ]
+    },
+    {
+      "name": "Environment",
+      "causes": [
+        "A major product release six weeks ago introduced a UI change that generated a sustained spike in confusion-related tickets"
+      ]
+    }
+  ],
+  "primaryCauses": [
+    "Two senior support engineers left in the same month without backfill",
+    "No triage tiering — every ticket is worked in raw first-in-first-out order regardless of severity",
+    "A major product release six weeks ago introduced a UI change that generated a sustained spike in confusion-related tickets"
+  ]
+}

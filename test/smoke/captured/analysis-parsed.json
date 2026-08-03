@@ -1,0 +1,339 @@
+{
+  "mode": "analysis",
+  "subject": "Authentication service failure modes \u2014 layered decomposition",
+  "scope": {
+    "inScope": [
+      "Login and credential-validation flow",
+      "JWT issuance, signing, and validation",
+      "Session management and cache layer",
+      "External identity provider (IdP) dependency",
+      "Rate limiting and brute-force defence",
+      "Key management and rotation",
+      "Observed cross-incident failure patterns"
+    ],
+    "outOfScope": [
+      "Authorization / RBAC enforcement (post-authentication)",
+      "User registration and account lifecycle",
+      "Client-side token storage (browser/app layer)",
+      "Network-layer DDoS mitigation upstream of the service"
+    ],
+    "justification": "Scoping to the authentication boundary \u2014 identity verification through token issuance \u2014 isolates the failure domain. Authorization and registration have distinct failure modes and are analyzed separately."
+  },
+  "layers": {
+    "surface": {
+      "observations": [
+        "Login endpoint returns HTTP 504 Gateway Timeout under peak load (>800 rps)",
+        "Valid, unexpired JWTs intermittently rejected with 401 \u2014 affects ~0.3% of requests in production",
+        "Password-reset flow returns 500 with no user-facing message approximately once every 40 invocations",
+        "Auth service pods restart 2\u20134 times per day; memory grows monotonically between restarts",
+        "Token expiry timestamps differ by 30\u201390 s between the service's issued claim and what the client observes",
+        "All authentication operations fail when upstream IdP (OAuth2 provider) is unreachable, even for local-credential users",
+        "Login failure rate spikes from a baseline of 0.1% to 12% during key-rotation windows",
+        "Audit logs have gaps of 5\u201315 minutes correlated with high-concurrency events",
+        "Distributed login attempts from rotating IPs proceed without throttling beyond the per-IP limit"
+      ],
+      "coverage": 0.72
+    },
+    "structural": {
+      "components": [
+        {
+          "id": "c1",
+          "name": "API Gateway / Load Balancer",
+          "role": "Terminates TLS, routes /auth/* traffic to the auth service fleet, enforces per-IP rate limit (WAF rule)",
+          "dependencies": []
+        },
+        {
+          "id": "c2",
+          "name": "Auth Service (Login Handler)",
+          "role": "Validates credentials against user store, orchestrates token issuance, coordinates IdP for federated logins",
+          "dependencies": [
+            "c1",
+            "c3",
+            "c4",
+            "c6",
+            "c7",
+            "c8",
+            "c9"
+          ]
+        },
+        {
+          "id": "c3",
+          "name": "User Store (PostgreSQL)",
+          "role": "Persists hashed credentials (bcrypt), user metadata, account lock state",
+          "dependencies": []
+        },
+        {
+          "id": "c4",
+          "name": "Token Service",
+          "role": "Signs JWTs with RS256, validates incoming tokens, manages token TTL",
+          "dependencies": [
+            "c5"
+          ]
+        },
+        {
+          "id": "c5",
+          "name": "Key Management Store (env-var / Vault)",
+          "role": "Holds RSA private key used for JWT signing; rotation is manual and requires service restart",
+          "dependencies": []
+        },
+        {
+          "id": "c6",
+          "name": "Session Cache (Redis)",
+          "role": "Stores session state and token revocation list; auth service calls synchronously on every request",
+          "dependencies": []
+        },
+        {
+          "id": "c7",
+          "name": "External Identity Provider (OAuth2 / OIDC)",
+          "role": "Handles federated login for SSO users; also called for all logins to check global account status",
+          "dependencies": []
+        },
+        {
+          "id": "c8",
+          "name": "Rate Limiter (in-process, per-pod)",
+          "role": "Enforces per-IP and per-account failed-attempt thresholds using local in-memory counters",
+          "dependencies": []
+        },
+        {
+          "id": "c9",
+          "name": "Audit Logger",
+          "role": "Emits structured auth-event records to a shared Kafka topic; uses synchronous flush",
+          "dependencies": []
+        }
+      ],
+      "relationships": [
+        {
+          "from": "c1",
+          "to": "c2",
+          "type": "calls",
+          "description": "Routes all /auth/* requests; applies per-IP rate limit only (not per-account)"
+        },
+        {
+          "from": "c2",
+          "to": "c3",
+          "type": "calls",
+          "description": "Reads hashed password and account-lock state on every login attempt"
+        },
+        {
+          "from": "c2",
+          "to": "c4",
+          "type": "calls",
+          "description": "Delegates token signing and validation; synchronous blocking call"
+        },
+        {
+          "from": "c4",
+          "to": "c5",
+          "type": "depends_on",
+          "description": "Token signing requires the RSA private key loaded at startup; no hot-reload"
+        },
+        {
+          "from": "c2",
+          "to": "c6",
+          "type": "calls",
+          "description": "Checks token revocation list and writes session state; synchronous, in the hot path"
+        },
+        {
+          "from": "c2",
+          "to": "c7",
+          "type": "calls",
+          "description": "Called for all logins (not just SSO) to validate global account status; no circuit breaker"
+        },
+        {
+          "from": "c2",
+          "to": "c8",
+          "type": "controls",
+          "description": "Rate-limit counters are local to each pod \u2014 not shared across the fleet"
+        },
+        {
+          "from": "c2",
+          "to": "c9",
+          "type": "produces",
+          "description": "Synchronous flush on every auth event; high latency on Kafka broker back-pressure propagates into auth latency"
+        },
+        {
+          "from": "c5",
+          "to": "c4",
+          "type": "owns",
+          "description": "Key rotation requires manual update of env var and full pod restart cycle"
+        }
+      ],
+      "coverage": 0.8
+    },
+    "patterns": [
+      {
+        "id": "p1",
+        "name": "Unconditional external IdP coupling \u2014 no fallback path",
+        "description": "The auth service calls the external IdP (c7) on every login, including for local-credential accounts. There is no circuit breaker, timeout guard, or fallback mode. When the IdP is degraded, all logins fail regardless of credential type. This has triggered three P1 incidents in the past quarter when the IdP had planned maintenance windows.",
+        "type": "failure_mode",
+        "evidence": [
+          "c2",
+          "c7"
+        ],
+        "significance": "high"
+      },
+      {
+        "id": "p2",
+        "name": "Synchronous Redis dependency in the hot path \u2014 single point of latency amplification",
+        "description": "Every authentication request performs a synchronous blocking call to Redis (c6) for revocation-list lookup. Redis P99 latency of 12 ms at peak load adds directly to login latency. During a Redis slowdown event (2026-03-14), auth service latency P99 rose from 80 ms to 4,200 ms, triggering cascade timeout failures upstream.",
+        "type": "failure_mode",
+        "evidence": [
+          "c2",
+          "c6"
+        ],
+        "significance": "high"
+      },
+      {
+        "id": "p3",
+        "name": "Key rotation requires pod restart \u2014 creates validation gap window",
+        "description": "RS256 private key (c5) is loaded once at pod startup via env var. Key rotation requires updating the env var and performing a rolling restart. During the restart window, pods with the old key issue tokens that pods with the new key immediately reject (and vice versa), causing the observed 12% login failure rate for 8\u201315 minutes per rotation event. No zero-downtime key-rotation protocol exists.",
+        "type": "failure_mode",
+        "evidence": [
+          "c4",
+          "c5"
+        ],
+        "significance": "high"
+      },
+      {
+        "id": "p4",
+        "name": "Per-pod in-memory rate limiting \u2014 distributed bypass trivially achievable",
+        "description": "Rate limiter counters (c8) live in each pod's memory independently. With N pods, an attacker can make N \u00d7 threshold failed attempts before any pod detects abuse. Observed in production: credential-stuffing campaigns that evaded per-IP limits by rotating across 10 IPs and distributing across 12 pods, achieving ~1,200 unchallenged attempts per account per minute.",
+        "type": "failure_mode",
+        "evidence": [
+          "c8",
+          "c1"
+        ],
+        "significance": "high"
+      },
+      {
+        "id": "p5",
+        "name": "Memory leak under sustained concurrent load \u2014 progressive service degradation",
+        "description": "Auth service (c2) memory grows linearly under load and does not stabilize. Pod restarts every 6\u20138 hours suggest a leak in the JWT validation or bcrypt worker pool. The final 20% of each memory cycle correlates with increased GC pause times and elevated 504 error rates. Root cause not yet confirmed \u2014 suspected accumulation of unpooled goroutines or byte buffers in the token validation library.",
+        "type": "failure_mode",
+        "evidence": [
+          "c2",
+          "c4"
+        ],
+        "significance": "high"
+      },
+      {
+        "id": "p6",
+        "name": "Clock skew between service and clients causes intermittent 401 storms",
+        "description": "JWT exp/iat claims are set using the service's system clock. Tokens validated on pods with clock drift > 30 s are rejected. The auth service fleet has no NTP drift monitoring; observed drift of 45\u201390 s between pods explains the 0.3% baseline 401 rate for valid tokens. The effect is worse immediately after a pod restart when NTP re-sync occurs.",
+        "type": "failure_mode",
+        "evidence": [
+          "c4",
+          "c2"
+        ],
+        "significance": "medium"
+      },
+      {
+        "id": "p7",
+        "name": "Synchronous audit log flush couples Kafka back-pressure into auth latency",
+        "description": "The audit logger (c9) performs a synchronous Kafka flush on every auth event. During Kafka broker rebalancing or back-pressure, this introduces 200\u2013800 ms latency directly into the login critical path. Audit log gaps observed during high-concurrency events are caused by the auth service timing out the flush rather than buffering \u2014 meaning audit records are silently dropped, not merely delayed.",
+        "type": "failure_mode",
+        "evidence": [
+          "c9",
+          "c2"
+        ],
+        "significance": "medium"
+      },
+      {
+        "id": "p8",
+        "name": "Absence of graceful degradation design \u2014 all failure modes are total failures",
+        "description": "Across all observed incidents, there is no evidence of a designed degraded-mode or fallback path. Every dependency (IdP, Redis, Kafka, key store) is treated as a hard synchronous requirement. No bulkhead, fallback, or circuit breaker pattern is present anywhere in the auth service. This is a systemic design absence, not an isolated gap.",
+        "type": "absence",
+        "evidence": [
+          "c2",
+          "c6",
+          "c7",
+          "c9"
+        ],
+        "significance": "high"
+      }
+    ],
+    "synthesis": {
+      "insights": [
+        {
+          "id": "i1",
+          "insight": "The auth service has no resilience layer: every dependency is a synchronous, uncircuit-broken single point of failure. The dominant failure mode is not any one component but the architectural pattern of zero graceful degradation. When any dependency degrades, the entire authentication flow fails for all users \u2014 not just the affected cohort.",
+          "basis": [
+            "p1",
+            "p2",
+            "p7",
+            "p8"
+          ],
+          "confidence": 0.92
+        },
+        {
+          "id": "i2",
+          "insight": "Operational procedures (key rotation, Redis maintenance, IdP maintenance windows) are as dangerous as unplanned outages because the system was never designed to tolerate them. Three of the last five P1 incidents were caused by planned changes, not external failures. This indicates the failure model is not primarily about reliability of dependencies but about the absence of a deployment and operations contract.",
+          "basis": [
+            "p3",
+            "p1",
+            "p8"
+          ],
+          "confidence": 0.88
+        },
+        {
+          "id": "i3",
+          "insight": "The rate limiting architecture (per-pod, in-memory) provides a false sense of brute-force protection. The effective per-account threshold is threshold \u00d7 pod_count, making the control nearly meaningless at fleet scale. This is not a tuning problem \u2014 it is a structural mismatch between the threat model and the implementation.",
+          "basis": [
+            "p4"
+          ],
+          "confidence": 0.9
+        },
+        {
+          "id": "i4",
+          "insight": "The memory leak (p5) and clock-skew issue (p6) are independent failure modes that compound each other: near the end of a pod's memory lifecycle, GC pressure increases token validation latency, which widens the window where clock-skew-adjacent tokens get rejected. Their interaction produces a failure rate higher than either cause in isolation would predict.",
+          "basis": [
+            "p5",
+            "p6"
+          ],
+          "confidence": 0.75
+        },
+        {
+          "id": "i5",
+          "insight": "Silent audit log loss (p7) means that during the highest-stress incidents \u2014 exactly when forensic data is most valuable \u2014 the audit trail is incomplete. Post-incident analysis has been and will continue to be hampered by the very conditions that caused the incident.",
+          "basis": [
+            "p7"
+          ],
+          "confidence": 0.95
+        }
+      ],
+      "recommendations": [
+        "Introduce circuit breakers on all external dependencies (IdP, Redis, Kafka) with explicit fallback behaviours: local-credential users must be authenticatable without IdP reachability.",
+        "Replace per-pod in-memory rate limiting with a distributed counter store (Redis Sorted Set or a dedicated rate-limit service) and enforce per-account thresholds fleet-wide, not per-pod.",
+        "Implement zero-downtime key rotation: carry two active signing keys simultaneously (current + next) with a 15-minute overlap window, allowing token validation to accept either during rotation.",
+        "Move audit logging to an async fire-and-forget pattern with a bounded in-process buffer and a dead-letter queue; never allow Kafka back-pressure to propagate into the auth request path.",
+        "Enforce strict NTP drift monitoring (alert at > 5 s, auto-restart pod at > 15 s) and add a clock-skew tolerance window (nbf/exp \u00b1 30 s) to the token validator.",
+        "Profile and instrument the JWT validation and bcrypt worker pool to identify the root cause of the memory leak; add memory-based liveness probe thresholds to trigger graceful pod restart before degradation onset.",
+        "Run a formal GameDay exercise where IdP, Redis, and Kafka are each killed independently to validate that fallback paths work before they are needed in production.",
+        "Establish a mandatory pre-rotation checklist and automated rotation tooling that verifies dual-key readiness across the fleet before retiring the old key."
+      ]
+    }
+  },
+  "coverage": {
+    "layersCovered": [
+      "surface",
+      "structural",
+      "patterns",
+      "synthesis"
+    ],
+    "estimatedCompleteness": 0.68,
+    "blindSpots": [
+      "Actual bcrypt cost factor vs. server concurrency capacity \u2014 over-tuned bcrypt can saturate CPU under modest load",
+      "Token revocation completeness \u2014 whether the Redis revocation list is the only mechanism and how logout is handled across sessions",
+      "Mobile and third-party client behaviour when they receive 401 \u2014 retry storms from aggressive clients can amplify auth service failures",
+      "Mutual TLS or service-mesh authentication between auth service and its dependencies \u2014 potential for certificate expiry failures",
+      "Database connection-pool exhaustion under sustained load \u2014 c3 (User Store) dependency not stress-tested in this analysis",
+      "Secrets scanning and key-exposure risk \u2014 RSA private key stored in env vars may appear in crash dumps, process listings, or CI logs"
+    ],
+    "wouldChangeAnalysisIf": [
+      "Confirmation that a WAF-layer per-account rate limit exists would reduce p4 severity from high to medium",
+      "Evidence that the IdP is only called for federated (SSO) users would narrow the blast radius of p1 significantly",
+      "A memory profiler heap dump would either confirm or refute the p5 goroutine-leak hypothesis and change the remediation priority",
+      "Knowledge of whether Redis is in a replicated HA configuration would affect whether p2 is a latency-amplification risk or also a durability risk",
+      "Confirmation that the clock-skew tolerance window already exists in the token validator would eliminate p6 as an active failure mode"
+    ]
+  }
+}

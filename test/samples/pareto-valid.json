@@ -1,0 +1,40 @@
+{
+  "mode": "pareto",
+  "items": [
+    {
+      "name": "Login/password issues",
+      "value": 420
+    },
+    {
+      "name": "Billing questions",
+      "value": 310
+    },
+    {
+      "name": "Feature how-to questions",
+      "value": 150
+    },
+    {
+      "name": "Bug reports",
+      "value": 80
+    },
+    {
+      "name": "Integration failures",
+      "value": 45
+    },
+    {
+      "name": "Data export requests",
+      "value": 25
+    },
+    {
+      "name": "Other misc",
+      "value": 20
+    }
+  ],
+  "cumulativePercent": [40.0, 69.52, 83.81, 91.43, 95.71, 98.1, 100.0],
+  "vitalFew": [
+    "Login/password issues",
+    "Billing questions",
+    "Feature how-to questions"
+  ],
+  "recommendation": "Fix login/password reliability and simplify the billing self-service flow first — together with feature how-to questions, these three categories account for roughly 84% of the 1,050 support tickets, so improvements here will move the backlog far more than spreading effort evenly across all seven categories."
+}

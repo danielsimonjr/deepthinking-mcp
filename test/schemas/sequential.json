@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SequentialThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "thoughtNumber",
+    "totalThoughts",
+    "content",
+    "nextThoughtNeeded"
+  ],
+  "properties": {
+    "mode": {
+      "const": "sequential"
+    },
+    "thoughtNumber": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "totalThoughts": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nextThoughtNeeded": {
+      "type": "boolean"
+    },
+    "isRevision": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "revisesThought": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "revisionReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "buildUpon": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "branchFrom": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "branchId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "needsMoreThoughts": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,38 @@
+{
+  "mode": "riskassessment",
+  "risks": [
+    {
+      "risk": "New payment gateway API has undocumented rate limits that could throttle checkout during peak traffic",
+      "probability": 0.4,
+      "impact": 4,
+      "score": 1.6,
+      "mitigation": "Load test against the gateway's sandbox at 3x expected peak volume before cutover; get documented rate limits in writing from the vendor and negotiate a higher tier if needed."
+    },
+    {
+      "risk": "Engineering team is unfamiliar with the new gateway's SDK and idempotency model",
+      "probability": 0.6,
+      "impact": 3,
+      "score": 1.8,
+      "mitigation": "Run a two-week SDK familiarization spike with a non-production integration; pair the two engineers who completed the vendor's certification with the rest of the team."
+    },
+    {
+      "risk": "Historical transaction records are corrupted or lost during the data migration",
+      "probability": 0.2,
+      "impact": 5,
+      "score": 1.0,
+      "mitigation": "Take a verified full backup before migration; run the migration in dry-run mode against a staging copy first and diff row counts and checksums before touching production."
+    },
+    {
+      "risk": "Vendor's published SLA does not explicitly cover our seasonal peak traffic windows",
+      "probability": 0.3,
+      "impact": 4,
+      "score": 1.2,
+      "mitigation": "Escalate to the vendor account team to get peak-window coverage added to the contract in writing; maintain the old gateway as a manual failover for the first peak season."
+    }
+  ],
+  "topRisks": [
+    "Engineering team is unfamiliar with the new gateway's SDK and idempotency model",
+    "New payment gateway API has undocumented rate limits that could throttle checkout during peak traffic"
+  ],
+  "recommendation": "Address the top two risks by score first: the SDK-familiarity gap (0.6 × 3 = 1.8) via the two-week spike, and the rate-limit unknown (0.4 × 4 = 1.6) via sandbox load testing and a written vendor commitment. Both mitigations should complete before cutover; the lower-scored data-corruption (0.2 × 5 = 1.0) and SLA-coverage (0.3 × 4 = 1.2) risks can be mitigated in parallel since their mitigations don't block the cutover timeline."
+}

@@ -1,0 +1,101 @@
+{
+  "mode": "physics",
+  "thoughtType": "tensor_formulation",
+  "tensorProperties": {
+    "rank": [
+      0,
+      2
+    ],
+    "components": "F_{\u03bc\u03bd} = \u2202_\u03bcA_\u03bd - \u2202_\u03bdA_\u03bc; explicit: F_{0i} = E_i/c, F_{ij} = -\u03b5_{ijk}B_k",
+    "latex": "F_{\\mu\\nu} = \\partial_\\mu A_\\nu - \\partial_\\nu A_\\mu = \\begin{pmatrix} 0 & -E_x/c & -E_y/c & -E_z/c \\\\ E_x/c & 0 & -B_z & B_y \\\\ E_y/c & B_z & 0 & -B_x \\\\ E_z/c & -B_y & B_x & 0 \\end{pmatrix}",
+    "symmetries": [
+      "Antisymmetric: F_{\u03bc\u03bd} = -F_{\u03bd\u03bc}, so the diagonal vanishes \u2014 F_{\u03bc\u03bc} = 0",
+      "6 independent components in 4D spacetime: 3 electric (E_x, E_y, E_z) and 3 magnetic (B_x, B_y, B_z)",
+      "F is a closed differential 2-form: dF = 0 (when F = dA), which encodes the homogeneous Maxwell equations",
+      "Under Lorentz boosts (velocity \u03b2 along x): E_y \u2192 \u03b3(E_y - \u03b2cB_z), B_z \u2192 \u03b3(B_z - \u03b2E_y/c) \u2014 E and B mix"
+    ],
+    "invariants": [
+      "FIRST INVARIANT \u2014 Lorentz scalar: I\u2081 = F_{\u03bc\u03bd}F^{\u03bc\u03bd} = 2(B\u00b2 - E\u00b2/c\u00b2)",
+      "  Derivation: F_{\u03bc\u03bd}F^{\u03bc\u03bd} = 2[F_{0i}F^{0i} + F_{ij}F^{ij}] = 2[-(E\u00b2/c\u00b2) + B\u00b2]",
+      "  since F^{0i} = \u03b7^{00}\u03b7^{ii}F_{0i} = (+1)(-1)(E_i/c) = -E_i/c contributes negative sign",
+      "  and F^{ij} = \u03b7^{ii}\u03b7^{jj}F_{ij} = (+1)F_{ij} contributes positively",
+      "  Classification: I\u2081 > 0 \u2192 magnetic-type field (B\u00b2 > E\u00b2/c\u00b2); I\u2081 < 0 \u2192 electric-type; I\u2081 = 0 \u2192 null or mixed",
+      "SECOND INVARIANT \u2014 Lorentz pseudoscalar: I\u2082 = F_{\u03bc\u03bd}*F^{\u03bc\u03bd} = (1/2)\u03b5^{\u03bc\u03bd\u03c1\u03c3}F_{\u03bc\u03bd}F_{\u03c1\u03c3} = -4(E\u20d7\u00b7B\u20d7)/c",
+      "  where *F^{\u03bc\u03bd} = (1/2)\u03b5^{\u03bc\u03bd\u03c1\u03c3}F_{\u03c1\u03c3} is the Hodge dual (\u03b5^{0123} = -1 for signature +\u2212\u2212\u2212)",
+      "  The dual swaps roles: *F_{0i} = B_i, *F_{ij} = \u03b5_{ijk}E_k/c",
+      "  Pseudoscalar: changes sign under parity (P) or time reversal (T); invariant under proper orthochronous Lorentz group",
+      "  Classification: I\u2082 = 0 \u2192 E\u20d7 \u22a5 B\u20d7 in every frame; I\u2082 \u2260 0 \u2192 E\u00b7B is an absolute fact, no boost removes it",
+      "COMPLETENESS: By Cayley-Hamilton applied to the linear map F^\u03bc_\u03bd, these two are the only algebraically independent invariants for a rank-2 antisymmetric tensor in 4D"
+    ],
+    "transformation": "covariant",
+    "indexStructure": "(0,2) antisymmetric tensor \u2014 element of the exterior algebra \u039b\u00b2(T*M)",
+    "coordinateSystem": "Minkowski, signature (+,\u2212,\u2212,\u2212), coordinates x^\u03bc = (ct, x, y, z)"
+  },
+  "physicalInterpretation": {
+    "quantity": "Electromagnetic field tensor (Faraday 2-form)",
+    "units": "F_{0i}: V\u00b7m\u207b\u00b9 = kg\u00b7m\u00b7A\u207b\u00b9\u00b7s\u207b\u00b3 (electric field / c); F_{ij}: T = kg\u00b7A\u207b\u00b9\u00b7s\u207b\u00b2 (magnetic field)",
+    "conservationLaws": [
+      "\u2202_\u03bcF^{\u03bc\u03bd} = \u03bc\u2080J^\u03bd \u2014 inhomogeneous Maxwell equations (Gauss + Amp\u00e8re-Maxwell)",
+      "\u2202_{[\u03bc}F_{\u03bd\u03c1]} = 0 \u2014 Bianchi identity / homogeneous Maxwell equations (Gauss-B + Faraday)",
+      "\u2202_\u03bcJ^\u03bc = 0 \u2014 charge conservation (follows from \u2202_\u03bc\u2202_\u03bdF^{\u03bc\u03bd} = 0 by antisymmetry of F)",
+      "\u2202_\u03bdT^{\u03bc\u03bd} = F^{\u03bc\u03bd}J_\u03bd \u2014 energy-momentum not conserved for field alone; Lorentz force density is the source term"
+    ],
+    "constraints": [
+      "Gauge redundancy: A_\u03bc \u2192 A_\u03bc + \u2202_\u03bc\u03bb(x) leaves F_{\u03bc\u03bd} strictly invariant \u2014 F is physical, A carries gauge freedom",
+      "Bianchi identity \u2202_{[\u03bc}F_{\u03bd\u03c1]} = 0 is automatic when F = dA (closedness of the 2-form)",
+      "Reality condition: all components of F_{\u03bc\u03bd} are real in classical EM"
+    ],
+    "observables": [
+      "Electric field: E^i = cF^{0i} \u2014 directly measurable via force on test charge at rest",
+      "Magnetic field: B^i = \u2212(1/2)\u03b5^{ijk}F_{jk} \u2014 measurable via force on moving charge",
+      "Lorentz 4-force on charge q: f^\u03bc = qF^\u03bc_\u03bd u^\u03bd (covariant form of F = q(E + v\u00d7B))",
+      "I\u2081 = 2(B\u00b2 \u2212 E\u00b2/c\u00b2): tells you whether the field is 'more magnetic' or 'more electric' in a Lorentz-invariant sense",
+      "    \u2022 I\u2081 > 0: there EXISTS a Lorentz frame in which E\u20d7 = 0 (purely magnetic in that frame)",
+      "    \u2022 I\u2081 < 0: there EXISTS a Lorentz frame in which B\u20d7 = 0 (purely electric in that frame)",
+      "    \u2022 I\u2081 = 0 with I\u2082 = 0: null field \u2014 electromagnetic radiation (plane waves); E = cB and E\u20d7\u22a5B\u20d7 in every frame",
+      "    \u2022 I\u2081 = 0 with I\u2082 \u2260 0: no standard frame simplification available",
+      "I\u2082 \u221d E\u20d7\u00b7B\u20d7: measures 'helicity' \u2014 whether E and B have a common projection axis",
+      "    \u2022 I\u2082 = 0: E\u20d7 \u22a5 B\u20d7 in every inertial frame (e.g., all radiation, static pure-E or pure-B fields)",
+      "    \u2022 I\u2082 \u2260 0: E\u20d7 and B\u20d7 retain a nonzero dot product in EVERY frame \u2014 absolute geometric fact",
+      "    \u2022 I\u2082 is a CP-odd observable: it changes sign under parity (E \u2192 E, B \u2192 \u2212B) or time reversal",
+      "Stress-energy tensor: T^{\u03bc\u03bd} = F^{\u03bc\u03b1}F^\u03bd_\u03b1 \u2212 (1/4)\u03b7^{\u03bc\u03bd}F_{\u03b1\u03b2}F^{\u03b1\u03b2} \u2014 directly involves I\u2081 in the trace term"
+    ]
+  },
+  "fieldTheoryContext": {
+    "fields": [
+      "A_\u03bc = (\u03c6/c, \u2212A\u20d7) \u2014 electromagnetic 4-potential (gauge field, not observable)",
+      "F_{\u03bc\u03bd} = \u2202_\u03bcA_\u03bd \u2212 \u2202_\u03bdA_\u03bc \u2014 field strength (gauge-invariant, observable)",
+      "J^\u03bc = (c\u03c1, J\u20d7) \u2014 4-current density (source of the field)",
+      "*F_{\u03bc\u03bd} = (1/2)\u03b5_{\u03bc\u03bd\u03c1\u03c3}F^{\u03c1\u03c3} \u2014 Hodge dual tensor; swaps E\u20d7 \u2194 cB\u20d7"
+    ],
+    "interactions": [
+      "Minimal coupling to charged matter: \u2202_\u03bc \u2192 D_\u03bc = \u2202_\u03bc + iqA_\u03bc/\u210f",
+      "Lorentz force (covariant): dp^\u03bc/d\u03c4 = qF^\u03bc_\u03bd u^\u03bd",
+      "Electromagnetic duality: (E\u20d7, B\u20d7) \u2192 (cB\u20d7, \u2212E\u20d7/c) maps F \u2192 *F, leaving Maxwell vacuum equations invariant"
+    ],
+    "symmetryGroup": "U(1) \u00d7 ISO(3,1) (gauge \u00d7 Poincar\u00e9)",
+    "gaugeSymmetries": [
+      "Local U(1): A_\u03bc \u2192 A_\u03bc + \u2202_\u03bc\u03bb(x); F_{\u03bc\u03bd} is invariant \u2014 gauge freedom in potential",
+      "Poincar\u00e9 (Lorentz boosts + rotations): F_{\u03bc\u03bd} transforms as a covariant 2-tensor; I\u2081 and I\u2082 are preserved",
+      "Electromagnetic duality (vacuum only): (F, *F) \u2192 (*F, \u2212F) maps solutions to solutions",
+      "Noether's theorem: U(1) gauge invariance \u2192 \u2202_\u03bcJ^\u03bc = 0 (charge conservation)"
+    ]
+  },
+  "dependencies": [
+    "Minkowski metric \u03b7_{\u03bc\u03bd} = diag(+1,\u22121,\u22121,\u22121) for raising/lowering indices",
+    "Levi-Civita pseudotensor \u03b5^{\u03bc\u03bd\u03c1\u03c3} with \u03b5^{0123} = \u22121 (signature +\u2212\u2212\u2212)",
+    "Hodge duality: *F^{\u03bc\u03bd} = (1/2)\u03b5^{\u03bc\u03bd\u03c1\u03c3}F_{\u03c1\u03c3}",
+    "Maxwell's equations in covariant form (source and Bianchi)",
+    "Noether's theorem (continuous symmetry \u2192 conserved current)",
+    "Exterior algebra: F = dA is an exact 2-form; dF = 0 follows automatically",
+    "Cayley-Hamilton theorem (completeness of invariants for antisymmetric tensors in 4D)"
+  ],
+  "assumptions": [
+    "Flat Minkowski spacetime \u2014 no gravitational curvature, R_{\u03bc\u03bd\u03c1\u03c3} = 0",
+    "Signature convention (+,\u2212,\u2212,\u2212) throughout",
+    "SI units with explicit factors of c; results hold in natural units by setting c = 1",
+    "Classical field theory \u2014 no quantum corrections or path integrals",
+    "No magnetic monopoles (Bianchi identity \u2202_{[\u03bc}F_{\u03bd\u03c1]} = 0 holds globally, not just locally)"
+  ],
+  "uncertainty": 0.02
+}

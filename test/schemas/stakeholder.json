@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "StakeholderThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "stakeholders"
+  ],
+  "properties": {
+    "mode": {
+      "const": "stakeholder"
+    },
+    "stakeholders": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "power",
+          "interest",
+          "quadrant",
+          "strategy"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "power": {
+            "type": "string"
+          },
+          "interest": {
+            "type": "string"
+          },
+          "quadrant": {
+            "type": "string"
+          },
+          "strategy": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "recommendation": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

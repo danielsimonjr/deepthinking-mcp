@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RiskAssessmentThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "risks"
+  ],
+  "properties": {
+    "mode": {
+      "const": "riskassessment"
+    },
+    "risks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "risk",
+          "probability",
+          "impact",
+          "score",
+          "mitigation"
+        ],
+        "properties": {
+          "risk": {
+            "type": "string"
+          },
+          "probability": {
+            "type": ["number", "string"]
+          },
+          "impact": {
+            "type": ["number", "string"]
+          },
+          "score": {
+            "type": ["number", "string"]
+          },
+          "mitigation": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "topRisks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recommendation": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

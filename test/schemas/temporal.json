@@ -1,0 +1,258 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "TemporalThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "thoughtType"
+  ],
+  "properties": {
+    "mode": {
+      "const": "temporal"
+    },
+    "thoughtType": {
+      "type": "string",
+      "enum": [
+        "event_definition",
+        "interval_analysis",
+        "temporal_constraint",
+        "sequence_construction",
+        "causality_timeline"
+      ]
+    },
+    "timeline": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "timeUnit",
+        "events"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "timeUnit": {
+          "type": "string",
+          "enum": [
+            "milliseconds",
+            "seconds",
+            "minutes",
+            "hours",
+            "days",
+            "months",
+            "years"
+          ]
+        },
+        "startTime": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "endTime": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "timestamp",
+          "type",
+          "properties"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "number"
+          },
+          "duration": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "instant",
+              "interval"
+            ]
+          },
+          "properties": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "intervals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "start",
+          "end"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "start": {
+            "type": "number"
+          },
+          "end": {
+            "type": "number"
+          },
+          "overlaps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "contains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "subject",
+          "object",
+          "confidence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "before",
+              "after",
+              "during",
+              "overlaps",
+              "meets",
+              "starts",
+              "finishes",
+              "equals"
+            ]
+          },
+          "subject": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string"
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "formula": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "from",
+          "to",
+          "relationType",
+          "strength"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "relationType": {
+            "type": "string",
+            "enum": [
+              "causes",
+              "enables",
+              "prevents",
+              "precedes",
+              "follows"
+            ]
+          },
+          "strength": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "delay": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "formula": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

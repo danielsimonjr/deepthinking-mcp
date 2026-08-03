@@ -1,0 +1,57 @@
+{
+  "mode": "counterfactual",
+  "actual": {
+    "id": "actual",
+    "name": "Midnight Deployment Outage",
+    "description": "Bad deployment at 00:00; first degradation alerts at 01:30 AM; team chose to investigate rather than roll back; full outage cascade began at 02:47 AM and lasted 3.5 hours",
+    "conditions": [
+      { "factor": "Deployment version", "value": "v4.3.0 (bad)" },
+      { "factor": "First alert time", "value": "01:30 AM" },
+      { "factor": "Rollback decision", "value": "Not taken; team chose to investigate" },
+      { "factor": "Cascade failure threshold", "value": "Reached at 02:47 AM" }
+    ],
+    "outcomes": [
+      { "description": "Full service outage lasting 3.5 hours, affecting 100% of users", "impact": "negative", "magnitude": 0.9 }
+    ]
+  },
+  "counterfactuals": [
+    {
+      "id": "cf1",
+      "name": "Rollback at 01:45 AM",
+      "description": "Team initiates rollback to v4.2.0 at 01:45 AM, 15 minutes after first alert and before the cascade failure threshold at ~02:30 AM",
+      "conditions": [
+        { "factor": "Deployment version", "value": "v4.3.0 (bad)" },
+        { "factor": "First alert time", "value": "01:30 AM" },
+        { "factor": "Rollback decision", "value": "Rollback to v4.2.0 initiated at 01:45 AM", "isIntervention": true },
+        { "factor": "Cascade failure threshold", "value": "Never reached — rollback completes at 02:10 AM" }
+      ],
+      "outcomes": [
+        { "description": "~25 minutes of service degradation during rollback; no full outage; cascade failure threshold never reached", "impact": "negative", "magnitude": 0.15 }
+      ],
+      "likelihood": 0.9
+    }
+  ],
+  "comparison": {
+    "differences": [
+      { "aspect": "Rollback timing", "actual": "Never initiated", "counterfactual": "01:45 AM — before cascade failure threshold" },
+      { "aspect": "Outage duration", "actual": "3.5 hours full outage", "counterfactual": "~25 minutes partial degradation, no full outage" },
+      { "aspect": "User impact", "actual": "100% of users fully blocked for 3.5 hours", "counterfactual": "Partial degradation affecting a subset of requests; no complete service loss" }
+    ],
+    "insights": [
+      "The rollback was technically available at 01:45 AM — a 77-minute window existed between first alert (01:30 AM) and cascade failure (02:47 AM)",
+      "The cost of the early rollback (25 min degradation) is an order of magnitude lower than the actual outage cost (3.5 hours)",
+      "Cascade failure became inevitable around 02:30 AM; the decision window effectively closed 60 minutes before the outage appeared"
+    ],
+    "lessons": [
+      "Establish a pre-agreed rollback trigger: if alerts fire within 90 minutes of a deployment and root cause is not identified within 15 minutes, initiate rollback by default",
+      "Reduce rollback cost (automation, faster procedures) to lower the threshold for making this decision without heroics",
+      "Instrument the cascade failure threshold explicitly so engineers have a measurable tripwire rather than a judgment call under pressure"
+    ]
+  },
+  "interventionPoint": {
+    "description": "Initiate rollback to v4.2.0 immediately after first alert confirmation, without waiting for root cause identification",
+    "timing": "01:30–02:00 AM window (77 minutes before cascade failure threshold)",
+    "feasibility": 0.9,
+    "expectedImpact": 0.85
+  }
+}

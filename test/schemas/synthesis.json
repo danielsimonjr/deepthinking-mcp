@@ -1,0 +1,264 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SynthesisThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "topic",
+    "sources",
+    "synthesisStatement",
+    "confidence"
+  ],
+  "properties": {
+    "mode": {
+      "const": "synthesis"
+    },
+    "topic": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "type",
+          "year",
+          "keyPosition",
+          "quality"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "empirical",
+              "theoretical",
+              "review",
+              "expert",
+              "case_study"
+            ]
+          },
+          "year": {
+            "type": "integer"
+          },
+          "keyPosition": {
+            "type": "string"
+          },
+          "quality": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "themes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "sourceIds",
+          "consensus",
+          "description"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "sourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "consensus": {
+            "type": "string",
+            "enum": [
+              "strong",
+              "moderate",
+              "weak",
+              "contested"
+            ]
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "convergence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "claim",
+          "sourceIds",
+          "strength"
+        ],
+        "properties": {
+          "claim": {
+            "type": "string"
+          },
+          "sourceIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2
+          },
+          "strength": {
+            "type": "string",
+            "enum": [
+              "strong",
+              "moderate",
+              "weak"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "divergence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "dimension",
+          "positions",
+          "nature"
+        ],
+        "properties": {
+          "dimension": {
+            "type": "string"
+          },
+          "positions": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "object",
+              "required": [
+                "sourceIds",
+                "position"
+              ],
+              "properties": {
+                "sourceIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "position": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "nature": {
+            "type": "string",
+            "enum": [
+              "methodological",
+              "theoretical",
+              "population",
+              "temporal",
+              "definitional"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "gaps": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "description",
+          "type",
+          "importance"
+        ],
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "empirical",
+              "theoretical",
+              "methodological",
+              "contextual"
+            ]
+          },
+          "importance": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "significant",
+              "moderate",
+              "minor"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "coverage": {
+      "type": "object",
+      "required": [
+        "sourcesExamined",
+        "estimatedRelevantTotal",
+        "coverageRatio",
+        "missingPerspectives"
+      ],
+      "properties": {
+        "sourcesExamined": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "estimatedRelevantTotal": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "coverageRatio": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "missingPerspectives": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "synthesisStatement": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    }
+  },
+  "additionalProperties": false
+}

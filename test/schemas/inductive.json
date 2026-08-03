@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "InductiveThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "observations",
+    "generalization",
+    "confidence"
+  ],
+  "properties": {
+    "mode": {
+      "const": "inductive"
+    },
+    "observations": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "pattern": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "generalization": {
+      "type": "string",
+      "minLength": 1
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "counterexamples": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sampleSize": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "inductionSteps": {
+      "type": "array",
+      "description": "Optional: intermediate refinement steps connecting observations to the final generalization. Use for multi-step inductions where a single-jump generalization would obscure the progressive reasoning — natural multi-step cases are progressive refinement (iterative Bayesian update), Mill's methods of causal induction, hierarchical generalization, eliminative induction, and analogical chains. Omit or leave empty for atomic single-inference inductions.",
+      "items": {
+        "type": "object",
+        "required": [
+          "stepNumber",
+          "intermediateGeneralization",
+          "inductionMethod"
+        ],
+        "properties": {
+          "stepNumber": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "1-indexed position of this step in the induction chain. Step numbers should be sequential and unique within inductionSteps[]."
+          },
+          "observationsUsed": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "description": "0-indexed references into the top-level observations[] array. May be empty if this step refines only from prior steps (e.g., a synthesis step combining earlier generalizations)."
+          },
+          "stepsUsed": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "References to prior stepNumber values. Each referenced step must appear earlier in inductionSteps[] — no forward references."
+          },
+          "intermediateGeneralization": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The generalization formed at this step. Each step's generalization should be narrower, broader, or more refined than the previous step — not a restatement. The last step's intermediateGeneralization should match (or closely match) the top-level generalization."
+          },
+          "inductionMethod": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Name of the induction method applied at this step. Valid values include: 'enumerative' (observed cases → universal claim), 'statistical' (sample proportion → population proportion), 'analogical' (same structure as similar case), 'bayesianUpdate' (prior + data → posterior), 'eliminative' (rule out competing hypotheses), 'causal (method of agreement)' (all positive cases share an antecedent), 'causal (method of difference)' (positive vs negative cases differ in one antecedent), 'causal (joint method)' (agreement and difference combined), 'causal (concomitant variation)' (magnitude covaries with antecedent), 'causal (residues)' (known effects subtracted from total), 'mixed' (a genuine blend of methods), 'other'. Free-text in v0.5.3; may become an enum in a future release."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

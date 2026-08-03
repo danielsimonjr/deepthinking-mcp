@@ -1,0 +1,52 @@
+{
+  "mode": "scientificmethod",
+  "question": "Do GC pauses in the JVM service account for the observed latency spikes, such that (a) GC pause timestamps temporally co-occur with spike events at r \u2265 0.75 and (b) switching to a low-pause collector reduces p99 latency spikes by \u2265 40%?",
+  "nullHypothesis": "H\u2080: GC pause events are not temporally correlated with p99 latency spikes (r < 0.50), and switching to a low-pause GC collector (ZGC) will not reduce p99 latency by \u2265 20%.",
+  "alternativeHypothesis": "H\u2081: GC pauses \u2265 50 ms directly cause p99 latency spikes; GC pause timestamps co-occur with spike onsets at r \u2265 0.75 within a 200 ms window, and replacing G1GC with ZGC reduces p99 latency by \u2265 40%.",
+  "falsifiable": true,
+  "experimentType": "experimental",
+  "independentVariables": [
+    "GC algorithm (G1GC baseline vs. ZGC canary) \u2014 Phase 2",
+    "Artificially injected GC pause events via scheduled System.gc() calls \u2014 Phase 1B causal probe"
+  ],
+  "dependentVariables": [
+    "p99 and p999 request latency (ms), sampled in 10-second buckets",
+    "GC pause duration (ms) and frequency (pauses/min) via -Xlog:gc*",
+    "Temporal co-occurrence rate: fraction of latency spike onsets with a GC pause within a \u00b1100 ms window",
+    "Pearson r between 10-second-bucket GC pause duration and p99 latency time series"
+  ],
+  "controlVariables": [
+    "JVM heap size (fixed at current production value; validate it is not undersized before starting)",
+    "Traffic load (requests/sec, replayed from production trace or synthetic load generator at identical RPS)",
+    "Application version and feature flags",
+    "Server hardware, OS, and JVM version",
+    "External dependency response times (mocked or rate-limited to baseline SLA)"
+  ],
+  "procedure": [
+    "Phase 1 \u2014 Baseline Telemetry (48 h): Enable JVM GC logging (-Xlog:gc*:file=gc.log:time,uptime:filecount=5,filesize=20m) and per-request latency tracing with millisecond-precision timestamps on production (or a staging replica under representative load). Run for 48 hours to capture at least two daily traffic cycles.",
+    "Phase 1 \u2014 Spike Definition: Compute a rolling 1-hour p99 mean and stddev. Label any 10-second bucket where p99 exceeds (mean + 3\u03c3) as a latency spike event. Extract all spike timestamps.",
+    "Phase 1 \u2014 Temporal Correlation: For each spike event, check whether a GC pause occurred within \u00b1100 ms of spike onset. Compute co-occurrence rate. Align GC pause duration and p99 latency into matching 10-second buckets and calculate Pearson r.",
+    "Phase 1B \u2014 Controlled Causal Probe (staging only): On a staging clone under identical load, inject GC pauses by scheduling System.gc() calls at a known cadence (e.g., every 30 s for 1 hour). Measure whether each injected pause produces an observable latency spike within 200 ms. Record hit rate (pauses that produce spikes / total injected pauses).",
+    "Phase 2 \u2014 ZGC Canary (48 h): Deploy a canary instance (10% traffic split) with -XX:+UseZGC and identical heap and load settings. Run for 48 hours. Record p99 latency and GC pause durations. Confirm ZGC pauses remain \u2264 10 ms (ZGC design target).",
+    "Phase 2 \u2014 Statistical Comparison: Compare p99 latency distributions (G1GC fleet vs. ZGC canary) using Welch's t-test (\u03b1 = 0.05). Compute Cohen's d as effect size. Apply Bonferroni correction if testing multiple percentiles (p50, p95, p99, p999).",
+    "Phase 3 \u2014 Confound Sweep (if H\u2081 is not confirmed): Measure thread-pool queue depth, lock contention events, I/O wait times, and upstream service p99 latency as alternative spike candidates. Repeat correlation analysis against each candidate."
+  ],
+  "successCriteria": "H\u2081 is confirmed if ALL four conditions hold: (a) Pearson r \u2265 0.75 between GC pause duration time series and p99 latency time series in Phase 1; (b) \u2265 80% of injected pauses in Phase 1B produce a measurable latency spike within 200 ms; (c) ZGC canary p99 latency is \u2265 40% lower than G1GC baseline with p < 0.05 and Cohen's d \u2265 0.8; (d) ZGC GC pauses are confirmed \u2264 10 ms, ruling out that canary improvement is attributable to something other than pause elimination.",
+  "falsificationCriteria": [
+    "H\u2081 is FALSIFIED (GC not correlated) if Phase 1 Pearson r < 0.50 \u2014 GC pauses do not co-occur with spikes; a different mechanism is responsible.",
+    "H\u2081 is FALSIFIED (GC not causal) if Phase 1B injection hit rate < 50% \u2014 GC pauses in isolation do not mechanically produce latency spikes in this system.",
+    "H\u2081 is FALSIFIED (GC not sufficient explanation) if ZGC canary p99 reduction < 20% despite confirmed ZGC pauses \u2264 10 ms \u2014 latency spikes persist even after GC pauses are eliminated, implying a different root cause.",
+    "H\u2081 is PARTIALLY FALSIFIED if only one arm confirms: high correlation but no ZGC improvement suggests GC pauses are a symptom of a deeper cause (e.g., memory pressure from a leak); ZGC improvement without correlation suggests GC overhead is a general drag, not a spike cause."
+  ],
+  "result": null,
+  "conclusion": null,
+  "confidence": 0.0,
+  "limitations": [
+    "Multi-causality: latency spikes may be co-caused by GC pauses AND other factors (lock contention, I/O queuing, downstream timeouts); H\u2081 can be true yet ZGC only partially improves p99.",
+    "CPU overhead: ZGC's concurrent collection adds 10\u201320% CPU load; if the service is near CPU saturation, ZGC may introduce a new bottleneck that masks its pause-elimination benefit.",
+    "Heap sizing confound: an undersized heap forces G1GC to collect more aggressively regardless of algorithm; heap sizing must be validated as adequate before the experiment or heap size must be swept as a separate variable.",
+    "48-hour observation may miss weekly traffic peaks (e.g., Monday-morning surge); extend to 168 hours (one full week) for higher confidence in generalizability.",
+    "10% canary traffic split introduces selection bias if routing is not randomized \u2014 request type distribution must be verified to be equivalent between G1GC fleet and ZGC canary.",
+    "JVM warm-up: the first 15\u201330 minutes of each run should be excluded from analysis to avoid JIT compilation artifacts inflating baseline latency."
+  ]
+}

@@ -1,0 +1,326 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CounterfactualThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "actual",
+    "counterfactuals",
+    "comparison",
+    "interventionPoint"
+  ],
+  "properties": {
+    "mode": {
+      "const": "counterfactual"
+    },
+    "actual": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "description",
+        "conditions",
+        "outcomes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "conditions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "factor",
+              "value"
+            ],
+            "properties": {
+              "factor": {
+                "type": "string",
+                "minLength": 1
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1
+              },
+              "isIntervention": {
+                "type": [
+                  "boolean",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "outcomes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "description",
+              "impact"
+            ],
+            "properties": {
+              "description": {
+                "type": "string",
+                "minLength": 1
+              },
+              "impact": {
+                "type": "string",
+                "enum": [
+                  "positive",
+                  "negative",
+                  "neutral"
+                ]
+              },
+              "magnitude": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "likelihood": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "counterfactuals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "conditions",
+          "outcomes"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "conditions": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "factor",
+                "value"
+              ],
+              "properties": {
+                "factor": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "value": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "isIntervention": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ]
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "outcomes": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "description",
+                "impact"
+              ],
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "impact": {
+                  "type": "string",
+                  "enum": [
+                    "positive",
+                    "negative",
+                    "neutral"
+                  ]
+                },
+                "magnitude": {
+                  "type": [
+                    "number",
+                    "null"
+                  ],
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "likelihood": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "comparison": {
+      "type": "object",
+      "required": [
+        "differences",
+        "insights",
+        "lessons"
+      ],
+      "properties": {
+        "differences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "aspect"
+            ],
+            "properties": {
+              "aspect": {
+                "type": "string",
+                "minLength": 1
+              },
+              "actual": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "counterfactual": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "insights": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "lessons": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "interventionPoint": {
+      "type": "object",
+      "required": [
+        "description",
+        "timing",
+        "feasibility",
+        "expectedImpact"
+      ],
+      "properties": {
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timing": {
+          "type": "string",
+          "minLength": 1
+        },
+        "feasibility": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "expectedImpact": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "causalChains": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "events",
+          "branchingPoint",
+          "divergence"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "branchingPoint": {
+            "type": "string",
+            "minLength": 1
+          },
+          "divergence": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,58 @@
+{
+  "mode": "engineering",
+  "analysisType": "trade-study",
+  "designChallenge": "Select order processing mechanism: direct DB write vs. message queue vs. event sourcing",
+  "tradeStudy": {
+    "title": "Order Processing Architecture Selection",
+    "objective": "Choose a durable, scalable mechanism for capturing customer orders with at-least-once delivery guarantee",
+    "alternatives": [
+      {
+        "id": "db",
+        "name": "Direct DB Write",
+        "description": "Synchronous INSERT to PostgreSQL orders table within the HTTP request",
+        "pros": ["Simple — no new infrastructure", "ACID transactions prevent corruption", "Easy to query for reporting"],
+        "cons": ["DB becomes bottleneck under spike load", "No natural backpressure", "Tight coupling to DB latency"],
+        "riskLevel": "low"
+      },
+      {
+        "id": "mq",
+        "name": "Message Queue (SQS)",
+        "description": "HTTP handler publishes order event to SQS; separate consumer writes to DB",
+        "pros": ["Decouples ingestion from processing", "Natural backpressure and replay", "Scales ingestion independently"],
+        "cons": ["Two additional components to operate", "Eventually consistent", "Consumer requires idempotency key"],
+        "riskLevel": "medium"
+      }
+    ],
+    "criteria": [
+      { "id": "simplicity", "name": "Operational Simplicity", "weight": 0.35, "description": "Fewer moving parts, easier incident response", "higherIsBetter": true },
+      { "id": "reliability", "name": "Reliability / At-Least-Once Delivery", "weight": 0.35, "description": "Orders must never be silently lost", "higherIsBetter": true },
+      { "id": "cost", "name": "Cost / Infrastructure Burden", "weight": 0.30, "description": "Licensing plus ops effort for a small team", "higherIsBetter": true }
+    ],
+    "scores": [
+      { "alternativeId": "db", "criteriaId": "simplicity", "score": 9, "weightedScore": 3.15, "rationale": "Single service, single database — every engineer already understands it" },
+      { "alternativeId": "db", "criteriaId": "reliability", "score": 6, "weightedScore": 2.10, "rationale": "ACID prevents corruption but DB saturation under spike causes timeouts without backpressure" },
+      { "alternativeId": "db", "criteriaId": "cost", "score": 9, "weightedScore": 2.70, "rationale": "No additional infrastructure — existing RDS instance covers this workload" },
+      { "alternativeId": "mq", "criteriaId": "simplicity", "score": 6, "weightedScore": 2.10, "rationale": "Queue plus consumer adds operational surface area and runbook complexity" },
+      { "alternativeId": "mq", "criteriaId": "reliability", "score": 9, "weightedScore": 3.15, "rationale": "SQS at-least-once delivery with idempotency key on order_id prevents silent loss" },
+      { "alternativeId": "mq", "criteriaId": "cost", "score": 6, "weightedScore": 1.80, "rationale": "SQS pricing negligible; consumer ECS task adds ~$40/month plus oncall burden" }
+    ],
+    "recommendation": "mq",
+    "justification": "Message queue scores 7.05 vs. 7.95 for direct DB — the DB edge on simplicity and cost is outweighed by the reliability gap. Under Black Friday spike load the direct DB path has no backpressure, making cascading timeouts the dominant risk. The queue provides natural load leveling.",
+    "sensitivityNotes": "If the team shrinks below 3 engineers and simplicity weight rises to 0.50, the direct DB option pulls ahead. Re-evaluate if peak TPS drops below 500."
+  },
+  "assessment": {
+    "confidence": 0.82,
+    "keyRisks": [
+      "Consumer idempotency must be implemented correctly — duplicate order processing is a business risk",
+      "Message visibility timeout must exceed max consumer processing time"
+    ],
+    "nextSteps": [
+      "Prototype SQS consumer with idempotency key on order_id",
+      "Load test consumer at 5x peak order rate before production rollout"
+    ],
+    "openIssues": [
+      "Exact peak TPS estimate not yet measured — current assumption is 2000 TPS based on last Black Friday",
+      "SQS vs. Kafka decision deferred pending data retention requirements review"
+    ]
+  }
+}

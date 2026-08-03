@@ -1,0 +1,40 @@
+{
+  "mode": "decisionmatrix",
+  "options": [
+    "Big-bang cutover",
+    "Dual-write phased migration",
+    "Strangler-fig incremental migration"
+  ],
+  "criteria": [
+    {
+      "name": "Risk of downtime (higher score = lower risk)",
+      "weight": 0.4
+    },
+    {
+      "name": "Engineering effort (higher score = less effort)",
+      "weight": 0.35
+    },
+    {
+      "name": "Time to completion (higher score = faster)",
+      "weight": 0.25
+    }
+  ],
+  "scores": [
+    {
+      "option": "Big-bang cutover",
+      "perCriterion": [2, 4, 5],
+      "total": 3.45
+    },
+    {
+      "option": "Dual-write phased migration",
+      "perCriterion": [4, 2, 2],
+      "total": 2.8
+    },
+    {
+      "option": "Strangler-fig incremental migration",
+      "perCriterion": [5, 3, 3],
+      "total": 3.8
+    }
+  ],
+  "recommendation": "Choose the strangler-fig incremental migration: 2*0.4+4*0.35+5*0.25=3.45 for big-bang, 4*0.4+2*0.35+2*0.25=2.80 for dual-write, and 5*0.4+3*0.35+3*0.25=3.80 for strangler-fig — the highest weighted total, driven by its low downtime risk without sacrificing much on effort or time."
+}

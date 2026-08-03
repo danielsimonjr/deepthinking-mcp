@@ -1,0 +1,350 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ArgumentationThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "claim",
+    "grounds",
+    "warrants",
+    "backings",
+    "qualifiers",
+    "rebuttals",
+    "argumentStrength"
+  ],
+  "properties": {
+    "mode": {
+      "const": "argumentation"
+    },
+    "claim": {
+      "type": "object",
+      "required": [
+        "id",
+        "statement",
+        "type",
+        "scope",
+        "strength",
+        "contested"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "fact",
+            "value",
+            "policy",
+            "definition",
+            "cause"
+          ]
+        },
+        "scope": {
+          "type": "string",
+          "enum": [
+            "universal",
+            "general",
+            "particular"
+          ]
+        },
+        "strength": {
+          "type": "string",
+          "enum": [
+            "strong",
+            "moderate",
+            "tentative"
+          ]
+        },
+        "contested": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "grounds": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "content",
+          "reliability",
+          "relevance",
+          "sufficiency"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "empirical",
+              "statistical",
+              "testimonial",
+              "analogical",
+              "logical"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "source": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reliability": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "relevance": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "sufficiency": {
+            "type": "string",
+            "enum": [
+              "sufficient",
+              "partial",
+              "insufficient"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "warrants": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "statement",
+          "type",
+          "implicit",
+          "strength",
+          "groundsIds",
+          "claimId"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "generalization",
+              "analogy",
+              "causal",
+              "authority",
+              "principle",
+              "definition"
+            ]
+          },
+          "implicit": {
+            "type": "boolean"
+          },
+          "strength": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "groundsIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "claimId": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "backings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "content",
+          "type",
+          "warrantId",
+          "credibility"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "theoretical",
+              "empirical",
+              "authoritative",
+              "definitional",
+              "precedent"
+            ]
+          },
+          "warrantId": {
+            "type": "string"
+          },
+          "credibility": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "qualifiers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "term",
+          "certainty"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "term": {
+            "type": "string"
+          },
+          "certainty": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "rebuttals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "objection",
+          "type",
+          "strength",
+          "targetElement",
+          "targetId",
+          "response"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "objection": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "factual",
+              "logical",
+              "ethical",
+              "practical",
+              "definitional"
+            ]
+          },
+          "strength": {
+            "type": "string",
+            "enum": [
+              "strong",
+              "moderate",
+              "weak"
+            ]
+          },
+          "targetElement": {
+            "type": "string",
+            "enum": [
+              "claim",
+              "grounds",
+              "warrant",
+              "backing"
+            ]
+          },
+          "targetId": {
+            "type": "string"
+          },
+          "response": {
+            "type": "object",
+            "required": [
+              "strategy",
+              "content",
+              "effectiveness"
+            ],
+            "properties": {
+              "strategy": {
+                "type": "string",
+                "enum": [
+                  "refute",
+                  "concede",
+                  "qualify",
+                  "reframe",
+                  "outweigh"
+                ]
+              },
+              "content": {
+                "type": "string"
+              },
+              "effectiveness": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "argumentStrength": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "keyInsight": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

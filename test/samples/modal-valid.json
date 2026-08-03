@@ -1,0 +1,72 @@
+{
+  "mode": "modal",
+  "modalDomain": "deontic",
+  "logicSystem": "S5",
+  "actualWorld": "w1",
+  "possibleWorlds": [
+    {
+      "id": "w1",
+      "name": "Current state",
+      "description": "Alice is a senior engineer assigned to the payments team",
+      "isActual": true,
+      "truths": ["alice_is_senior_engineer", "alice_on_payments_team", "payments_team_requires_admin"]
+    },
+    {
+      "id": "w2",
+      "name": "Role-change scenario",
+      "description": "Alice moves to the docs team, which has no admin requirement",
+      "isActual": false,
+      "truths": ["alice_is_senior_engineer", "alice_on_docs_team"]
+    },
+    {
+      "id": "w3",
+      "name": "Contractor scenario",
+      "description": "Alice's employment changes to contractor; contractor policy forbids admin",
+      "isActual": false,
+      "truths": ["alice_is_contractor", "contractor_no_admin_allowed"]
+    }
+  ],
+  "accessibilityRelations": [
+    { "from": "w1", "to": "w2", "type": "reflexive" },
+    { "from": "w1", "to": "w3", "type": "reflexive" }
+  ],
+  "propositions": [
+    {
+      "id": "p1",
+      "content": "Alice has admin access",
+      "operator": "necessity",
+      "truthValue": false,
+      "justification": "Admin access is NOT true in w2 and w3 — necessity fails."
+    },
+    {
+      "id": "p2",
+      "content": "Alice has admin access",
+      "operator": "possibility",
+      "truthValue": true,
+      "justification": "Admin access IS true in w1 (actual world). Possibility holds."
+    },
+    {
+      "id": "p3",
+      "content": "Alice MUST have admin access when on payments team with senior engineer role",
+      "operator": "necessity",
+      "truthValue": true,
+      "justification": "In every world where alice_is_senior_engineer AND alice_on_payments_team, admin is required."
+    }
+  ],
+  "inferences": [
+    {
+      "id": "inf1",
+      "premises": ["alice_is_senior_engineer", "alice_on_payments_team", "payments_team_requires_admin"],
+      "conclusion": "Alice MUST have admin access (conditional necessity under current role)",
+      "valid": true,
+      "justification": "Necessitation: if P is provable from the role policy axioms, then □P holds in this frame."
+    },
+    {
+      "id": "inf2",
+      "premises": ["w2 and w3 are accessible from w1"],
+      "conclusion": "Alice's admin access is NOT unconditionally necessary",
+      "valid": true,
+      "justification": "Countermodel: w2 and w3 falsify unconditional necessity. ◇¬(admin) holds."
+    }
+  ]
+}

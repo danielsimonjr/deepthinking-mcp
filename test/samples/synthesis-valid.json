@@ -1,0 +1,88 @@
+{
+  "mode": "synthesis",
+  "topic": "Does remote work improve or harm employee productivity?",
+  "sources": [
+    {
+      "id": "s1",
+      "title": "Does Working from Home Work? Evidence from a Chinese Experiment",
+      "type": "empirical",
+      "year": 2015,
+      "keyPosition": "Remote work increases individual productivity by ~13% for structured, measurable tasks",
+      "quality": 0.92
+    },
+    {
+      "id": "s2",
+      "title": "The Effects of Remote Work on Collaboration Among Information Workers",
+      "type": "empirical",
+      "year": 2021,
+      "keyPosition": "Fully remote work narrows collaboration networks and reduces spontaneous cross-team communication",
+      "quality": 0.88
+    },
+    {
+      "id": "s3",
+      "title": "How Well-Designed Hybrid Work Benefits Employees and Companies",
+      "type": "empirical",
+      "year": 2022,
+      "keyPosition": "Hybrid arrangements (2-3 days remote) maximize both individual output and collaborative quality",
+      "quality": 0.85
+    }
+  ],
+  "themes": [
+    {
+      "id": "t1",
+      "name": "Task type moderates remote work benefit",
+      "sourceIds": ["s1", "s2", "s3"],
+      "consensus": "moderate",
+      "description": "Individual, structured tasks benefit from remote work; collaborative, unstructured tasks are harmed by it"
+    },
+    {
+      "id": "t2",
+      "name": "Hybrid as reconciliation",
+      "sourceIds": ["s2", "s3"],
+      "consensus": "moderate",
+      "description": "Hybrid arrangements preserve both individual productivity gains and collaboration quality"
+    }
+  ],
+  "convergence": [
+    {
+      "claim": "Remote work is not universally good or bad — its effect depends on task type",
+      "sourceIds": ["s1", "s2", "s3"],
+      "strength": "strong"
+    }
+  ],
+  "divergence": [
+    {
+      "dimension": "Whether fully remote is net positive or negative",
+      "positions": [
+        { "sourceIds": ["s1"], "position": "Fully remote increases productivity in structured-task roles" },
+        { "sourceIds": ["s2"], "position": "Fully remote weakens collaborative networks in knowledge-worker roles" }
+      ],
+      "nature": "population"
+    }
+  ],
+  "gaps": [
+    {
+      "description": "Long-run career development and promotion equity for remote workers vs. in-office workers",
+      "type": "empirical",
+      "importance": "significant"
+    },
+    {
+      "description": "Effects on junior employees who rely more heavily on informal mentoring",
+      "type": "contextual",
+      "importance": "significant"
+    }
+  ],
+  "coverage": {
+    "sourcesExamined": 3,
+    "estimatedRelevantTotal": 40,
+    "coverageRatio": 0.08,
+    "missingPerspectives": [
+      "Employee mental health outcomes",
+      "Long-run career equity",
+      "Non-knowledge-worker populations",
+      "Managerial effectiveness remotely"
+    ]
+  },
+  "synthesisStatement": "Remote work increases individual productivity for structured tasks but reduces spontaneous collaboration in knowledge-work contexts. These findings are reconciled by hybrid arrangements (2-3 remote days) which preserve individual output gains while maintaining collaborative network density. The productivity debate is not 'remote vs. in-office' but 'which tasks belong in which setting' — a question every team must answer for its specific work profile.",
+  "confidence": 0.72
+}

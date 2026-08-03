@@ -1,5 +1,19 @@
 {
   "name": "deepthinking-mcp",
-  "version": "9.1.4",
-  "description": "Structured reasoning MCP server: 34 reasoning modes, 13 focused tools, meta-reasoning, taxonomy classification, and visual exports."
+  "version": "9.2.0",
+  "description": "Structured reasoning for Claude Code, in one plugin: an MCP server (34 modes, 14 tools, meta-reasoning, taxonomy classification) plus the /think and /think-render slash commands, 14 reasoning skills covering 46 modes, and the visual-exporter subagent. Absorbed deepthinking-plugin on 2026-08-03.",
+  "author": {
+    "name": "Daniel Simon Jr.",
+    "url": "https://github.com/danielsimonjr/deepthinking-mcp"
+  },
+  "license": "MIT",
+  "keywords": [
+    "reasoning",
+    "thinking",
+    "bayesian",
+    "causal",
+    "mcp",
+    "skills"
+  ],
+  "repository": "https://github.com/danielsimonjr/deepthinking-mcp"
 }

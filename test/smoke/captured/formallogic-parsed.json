@@ -1,0 +1,75 @@
+{
+  "mode": "formallogic",
+  "theorem": "\u00acH  (given H\u2192D and \u00acD)",
+  "propositions": [
+    {
+      "id": "H",
+      "symbol": "H",
+      "statement": "The health check fails",
+      "type": "atomic"
+    },
+    {
+      "id": "D",
+      "symbol": "D",
+      "statement": "The service is degraded",
+      "type": "atomic"
+    },
+    {
+      "id": "HD",
+      "symbol": "H\u2192D",
+      "statement": "If the health check fails, then the service is degraded",
+      "type": "compound",
+      "formula": "H \u2192 D",
+      "latex": "H \\rightarrow D"
+    },
+    {
+      "id": "notD",
+      "symbol": "\u00acD",
+      "statement": "The service is NOT degraded",
+      "type": "compound",
+      "formula": "\u00acD",
+      "latex": "\\neg D"
+    },
+    {
+      "id": "notH",
+      "symbol": "\u00acH",
+      "statement": "The health check does NOT fail",
+      "type": "compound",
+      "formula": "\u00acH",
+      "latex": "\\neg H"
+    }
+  ],
+  "proof": {
+    "technique": "direct",
+    "steps": [
+      {
+        "step": 1,
+        "statement": "If the health check fails, then the service is degraded",
+        "formula": "H \u2192 D",
+        "justification": "Premise",
+        "refs": []
+      },
+      {
+        "step": 2,
+        "statement": "The service is not degraded",
+        "formula": "\u00acD",
+        "justification": "Premise",
+        "refs": []
+      },
+      {
+        "step": 3,
+        "statement": "The health check does not fail",
+        "formula": "\u00acH",
+        "justification": "Modus Tollens",
+        "refs": [
+          1,
+          2
+        ]
+      }
+    ],
+    "conclusion": "\u00acH \u2014 The health check does not fail",
+    "valid": true
+  },
+  "validityCheck": true,
+  "soundnessCheck": null
+}

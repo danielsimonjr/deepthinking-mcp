@@ -1,0 +1,35 @@
+{
+  "mode": "deductive",
+  "premises": [
+    "Every published blog post must have an author",
+    "Every author must be a registered user account",
+    "Post P was just published"
+  ],
+  "conclusion": "Post P has an author, and that author is a registered user account",
+  "logicForm": "chained modus ponens",
+  "derivationSteps": [
+    {
+      "stepNumber": 1,
+      "premisesUsed": [
+        0,
+        2
+      ],
+      "stepsUsed": [],
+      "intermediateConclusion": "Post P must have an author",
+      "inferenceRule": "modus ponens"
+    },
+    {
+      "stepNumber": 2,
+      "premisesUsed": [
+        1
+      ],
+      "stepsUsed": [
+        1
+      ],
+      "intermediateConclusion": "Post P has an author, and that author is a registered user account",
+      "inferenceRule": "modus ponens"
+    }
+  ],
+  "validityCheck": true,
+  "soundnessCheck": true
+}

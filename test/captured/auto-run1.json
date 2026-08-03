@@ -1,0 +1,34 @@
+[
+  {
+    "mode": "sequential",
+    "thoughtNumber": 1,
+    "totalThoughts": 4,
+    "content": "Before any reasoning can happen, gather the actual failure data for the three most recent deployments: timestamps, commit SHAs, which pipeline stage failed, exact error messages, whether they share a commit range or affect the same services.",
+    "nextThoughtNeeded": true,
+    "dependencies": []
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 2,
+    "totalThoughts": 4,
+    "content": "Once data is in hand, check cheap hypotheses first: identical failure mode across all three? Cluster in time around a merge/infra change? Shared external factor like expired cert?",
+    "nextThoughtNeeded": true,
+    "dependencies": ["1"]
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 3,
+    "totalThoughts": 4,
+    "content": "If thought 2 shows identical failure modes, flip to inductive reasoning to extract the invariant. If failure modes differ, switch to abductive reasoning since each failure needs its own root cause.",
+    "nextThoughtNeeded": true,
+    "dependencies": ["2"]
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 4,
+    "totalThoughts": 4,
+    "content": "Produce root-cause write-up: confirmed causes with evidence, fix or mitigation applied, and the systemic change that would have caught this earlier.",
+    "nextThoughtNeeded": false,
+    "dependencies": ["3"]
+  }
+]

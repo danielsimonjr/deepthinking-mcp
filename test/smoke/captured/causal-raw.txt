@@ -1,0 +1,210 @@
+Using **causal** reasoning to model the directed acyclic graph of the deployment, isolate the independent paths from both changes to p99 latency, and identify the true confounder.
+
+```json
+{
+  "mode": "causal",
+  "causalGraph": {
+    "nodes": [
+      {
+        "id": "deployment",
+        "name": "Same-Day Deployment Event",
+        "type": "confounder",
+        "description": "Single deployment that simultaneously introduced the eviction policy change AND the memory limit reduction — the common root cause that conflates both effects in any naive before/after comparison"
+      },
+      {
+        "id": "eviction",
+        "name": "Cache Eviction Policy Change",
+        "type": "cause",
+        "description": "Policy changed (e.g., LRU → LFU) in last week's deployment; determines which keys are kept vs. evicted when cache pressure exists"
+      },
+      {
+        "id": "memlimit",
+        "name": "Memory Limit Change",
+        "type": "cause",
+        "description": "Reduced server memory limit deployed simultaneously; independently constrains cache capacity and can trigger OS-level swapping under load"
+      },
+      {
+        "id": "cache_capacity",
+        "name": "Effective Cache Capacity",
+        "type": "mediator",
+        "description": "Actual usable cache space in bytes; reduced by a lower memory ceiling regardless of which eviction algorithm is running"
+      },
+      {
+        "id": "hitrate",
+        "name": "Cache Hit Rate",
+        "type": "mediator",
+        "description": "Fraction of requests served directly from cache; driven by both the efficiency of the eviction policy for the observed workload shape AND raw cache capacity"
+      },
+      {
+        "id": "dbqueries",
+        "name": "Database Query Count",
+        "type": "mediator",
+        "description": "Volume of queries reaching the database per second; each cache miss maps to exactly one additional DB query"
+      },
+      {
+        "id": "os_swap",
+        "name": "OS Memory Pressure / Swapping",
+        "type": "mediator",
+        "description": "When available memory is reduced below the process working-set size, the OS swaps pages to disk, injecting I/O wait into concurrent request processing"
+      },
+      {
+        "id": "latency",
+        "name": "p99 Latency",
+        "type": "effect",
+        "description": "99th-percentile response time; the observed effect — spiked following last week's deployment"
+      }
+    ],
+    "edges": [
+      {
+        "from": "deployment",
+        "to": "eviction",
+        "strength": 1.0,
+        "confidence": 1.0,
+        "mechanism": "The deployment deterministically introduced the eviction policy change — there is no causal ambiguity on this edge"
+      },
+      {
+        "from": "deployment",
+        "to": "memlimit",
+        "strength": 1.0,
+        "confidence": 1.0,
+        "mechanism": "The same deployment also reduced the memory limit; both changes share one root cause, which is why naive attribution is impossible without controlled isolation"
+      },
+      {
+        "from": "eviction",
+        "to": "hitrate",
+        "strength": -0.6,
+        "confidence": 0.72,
+        "mechanism": "LFU evicts keys with low historical access frequency; for bursty or access-diverse workloads, recently-added but currently-hot keys get evicted prematurely, reducing hit rate relative to LRU. Confidence is moderate because the direction and magnitude depend heavily on workload access distribution, which we do not have confirmed data for."
+      },
+      {
+        "from": "memlimit",
+        "to": "cache_capacity",
+        "strength": -0.75,
+        "confidence": 0.9,
+        "mechanism": "A lower memory ceiling directly shrinks the pool available for caching. This effect is policy-agnostic: no matter how good the eviction algorithm, fewer bytes of cache means more keys must be evicted."
+      },
+      {
+        "from": "cache_capacity",
+        "to": "hitrate",
+        "strength": 0.72,
+        "confidence": 0.88,
+        "mechanism": "A larger cache holds more of the working set; shrinking capacity increases the eviction rate and lowers hit rate in direct proportion to how much of the working set no longer fits."
+      },
+      {
+        "from": "hitrate",
+        "to": "dbqueries",
+        "strength": -0.95,
+        "confidence": 0.95,
+        "mechanism": "Cache miss rate and DB query rate are nearly complementary: each miss generates exactly one additional database round-trip. The relationship is mechanistic, not probabilistic."
+      },
+      {
+        "from": "dbqueries",
+        "to": "latency",
+        "strength": 0.82,
+        "confidence": 0.9,
+        "mechanism": "Additional DB queries add ~30–60 ms of serialization latency each; at the p99 level, connection pool contention and query-queue depth create super-linear amplification of tail latency — small increases in query volume produce disproportionately large p99 increases."
+      },
+      {
+        "from": "memlimit",
+        "to": "os_swap",
+        "strength": 0.5,
+        "confidence": 0.62,
+        "mechanism": "If the memory limit reduction pushes the system closer to its working-set size, the OS will begin paging under load spikes. Confidence is lower because this path only activates if the new limit is actually binding — if the process was not using all its old memory, this edge is inactive."
+      },
+      {
+        "from": "os_swap",
+        "to": "latency",
+        "strength": 0.65,
+        "confidence": 0.72,
+        "mechanism": "Disk I/O from swapping adds 10–200 ms to any request thread interrupted by a page fault; p99 requests are disproportionately affected because they are the longest-running and thus most likely to encounter swap activity during processing."
+      }
+    ]
+  },
+  "mechanisms": [
+    {
+      "from": "eviction",
+      "to": "latency",
+      "description": "Eviction policy change → degraded cache hit rate (policy poorly suited to workload access pattern) → increased DB query volume → higher p99 via DB serialization latency and connection pool contention",
+      "type": "indirect"
+    },
+    {
+      "from": "memlimit",
+      "to": "latency",
+      "description": "Memory limit reduction forks into two parallel paths: (1) smaller effective cache capacity → lower hit rate → more DB queries → p99 spike; (2) OS memory pressure → page swapping → I/O wait injected into tail requests",
+      "type": "indirect"
+    },
+    {
+      "from": "deployment",
+      "to": "latency",
+      "description": "The deployment event is the common root cause that activated both independent causal chains simultaneously, making it impossible to attribute the observed spike to either change alone without controlled isolation",
+      "type": "indirect"
+    }
+  ],
+  "confounders": [
+    {
+      "nodeId": "deployment",
+      "affects": ["eviction", "memlimit"],
+      "description": "The same-day deployment is the true confounder: it is the common cause of BOTH the eviction policy change and the memory limit change. Because both were deployed together, any naive before/after comparison of 'eviction policy vs. latency' implicitly absorbs the memory limit effect, making the policy's contribution appear larger or smaller than it actually is. Critically, the memory limit change is NOT merely a confounder between eviction and latency — it has its own independent causal path to latency through two distinct mechanisms (cache capacity reduction and OS swapping). It is better characterized as a co-cause sharing a confounded origin with the eviction policy change."
+    }
+  ],
+  "interventions": [
+    {
+      "nodeId": "eviction",
+      "action": "Revert only the eviction policy to its previous algorithm (e.g., back to LRU), while holding the new (reduced) memory limit fixed",
+      "expectedEffects": [
+        {
+          "nodeId": "hitrate",
+          "expectedChange": "If the eviction policy is causally responsible, hit rate should recover toward pre-deployment baseline. Recovery magnitude depends on workload access pattern — minimal if workload is frequency-stable, significant if workload is bursty or access-diverse.",
+          "confidence": 0.68
+        },
+        {
+          "nodeId": "latency",
+          "expectedChange": "Partial reduction in p99. Because the memory limit path is still active, latency will NOT fully recover to pre-deployment baseline. Incomplete recovery strongly implicates memlimit as a co-cause.",
+          "confidence": 0.65
+        }
+      ]
+    },
+    {
+      "nodeId": "memlimit",
+      "action": "Restore the memory limit to its previous (higher) value, while keeping the new eviction policy in place",
+      "expectedEffects": [
+        {
+          "nodeId": "cache_capacity",
+          "expectedChange": "Effective cache capacity expands back to original size, neutralizing the capacity-reduction path regardless of eviction policy",
+          "confidence": 0.9
+        },
+        {
+          "nodeId": "os_swap",
+          "expectedChange": "OS swapping ceases or diminishes significantly if the reduced memory limit was the binding constraint triggering page faults",
+          "confidence": 0.7
+        },
+        {
+          "nodeId": "latency",
+          "expectedChange": "Partial to near-full p99 recovery depending on how much of the spike was attributable to memory pressure vs. pure eviction policy degradation. If this intervention fully resolves the spike, memlimit was the dominant cause.",
+          "confidence": 0.74
+        }
+      ]
+    }
+  ],
+  "counterfactuals": [
+    {
+      "description": "If only the eviction policy had changed and the memory limit had been left at its original value — what fraction of the observed latency spike would have appeared?",
+      "modifiedNodes": [
+        { "nodeId": "memlimit", "newValue": "unchanged (original, higher memory limit)" }
+      ]
+    },
+    {
+      "description": "If only the memory limit had changed and the eviction policy had been left at its original algorithm — what fraction of the observed latency spike would have appeared?",
+      "modifiedNodes": [
+        { "nodeId": "eviction", "newValue": "unchanged (original eviction policy)" }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+**Both the eviction policy change and the memory limit change are genuine co-causes of the p99 latency spike** — the memory limit change is not merely a confounder, it has two independent causal paths to latency (cache capacity reduction and OS swapping). The true confounder is the **deployment event itself**, which introduced both changes simultaneously and makes naive attribution impossible without a controlled isolation experiment.
+
+To determine their relative contributions, the cleanest next step is a **split revert experiment**: first restore only the eviction policy (keeping new memory limit) and observe whether latency partially recovers, then restore only the memory limit (keeping new eviction policy) and observe the same — partial recoveries on each arm confirm both are active causes, and their magnitudes tell you which dominates. If the memory limit revert alone resolves nearly all of the spike, the eviction policy change contributed little; if the eviction policy revert resolves most of it, the policy change was the dominant path.

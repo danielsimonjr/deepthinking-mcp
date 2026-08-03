@@ -1,0 +1,253 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CausalThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "causalGraph",
+    "mechanisms"
+  ],
+  "properties": {
+    "mode": {
+      "const": "causal"
+    },
+    "causalGraph": {
+      "type": "object",
+      "required": [
+        "nodes",
+        "edges"
+      ],
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "object",
+            "required": [
+              "id",
+              "name",
+              "type",
+              "description"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "cause",
+                  "effect",
+                  "mediator",
+                  "confounder"
+                ]
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "edges": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "from",
+              "to",
+              "strength",
+              "confidence"
+            ],
+            "properties": {
+              "from": {
+                "type": "string",
+                "minLength": 1
+              },
+              "to": {
+                "type": "string",
+                "minLength": 1
+              },
+              "strength": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1
+              },
+              "confidence": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "mechanism": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "mechanisms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "description",
+          "type"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "minLength": 1
+          },
+          "to": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "direct",
+              "indirect",
+              "feedback"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "confounders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "nodeId",
+          "affects",
+          "description"
+        ],
+        "properties": {
+          "nodeId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "affects": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "interventions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "nodeId",
+          "action",
+          "expectedEffects"
+        ],
+        "properties": {
+          "nodeId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expectedEffects": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "nodeId",
+                "expectedChange",
+                "confidence"
+              ],
+              "properties": {
+                "nodeId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "expectedChange": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "counterfactuals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "description",
+          "modifiedNodes"
+        ],
+        "properties": {
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "modifiedNodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "nodeId",
+                "newValue"
+              ],
+              "properties": {
+                "nodeId": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "newValue": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "additionalProperties": false
+}

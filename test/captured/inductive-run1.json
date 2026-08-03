@@ -1,0 +1,13 @@
+{
+  "mode": "inductive",
+  "observations": [
+    "Deploy on Monday 2026-04-06 failed with DB connection timeout",
+    "Deploy on Wednesday 2026-04-08 failed with DB connection timeout",
+    "Deploy on Friday 2026-04-10 failed with DB connection timeout"
+  ],
+  "pattern": "Every deploy attempted in the week of 2026-04-06 failed at the DB connection phase with identical symptoms, across three non-adjacent weekdays",
+  "generalization": "Something introduced on or before 2026-04-06 is causing every production deploy to fail at DB connection, and the failure is persistent rather than intermittent — the fact that it reproduces on three different weekdays rules out weekly cron jobs, maintenance windows, or day-of-week effects",
+  "confidence": 0.8,
+  "counterexamples": [],
+  "sampleSize": 3
+}

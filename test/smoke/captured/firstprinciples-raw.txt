@@ -1,0 +1,144 @@
+Using **first principles** reasoning as explicitly requested — decomposing authentication to its irreducible axioms and rebuilding the requirements from the ground up.
+
+```json
+{
+  "mode": "firstprinciples",
+  "question": "From first principles, what does authentication actually require? Decompose to fundamentals and rebuild.",
+  "principles": [
+    {
+      "id": "p1",
+      "type": "definition",
+      "statement": "Authentication is the process of verifying that a claimed identity corresponds to a real, enrolled identity in the system",
+      "justification": "Definitional baseline — authentication is not granting access, not authorization, and not identification; it is the binary check that a claim is true"
+    },
+    {
+      "id": "p2",
+      "type": "definition",
+      "statement": "Identity is a persistent, distinguishable actor within a system — an entity that can be enrolled, tracked, and held accountable",
+      "justification": "Authentication only makes sense if identities are persistent and distinguishable; a one-time, indistinguishable actor cannot be authenticated"
+    },
+    {
+      "id": "p3",
+      "type": "axiom",
+      "statement": "A verifier can only confirm a claim against prior knowledge — verification without a pre-existing reference is logically impossible",
+      "justification": "To say 'this is Alice' requires having a record of what Alice looks like; without enrollment there is nothing to compare against"
+    },
+    {
+      "id": "p4",
+      "type": "axiom",
+      "statement": "If two distinct entities can produce the same proof for a given identity claim, the proof conveys no information about identity",
+      "justification": "This is the uniqueness axiom: a proof that is not exclusive to the claimed identity cannot distinguish that identity from any other — it is vacuous as evidence",
+      "latex": "\\forall A \\neq B: \\text{proof}(A) = \\text{proof}(B) \\Rightarrow \\text{proof is not identity-binding}"
+    },
+    {
+      "id": "p5",
+      "type": "axiom",
+      "statement": "Claims made at zero cost carry zero evidential weight — only proofs that are costly or impossible to fabricate by non-owners are meaningful",
+      "justification": "If anyone can trivially produce a proof, the proof is indistinguishable from a fabrication; authentication is structurally a game of making false claims more expensive than their value",
+      "latex": "\\text{evidential\\_weight}(proof) \\propto \\text{cost\\_to\\_forge}(proof)"
+    },
+    {
+      "id": "p6",
+      "type": "observation",
+      "statement": "All verifiable proof artifacts exhaust to three categories: something the claimant knows (cognitive secret), something the claimant has (physical token), or something the claimant is (biometric characteristic)",
+      "justification": "Decades of identity literature confirm this as an exhaustive partition — every authentication scheme is a combination of these three factor classes",
+      "confidence": 0.95
+    },
+    {
+      "id": "p7",
+      "type": "observation",
+      "statement": "Channels between provers and verifiers are adversarial — proofs transmitted over a channel can be intercepted and replayed by a third party who never possessed the original artifact",
+      "justification": "Network threat model: adversary-in-the-middle and credential capture attacks are empirically confirmed attack classes across all communication protocols",
+      "confidence": 0.98
+    },
+    {
+      "id": "p8",
+      "type": "assumption",
+      "statement": "The enrollment process itself was performed correctly — the reference held by the verifier is a faithful record of the legitimate identity, not an adversarially injected one",
+      "justification": "The entire authentication chain depends on this root-of-trust assumption; it is contextually plausible in well-governed systems but is the single most frequently exploited gap in practice",
+      "confidence": 0.85
+    },
+    {
+      "id": "p9",
+      "type": "axiom",
+      "statement": "Any secret shared with more parties than strictly necessary has a probability of disclosure proportional to the number of parties and channels involved",
+      "justification": "Information-theoretic consequence of exposure: each additional party is an additional attack surface; minimum disclosure is therefore a structural requirement, not merely a preference"
+    }
+  ],
+  "derivationSteps": [
+    {
+      "stepNumber": 1,
+      "principle": "p1",
+      "inference": "Authentication is a binary decision operation: the claimant either matches the enrolled record or does not. It is not probabilistic by default — the system must resolve to a definitive yes or no.",
+      "logicalForm": "auth(claim, record) ∈ {true, false}",
+      "confidence": 1.0
+    },
+    {
+      "stepNumber": 2,
+      "principle": "p3",
+      "inference": "Authentication requires prior enrollment. The verifier must hold a reference record for the claimed identity before any authentication attempt begins. Without enrollment, no comparison is possible and no claim can be verified.",
+      "logicalForm": "verify(claim) requires ∃ stored_reference(claimed_identity)",
+      "confidence": 1.0
+    },
+    {
+      "stepNumber": 3,
+      "principle": "p4",
+      "inference": "The proof presented must be exclusive to the claimed identity. If the proof could be produced by any entity other than the one claiming to be Alice, the proof cannot establish that the presenter is Alice. Exclusivity is not a security property — it is a logical prerequisite for the proof to carry any evidential weight at all.",
+      "logicalForm": "valid_proof(x, identity_A) → ¬valid_proof(y, identity_A) for all y ≠ A",
+      "confidence": 1.0
+    },
+    {
+      "stepNumber": 4,
+      "principle": "p5",
+      "inference": "The proof must impose a non-trivial cost of fabrication on non-owners. Authentication is structurally a mechanism for making impersonation more expensive than its value. A trivially forgeable proof (e.g., a username alone) provides no security margin regardless of any surrounding controls.",
+      "logicalForm": "secure_auth requires cost_to_forge(proof) >> value_of_impersonation",
+      "confidence": 1.0
+    },
+    {
+      "stepNumber": 5,
+      "principle": "p6",
+      "inference": "Every authentication scheme must use at least one proof artifact from the three canonical categories (know / have / are). Any authentication claim that does not resolve to at least one of these categories is not presenting a verifiable artifact — it is making an unverifiable assertion. Multi-factor authentication is simply requiring artifacts from more than one category simultaneously, increasing the fabrication cost from Step 4.",
+      "confidence": 0.95
+    },
+    {
+      "stepNumber": 6,
+      "principle": "p7",
+      "inference": "Because the channel is adversarial, the proof presentation must include a freshness component to prevent replay. An adversary who captures a valid proof must be unable to reuse it. This requires either a challenge-response mechanism (nonce from verifier), a time-bounded token (OTP/TOTP), or a per-session cryptographic binding. A proof without a freshness mechanism is structurally vulnerable to replay regardless of the proof's intrinsic strength.",
+      "logicalForm": "secure_auth requires present(artifact) ∧ present(freshness_proof) where freshness_proof = f(nonce_verifier) or f(time_t)",
+      "confidence": 0.98
+    },
+    {
+      "stepNumber": 7,
+      "principle": "p8",
+      "inference": "The entire derivation chain depends on the enrollment root of trust. If the enrollment was compromised — if the reference record was injected by an adversary — then all subsequent authentication steps verify correctly against a fraudulent identity. Trusted enrollment is not a separate problem from authentication; it is the foundation on which authentication's validity rests.",
+      "confidence": 0.85
+    },
+    {
+      "stepNumber": 8,
+      "principle": "p9",
+      "inference": "Minimum disclosure is a structural requirement derived from the exclusivity requirement in Step 3. If the verifier stores the raw proof artifact (e.g., a plaintext password), the verifier itself becomes an attack surface that can violate the exclusivity property. The proof should be stored and transmitted in a form that lets the verifier confirm a match without holding a forgeable copy — e.g., a hash, a public key, or a commitment scheme.",
+      "logicalForm": "stored_reference should be verify(artifact) not artifact itself — i.e., a one-way function output or asymmetric public key",
+      "confidence": 0.95
+    }
+  ],
+  "conclusion": {
+    "statement": "Authentication fundamentally and irreducibly requires exactly seven things: (1) Prior enrollment of a reference record by the verifier; (2) An exclusive proof artifact — one only the claimed identity can produce; (3) A non-trivial fabrication cost on that artifact; (4) An artifact belonging to at least one canonical factor category (know / have / are); (5) A freshness mechanism (challenge-response or time-bound token) to prevent replay; (6) A trusted root at enrollment, without which all subsequent steps are meaningless; (7) Minimum-disclosure proof storage, so the verifier cannot itself become a source of forgeable artifacts. Any system calling itself 'authentication' that omits any of these seven is not verifying identity — it is accepting a claim on trust. Notably: passwords stored in plaintext violate (7); passwords without challenge-response violate (5); username-only 'authentication' violates (2), (3), and (4). The rebuild insight is that FIDO2/WebAuthn satisfies all seven structurally: the private key satisfies (2), (3), (7) via asymmetric cryptography; the challenge satisfies (5); the registration ceremony satisfies (6); and the public key satisfies (4) as a 'something you have'.",
+    "derivationChain": [1, 2, 3, 4, 5, 6, 7, 8],
+    "certainty": 0.85,
+    "limitations": [
+      "Physical co-presence (e.g., in-person identity verification) partially bypasses requirement (5) since an adversary cannot replay a physical presence — the framework holds but the implementation differs",
+      "Zero-knowledge proofs maximally satisfy requirement (7) — the verifier gains only a single confirmation bit without learning the artifact — and are captured by this framework but not explicitly derived from it",
+      "Requirement (6) — trusted enrollment — is treated as an assumption here, not fully derived; a complete treatment requires a separate trust bootstrap analysis",
+      "Continuous/behavioral authentication (ongoing re-verification during a session) extends requirement (5) from a per-session gate to a continuous stream, which is a generalization of, not a contradiction to, this derivation",
+      "Machine-to-machine authentication has no 'are' factor — biometrics are human-bound — but the remaining six requirements apply unchanged"
+    ]
+  },
+  "alternativeInterpretations": [
+    "A purely epistemic reading treats authentication as the verifier forming a belief (probability ≥ threshold) rather than a binary decision — this collapses requirements (2) and (3) into a single probabilistic requirement but does not eliminate them",
+    "In federated identity systems, requirement (6) is delegated to an identity provider, not held locally — this does not eliminate the requirement but shifts accountability and introduces a new attack surface (the federation trust chain)",
+    "Requirement (7) could be derived more strongly from information theory (Shannnon entropy of the stored credential must not exceed zero from the adversary's perspective after breach) rather than from p9 — this is a tighter formulation of the same principle"
+  ]
+}
+```
+
+Authentication, stripped to its logical bones, requires seven non-negotiable components — none of which are design choices. The core insight from the derivation is that **exclusivity** (Step 3) and **freshness** (Step 6) are the two requirements most commonly violated in practice: passwords without challenge-response fail freshness, and verifiers that store raw credentials fail exclusivity. The rebuild leads directly to asymmetric cryptography as the canonical solution — not because it is fashionable, but because it is the only widely-deployed primitive that satisfies all seven requirements structurally. Critically, requirement (6) — the trusted enrollment root — is the one the derivation must treat as an *assumption* rather than a derived property, which means it is the true architectural weak point: any system can be broken at the moment someone fraudulent enrolls a legitimate-looking credential.

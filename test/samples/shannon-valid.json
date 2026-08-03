@@ -1,0 +1,20 @@
+{
+  "mode": "shannon",
+  "thoughtNumber": 1,
+  "totalThoughts": 5,
+  "content": "Define the problem: our user-search API has unacceptable p99 latency (>800ms observed, target <200ms). The reducible uncertainty here is: we do not know which subsystem contributes most to tail latency. Decompose the problem into three independently measurable sources: (1) query parsing and tokenisation, (2) index lookup and ranking, (3) serialisation and network round-trip.",
+  "nextThoughtNeeded": true,
+  "stage": "problem_definition",
+  "uncertainty": 0.75,
+  "dependencies": [],
+  "assumptions": [
+    "p99 is measured at the load balancer, not inside the service",
+    "the three subsystems are approximately independent",
+    "existing tracing covers all three stages"
+  ],
+  "confidenceFactors": {
+    "dataQuality": 0.7,
+    "methodologyRobustness": 0.8,
+    "assumptionValidity": 0.65
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "mode": "scientificmethod",
+  "question": "Does enabling HTTP/2 multiplexing on the API gateway reduce p99 latency by at least 20% compared to HTTP/1.1 under 500 concurrent connections?",
+  "nullHypothesis": "Enabling HTTP/2 multiplexing has no significant effect on p99 latency; mean p99 under HTTP/2 equals mean p99 under HTTP/1.1",
+  "alternativeHypothesis": "Enabling HTTP/2 multiplexing reduces p99 latency by at least 20% compared to HTTP/1.1 under 500 concurrent connections",
+  "falsifiable": true,
+  "experimentType": "experimental",
+  "independentVariables": ["HTTP protocol version (HTTP/1.1 vs HTTP/2)"],
+  "dependentVariables": ["p99 response latency (ms)", "p50 response latency (ms)", "error rate (%)"],
+  "controlVariables": [
+    "Server hardware and instance type",
+    "Application version (v3.7.1)",
+    "Synthetic load profile (500 concurrent connections, 1,000 req/sec)",
+    "Payload size (fixed at 2 KB JSON response)",
+    "Network conditions (same VPC, no throttling)"
+  ],
+  "procedure": [
+    "Deploy two identical API gateway instances: one configured for HTTP/1.1, one for HTTP/2",
+    "Run synthetic load test using k6 at 500 concurrent connections for 10 minutes on each instance",
+    "Record p50, p95, and p99 latency distributions and error rates for each run",
+    "Repeat each run 3 times and average results to reduce variance",
+    "Apply Welch's t-test to compare p99 distributions with α = 0.05"
+  ],
+  "successCriteria": "HTTP/2 p99 latency is ≥20% lower than HTTP/1.1 p99, with statistical significance (p < 0.05) and error rate remaining below 0.1%",
+  "result": "HTTP/1.1 p99: 342 ms (avg over 3 runs). HTTP/2 p99: 201 ms (avg over 3 runs). Error rate: 0.02% on both. Welch's t-test: p = 0.003.",
+  "conclusion": "Reject H₀. HTTP/2 reduces p99 latency by 41% (342 ms → 201 ms), exceeding the 20% threshold with statistical significance (p = 0.003). Enable HTTP/2 on the production API gateway.",
+  "confidence": 0.91,
+  "limitations": [
+    "Synthetic load test does not capture real-world request size variability or user session patterns",
+    "Experiment was run in the same VPC — cross-region or CDN edge effects are not captured",
+    "HTTP/2 server push was disabled; enabling it may yield further improvements or introduce overhead"
+  ]
+}

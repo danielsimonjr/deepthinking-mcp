@@ -1,0 +1,148 @@
+Using **synthesis** reasoning to integrate three conflicting empirical studies and build a coherent position on remote-work productivity.
+
+```json
+{
+  "mode": "synthesis",
+  "topic": "What is the net effect of remote work on employee productivity?",
+  "sources": [
+    {
+      "id": "sA",
+      "title": "Study A (2021)",
+      "type": "empirical",
+      "year": 2021,
+      "keyPosition": "Remote work increases productivity by +13% on average",
+      "quality": 0.82
+    },
+    {
+      "id": "sB",
+      "title": "Study B (2023)",
+      "type": "empirical",
+      "year": 2023,
+      "keyPosition": "Remote work produces no statistically significant change in overall productivity",
+      "quality": 0.75
+    },
+    {
+      "id": "sC",
+      "title": "Study C (2024)",
+      "type": "empirical",
+      "year": 2024,
+      "keyPosition": "Remote work reduces productivity by -8% specifically for junior engineers; no significant effect reported for other groups",
+      "quality": 0.78
+    }
+  ],
+  "themes": [
+    {
+      "id": "t1",
+      "name": "Heterogeneity of effect by experience level",
+      "sourceIds": ["sB", "sC"],
+      "consensus": "moderate",
+      "description": "Productivity effects differ substantially by worker seniority. Study B's null aggregate plausibly conceals opposing subgroup effects that Study C reveals — junior engineers bear the costs while experienced workers retain or extend earlier gains."
+    },
+    {
+      "id": "t2",
+      "name": "Temporal drift in remote-work conditions",
+      "sourceIds": ["sA", "sB", "sC"],
+      "consensus": "weak",
+      "description": "The three studies span 2021–2024, a period of rapid normative and infrastructural change. Declining aggregate gains over time may reflect diminishing novelty, workforce composition shifts (more juniors hired remotely post-2020), or the erosion of early structured-task advantages."
+    },
+    {
+      "id": "t3",
+      "name": "Task structure and role type as moderating variables",
+      "sourceIds": ["sA"],
+      "consensus": "weak",
+      "description": "The 2021 positive finding likely reflects conditions favorable to structured-task, experienced workers. Later studies covering broader role profiles show attenuated or null population-level effects, consistent with a moderating role for task type."
+    }
+  ],
+  "convergence": [
+    {
+      "claim": "Remote work does not uniformly improve productivity across all worker types",
+      "sourceIds": ["sB", "sC"],
+      "strength": "moderate"
+    },
+    {
+      "claim": "Junior or early-career workers are disproportionately at risk of productivity loss under remote arrangements",
+      "sourceIds": ["sB", "sC"],
+      "strength": "weak"
+    }
+  ],
+  "divergence": [
+    {
+      "dimension": "Direction and magnitude of overall productivity effect",
+      "positions": [
+        {
+          "sourceIds": ["sA"],
+          "position": "+13% gain — remote work significantly improves productivity at the population level"
+        },
+        {
+          "sourceIds": ["sB"],
+          "position": "No significant change — population-level effect is indistinguishable from zero"
+        },
+        {
+          "sourceIds": ["sC"],
+          "position": "-8% loss for junior engineers specifically, implying net harm within that subgroup"
+        }
+      ],
+      "nature": "temporal"
+    },
+    {
+      "dimension": "Whether aggregate averages mask subgroup heterogeneity",
+      "positions": [
+        {
+          "sourceIds": ["sA", "sB"],
+          "position": "Report population-level averages without disaggregation by seniority or experience"
+        },
+        {
+          "sourceIds": ["sC"],
+          "position": "Explicitly disaggregates by seniority, revealing a negative effect that aggregate designs would hide or cancel out"
+        }
+      ],
+      "nature": "methodological"
+    }
+  ],
+  "gaps": [
+    {
+      "description": "No study isolates the causal mechanism for junior-engineer losses — whether reduced mentorship access, loss of informal knowledge transfer, collaboration friction, or visibility/feedback deficits are responsible",
+      "type": "theoretical",
+      "importance": "critical"
+    },
+    {
+      "description": "None of the studies fully controls for task type (structured vs. knowledge-intensive vs. creative), making it impossible to disentangle task-type effects from remote-work effects",
+      "type": "methodological",
+      "importance": "significant"
+    },
+    {
+      "description": "Long-term career trajectory outcomes for junior engineers who onboard remotely (promotion rates, skill acquisition, retention) remain unmeasured across all three studies",
+      "type": "empirical",
+      "importance": "significant"
+    },
+    {
+      "description": "No study distinguishes fully-remote from hybrid arrangements, which prior literature suggests have substantially different outcomes",
+      "type": "contextual",
+      "importance": "moderate"
+    },
+    {
+      "description": "Industry, organizational culture, and management quality are uncontrolled; tech firms, agencies, and manufacturing companies likely exhibit structurally different patterns",
+      "type": "contextual",
+      "importance": "moderate"
+    }
+  ],
+  "coverage": {
+    "sourcesExamined": 3,
+    "estimatedRelevantTotal": 50,
+    "coverageRatio": 0.06,
+    "missingPerspectives": [
+      "Non-tech industries and non-knowledge-worker roles",
+      "Longitudinal cohort studies tracking the same individuals over multi-year remote arrangements",
+      "Studies comparing fully-remote vs. hybrid vs. in-office within the same organizations",
+      "Team-level and project-level (vs. individual) productivity measures",
+      "Managerial effectiveness and oversight quality as confounders"
+    ]
+  },
+  "synthesisStatement": "The three studies are not simply contradictory — they are a time-series revealing a structural pattern. The early-pandemic +13% gain (Study A, 2021) likely captured favorable conditions for experienced workers performing structured tasks under high motivation and low commute friction. By 2023 that advantage had eroded to a population-level null (Study B), consistent with the hypothesis that gains for senior workers were being offset by losses among junior staff hired and onboarded remotely post-2020. Study C (2024) confirms this directly: junior engineers experience a measurable -8% productivity penalty. The operationally important conclusion is not 'remote work raises or lowers productivity' but rather: remote work redistributes productivity gains toward experienced workers while imposing measurable and growing costs on junior ones. This gap likely widens over time without deliberate structural interventions — mentorship programs, structured onboarding, deliberate in-person rituals for early-career staff.",
+  "confidence": 0.62
+}
+```
+
+---
+
+The three studies are best understood as a time-series rather than a flat contradiction: early-pandemic enthusiasm drove real gains for experienced, structured-task workers (Study A), but by 2023 those gains had normalized to zero at the aggregate level (Study B), with Study C revealing the hidden cost — junior engineers are bearing a consistent -8% productivity loss that aggregate designs obscure. The synthesis conclusion is therefore **subgroup-conditioned**: remote work appears productivity-neutral to positive for senior workers and productivity-negative for juniors, and any policy recommendation that ignores this stratification will produce misleading results. Confidence is 0.62 — the directional pattern is compelling, but coverage is very thin (≈6% of the relevant literature), and critical mechanisms (mentorship loss, feedback deficit, informal learning) remain unconfirmed.

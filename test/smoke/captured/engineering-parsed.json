@@ -1,0 +1,307 @@
+{
+  "mode": "engineering",
+  "analysisType": "trade-study",
+  "designChallenge": "Choose between a managed database service (e.g., AWS RDS/Aurora, Google Cloud SQL) and a self-hosted database (e.g., PostgreSQL on cloud VMs) for production workloads, trading off reliability, performance, cost, and operational burden.",
+  "tradeStudy": {
+    "title": "Managed vs. Self-Hosted Database Trade Study",
+    "objective": "Select the database deployment model that best balances reliability, performance, cost, and operational burden across a range of production engineering team profiles",
+    "alternatives": [
+      {
+        "id": "managed",
+        "name": "Managed Database Service",
+        "description": "Cloud-provider-operated database (e.g., AWS RDS/Aurora, Google Cloud SQL, Azure Database for PostgreSQL). Provider handles provisioning, patching, backups, HA, and failover.",
+        "pros": [
+          "Automated Multi-AZ failover and point-in-time recovery out of the box",
+          "Provider-managed patching eliminates most oncall surface area",
+          "One-click read replicas, storage autoscaling, and monitoring integration",
+          "99.95%+ uptime SLA backed by provider engineering investment"
+        ],
+        "cons": [
+          "2\u20134\u00d7 pricing premium over equivalent raw compute",
+          "Limited kernel/OS tuning; some extensions blocked or version-lagged",
+          "Vendor lock-in risk if proprietary features are adopted incrementally",
+          "Upgrade schedule controlled by provider \u2014 forced migrations can be disruptive"
+        ],
+        "riskLevel": "low"
+      },
+      {
+        "id": "selfhosted",
+        "name": "Self-Hosted on Cloud VMs",
+        "description": "PostgreSQL (or MySQL) on EC2/GCE instances with team-managed HA via Patroni/repmgr, backups via pgBackRest/WAL-G, and custom monitoring.",
+        "pros": [
+          "Full OS and kernel tuning: huge pages, IO scheduler, NUMA pinning, network stack",
+          "Any extension, any version, any custom build \u2014 no provider restrictions",
+          "Raw compute cost is 40\u201360% lower than managed equivalent",
+          "No vendor lock-in: fully portable to any cloud or on-premises environment"
+        ],
+        "cons": [
+          "Team owns HA setup, failover testing, backup validation, and all incident response",
+          "Patching and security updates are manual, ongoing operational work",
+          "Oncall incidents require DBA-level expertise; error during failover can extend RTO from minutes to hours",
+          "Patroni + etcd/Consul + VIP/DNS failover is non-trivial to operate correctly under pressure"
+        ],
+        "riskLevel": "high"
+      },
+      {
+        "id": "serverless",
+        "name": "Serverless DBaaS",
+        "description": "Fully serverless database (e.g., Neon, PlanetScale, CockroachDB Serverless, Aurora Serverless v2). Auto-scales compute and storage with pay-per-use pricing.",
+        "pros": [
+          "Zero operational burden \u2014 provider manages everything including auto-scaling",
+          "Pay-per-use pricing is excellent for variable or bursty workloads and dev/staging environments",
+          "Database branching (Neon, PlanetScale) accelerates CI/CD workflows",
+          "Eliminates capacity planning entirely"
+        ],
+        "cons": [
+          "Cold-start latency spikes (100\u2013500ms on compute wake-up for true serverless variants)",
+          "Proprietary SQL dialects or wire protocols create lock-in (Vitess sharding, CockroachDB semantics)",
+          "Cost exceeds provisioned managed service at sustained high throughput (break-even ~40\u201360% utilization)",
+          "Shorter production track record than established managed services at scale"
+        ],
+        "riskLevel": "medium"
+      }
+    ],
+    "criteria": [
+      {
+        "id": "reliability",
+        "name": "Reliability",
+        "weight": 0.25,
+        "description": "Uptime SLA, automated failover quality, backup/restore fidelity, RPO/RTO achievability",
+        "higherIsBetter": true
+      },
+      {
+        "id": "performance",
+        "name": "Performance",
+        "weight": 0.2,
+        "description": "Query latency, throughput ceiling, tuning flexibility, I/O predictability under load",
+        "higherIsBetter": true
+      },
+      {
+        "id": "cost",
+        "name": "Cost",
+        "weight": 0.2,
+        "description": "Total cost of ownership: infrastructure + DBA/DevOps labor + incident opportunity cost",
+        "higherIsBetter": true
+      },
+      {
+        "id": "opburden",
+        "name": "Operational Burden",
+        "weight": 0.25,
+        "description": "Patching, HA configuration, backup validation, oncall complexity, and runbook depth",
+        "higherIsBetter": true
+      },
+      {
+        "id": "flexibility",
+        "name": "Flexibility and Control",
+        "weight": 0.1,
+        "description": "Ability to tune, extend, migrate, and customize the database stack without provider friction",
+        "higherIsBetter": true
+      }
+    ],
+    "scores": [
+      {
+        "alternativeId": "managed",
+        "criteriaId": "reliability",
+        "score": 9,
+        "weightedScore": 2.25,
+        "rationale": "Multi-AZ with automated failover (60\u2013120s), PITR, automated backups, and a 99.95%+ SLA. The provider invests dedicated reliability engineering at a scale no individual team can replicate."
+      },
+      {
+        "alternativeId": "managed",
+        "criteriaId": "performance",
+        "score": 7,
+        "weightedScore": 1.4,
+        "rationale": "Adequate for most OLTP workloads; Aurora's storage engine can exceed raw PostgreSQL on reads. The managed layer forecloses kernel tuning, and provisioned IOPS can throttle unpredictably during bursts. Extreme OLAP or low-latency specialized workloads may hit a ceiling."
+      },
+      {
+        "alternativeId": "managed",
+        "criteriaId": "cost",
+        "score": 6,
+        "weightedScore": 1.2,
+        "rationale": "2\u20134\u00d7 premium over raw compute looks expensive, but eliminates the need for a dedicated DBA ($150K\u2013$200K/yr fully-loaded). For teams without DBA expertise, managed services are frequently cheaper in TCO \u2014 the compute premium is often less than one incident's engineering cost."
+      },
+      {
+        "alternativeId": "managed",
+        "criteriaId": "opburden",
+        "score": 9,
+        "weightedScore": 2.25,
+        "rationale": "Patching, failover, backups, and storage scaling are fully provider-managed. Engineering oncall involvement is limited to application-layer issues. No Patroni quorum decisions, no WAL archiving setup, no manual failover runbooks required."
+      },
+      {
+        "alternativeId": "managed",
+        "criteriaId": "flexibility",
+        "score": 5,
+        "weightedScore": 0.5,
+        "rationale": "Extension support is limited (RDS blocks several pg extensions; Aurora has storage engine quirks). Upgrade timing follows provider deprecation schedules. Cannot tune kernel parameters or run custom PostgreSQL builds."
+      },
+      {
+        "alternativeId": "selfhosted",
+        "criteriaId": "reliability",
+        "score": 6,
+        "weightedScore": 1.5,
+        "rationale": "Patroni + etcd + pgBackRest is battle-tested and can reach managed-service reliability parity, but requires significant upfront investment and sustained expertise. Teams without dedicated DBAs frequently misconfigure failover, leading to extended RTO (hours, not minutes) during incidents."
+      },
+      {
+        "alternativeId": "selfhosted",
+        "criteriaId": "performance",
+        "score": 9,
+        "weightedScore": 1.8,
+        "rationale": "Full OS-level tuning: huge pages, NUMA pinning, IO scheduler selection, custom network stack. Any PostgreSQL extension (TimescaleDB, pgvector, PostGIS) at any version. Maximum achievable throughput for the underlying hardware."
+      },
+      {
+        "alternativeId": "selfhosted",
+        "criteriaId": "cost",
+        "score": 8,
+        "weightedScore": 1.6,
+        "rationale": "Raw VM costs run 40\u201360% below managed equivalents. This advantage erodes quickly once DBA labor is included at market rate. Justifiable for large teams with existing infrastructure expertise or for high-throughput workloads where managed service costs become significant (>$15K/month)."
+      },
+      {
+        "alternativeId": "selfhosted",
+        "criteriaId": "opburden",
+        "score": 3,
+        "weightedScore": 0.75,
+        "rationale": "Team owns: OS patching, major/minor PostgreSQL upgrades, HA configuration, quarterly failover tests, backup validation, WAL archiving, monitoring setup, and all incident response. Requires DBA expertise on-call. A 2 AM Patroni split-brain or etcd quorum failure is a high-stakes recovery scenario."
+      },
+      {
+        "alternativeId": "selfhosted",
+        "criteriaId": "flexibility",
+        "score": 9,
+        "weightedScore": 0.9,
+        "rationale": "Unrestricted: any version, any extension, any kernel setting, any hardware profile. Trivially portable across clouds or on-prem. Custom builds possible (Citus for distributed Postgres, Timescale for time-series). Zero provider friction."
+      },
+      {
+        "alternativeId": "serverless",
+        "criteriaId": "reliability",
+        "score": 8,
+        "weightedScore": 2.0,
+        "rationale": "Strong reliability story for sustained workloads (Aurora Serverless v2 is well battle-tested). Neon and PlanetScale are newer services with shorter incident track records. True scale-from-zero variants can produce transient availability dips during cold-start under sudden traffic spikes."
+      },
+      {
+        "alternativeId": "serverless",
+        "criteriaId": "performance",
+        "score": 6,
+        "weightedScore": 1.2,
+        "rationale": "Excellent for variable workloads. Cold-start latency spikes (100\u2013500ms on compute wake-up for Neon-style serverless), connection pooling complexities, and throughput caps at lower ACU tiers create P99 latency unpredictability. Aurora Serverless v2 mitigates most cold-start issues but at higher minimum cost."
+      },
+      {
+        "alternativeId": "serverless",
+        "criteriaId": "cost",
+        "score": 8,
+        "weightedScore": 1.6,
+        "rationale": "Pay-per-use is excellent for dev/staging and bursty production workloads. At sustained 24/7 high load, serverless frequently exceeds provisioned managed service costs. Break-even is typically around 40\u201360% utilization; below that, serverless wins cleanly."
+      },
+      {
+        "alternativeId": "serverless",
+        "criteriaId": "opburden",
+        "score": 9,
+        "weightedScore": 2.25,
+        "rationale": "Lowest operational burden of all three options. No capacity planning, no instance sizing, no storage management. Built-in connection pooling (PlanetScale, Neon). Database branching features directly accelerate CI/CD and reduce environment provisioning overhead."
+      },
+      {
+        "alternativeId": "serverless",
+        "criteriaId": "flexibility",
+        "score": 4,
+        "weightedScore": 0.4,
+        "rationale": "Highly constrained: provider dictates engine version, available extensions, and scaling behavior. PlanetScale uses Vitess sharding with MySQL compatibility gaps. CockroachDB has PostgreSQL wire compatibility but different transaction semantics. Migration cost out of proprietary serverless is high."
+      }
+    ],
+    "recommendation": "managed",
+    "justification": "Managed service scores 7.60, beating serverless DBaaS (7.45) and self-hosted (6.55). The margin over serverless is narrow \u2014 for genuinely bursty or development workloads, serverless may edge ahead and should be considered a co-winner. Self-hosted's 1.05-point gap is driven almost entirely by operational burden (score 3 vs. 9): teams consistently underestimate the ongoing cost of operating HA databases, especially during 2 AM incidents. The managed recommendation holds for most production teams unless: (a) the team employs dedicated DBAs with Patroni/pgBackRest expertise who can absorb the operational burden, (b) performance requirements demonstrably exceed managed service ceilings, or (c) monthly DB spend exceeds ~$15K where self-hosting achieves ROI within 12 months.",
+    "sensitivityNotes": "If operational burden weight drops to 0.10 and performance rises to 0.35 (specialist team with extreme throughput requirements), self-hosted pulls ahead: managed 6.95 vs. self-hosted 7.40. If the workload is bursty (< 40% average utilization), serverless edges managed on cost and nudges its total score above 7.60. If a multi-cloud strategy is a stated goal, increase flexibility weight to 0.20 and reduce another criterion proportionally \u2014 that change materially penalizes serverless (score 4 on flexibility) and makes managed the clear winner over self-hosted only."
+  },
+  "fmea": {
+    "title": "Managed Database Service \u2014 Failure Mode and Effects Analysis",
+    "system": "Production managed relational database (AWS RDS Aurora PostgreSQL as representative)",
+    "failureModes": [
+      {
+        "id": "fm1",
+        "component": "Multi-AZ Availability Zone",
+        "failureMode": "Provider regional outage eliminates both primary and standby simultaneously",
+        "cause": "Cloud provider infrastructure failure (power, networking, or software bug in the control plane) affects an entire region",
+        "effect": "Complete database unavailability with no automatic failover path within the affected region",
+        "severity": 10,
+        "occurrence": 2,
+        "detection": 5,
+        "rpn": 100,
+        "mitigation": "Deploy a read replica in a second region; implement application-level read-fallback to the replica during write unavailability; use Aurora Global Database or equivalent for sub-1s RPO cross-region; run quarterly failover drills to validate RTO against SLA"
+      },
+      {
+        "id": "fm2",
+        "component": "Engine Version Lifecycle",
+        "failureMode": "Provider forces a major version upgrade on End-of-Life deadline; upgrade breaks application behavior",
+        "cause": "Provider deprecates engine version (e.g., PostgreSQL 14 EOL); automatic upgrade window or forced manual upgrade hits incompatible SQL, extension, or behavior change",
+        "effect": "Unplanned downtime during upgrade window; potential data access failures from changed optimizer behavior or deprecated features",
+        "severity": 7,
+        "occurrence": 3,
+        "detection": 8,
+        "rpn": 168,
+        "mitigation": "Subscribe to AWS RDS deprecation calendar notifications; run the full regression suite against the target engine version in staging at least 6 months before EOL; pin major version in IaC (Terraform); avoid deprecated SQL features; schedule upgrades proactively rather than reactively"
+      },
+      {
+        "id": "fm3",
+        "component": "Storage Auto-Scaling",
+        "failureMode": "Uncontrolled storage autoscaling drives unexpected cost spike",
+        "cause": "Data growth, a runaway migration, or write amplification triggers autoscaling; team lacks storage utilization monitoring",
+        "effect": "Monthly database costs exceed budget by 2\u20135\u00d7; no immediate operational impact but creates financial exposure and potentially triggers account-level spend alerts that slow other resources",
+        "severity": 4,
+        "occurrence": 4,
+        "detection": 7,
+        "rpn": 112,
+        "mitigation": "Configure CloudWatch cost anomaly detection on RDS spend with a 20% threshold; set storage utilization alarm at 75% capacity; cap autoscaling maximum to a pre-approved ceiling if workload allows; review storage growth trend weekly during the first 90 days after launch"
+      },
+      {
+        "id": "fm4",
+        "component": "Proprietary Feature Adoption",
+        "failureMode": "Team incrementally adopts Aurora-specific or Cloud SQL-specific features; vendor lock-in prevents future cloud migration or renegotiation",
+        "cause": "Incremental adoption of provider-proprietary features (Aurora Fast DDL, Aurora Global Tables, Cloud SQL IAM auth) without a portability tracking process",
+        "effect": "Future cloud migration or provider renegotiation requires 6\u201318 months of re-engineering work; negotiating leverage is lost; engineering bandwidth consumed by unplanned migration",
+        "severity": 6,
+        "occurrence": 5,
+        "detection": 9,
+        "rpn": 270,
+        "mitigation": "Maintain a living 'portability inventory' document listing all non-standard SQL, proprietary extensions, and provider-specific APIs in use; prefer ANSI SQL and standard PostgreSQL extensions; use abstraction layers (SQLAlchemy, Flyway) that normalize provider differences; schedule an annual migration feasibility review as part of architecture review"
+      },
+      {
+        "id": "fm5",
+        "component": "Connection Management",
+        "failureMode": "Connection pool exhaustion under load surge causes new connections to be refused",
+        "cause": "PostgreSQL max_connections limit (typically 5,000 for large RDS instances, much lower for small) is saturated by application connection pools that were not sized against the managed instance limit",
+        "effect": "Cascading 'too many connections' errors; partial service unavailability for new requests; potential application crash-loop if connection failures are not handled gracefully",
+        "severity": 8,
+        "occurrence": 4,
+        "detection": 6,
+        "rpn": 192,
+        "mitigation": "Deploy RDS Proxy (AWS) or PgBouncer in transaction-mode as a connection pooler from day one \u2014 not as an afterthought; set an alert at 80% of max_connections; load test connection exhaustion behavior before production launch; size application connection pools against the pooler limit, not the raw DB limit"
+      }
+    ],
+    "rpnThreshold": 100,
+    "summary": {
+      "totalModes": 5,
+      "criticalModes": 5,
+      "averageRpn": 168.4,
+      "maxRpn": 270
+    }
+  },
+  "assessment": {
+    "confidence": 0.8,
+    "keyRisks": [
+      "Vendor lock-in (RPN 270) is the highest-risk failure mode and is invisible until a migration is attempted \u2014 it requires proactive governance starting on day one, not reactive mitigation after the fact",
+      "Connection pool exhaustion (RPN 192) is one of the most common production database incidents; RDS Proxy or PgBouncer should be treated as mandatory infrastructure, not optional",
+      "Forced version upgrades (RPN 168) are entirely predictable and mitigatable \u2014 the residual risk is organizational (no regression pipeline, no deprecation tracking), not technical",
+      "The self-hosted alternative's operational burden is frequently underestimated by teams; the true cost surfaces during the first major incident, not during planning"
+    ],
+    "nextSteps": [
+      "Deploy RDS Proxy (or PgBouncer in transaction mode) before production launch \u2014 this is not optional at any non-trivial traffic level",
+      "Establish a portability inventory document on day one and include it in quarterly architecture reviews",
+      "Subscribe to AWS RDS deprecation announcements and add a 'DB engine version review' milestone to the annual engineering roadmap",
+      "Run a quarterly failover drill: promote Multi-AZ standby, validate application reconnection behavior, measure actual RTO against the SLA target",
+      "Set CloudWatch cost anomaly detection on RDS spend with a 20% threshold and a 75% storage utilization alarm"
+    ],
+    "openIssues": [
+      "Team size and DBA expertise are unknown \u2014 if a dedicated DBA is hired, re-run this trade study with operational burden weight reduced to 0.10 and performance raised to 0.35",
+      "Peak TPS has not been load-tested \u2014 if P99 latency requirements cannot be satisfied by the managed service's performance ceiling, evaluate self-hosted for the hot-path write workload with a managed read-replica layer",
+      "Regulatory and data-residency requirements have not been assessed \u2014 some compliance regimes (HIPAA BAA, FedRAMP, EU data residency) constrain provider and region choices in ways that may override this analysis",
+      "Multi-cloud strategy is undefined \u2014 if multi-cloud is a stated organizational goal, the flexibility criterion weight should increase to at least 0.20, which materially changes the scoring"
+    ]
+  }
+}

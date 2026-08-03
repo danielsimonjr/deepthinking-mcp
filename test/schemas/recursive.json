@@ -1,0 +1,265 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RecursiveThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "strategy",
+    "currentDepth",
+    "maxDepth",
+    "baseCaseReached",
+    "baseCases",
+    "recurrence"
+  ],
+  "properties": {
+    "mode": {
+      "const": "recursive"
+    },
+    "strategy": {
+      "type": "string",
+      "enum": [
+        "divide_and_conquer",
+        "dynamic_programming",
+        "backtracking",
+        "tree_traversal",
+        "mathematical_induction"
+      ]
+    },
+    "currentDepth": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "maxDepth": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "baseCaseReached": {
+      "type": "boolean"
+    },
+    "divisionFactor": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 1
+    },
+    "baseCases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "condition",
+          "result"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "condition": {
+            "type": "string",
+            "minLength": 1
+          },
+          "result": {},
+          "reachedCount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "verified": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "recurrence": {
+      "type": "object",
+      "required": [
+        "formula"
+      ],
+      "properties": {
+        "formula": {
+          "type": "string",
+          "minLength": 1
+        },
+        "latex": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "baseCase": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "timeComplexity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "spaceComplexity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "closedForm": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "complexity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "subproblems": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "description",
+          "size",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "size": {},
+          "depth": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "parent": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parentId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "in_progress",
+              "solving",
+              "solved"
+            ]
+          },
+          "solution": {},
+          "result": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "callStack": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "depth",
+          "input",
+          "completed"
+        ],
+        "properties": {
+          "depth": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "input": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "completed": {
+            "type": "boolean"
+          },
+          "result": {}
+        },
+        "additionalProperties": true
+      }
+    },
+    "memoization": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "hits",
+        "misses",
+        "cacheSize"
+      ],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "hits": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "misses": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cacheSize": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": true
+    },
+    "haltingCondition": {
+      "type": [
+        "string",
+        "object",
+        "null"
+      ],
+      "description": "The condition under which the recursion terminates"
+    }
+  },
+  "additionalProperties": false
+}

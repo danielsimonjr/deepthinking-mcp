@@ -1,0 +1,76 @@
+{
+  "mode": "metareasoning",
+  "currentStrategy": {
+    "mode": "sequential",
+    "approach": "Step-by-step decomposition of microservice latency degradation over the past week",
+    "startedAt": "2026-04-11T09:15:00Z",
+    "thoughtsSpent": 6,
+    "progressIndicators": [
+      "Identified 3 potential causes (DB, network, GC pause)",
+      "Eliminated GC pause via heap metrics",
+      "No clear convergence toward root cause yet"
+    ]
+  },
+  "strategyEvaluation": {
+    "effectiveness": 0.45,
+    "efficiency": 0.40,
+    "confidence": 0.55,
+    "progressRate": 0.35,
+    "qualityScore": 0.50,
+    "issues": [
+      "6 thoughts without converging on a hypothesis — sequential enumeration may be too broad",
+      "DB and network causes are still co-equal suspects; no discriminating evidence collected yet",
+      "Sequential mode does not naturally generate rival hypotheses for direct comparison"
+    ],
+    "strengths": [
+      "GC hypothesis correctly eliminated early via objective data",
+      "Systematic logging of all considered causes provides audit trail"
+    ]
+  },
+  "alternativeStrategies": [
+    {
+      "mode": "abductive",
+      "reasoning": "Two live hypotheses (DB vs. network) are begging to be compared via competing predictions; abductive mode is designed exactly for this",
+      "expectedBenefit": "Forces generation of testable predictions for each hypothesis and explicit scoring — should converge in 3-4 thoughts instead of continuing to enumerate",
+      "switchingCost": 0.25,
+      "recommendationScore": 0.88
+    },
+    {
+      "mode": "causal",
+      "reasoning": "The problem may require building a causal graph of the system before isolating root cause",
+      "expectedBenefit": "Reveals hidden dependencies — e.g., whether the DB slowdown IS caused by the network issue upstream",
+      "switchingCost": 0.45,
+      "recommendationScore": 0.65
+    }
+  ],
+  "recommendation": {
+    "action": "SWITCH",
+    "targetMode": "abductive",
+    "justification": "Six sequential thoughts without convergence is a strong signal the current mode is wrong for this problem. Two competing hypotheses (DB saturation vs. network degradation) are present and need direct comparison. Abductive reasoning forces discriminating predictions and explicit scoring — exactly what is missing.",
+    "confidence": 0.82,
+    "expectedImprovement": "Root cause identified within 3-4 abductive thoughts rather than continuing to enumerate in sequential mode"
+  },
+  "resourceAllocation": {
+    "timeSpent": 480000,
+    "thoughtsRemaining": 6,
+    "complexityLevel": "medium",
+    "urgency": "high",
+    "recommendation": "Switch to abductive immediately and invest the remaining 6 thoughts in hypothesis comparison. Do not spend more thoughts on sequential enumeration — diminishing returns past thought 4."
+  },
+  "qualityMetrics": {
+    "logicalConsistency": 0.75,
+    "evidenceQuality": 0.60,
+    "completeness": 0.45,
+    "originality": 0.40,
+    "clarity": 0.70,
+    "overallQuality": 0.58
+  },
+  "sessionContext": {
+    "sessionId": "sess-latency-debug-2026-04-11",
+    "totalThoughts": 6,
+    "modesUsed": ["sequential"],
+    "modeSwitches": 0,
+    "problemType": "incident-root-cause-analysis",
+    "historicalEffectiveness": 0.72
+  }
+}

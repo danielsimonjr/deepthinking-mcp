@@ -1,0 +1,140 @@
+{
+  "mode": "evidential",
+  "thoughtType": "evidence_combination",
+  "frameOfDiscernment": ["Vehicle", "Pedestrian", "Cyclist"],
+  "hypotheses": [
+    {
+      "id": "h1",
+      "name": "Vehicle",
+      "description": "Motorized vehicle detected by sensors",
+      "mutuallyExclusive": true
+    },
+    {
+      "id": "h2",
+      "name": "Pedestrian",
+      "description": "Person on foot detected by sensors",
+      "mutuallyExclusive": true
+    },
+    {
+      "id": "h3",
+      "name": "Cyclist",
+      "description": "Person on bicycle detected by sensors",
+      "mutuallyExclusive": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e1",
+      "description": "Radar signature consistent with large metallic object moving at vehicle speed",
+      "source": "radar",
+      "reliability": 0.85,
+      "timestamp": 1744358400,
+      "supports": ["h1"],
+      "contradicts": ["h2", "h3"]
+    },
+    {
+      "id": "e2",
+      "description": "Camera detects two-wheeled silhouette with upright rider posture",
+      "source": "camera",
+      "reliability": 0.7,
+      "timestamp": 1744358401,
+      "supports": ["h2", "h3"],
+      "contradicts": []
+    }
+  ],
+  "beliefFunctions": [
+    {
+      "id": "bf1",
+      "source": "e1",
+      "massAssignments": [
+        {
+          "hypothesisSet": ["h1"],
+          "mass": 0.72,
+          "justification": "Radar strongly supports Vehicle: reliability 0.85 × detection confidence 0.85"
+        },
+        {
+          "hypothesisSet": ["h1", "h2", "h3"],
+          "mass": 0.28,
+          "justification": "Residual ignorance — radar cannot fully distinguish at this range"
+        }
+      ]
+    },
+    {
+      "id": "bf2",
+      "source": "e2",
+      "massAssignments": [
+        {
+          "hypothesisSet": ["h2", "h3"],
+          "mass": 0.56,
+          "justification": "Camera supports Cyclist or Pedestrian: reliability 0.7 × detection confidence 0.8"
+        },
+        {
+          "hypothesisSet": ["h1", "h2", "h3"],
+          "mass": 0.44,
+          "justification": "Residual ignorance — camera resolution insufficient for definitive classification"
+        }
+      ]
+    }
+  ],
+  "combinedBelief": {
+    "id": "combined",
+    "source": "combined",
+    "massAssignments": [
+      {
+        "hypothesisSet": ["h1"],
+        "mass": 0.42,
+        "justification": "Dempster's rule normalizing conflict between radar (Vehicle) and camera (Cyclist/Pedestrian)"
+      },
+      {
+        "hypothesisSet": ["h2", "h3"],
+        "mass": 0.45,
+        "justification": "Combined mass for non-vehicle hypotheses after normalization"
+      },
+      {
+        "hypothesisSet": ["h1", "h2", "h3"],
+        "mass": 0.13,
+        "justification": "Remaining ignorance after combining both sources"
+      }
+    ],
+    "conflictMass": 0.40
+  },
+  "plausibility": {
+    "id": "pl1",
+    "assignments": [
+      {
+        "hypothesisSet": ["h1"],
+        "plausibility": 0.72,
+        "belief": 0.42,
+        "uncertaintyInterval": [0.42, 0.72]
+      },
+      {
+        "hypothesisSet": ["h2"],
+        "plausibility": 0.40,
+        "belief": 0.15,
+        "uncertaintyInterval": [0.15, 0.40]
+      },
+      {
+        "hypothesisSet": ["h3"],
+        "plausibility": 0.40,
+        "belief": 0.15,
+        "uncertaintyInterval": [0.15, 0.40]
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "id": "d1",
+      "name": "Object classification decision",
+      "selectedHypothesis": ["h1"],
+      "confidence": 0.57,
+      "reasoning": "Vehicle has the highest belief (0.42) and plausibility (0.72). Despite camera suggesting Cyclist/Pedestrian, radar reliability advantage (0.85 vs 0.70) dominates. High conflict mass (0.40) signals the sensors fundamentally disagree — additional sensors recommended.",
+      "alternatives": [
+        {
+          "hypothesis": ["h2", "h3"],
+          "expectedUtility": 0.3,
+          "risk": 0.6
+        }
+      ]
+    }
+  ]
+}

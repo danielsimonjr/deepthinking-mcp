@@ -1,0 +1,104 @@
+Using **physics** mode as explicitly invoked — the problem calls for tensor rank analysis, index symmetry, Lorentz invariant construction, and physical interpretation of field classification.
+
+```json
+{
+  "mode": "physics",
+  "thoughtType": "tensor_formulation",
+  "tensorProperties": {
+    "rank": [0, 2],
+    "components": "F_{μν} = ∂_μA_ν - ∂_νA_μ; explicit: F_{0i} = E_i/c, F_{ij} = -ε_{ijk}B_k",
+    "latex": "F_{\\mu\\nu} = \\partial_\\mu A_\\nu - \\partial_\\nu A_\\mu = \\begin{pmatrix} 0 & -E_x/c & -E_y/c & -E_z/c \\\\ E_x/c & 0 & -B_z & B_y \\\\ E_y/c & B_z & 0 & -B_x \\\\ E_z/c & -B_y & B_x & 0 \\end{pmatrix}",
+    "symmetries": [
+      "Antisymmetric: F_{μν} = -F_{νμ}, so the diagonal vanishes — F_{μμ} = 0",
+      "6 independent components in 4D spacetime: 3 electric (E_x, E_y, E_z) and 3 magnetic (B_x, B_y, B_z)",
+      "F is a closed differential 2-form: dF = 0 (when F = dA), which encodes the homogeneous Maxwell equations",
+      "Under Lorentz boosts (velocity β along x): E_y → γ(E_y - βcB_z), B_z → γ(B_z - βE_y/c) — E and B mix"
+    ],
+    "invariants": [
+      "FIRST INVARIANT — Lorentz scalar: I₁ = F_{μν}F^{μν} = 2(B² - E²/c²)",
+      "  Derivation: F_{μν}F^{μν} = 2[F_{0i}F^{0i} + F_{ij}F^{ij}] = 2[-(E²/c²) + B²]",
+      "  since F^{0i} = η^{00}η^{ii}F_{0i} = (+1)(-1)(E_i/c) = -E_i/c contributes negative sign",
+      "  and F^{ij} = η^{ii}η^{jj}F_{ij} = (+1)F_{ij} contributes positively",
+      "  Classification: I₁ > 0 → magnetic-type field (B² > E²/c²); I₁ < 0 → electric-type; I₁ = 0 → null or mixed",
+      "SECOND INVARIANT — Lorentz pseudoscalar: I₂ = F_{μν}*F^{μν} = (1/2)ε^{μνρσ}F_{μν}F_{ρσ} = -4(E⃗·B⃗)/c",
+      "  where *F^{μν} = (1/2)ε^{μνρσ}F_{ρσ} is the Hodge dual (ε^{0123} = -1 for signature +−−−)",
+      "  The dual swaps roles: *F_{0i} = B_i, *F_{ij} = ε_{ijk}E_k/c",
+      "  Pseudoscalar: changes sign under parity (P) or time reversal (T); invariant under proper orthochronous Lorentz group",
+      "  Classification: I₂ = 0 → E⃗ ⊥ B⃗ in every frame; I₂ ≠ 0 → E·B is an absolute fact, no boost removes it",
+      "COMPLETENESS: By Cayley-Hamilton applied to the linear map F^μ_ν, these two are the only algebraically independent invariants for a rank-2 antisymmetric tensor in 4D"
+    ],
+    "transformation": "covariant",
+    "indexStructure": "(0,2) antisymmetric tensor — element of the exterior algebra Λ²(T*M)",
+    "coordinateSystem": "Minkowski, signature (+,−,−,−), coordinates x^μ = (ct, x, y, z)"
+  },
+  "physicalInterpretation": {
+    "quantity": "Electromagnetic field tensor (Faraday 2-form)",
+    "units": "F_{0i}: V·m⁻¹ = kg·m·A⁻¹·s⁻³ (electric field / c); F_{ij}: T = kg·A⁻¹·s⁻² (magnetic field)",
+    "conservationLaws": [
+      "∂_μF^{μν} = μ₀J^ν — inhomogeneous Maxwell equations (Gauss + Ampère-Maxwell)",
+      "∂_{[μ}F_{νρ]} = 0 — Bianchi identity / homogeneous Maxwell equations (Gauss-B + Faraday)",
+      "∂_μJ^μ = 0 — charge conservation (follows from ∂_μ∂_νF^{μν} = 0 by antisymmetry of F)",
+      "∂_νT^{μν} = F^{μν}J_ν — energy-momentum not conserved for field alone; Lorentz force density is the source term"
+    ],
+    "constraints": [
+      "Gauge redundancy: A_μ → A_μ + ∂_μλ(x) leaves F_{μν} strictly invariant — F is physical, A carries gauge freedom",
+      "Bianchi identity ∂_{[μ}F_{νρ]} = 0 is automatic when F = dA (closedness of the 2-form)",
+      "Reality condition: all components of F_{μν} are real in classical EM"
+    ],
+    "observables": [
+      "Electric field: E^i = cF^{0i} — directly measurable via force on test charge at rest",
+      "Magnetic field: B^i = −(1/2)ε^{ijk}F_{jk} — measurable via force on moving charge",
+      "Lorentz 4-force on charge q: f^μ = qF^μ_ν u^ν (covariant form of F = q(E + v×B))",
+      "I₁ = 2(B² − E²/c²): tells you whether the field is 'more magnetic' or 'more electric' in a Lorentz-invariant sense",
+      "    • I₁ > 0: there EXISTS a Lorentz frame in which E⃗ = 0 (purely magnetic in that frame)",
+      "    • I₁ < 0: there EXISTS a Lorentz frame in which B⃗ = 0 (purely electric in that frame)",
+      "    • I₁ = 0 with I₂ = 0: null field — electromagnetic radiation (plane waves); E = cB and E⃗⊥B⃗ in every frame",
+      "    • I₁ = 0 with I₂ ≠ 0: no standard frame simplification available",
+      "I₂ ∝ E⃗·B⃗: measures 'helicity' — whether E and B have a common projection axis",
+      "    • I₂ = 0: E⃗ ⊥ B⃗ in every inertial frame (e.g., all radiation, static pure-E or pure-B fields)",
+      "    • I₂ ≠ 0: E⃗ and B⃗ retain a nonzero dot product in EVERY frame — absolute geometric fact",
+      "    • I₂ is a CP-odd observable: it changes sign under parity (E → E, B → −B) or time reversal",
+      "Stress-energy tensor: T^{μν} = F^{μα}F^ν_α − (1/4)η^{μν}F_{αβ}F^{αβ} — directly involves I₁ in the trace term"
+    ]
+  },
+  "fieldTheoryContext": {
+    "fields": [
+      "A_μ = (φ/c, −A⃗) — electromagnetic 4-potential (gauge field, not observable)",
+      "F_{μν} = ∂_μA_ν − ∂_νA_μ — field strength (gauge-invariant, observable)",
+      "J^μ = (cρ, J⃗) — 4-current density (source of the field)",
+      "*F_{μν} = (1/2)ε_{μνρσ}F^{ρσ} — Hodge dual tensor; swaps E⃗ ↔ cB⃗"
+    ],
+    "interactions": [
+      "Minimal coupling to charged matter: ∂_μ → D_μ = ∂_μ + iqA_μ/ℏ",
+      "Lorentz force (covariant): dp^μ/dτ = qF^μ_ν u^ν",
+      "Electromagnetic duality: (E⃗, B⃗) → (cB⃗, −E⃗/c) maps F → *F, leaving Maxwell vacuum equations invariant"
+    ],
+    "symmetryGroup": "U(1) × ISO(3,1) (gauge × Poincaré)",
+    "gaugeSymmetries": [
+      "Local U(1): A_μ → A_μ + ∂_μλ(x); F_{μν} is invariant — gauge freedom in potential",
+      "Poincaré (Lorentz boosts + rotations): F_{μν} transforms as a covariant 2-tensor; I₁ and I₂ are preserved",
+      "Electromagnetic duality (vacuum only): (F, *F) → (*F, −F) maps solutions to solutions",
+      "Noether's theorem: U(1) gauge invariance → ∂_μJ^μ = 0 (charge conservation)"
+    ]
+  },
+  "dependencies": [
+    "Minkowski metric η_{μν} = diag(+1,−1,−1,−1) for raising/lowering indices",
+    "Levi-Civita pseudotensor ε^{μνρσ} with ε^{0123} = −1 (signature +−−−)",
+    "Hodge duality: *F^{μν} = (1/2)ε^{μνρσ}F_{ρσ}",
+    "Maxwell's equations in covariant form (source and Bianchi)",
+    "Noether's theorem (continuous symmetry → conserved current)",
+    "Exterior algebra: F = dA is an exact 2-form; dF = 0 follows automatically",
+    "Cayley-Hamilton theorem (completeness of invariants for antisymmetric tensors in 4D)"
+  ],
+  "assumptions": [
+    "Flat Minkowski spacetime — no gravitational curvature, R_{μνρσ} = 0",
+    "Signature convention (+,−,−,−) throughout",
+    "SI units with explicit factors of c; results hold in natural units by setting c = 1",
+    "Classical field theory — no quantum corrections or path integrals",
+    "No magnetic monopoles (Bianchi identity ∂_{[μ}F_{νρ]} = 0 holds globally, not just locally)"
+  ],
+  "uncertainty": 0.02
+}
+```
+
+**Summary:** The electromagnetic field tensor F_μν is a rank-(0,2) antisymmetric covariant tensor with exactly 6 independent real components (the three E-field and three B-field components), and it admits exactly **two** algebraically independent Lorentz invariants. The **first invariant** I₁ = F_μν F^μν = 2(B² − E²/c²) is a true Lorentz scalar that classifies the field type: positive means a Lorentz frame exists where the electric field vanishes (magnetic-type), negative means a frame exists where the magnetic field vanishes (electric-type), and zero (together with I₂ = 0) characterizes null radiation fields like plane waves. The **second invariant** I₂ = F_μν *F^μν ∝ E⃗·B⃗ is a Lorentz pseudoscalar (CP-odd) that encodes whether the electric and magnetic fields have a common projection — if I₂ ≠ 0, no Lorentz boost can ever make E⃗ perpendicular to B⃗, making it an absolute geometric fact; for all electromagnetic radiation and all static vacuum fields, I₂ = 0. Together, (I₁, I₂) provide the complete Lorentz-invariant characterization of any classical electromagnetic field configuration.

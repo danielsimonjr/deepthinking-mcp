@@ -1,0 +1,272 @@
+Using **evidential** (Dempster-Shafer) reasoning, as explicitly requested, to fuse three conflicting sensor streams into a single belief/plausibility ranking across mutually exclusive classification hypotheses.
+
+---
+
+> **Full Dempster-Shafer arithmetic (show your work)**
+>
+> **Frame:** Ω = {Vehicle (h1), Pedestrian (h2), Other (h3)}
+> *LiDAR "unknown" is interpreted as mass assigned to {Other}—a third focal class for unclassifiable/non-standard objects—not mere ignorance, which produces a more informative fusion than a vacuous BBA.*
+>
+> **Belief functions (raw mass assignments):**
+> - BF1 — Radar: m({V}) = 0.70, m(Ω) = 0.30
+> - BF2 — Camera: m({P}) = 0.60, m(Ω) = 0.40
+> - BF3 — LiDAR: m({O}) = 0.40, m(Ω) = 0.60
+>
+> **Step 1 — Combine BF1 ⊕ BF2 (Dempster's rule):**
+>
+> | Product | Sets | Intersection | Outcome |
+> |---|---|---|---|
+> | 0.7 × 0.6 = 0.42 | {V} ∩ {P} | ∅ | **CONFLICT** |
+> | 0.7 × 0.4 = 0.28 | {V} ∩ Ω | {V} | → m({V}) |
+> | 0.3 × 0.6 = 0.18 | Ω ∩ {P} | {P} | → m({P}) |
+> | 0.3 × 0.4 = 0.12 | Ω ∩ Ω | Ω | → m(Ω) |
+>
+> K₁₂ = 0.42 → normalizer = 1 − 0.42 = **0.58**
+> m₁₂({V}) = 0.28/0.58 ≈ **0.4828**; m₁₂({P}) = 0.18/0.58 ≈ **0.3103**; m₁₂(Ω) = 0.12/0.58 ≈ **0.2069**
+>
+> **Step 2 — Combine m₁₂ ⊕ BF3:**
+>
+> | Product | Intersection | Outcome |
+> |---|---|---|
+> | 0.4828 × 0.4 = 0.1931 | {V} ∩ {O} = ∅ | **CONFLICT** |
+> | 0.4828 × 0.6 = 0.2897 | {V} ∩ Ω = {V} | → m({V}) |
+> | 0.3103 × 0.4 = 0.1241 | {P} ∩ {O} = ∅ | **CONFLICT** |
+> | 0.3103 × 0.6 = 0.1862 | {P} ∩ Ω = {P} | → m({P}) |
+> | 0.2069 × 0.4 = 0.0828 | Ω ∩ {O} = {O} | → m({O}) |
+> | 0.2069 × 0.6 = 0.1241 | Ω ∩ Ω = Ω | → m(Ω) |
+>
+> K₂₃ = 0.1931 + 0.1241 = 0.3172 → normalizer = 0.6828
+>
+> **Verification via direct 3-way combination:**
+> K_total = m1({V})·m2({P})·m3({O}) + m1({V})·m2({P})·m3(Ω) + m1({V})·m2(Ω)·m3({O}) + m1(Ω)·m2({P})·m3({O})
+> = (0.7)(0.6)(0.4) + (0.7)(0.6)(0.6) + (0.7)(0.4)(0.4) + (0.3)(0.6)(0.4)
+> = 0.168 + 0.252 + 0.112 + 0.072 = **0.604** | normalizer = **0.396**
+>
+> Non-conflict products: m({V}) = 0.168; m({P}) = 0.108; m({O}) = 0.048; m(Ω) = 0.072
+>
+> **Final combined masses (÷ 0.396):**
+> m({V}) = 0.168/0.396 = **42/99 ≈ 0.4242**
+> m({P}) = 0.108/0.396 = **27/99 ≈ 0.2727**
+> m({O}) = 0.048/0.396 = **12/99 ≈ 0.1212**
+> m(Ω) = 0.072/0.396 = **18/99 ≈ 0.1818** (residual ignorance)
+>
+> **Belief & Plausibility:**
+> Bel(A) = Σ{ m(B) : B ⊆ A }; Pl(A) = 1 − Σ{ m(B) : B ∩ A = ∅ }
+>
+> | Hypothesis | Belief | Plausibility | Uncertainty Interval |
+> |---|---|---|---|
+> | Vehicle | 42/99 ≈ 0.4242 | 60/99 ≈ 0.6061 | [0.42, 0.61] |
+> | Pedestrian | 27/99 ≈ 0.2727 | 45/99 ≈ 0.4545 | [0.27, 0.45] |
+> | Other | 12/99 ≈ 0.1212 | 30/99 ≈ 0.3030 | [0.12, 0.30] |
+>
+> Pl({V}) = 1 − (m({P}) + m({O})) = 1 − (0.2727+0.1212) = 0.6061
+> Pl({P}) = 1 − (m({V}) + m({O})) = 1 − (0.4242+0.1212) = 0.4546
+> Pl({O}) = 1 − (m({V}) + m({P})) = 1 − (0.4242+0.2727) = 0.3031
+
+---
+
+```json
+{
+  "mode": "evidential",
+  "thoughtType": "evidence_combination",
+  "frameOfDiscernment": ["Vehicle", "Pedestrian", "Other"],
+  "hypotheses": [
+    {
+      "id": "h1",
+      "name": "Vehicle",
+      "description": "Motorized vehicle (car, truck, motorcycle, or similar large metallic object)",
+      "mutuallyExclusive": true
+    },
+    {
+      "id": "h2",
+      "name": "Pedestrian",
+      "description": "Person on foot",
+      "mutuallyExclusive": true
+    },
+    {
+      "id": "h3",
+      "name": "Other",
+      "description": "Cyclist, animal, debris, or otherwise unclassifiable object",
+      "mutuallyExclusive": true
+    }
+  ],
+  "evidence": [
+    {
+      "id": "e1",
+      "description": "Radar signature consistent with a large metallic reflective object; reported as Vehicle",
+      "source": "radar",
+      "reliability": 0.7,
+      "timestamp": 1744588800,
+      "supports": ["h1"],
+      "contradicts": ["h2", "h3"]
+    },
+    {
+      "id": "e2",
+      "description": "Camera detects human-proportioned silhouette with bipedal motion profile; reported as Pedestrian",
+      "source": "camera",
+      "reliability": 0.6,
+      "timestamp": 1744588800,
+      "supports": ["h2"],
+      "contradicts": ["h1", "h3"]
+    },
+    {
+      "id": "e3",
+      "description": "LiDAR point cloud pattern does not match Vehicle or Pedestrian templates; reported as Unknown/Other",
+      "source": "lidar",
+      "reliability": 0.4,
+      "timestamp": 1744588800,
+      "supports": ["h3"],
+      "contradicts": []
+    }
+  ],
+  "beliefFunctions": [
+    {
+      "id": "bf1",
+      "source": "e1",
+      "massAssignments": [
+        {
+          "hypothesisSet": ["h1"],
+          "mass": 0.7,
+          "justification": "Radar stated confidence 0.7 → direct focal mass on {Vehicle}"
+        },
+        {
+          "hypothesisSet": ["h1", "h2", "h3"],
+          "mass": 0.3,
+          "justification": "Residual ignorance: 1 − 0.7 = 0.3 assigned to full frame Ω"
+        }
+      ]
+    },
+    {
+      "id": "bf2",
+      "source": "e2",
+      "massAssignments": [
+        {
+          "hypothesisSet": ["h2"],
+          "mass": 0.6,
+          "justification": "Camera stated confidence 0.6 → direct focal mass on {Pedestrian}"
+        },
+        {
+          "hypothesisSet": ["h1", "h2", "h3"],
+          "mass": 0.4,
+          "justification": "Residual ignorance: 1 − 0.6 = 0.4 assigned to full frame Ω"
+        }
+      ]
+    },
+    {
+      "id": "bf3",
+      "source": "e3",
+      "massAssignments": [
+        {
+          "hypothesisSet": ["h3"],
+          "mass": 0.4,
+          "justification": "LiDAR 'unknown' at 0.4 confidence maps to {Other}; this is an active non-match classification, not pure ignorance"
+        },
+        {
+          "hypothesisSet": ["h1", "h2", "h3"],
+          "mass": 0.6,
+          "justification": "Residual ignorance: 1 − 0.4 = 0.6 assigned to full frame Ω; LiDAR has low confidence in its own classification"
+        }
+      ]
+    },
+    {
+      "id": "bf12",
+      "source": "e1+e2 (intermediate: Dempster combination of bf1 ⊕ bf2)",
+      "massAssignments": [
+        {
+          "hypothesisSet": ["h1"],
+          "mass": 0.4828,
+          "justification": "m1({V})×m2(Ω) = 0.7×0.4 = 0.28; K12 = m1({V})×m2({P}) = 0.42; normalizer = 0.58; 0.28/0.58 ≈ 0.4828"
+        },
+        {
+          "hypothesisSet": ["h2"],
+          "mass": 0.3103,
+          "justification": "m1(Ω)×m2({P}) = 0.3×0.6 = 0.18; 0.18/0.58 ≈ 0.3103"
+        },
+        {
+          "hypothesisSet": ["h1", "h2", "h3"],
+          "mass": 0.2069,
+          "justification": "m1(Ω)×m2(Ω) = 0.3×0.4 = 0.12; 0.12/0.58 ≈ 0.2069"
+        }
+      ],
+      "conflictMass": 0.42
+    }
+  ],
+  "combinedBelief": {
+    "id": "combined",
+    "source": "combined",
+    "massAssignments": [
+      {
+        "hypothesisSet": ["h1"],
+        "mass": 0.4242,
+        "justification": "Direct 3-way Dempster: only non-∅ path = m1({V})×m2(Ω)×m3(Ω) = 0.7×0.4×0.6 = 0.168; K_total = 0.604; 0.168/0.396 ≈ 0.4242"
+      },
+      {
+        "hypothesisSet": ["h2"],
+        "mass": 0.2727,
+        "justification": "m1(Ω)×m2({P})×m3(Ω) = 0.3×0.6×0.6 = 0.108; 0.108/0.396 ≈ 0.2727"
+      },
+      {
+        "hypothesisSet": ["h3"],
+        "mass": 0.1212,
+        "justification": "m1(Ω)×m2(Ω)×m3({O}) = 0.3×0.4×0.4 = 0.048; 0.048/0.396 ≈ 0.1212"
+      },
+      {
+        "hypothesisSet": ["h1", "h2", "h3"],
+        "mass": 0.1818,
+        "justification": "m1(Ω)×m2(Ω)×m3(Ω) = 0.3×0.4×0.6 = 0.072; 0.072/0.396 ≈ 0.1818 (residual ignorance after normalization)"
+      }
+    ],
+    "conflictMass": 0.604
+  },
+  "plausibility": {
+    "id": "pl1",
+    "assignments": [
+      {
+        "hypothesisSet": ["h1"],
+        "plausibility": 0.6061,
+        "belief": 0.4242,
+        "uncertaintyInterval": [0.4242, 0.6061]
+      },
+      {
+        "hypothesisSet": ["h2"],
+        "plausibility": 0.4545,
+        "belief": 0.2727,
+        "uncertaintyInterval": [0.2727, 0.4545]
+      },
+      {
+        "hypothesisSet": ["h3"],
+        "plausibility": 0.3030,
+        "belief": 0.1212,
+        "uncertaintyInterval": [0.1212, 0.3030]
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "id": "d1",
+      "name": "Object classification for AV response planning",
+      "selectedHypothesis": ["h1"],
+      "confidence": 0.52,
+      "reasoning": "Vehicle holds the highest belief (0.4242) AND highest plausibility (0.6061) across all three hypotheses. Radar's 0.7 confidence advantage over camera's 0.6 means it contributes more mass to its focal set; after Dempster normalization radar dominates. The radar-camera conflict (K12 = 0.42) is substantial but survives normalization intact because no third source overrides it—LiDAR's 'Other' adds further conflict (K_total = 0.604) but does not redirect the plurality. Confidence is capped at 0.52 (midpoint of uncertainty interval [0.42, 0.61]) rather than the full plausibility because the extreme conflict mass (0.604 > 0.5) signals sensors are fundamentally disagreeing: the system should apply cautious, vehicle-class avoidance protocols and request additional frames before committing.",
+      "alternatives": [
+        {
+          "hypothesis": ["h2"],
+          "expectedUtility": 0.27,
+          "risk": 0.73
+        },
+        {
+          "hypothesis": ["h3"],
+          "expectedUtility": 0.12,
+          "risk": 0.30
+        }
+      ]
+    }
+  ]
+}
+```
+
+---
+
+**⚠️ High conflict mass warning (K_total = 0.604 > 0.5):** The three sensors fundamentally disagree. Dempster's rule normalizes away the conflict and still yields a winner, but this result must be treated cautiously.
+
+**Most plausible classification: Vehicle**, with Bel = 0.42 and Pl = 0.61 — but the sensors are in strong three-way conflict. Radar's slight confidence edge (0.70 vs. camera's 0.60) is enough to keep Vehicle at the top after normalization: the only path to mass on {Vehicle} requires all other sources to "stay silent" via their ignorance residual (m(Ω)), which radar's larger focal mass wins. Pedestrian sits second [0.27, 0.45] because camera still contributes meaningful mass, while LiDAR's "Other" classification lands last [0.12, 0.30] due to its low stated confidence (0.40). In a real autonomous driving context, K_total = 0.604 should trigger a request for additional sensor frames or human escalation before acting on this classification.

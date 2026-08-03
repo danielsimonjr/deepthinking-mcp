@@ -1,0 +1,166 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ShannonThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "thoughtNumber",
+    "totalThoughts",
+    "content",
+    "nextThoughtNeeded",
+    "stage",
+    "uncertainty",
+    "dependencies",
+    "assumptions"
+  ],
+  "properties": {
+    "mode": {
+      "const": "shannon"
+    },
+    "thoughtNumber": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "totalThoughts": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nextThoughtNeeded": {
+      "type": "boolean"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "problem_definition",
+        "constraints",
+        "model",
+        "proof",
+        "implementation"
+      ]
+    },
+    "uncertainty": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "recheckStep": {
+      "type": "object",
+      "required": [
+        "stepToRecheck",
+        "reason"
+      ],
+      "properties": {
+        "stepToRecheck": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "newInformation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "confidenceFactors": {
+      "type": "object",
+      "required": [
+        "dataQuality",
+        "methodologyRobustness",
+        "assumptionValidity"
+      ],
+      "properties": {
+        "dataQuality": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "methodologyRobustness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "assumptionValidity": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": true
+    },
+    "alternativeApproaches": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "knownLimitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "isRevision": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "revisesThought": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "revisionReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "branchFrom": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "branchId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "importance": {
+      "type": [
+        "number",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

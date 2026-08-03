@@ -1,0 +1,68 @@
+{
+  "mode": "systemsthinking",
+  "systemName": "On-Call Incident Response System",
+  "boundary": "Engineering on-call rotation; excludes product, sales, and external customer behavior",
+  "stocks": [
+    {
+      "id": "alert_fatigue",
+      "name": "Alert Fatigue",
+      "description": "Accumulated desensitization of on-call engineers to alerts; increases as false-positive rate rises over time"
+    },
+    {
+      "id": "toil",
+      "name": "Accumulated Toil",
+      "description": "Backlog of manual, repetitive operational tasks (restarts, re-deploys, threshold tweaks) that consume on-call time without durable fixes"
+    },
+    {
+      "id": "engineer_morale",
+      "name": "On-Call Engineer Morale",
+      "description": "Composite of sleep quality, perceived productivity, and willingness to remain on the team; depletes under high toil and frequent night pages"
+    }
+  ],
+  "feedbackLoops": [
+    {
+      "id": "R1",
+      "name": "Alert Inflation Loop (Reinforcing)",
+      "type": "reinforcing",
+      "components": ["alert_fatigue", "ignored_alerts", "missed_incidents", "reactive_alert_additions", "alert_fatigue"],
+      "description": "High alert fatigue causes on-call engineers to ignore borderline alerts. Missed incidents prompt managers to add more alerts as a safeguard. More alerts increase fatigue further — a vicious reinforcing cycle."
+    },
+    {
+      "id": "B1",
+      "name": "Toil Triage Loop (Balancing)",
+      "type": "balancing",
+      "components": ["toil", "on_call_capacity", "incident_response_time", "sla_breaches", "toil"],
+      "description": "Rising toil consumes on-call capacity, increasing incident response time. SLA breaches create pressure to reduce toil, temporarily drawing engineering resources to remediation. The loop seeks equilibrium but responds slowly due to prioritization delays."
+    },
+    {
+      "id": "R2",
+      "name": "Morale-Attrition Loop (Reinforcing)",
+      "type": "reinforcing",
+      "components": ["engineer_morale", "attrition", "team_size", "per_engineer_toil", "engineer_morale"],
+      "description": "Low morale increases attrition. Fewer engineers mean each remaining engineer carries more toil and more pages, further depleting morale — a vicious cycle that accelerates once attrition begins."
+    }
+  ],
+  "archetype": "Fixes that Fail",
+  "leveragePoints": [
+    {
+      "location": "alert_fatigue stock",
+      "type": "structure",
+      "intervention": "Establish an alert review board that requires every alert to have a documented runbook and a false-positive rate below 5%; automatically suppress alerts failing this criterion",
+      "rationale": "Breaking the R1 reinforcing loop at its source (alert additions without quality gates) prevents the vicious cycle from accelerating. Reducing alert volume reduces fatigue faster than any symptomatic fix."
+    },
+    {
+      "location": "toil stock",
+      "type": "rules",
+      "intervention": "Mandate that every recurring manual remediation step generates a ticket for permanent automation; block new feature work if toil exceeds 30% of on-call time for two consecutive sprints",
+      "rationale": "Policy-level rule changes are more powerful than parameter changes (e.g., adjusting thresholds). Forcing the organization to address the root cause of toil breaks the B1 balancing loop out of its low-equilibrium trap."
+    }
+  ],
+  "delays": [
+    "Automation of a toil item typically takes 1–2 sprints after the ticket is created; the toil continues to accumulate during this lag, causing teams to underestimate its impact",
+    "Morale depletion is a slow stock — it takes 3–6 months of poor conditions to manifest as attrition, making the R2 loop invisible until it is already accelerating"
+  ],
+  "unintendedConsequences": [
+    "Adding more on-call engineers without fixing alert quality increases the total alert acknowledgment cost and spreads fatigue more broadly — short-term relief, long-term acceleration of R1",
+    "Suppressing alerts without fixing their root cause creates blind spots; an aggressive alert-reduction campaign without quality gates may cause the team to miss genuine incidents"
+  ]
+}

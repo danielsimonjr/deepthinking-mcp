@@ -1,0 +1,80 @@
+[
+  {
+    "mode": "sequential",
+    "thoughtNumber": 1,
+    "totalThoughts": 8,
+    "content": "Service inventory first. Catalog every process that holds a connection string to the current Postgres instance: REST/GraphQL APIs, background workers, cron jobs, ETL pipelines, BI dashboards, and health-check probes. This inventory is the prerequisite for every subsequent step \u2014 you cannot safely cut over until every caller is known and ready to be pointed at the new host.",
+    "nextThoughtNeeded": true,
+    "dependencies": []
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 2,
+    "totalThoughts": 8,
+    "content": "Define RTO/RPO and choose a migration strategy. Measure current DB size (SELECT pg_size_pretty(pg_database_size(current_database()))), peak write throughput (rows/s), and acceptable downtime window. If downtime > 0 is tolerable: pg_dump/restore. If near-zero downtime is required: set up logical replication (pglogical or native pg_logical) from source to target. Record the choice and its rationale, since it dictates every downstream step.",
+    "nextThoughtNeeded": true,
+    "dependencies": [
+      "1"
+    ]
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 3,
+    "totalThoughts": 8,
+    "content": "Provision the target-region Postgres instance with identical configuration. Match: Postgres major version, installed extensions (SELECT * FROM pg_extension), postgresql.conf parameters (especially shared_buffers, max_connections, wal_level), storage type and IOPS, and security groups / VPC rules. If using a managed service (RDS, Cloud SQL, AlloyDB), configure the equivalent parameter groups. Document every configuration delta found \u2014 these are future failure points.",
+    "nextThoughtNeeded": true,
+    "dependencies": [
+      "2"
+    ]
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 4,
+    "totalThoughts": 8,
+    "content": "Seed the target and establish continuous replication. For dump/restore: take a pg_dump with --no-owner --no-acl, transfer with an encrypted channel, and restore. For logical replication: create a publication on the source (CREATE PUBLICATION all_tables FOR ALL TABLES) and a subscription on the target (CREATE SUBSCRIPTION ...). Monitor lag continuously with SELECT now() - pg_last_xact_replay_timestamp() on the replica, or via pg_stat_subscription. Do not proceed until lag is stable and < 1 second.",
+    "nextThoughtNeeded": true,
+    "dependencies": [
+      "3"
+    ]
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 5,
+    "totalThoughts": 8,
+    "content": "Validate the target in isolation before touching production traffic. Run: (a) row-count checksums on all critical tables between source and target, (b) a full integration test suite pointed at the new host, (c) EXPLAIN ANALYZE on the top-20 slowest queries to confirm index usage and query plans are equivalent, and (d) a synthetic load test to verify the target hardware handles peak throughput. Do not proceed if any check fails \u2014 diagnose before moving forward.",
+    "nextThoughtNeeded": true,
+    "dependencies": [
+      "4"
+    ]
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 6,
+    "totalThoughts": 8,
+    "content": "Execute the cutover. Steps in order: (1) Announce the maintenance window and set the application to read-only or maintenance mode. (2) Confirm replication lag has dropped to 0 (or take a final pg_dump snapshot for dump/restore). (3) Stop writes on the source. (4) For logical replication, wait for all pending WAL to drain; then drop the subscription. (5) Update all connection strings \u2014 environment variables, secrets manager, config files \u2014 to point to the new host. (6) Restart services in dependency order (DB-dependent workers before APIs). (7) Re-enable writes and lift maintenance mode.",
+    "nextThoughtNeeded": true,
+    "dependencies": [
+      "5"
+    ]
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 7,
+    "totalThoughts": 8,
+    "content": "Post-cutover validation. Immediately after cutover: (a) run the same row-count checksums from Step 5 on the live target, (b) tail application error logs for connection errors or query failures, (c) watch key latency metrics (p50/p95/p99) \u2014 a jump may indicate a missing index or stats not yet collected (run ANALYZE manually), (d) confirm all background workers and cron jobs reconnected successfully. Keep the source instance alive and running (read-only, no new writes) for at least 24\u201372 hours as a rollback target. Document the rollback procedure now, not later.",
+    "nextThoughtNeeded": true,
+    "dependencies": [
+      "6"
+    ]
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 8,
+    "totalThoughts": 8,
+    "content": "Decommission the source instance. After the validation hold period (24\u201372 h minimum, or per your SLA), take a final verified pg_dump backup of the source and store it in long-term storage (S3 Glacier, GCS Archive, etc.). Revoke all credentials that pointed to the old host. Terminate the old instance (or snapshot it and stop it if your cloud provider charges for stopped instances). Update internal runbooks, monitoring dashboards, and alerting rules to reference the new host. Migration is complete.",
+    "nextThoughtNeeded": false,
+    "dependencies": [
+      "7"
+    ]
+  }
+]

@@ -1,0 +1,117 @@
+{
+  "mode": "argumentation",
+  "claim": {
+    "id": "c1",
+    "statement": "Engineering teams should gate all new production features behind feature flags rather than deploying them to all users simultaneously",
+    "type": "policy",
+    "scope": "general",
+    "strength": "strong",
+    "contested": true
+  },
+  "grounds": [
+    {
+      "id": "g1",
+      "type": "statistical",
+      "content": "Teams using feature flags reduce mean time to recovery (MTTR) by 60% on average compared to teams doing big-bang releases (LaunchDarkly State of Feature Management 2023)",
+      "source": "LaunchDarkly State of Feature Management Report, 2023",
+      "reliability": 0.78,
+      "relevance": 0.95,
+      "sufficiency": "partial"
+    },
+    {
+      "id": "g2",
+      "type": "empirical",
+      "content": "Amazon, Netflix, and Google have all publicly documented progressive rollout as a core deployment practice that reduces blast radius of defects",
+      "source": "Various engineering blog posts, 2018-2023",
+      "reliability": 0.80,
+      "relevance": 0.88,
+      "sufficiency": "partial"
+    },
+    {
+      "id": "g3",
+      "type": "logical",
+      "content": "A feature that is deployed but dark can be activated for 1% of users, then 10%, then 100% — allowing observation at each stage without a separate staging environment",
+      "reliability": 0.95,
+      "relevance": 0.90,
+      "sufficiency": "partial"
+    }
+  ],
+  "warrants": [
+    {
+      "id": "w1",
+      "statement": "Practices that reduce MTTR and blast radius of defects should be adopted by teams that value production reliability",
+      "type": "principle",
+      "implicit": false,
+      "strength": 0.88,
+      "groundsIds": ["g1", "g2"],
+      "claimId": "c1"
+    },
+    {
+      "id": "w2",
+      "statement": "Incremental rollout is a form of empirical validation — each stage is evidence before full commitment",
+      "type": "causal",
+      "implicit": true,
+      "strength": 0.80,
+      "groundsIds": ["g3"],
+      "claimId": "c1"
+    }
+  ],
+  "backings": [
+    {
+      "id": "b1",
+      "content": "Site Reliability Engineering (SRE) literature (Beyer et al., Google SRE Book) establishes MTTR and blast-radius reduction as canonical reliability objectives",
+      "type": "authoritative",
+      "warrantId": "w1",
+      "credibility": 0.90
+    },
+    {
+      "id": "b2",
+      "content": "The empirical cycle (hypothesis → test → observe → expand) is foundational to controlled experiment design; feature flags operationalize this cycle in production",
+      "type": "theoretical",
+      "warrantId": "w2",
+      "credibility": 0.85
+    }
+  ],
+  "qualifiers": [
+    {
+      "id": "q1",
+      "term": "generally",
+      "certainty": 0.78,
+      "conditions": [
+        "Team has a feature flag management system (not just ad hoc if/else checks)",
+        "Flags are cleaned up after full rollout — flag debt is managed",
+        "Feature is observable (metrics exist to evaluate each rollout stage)"
+      ]
+    }
+  ],
+  "rebuttals": [
+    {
+      "id": "r1",
+      "objection": "Feature flags add code complexity — every flag is a branch, and stale flags become technical debt",
+      "type": "practical",
+      "strength": "strong",
+      "targetElement": "claim",
+      "targetId": "c1",
+      "response": {
+        "strategy": "qualify",
+        "content": "Valid: flag debt is real and teams must enforce flag lifecycle discipline (expiry dates, automated staleness warnings). The qualifier already requires a flag management system. The complexity cost is real but lower than the cost of a full-traffic incident.",
+        "effectiveness": 0.78
+      }
+    },
+    {
+      "id": "r2",
+      "objection": "Small teams with low traffic may not benefit — they can monitor a full release in hours anyway",
+      "type": "practical",
+      "strength": "moderate",
+      "targetElement": "warrant",
+      "targetId": "w1",
+      "response": {
+        "strategy": "concede",
+        "content": "Correct for very low-traffic applications where a full release is observable within one business hour. The policy should be scoped to teams with meaningful traffic volumes or high incident cost.",
+        "effectiveness": 0.85
+      }
+    }
+  ],
+  "argumentStrength": 0.78,
+  "keyInsight": "The non-obvious point: feature flags shift the risk model from binary (it works or it doesn't, at full blast) to graduated (observe failure signals at 1% before they become incidents at 100%). The warrant — that reliability teams should minimize blast radius — is the load-bearing premise; teams that dispute this are disputing a foundational SRE principle, not just the feature-flag tactic."
+}

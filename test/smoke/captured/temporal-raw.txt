@@ -1,0 +1,133 @@
+Using **temporal** reasoning (explicitly requested) to map Allen interval relations and flag the causation paradox embedded in this incident timeline.
+
+```json
+{
+  "mode": "temporal",
+  "thoughtType": "causality_timeline",
+  "timeline": {
+    "id": "api_incident_2026-04-13",
+    "name": "API 502 Incident — Causal Ordering Analysis",
+    "timeUnit": "minutes",
+    "startTime": 0,
+    "endTime": 7,
+    "events": ["errors_502", "cpu_alert_worker3", "deploy_complete", "deploy_in_flight"]
+  },
+  "events": [
+    {
+      "id": "errors_502",
+      "name": "502 errors begin on API",
+      "description": "API begins returning 502 Bad Gateway at 10:00 (T+0). This is the first observable symptom.",
+      "timestamp": 0,
+      "duration": null,
+      "type": "instant",
+      "properties": { "wall_clock": "10:00", "statusCode": 502, "component": "API" }
+    },
+    {
+      "id": "cpu_alert_worker3",
+      "name": "CPU alert fires on worker-3",
+      "description": "CPU threshold breach alert triggers on worker-3 at 10:04 (T+4), four minutes after the first 502.",
+      "timestamp": 4,
+      "duration": null,
+      "type": "instant",
+      "properties": { "wall_clock": "10:04", "component": "worker-3", "alertType": "CPU" }
+    },
+    {
+      "id": "deploy_complete",
+      "name": "Upstream deploy completes",
+      "description": "Upstream service deployment finishes at 10:07 (T+7), seven minutes after errors started and three minutes after CPU alert.",
+      "timestamp": 7,
+      "duration": null,
+      "type": "instant",
+      "properties": { "wall_clock": "10:07", "component": "upstream-service" }
+    },
+    {
+      "id": "deploy_in_flight",
+      "name": "Upstream deploy in progress (inferred)",
+      "description": "The deploy was necessarily in flight before T+0, since it completed at T+7. Start time unknown but constrained to before 10:00. This is the causally relevant state — not the completion event.",
+      "timestamp": -999,
+      "duration": null,
+      "type": "interval",
+      "properties": {
+        "note": "inferred from deploy_complete timestamp",
+        "end": "T+7",
+        "start": "unknown, but strictly before T+0"
+      }
+    }
+  ],
+  "relations": [
+    {
+      "id": "r1",
+      "from": "deploy_in_flight",
+      "to": "errors_502",
+      "relationType": "causes",
+      "strength": 0.80,
+      "delay": 0,
+      "formula": "\\text{deploy\\_in\\_flight}(t < 0) \\to \\text{errors}_{502}(t=0)",
+      "note": "Mechanism: rolling deploy creates a mixed-version upstream; new code version introduces incompatibility or the restart cycle makes some backends temporarily unavailable, triggering 502s. The 0-minute delay at onset is consistent with a hard-break compatibility issue vs. a gradual degradation."
+    },
+    {
+      "id": "r2",
+      "from": "errors_502",
+      "to": "cpu_alert_worker3",
+      "relationType": "enables",
+      "strength": 0.72,
+      "delay": 4,
+      "note": "Mechanism: 502 errors generate aggressive client retries; retry storm accumulates over ~4 minutes until CPU threshold is breached on worker-3. Alternatively, error-handling code paths (logging, circuit breakers) are more compute-intensive than the happy path."
+    },
+    {
+      "id": "r3_refuted",
+      "from": "deploy_complete",
+      "to": "errors_502",
+      "relationType": "follows",
+      "strength": 0.0,
+      "delay": -7,
+      "note": "TEMPORAL PARADOX — REFUTED. The deploy completion at T+7 cannot cause errors at T+0. The effect precedes the purported cause by 7 minutes. The naive hypothesis 'deploy caused errors' is only valid if reframed as the in-progress deploy state (r1), not the completion event."
+    }
+  ],
+  "constraints": [
+    {
+      "id": "tc1",
+      "type": "before",
+      "subject": "errors_502",
+      "object": "cpu_alert_worker3",
+      "confidence": 1.0,
+      "formula": "T_{\\text{errors}} + 4 = T_{\\text{cpu\\_alert}}"
+    },
+    {
+      "id": "tc2",
+      "type": "before",
+      "subject": "errors_502",
+      "object": "deploy_complete",
+      "confidence": 1.0,
+      "formula": "T_{\\text{errors}} + 7 = T_{\\text{deploy\\_complete}}"
+    },
+    {
+      "id": "tc3",
+      "type": "before",
+      "subject": "cpu_alert_worker3",
+      "object": "deploy_complete",
+      "confidence": 1.0,
+      "formula": "T_{\\text{cpu\\_alert}} + 3 = T_{\\text{deploy\\_complete}}"
+    },
+    {
+      "id": "tc4_paradox_flag",
+      "type": "after",
+      "subject": "deploy_complete",
+      "object": "errors_502",
+      "confidence": 1.0,
+      "formula": "T_{\\text{deploy\\_complete}} > T_{\\text{errors}} \\Rightarrow \\text{deploy\\_complete} \\not\\Rightarrow \\text{errors}_{502}",
+      "note": "This constraint directly falsifies any causal model where the deploy *completion* is the trigger. It does NOT falsify the deploy *process* as a cause."
+    }
+  ]
+}
+```
+
+---
+
+**The ordering tells three clear stories:**
+
+1. **CPU saturation is not the root cause — it's a downstream effect.** The CPU alert fires 4 minutes *after* errors start. Saturation cannot cause events that precede it; it is most likely a consequence of client retry storms cascading from the 502s, not an independent trigger.
+
+2. **The upstream deploy "completion" at 10:07 is a temporal paradox as a cause.** Errors begin 7 minutes before the deploy finishes — the effect precedes the purported cause. The correct causal frame shifts from *completion* to *in-progress state*: the deploy was rolling through the fleet starting before 10:00, and the mixed-version or mid-restart state of the upstream is what introduced the 502s.
+
+3. **The probable causal chain is: deploy in flight → 502 errors (T+0) → retry storm builds → CPU breach on worker-3 (T+4) → deploy finishes (T+7), possibly resolving the mixed-version state.** The critical investigative question is: *did errors stop around 10:07 when the deploy completed?* If yes, that would strongly corroborate the mid-deploy incompatibility hypothesis. If errors persisted past 10:07, the deploy introduced a persistent breaking change.

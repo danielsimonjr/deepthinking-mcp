@@ -1,0 +1,144 @@
+{
+  "mode": "algorithmic",
+  "thoughtType": "algorithm_selection",
+  "designPattern": "greedy",
+  "clrsCategory": "sorting_order_statistics",
+  "algorithm": {
+    "id": "top_k_min_heap_stream",
+    "name": "Top-K Streaming via Fixed-Size Min-Heap",
+    "description": "Maintain a binary min-heap of exactly K=100 elements keyed by item timestamp. For each of N incoming items: (1) push unconditionally while |H| < K; (2) if item.timestamp > heap.peek_min(), evict the minimum and push the new item; (3) otherwise discard the item in O(1). After all N items, the heap holds exactly the K items with the largest timestamps globally.",
+    "category": "Order Statistics",
+    "designPattern": "greedy",
+    "input": {
+      "description": "A one-pass stream of N=1,000,000 items, each carrying a comparable timestamp. Only O(K) working memory is permitted.",
+      "constraints": [
+        "N = 1,000,000",
+        "K = 100",
+        "K << N (K/N \u2248 0.0001)",
+        "Items arrive in arbitrary, potentially adversarial timestamp order",
+        "Single-pass streaming: no random access or second pass available",
+        "Timestamps are totally ordered; O(1) comparison"
+      ],
+      "dataStructure": "Array-backed binary min-heap of capacity K"
+    },
+    "output": {
+      "description": "The K items with the globally largest timestamps among all N streamed items",
+      "properties": [
+        "Exactly min(K, N) items returned",
+        "Every returned item's timestamp \u2265 every discarded item's timestamp",
+        "Heap is unordered internally; if rank order is needed, sort the K-element result in O(K log K)"
+      ]
+    },
+    "pseudocode": "TOP-K-STREAM(stream, K):\n  H \u2190 new MinHeap(capacity=K)      // keyed by item.timestamp\n  for each item x in stream:\n    if |H| < K:\n      MIN-HEAP-PUSH(H, x)           // O(log K) \u2014 fill phase\n    else if x.timestamp > HEAP-MINIMUM(H):  // O(1) peek\n      HEAP-EXTRACT-MIN(H)           // O(log K) \u2014 evict worst\n      MIN-HEAP-PUSH(H, x)           // O(log K) \u2014 admit new\n    // else: x.timestamp \u2264 heap min \u2192 x cannot be in top-K; discard\n  return H                          // K items with largest timestamps\n\nCORRECTNESS (Loop Invariant):\n  After processing items 1..i (i \u2265 K), H contains exactly the K items\n  with the largest timestamps among items 1..i.\n  Init:   After K items, H holds all K \u2014 trivially correct.\n  Maint:  If x.timestamp > H.min, x beats the weakest current member;\n          evict it, admit x \u2014 invariant preserved.\n          If x.timestamp \u2264 H.min, x cannot displace any current member;\n          discarding preserves invariant.\n  Term:   After N items, H = top-K globally. \u25a1",
+    "timeComplexity": {
+      "bestCase": "\u03a9(N)",
+      "averageCase": "\u0398(N log K)",
+      "worstCase": "O(N log K)",
+      "recurrence": "Not recursive; iterative scan of N items, each costing at most 2 \u00d7 O(log K) heap operations."
+    },
+    "spaceComplexity": {
+      "auxiliary": "O(K)",
+      "total": "O(N + K)",
+      "inPlace": false
+    },
+    "clrsReference": {
+      "chapter": 6,
+      "section": 6.5
+    }
+  },
+  "timeComplexity": {
+    "bestCase": "\u03a9(N)",
+    "averageCase": "\u0398(N log K)",
+    "worstCase": "O(N log K)",
+    "amortized": "Amortized O(log K) per item \u2014 each item triggers at most one push + one pop, each O(log K); fills (first K items) trigger only pushes.",
+    "concreteNumbers": {
+      "N": 1000000,
+      "K": 100,
+      "log2_K": 6.64,
+      "log2_N": 19.93,
+      "worstCaseOps": "\u2248 2 \u00d7 6.64 \u00d7 1,000,000 = 13.28M heap comparisons",
+      "fullSortOps": "\u2248 19.93 \u00d7 1,000,000 = 19.93M comparisons",
+      "speedupFactor": "\u2248 1.5\u00d7 fewer comparisons; \u2248 3\u00d7 better if stream admits many early discards"
+    }
+  },
+  "spaceComplexity": {
+    "auxiliary": "O(K) \u2014 heap stores at most K items at any time; K=100 elements \u00d7 ~64 bytes/item = ~6.4 KB, fitting in L1 cache",
+    "total": "O(N + K) \u2014 input stream O(N) + heap O(K); for true streaming (items not buffered), effective footprint is O(K)",
+    "inPlace": false
+  },
+  "dataStructure": {
+    "name": "Binary Min-Heap (array-backed, fixed capacity K)",
+    "description": "Standard binary heap stored in a length-K array. The minimum element (weakest timestamp) lives at index 0 and is the eviction candidate. All heap invariant operations are O(log K) on this fixed-size structure.",
+    "operations": [
+      {
+        "name": "peek-min",
+        "complexity": "O(1)",
+        "description": "Read heap[0] \u2014 the current smallest timestamp in the top-K set. Used to decide whether each incoming item qualifies."
+      },
+      {
+        "name": "push (sift-up)",
+        "complexity": "O(log K)",
+        "description": "Insert new item at end of array, swap upward while parent.timestamp > child.timestamp."
+      },
+      {
+        "name": "extract-min (sift-down)",
+        "complexity": "O(log K)",
+        "description": "Swap heap[0] with last element, shrink size, sift-down from root. Evicts the weakest current top-K member."
+      }
+    ],
+    "cacheNote": "For K=100, the entire heap (~6.4 KB) fits in an L1 cache (typically 32\u201364 KB). Every sift-up/sift-down traverses at most log\u2082(100) \u2248 7 levels \u2014 all accesses hit cache, giving excellent practical performance despite the theoretical log factor."
+  },
+  "comparison": {
+    "alternatives": [
+      {
+        "name": "Full Sort + Slice (Merge Sort / Timsort)",
+        "timeComplexity": "O(N log N)",
+        "spaceComplexity": "O(N)",
+        "reason": "Sorts all 1M items unconditionally, including the 999,900 items that will never appear in the output. Requires O(N) memory \u2014 1M items cannot be streamed; entire dataset must be buffered. For K=100, N=1M: log N \u2248 20 vs. log K \u2248 7, roughly 3\u00d7 more work. Streaming-incompatible."
+      },
+      {
+        "name": "Randomized Quickselect (CLRS \u00a79.2)",
+        "timeComplexity": "O(N) expected, O(N\u00b2) worst-case",
+        "spaceComplexity": "O(log N) stack",
+        "reason": "Finds the K-th order statistic in O(N) expected time \u2014 better asymptotically \u2014 but (a) requires all N items in memory simultaneously (streaming-incompatible); (b) returns a single pivot value, not the K items; finding all K items requires an additional O(K log K) sort pass; (c) O(N\u00b2) worst case without median-of-medians. Not usable here."
+      },
+      {
+        "name": "Deterministic Linear Select / Introselect (CLRS \u00a79.3)",
+        "timeComplexity": "O(N) worst-case",
+        "spaceComplexity": "O(N)",
+        "reason": "Median-of-medians guarantees O(N) worst-case, eliminating Quickselect's adversarial risk. Still requires buffering all N items \u2014 streaming-incompatible. If the dataset fits in memory and K \u2248 N/2, this would be preferred over the min-heap approach."
+      },
+      {
+        "name": "Max-Heap Heapify + K Extractions (CLRS \u00a76.3)",
+        "timeComplexity": "O(N + K log N)",
+        "spaceComplexity": "O(N)",
+        "reason": "Floyd's linear-time bottom-up heapify builds a max-heap over all N items in O(N); K extract-max calls cost O(K log N) \u2248 O(100 \u00d7 20) = O(2000) \u2014 effectively O(N) total. Asymptotically competitive but requires O(N) memory for the full heap. Optimal when data already resides in memory and K is large (K > N / log N \u2248 50,000 for N=1M)."
+      },
+      {
+        "name": "Order-Statistics Tree (Red-Black BST of size K)",
+        "timeComplexity": "O(N log K)",
+        "spaceComplexity": "O(K)",
+        "reason": "Same O(N log K) asymptotic time and O(K) space as the min-heap, with the bonus of O(log K) rank queries. However, pointer-based BST nodes incur ~3\u20135\u00d7 more memory per element and poor cache locality versus the contiguous array heap. No practical advantage for this problem; heap wins on constants."
+      },
+      {
+        "name": "Reservoir Sampling (CLRS-adjacent: randomized streaming)",
+        "timeComplexity": "\u0398(N)",
+        "spaceComplexity": "O(K)",
+        "reason": "Produces a uniformly random sample of K items \u2014 not the top-K by timestamp. Incorrect for this problem. Mentioned to explicitly rule out a commonly confused algorithm."
+      }
+    ],
+    "winner": "top_k_min_heap_stream",
+    "justification": "The min-heap is the uniquely correct choice given the three simultaneous constraints: (1) STREAMING \u2014 O(K) working memory, no full dataset buffering; (2) CORRECTNESS \u2014 greedy invariant provably produces the global top-K; (3) EFFICIENCY \u2014 O(N log K) \u2248 O(6.64N) vs. O(N log N) \u2248 O(19.93N), a concrete 3\u00d7 comparison reduction for K=100, N=1M. The K=100-element heap (~6.4 KB) fits entirely in L1 cache, making the practical constant factor very small. No other algorithm satisfies all three constraints simultaneously."
+  },
+  "dependencies": [],
+  "assumptions": [
+    "K=100 is known a priori and fixed for the lifetime of the stream",
+    "Item timestamps are totally ordered with a O(1) < comparator (integers, floats, epoch milliseconds)",
+    "Single-pass streaming model: items are consumed one at a time and cannot be revisited",
+    "Ties broken arbitrarily \u2014 no stable-selection requirement among equal timestamps",
+    "The output need not be sorted; if sorted rank order is required, add O(K log K) = O(664) final sort \u2014 negligible",
+    "N=1,000,000 is the total stream length; if N is unknown, the algorithm is self-terminating and correct at any stopping point"
+  ],
+  "uncertainty": 0.04,
+  "keyInsight": "The heap minimum is a live threshold \u2014 'the timestamp of the weakest item currently in the top-K' \u2014 so every new item is either accepted by beating this threshold (O(log K)) or rejected by falling below it (O(1)), meaning the full N-item dataset is never materialized and no comparison is wasted on elements that cannot affect the answer."
+}

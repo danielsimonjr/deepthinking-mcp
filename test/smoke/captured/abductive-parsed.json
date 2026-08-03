@@ -1,0 +1,227 @@
+{
+  "mode": "abductive",
+  "observations": [
+    {
+      "id": "o1",
+      "description": "App crash rate spiked from 0.2% to 3.1% beginning Thursday \u2014 a 15.5\u00d7 increase",
+      "confidence": 0.98
+    },
+    {
+      "id": "o2",
+      "description": "The elevated crash rate has remained at ~3.1% since Thursday with no recovery \u2014 the cause is persistent, not transient",
+      "confidence": 0.97
+    },
+    {
+      "id": "o3",
+      "description": "The crash spike is exclusive to iOS; Android crash rate is completely unchanged",
+      "confidence": 0.99
+    },
+    {
+      "id": "o4",
+      "description": "App version 4.7.0 was released on Wednesday \u2014 one day before the spike appeared",
+      "confidence": 1.0
+    },
+    {
+      "id": "o5",
+      "description": "CDN provider migration occurred Thursday morning",
+      "confidence": 1.0
+    },
+    {
+      "id": "o6",
+      "description": "Firebase analytics SDK pushed an automatic config update Thursday afternoon",
+      "confidence": 1.0
+    }
+  ],
+  "hypotheses": [
+    {
+      "id": "h1",
+      "explanation": "App version 4.7.0 contains an iOS-specific code defect \u2014 e.g., misuse of a UIKit/SwiftUI API, an Objective-C/Swift bridging issue, or a threading/memory-management fault that has no equivalent in the Android codebase",
+      "assumptions": [
+        "Version 4.7.0 introduced at least one code path that exists only in the iOS build",
+        "The defect triggers reliably enough across user sessions to raise crash rate from 0.2% to 3.1%",
+        "Adoption of 4.7.0 ramped up through Wednesday evening and Thursday, explaining the ~24-hour lag from release to spike peak"
+      ],
+      "predictions": [
+        "Crash reporter (Crashlytics/Sentry) shows a single dominant iOS-only stack trace absent from all prior version crash reports",
+        "Crash rate on iOS correlates tightly with the 4.7.0 adoption percentage over time",
+        "Force-rollback to 4.6.x or a hotfix 4.7.1 drops iOS crash rate back to ~0.2% within hours",
+        "Android 4.7.0 crash reports show no corresponding stack trace at the same code area"
+      ],
+      "score": 0.74
+    },
+    {
+      "id": "h2",
+      "explanation": "Firebase's automatic config update Thursday afternoon pushed a value that triggered a crash-inducing code path in the iOS Firebase SDK or in the app's iOS-side Firebase integration \u2014 the same config is consumed differently by the Android SDK",
+      "assumptions": [
+        "The pushed config value or schema change is handled differently by the iOS Firebase SDK versus Android",
+        "The iOS app has a nil-handling, type-cast, or API-contract bug that is only exposed by the new config payload",
+        "Firebase Remote Config or SDK initialization enters a bad state on iOS post-update, triggering repeated crashes"
+      ],
+      "predictions": [
+        "Crash timestamp distribution clusters tightly to Thursday afternoon (after ~14:00 local time) rather than to Thursday morning",
+        "Reverting or overriding the Firebase config to its Wednesday values measurably reduces the iOS crash rate",
+        "Crash stack traces contain Firebase SDK frames at or near the top of the iOS crash report",
+        "Firebase SDK release notes or change log for the auto-updated version shows an iOS-only behavioral change"
+      ],
+      "score": 0.62
+    },
+    {
+      "id": "h3",
+      "explanation": "The CDN provider migration Thursday morning introduced a TLS certificate or cipher-suite configuration incompatible with iOS App Transport Security (ATS), causing network-dependent app initialization to fail and crash on iOS while Android's less restrictive security model tolerates the same endpoint",
+      "assumptions": [
+        "The new CDN's TLS setup \u2014 certificate chain completeness, forward-secrecy support, or minimum TLS version \u2014 fails iOS ATS validation",
+        "The app crashes on ATS-blocked requests rather than gracefully degrading or showing an error state",
+        "Android's network security config permits the same TLS profile that ATS rejects on iOS"
+      ],
+      "predictions": [
+        "Crash logs show NSURLErrorDomain or ATS policy error frames at or before the first authenticated network call",
+        "Inspecting the new CDN endpoints with an iOS network proxy (Charles, mitmproxy) reproduces a certificate or TLS handshake error",
+        "Temporarily disabling ATS in the iOS app's Info.plist eliminates the crash without any other change",
+        "CDN migration documentation reveals a missing HSTS preload, incomplete intermediate certificate, or removed TLS 1.2 cipher suite"
+      ],
+      "score": 0.51
+    },
+    {
+      "id": "h4",
+      "explanation": "Interaction effect: 4.7.0 modified how the iOS app parses CDN responses or Firebase config payloads, and the Thursday infrastructure changes exposed a latent iOS-only type-cast or nil-dereference defect that neither the code change alone nor the infrastructure change alone would have surfaced",
+      "assumptions": [
+        "4.7.0 changed the iOS network layer or analytics integration in a way that is only incorrect under the new CDN endpoint or Firebase config schema",
+        "Neither the 4.7.0 code change alone nor either Thursday infrastructure change alone triggers the crash \u2014 the conjunction of at least two changes is necessary"
+      ],
+      "predictions": [
+        "iOS 4.6.x on the new CDN and new Firebase config produces no crash spike",
+        "iOS 4.7.0 on the old CDN and old Firebase config (staging replay) produces no crash spike",
+        "Stack traces point to a module that was modified in 4.7.0 AND touches CDN response parsing or Firebase config consumption"
+      ],
+      "score": 0.38
+    }
+  ],
+  "evaluationCriteria": {
+    "parsimony": 0.71,
+    "explanatoryPower": 0.82,
+    "plausibility": 0.76,
+    "testability": true
+  },
+  "evidence": [
+    {
+      "hypothesisId": "h1",
+      "type": "supporting",
+      "description": "A sustained 15.5\u00d7 crash increase beginning the day after a release is the canonical signature of a code defect shipped in that release \u2014 this pattern is the dominant root cause across mobile crash post-mortems industry-wide",
+      "strength": 0.8
+    },
+    {
+      "hypothesisId": "h1",
+      "type": "supporting",
+      "description": "iOS-only impact is directly explained by the existence of iOS-exclusive code paths in the 4.7.0 diff \u2014 differences in Swift/Objective-C versus Kotlin/Java APIs mean platform-specific regressions are routine and expected",
+      "strength": 0.83
+    },
+    {
+      "hypothesisId": "h1",
+      "type": "supporting",
+      "description": "The crash rate is sustained and flat (not decaying), which is consistent with a binary code defect persisting in the deployed artifact rather than a transient config or infrastructure state that ops teams would ordinarily revert",
+      "strength": 0.76
+    },
+    {
+      "hypothesisId": "h2",
+      "type": "supporting",
+      "description": "Firebase automatic config updates are known to have different rollout behavior between iOS and Android SDKs, making a platform-split from a config push a plausible mechanism",
+      "strength": 0.6
+    },
+    {
+      "hypothesisId": "h2",
+      "type": "contradicting",
+      "description": "Firebase automatic config pushes are remotely reversible \u2014 if h2 were the root cause, the ops team would typically detect and revert the config within hours; the crash persisting 'since Thursday' without resolution weakens this hypothesis unless the config was not yet identified as the cause",
+      "strength": 0.58
+    },
+    {
+      "hypothesisId": "h3",
+      "type": "supporting",
+      "description": "iOS ATS is a well-documented source of iOS-specific network failures invisible to Android, and CDN migrations frequently change TLS profiles in ways that violate ATS requirements",
+      "strength": 0.61
+    },
+    {
+      "hypothesisId": "h3",
+      "type": "contradicting",
+      "description": "ATS-blocked requests normally manifest as NSURLErrorDomain connection errors rather than hard app crashes, and would affect all iOS users uniformly from the first network call \u2014 not explain a ramp from 0.2% to 3.1% that correlates with app update adoption",
+      "strength": 0.63
+    },
+    {
+      "hypothesisId": "h4",
+      "type": "contradicting",
+      "description": "Interaction-effect hypotheses require multiple simultaneous necessary conditions and are strongly disfavored by parsimony; they are only worth pursuing once all single-cause explanations have been actively falsified by evidence",
+      "strength": 0.67
+    }
+  ],
+  "bestExplanation": {
+    "id": "h1",
+    "explanation": "App version 4.7.0 contains an iOS-specific code defect \u2014 e.g., misuse of a UIKit/SwiftUI API, an Objective-C/Swift bridging issue, or a threading/memory-management fault that has no equivalent in the Android codebase",
+    "assumptions": [
+      "Version 4.7.0 introduced at least one code path that exists only in the iOS build",
+      "The defect triggers reliably enough across user sessions to raise crash rate from 0.2% to 3.1%",
+      "Adoption of 4.7.0 ramped up through Wednesday evening and Thursday, explaining the ~24-hour lag from release to spike peak"
+    ],
+    "predictions": [
+      "Crash reporter (Crashlytics/Sentry) shows a single dominant iOS-only stack trace absent from all prior version crash reports",
+      "Crash rate on iOS correlates tightly with the 4.7.0 adoption percentage over time",
+      "Force-rollback to 4.6.x or a hotfix 4.7.1 drops iOS crash rate back to ~0.2% within hours",
+      "Android 4.7.0 crash reports show no corresponding stack trace at the same code area"
+    ],
+    "score": 0.74
+  },
+  "abductionSteps": [
+    {
+      "stepNumber": 1,
+      "stepSummary": "Three concrete changes occurred within a 48-hour window surrounding the crash spike. Applied retroductive reasoning from the spike onset (o1) to enumerate one candidate hypothesis per change event, plus one interaction-effect hypothesis covering multiple changes. This produced four candidates: h1 (4.7.0 iOS code defect), h2 (Firebase config update), h3 (CDN ATS failure), h4 (compound interaction).",
+      "abductionMethod": "retroduction",
+      "triggerObservation": "o1",
+      "hypothesesGenerated": [
+        "h1",
+        "h2",
+        "h3",
+        "h4"
+      ],
+      "hypothesesEliminated": [],
+      "stepsUsed": []
+    },
+    {
+      "stepNumber": 2,
+      "stepSummary": "Applied the iOS-only constraint (o3) as a parsimony filter. All four hypotheses can be constructed to explain the platform split, but h4 requires a compound condition (4.7.0 code change AND an infrastructure change) as a necessary precondition. Single-cause hypotheses satisfy parsimony better, and no evidence yet forces us to the compound case. h4 is eliminated as a primary candidate \u2014 it remains investigable only after h1, h2, and h3 are ruled out.",
+      "abductionMethod": "eliminative",
+      "triggerObservation": "o3",
+      "hypothesesGenerated": [],
+      "hypothesesEliminated": [
+        "h4"
+      ],
+      "stepsUsed": [
+        1
+      ]
+    },
+    {
+      "stepNumber": 3,
+      "stepSummary": "Applied the sustained-not-transient constraint (o2) to discriminate between the three remaining candidates. A Firebase config push (h2) is a remotely mutable state \u2014 operations teams can and routinely do revert such pushes within hours when they are suspected. A CDN misconfiguration (h3) is similarly addressable at the infrastructure layer. That both Thursday changes remain in place and the crash persists points toward a binary code defect that cannot be resolved without a new app release. This step does not eliminate h2 or h3 but substantially lowers their relative plausibility versus h1.",
+      "abductionMethod": "hypothetico-deductive",
+      "triggerObservation": "o2",
+      "hypothesesGenerated": [],
+      "hypothesesEliminated": [],
+      "stepsUsed": [
+        1,
+        2
+      ]
+    },
+    {
+      "stepNumber": 4,
+      "stepSummary": "Committed to h1 as the best explanation using inference to the best explanation across h1, h2, and h3. h1 (4.7.0 iOS code defect) best satisfies all three criteria simultaneously: parsimony (one code defect, one platform), explanatory power (accounts for the platform split, the ~24-hour adoption-lag timing, and the sustained persistence), and plausibility (code regressions are the dominant root cause of crash spikes in mobile post-mortem data). h3 (CDN/ATS) is eliminated at this step \u2014 ATS failures manifest as network errors, not hard crashes, and would not produce the adoption-curve ramp. h2 (Firebase config) remains the recommended second investigation path if crash log analysis does not surface a 4.7.0-specific stack trace.",
+      "abductionMethod": "ibe",
+      "triggerObservation": null,
+      "hypothesesGenerated": [],
+      "hypothesesEliminated": [
+        "h3"
+      ],
+      "stepsUsed": [
+        1,
+        2,
+        3
+      ]
+    }
+  ]
+}

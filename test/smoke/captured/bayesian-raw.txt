@@ -1,0 +1,58 @@
+Using **bayesian** mode as explicitly requested — applying sequential Bayes' theorem across three evidence dimensions to compute the posterior probability that the new cache config caused the 502 spike.
+
+```json
+{
+  "mode": "bayesian",
+  "hypothesis": {
+    "id": "h1",
+    "statement": "The 502 error rate increase is caused by the new cache configuration",
+    "alternatives": [
+      "Upstream service degradation coinciding with the deployment window (external failure)",
+      "Traffic spike or load pattern change overwhelming the origin",
+      "Unrelated infrastructure failure — network, DNS, or TLS certificate expiry",
+      "Database saturation cascading to the proxy/gateway layer"
+    ]
+  },
+  "prior": {
+    "probability": 0.40,
+    "justification": "SRE literature places configuration changes as the leading cause of production incidents (~35–45% across cloud environments). A prior of 0.40 is moderately generous: it acknowledges that a newly deployed config is the most plausible single candidate when errors appear near a deployment, but leaves 0.60 mass for external failures, traffic anomalies, and pure coincidence. It is deliberately not set higher to avoid anchoring on the post-hoc temporal observation that is itself one of the evidence items."
+  },
+  "likelihood": {
+    "probability": 0.86,
+    "description": "If the cache config is the cause, we expect three observable signatures: errors begin at or shortly after the config push, the error code is 502 specifically (Bad Gateway — consistent with cache misconfig blocking upstream connections to origin servers), and no other concurrent change can serve as an alternative explanation. The joint likelihood of all three is high if H is true."
+  },
+  "evidence": [
+    {
+      "id": "e1",
+      "description": "(a) Temporal correlation: 502 error rate spike onset aligns with the cache config deployment timestamp; no elevated error rate was observed in the preceding baseline window",
+      "likelihoodGivenHypothesis": 0.95,
+      "likelihoodGivenNotHypothesis": 0.15
+    },
+    {
+      "id": "e2",
+      "description": "(b) Error code specificity: errors are precisely 502 Bad Gateway — consistent with cache misconfiguration causing invalid or refused upstream connections to origin servers; not 500 (application error), 503 (service unavailable), or 504 (gateway timeout)",
+      "likelihoodGivenHypothesis": 0.80,
+      "likelihoodGivenNotHypothesis": 0.25
+    },
+    {
+      "id": "e3",
+      "description": "(c) Isolated change window: independently verified that no other deployments, infrastructure updates, certificate rotations, or config mutations occurred during the incident window — the cache config is the sole candidate change",
+      "likelihoodGivenHypothesis": 0.90,
+      "likelihoodGivenNotHypothesis": 0.25
+    }
+  ],
+  "posterior": {
+    "probability": 0.980,
+    "calculation": "Sequential update — each posterior becomes the prior for the next step.\n\n── Step 1: Temporal correlation (e1), prior = 0.40 ──\nP(H|e1) = (0.95 × 0.40) / ((0.95 × 0.40) + (0.15 × 0.60))\n         = 0.3800 / (0.3800 + 0.0900)\n         = 0.3800 / 0.4700\n         = 0.809\n         [BF₁ = 0.95 / 0.15 = 6.33 — moderate-to-strong evidence]\n\n── Step 2: Error code specificity (e2), prior = 0.809 ──\nP(H|e2) = (0.80 × 0.809) / ((0.80 × 0.809) + (0.25 × 0.191))\n         = 0.6472 / (0.6472 + 0.04775)\n         = 0.6472 / 0.69495\n         = 0.931\n         [BF₂ = 0.80 / 0.25 = 3.20 — moderate evidence]\n\n── Step 3: Isolated change window (e3), prior = 0.931 ──\nP(H|e3) = (0.90 × 0.931) / ((0.90 × 0.931) + (0.25 × 0.069))\n         = 0.8379 / (0.8379 + 0.01725)\n         = 0.8379 / 0.85515\n         = 0.980\n         [BF₃ = 0.90 / 0.25 = 3.60 — moderate evidence]\n\n── Combined Bayes Factor ──\nBF_combined = BF₁ × BF₂ × BF₃ = 6.33 × 3.20 × 3.60 = 72.9\n(Overwhelmingly strong; BF > 30 = 'very strong' by Kass-Raftery scale)",
+    "confidence": 0.78
+  },
+  "bayesFactor": 72.9,
+  "sensitivity": {
+    "priorRange": [0.20, 0.60],
+    "posteriorRange": [0.948, 0.991],
+    "note": "Skeptical prior (0.20): posterior converges to 0.948. Generous prior (0.60): posterior reaches 0.991. The conclusion is robust to prior uncertainty — even the most skeptical starting point yields >94% posterior after all three evidence items. The combined BF of 72.9 dominates the prior."
+  }
+}
+```
+
+**The posterior probability that the new cache config caused the 502 spike is 0.98.** Starting from a conservative 40% prior (not all config-correlated incidents are config-caused), three sequential evidence updates — temporal alignment (BF 6.3), 502-specific error signature (BF 3.2), and verified clean change window (BF 3.6) — combine to a joint Bayes Factor of 72.9, which is classified as "overwhelming" on the Kass-Raftery scale. The confidence is set at 0.78 (not 1.0) because the likelihood estimates are expert judgments rather than measured frequencies — the independence assumption among the three evidence items may be mildly violated (temporal correlation and isolated window are correlated), and no rollback experiment has yet confirmed causation by reversibility. **The recommended next action is to revert the cache config; if the 502 rate drops, the posterior effectively reaches 1.0.**

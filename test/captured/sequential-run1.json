@@ -1,0 +1,50 @@
+[
+  {
+    "mode": "sequential",
+    "thoughtNumber": 1,
+    "totalThoughts": 6,
+    "content": "Inventory every component that touches the database: application services (API, workers, cron jobs), analytics/ETL pipelines, dashboards, IAM roles, and any hard-coded connection strings in infra-as-code. Without a complete list, a later cutover step will silently miss a consumer.",
+    "nextThoughtNeeded": true,
+    "dependencies": []
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 2,
+    "totalThoughts": 6,
+    "content": "Choose a migration strategy based on size, downtime tolerance, and Postgres version.",
+    "nextThoughtNeeded": true,
+    "dependencies": ["1"]
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 3,
+    "totalThoughts": 6,
+    "content": "Provision the target region.",
+    "nextThoughtNeeded": true,
+    "dependencies": ["2"]
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 4,
+    "totalThoughts": 6,
+    "content": "Initialize replication and validate.",
+    "nextThoughtNeeded": true,
+    "dependencies": ["3"]
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 5,
+    "totalThoughts": 6,
+    "content": "Execute cutover inside a maintenance window.",
+    "nextThoughtNeeded": true,
+    "dependencies": ["1", "4"]
+  },
+  {
+    "mode": "sequential",
+    "thoughtNumber": 6,
+    "totalThoughts": 6,
+    "content": "Post-cutover: run smoke tests and keep source warm as rollback target.",
+    "nextThoughtNeeded": false,
+    "dependencies": ["5"]
+  }
+]

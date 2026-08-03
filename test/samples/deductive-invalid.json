@@ -1,0 +1,6 @@
+{
+  "mode": "causal",
+  "premises": ["All admins can edit", "Alice is an admin"],
+  "conclusion": "Alice can edit",
+  "validityCheck": true
+}

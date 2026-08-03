@@ -1,0 +1,84 @@
+Using **formallogic** mode as explicitly invoked — applying **Modus Tollens** via direct natural deduction to derive the negation of the antecedent from a denied consequent.
+
+```json
+{
+  "mode": "formallogic",
+  "theorem": "¬H  (given H→D and ¬D)",
+  "propositions": [
+    {
+      "id": "H",
+      "symbol": "H",
+      "statement": "The health check fails",
+      "type": "atomic"
+    },
+    {
+      "id": "D",
+      "symbol": "D",
+      "statement": "The service is degraded",
+      "type": "atomic"
+    },
+    {
+      "id": "HD",
+      "symbol": "H→D",
+      "statement": "If the health check fails, then the service is degraded",
+      "type": "compound",
+      "formula": "H → D",
+      "latex": "H \\rightarrow D"
+    },
+    {
+      "id": "notD",
+      "symbol": "¬D",
+      "statement": "The service is NOT degraded",
+      "type": "compound",
+      "formula": "¬D",
+      "latex": "\\neg D"
+    },
+    {
+      "id": "notH",
+      "symbol": "¬H",
+      "statement": "The health check does NOT fail",
+      "type": "compound",
+      "formula": "¬H",
+      "latex": "\\neg H"
+    }
+  ],
+  "proof": {
+    "technique": "direct",
+    "steps": [
+      {
+        "step": 1,
+        "statement": "If the health check fails, then the service is degraded",
+        "formula": "H → D",
+        "justification": "Premise",
+        "refs": []
+      },
+      {
+        "step": 2,
+        "statement": "The service is not degraded",
+        "formula": "¬D",
+        "justification": "Premise",
+        "refs": []
+      },
+      {
+        "step": 3,
+        "statement": "The health check does not fail",
+        "formula": "¬H",
+        "justification": "Modus Tollens",
+        "refs": [1, 2]
+      }
+    ],
+    "conclusion": "¬H — The health check does not fail",
+    "valid": true
+  },
+  "validityCheck": true,
+  "soundnessCheck": null
+}
+```
+
+---
+
+### Summary
+
+This is a **three-step direct proof** using a single application of **Modus Tollens**: given the conditional `H → D` (Step 1) and the negation of its consequent `¬D` (Step 2), we derive the negation of its antecedent `¬H` (Step 3) — the health check does not fail. The argument form is the **contrapositive** of the given implication: since `H → D` is equivalent to `¬D → ¬H`, and `¬D` holds, `¬H` must follow.
+
+**Validity** is confirmed — every step follows mechanically from prior steps by a recognized inference rule. **Soundness** is marked `null` because we cannot independently verify the premises from within the proof itself; in practice, soundness depends on whether the health check contract (`H → D`) actually holds in the real system. If a health check can fail for reasons that leave the service fully operational (e.g., a misconfigured probe), then Premise 1 is false and the argument, though valid in form, would be unsound.

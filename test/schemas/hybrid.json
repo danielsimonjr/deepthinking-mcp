@@ -1,0 +1,333 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HybridThought",
+  "type": "object",
+  "required": [
+    "mode",
+    "thoughtNumber",
+    "totalThoughts",
+    "content",
+    "nextThoughtNeeded",
+    "primaryMode",
+    "secondaryFeatures"
+  ],
+  "properties": {
+    "mode": {
+      "const": "hybrid"
+    },
+    "thoughtNumber": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "totalThoughts": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nextThoughtNeeded": {
+      "type": "boolean"
+    },
+    "primaryMode": {
+      "type": "string",
+      "enum": [
+        "sequential",
+        "shannon",
+        "hybrid",
+        "mathematics",
+        "physics",
+        "computability",
+        "inductive",
+        "deductive",
+        "abductive",
+        "temporal",
+        "historical",
+        "bayesian",
+        "evidential",
+        "causal",
+        "counterfactual",
+        "gametheory",
+        "optimization",
+        "constraint",
+        "analogical",
+        "firstprinciples",
+        "metareasoning",
+        "cryptanalytic",
+        "scientificmethod",
+        "systemsthinking",
+        "formallogic",
+        "engineering",
+        "algorithmic",
+        "synthesis",
+        "argumentation",
+        "critique",
+        "analysis",
+        "recursive",
+        "modal",
+        "stochastic"
+      ]
+    },
+    "secondaryFeatures": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "thoughtType": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 1
+    },
+    "stage": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "problem_definition",
+        "constraints",
+        "model",
+        "proof",
+        "implementation"
+      ]
+    },
+    "uncertainty": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "revisionReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "switchReason": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "mathematicalModel": {
+      "type": "object",
+      "required": [
+        "latex",
+        "symbolic"
+      ],
+      "properties": {
+        "latex": {
+          "type": "string"
+        },
+        "symbolic": {
+          "type": "string"
+        },
+        "ascii": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tensorRank": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "invariants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "symmetries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "complexity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stabilityNotes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "validated": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "validationMethod": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "tensorProperties": {
+      "type": "object",
+      "required": [
+        "rank",
+        "components",
+        "latex",
+        "symmetries",
+        "invariants",
+        "transformation"
+      ],
+      "properties": {
+        "rank": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "components": {
+          "type": "string"
+        },
+        "latex": {
+          "type": "string"
+        },
+        "symmetries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "invariants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "transformation": {
+          "type": "string",
+          "enum": [
+            "covariant",
+            "contravariant",
+            "mixed"
+          ]
+        },
+        "indexStructure": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "coordinateSystem": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+    "physicalInterpretation": {
+      "type": "object",
+      "required": [
+        "quantity",
+        "units",
+        "conservationLaws"
+      ],
+      "properties": {
+        "quantity": {
+          "type": "string"
+        },
+        "units": {
+          "type": "string"
+        },
+        "conservationLaws": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "observables": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "isRevision": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "revisesThought": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "branchFrom": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "branchId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "importance": {
+      "type": [
+        "number",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

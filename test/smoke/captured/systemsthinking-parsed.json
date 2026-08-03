@@ -1,0 +1,128 @@
+{
+  "mode": "systemsthinking",
+  "systemName": "Software Team Delivery Capacity",
+  "boundary": "Includes: developer headcount, technical debt, coordination overhead, shared knowledge, onboarding load, schedule pressure. Excludes: product scope decisions, external vendor dependencies, and market demand changes.",
+  "stocks": [
+    {
+      "id": "headcount",
+      "name": "Developer Headcount",
+      "description": "Total number of developers on the team. Accumulates through hiring, depletes through attrition. By itself, headcount does not equal capacity."
+    },
+    {
+      "id": "tech_debt",
+      "name": "Technical Debt",
+      "description": "Accumulated shortcuts, missing tests, undocumented decisions, and deferred refactors. Grows when pressure favors speed over quality; depletes only through deliberate investment. Acts as a tax on every future unit of work."
+    },
+    {
+      "id": "coordination_overhead",
+      "name": "Coordination Overhead",
+      "description": "Meeting hours, code review queues, merge conflict resolution, and communication cost per sprint. Grows quadratically with team size: n developers require n*(n-1)/2 communication channels. Cannot be reduced simply by adding more people."
+    },
+    {
+      "id": "shared_knowledge",
+      "name": "Shared Codebase Knowledge",
+      "description": "The fraction of the system each developer can reason about safely. Accumulated through pairing, code review, and documentation; diluted each time a new developer joins before knowledge transfer is complete."
+    },
+    {
+      "id": "senior_dev_capacity",
+      "name": "Available Senior Developer Capacity",
+      "description": "Hours senior developers have available for feature work, architecture decisions, and deep problem solving. Drawn down by mentoring new hires, code reviews, and meeting escalations."
+    }
+  ],
+  "feedbackLoops": [
+    {
+      "id": "R1",
+      "name": "Pressure \u2192 Shortcuts \u2192 Debt \u2192 Slowdown Loop (Reinforcing / Vicious)",
+      "type": "reinforcing",
+      "components": [
+        "schedule_pressure",
+        "shortcuts_taken",
+        "tech_debt",
+        "velocity_loss",
+        "schedule_pressure"
+      ],
+      "description": "Schedule pressure induces developers to skip tests, defer refactoring, and accrue technical debt. Growing debt raises the cost of every subsequent feature \u2014 more code to understand, more edge cases to avoid, more regression risk. Velocity falls. The capacity shortfall is perceived as a people problem, which increases schedule pressure further. The loop is self-sustaining and worsens with each turn."
+    },
+    {
+      "id": "R2",
+      "name": "Team Size \u2192 Coordination Tax \u2192 Throughput Drop \u2192 Add More Developers Loop (Reinforcing / Vicious)",
+      "type": "reinforcing",
+      "components": [
+        "headcount",
+        "communication_channels",
+        "coordination_overhead",
+        "net_throughput",
+        "perceived_capacity_gap",
+        "headcount"
+      ],
+      "description": "Communication channels grow as n*(n-1)/2. As the team grows, pull-request review queues lengthen, standup becomes a status broadcast, alignment meetings multiply, and context-switching costs rise. Net throughput per developer falls. Management reads declining throughput as a staffing gap and hires again \u2014 the very action that tightened the constraint. This is the core of Brooks' Law."
+    },
+    {
+      "id": "B1",
+      "name": "Hiring \u2192 Onboarding Load \u2192 Senior Dev Drain Loop (Balancing / Dampening)",
+      "type": "balancing",
+      "components": [
+        "perceived_capacity_gap",
+        "new_hires",
+        "onboarding_load",
+        "senior_dev_capacity",
+        "feature_throughput",
+        "perceived_capacity_gap"
+      ],
+      "description": "Each new hire consumes senior developer time through mentoring, code walkthroughs, and PR reviews \u2014 often 20\u201340% of at least one senior's week for 3\u20136 months. This drains the very capacity needed to deliver features, creating a temporary productivity dip immediately after each hire. Because the dip is misread as 'still not enough people,' it triggers another hire before the previous one pays off, compounding the drain. The balancing loop that was supposed to close the capacity gap instead keeps it open."
+    },
+    {
+      "id": "B2",
+      "name": "Codebase Complexity \u2192 Knowledge Dilution \u2192 Individual Output Ceiling (Balancing / Growth-Limiting)",
+      "type": "balancing",
+      "components": [
+        "headcount",
+        "shared_knowledge_per_developer",
+        "safe_work_surface",
+        "individual_throughput",
+        "headcount"
+      ],
+      "description": "As the team grows and the codebase accumulates debt, the fraction of the system any individual can safely modify shrinks. New developers own smaller and smaller slices. Work that touches cross-cutting concerns is blocked on the few who understand them, creating bottlenecks that cap aggregate throughput regardless of team size. Adding more developers beyond this ceiling produces diminishing and then negative returns."
+    }
+  ],
+  "archetype": "Limits to Growth",
+  "leveragePoints": [
+    {
+      "location": "tech_debt stock \u2014 upstream of R1 and B2",
+      "type": "rules",
+      "intervention": "Enforce a non-negotiable 'Definition of Done' that requires passing test coverage thresholds and a zero-increase in debt metrics before any story is closed. Block merges that raise cyclomatic complexity or reduce coverage below team baseline.",
+      "rationale": "Technical debt is the binding constraint that turns additional headcount into a liability. Addressing the debt stock directly attacks the root of R1 and B2 simultaneously \u2014 reducing the velocity tax that each new hire inherits and widening the safe work surface so developers can work in parallel without stepping on each other."
+    },
+    {
+      "location": "coordination_overhead stock \u2014 restructure communication topology",
+      "type": "structure",
+      "intervention": "Reorganize into 2\u20134 person autonomous squads aligned to bounded service domains (Conway's Law intentionally applied). Give each squad end-to-end ownership, a single deployment pipeline, and a public API contract with other squads. Limit cross-squad dependencies to asynchronous contracts.",
+      "rationale": "Squad decomposition transforms the n*(n-1)/2 communication graph into k*(k-1)/2 within each squad, where k << n. This breaks R2 structurally, not by policy. The number of channels a 4-person squad generates (6) is dramatically lower than a 12-person team (66). Throughput becomes additive rather than subtractive as you scale squads."
+    },
+    {
+      "location": "information flows \u2014 make the invisible visible",
+      "type": "information",
+      "intervention": "Instrument and publish a weekly 'system health dashboard' showing: tech debt trend (DORA change failure rate, cyclomatic complexity delta), PR cycle time, coordination overhead (meeting hours per engineer per week), and new-hire productivity ramp (story points per sprint for developers < 6 months). Require this data in any hiring proposal.",
+      "rationale": "Managers currently operate on headcount and deadline metrics alone \u2014 the feedback loops driving slowdown are invisible to decision-makers. Making coordination overhead and debt trends visible changes the information environment so that hiring triggers an automatic debt-reduction review rather than an automatic job-requisition."
+    },
+    {
+      "location": "paradigm \u2014 reframe the mental model driving decisions",
+      "type": "paradigm",
+      "intervention": "Replace the operating assumption 'team capacity = headcount \u00d7 hours' with 'team capacity = flow efficiency \u00d7 effective work surface.' Capacity growth means increasing throughput per existing developer before adding new ones.",
+      "rationale": "This is the highest-leverage point. Every other intervention can be undermined if leadership still equates bodies with output. Changing the paradigm changes which metrics are tracked, which proposals get funded, and which tradeoffs are made in planning \u2014 it restructures the decision logic that drives the hiring reflex."
+    }
+  ],
+  "delays": [
+    "Onboarding delay (3\u20136 months): New hires typically reach 50% productivity at 3 months and full productivity at 6. Decisions made in Q1 affect throughput in Q3. Managers who cannot see this delay interpret the ongoing dip as evidence of continued understaffing and hire again.",
+    "Technical debt latency (2\u20134 sprints): Shortcuts taken today depress velocity 2\u20134 sprints later, after the shortcuts have compounded with subsequent changes. By the time the slowdown is visible, its cause is two months in the past \u2014 making root-cause attribution nearly impossible without instrumentation.",
+    "Restructuring lag (1\u20132 quarters): Team reorganizations into squads take 6\u201312 weeks before new ownership boundaries stabilize. Benefits in coordination overhead reduction materialize only after the reorganization is complete and contracts between squads are established.",
+    "Knowledge transfer diffusion (per hire): Each new hire requires knowledge to diffuse from senior developers through pairing and review. This diffusion is serial, not parallel \u2014 adding 5 hires simultaneously does not speed it up; it multiplies the drain on senior capacity fivefold."
+  ],
+  "unintendedConsequences": [
+    "Hiring into a high-debt codebase accelerates R1: more developers under the same schedule pressure produce more shortcuts. The team ends the quarter with more people, more debt, and lower velocity than when it started.",
+    "Coordination overhead grows quadratically: adding the 10th developer to a 9-person team adds 9 new communication channels but only 1 new production unit. For teams above ~8 developers in a shared codebase, each marginal hire has a negative near-term ROI.",
+    "Senior developers become permanent bottlenecks: as junior-to-senior ratios worsen, the few people who understand the system architecture spend all their time in review, mentoring, and unblocking \u2014 removing them from the high-leverage work that would reduce the debt stock. The organization accidentally optimizes for knowledge hoarding.",
+    "Mandating crunch to compensate reduces the shared_knowledge stock: overtime and pressure accelerate attrition among senior developers, who carry disproportionate codebase knowledge. Each departure resets months of knowledge accumulation and consumes another onboarding cycle.",
+    "Attempts to parallelize work increase merge conflict frequency: more developers working on a tangled codebase without strong module boundaries produce more integration conflicts, increasing the coordination overhead stock precisely when it needs to shrink."
+  ]
+}

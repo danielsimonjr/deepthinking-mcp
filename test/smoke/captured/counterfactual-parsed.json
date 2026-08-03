@@ -1,0 +1,224 @@
+{
+  "mode": "counterfactual",
+  "actual": {
+    "id": "actual",
+    "name": "Production Outage \u2014 Post-Deployment Cascade Failure",
+    "description": "A deployment was pushed to production. Within roughly 90 minutes, degradation alerts began firing. The on-call team chose to investigate root cause rather than rolling back immediately. Degradation escalated into a full cascade failure after 2 AM, triggering a complete production outage.",
+    "conditions": [
+      {
+        "factor": "Deployment version",
+        "value": "New release (bad state \u2014 introduced regression)"
+      },
+      {
+        "factor": "Deployment time",
+        "value": "~00:00 AM"
+      },
+      {
+        "factor": "First degradation alert",
+        "value": "~00:30\u201301:00 AM (error rate rising, latency elevated)"
+      },
+      {
+        "factor": "Team response",
+        "value": "Investigation mode \u2014 root cause analysis pursued; rollback deferred"
+      },
+      {
+        "factor": "Rollback decision",
+        "value": "Not executed before 2 AM"
+      },
+      {
+        "factor": "Cascade failure onset",
+        "value": "Shortly after 2 AM (dependent service health checks failing, circuit breakers opening)"
+      },
+      {
+        "factor": "System architecture",
+        "value": "Microservices with circuit breakers; cascade risk above error-rate threshold ~8%"
+      }
+    ],
+    "outcomes": [
+      {
+        "description": "Full production outage \u2014 all or majority of users unable to use the service; incident bridge opened; multiple teams paged; extended recovery time required",
+        "impact": "negative",
+        "magnitude": 0.92
+      },
+      {
+        "description": "Significant engineering hours consumed during the outage and post-mortem",
+        "impact": "negative",
+        "magnitude": 0.6
+      }
+    ]
+  },
+  "counterfactuals": [
+    {
+      "id": "cf1",
+      "name": "Rollback Initiated Before 2 AM (~01:45 AM)",
+      "description": "On-call engineer triggers rollback to the previously-stable version at 01:45 AM \u2014 approximately 15 minutes before the cascade failure threshold \u2014 without waiting for root cause identification. All other conditions remain identical: the bad deployment exists, the same alerts fire, the same architecture is in place.",
+      "conditions": [
+        {
+          "factor": "Deployment version",
+          "value": "New release (bad state \u2014 introduced regression)"
+        },
+        {
+          "factor": "Deployment time",
+          "value": "~00:00 AM"
+        },
+        {
+          "factor": "First degradation alert",
+          "value": "~00:30\u201301:00 AM (error rate rising, latency elevated)"
+        },
+        {
+          "factor": "Team response",
+          "value": "Rollback-first policy applied after 15-minute investigation window elapsed without root cause"
+        },
+        {
+          "factor": "Rollback decision",
+          "value": "Rollback to previous stable version initiated at 01:45 AM",
+          "isIntervention": true
+        },
+        {
+          "factor": "Cascade failure onset",
+          "value": "Never reached \u2014 system restored to stable state before error rate crossed cascade threshold"
+        },
+        {
+          "factor": "System architecture",
+          "value": "Microservices with circuit breakers; cascade risk above error-rate threshold ~8%"
+        }
+      ],
+      "outcomes": [
+        {
+          "description": "~20\u201330 minutes of elevated error rates and degraded performance during rollback window; no full cascade failure; majority of users experience intermittent errors, not a complete outage",
+          "impact": "negative",
+          "magnitude": 0.18
+        },
+        {
+          "description": "Service fully restored once rollback completes; no bridge call required beyond initial on-call response",
+          "impact": "positive",
+          "magnitude": 0.75
+        }
+      ],
+      "likelihood": 0.85
+    },
+    {
+      "id": "cf2",
+      "name": "Rollback Initiated After 2 AM (~02:15 AM)",
+      "description": "Team decides to roll back, but the decision comes at 02:15 AM \u2014 after the cascade failure has already begun propagating. Rollback is initiated but the cascade has already tripped circuit breakers and taken dependent services down.",
+      "conditions": [
+        {
+          "factor": "Deployment version",
+          "value": "New release (bad state \u2014 introduced regression)"
+        },
+        {
+          "factor": "Deployment time",
+          "value": "~00:00 AM"
+        },
+        {
+          "factor": "First degradation alert",
+          "value": "~00:30\u201301:00 AM (error rate rising, latency elevated)"
+        },
+        {
+          "factor": "Team response",
+          "value": "Investigation continued past cascade threshold; rollback ordered reactively"
+        },
+        {
+          "factor": "Rollback decision",
+          "value": "Rollback initiated at 02:15 AM \u2014 after cascade failure onset",
+          "isIntervention": true
+        },
+        {
+          "factor": "Cascade failure onset",
+          "value": "Occurred at ~02:00 AM before rollback decision"
+        },
+        {
+          "factor": "System architecture",
+          "value": "Microservices with circuit breakers; cascade risk above error-rate threshold ~8%"
+        }
+      ],
+      "outcomes": [
+        {
+          "description": "Full outage still occurs; rollback reduces total duration modestly (perhaps 2 hours instead of 3.5 hours) because the bad version is removed sooner, but circuit breakers and dependent-service restarts still require manual intervention",
+          "impact": "negative",
+          "magnitude": 0.72
+        }
+      ],
+      "likelihood": 0.7
+    }
+  ],
+  "comparison": {
+    "differences": [
+      {
+        "aspect": "Rollback timing relative to cascade threshold",
+        "actual": "Rollback never initiated before cascade; failure cascaded freely",
+        "counterfactual": "cf1: Rollback at 01:45 AM (before threshold) \u2014 cascade never triggered; cf2: Rollback at 02:15 AM (after threshold) \u2014 cascade already in progress"
+      },
+      {
+        "aspect": "Maximum user impact",
+        "actual": "Complete production outage \u2014 100% of users blocked",
+        "counterfactual": "cf1: Degraded experience for ~25 minutes, no complete outage; cf2: Full outage still occurs but shorter duration"
+      },
+      {
+        "aspect": "Outage duration",
+        "actual": "Full outage lasting 2\u20134 hours (including cascade recovery and dependent-service restart)",
+        "counterfactual": "cf1: ~25\u201330 minutes degradation; cf2: ~2 hours (outage shortened but not eliminated)"
+      },
+      {
+        "aspect": "Recovery complexity",
+        "actual": "Required circuit breaker resets, dependent service restarts, and state reconciliation in addition to rollback",
+        "counterfactual": "cf1: Rollback alone sufficient \u2014 no cascade state to clean up; cf2: Still required circuit breaker resets"
+      },
+      {
+        "aspect": "Decision pressure",
+        "actual": "Team under mounting pressure with incomplete information; investigation without a time-box",
+        "counterfactual": "cf1: Pre-agreed policy removes the judgment call under pressure; decision is automatic after 15-minute window"
+      }
+    ],
+    "insights": [
+      "The cascade failure is the decisive branching point \u2014 before it triggers, a rollback resolves the incident cleanly; after it triggers, a rollback only reduces duration, not severity",
+      "The 2 AM threshold in the question corresponds closely to the cascade failure onset, which is why it is the right boundary: rolling back before 2 AM = before cascade; after = during cascade",
+      "A late rollback (cf2) still improves outcomes versus the actual scenario but by far less than an early rollback \u2014 this is a non-linear payoff curve with a cliff at cascade onset",
+      "The core decision failure was not a lack of information but a lack of a pre-committed policy: the team had degradation alerts and a known-bad deployment, which together are sufficient grounds for rollback without root cause identification",
+      "Rollback cost before cascade (~25 min degradation) is roughly 8\u201310\u00d7 lower than the actual outage cost (2\u20134 hours full outage), making early rollback strongly net-positive even if the issue turned out to be transient"
+    ],
+    "lessons": [
+      "Adopt a default rollback policy: if a deployment is followed within 90 minutes by sustained degradation alerts and root cause is not identified within 15 minutes, initiate rollback \u2014 do not wait for root cause",
+      "Instrument and publish the cascade failure threshold (e.g., 'error rate > 8% for > 5 minutes trips circuit breakers') so engineers have a measurable countdown, not a judgment call",
+      "Treat pre-cascade rollback cost and post-cascade recovery cost as explicitly different quantities in incident runbooks \u2014 this comparison makes the early-rollback decision obviously correct in advance",
+      "Run quarterly rollback drills so that rollback time is well-understood and fast; slow rollback procedures raise the cost of early rollback and create rational bias toward investigation",
+      "Add an automated rollback trigger as a future-state goal: if error rate exceeds threshold within N minutes of a deployment, page on-call AND propose automated rollback requiring only a single approval"
+    ]
+  },
+  "interventionPoint": {
+    "description": "Initiate rollback to the previously-stable version immediately upon confirming sustained degradation following the deployment \u2014 without waiting for root cause identification. The go/no-go criterion is simply: (1) deployment occurred in the last 90 minutes AND (2) degradation alerts are sustained for > 15 minutes AND (3) root cause is not yet identified.",
+    "timing": "01:45 AM window (before 2 AM and before the cascade failure threshold); the outer boundary of the safe window closes at approximately 02:00 AM when cascade propagation begins",
+    "feasibility": 0.88,
+    "expectedImpact": 0.87
+  },
+  "causalChains": [
+    {
+      "id": "chain-actual",
+      "events": [
+        "00:00 AM \u2014 Bad deployment pushed to production",
+        "00:30\u201301:00 AM \u2014 Error rates begin rising; latency degrades; first alerts fire",
+        "01:00\u201301:59 AM \u2014 On-call team investigates; no rollback decision; error rate continues climbing",
+        "~02:00 AM \u2014 Error rate crosses cascade threshold; circuit breakers begin opening",
+        "02:00\u201302:15 AM \u2014 Cascade propagates to dependent services; health checks fail",
+        "02:15+ AM \u2014 Full production outage; bridge call opened; all-hands recovery begins",
+        "05:30\u201306:00 AM \u2014 Services fully restored after manual circuit-breaker resets and state reconciliation"
+      ],
+      "branchingPoint": "01:45 AM \u2014 the last moment at which a rollback decision would have resolved the incident before cascade onset",
+      "divergence": "In the actual world, the team continued investigation past the cascade threshold. In cf1, a rollback at 01:45 AM removes the bad version before error rate reaches cascade threshold; circuit breakers never open; no cascade propagation occurs."
+    },
+    {
+      "id": "chain-cf1",
+      "events": [
+        "00:00 AM \u2014 Bad deployment pushed to production (same)",
+        "00:30\u201301:00 AM \u2014 Degradation alerts fire (same)",
+        "01:00\u201301:45 AM \u2014 On-call investigates for 15-minute window; no root cause found",
+        "01:45 AM \u2014 Rollback policy triggered; rollback to stable version initiated",
+        "01:45\u201302:10 AM \u2014 Rollback in progress; elevated error rates during transition",
+        "02:10 AM \u2014 Rollback complete; stable version running; error rates normalize",
+        "02:15 AM \u2014 All-clear; incident closed; post-mortem scheduled"
+      ],
+      "branchingPoint": "01:45 AM \u2014 rollback decision taken under the pre-agreed policy",
+      "divergence": "Cascade failure never occurs. Recovery is self-contained to the rollback window. No circuit-breaker resets or dependent-service restarts required."
+    }
+  ]
+}

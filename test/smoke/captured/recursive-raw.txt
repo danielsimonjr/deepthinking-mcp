@@ -1,0 +1,68 @@
+Using **recursive** reasoning — explicitly requested — to decompose config validation into a self-similar tree problem where every node applies the same rules as the root.
+
+```json
+{
+  "mode": "recursive",
+  "strategy": "tree_traversal",
+  "currentDepth": 0,
+  "maxDepth": 32,
+  "baseCaseReached": false,
+  "baseCases": [
+    {
+      "id": "bc1",
+      "condition": "config node is null or undefined",
+      "result": "return [] (empty error list — nothing to validate; caller decides if null is allowed)"
+    },
+    {
+      "id": "bc2",
+      "condition": "config node is a primitive leaf (string | number | boolean | null) with no nested keys",
+      "result": "apply type/range/pattern validators to the value; return list of field-level ValidationError objects"
+    },
+    {
+      "id": "bc3",
+      "condition": "currentDepth >= maxDepth (depth-limit guard)",
+      "result": "return [{ error: 'MAX_DEPTH_EXCEEDED', path: currentPath, depth: currentDepth }] — prevents stack overflow from cyclic or maliciously deep configs"
+    }
+  ],
+  "recurrence": {
+    "formula": "validate(node, depth, path) = validateOwnFields(node, path) ++ flatMap(key => validate(node[key], depth + 1, path + '.' + key), keys(node.subConfigs))",
+    "closedForm": "O(n) — each config node is visited exactly once",
+    "timeComplexity": "O(n) where n = total number of config nodes across all nesting levels",
+    "spaceComplexity": "O(d) where d = maximum nesting depth (implicit call stack); O(n + d) if error accumulation is included"
+  },
+  "subproblems": [
+    {
+      "id": "sp1",
+      "description": "Validate each direct child key of the current config object using the same rule set — required fields, forbidden fields, type constraints, enum constraints, cross-field dependencies",
+      "size": "subtree rooted at child node (strictly fewer nodes than parent subtree)",
+      "status": "pending"
+    },
+    {
+      "id": "sp2",
+      "description": "For array-valued config fields (e.g. 'servers: [...]'), validate each array element as an independent sub-config using the same recursive validator",
+      "size": "subtree rooted at each array element (bounded by array length × element depth)",
+      "status": "pending"
+    },
+    {
+      "id": "sp3",
+      "description": "For schema-referenced sub-configs ($ref or 'extends'), inline-expand the reference and validate the merged config — same rule set, smaller or equal subtree",
+      "size": "merged config node count (no larger than source + override nodes)",
+      "status": "pending"
+    }
+  ],
+  "haltingCondition": {
+    "parameter": "subtree node count N(node) = 1 + sum(N(child) for child in node.subConfigs)",
+    "strictlyDecreases": "Each recursive call is on node[key], whose subtree is a strict subset of the parent's subtree. No child subtree equals the parent. N(node[key]) < N(node) for all keys.",
+    "guard": "bc3 (maxDepth = 32) provides a hard ceiling independent of subtree counting — handles cycles if the config graph is a DAG with back-edges due to $ref resolution"
+  },
+  "memoization": {
+    "enabled": false,
+    "hits": 0,
+    "misses": 0,
+    "cacheSize": 0,
+    "note": "Disabled for pure tree configs (each node is visited exactly once, no overlap). Enable with a path-keyed cache ONLY when $ref expansion causes the same schema fragment to be validated multiple times — e.g. a shared 'address' sub-schema referenced by both 'billingAddress' and 'shippingAddress'."
+  }
+}
+```
+
+**The recursive structure emerges naturally from the self-similar shape of the config tree:** a config node is either a primitive leaf (base case — validate directly), null/empty (base case — skip), or a composite with children (recursive case — validate own fields then recurse into each child using the identical rule set). The **halting condition** is guaranteed by two independent mechanisms: the subtree node count strictly decreases at every recursive step (structural induction on the tree), and a hard `maxDepth = 32` guard catches any cycles introduced by `$ref` expansion before they cause a stack overflow. **Memoization is off** for pure trees since there are no overlapping subproblems, but should be turned on with a schema-path cache if `$ref` references cause the same sub-schema to be re-validated multiple times, collapsing redundant work from O(refs × schema_size) to O(schema_size).

@@ -1,0 +1,28 @@
+{
+  "mode": "fivewhys",
+  "problem": "The nightly ETL job failed to load yesterday's sales data into the reporting warehouse",
+  "whys": [
+    {
+      "question": "Why did the nightly ETL job fail to load yesterday's sales data?",
+      "answer": "The load step threw a schema-mismatch error and the pipeline aborted before writing any rows"
+    },
+    {
+      "question": "Why was there a schema mismatch?",
+      "answer": "The upstream orders table gained a new nullable column (`discount_code`) that the ETL's strict column-count check did not expect"
+    },
+    {
+      "question": "Why did the ETL have a strict column-count check that breaks on new columns?",
+      "answer": "The ETL was written to validate schema by comparing an exact column count instead of validating by column name, as a shortcut during initial development"
+    },
+    {
+      "question": "Why was a column-count check chosen instead of a column-name check?",
+      "answer": "The original author prioritized shipping the pipeline quickly for a launch deadline and treated schema validation as a follow-up task that was never scheduled"
+    },
+    {
+      "question": "Why was the schema-validation follow-up task never scheduled?",
+      "answer": "There is no team process for tracking and prioritizing 'follow-up' technical debt items created during launch crunches — they are logged informally in Slack and not tracked in the backlog"
+    }
+  ],
+  "rootCause": "The team has no process for converting launch-crunch shortcuts into tracked backlog items, so brittle validation logic (column-count instead of column-name) shipped and was never hardened",
+  "correctiveAction": "Replace the ETL's column-count check with a column-name-based schema validation that tolerates additive nullable columns, and add a 'launch debt' label + mandatory backlog entry requirement to the team's post-launch checklist"
+}

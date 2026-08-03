@@ -1,0 +1,158 @@
+{
+  "mode": "cryptanalytic",
+  "thoughtType": "evidence_accumulation",
+  "ciphertext": "AUTH_FAIL_LOG_STREAM",
+  "assumptions": [
+    "The 50 authentication failures over 24 hours are a representative sample",
+    "The attacker (if present) uses a scripted credential-stuffing tool with consistent behavior",
+    "Normal user failures are distributed across business hours with low frequency per account"
+  ],
+  "dependencies": ["hypothesis_formation", "frequency_analysis"],
+  "uncertainty": 0.25,
+  "hypotheses": [
+    {
+      "id": "h1",
+      "description": "Credential-stuffing attack: automated tool cycling through a breached credential list against many accounts",
+      "cipherType": "behavioral_pattern",
+      "parameters": { "attackType": "credential_stuffing", "toolBehavior": "scripted" },
+      "priorProbability": 0.35,
+      "posteriorProbability": 0.78,
+      "decibanScore": 19.5,
+      "evidence": [
+        {
+          "observation": "47 of 50 failures originated from 3 IP addresses in the same /24 subnet",
+          "decibans": 8.0,
+          "likelihoodRatio": 6.3,
+          "source": "pattern",
+          "confidence": 0.95,
+          "explanation": "Random user error would be distributed across many IPs; concentration in a /24 is a strong automation signal"
+        },
+        {
+          "observation": "Failures hit 38 distinct usernames — each targeted exactly once or twice",
+          "decibans": 6.5,
+          "likelihoodRatio": 4.5,
+          "source": "statistical",
+          "confidence": 0.90,
+          "explanation": "Users forgetting their password retry the same account repeatedly; credential stuffing iterates across accounts"
+        },
+        {
+          "observation": "Inter-request timing is 1.2 ± 0.08 seconds — highly regular",
+          "decibans": 5.0,
+          "likelihoodRatio": 3.2,
+          "source": "pattern",
+          "confidence": 0.88,
+          "explanation": "Human users have variable timing; 0.08s standard deviation over 50 requests implies scripted behavior"
+        }
+      ],
+      "status": "active"
+    },
+    {
+      "id": "h2",
+      "description": "User error cascade: a deployment changed the login flow and confused many legitimate users simultaneously",
+      "cipherType": "behavioral_pattern",
+      "parameters": { "triggerEvent": "deployment", "affectedUsers": "many" },
+      "priorProbability": 0.40,
+      "posteriorProbability": 0.18,
+      "decibanScore": -7.4,
+      "evidence": [
+        {
+          "observation": "No deployment occurred in the 24 hours preceding the failure spike",
+          "decibans": -5.0,
+          "likelihoodRatio": 0.32,
+          "source": "structural",
+          "confidence": 0.92,
+          "explanation": "Without a deployment trigger, a sudden user-error cascade is implausible"
+        },
+        {
+          "observation": "Failures spread across 38 accounts with no shared session or IP cluster",
+          "decibans": -2.4,
+          "likelihoodRatio": 0.57,
+          "source": "statistical",
+          "confidence": 0.80,
+          "explanation": "A confused-user pattern would show failures concentrated on recently-returning users, not a broad sweep"
+        }
+      ],
+      "status": "active"
+    }
+  ],
+  "currentHypothesis": {
+    "id": "h1",
+    "description": "Credential-stuffing attack: automated tool cycling through a breached credential list against many accounts",
+    "cipherType": "behavioral_pattern",
+    "parameters": { "attackType": "credential_stuffing", "toolBehavior": "scripted" },
+    "priorProbability": 0.35,
+    "posteriorProbability": 0.78,
+    "decibanScore": 19.5,
+    "evidence": [
+      {
+        "observation": "47 of 50 failures originated from 3 IP addresses in the same /24 subnet",
+        "decibans": 8.0,
+        "likelihoodRatio": 6.3,
+        "source": "pattern",
+        "confidence": 0.95,
+        "explanation": "IP concentration is the single strongest signal — random users don't share a /24"
+      }
+    ],
+    "status": "active"
+  },
+  "evidenceChains": [
+    {
+      "hypothesis": "Credential-stuffing attack (h1)",
+      "observations": [
+        {
+          "observation": "IP concentration: 47/50 failures from a /24 subnet",
+          "decibans": 8.0,
+          "likelihoodRatio": 6.3,
+          "source": "pattern",
+          "confidence": 0.95
+        },
+        {
+          "observation": "Account breadth: 38 distinct accounts, each hit 1-2 times",
+          "decibans": 6.5,
+          "likelihoodRatio": 4.5,
+          "source": "statistical",
+          "confidence": 0.90
+        },
+        {
+          "observation": "Timing regularity: 1.2s ± 0.08s inter-request interval",
+          "decibans": 5.0,
+          "likelihoodRatio": 3.2,
+          "source": "pattern",
+          "confidence": 0.88
+        }
+      ],
+      "totalDecibans": 19.5,
+      "oddsRatio": 89.1,
+      "conclusion": "inconclusive",
+      "confirmationThreshold": 20,
+      "refutationThreshold": -20
+    }
+  ],
+  "frequencyAnalysis": {
+    "observed": { "failures_per_account": 1.3, "ips_involved": 3, "unique_accounts": 38 },
+    "expected": { "failures_per_account": 4.2, "ips_involved": 35, "unique_accounts": 12 },
+    "chiSquared": 48.7,
+    "degreesOfFreedom": 2,
+    "pValue": 0.00003,
+    "significantDeviations": [
+      { "character": "failures_per_account", "observed": 1.3, "expected": 4.2, "deviation": -2.9, "isSignificant": true },
+      { "character": "ips_involved", "observed": 3, "expected": 35, "deviation": -32.0, "isSignificant": true },
+      { "character": "unique_accounts", "observed": 38, "expected": 12, "deviation": 26.0, "isSignificant": true }
+    ]
+  },
+  "patterns": [
+    {
+      "pattern": "IP_CONCENTRATION_24",
+      "positions": [0, 1, 2, 3, 4, 5, 6, 7],
+      "suggestion": "All attacking IPs share a /24 subnet — likely same hosting provider or VPN exit node",
+      "decibanContribution": 8.0
+    },
+    {
+      "pattern": "TIMING_REGULARITY",
+      "positions": [0, 1, 2, 3, 4],
+      "suggestion": "Sub-100ms timing jitter across 50 requests strongly implies scripted automation",
+      "decibanContribution": 5.0
+    }
+  ],
+  "keyInsight": "At 19.5 decibans (odds ratio ~89:1), the credential-stuffing hypothesis approaches but has not yet crossed the 20-deciban confirmation threshold. One more independent signal — e.g., matching usernames against a known breached credential list — would confirm. Immediate mitigation: rate-limit the three /24 source IPs and require MFA for the 38 affected accounts."
+}

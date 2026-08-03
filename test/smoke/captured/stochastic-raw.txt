@@ -1,0 +1,127 @@
+Using **stochastic** reasoning to model the M/M/1 birth-death queue with Poisson arrivals (λ=10/hr) and exponential service (μ=12/hr), computing exact closed-form distributions and performance metrics.
+
+```json
+{
+  "mode": "stochastic",
+  "processType": "queueing",
+  "stepCount": 0,
+  "states": [
+    {
+      "id": "n0",
+      "name": "Empty System (n=0)",
+      "description": "No tickets in system; server idle. Stationary weight π₀ = 1−ρ = 1/6 ≈ 16.67% of the time.",
+      "isAbsorbing": false,
+      "isTransient": false
+    },
+    {
+      "id": "n1",
+      "name": "1 Ticket in System (n=1)",
+      "description": "One ticket in service, queue empty. π₁ = (1−ρ)ρ = 5/36 ≈ 13.89%.",
+      "isAbsorbing": false,
+      "isTransient": false
+    },
+    {
+      "id": "n2",
+      "name": "2 Tickets in System (n=2)",
+      "description": "One in service, one waiting. π₂ = (1−ρ)ρ² = 25/216 ≈ 11.57%.",
+      "isAbsorbing": false,
+      "isTransient": false
+    },
+    {
+      "id": "n3p",
+      "name": "3+ Tickets in System (n≥3)",
+      "description": "Queue growing: one in service, two or more waiting. Lumped absorbing state: π_{3+} = ρ³ = 125/216 ≈ 57.87%. High ρ means the queue spends the majority of time here.",
+      "isAbsorbing": false,
+      "isTransient": false
+    }
+  ],
+  "transitions": [
+    { "from": "n0",  "to": "n0",  "probability": 0.5455 },
+    { "from": "n0",  "to": "n1",  "probability": 0.4545 },
+    { "from": "n1",  "to": "n0",  "probability": 0.5455 },
+    { "from": "n1",  "to": "n2",  "probability": 0.4545 },
+    { "from": "n2",  "to": "n1",  "probability": 0.5455 },
+    { "from": "n2",  "to": "n3p", "probability": 0.4545 },
+    { "from": "n3p", "to": "n2",  "probability": 0.0909 },
+    { "from": "n3p", "to": "n3p", "probability": 0.9091 }
+  ],
+  "markovChain": {
+    "id": "mm1_tickets_lambda10_mu12",
+    "states": ["n0", "n1", "n2", "n3p"],
+    "transitionMatrix": [
+      [0.5455, 0.4545, 0.0000, 0.0000],
+      [0.5455, 0.0000, 0.4545, 0.0000],
+      [0.0000, 0.5455, 0.0000, 0.4545],
+      [0.0000, 0.0000, 0.0909, 0.9091]
+    ],
+    "initialDistribution": [1.0, 0.0, 0.0, 0.0],
+    "stationaryDistribution": [0.1667, 0.1389, 0.1157, 0.5787],
+    "isIrreducible": true,
+    "isAperiodic": true,
+    "isErgodic": true
+  },
+  "randomVariables": [
+    {
+      "id": "rv_interarrival",
+      "name": "Inter-arrival time A — Poisson process, λ=10/hr",
+      "distribution": "Exponential",
+      "parameters": { "rate": 10, "unit": "per_hr" },
+      "mean": 0.1,
+      "variance": 0.01
+    },
+    {
+      "id": "rv_service",
+      "name": "Service time S per ticket — μ=12/hr (≈5 min/ticket)",
+      "distribution": "Exponential",
+      "parameters": { "rate": 12, "unit": "per_hr" },
+      "mean": 0.0833,
+      "variance": 0.00694
+    },
+    {
+      "id": "rv_sojourn",
+      "name": "Sojourn time W — total time in system (wait + service). W ~ Exp(μ−λ). E[W] = 1/(μ−λ) = 0.5 hr = 30 min. P(W>t) = e^{−2t}. P90 ≈ 69 min, P95 ≈ 90 min.",
+      "distribution": "Exponential",
+      "parameters": { "rate": 2, "formula": "μ − λ = 12 − 10 = 2/hr" },
+      "mean": 0.5,
+      "variance": 0.25
+    },
+    {
+      "id": "rv_wait",
+      "name": "Queue wait time Wq — time before service begins. Mixed distribution: P(Wq=0) = 1−ρ = 1/6 ≈ 16.7% (no wait); P(Wq>t) = ρ·e^{−(μ−λ)t} for t>0. E[Wq] = ρ/(μ−λ) = 5/12 hr ≈ 25 min.",
+      "distribution": "Exponential",
+      "parameters": { "rate": 2, "mass_at_zero": 0.1667, "note": "Wq is zero with prob 1−ρ; Exp(2) conditional on Wq>0" },
+      "mean": 0.4167,
+      "variance": 0.2431
+    },
+    {
+      "id": "rv_system_length",
+      "name": "System length L — total tickets in system. P(L=n) = (1−ρ)ρⁿ. E[L] = ρ/(1−ρ) = 5 tickets. E[Lq] = ρ²/(1−ρ) = 25/6 ≈ 4.17 tickets waiting.",
+      "distribution": "Geometric",
+      "parameters": { "success_prob": 0.1667, "note": "Number of failures before first success (0-indexed); p = 1−ρ = 1/6" },
+      "mean": 5.0,
+      "variance": 30.0
+    }
+  ]
+}
+```
+
+---
+
+## Summary
+
+**Model:** M/M/1 queue — Poisson arrivals at λ=10/hr, exponential service at μ=12/hr. Traffic intensity **ρ = λ/μ = 5/6 ≈ 83.3%** — the queue is stable (ρ < 1), but heavily loaded.
+
+**Key results:**
+
+| Metric | Formula | Value |
+|--------|---------|-------|
+| Server utilization | ρ = λ/μ | **83.3%** |
+| Prob. any wait | P(Wq > 0) = ρ | **83.3%** |
+| Avg. wait in queue | Wq = ρ/(μ−λ) | **25 min** |
+| Avg. time in system | W = 1/(μ−λ) | **30 min** |
+| Avg. tickets waiting | Lq = ρ²/(1−ρ) | **≈ 4.17** |
+| Avg. tickets in system | L = ρ/(1−ρ) | **5.0** |
+
+**Distribution shape:** The sojourn time W is purely Exponential(rate=2/hr) with no atom at zero — every ticket spends *some* time in service. The wait time Wq is a **mixed distribution**: 16.7% of tickets go straight to service (Wq=0); the remaining 83.3% wait an additional Exp(2)-distributed time, yielding an overall mean of 25 min.
+
+**Practical takeaway:** Increasing service rate by just 2/hr (μ: 12→14) would drop ρ to 71%, cut E[W] from 30 min → 25 min, and reduce E[Lq] from 4.17 → 1.75 tickets — a 58% queue-length reduction for a 17% throughput gain. This system is highly sensitive near ρ→1; adding a second server (M/M/2) would be even more impactful.

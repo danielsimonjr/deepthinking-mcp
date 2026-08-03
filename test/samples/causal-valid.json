@@ -1,0 +1,50 @@
+{
+  "mode": "causal",
+  "causalGraph": {
+    "nodes": [
+      { "id": "eviction", "name": "Cache Eviction Policy", "type": "cause", "description": "Changed from LRU to LFU in deployment v4.2.1" },
+      { "id": "hitrate", "name": "Cache Hit Rate", "type": "mediator", "description": "Percentage of requests served from cache" },
+      { "id": "dbqueries", "name": "Database Query Count", "type": "mediator", "description": "Number of queries reaching the database per second" },
+      { "id": "memlimit", "name": "Server Memory Limit", "type": "confounder", "description": "Reduced from 16 GB to 12 GB in same deployment v4.2.1" },
+      { "id": "latency", "name": "p99 Latency", "type": "effect", "description": "99th-percentile response time in ms" }
+    ],
+    "edges": [
+      { "from": "eviction", "to": "hitrate", "strength": -0.6, "confidence": 0.85, "mechanism": "LFU evicts recently-added but infrequent keys; for bursty workloads this reduces hit rate vs LRU" },
+      { "from": "hitrate", "to": "dbqueries", "strength": -0.9, "confidence": 0.95, "mechanism": "Each cache miss results in exactly one additional database query" },
+      { "from": "dbqueries", "to": "latency", "strength": 0.8, "confidence": 0.9, "mechanism": "Each additional DB query adds ~40 ms median; under load, connection pool contention amplifies tail latency" },
+      { "from": "memlimit", "to": "hitrate", "strength": -0.5, "confidence": 0.8, "mechanism": "Smaller memory limit reduces cache capacity, directly increasing eviction rate regardless of policy" },
+      { "from": "memlimit", "to": "latency", "strength": 0.4, "confidence": 0.7, "mechanism": "Reduced memory triggers OS-level swapping under high load, adding I/O wait to request processing" }
+    ]
+  },
+  "mechanisms": [
+    {
+      "from": "eviction",
+      "to": "latency",
+      "description": "Eviction policy change reduces cache hit rate, which increases DB query volume, which raises p99 latency through connection pool contention",
+      "type": "indirect"
+    },
+    {
+      "from": "memlimit",
+      "to": "latency",
+      "description": "Memory limit reduction raises latency through two independent paths: reduced cache capacity and OS swapping",
+      "type": "indirect"
+    }
+  ],
+  "confounders": [
+    {
+      "nodeId": "memlimit",
+      "affects": ["hitrate", "latency"],
+      "description": "Deployment v4.2.1 changed both eviction policy and memory limits simultaneously. Without controlling for memory, naive correlation overstates the causal effect of the eviction policy alone."
+    }
+  ],
+  "interventions": [
+    {
+      "nodeId": "eviction",
+      "action": "Revert eviction policy to LRU while keeping memory limit at 12 GB",
+      "expectedEffects": [
+        { "nodeId": "hitrate", "expectedChange": "Hit rate improves 10–15% for bursty workload patterns", "confidence": 0.75 },
+        { "nodeId": "latency", "expectedChange": "p99 latency decreases 20–30% from policy-driven contribution; memory-driven contribution remains", "confidence": 0.7 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "mode": "stochastic",
+  "processType": "queueing",
+  "stepCount": 0,
+  "states": [
+    {
+      "id": "empty",
+      "name": "Empty Queue",
+      "description": "No tickets waiting; server idle",
+      "isAbsorbing": false,
+      "isTransient": false
+    },
+    {
+      "id": "busy_1",
+      "name": "1 Ticket Being Processed",
+      "description": "One ticket in service, none waiting",
+      "isAbsorbing": false,
+      "isTransient": false
+    },
+    {
+      "id": "busy_2plus",
+      "name": "Queue Building",
+      "description": "One in service, one or more waiting",
+      "isAbsorbing": false,
+      "isTransient": false
+    }
+  ],
+  "transitions": [
+    { "from": "empty", "to": "empty", "probability": 0.30 },
+    { "from": "empty", "to": "busy_1", "probability": 0.70 },
+    { "from": "busy_1", "to": "empty", "probability": 0.55 },
+    { "from": "busy_1", "to": "busy_2plus", "probability": 0.45 },
+    { "from": "busy_2plus", "to": "busy_1", "probability": 0.60 },
+    { "from": "busy_2plus", "to": "busy_2plus", "probability": 0.40 }
+  ],
+  "markovChain": {
+    "id": "mc_ticket_queue",
+    "states": ["empty", "busy_1", "busy_2plus"],
+    "transitionMatrix": [
+      [0.30, 0.70, 0.00],
+      [0.55, 0.00, 0.45],
+      [0.00, 0.60, 0.40]
+    ],
+    "initialDistribution": [1.0, 0.0, 0.0],
+    "stationaryDistribution": [0.32, 0.39, 0.29],
+    "isIrreducible": true,
+    "isAperiodic": true,
+    "isErgodic": true
+  },
+  "randomVariables": [
+    {
+      "id": "rv_arrival",
+      "name": "Ticket inter-arrival time",
+      "distribution": "Exponential",
+      "parameters": { "rate": 5.0 },
+      "mean": 0.20,
+      "variance": 0.04
+    },
+    {
+      "id": "rv_service",
+      "name": "Ticket service time",
+      "distribution": "Exponential",
+      "parameters": { "rate": 8.0 },
+      "mean": 0.125,
+      "variance": 0.016
+    },
+    {
+      "id": "rv_wait",
+      "name": "Customer wait time (M/M/1 formula)",
+      "distribution": "Exponential",
+      "parameters": { "rate": 3.0 },
+      "mean": 0.333,
+      "variance": 0.111
+    }
+  ]
+}
