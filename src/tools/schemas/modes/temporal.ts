@@ -13,30 +13,35 @@ import {
   TemporalConstraintEnum,
   TemporalRelationEnum,
   EventTypeEnum,
+  IdSchema,
+  NameSchema,
+  TextSchema,
+  IdArraySchema,
 } from "../shared.js";
+import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 // ===== HISTORICAL MODE SCHEMAS (v9.1.0) =====
 
 const DateRangeSchema = z.object({
-  start: z.string(),
-  end: z.string(),
+  start: IdSchema,
+  end: IdSchema,
   precision: z
     .enum(["exact", "approximate", "century", "decade", "year", "month", "day"])
     .optional(),
 });
 
 const HistoricalEventSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  date: z.union([z.string(), DateRangeSchema]),
-  location: z.string().optional(),
-  description: z.string().optional(),
-  actors: z.array(z.string()).optional(),
-  causes: z.array(z.string()).optional(),
-  effects: z.array(z.string()).optional(),
+  id: IdSchema,
+  name: NameSchema,
+  date: z.union([IdSchema, DateRangeSchema]),
+  location: NameSchema.optional(),
+  description: TextSchema.optional(),
+  actors: IdArraySchema.optional(),
+  causes: IdArraySchema.optional(),
+  effects: IdArraySchema.optional(),
   significance: z.enum(["minor", "moderate", "major", "transformative"]),
-  sources: z.array(z.string()).optional(),
-  tags: z.array(z.string()).optional(),
+  sources: IdArraySchema.optional(),
+  tags: IdArraySchema.optional(),
 });
 
 const SourceBiasSchema = z.object({
@@ -49,13 +54,13 @@ const SourceBiasSchema = z.object({
     "ideological",
     "personal",
   ]),
-  direction: z.string().optional(),
+  direction: IdSchema.optional(),
   severity: z.number().min(0).max(1).optional(),
 });
 
 const HistoricalSourceSchema = z.object({
-  id: z.string(),
-  title: z.string(),
+  id: IdSchema,
+  title: NameSchema,
   type: z.enum(["primary", "secondary", "tertiary"]),
   subtype: z
     .enum([
@@ -67,43 +72,43 @@ const HistoricalSourceSchema = z.object({
       "statistical",
     ])
     .optional(),
-  author: z.string().optional(),
-  date: z.string().optional(),
+  author: NameSchema.optional(),
+  date: IdSchema.optional(),
   reliability: z.number().min(0).max(1),
   bias: SourceBiasSchema.optional(),
-  corroboratedBy: z.array(z.string()).optional(),
-  contradictedBy: z.array(z.string()).optional(),
+  corroboratedBy: IdArraySchema.optional(),
+  contradictedBy: IdArraySchema.optional(),
 });
 
 const HistoricalPeriodSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  startDate: z.string(),
-  endDate: z.string(),
-  characteristics: z.array(z.string()),
-  keyEvents: z.array(z.string()).optional(),
-  keyActors: z.array(z.string()).optional(),
-  themes: z.array(z.string()).optional(),
+  id: IdSchema,
+  name: NameSchema,
+  startDate: IdSchema,
+  endDate: IdSchema,
+  characteristics: IdArraySchema,
+  keyEvents: IdArraySchema.optional(),
+  keyActors: IdArraySchema.optional(),
+  themes: IdArraySchema.optional(),
 });
 
 const CausalLinkSchema = z.object({
-  cause: z.string(),
-  effect: z.string(),
-  mechanism: z.string().optional(),
+  cause: TextSchema,
+  effect: TextSchema,
+  mechanism: TextSchema.optional(),
   confidence: z.number().min(0).max(1),
-  evidence: z.array(z.string()).optional(),
+  evidence: IdArraySchema.optional(),
 });
 
 const CausalChainSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  links: z.array(CausalLinkSchema),
+  id: IdSchema,
+  name: NameSchema,
+  links: z.array(CausalLinkSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS),
   confidence: z.number().min(0).max(1),
-  alternativeExplanations: z.array(z.string()).optional(),
+  alternativeExplanations: IdArraySchema.optional(),
 });
 
 const ActorRelationshipSchema = z.object({
-  actorId: z.string(),
+  actorId: IdSchema,
   type: z.enum([
     "ally",
     "rival",
@@ -114,12 +119,12 @@ const ActorRelationshipSchema = z.object({
     "mentor",
     "successor",
   ]),
-  description: z.string().optional(),
+  description: TextSchema.optional(),
 });
 
 const HistoricalActorSchema = z.object({
-  id: z.string(),
-  name: z.string(),
+  id: IdSchema,
+  name: NameSchema,
   type: z.enum([
     "individual",
     "group",
@@ -128,10 +133,10 @@ const HistoricalActorSchema = z.object({
     "movement",
     "class",
   ]),
-  period: z.string().optional(),
-  roles: z.array(z.string()).optional(),
-  motivations: z.array(z.string()).optional(),
-  relationships: z.array(ActorRelationshipSchema).optional(),
+  period: IdSchema.optional(),
+  roles: IdArraySchema.optional(),
+  motivations: IdArraySchema.optional(),
+  relationships: z.array(ActorRelationshipSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
   significance: z
     .enum(["minor", "moderate", "major", "transformative"])
     .optional(),
@@ -146,45 +151,45 @@ const HistoricalThoughtTypeSchema = z.enum([
 ]);
 
 const TimelineSchema = z.object({
-  id: z.string(),
-  name: z.string(),
+  id: IdSchema,
+  name: NameSchema,
   timeUnit: TimeUnitEnum,
-  events: z.array(z.string()),
+  events: IdArraySchema,
   startTime: z.number().optional(),
   endTime: z.number().optional(),
 });
 
 const TemporalEventSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
+  id: IdSchema,
+  name: NameSchema,
+  description: TextSchema,
   timestamp: z.number(),
   type: EventTypeEnum,
   duration: z.number().optional(),
-  properties: z.record(z.string(), z.unknown()).optional(),
+  properties: z.record(IdSchema, z.unknown()).optional(),
 });
 
 const TemporalConstraintSchema = z.object({
-  id: z.string(),
+  id: IdSchema,
   type: TemporalConstraintEnum,
-  subject: z.string(),
-  object: z.string(),
+  subject: IdSchema,
+  object: IdSchema,
   confidence: ConfidenceSchema,
 });
 
 const TemporalIntervalSchema = z.object({
-  id: z.string(),
-  name: z.string(),
+  id: IdSchema,
+  name: NameSchema,
   start: z.number(),
   end: z.number(),
-  contains: z.array(z.string()).optional(),
-  overlaps: z.array(z.string()).optional(),
+  contains: IdArraySchema.optional(),
+  overlaps: IdArraySchema.optional(),
 });
 
 const TemporalRelationSchema = z.object({
-  id: z.string(),
-  from: z.string(),
-  to: z.string(),
+  id: IdSchema,
+  from: IdSchema,
+  to: IdSchema,
   relationType: TemporalRelationEnum,
   strength: ConfidenceSchema,
   delay: z.number().optional(),
@@ -201,19 +206,19 @@ export const TemporalSchema = BaseThoughtSchema.extend({
 
   // Temporal-specific properties
   timeline: TimelineSchema.optional(),
-  events: z.array(TemporalEventSchema).optional(),
-  constraints: z.array(TemporalConstraintSchema).optional(),
-  intervals: z.array(TemporalIntervalSchema).optional(),
-  relations: z.array(TemporalRelationSchema).optional(),
+  events: z.array(TemporalEventSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  constraints: z.array(TemporalConstraintSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  intervals: z.array(TemporalIntervalSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  relations: z.array(TemporalRelationSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
 
   // Historical-specific properties (v9.1.0)
   thoughtType: HistoricalThoughtTypeSchema.optional(),
-  historicalEvents: z.array(HistoricalEventSchema).optional(),
-  historicalSources: z.array(HistoricalSourceSchema).optional(),
-  periods: z.array(HistoricalPeriodSchema).optional(),
-  causalChains: z.array(CausalChainSchema).optional(),
-  actors: z.array(HistoricalActorSchema).optional(),
-  historiographicalSchool: z.string().optional(),
+  historicalEvents: z.array(HistoricalEventSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  historicalSources: z.array(HistoricalSourceSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  periods: z.array(HistoricalPeriodSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  causalChains: z.array(CausalChainSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  actors: z.array(HistoricalActorSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  historiographicalSchool: IdSchema.optional(),
 });
 
 export type TemporalInput = z.infer<typeof TemporalSchema>;

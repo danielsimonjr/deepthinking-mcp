@@ -7,6 +7,7 @@
  */
 
 import { z } from "zod";
+import { MAX_LENGTHS } from "../../utils/sanitization.js";
 
 /**
  * Input schema for the deepthinking_analyze tool
@@ -16,6 +17,7 @@ export const analyzeInputSchema = z.object({
   thought: z
     .string()
     .min(1, "Thought is required")
+    .max(MAX_LENGTHS.THOUGHT_CONTENT)
     .describe(
       "The thought, problem, or question to analyze using multiple reasoning modes",
     ),
@@ -88,12 +90,14 @@ export const analyzeInputSchema = z.object({
   /** Optional session ID for tracking */
   sessionId: z
     .string()
+    .max(MAX_LENGTHS.STRING_FIELD)
     .optional()
     .describe("Session ID to associate this analysis with an existing session"),
 
   /** Optional context for the analysis */
   context: z
     .string()
+    .max(MAX_LENGTHS.DESCRIPTION)
     .optional()
     .describe(
       "Additional context or background information to consider during analysis",

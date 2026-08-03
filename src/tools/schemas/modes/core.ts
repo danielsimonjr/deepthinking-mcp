@@ -7,7 +7,14 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { ShannonStageEnum } from "../shared.js";
+import {
+  ShannonStageEnum,
+  IdSchema,
+  TextSchema,
+  IdArraySchema,
+  TextArraySchema,
+} from "../shared.js";
+import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 /**
  * Standard workflow modes (sequential, shannon, hybrid)
@@ -16,7 +23,7 @@ import { ShannonStageEnum } from "../shared.js";
 export const StandardSchema = BaseThoughtSchema.extend({
   mode: z.enum(["sequential", "shannon", "hybrid"]),
   stage: ShannonStageEnum.optional(),
-  activeModes: z.array(z.string()).optional(),
+  activeModes: IdArraySchema.optional(),
 });
 
 /**
@@ -26,32 +33,33 @@ export const StandardSchema = BaseThoughtSchema.extend({
 export const CoreModeSchema = BaseThoughtSchema.extend({
   mode: z.enum(["inductive", "deductive", "abductive"]),
   // Inductive properties
-  observations: z.array(z.string()).optional(),
-  pattern: z.string().optional(),
-  generalization: z.string().optional(),
+  observations: TextArraySchema.optional(),
+  pattern: TextSchema.optional(),
+  generalization: TextSchema.optional(),
   confidence: z.number().min(0).max(1).optional(),
-  counterexamples: z.array(z.string()).optional(),
+  counterexamples: TextArraySchema.optional(),
   sampleSize: z.number().int().min(1).optional(),
   // Deductive properties
-  premises: z.array(z.string()).optional(),
-  conclusion: z.string().optional(),
-  logicForm: z.string().optional(),
+  premises: TextArraySchema.optional(),
+  conclusion: TextSchema.optional(),
+  logicForm: TextSchema.optional(),
   validityCheck: z.boolean().optional(),
   soundnessCheck: z.boolean().optional(),
   // Abductive properties
   hypotheses: z
     .array(
       z.object({
-        id: z.string(),
-        explanation: z.string(),
+        id: IdSchema,
+        explanation: TextSchema,
         score: z.number().optional(),
       }),
     )
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
     .optional(),
   bestExplanation: z
     .object({
-      id: z.string(),
-      explanation: z.string(),
+      id: IdSchema,
+      explanation: TextSchema,
       score: z.number().optional(),
     })
     .optional(),

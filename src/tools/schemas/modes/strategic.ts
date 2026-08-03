@@ -6,21 +6,22 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { ConfidenceSchema } from "../shared.js";
+import { ConfidenceSchema, IdSchema, NameSchema, TextSchema, IdArraySchema } from "../shared.js";
+import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 const PlayerSchema = z.object({
-  id: z.string(),
-  name: z.string(),
+  id: IdSchema,
+  name: NameSchema,
   isRational: z.boolean(),
-  availableStrategies: z.array(z.string()),
-  role: z.string().optional(),
+  availableStrategies: IdArraySchema,
+  role: TextSchema.optional(),
 });
 
 const StrategySchema = z.object({
-  id: z.string(),
-  playerId: z.string(),
-  name: z.string(),
-  description: z.string(),
+  id: IdSchema,
+  playerId: IdSchema,
+  name: NameSchema,
+  description: TextSchema,
   isPure: z.boolean(),
   probability: ConfidenceSchema.optional(),
 });
@@ -29,25 +30,25 @@ const StrategySchema = z.object({
  * Payoff entry
  */
 const PayoffEntrySchema = z.object({
-  strategyProfile: z.array(z.string()),
-  payoffs: z.array(z.number()),
+  strategyProfile: IdArraySchema,
+  payoffs: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS),
 });
 
 /**
  * Payoff matrix
  */
 const PayoffMatrixSchema = z.object({
-  players: z.array(z.string()),
-  dimensions: z.array(z.number()),
-  payoffs: z.array(PayoffEntrySchema),
+  players: IdArraySchema,
+  dimensions: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS),
+  payoffs: z.array(PayoffEntrySchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS),
 });
 
 /**
  * Solution schema for optimization
  */
 const SolutionSchema = z.object({
-  value: z.string(),
-  variables: z.record(z.string(), z.number()).optional(),
+  value: TextSchema,
+  variables: z.record(IdSchema, z.number()).optional(),
 });
 
 /**
@@ -57,14 +58,14 @@ export const StrategicSchema = BaseThoughtSchema.extend({
   mode: z.enum(["gametheory", "optimization"]),
 
   // Game theory specific
-  players: z.array(PlayerSchema).optional(),
-  strategies: z.array(StrategySchema).optional(),
+  players: z.array(PlayerSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  strategies: z.array(StrategySchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
   payoffMatrix: PayoffMatrixSchema.optional(),
 
   // Optimization specific
-  objectiveFunction: z.string().optional(),
-  constraints: z.array(z.string()).optional(),
-  optimizationMethod: z.string().optional(),
+  objectiveFunction: TextSchema.optional(),
+  constraints: IdArraySchema.optional(),
+  optimizationMethod: IdSchema.optional(),
   solution: SolutionSchema.optional(),
 });
 

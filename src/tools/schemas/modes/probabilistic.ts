@@ -6,14 +6,15 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { ConfidenceSchema } from "../shared.js";
+import { ConfidenceSchema, IdSchema, TextSchema, IdArraySchema } from "../shared.js";
+import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 /**
  * Hypothesis schema for Bayesian reasoning
  */
 const HypothesisSchema = z.object({
-  id: z.string(),
-  description: z.string(),
+  id: IdSchema,
+  description: TextSchema,
   probability: ConfidenceSchema.optional(),
 });
 
@@ -21,9 +22,9 @@ const HypothesisSchema = z.object({
  * Belief mass schema for Dempster-Shafer
  */
 const BeliefMassSchema = z.object({
-  hypothesisSet: z.array(z.string()),
+  hypothesisSet: IdArraySchema,
   mass: ConfidenceSchema,
-  justification: z.string(),
+  justification: TextSchema,
 });
 
 /**
@@ -33,18 +34,18 @@ export const ProbabilisticSchema = BaseThoughtSchema.extend({
   mode: z.enum(["bayesian", "evidential"]),
 
   // Bayesian reasoning
-  hypotheses: z.array(HypothesisSchema).optional(),
+  hypotheses: z.array(HypothesisSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
   priorProbability: ConfidenceSchema.optional(),
   likelihood: ConfidenceSchema.optional(),
   posteriorProbability: ConfidenceSchema.optional(),
-  evidence: z.array(z.string()).optional(),
+  evidence: IdArraySchema.optional(),
 
   // Evidential (Dempster-Shafer) reasoning
-  frameOfDiscernment: z.array(z.string()).optional(),
-  beliefMasses: z.array(BeliefMassSchema).optional(),
-  massFunction: z.record(z.string(), ConfidenceSchema).optional(),
-  beliefFunction: z.record(z.string(), ConfidenceSchema).optional(),
-  plausibilityFunction: z.record(z.string(), ConfidenceSchema).optional(),
+  frameOfDiscernment: IdArraySchema.optional(),
+  beliefMasses: z.array(BeliefMassSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  massFunction: z.record(IdSchema, ConfidenceSchema).optional(),
+  beliefFunction: z.record(IdSchema, ConfidenceSchema).optional(),
+  plausibilityFunction: z.record(IdSchema, ConfidenceSchema).optional(),
 });
 
 export type ProbabilisticInput = z.infer<typeof ProbabilisticSchema>;
