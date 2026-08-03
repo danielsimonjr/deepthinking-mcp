@@ -1,10 +1,10 @@
 metadata:
   name: deepthinking-mcp
-  version: 9.2.0
+  version: 9.3.0
   lastUpdated: '2026-08-03'
-  totalFiles: 237
-  totalModules: 15
-  totalExports: 1276
+  totalFiles: 234
+  totalModules: 14
+  totalExports: 1280
 entryPoints:
   - file: src/index.ts
     type: main
@@ -3144,9 +3144,6 @@ modules:
             - modeToToolMap
             - toolList
             - toolSchemas
-        - file: ./tools/thinking.js
-          imports:
-            - thinkingTool
         - file: ./types/index.js
           imports:
             - ThinkingMode
@@ -5859,68 +5856,6 @@ modules:
         - ProofVerifier
       interfaces:
         - ProofVerifierConfig
-  search:
-    src/search/index.ts:
-      description: Search Index (v3.4.0)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/index.js
-          imports:
-            - ThinkingSession
-            - ThinkingMode
-          typeOnly: true
-        - file: ./types.js
-          imports:
-            - SearchIndexEntry
-            - SearchStats
-          typeOnly: true
-        - file: ./tokenizer.js
-          imports:
-            - Tokenizer
-        - file: ../taxonomy/classifier.js
-          imports:
-            - TaxonomyClassifier
-      exports:
-        - SearchIndex
-      classes:
-        - SearchIndex
-    src/search/tokenizer.ts:
-      description: Text Tokenizer (v3.4.0)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies: []
-      exports:
-        - DEFAULT_TOKENIZER_OPTIONS
-        - Tokenizer
-      classes:
-        - Tokenizer
-      interfaces:
-        - TokenizerOptions
-      constants:
-        - DEFAULT_TOKENIZER_OPTIONS
-    src/search/types.ts:
-      description: Search and Query Types (v3.4.0)
-      externalDependencies: []
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/index.js
-          imports:
-            - ThinkingSession
-            - ThinkingMode
-          typeOnly: true
-      exports: []
-      interfaces:
-        - SearchQuery
-        - SortOptions
-        - PaginationOptions
-        - SearchResult
-        - SearchHighlight
-        - SearchResults
-        - SearchIndexEntry
-        - SearchStats
-        - AdvancedQuery
-        - FacetedResults
   services:
     src/services/ExportService.ts:
       description: Export Service (v9.1.0)
@@ -6054,6 +5989,7 @@ modules:
         - file: ../utils/errors.js
           imports:
             - SessionNotFoundError
+            - ResourceLimitError
         - file: ../utils/sanitization.js
           imports:
             - sanitizeString
@@ -6080,6 +6016,9 @@ modules:
         - file: ./SessionMetricsCalculator.js
           imports:
             - SessionMetricsCalculator
+        - file: ../config/index.js
+          imports:
+            - getConfig
         - file: ./utils/logger.js
           imports:
             - createLogger
@@ -6145,6 +6084,9 @@ modules:
         - file: ../../utils/sanitization.js
           imports:
             - validateSessionId
+        - file: ../../utils/errors.js
+          imports:
+            - StorageError
       exports:
         - FileSessionStore
       classes:
@@ -6391,7 +6333,10 @@ modules:
           imports:
             - z
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - analyzeInputSchema
         - analyzeOutputSchema
@@ -6419,6 +6364,10 @@ modules:
             - ExportFormatEnum
             - ExportProfileEnum
             - LevelEnum
+            - IdSchema
+            - TextSchema
+            - ThoughtTextSchema
+            - IdArraySchema
       exports:
         - BaseThoughtSchema
         - SessionActionSchema
@@ -6533,6 +6482,13 @@ modules:
         - file: ../shared.js
           imports:
             - ConfidenceSchema
+            - IdSchema
+            - NameSchema
+            - TextSchema
+            - IdArraySchema
+        - file: ../../../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - AcademicModeEnum
         - AcademicSchema
@@ -6553,6 +6509,11 @@ modules:
         - file: ../shared.js
           imports:
             - ConfidenceSchema
+            - IdSchema
+            - IdArraySchema
+        - file: ../../../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - AnalyticalSchema
       constants:
@@ -6568,6 +6529,15 @@ modules:
         - file: ../base.js
           imports:
             - BaseThoughtSchema
+        - file: ../shared.js
+          imports:
+            - IdSchema
+            - NameSchema
+            - TextSchema
+            - IdArraySchema
+        - file: ../../../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - CausalSchema
       constants:
@@ -6586,6 +6556,13 @@ modules:
         - file: ../shared.js
           imports:
             - ShannonStageEnum
+            - IdSchema
+            - TextSchema
+            - IdArraySchema
+            - TextArraySchema
+        - file: ../../../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - StandardSchema
         - CoreModeSchema
@@ -6605,6 +6582,12 @@ modules:
         - file: ../base.js
           imports:
             - BaseThoughtSchema
+        - file: ../shared.js
+          imports:
+            - IdSchema
+            - NameSchema
+            - TextSchema
+            - IdArraySchema
       exports:
         - EngineeringSchema
       constants:
@@ -6721,6 +6704,12 @@ modules:
           imports:
             - ProofTypeEnum
             - TransformationEnum
+            - IdSchema
+            - TextSchema
+            - IdArraySchema
+        - file: ../../../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - MathSchema
       constants:
@@ -6739,6 +6728,12 @@ modules:
         - file: ../shared.js
           imports:
             - ConfidenceSchema
+            - IdSchema
+            - TextSchema
+            - IdArraySchema
+        - file: ../../../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - ProbabilisticSchema
       constants:
@@ -6754,6 +6749,15 @@ modules:
         - file: ../base.js
           imports:
             - BaseThoughtSchema
+        - file: ../shared.js
+          imports:
+            - IdSchema
+            - NameSchema
+            - TextSchema
+            - IdArraySchema
+        - file: ../../../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - ScientificSchema
       constants:
@@ -6772,6 +6776,13 @@ modules:
         - file: ../shared.js
           imports:
             - ConfidenceSchema
+            - IdSchema
+            - NameSchema
+            - TextSchema
+            - IdArraySchema
+        - file: ../../../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - StrategicSchema
       constants:
@@ -6794,6 +6805,13 @@ modules:
             - TemporalConstraintEnum
             - TemporalRelationEnum
             - EventTypeEnum
+            - IdSchema
+            - NameSchema
+            - TextSchema
+            - IdArraySchema
+        - file: ../../../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - TemporalSchema
       constants:
@@ -6805,10 +6823,19 @@ modules:
           imports:
             - z
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - ConfidenceSchema
         - PositiveIntSchema
+        - IdSchema
+        - NameSchema
+        - TextSchema
+        - ThoughtTextSchema
+        - IdArraySchema
+        - TextArraySchema
         - LevelEnum
         - ImpactEnum
         - ExportFormatEnum
@@ -6823,9 +6850,18 @@ modules:
         - ShannonStageEnum
         - EntitySchema
         - DescribedEntitySchema
+        - boundedArray
+      functions:
+        - boundedArray
       constants:
         - ConfidenceSchema
         - PositiveIntSchema
+        - IdSchema
+        - NameSchema
+        - TextSchema
+        - ThoughtTextSchema
+        - IdArraySchema
+        - TextArraySchema
         - LevelEnum
         - ImpactEnum
         - ExportFormatEnum
@@ -6847,7 +6883,10 @@ modules:
           imports:
             - z
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - ThinkingToolSchema
         - thinkingTool
@@ -10999,11 +11038,6 @@ dependencyGraph:
         - src/proof/patterns/warnings.ts
         - src/proof/strategy-recommender.ts
         - src/proof/verifier.ts
-    - name: Search
-      files:
-        - src/search/index.ts
-        - src/search/tokenizer.ts
-        - src/search/types.ts
     - name: Services
       files:
         - src/services/ExportService.ts
@@ -11136,19 +11170,19 @@ dependencyGraph:
         - src/validation/validators/registry.ts
         - src/validation/validators/validation-utils.ts
 statistics:
-  totalTypeScriptFiles: 237
-  totalModules: 15
-  totalLinesOfCode: 115713
-  totalExports: 1276
-  totalClasses: 145
-  totalInterfaces: 536
-  totalFunctions: 429
+  totalTypeScriptFiles: 234
+  totalModules: 14
+  totalLinesOfCode: 115132
+  totalExports: 1280
+  totalClasses: 143
+  totalInterfaces: 525
+  totalFunctions: 430
   totalTypeGuards: 87
   totalEnums: 3
-  totalConstants: 144
+  totalConstants: 149
   totalReExports: 571
-  totalTypeOnlyImports: 316
+  totalTypeOnlyImports: 313
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 57
   unusedFilesCount: 16
-  unusedExportsCount: 479
+  unusedExportsCount: 466
