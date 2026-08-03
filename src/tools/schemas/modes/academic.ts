@@ -7,7 +7,8 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { ConfidenceSchema } from "../shared.js";
+import { ConfidenceSchema, IdSchema, NameSchema, TextSchema, IdArraySchema } from "../shared.js";
+import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 /**
  * Academic mode enum
@@ -23,13 +24,13 @@ export const AcademicModeEnum = z.enum([
  * Source schema for synthesis mode
  */
 const SourceSchema = z.object({
-  id: z.string(),
-  type: z.string().optional(),
-  title: z.string(),
-  authors: z.array(z.string()).optional(),
+  id: IdSchema,
+  type: IdSchema.optional(),
+  title: NameSchema,
+  authors: IdArraySchema.optional(),
   year: z.number().int().optional(),
-  venue: z.string().optional(),
-  doi: z.string().optional(),
+  venue: NameSchema.optional(),
+  doi: IdSchema.optional(),
   relevance: ConfidenceSchema.optional(),
 });
 
@@ -37,10 +38,10 @@ const SourceSchema = z.object({
  * Theme schema for synthesis mode
  */
 const ThemeSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
-  sourceIds: z.array(z.string()).optional(),
+  id: IdSchema,
+  name: NameSchema,
+  description: TextSchema.optional(),
+  sourceIds: IdArraySchema.optional(),
   strength: ConfidenceSchema.optional(),
   consensus: z.enum(["strong", "moderate", "weak", "contested"]).optional(),
 });
@@ -49,8 +50,8 @@ const ThemeSchema = z.object({
  * Gap schema for synthesis mode
  */
 const GapSchema = z.object({
-  id: z.string(),
-  description: z.string(),
+  id: IdSchema,
+  description: TextSchema,
   type: z
     .enum([
       "empirical",
@@ -69,8 +70,8 @@ const GapSchema = z.object({
  * Claim schema for argumentation mode (Toulmin)
  */
 const ClaimSchema = z.object({
-  id: z.string(),
-  statement: z.string(),
+  id: IdSchema,
+  statement: TextSchema,
   type: z.enum(["fact", "value", "policy", "definition", "cause"]).optional(),
   strength: z.enum(["strong", "moderate", "tentative"]).optional(),
 });
@@ -79,7 +80,7 @@ const ClaimSchema = z.object({
  * Grounds schema for argumentation mode
  */
 const GroundsSchema = z.object({
-  id: z.string(),
+  id: IdSchema,
   type: z
     .enum([
       "empirical",
@@ -90,8 +91,8 @@ const GroundsSchema = z.object({
       "textual",
     ])
     .optional(),
-  content: z.string(),
-  source: z.string().optional(),
+  content: TextSchema,
+  source: IdSchema.optional(),
   reliability: ConfidenceSchema.optional(),
 });
 
@@ -99,8 +100,8 @@ const GroundsSchema = z.object({
  * Warrant schema for argumentation mode
  */
 const WarrantSchema = z.object({
-  id: z.string(),
-  statement: z.string(),
+  id: IdSchema,
+  statement: TextSchema,
   type: z
     .enum([
       "generalization",
@@ -111,42 +112,42 @@ const WarrantSchema = z.object({
       "definition",
     ])
     .optional(),
-  groundsIds: z.array(z.string()).optional(),
-  claimId: z.string().optional(),
+  groundsIds: IdArraySchema.optional(),
+  claimId: IdSchema.optional(),
 });
 
 /**
  * Rebuttal schema for argumentation mode
  */
 const RebuttalSchema = z.object({
-  id: z.string(),
-  objection: z.string(),
+  id: IdSchema,
+  objection: TextSchema,
   type: z
     .enum(["factual", "logical", "ethical", "practical", "definitional"])
     .optional(),
   strength: z.enum(["strong", "moderate", "weak"]).optional(),
-  response: z.string().optional(),
+  response: TextSchema.optional(),
 });
 
 /**
  * Critiqued work schema
  */
 const CritiquedWorkSchema = z.object({
-  id: z.string().optional(),
-  title: z.string(),
-  authors: z.array(z.string()).optional(),
+  id: IdSchema.optional(),
+  title: NameSchema,
+  authors: IdArraySchema.optional(),
   year: z.number().int().optional(),
-  type: z.string().optional(),
-  field: z.string().optional(),
+  type: IdSchema.optional(),
+  field: IdSchema.optional(),
 });
 
 /**
  * Qualitative code schema for analysis mode
  */
 const CodeSchema = z.object({
-  id: z.string(),
-  label: z.string(),
-  definition: z.string().optional(),
+  id: IdSchema,
+  label: NameSchema,
+  definition: TextSchema.optional(),
   type: z
     .enum([
       "descriptive",
@@ -161,14 +162,14 @@ const CodeSchema = z.object({
     ])
     .optional(),
   frequency: z.number().int().optional(),
-  examples: z.array(z.string()).optional(),
+  examples: IdArraySchema.optional(),
 });
 
 /**
  * Memo schema for analysis mode
  */
 const MemoSchema = z.object({
-  id: z.string(),
+  id: IdSchema,
   type: z
     .enum([
       "analytical",
@@ -179,8 +180,8 @@ const MemoSchema = z.object({
       "operational",
     ])
     .optional(),
-  content: z.string(),
-  relatedCodes: z.array(z.string()).optional(),
+  content: TextSchema,
+  relatedCodes: IdArraySchema.optional(),
 });
 
 /**
@@ -188,25 +189,25 @@ const MemoSchema = z.object({
  */
 export const AcademicSchema = BaseThoughtSchema.extend({
   mode: AcademicModeEnum,
-  thoughtType: z.string().optional(),
+  thoughtType: IdSchema.optional(),
 
   // Synthesis properties
-  sources: z.array(SourceSchema).optional(),
-  themes: z.array(ThemeSchema).optional(),
-  gaps: z.array(GapSchema).optional(),
+  sources: z.array(SourceSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  themes: z.array(ThemeSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  gaps: z.array(GapSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
 
   // Argumentation properties (Toulmin model)
-  claims: z.array(ClaimSchema).optional(),
-  grounds: z.array(GroundsSchema).optional(),
-  warrants: z.array(WarrantSchema).optional(),
-  rebuttals: z.array(RebuttalSchema).optional(),
+  claims: z.array(ClaimSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  grounds: z.array(GroundsSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  warrants: z.array(WarrantSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  rebuttals: z.array(RebuttalSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
   argumentStrength: ConfidenceSchema.optional(),
 
   // Critique properties
   critiquedWork: CritiquedWorkSchema.optional(),
-  strengths: z.array(z.string()).optional(),
-  weaknesses: z.array(z.string()).optional(),
-  suggestions: z.array(z.string()).optional(),
+  strengths: IdArraySchema.optional(),
+  weaknesses: IdArraySchema.optional(),
+  suggestions: IdArraySchema.optional(),
 
   // Analysis properties (qualitative)
   methodology: z
@@ -225,19 +226,20 @@ export const AcademicSchema = BaseThoughtSchema.extend({
   dataSources: z
     .array(
       z.object({
-        id: z.string(),
-        type: z.string(),
-        description: z.string().optional(),
-        participantId: z.string().optional(),
+        id: IdSchema,
+        type: IdSchema,
+        description: TextSchema.optional(),
+        participantId: IdSchema.optional(),
       }),
     )
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
     .optional(),
-  codes: z.array(CodeSchema).optional(),
-  memos: z.array(MemoSchema).optional(),
+  codes: z.array(CodeSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  memos: z.array(MemoSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
   saturationReached: z.boolean().optional(),
 
   // Shared
-  keyInsight: z.string().optional(),
+  keyInsight: TextSchema.optional(),
 });
 
 export type AcademicInput = z.infer<typeof AcademicSchema>;

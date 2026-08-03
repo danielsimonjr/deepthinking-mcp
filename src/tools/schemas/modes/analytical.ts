@@ -7,23 +7,24 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { ConfidenceSchema } from "../shared.js";
+import { ConfidenceSchema, IdSchema, IdArraySchema } from "../shared.js";
+import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 /**
  * Domain schema for analogical reasoning
  */
 const DomainSchema = z.object({
-  domain: z.string(),
-  elements: z.array(z.string()).optional(),
-  relations: z.array(z.string()).optional(),
+  domain: IdSchema,
+  elements: IdArraySchema.optional(),
+  relations: IdArraySchema.optional(),
 });
 
 /**
  * Mapping schema for analogical reasoning
  */
 const MappingSchema = z.object({
-  source: z.string(),
-  target: z.string(),
+  source: IdSchema,
+  target: IdSchema,
   confidence: ConfidenceSchema.optional(),
 });
 
@@ -41,11 +42,11 @@ export const AnalyticalSchema = BaseThoughtSchema.extend({
   // Analogical reasoning
   sourceAnalogy: DomainSchema.optional(),
   targetAnalogy: DomainSchema.optional(),
-  mappings: z.array(MappingSchema).optional(),
+  mappings: z.array(MappingSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
 
   // First principles reasoning
-  fundamentals: z.array(z.string()).optional(),
-  derivedInsights: z.array(z.string()).optional(),
+  fundamentals: IdArraySchema.optional(),
+  derivedInsights: IdArraySchema.optional(),
 });
 
 export type AnalyticalInput = z.infer<typeof AnalyticalSchema>;

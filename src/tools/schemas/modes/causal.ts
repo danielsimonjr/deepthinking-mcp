@@ -6,14 +6,16 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
+import { IdSchema, NameSchema, TextSchema, IdArraySchema } from "../shared.js";
+import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 /**
  * Causal node schema
  */
 const CausalNodeSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string().optional(),
+  id: IdSchema,
+  name: NameSchema,
+  description: TextSchema.optional(),
   type: z.enum(["cause", "effect", "mediator", "confounder"]).optional(),
 });
 
@@ -21,9 +23,9 @@ const CausalNodeSchema = z.object({
  * Causal edge schema
  */
 const CausalEdgeSchema = z.object({
-  from: z.string(),
-  to: z.string(),
-  type: z.string().optional(),
+  from: IdSchema,
+  to: IdSchema,
+  type: IdSchema.optional(),
   strength: z.number().min(0).max(1).optional(),
 });
 
@@ -31,45 +33,46 @@ const CausalEdgeSchema = z.object({
  * Counterfactual scenario schema
  */
 const CounterfactualSchema = z.object({
-  actual: z.string().optional(),
-  hypothetical: z.string().optional(),
-  consequence: z.string().optional(),
+  actual: TextSchema.optional(),
+  hypothetical: TextSchema.optional(),
+  consequence: TextSchema.optional(),
 });
 
 /**
  * Intervention schema
  */
 const InterventionSchema = z.object({
-  node: z.string(),
-  value: z.string().optional(),
-  effect: z.string().optional(),
+  node: IdSchema,
+  value: IdSchema.optional(),
+  effect: TextSchema.optional(),
 });
 
 export const CausalSchema = BaseThoughtSchema.extend({
   mode: z.enum(["causal", "counterfactual", "abductive"]),
   // Causal graph properties (top-level for JSON schema compatibility)
-  nodes: z.array(CausalNodeSchema).optional(),
-  edges: z.array(CausalEdgeSchema).optional(),
+  nodes: z.array(CausalNodeSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  edges: z.array(CausalEdgeSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
   // Nested causalGraph for backwards compatibility
   causalGraph: z
     .object({
-      nodes: z.array(CausalNodeSchema),
-      edges: z.array(CausalEdgeSchema),
+      nodes: z.array(CausalNodeSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS),
+      edges: z.array(CausalEdgeSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS),
     })
     .optional(),
   // Counterfactual properties
   counterfactual: CounterfactualSchema.optional(),
   // Intervention properties
-  interventions: z.array(InterventionSchema).optional(),
+  interventions: z.array(InterventionSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
   // Observations for abductive reasoning
-  observations: z.array(z.string()).optional(),
+  observations: IdArraySchema.optional(),
   explanations: z
     .array(
       z.object({
-        hypothesis: z.string(),
+        hypothesis: TextSchema,
         plausibility: z.number().min(0).max(1).optional(),
       }),
     )
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
     .optional(),
 });
 

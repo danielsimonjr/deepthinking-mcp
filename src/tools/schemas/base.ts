@@ -12,25 +12,29 @@ import {
   ExportFormatEnum,
   ExportProfileEnum,
   LevelEnum,
+  IdSchema,
+  TextSchema,
+  ThoughtTextSchema,
+  IdArraySchema,
 } from "./shared.js";
 
 /**
  * Base schema with properties common to all thought types
  */
 export const BaseThoughtSchema = z.object({
-  sessionId: z.string().optional(),
-  thought: z.string().min(1),
+  sessionId: IdSchema.optional(),
+  thought: ThoughtTextSchema.min(1),
   thoughtNumber: PositiveIntSchema,
   totalThoughts: PositiveIntSchema,
   nextThoughtNeeded: z.boolean(),
   isRevision: z.boolean().optional(),
-  revisesThought: z.string().optional(),
-  revisionReason: z.string().optional(),
-  branchFrom: z.string().optional(),
-  branchId: z.string().optional(),
+  revisesThought: IdSchema.optional(),
+  revisionReason: TextSchema.optional(),
+  branchFrom: IdSchema.optional(),
+  branchId: IdSchema.optional(),
   uncertainty: ConfidenceSchema.optional(),
-  dependencies: z.array(z.string()).optional(),
-  assumptions: z.array(z.string()).optional(),
+  dependencies: IdArraySchema.optional(),
+  assumptions: IdArraySchema.optional(),
 });
 
 export type BaseThoughtInput = z.infer<typeof BaseThoughtSchema>;
@@ -39,18 +43,18 @@ export type BaseThoughtInput = z.infer<typeof BaseThoughtSchema>;
  * Session action schema for non-thought operations
  */
 export const SessionActionSchema = z.object({
-  sessionId: z.string().optional(),
+  sessionId: IdSchema.optional(),
   action: SessionActionEnum,
   exportFormat: ExportFormatEnum.optional(),
   exportProfile: ExportProfileEnum.optional(), // Phase 12: Pre-configured export bundles
   includeContent: z.boolean().optional(), // For export_all action
-  outputDir: z.string().optional(), // Phase 16: File export - when provided, exports write to files instead of returning content
+  outputDir: IdSchema.optional(), // Phase 16: File export - when provided, exports write to files instead of returning content
   overwrite: z.boolean().optional(), // Phase 16: File export - overwrite existing files (default: false)
-  newMode: z.string().optional(),
-  problemType: z.string().optional(),
+  newMode: IdSchema.optional(),
+  problemType: IdSchema.optional(),
   problemCharacteristics: z
     .object({
-      domain: z.string(),
+      domain: IdSchema,
       complexity: LevelEnum,
       uncertainty: LevelEnum,
       timeDependent: z.boolean(),

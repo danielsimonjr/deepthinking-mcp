@@ -6,32 +6,34 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
+import { IdSchema, NameSchema, TextSchema, IdArraySchema } from "../shared.js";
+import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 /**
  * Experiment schema for scientific method
  */
 const ExperimentSchema = z.object({
-  id: z.string(),
-  description: z.string(),
-  result: z.string().optional(),
+  id: IdSchema,
+  description: TextSchema,
+  result: TextSchema.optional(),
 });
 
 /**
  * System component schema for systems thinking
  */
 const SystemComponentSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  role: z.string().optional(),
+  id: IdSchema,
+  name: NameSchema,
+  role: TextSchema.optional(),
 });
 
 /**
  * Interaction schema for systems thinking
  */
 const InteractionSchema = z.object({
-  from: z.string(),
-  to: z.string(),
-  type: z.string(),
+  from: IdSchema,
+  to: IdSchema,
+  type: IdSchema,
 });
 
 /**
@@ -39,7 +41,7 @@ const InteractionSchema = z.object({
  */
 const FeedbackLoopSchema = z.object({
   type: z.enum(["positive", "negative", "neutral"]),
-  components: z.array(z.string()),
+  components: IdArraySchema,
 });
 
 /**
@@ -49,19 +51,19 @@ export const ScientificSchema = BaseThoughtSchema.extend({
   mode: z.enum(["scientificmethod", "systemsthinking", "formallogic"]),
 
   // Scientific method
-  hypothesis: z.string().optional(),
-  predictions: z.array(z.string()).optional(),
-  experiments: z.array(ExperimentSchema).optional(),
+  hypothesis: TextSchema.optional(),
+  predictions: IdArraySchema.optional(),
+  experiments: z.array(ExperimentSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
 
   // Systems thinking
-  systemComponents: z.array(SystemComponentSchema).optional(),
-  interactions: z.array(InteractionSchema).optional(),
-  feedbackLoops: z.array(FeedbackLoopSchema).optional(),
+  systemComponents: z.array(SystemComponentSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  interactions: z.array(InteractionSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  feedbackLoops: z.array(FeedbackLoopSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
 
   // Formal logic
-  premises: z.array(z.string()).optional(),
-  conclusion: z.string().optional(),
-  inference: z.string().optional(),
+  premises: IdArraySchema.optional(),
+  conclusion: TextSchema.optional(),
+  inference: TextSchema.optional(),
 });
 
 export type ScientificInput = z.infer<typeof ScientificSchema>;

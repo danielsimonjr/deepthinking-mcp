@@ -7,6 +7,7 @@
  */
 
 import { z } from "zod";
+import { MAX_LENGTHS } from "../../utils/sanitization.js";
 
 // ============================================================
 // NUMERIC SCHEMAS
@@ -22,6 +23,54 @@ export const ConfidenceSchema = z.number().min(0).max(1);
  * Positive integer (1+)
  */
 export const PositiveIntSchema = z.number().int().min(1);
+
+// ============================================================
+// BOUNDED STRING/ARRAY SCHEMAS (H-2 remediation, 2026-08-03 audit)
+// ============================================================
+//
+// Every free-text string and every array in src/tools/schemas/** must be
+// bounded — before this fix, sanitization only ran in SessionManager, so a
+// tool call (deepthinking_probabilistic) could carry a 5 MB string field or
+// a 50,000-element array. Limits are centralised on MAX_LENGTHS
+// (src/utils/sanitization.ts) so this file and MAX_LENGTHS never drift.
+//
+// Tiers, chosen to be generous for legitimate use while killing multi-MB /
+// unbounded-array payloads:
+//   - IdSchema     short identifiers/enums-as-strings (id, from, to, node…) — 1,000 chars
+//   - NameSchema    names/titles/labels                                     —   500 chars
+//   - TextSchema    free-text content/descriptions/explanations             — 10,000 chars
+//   - ThoughtTextSchema  large free-form bodies (the `thought` field itself) — 100,000 chars
+//   - boundedArray(item, maxItems)  caps array length (default tiers below)
+
+/** Short identifier/enum-like string (ids, from/to, node refs, etc.) */
+export const IdSchema = z.string().max(MAX_LENGTHS.STRING_FIELD);
+
+/** Name/title/label-like string */
+export const NameSchema = z.string().max(MAX_LENGTHS.TITLE);
+
+/** Free-text content: description, explanation, statement, justification, etc. */
+export const TextSchema = z.string().max(MAX_LENGTHS.DESCRIPTION);
+
+/** Large free-form text bodies (thought content, LaTeX/model source, etc.) */
+export const ThoughtTextSchema = z.string().max(MAX_LENGTHS.THOUGHT_CONTENT);
+
+/**
+ * Bound an array's length. Defaults to ARRAY_ITEMS (1,000) for arrays of
+ * primitives; pass MAX_LENGTHS.NESTED_ARRAY_ITEMS (500) for arrays of
+ * structured objects, which are heavier per element.
+ */
+export function boundedArray<T extends z.ZodTypeAny>(
+  item: T,
+  maxItems: number = MAX_LENGTHS.ARRAY_ITEMS,
+) {
+  return z.array(item).max(maxItems);
+}
+
+/** Array of bounded id-like strings (evidence, tags, dependencies, etc.) */
+export const IdArraySchema = boundedArray(IdSchema);
+
+/** Array of bounded free-text strings (observations, premises, etc.) */
+export const TextArraySchema = boundedArray(TextSchema);
 
 // ============================================================
 // COMMON ENUMS
@@ -163,15 +212,15 @@ export const ShannonStageEnum = z.enum([
  * Basic entity with ID and name
  */
 export const EntitySchema = z.object({
-  id: z.string(),
-  name: z.string(),
+  id: IdSchema,
+  name: NameSchema,
 });
 
 /**
  * Entity with description
  */
 export const DescribedEntitySchema = EntitySchema.extend({
-  description: z.string(),
+  description: TextSchema,
 });
 
 // ============================================================

@@ -7,32 +7,39 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { ProofTypeEnum, TransformationEnum } from "../shared.js";
+import {
+  ProofTypeEnum,
+  TransformationEnum,
+  IdSchema,
+  TextSchema,
+  IdArraySchema,
+} from "../shared.js";
+import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 const ProofStrategySchema = z.object({
   type: ProofTypeEnum,
-  steps: z.array(z.string()),
+  steps: IdArraySchema,
 });
 
 const MathematicalModelSchema = z.object({
-  latex: z.string(),
-  symbolic: z.string(),
-  ascii: z.string().optional(),
+  latex: TextSchema,
+  symbolic: TextSchema,
+  ascii: TextSchema.optional(),
 });
 
 const TensorPropertiesSchema = z.object({
   rank: z.tuple([z.number(), z.number()]),
-  components: z.string(),
-  latex: z.string(),
-  symmetries: z.array(z.string()),
-  invariants: z.array(z.string()),
+  components: TextSchema,
+  latex: TextSchema,
+  symmetries: IdArraySchema,
+  invariants: IdArraySchema,
   transformation: TransformationEnum,
 });
 
 const PhysicalInterpretationSchema = z.object({
-  quantity: z.string(),
-  units: z.string(),
-  conservationLaws: z.array(z.string()),
+  quantity: IdSchema,
+  units: IdSchema,
+  conservationLaws: IdArraySchema,
 });
 
 /**
@@ -40,24 +47,24 @@ const PhysicalInterpretationSchema = z.object({
  */
 const ProofStepInputSchema = z.object({
   stepNumber: z.number().int().positive(),
-  statement: z.string(),
-  justification: z.string().optional(),
-  latex: z.string().optional(),
-  referencesSteps: z.array(z.number()).optional(),
+  statement: TextSchema,
+  justification: TextSchema.optional(),
+  latex: TextSchema.optional(),
+  referencesSteps: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
 });
 
 export const MathSchema = BaseThoughtSchema.extend({
   mode: z.enum(["mathematics", "physics", "computability"]),
-  thoughtType: z.string().optional(),
+  thoughtType: IdSchema.optional(),
   proofStrategy: ProofStrategySchema.optional(),
   mathematicalModel: MathematicalModelSchema.optional(),
   tensorProperties: TensorPropertiesSchema.optional(),
   physicalInterpretation: PhysicalInterpretationSchema.optional(),
 
   // Phase 8: Proof decomposition fields
-  proofSteps: z.array(ProofStepInputSchema).optional(),
-  theorem: z.string().optional(),
-  hypotheses: z.array(z.string()).optional(),
+  proofSteps: z.array(ProofStepInputSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  theorem: TextSchema.optional(),
+  hypotheses: IdArraySchema.optional(),
   analysisDepth: z.enum(["shallow", "standard", "deep"]).optional(),
   includeConsistencyCheck: z.boolean().optional(),
   traceAssumptions: z.boolean().optional(),

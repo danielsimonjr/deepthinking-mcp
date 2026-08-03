@@ -15,6 +15,10 @@ export const MAX_LENGTHS = {
   HYPOTHESIS: 5000,
   DESCRIPTION: 10000,
   STRING_FIELD: 1000,
+  // H-2 remediation (2026-08-03 audit): bounds for the mode-schema layer
+  // (src/tools/schemas/**), which previously had zero .max() coverage.
+  ARRAY_ITEMS: 1000, // max items in an array of primitive strings (e.g. evidence, tags)
+  NESTED_ARRAY_ITEMS: 500, // max items in an array of structured objects (e.g. hypotheses, sources)
 };
 
 /**
