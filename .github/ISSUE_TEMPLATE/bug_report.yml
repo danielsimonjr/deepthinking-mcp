@@ -1,0 +1,80 @@
+name: Bug Report
+description: Report a defect in deepthinking-mcp (the MCP server, a reasoning mode, an export format, or the CI/build tooling).
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. **Security vulnerabilities do not belong here** —
+        see [SECURITY.md](../../SECURITY.md) for the private disclosure path instead.
+
+  - type: input
+    id: version
+    attributes:
+      label: deepthinking-mcp version
+      description: From `npm ls deepthinking-mcp`, the `serverInfo.version` in an `initialize` response, or `.claude-plugin/plugin.json`.
+      placeholder: "9.2.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Which surface?
+      options:
+        - MCP server (npx / node dist/index.js)
+        - Claude Code plugin (local-marketplace)
+        - Reasoning mode / thought validation
+        - Export (Mermaid/DOT/SVG/etc.)
+        - Session management / persistence
+        - Build / CI / release tooling
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug. Include the exact error message if there was one — don't paraphrase it.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Minimal steps to reproduce, ideally with the exact tool call (name + arguments) that triggered it.
+      placeholder: |
+        1. Call `deepthinking_standard` with mode "sequential" and ...
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node.js version (`node -v`), and how the server is launched (npx / local build / Claude Code plugin).
+      placeholder: |
+        OS: Windows 11
+        Node: v20.x
+        Launch method: npx -y deepthinking-mcp@9.2.0
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs / stack trace
+      description: Paste any error output. This will be formatted as code automatically.
+      render: shell

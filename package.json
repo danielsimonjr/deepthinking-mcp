@@ -25,13 +25,13 @@
     "test:all": "cross-env VITEST_REPORT_MODE=all vitest --run --coverage",
     "test:publish": "cross-env SKIP_BENCHMARKS=1 VITEST_REPORT_MODE=summary vitest --run --coverage",
     "test:coverage": "vitest --coverage",
-    "lint": "eslint src/",
+    "lint": "eslint src/ --max-warnings 357",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
     "typecheck": "tsc --noEmit",
     "typecheck:tools": "tsc -p tools/tsconfig.json",
     "prepublishOnly": "npm run build && npm run test:publish",
-    "docs:deps": "npx tsx tools/create-dependency-graph.ts"
+    "docs:deps": "npx tsx tools/create-dependency-graph/create-dependency-graph.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.30.0",

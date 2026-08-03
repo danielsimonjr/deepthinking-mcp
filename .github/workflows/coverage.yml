@@ -12,6 +12,14 @@ permissions:
   pull-requests: write
   checks: write
 
+env:
+  # Single source of truth for the coverage gate. Measured lines coverage as
+  # of 2026-08-03 is ~58.1%; this is a ratchet baseline just below that so
+  # the gate is real (fails the build) without being a no-op or an
+  # immediately-red hard-fail. Raise this as coverage improves - never lower
+  # it to make a regression pass.
+  COVERAGE_THRESHOLD: 55
+
 jobs:
   coverage:
     name: Generate Coverage Report
@@ -102,19 +110,21 @@ jobs:
                 { name: 'Branches', data: total.branches }
               ];
 
+              const threshold = Number(process.env.COVERAGE_THRESHOLD);
+
               metrics.forEach(metric => {
                 const pct = metric.data.pct;
-                const status = pct >= 80 ? '✅' : pct >= 60 ? '⚠️' : '❌';
+                const status = pct >= threshold ? '✅' : '❌';
                 coverageComment += `| ${metric.name} | ${pct}% (${metric.data.covered}/${metric.data.total}) | ${status} |\n`;
               });
 
               coverageComment += '\n';
 
-              // Coverage threshold check
-              if (total.lines.pct < 60) {
-                coverageComment += '⚠️ **Warning**: Line coverage is below 60%\n';
-              } else if (total.lines.pct >= 80) {
-                coverageComment += '✅ **Great!**: Coverage meets the 80% threshold\n';
+              // Coverage threshold check (single source of truth: COVERAGE_THRESHOLD env var)
+              if (total.lines.pct < threshold) {
+                coverageComment += `❌ **Below gate**: Line coverage (${total.lines.pct}%) is below the required ${threshold}% threshold\n`;
+              } else {
+                coverageComment += `✅ **Meets gate**: Coverage is at or above the required ${threshold}% threshold\n`;
               }
 
             } catch (error) {
@@ -175,6 +185,8 @@ jobs:
       - name: Check coverage threshold
         run: |
           COVERAGE=$(node -pe "JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.lines.pct")
-          if (( $(echo "$COVERAGE < 60" | bc -l) )); then
-            echo "::warning::Code coverage ($COVERAGE%) is below 60% threshold"
+          echo "Line coverage: $COVERAGE% (threshold: $COVERAGE_THRESHOLD%)"
+          if (( $(echo "$COVERAGE < $COVERAGE_THRESHOLD" | bc -l) )); then
+            echo "::error::Code coverage ($COVERAGE%) is below the required $COVERAGE_THRESHOLD% threshold"
+            exit 1
           fi

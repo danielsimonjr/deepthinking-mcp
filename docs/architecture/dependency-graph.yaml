@@ -1,14 +1,14 @@
 metadata:
   name: deepthinking-mcp
-  version: 9.1.0
-  lastUpdated: "2025-12-31"
+  version: 9.2.0
+  lastUpdated: '2026-08-03'
   totalFiles: 237
   totalModules: 15
-  totalExports: 1275
+  totalExports: 1276
 entryPoints:
   - file: src/index.ts
     type: main
-    description: DeepThinking MCP Server (v9.1.0)
+    description: DeepThinking MCP Server
 modules:
   cache:
     src/cache/index.ts:
@@ -79,10 +79,13 @@ modules:
       nodeDependencies:
         - module: fs
           imports:
-            - "* as fs"
+            - '* as fs'
+        - module: os
+          imports:
+            - '* as os'
         - module: path
           imports:
-            - "* as path"
+            - '* as path'
       internalDependencies:
         - file: ../types/session.js
           imports:
@@ -97,6 +100,7 @@ modules:
           imports:
             - getExportProfile
       exports:
+        - resolveSandboxedOutputDir
         - createFileExporter
         - FileExporter
       classes:
@@ -107,6 +111,7 @@ modules:
         - BatchExportResult
         - ExportProgress
       functions:
+        - resolveSandboxedOutputDir
         - createFileExporter
     src/export/index.ts:
       description: Export module index (v4.4.0)
@@ -134,7 +139,9 @@ modules:
             - exportScientificMethodExperiment
             - exportOptimizationSolution
             - exportFormalLogicProof
-            - "// Phase 8: Proof decomposition\r\n  exportProofDecomposition"
+            - |-
+              // Phase 8: Proof decomposition
+                exportProofDecomposition
           reExport: true
         - file: ./visual/utils/latex.js
           imports:
@@ -189,7 +196,9 @@ modules:
         - exportScientificMethodExperiment
         - exportOptimizationSolution
         - exportFormalLogicProof
-        - "// Phase 8: Proof decomposition\r\n  exportProofDecomposition"
+        - |-
+          // Phase 8: Proof decomposition
+            exportProofDecomposition
         - LaTeXExporter
         - type LaTeXExportOptions
         - type ExportFormatType
@@ -234,7 +243,9 @@ modules:
         - exportScientificMethodExperiment
         - exportOptimizationSolution
         - exportFormalLogicProof
-        - "// Phase 8: Proof decomposition\r\n  exportProofDecomposition"
+        - |-
+          // Phase 8: Proof decomposition
+            exportProofDecomposition
         - LaTeXExporter
         - type LaTeXExportOptions
         - type ExportFormatType
@@ -298,11 +309,11 @@ modules:
       internalDependencies:
         - file: ./modes/index.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./utils/index.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./types.js
           imports:
@@ -323,8 +334,8 @@ modules:
         - sanitizeId
         - VisualExporter
       reExported:
-        - "* from ./modes/index.js"
-        - "* from ./utils/index.js"
+        - '* from ./modes/index.js'
+        - '* from ./utils/index.js'
         - type VisualFormat
         - type VisualExportOptions
         - sanitizeId
@@ -2524,71 +2535,71 @@ modules:
       internalDependencies:
         - file: ./mermaid.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./dot.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./ascii.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./svg.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./graphml.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./tikz.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./html.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./modelica.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./uml.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./json.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./markdown.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./latex.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./latex-mermaid-integration.js
           imports:
-            - "*"
+            - '*'
           reExport: true
       exports: []
       reExported:
-        - "* from ./mermaid.js"
-        - "* from ./dot.js"
-        - "* from ./ascii.js"
-        - "* from ./svg.js"
-        - "* from ./graphml.js"
-        - "* from ./tikz.js"
-        - "* from ./html.js"
-        - "* from ./modelica.js"
-        - "* from ./uml.js"
-        - "* from ./json.js"
-        - "* from ./markdown.js"
-        - "* from ./latex.js"
-        - "* from ./latex-mermaid-integration.js"
+        - '* from ./mermaid.js'
+        - '* from ./dot.js'
+        - '* from ./ascii.js'
+        - '* from ./svg.js'
+        - '* from ./graphml.js'
+        - '* from ./tikz.js'
+        - '* from ./html.js'
+        - '* from ./modelica.js'
+        - '* from ./uml.js'
+        - '* from ./json.js'
+        - '* from ./markdown.js'
+        - '* from ./latex.js'
+        - '* from ./latex-mermaid-integration.js'
     src/export/visual/utils/json.ts:
       description: JSON Visual Export Utilities (v8.5.0)
       externalDependencies: []
@@ -3088,15 +3099,15 @@ modules:
         - VisualExporter
   entry:
     src/index.ts:
-      description: DeepThinking MCP Server (v9.1.0)
+      description: DeepThinking MCP Server
       externalDependencies:
-        - package: "@modelcontextprotocol/sdk/server/index.js"
+        - package: '@modelcontextprotocol/sdk/server/index.js'
           imports:
             - Server
-        - package: "@modelcontextprotocol/sdk/server/stdio.js"
+        - package: '@modelcontextprotocol/sdk/server/stdio.js'
           imports:
             - StdioServerTransport
-        - package: "@modelcontextprotocol/sdk/types.js"
+        - package: '@modelcontextprotocol/sdk/types.js'
           imports:
             - CallToolRequestSchema
             - ListToolsRequestSchema
@@ -3411,12 +3422,12 @@ modules:
       internalDependencies:
         - file: ./modes/combinations
           imports:
-            - "*   MultiModeAnalyzer"
-            - "*   analyzeMultiMode"
-            - "*   getPreset"
-            - "*   InsightMerger"
-            - "*   ConflictResolver"
-            - "*"
+            - '*   MultiModeAnalyzer'
+            - '*   analyzeMultiMode'
+            - '*   getPreset'
+            - '*   InsightMerger'
+            - '*   ConflictResolver'
+            - '*'
         - file: ./presets.js
           imports:
             - type PresetId
@@ -5940,7 +5951,9 @@ modules:
             - isScientificMethodThought
             - isHistoricalThought
             - HybridThought
-            - "// Sprint 1: Visual export integration types\r\n  SequentialThought"
+            - |-
+              // Sprint 1: Visual export integration types
+                SequentialThought
             - ShannonThought
             - AbductiveThought
             - CounterfactualThought
@@ -6060,6 +6073,10 @@ modules:
         - file: ../cache/lru.js
           imports:
             - LRUCache
+        - file: ../cache/types.js
+          imports:
+            - CacheStats
+          typeOnly: true
         - file: ./SessionMetricsCalculator.js
           imports:
             - SessionMetricsCalculator
@@ -6105,7 +6122,7 @@ modules:
             - promises
         - module: path
           imports:
-            - "* as path"
+            - '* as path'
       internalDependencies:
         - file: ../../types/index.js
           imports:
@@ -6125,6 +6142,9 @@ modules:
             - withLock
             - withSharedLock
             - LockOptions
+        - file: ../../utils/sanitization.js
+          imports:
+            - validateSessionId
       exports:
         - FileSessionStore
       classes:
@@ -7106,15 +7126,15 @@ modules:
       internalDependencies:
         - file: ./core.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./session.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ./modes/recommendations.js
           imports:
-            - "*"
+            - '*'
           reExport: true
         - file: ../modes/handlers/ModeHandler.js
           imports:
@@ -7558,9 +7578,9 @@ modules:
         - isSessionActionInput
         - isAnalyzeInput
       reExported:
-        - "* from ./core.js"
-        - "* from ./session.js"
-        - "* from ./modes/recommendations.js"
+        - '* from ./core.js'
+        - '* from ./session.js'
+        - '* from ./modes/recommendations.js'
         - type ModeHandler
         - type ValidationResult
         - type ValidationError
@@ -8628,7 +8648,10 @@ modules:
             - promises
         - module: path
           imports:
-            - "* as path"
+            - '* as path'
+        - module: os
+          imports:
+            - '* as os'
       internalDependencies:
         - file: ./logger.js
           imports:
@@ -8850,7 +8873,9 @@ modules:
           reExport: true
         - file: ./schema-utils.js
           imports:
-            - "// Primitive schemas\r\n  probabilitySchema"
+            - |-
+              // Primitive schemas
+                probabilitySchema
             - confidenceSchema
             - progressSchema
             - weightSchema
@@ -8859,7 +8884,9 @@ modules:
             - nonEmptyStringSchema
             - uuidSchema
             - timestampSchema
-            - "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema"
+            - |-
+              // Composite schemas - Hypothesis & Evidence
+                hypothesisSchema
             - probabilityWithJustificationSchema
             - probabilityWithCalculationSchema
             - evidenceSchema
@@ -8869,7 +8896,9 @@ modules:
             - type ProbabilityWithCalculation
             - type EvidenceInput
             - type EvidenceWithSupport
-            - "// Graph schemas\r\n  createNodeSchema"
+            - |-
+              // Graph schemas
+                createNodeSchema
             - createEdgeSchema
             - nodeSchema
             - weightedNodeSchema
@@ -8881,48 +8910,64 @@ modules:
             - type EdgeInput
             - type WeightedEdgeInput
             - type CausalEdgeInput
-            - "// Temporal schemas\r\n  timePointSchema"
+            - |-
+              // Temporal schemas
+                timePointSchema
             - timeIntervalSchema
             - temporalEventSchema
             - type TimePointInput
             - type TimeIntervalInput
             - type TemporalEventInput
-            - "// Mathematical schemas\r\n  mathExpressionSchema"
+            - |-
+              // Mathematical schemas
+                mathExpressionSchema
             - valueWithUnitSchema
             - measurementSchema
             - type MathExpressionInput
             - type ValueWithUnitInput
             - type MeasurementInput
-            - "// Game Theory schemas\r\n  playerSchema"
+            - |-
+              // Game Theory schemas
+                playerSchema
             - strategySchema
             - payoffSchema
             - type PlayerInput
             - type StrategyInput
             - type PayoffInput
-            - "// Reasoning schemas\r\n  reasoningStepSchema"
+            - |-
+              // Reasoning schemas
+                reasoningStepSchema
             - propositionSchema
             - inferenceRuleSchema
             - type ReasoningStepInput
             - type PropositionInput
             - type InferenceRuleInput
-            - "// Optimization schemas\r\n  constraintSchema"
+            - |-
+              // Optimization schemas
+                constraintSchema
             - objectiveSchema
             - solutionSchema
             - type ConstraintInput
             - type ObjectiveInput
             - type SolutionInput
-            - "// Base schemas\r\n  baseThoughtSchema"
+            - |-
+              // Base schemas
+                baseThoughtSchema
             - sequentialThoughtExtensionSchema
             - bayesianThoughtExtensionSchema
             - type BaseThoughtInput
-            - "// Helpers\r\n  createRangeSchema"
+            - |-
+              // Helpers
+                createRangeSchema
             - createEnumSchema
             - createOptionalStringWithDefault
             - createOptionalNumberWithDefault
             - createOptionalBooleanWithDefault
             - uniqueIdArraySchema
             - createGraphSchema
-            - "// Namespace export\r\n  SchemaUtils"
+            - |-
+              // Namespace export
+                SchemaUtils
           reExport: true
       exports:
         - IssueSeverity
@@ -8954,7 +8999,9 @@ modules:
         - type BatchOperationInput
         - validateInput
         - safeValidateInput
-        - "// Primitive schemas\r\n  probabilitySchema"
+        - |-
+          // Primitive schemas
+            probabilitySchema
         - confidenceSchema
         - progressSchema
         - weightSchema
@@ -8963,7 +9010,9 @@ modules:
         - nonEmptyStringSchema
         - uuidSchema
         - timestampSchema
-        - "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema"
+        - |-
+          // Composite schemas - Hypothesis & Evidence
+            hypothesisSchema
         - probabilityWithJustificationSchema
         - probabilityWithCalculationSchema
         - evidenceSchema
@@ -8973,7 +9022,9 @@ modules:
         - type ProbabilityWithCalculation
         - type EvidenceInput
         - type EvidenceWithSupport
-        - "// Graph schemas\r\n  createNodeSchema"
+        - |-
+          // Graph schemas
+            createNodeSchema
         - createEdgeSchema
         - nodeSchema
         - weightedNodeSchema
@@ -8985,48 +9036,64 @@ modules:
         - type EdgeInput
         - type WeightedEdgeInput
         - type CausalEdgeInput
-        - "// Temporal schemas\r\n  timePointSchema"
+        - |-
+          // Temporal schemas
+            timePointSchema
         - timeIntervalSchema
         - temporalEventSchema
         - type TimePointInput
         - type TimeIntervalInput
         - type TemporalEventInput
-        - "// Mathematical schemas\r\n  mathExpressionSchema"
+        - |-
+          // Mathematical schemas
+            mathExpressionSchema
         - valueWithUnitSchema
         - measurementSchema
         - type MathExpressionInput
         - type ValueWithUnitInput
         - type MeasurementInput
-        - "// Game Theory schemas\r\n  playerSchema"
+        - |-
+          // Game Theory schemas
+            playerSchema
         - strategySchema
         - payoffSchema
         - type PlayerInput
         - type StrategyInput
         - type PayoffInput
-        - "// Reasoning schemas\r\n  reasoningStepSchema"
+        - |-
+          // Reasoning schemas
+            reasoningStepSchema
         - propositionSchema
         - inferenceRuleSchema
         - type ReasoningStepInput
         - type PropositionInput
         - type InferenceRuleInput
-        - "// Optimization schemas\r\n  constraintSchema"
+        - |-
+          // Optimization schemas
+            constraintSchema
         - objectiveSchema
         - solutionSchema
         - type ConstraintInput
         - type ObjectiveInput
         - type SolutionInput
-        - "// Base schemas\r\n  baseThoughtSchema"
+        - |-
+          // Base schemas
+            baseThoughtSchema
         - sequentialThoughtExtensionSchema
         - bayesianThoughtExtensionSchema
         - type BaseThoughtInput
-        - "// Helpers\r\n  createRangeSchema"
+        - |-
+          // Helpers
+            createRangeSchema
         - createEnumSchema
         - createOptionalStringWithDefault
         - createOptionalNumberWithDefault
         - createOptionalBooleanWithDefault
         - uniqueIdArraySchema
         - createGraphSchema
-        - "// Namespace export\r\n  SchemaUtils"
+        - |-
+          // Namespace export
+            SchemaUtils
       reExported:
         - IssueSeverity
         - IssueCategory
@@ -9057,7 +9124,9 @@ modules:
         - type BatchOperationInput
         - validateInput
         - safeValidateInput
-        - "// Primitive schemas\r\n  probabilitySchema"
+        - |-
+          // Primitive schemas
+            probabilitySchema
         - confidenceSchema
         - progressSchema
         - weightSchema
@@ -9066,7 +9135,9 @@ modules:
         - nonEmptyStringSchema
         - uuidSchema
         - timestampSchema
-        - "// Composite schemas - Hypothesis & Evidence\r\n  hypothesisSchema"
+        - |-
+          // Composite schemas - Hypothesis & Evidence
+            hypothesisSchema
         - probabilityWithJustificationSchema
         - probabilityWithCalculationSchema
         - evidenceSchema
@@ -9076,7 +9147,9 @@ modules:
         - type ProbabilityWithCalculation
         - type EvidenceInput
         - type EvidenceWithSupport
-        - "// Graph schemas\r\n  createNodeSchema"
+        - |-
+          // Graph schemas
+            createNodeSchema
         - createEdgeSchema
         - nodeSchema
         - weightedNodeSchema
@@ -9088,48 +9161,64 @@ modules:
         - type EdgeInput
         - type WeightedEdgeInput
         - type CausalEdgeInput
-        - "// Temporal schemas\r\n  timePointSchema"
+        - |-
+          // Temporal schemas
+            timePointSchema
         - timeIntervalSchema
         - temporalEventSchema
         - type TimePointInput
         - type TimeIntervalInput
         - type TemporalEventInput
-        - "// Mathematical schemas\r\n  mathExpressionSchema"
+        - |-
+          // Mathematical schemas
+            mathExpressionSchema
         - valueWithUnitSchema
         - measurementSchema
         - type MathExpressionInput
         - type ValueWithUnitInput
         - type MeasurementInput
-        - "// Game Theory schemas\r\n  playerSchema"
+        - |-
+          // Game Theory schemas
+            playerSchema
         - strategySchema
         - payoffSchema
         - type PlayerInput
         - type StrategyInput
         - type PayoffInput
-        - "// Reasoning schemas\r\n  reasoningStepSchema"
+        - |-
+          // Reasoning schemas
+            reasoningStepSchema
         - propositionSchema
         - inferenceRuleSchema
         - type ReasoningStepInput
         - type PropositionInput
         - type InferenceRuleInput
-        - "// Optimization schemas\r\n  constraintSchema"
+        - |-
+          // Optimization schemas
+            constraintSchema
         - objectiveSchema
         - solutionSchema
         - type ConstraintInput
         - type ObjectiveInput
         - type SolutionInput
-        - "// Base schemas\r\n  baseThoughtSchema"
+        - |-
+          // Base schemas
+            baseThoughtSchema
         - sequentialThoughtExtensionSchema
         - bayesianThoughtExtensionSchema
         - type BaseThoughtInput
-        - "// Helpers\r\n  createRangeSchema"
+        - |-
+          // Helpers
+            createRangeSchema
         - createEnumSchema
         - createOptionalStringWithDefault
         - createOptionalNumberWithDefault
         - createOptionalBooleanWithDefault
         - uniqueIdArraySchema
         - createGraphSchema
-        - "// Namespace export\r\n  SchemaUtils"
+        - |-
+          // Namespace export
+            SchemaUtils
     src/validation/schema-utils.ts:
       description: Schema Utilities (v7.1.0)
       externalDependencies:
@@ -11049,17 +11138,17 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 237
   totalModules: 15
-  totalLinesOfCode: 102467
-  totalExports: 1275
+  totalLinesOfCode: 115713
+  totalExports: 1276
   totalClasses: 145
   totalInterfaces: 536
-  totalFunctions: 428
+  totalFunctions: 429
   totalTypeGuards: 87
   totalEnums: 3
   totalConstants: 144
   totalReExports: 571
-  totalTypeOnlyImports: 315
+  totalTypeOnlyImports: 316
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 57
   unusedFilesCount: 16
-  unusedExportsCount: 478
+  unusedExportsCount: 479

@@ -15,7 +15,8 @@
  */
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs';
-import yaml from 'js-yaml';
+import * as yamlNs from 'js-yaml';
+const yaml = (yamlNs as any).default ?? yamlNs;
 import { basename, dirname, join, relative } from 'path';
 
 // Types

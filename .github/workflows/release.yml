@@ -118,7 +118,7 @@ jobs:
             ## Installation
 
             ```bash
-            npm install @anthropic/deepthinking-mcp@${{ steps.get_version.outputs.version }}
+            npm install deepthinking-mcp@${{ steps.get_version.outputs.version }}
             ```
 
             ## Full Changelog

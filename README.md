@@ -38,11 +38,13 @@
 
 A comprehensive Model Context Protocol (MCP) server featuring **34 reasoning modes** (30 with dedicated thought types, 4 advanced runtime modes) including historical reasoning, meta-reasoning for strategic oversight, with intelligent mode recommendation, taxonomy-based classification, enterprise security, and production-ready features for complex problem-solving, analysis, and decision-making.
 
-> 📋 **Final feature release**: v9.1.3 — see [DEPRECATED.md](DEPRECATED.md) for the migration path to `deepthinking-plugin`. Security fixes through 2026-10-12.
+> 📋 **Current release**: v9.2.0 — actively maintained (see the reversal notice above and
+> [CHANGELOG.md](CHANGELOG.md) for release history). [DEPRECATED.md](DEPRECATED.md) is kept for
+> anyone following an old link to the retracted notice.
 >
 > 🎉 **v9.1.0 added**: Historical Reasoning Mode — analyze historical events, evaluate sources, identify patterns, trace causal chains, and define periods with 5 thought types.
 >
-> ✨ **Codebase**: 237 TypeScript files | ~102,500 LOC | 15 modules | 5,148+ tests passing
+> ✨ **Codebase**: 237 TypeScript files | ~102,000 LOC | 15 modules | 5,065+ tests passing
 
 
 ## Table of Contents
@@ -148,7 +150,8 @@ Configure the server with environment variables:
 
 ### MCP Tool Usage
 
-DeepThinking MCP provides 13 focused tools for different reasoning domains:
+DeepThinking MCP provides 13 focused tools for different reasoning domains, plus a deprecated
+legacy `deepthinking` tool kept for backward compatibility (14 tools total on `tools/list`):
 
 | Tool | Modes | Description |
 |------|-------|-------------|
@@ -165,6 +168,7 @@ DeepThinking MCP provides 13 focused tools for different reasoning domains:
 | `deepthinking_academic` | synthesis, argumentation, critique, analysis | Academic research |
 | `deepthinking_session` | - | Session management |
 | `deepthinking_analyze` | Multi-mode | Analysis with presets and merge strategies |
+| `deepthinking` | Multi-mode | **Deprecated** legacy catch-all tool; use the focused tools above |
 
 ### Example: Sequential Reasoning
 
@@ -881,18 +885,18 @@ For architecture details, see [docs/architecture/](docs/architecture/).
 | Metric | Value |
 |--------|-------|
 | TypeScript Files | 237 |
-| Lines of Code | ~102,500 |
-| Test Files | 181 |
-| Passing Tests | 5,048 |
+| Lines of Code | ~102,000 (`src/*.ts`) |
+| Test Files | 177 |
+| Passing Tests | 5,065 |
 | Thinking Modes | 34 (30 with thought types) |
 | ModeHandlers | 37 specialized handlers |
-| MCP Tools | 13 focused tools |
+| MCP Tools | 14 (13 focused + 1 deprecated legacy) |
 | Export Formats | 8 + native SVG |
 | Visual Exporters | 42 files (24 mode-specific) |
 | Builder Classes | 14 fluent APIs |
 | Reasoning Types | 69 (110 planned) |
 | Modules | 15 |
-| Total Exports | 1,275 (571 re-exports) |
+| Total Exports | 1,276 (571 re-exports) |
 
 
 ## Architecture

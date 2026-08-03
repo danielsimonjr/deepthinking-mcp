@@ -1,11 +1,11 @@
 # Unused Files and Exports Analysis
 
-**Generated**: 2025-12-31
+**Generated**: 2026-08-03
 
 ## Summary
 
 - **Potentially unused files**: 16
-- **Potentially unused exports**: 478
+- **Potentially unused exports**: 479
 
 ## Potentially Unused Files
 
@@ -46,6 +46,7 @@ These exports are not imported by any other file in the codebase:
 
 ### `src/export/file-exporter.ts`
 
+- `resolveSandboxedOutputDir` (function)
 - `FileExportConfig` (interface)
 - `FileExportResult` (interface)
 - `BatchExportResult` (interface)
