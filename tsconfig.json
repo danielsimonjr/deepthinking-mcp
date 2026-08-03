@@ -16,7 +16,6 @@
       "@validation/*": ["src/validation/*"],
       "@modes/*": ["src/modes/*"],
       "@session/*": ["src/session/*"],
-      "@search/*": ["src/search/*"],
       "@cache/*": ["src/cache/*"],
       "@export/*": ["src/export/*"],
       "@taxonomy/*": ["src/taxonomy/*"]

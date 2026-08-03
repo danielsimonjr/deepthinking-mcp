@@ -185,6 +185,22 @@ export class SessionManager {
               { sessionId: key },
             );
           }
+        } else {
+          // Without persistence the evicted session is simply gone, and it
+          // used to go silently -- no log line explained why a subsequent
+          // getSession() started returning SessionNotFoundError. That matters
+          // more since maxActiveSessions became configurable: the effective
+          // default cap dropped 1000 -> 100, so this fires 10x sooner than it
+          // used to. Warn rather than discard quietly.
+          this.logger.warn(
+            "Session evicted from memory with no persistence configured; its thoughts are discarded",
+            {
+              sessionId: key,
+              thoughtCount: session.thoughts.length,
+              maxActiveSessions: getConfig().maxActiveSessions,
+              hint: "Set SESSION_DIR to persist sessions, or raise MCP_MAX_SESSIONS.",
+            },
+          );
         }
         // Clear meta-monitoring data for evicted session
         this.clearMetaSession(key);
@@ -330,6 +346,21 @@ export class SessionManager {
       try {
         session = (await this.storage.loadSession(sessionId)) ?? undefined;
         if (session) {
+          // Expiry must be re-checked here, not just in getLiveSession().
+          // A persisted session's updatedAt is unchanged by the reload, so
+          // without this an expired file-backed session was resurrected on
+          // every read: getLiveSession() evicted it, this branch reloaded it,
+          // forever. sessionTimeoutMs then never took effect for the read
+          // paths (`get_session`, `export`) even though it correctly blocked
+          // the mutating ones. Found by security review of v9.3.0 -- the
+          // release that added expiry.
+          if (this.isSessionExpired(session)) {
+            this.logger.debug("Expired session not restored from storage", {
+              sessionId,
+              sessionTimeoutMs: getConfig().sessionTimeoutMs,
+            });
+            return null;
+          }
           // Add to active sessions cache
           this.activeSessions.set(sessionId, session);
           this.logger.debug("Session loaded from storage", { sessionId });
@@ -546,8 +577,14 @@ export class SessionManager {
   async listSessions(
     includeStoredSessions: boolean = true,
   ): Promise<SessionMetadata[]> {
-    const memoryMetadata = Array.from(this.activeSessions.values()).map(
-      (session) => ({
+    // Expired sessions must be filtered here too. Reading the LRU directly
+    // reported them as active (with a stale updatedAt) while a follow-up
+    // getSession() on the same id returned null -- an inconsistency a caller
+    // could not explain. Every other read path goes through getLiveSession();
+    // this one did not.
+    const memoryMetadata = Array.from(this.activeSessions.values())
+      .filter((session) => !this.isSessionExpired(session))
+      .map((session) => ({
         id: session.id,
         title: session.title,
         createdAt: session.createdAt,

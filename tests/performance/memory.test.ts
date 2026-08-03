@@ -59,10 +59,23 @@ describe('Memory Performance Tests', () => {
         v8.setFlagsFromString('--expose_gc');
         g.gc = vm.runInNewContext('gc') as () => void;
       } finally {
-        // Leave the flag off so unrelated code can't call gc() as a side effect.
+        // Stops NEW contexts from receiving gc. It does not revoke the
+        // reference already captured above -- that is intentional and is what
+        // makes the helper usable for the rest of the run.
         v8.setFlagsFromString('--no-expose_gc');
       }
     }
+    // Enforced here rather than in a single test. Eight other tests in this
+    // file call forceGC() and then gate their assertions behind
+    // `if (delta > 0)` -- which never skips, because heapUsed is never 0. If
+    // acquiring gc ever silently failed (a sandboxed CI, restricted
+    // permissions), those tests would quietly go back to asserting against
+    // allocator noise, which is the exact flake class this helper exists to
+    // remove. Fail loudly instead.
+    expect(
+      typeof g.gc,
+      'global.gc unavailable - forceGC() could not acquire it via v8.setFlagsFromString; memory assertions would be measuring allocator noise',
+    ).toBe('function');
     g.gc?.();
   }
 
@@ -131,16 +144,9 @@ describe('Memory Performance Tests', () => {
         sessionSizes.push(after - before);
       }
 
-      // Precondition, asserted rather than assumed: this test is only
-      // meaningful when GC can actually be forced. vitest.config.ts passes
-      // --expose-gc for exactly this. Before that was wired, forceGC() was a
-      // silent no-op and the guard below skipped the assertion whenever the
-      // first delta happened to be <= 0 -- a test that could pass without
-      // checking anything. Fail loudly instead of self-disabling.
-      expect(
-        typeof (global as unknown as { gc?: () => void }).gc,
-        'global.gc unavailable - vitest must run with --expose-gc (see vitest.config.ts poolOptions)',
-      ).toBe('function');
+      // The gc-availability precondition is now asserted inside forceGC()
+      // itself, so it covers every call site in this file rather than only
+      // this test.
 
       // Memory growth per session should be relatively consistent.
       if (sessionSizes[0] > 0) {

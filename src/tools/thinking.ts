@@ -8,6 +8,7 @@
 
 import { z } from "zod";
 import { MAX_LENGTHS } from "../utils/sanitization.js";
+import { boundedRecord } from "./schemas/shared.js";
 
 /**
  * Zod schema for runtime validation (internal use)
@@ -430,7 +431,7 @@ export const ThinkingToolSchema = z.object({
         timestamp: z.number(),
         duration: z.number().optional(),
         type: z.enum(["instant", "interval"]),
-        properties: z.record(z.string().max(MAX_LENGTHS.DESCRIPTION), z.any()),
+        properties: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.any()),
       }),
     )
     .optional(),
@@ -960,8 +961,8 @@ export const ThinkingToolSchema = z.object({
         "unbounded",
         "approximate",
       ]),
-      variableValues: z.record(z.string().max(MAX_LENGTHS.DESCRIPTION), z.union([z.number(), z.string().max(MAX_LENGTHS.DESCRIPTION)])),
-      objectiveValues: z.record(z.string().max(MAX_LENGTHS.DESCRIPTION), z.number()),
+      variableValues: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.union([z.number(), z.string().max(MAX_LENGTHS.DESCRIPTION)])),
+      objectiveValues: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.number()),
       quality: z.number().min(0).max(1),
       computationTime: z.number().optional(),
       iterations: z.number().optional(),
@@ -974,7 +975,7 @@ export const ThinkingToolSchema = z.object({
       id: z.string().max(MAX_LENGTHS.DESCRIPTION),
       robustness: z.number().min(0).max(1),
       criticalConstraints: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
-      shadowPrices: z.record(z.string().max(MAX_LENGTHS.DESCRIPTION), z.number()).optional(),
+      shadowPrices: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.number()).optional(),
       recommendations: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
     })
     .optional(),
@@ -1068,7 +1069,7 @@ export const ThinkingToolSchema = z.object({
       rows: z.array(
         z.object({
           rowNumber: z.number().int().positive(),
-          assignments: z.record(z.string().max(MAX_LENGTHS.DESCRIPTION), z.boolean()),
+          assignments: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.boolean()),
           result: z.boolean(),
         }),
       ),
@@ -1082,7 +1083,7 @@ export const ThinkingToolSchema = z.object({
       id: z.string().max(MAX_LENGTHS.DESCRIPTION),
       formula: z.string().max(MAX_LENGTHS.DESCRIPTION),
       satisfiable: z.boolean(),
-      model: z.record(z.string().max(MAX_LENGTHS.DESCRIPTION), z.boolean()).optional(),
+      model: boundedRecord(z.string().max(MAX_LENGTHS.DESCRIPTION), z.boolean()).optional(),
       method: z.enum(["dpll", "cdcl", "resolution", "truth_table", "other"]),
       complexity: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
       explanation: z.string().max(MAX_LENGTHS.DESCRIPTION),

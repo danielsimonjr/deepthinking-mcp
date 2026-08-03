@@ -14,6 +14,8 @@
  */
 
 import { describe, it, expect } from "vitest";
+import { z } from "zod";
+import { boundedRecord } from "../../../../src/tools/schemas/shared.js";
 import { toolSchemas } from "../../../../src/tools/definitions.js";
 import { ProbabilisticSchema } from "../../../../src/tools/schemas/modes/probabilistic.js";
 import { CausalSchema } from "../../../../src/tools/schemas/modes/causal.js";
@@ -312,5 +314,65 @@ describe("H-2: schema-layer input bounding", () => {
         ),
       ).not.toThrow();
     });
+  });
+});
+
+/**
+ * Regression: record ENTRY COUNTS were unbounded.
+ *
+ * The v9.3.0 bounding pass capped string lengths and array lengths, but Zod
+ * records have no built-in cap on the number of keys -- so bounding the key
+ * string and the value type still left the map itself unbounded. Surfaced by
+ * security review of v9.3.0; the same gap the array bounds closed, simply not
+ * extended to records.
+ */
+describe('record entry-count bounds (regression)', () => {
+  it('rejects a record with more entries than the cap', () => {
+    const schema = boundedRecord(z.string().max(100), z.number(), 10);
+    const tooMany: Record<string, number> = {};
+    for (let i = 0; i < 11; i++) tooMany[`k${i}`] = i;
+
+    const result = schema.safeParse(tooMany);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(JSON.stringify(result.error.issues)).toMatch(/at most 10 entries/);
+    }
+  });
+
+  it('accepts a record at exactly the cap', () => {
+    const schema = boundedRecord(z.string().max(100), z.number(), 10);
+    const exact: Record<string, number> = {};
+    for (let i = 0; i < 10; i++) exact[`k${i}`] = i;
+
+    expect(schema.safeParse(exact).success).toBe(true);
+  });
+
+  it('bounds records in the legacy tool schema, which is still callable by name', () => {
+    // events[].properties is a real record field on ThinkingToolSchema
+    // (thinking.ts:434). Before boundedRecord, a 100k-entry map here parsed
+    // cleanly -- and the legacy tool remains callable by name even though it
+    // is hidden from tools/list, so it must carry the same bounds.
+    const properties: Record<string, unknown> = {};
+    for (let i = 0; i < 100_000; i++) properties[`p${i}`] = 1;
+
+    const result = ThinkingToolSchema.safeParse({
+      action: 'add_thought',
+      thought: 'x',
+      thoughtNumber: 1,
+      totalThoughts: 1,
+      nextThoughtNeeded: false,
+      mode: 'temporal',
+      events: [
+        {
+          id: 'e1',
+          name: 'e',
+          description: 'd',
+          timestamp: 0,
+          type: 'instant',
+          properties,
+        },
+      ],
+    });
+    expect(result.success).toBe(false);
   });
 });

@@ -72,6 +72,37 @@ export const IdArraySchema = boundedArray(IdSchema);
 /** Array of bounded free-text strings (observations, premises, etc.) */
 export const TextArraySchema = boundedArray(TextSchema);
 
+/**
+ * Bound a record's ENTRY COUNT, not just its key length and value type.
+ *
+ * Zod records have no built-in `.max()` on the number of keys, so bounding the
+ * key string and the value type still leaves the map itself unbounded -- a
+ * caller could submit 100,000 entries. That is the same gap the array bounds
+ * closed, simply not extended to records when they were added; surfaced by
+ * security review of v9.3.0.
+ *
+ * Implemented with superRefine rather than a wrapper type so the inferred type
+ * is unchanged and call sites keep their existing shape.
+ */
+export function boundedRecord<K extends z.ZodType<string>, V extends z.ZodTypeAny>(
+  key: K,
+  value: V,
+  maxEntries: number = MAX_LENGTHS.ARRAY_ITEMS,
+) {
+  return z.record(key, value).superRefine((val, ctx) => {
+    const size = Object.keys(val ?? {}).length;
+    if (size > maxEntries) {
+      ctx.addIssue({
+        code: "too_big",
+        origin: "record",
+        maximum: maxEntries,
+        inclusive: true,
+        message: `Too big: expected at most ${maxEntries} entries, received ${size}`,
+      });
+    }
+  });
+}
+
 // ============================================================
 // COMMON ENUMS
 // ============================================================

@@ -1,6 +1,6 @@
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 9.2.0 | **Last Updated**: 2026-08-03
+**Version**: 9.3.0 | **Last Updated**: 2026-08-03
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -16,18 +16,17 @@ This document provides a comprehensive dependency graph of all files, components
 6. [Interfaces Dependencies](#interfaces-dependencies)
 7. [Modes Dependencies](#modes-dependencies)
 8. [Proof Dependencies](#proof-dependencies)
-9. [Search Dependencies](#search-dependencies)
-10. [Services Dependencies](#services-dependencies)
-11. [Session Dependencies](#session-dependencies)
-12. [Taxonomy Dependencies](#taxonomy-dependencies)
-13. [Tools Dependencies](#tools-dependencies)
-14. [Types Dependencies](#types-dependencies)
-15. [Utils Dependencies](#utils-dependencies)
-16. [Validation Dependencies](#validation-dependencies)
-17. [Dependency Matrix](#dependency-matrix)
-18. [Circular Dependency Analysis](#circular-dependency-analysis)
-19. [Visual Dependency Graph](#visual-dependency-graph)
-20. [Summary Statistics](#summary-statistics)
+9. [Services Dependencies](#services-dependencies)
+10. [Session Dependencies](#session-dependencies)
+11. [Taxonomy Dependencies](#taxonomy-dependencies)
+12. [Tools Dependencies](#tools-dependencies)
+13. [Types Dependencies](#types-dependencies)
+14. [Utils Dependencies](#utils-dependencies)
+15. [Validation Dependencies](#validation-dependencies)
+16. [Dependency Matrix](#dependency-matrix)
+17. [Circular Dependency Analysis](#circular-dependency-analysis)
+18. [Visual Dependency Graph](#visual-dependency-graph)
+19. [Summary Statistics](#summary-statistics)
 
 ---
 
@@ -42,7 +41,6 @@ The codebase is organized into the following modules:
 - **interfaces**: 1 file
 - **modes**: 53 files
 - **proof**: 13 files
-- **search**: 3 files
 - **services**: 2 files
 - **session**: 4 files
 - **taxonomy**: 5 files
@@ -971,7 +969,6 @@ The codebase is organized into the following modules:
 | `./types/modes/recommendations.js` | `ModeRecommender` | Import |
 | `./session/storage/file-store.js` | `FileSessionStore` | Import |
 | `./tools/definitions.js` | `isValidTool, modeToToolMap, toolList, toolSchemas` | Import |
-| `./tools/thinking.js` | `thinkingTool` | Import |
 | `./types/index.js` | `ThinkingMode, isFullyImplemented, AddThoughtResponse, AnalyzeResponse, MCPResponse, ProblemCharacteristics` | Import |
 | `./tools/thinking.js` | `ThinkingToolInput` | Import |
 
@@ -2207,41 +2204,6 @@ The codebase is organized into the following modules:
 
 ---
 
-## Search Dependencies
-
-### `src/search/index.ts` - Search Index (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingSession, ThinkingMode` | Import (type-only) |
-| `./types.js` | `SearchIndexEntry, SearchStats` | Import (type-only) |
-| `./tokenizer.js` | `Tokenizer` | Import |
-| `../taxonomy/classifier.js` | `TaxonomyClassifier` | Import |
-
-**Exports:**
-- Classes: `SearchIndex`
-
----
-
-### `src/search/tokenizer.ts` - Text Tokenizer (v3.4.0)
-
-**Exports:**
-- Classes: `Tokenizer`
-- Interfaces: `TokenizerOptions`
-- Constants: `DEFAULT_TOKENIZER_OPTIONS`
-
----
-
-### `src/search/types.ts` - Search and Query Types (v3.4.0)
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingSession, ThinkingMode` | Import (type-only) |
-
----
-
 ## Services Dependencies
 
 ### `src/services/ExportService.ts` - Export Service (v9.1.0)
@@ -2296,7 +2258,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../types/index.js` | `ThinkingSession, SessionConfig, SessionMetadata, Thought, ThinkingMode` | Import |
 | `../types/modes/metareasoning.js` | `StrategyEvaluation, AlternativeStrategy, QualityMetrics, SessionContext` | Import |
-| `../utils/errors.js` | `SessionNotFoundError` | Import |
+| `../utils/errors.js` | `SessionNotFoundError, ResourceLimitError` | Import |
 | `../utils/sanitization.js` | `sanitizeString, sanitizeThoughtContent, validateSessionId, MAX_LENGTHS` | Import |
 | `../utils/logger.js` | `createLogger, LogLevel` | Import |
 | `../interfaces/ILogger.js` | `ILogger` | Import |
@@ -2304,6 +2266,7 @@ The codebase is organized into the following modules:
 | `../cache/lru.js` | `LRUCache` | Import |
 | `../cache/types.js` | `CacheStats` | Import (type-only) |
 | `./SessionMetricsCalculator.js` | `SessionMetricsCalculator` | Import |
+| `../config/index.js` | `getConfig` | Import |
 | `./utils/logger.js` | `createLogger, LogLevel` | Import |
 | `./storage/file-store.js` | `FileSessionStore` | Import |
 
@@ -2342,6 +2305,7 @@ The codebase is organized into the following modules:
 | `../../utils/logger.js` | `logger` | Import |
 | `../../utils/file-lock.js` | `withLock, withSharedLock, LockOptions` | Import |
 | `../../utils/sanitization.js` | `validateSessionId` | Import |
+| `../../utils/errors.js` | `StorageError` | Import |
 
 **Exports:**
 - Classes: `FileSessionStore`
@@ -2470,6 +2434,11 @@ The codebase is organized into the following modules:
 |---------|--------|
 | `zod` | `z` |
 
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
+
 **Exports:**
 - Functions: `mapModeStringToEnum`
 - Constants: `analyzeInputSchema`, `analyzeOutputSchema`, `analyzeToolDefinition`
@@ -2486,7 +2455,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `./shared.js` | `ConfidenceSchema, PositiveIntSchema, SessionActionEnum, ExportFormatEnum, ExportProfileEnum, LevelEnum` | Import |
+| `./shared.js` | `ConfidenceSchema, PositiveIntSchema, SessionActionEnum, ExportFormatEnum, ExportProfileEnum, LevelEnum, IdSchema, TextSchema, ThoughtTextSchema, IdArraySchema` | Import |
 
 **Exports:**
 - Constants: `BaseThoughtSchema`, `SessionActionSchema`
@@ -2524,7 +2493,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ConfidenceSchema` | Import |
+| `../shared.js` | `ConfidenceSchema, IdSchema, NameSchema, TextSchema, IdArraySchema` | Import |
+| `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
 - Constants: `AcademicModeEnum`, `AcademicSchema`
@@ -2542,7 +2512,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ConfidenceSchema` | Import |
+| `../shared.js` | `ConfidenceSchema, IdSchema, IdArraySchema` | Import |
+| `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
 - Constants: `AnalyticalSchema`
@@ -2560,6 +2531,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
+| `../shared.js` | `IdSchema, NameSchema, TextSchema, IdArraySchema` | Import |
+| `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
 - Constants: `CausalSchema`
@@ -2577,7 +2550,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ShannonStageEnum` | Import |
+| `../shared.js` | `ShannonStageEnum, IdSchema, TextSchema, IdArraySchema, TextArraySchema` | Import |
+| `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
 - Constants: `StandardSchema`, `CoreModeSchema`, `CoreSchema`
@@ -2595,6 +2569,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
+| `../shared.js` | `IdSchema, NameSchema, TextSchema, IdArraySchema` | Import |
 
 **Exports:**
 - Constants: `EngineeringSchema`
@@ -2633,7 +2608,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ProofTypeEnum, TransformationEnum` | Import |
+| `../shared.js` | `ProofTypeEnum, TransformationEnum, IdSchema, TextSchema, IdArraySchema` | Import |
+| `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
 - Constants: `MathSchema`
@@ -2651,7 +2627,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ConfidenceSchema` | Import |
+| `../shared.js` | `ConfidenceSchema, IdSchema, TextSchema, IdArraySchema` | Import |
+| `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
 - Constants: `ProbabilisticSchema`
@@ -2669,6 +2646,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
+| `../shared.js` | `IdSchema, NameSchema, TextSchema, IdArraySchema` | Import |
+| `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
 - Constants: `ScientificSchema`
@@ -2686,7 +2665,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ConfidenceSchema` | Import |
+| `../shared.js` | `ConfidenceSchema, IdSchema, NameSchema, TextSchema, IdArraySchema` | Import |
+| `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
 - Constants: `StrategicSchema`
@@ -2704,7 +2684,8 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ConfidenceSchema, TimeUnitEnum, TemporalConstraintEnum, TemporalRelationEnum, EventTypeEnum` | Import |
+| `../shared.js` | `ConfidenceSchema, TimeUnitEnum, TemporalConstraintEnum, TemporalRelationEnum, EventTypeEnum, IdSchema, NameSchema, TextSchema, IdArraySchema` | Import |
+| `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
 - Constants: `TemporalSchema`
@@ -2718,8 +2699,14 @@ The codebase is organized into the following modules:
 |---------|--------|
 | `zod` | `z` |
 
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
+
 **Exports:**
-- Constants: `ConfidenceSchema`, `PositiveIntSchema`, `LevelEnum`, `ImpactEnum`, `ExportFormatEnum`, `SessionActionEnum`, `ExportProfileEnum`, `ProofTypeEnum`, `TimeUnitEnum`, `TemporalConstraintEnum`, `TemporalRelationEnum`, `EventTypeEnum`, `TransformationEnum`, `ShannonStageEnum`, `EntitySchema`, `DescribedEntitySchema`
+- Functions: `boundedArray`
+- Constants: `ConfidenceSchema`, `PositiveIntSchema`, `IdSchema`, `NameSchema`, `TextSchema`, `ThoughtTextSchema`, `IdArraySchema`, `TextArraySchema`, `LevelEnum`, `ImpactEnum`, `ExportFormatEnum`, `SessionActionEnum`, `ExportProfileEnum`, `ProofTypeEnum`, `TimeUnitEnum`, `TemporalConstraintEnum`, `TemporalRelationEnum`, `EventTypeEnum`, `TransformationEnum`, `ShannonStageEnum`, `EntitySchema`, `DescribedEntitySchema`
 
 ---
 
@@ -2729,6 +2716,11 @@ The codebase is organized into the following modules:
 | Package | Import |
 |---------|--------|
 | `zod` | `z` |
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
 - Constants: `ThinkingToolSchema`, `thinkingTool`
@@ -4099,7 +4091,7 @@ The codebase is organized into the following modules:
 | `index` | 1 files | 0 files |
 | `lru` | 1 files | 2 files |
 | `types` | 0 files | 2 files |
-| `index` | 0 files | 2 files |
+| `index` | 0 files | 3 files |
 | `file-exporter` | 2 files | 1 files |
 | `index` | 4 files | 0 files |
 | `profiles` | 0 files | 2 files |
@@ -4203,66 +4195,60 @@ graph TD
         N23[...8 more]
     end
 
-    subgraph Search
-        N24[index]
-        N25[tokenizer]
-        N26[types]
-    end
-
     subgraph Services
-        N27[ExportService]
-        N28[ThoughtFactory]
+        N24[ExportService]
+        N25[ThoughtFactory]
     end
 
     subgraph Session
-        N29[manager]
-        N30[SessionMetricsCalculator]
-        N31[file-store]
-        N32[interface]
+        N26[manager]
+        N27[SessionMetricsCalculator]
+        N28[file-store]
+        N29[interface]
     end
 
     subgraph Taxonomy
-        N33[classifier]
-        N34[multi-modal-analyzer]
-        N35[navigator]
-        N36[reasoning-types]
-        N37[suggestion-engine]
+        N30[classifier]
+        N31[multi-modal-analyzer]
+        N32[navigator]
+        N33[reasoning-types]
+        N34[suggestion-engine]
     end
 
     subgraph Tools
-        N38[definitions]
-        N39[json-schemas]
-        N40[analyze]
-        N41[base]
-        N42[index]
-        N43[...13 more]
+        N35[definitions]
+        N36[json-schemas]
+        N37[analyze]
+        N38[base]
+        N39[index]
+        N40[...13 more]
     end
 
     subgraph Types
-        N44[core]
-        N45[handlers]
-        N46[index]
-        N47[algorithmic]
-        N48[analogical]
-        N49[...32 more]
+        N41[core]
+        N42[handlers]
+        N43[index]
+        N44[algorithmic]
+        N45[analogical]
+        N46[...32 more]
     end
 
     subgraph Utils
-        N50[errors]
-        N51[file-lock]
-        N52[logger-types]
-        N53[logger]
-        N54[sanitization]
-        N55[...1 more]
+        N47[errors]
+        N48[file-lock]
+        N49[logger-types]
+        N50[logger]
+        N51[sanitization]
+        N52[...1 more]
     end
 
     subgraph Validation
-        N56[cache]
-        N57[constants]
-        N58[index]
-        N59[schema-utils]
-        N60[schemas]
-        N61[...40 more]
+        N53[cache]
+        N54[constants]
+        N55[index]
+        N56[schema-utils]
+        N57[schemas]
+        N58[...40 more]
     end
 
     N0 --> N1
@@ -4271,30 +4257,30 @@ graph TD
     N5 --> N7
     N5 --> N6
     N5 --> N4
-    N8 --> N46
+    N8 --> N43
+    N10 --> N25
+    N10 --> N24
+    N10 --> N26
     N10 --> N28
-    N10 --> N27
-    N10 --> N29
-    N10 --> N31
-    N10 --> N38
-    N10 --> N46
-    N11 --> N52
+    N10 --> N35
+    N10 --> N43
+    N11 --> N49
     N12 --> N15
     N13 --> N15
     N14 --> N15
     N14 --> N13
-    N16 --> N44
+    N16 --> N41
     N19 --> N22
     N19 --> N20
     N20 --> N22
-    N24 --> N46
-    N24 --> N26
-    N24 --> N25
-    N24 --> N33
-    N26 --> N46
-    N27 --> N46
-    N27 --> N7
-    N27 --> N54
+    N24 --> N43
+    N24 --> N7
+    N24 --> N51
+    N24 --> N11
+    N24 --> N50
+    N25 --> N43
+    N25 --> N11
+    N25 --> N50
 ```
 
 ---
@@ -4303,21 +4289,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 237 |
-| Total Modules | 15 |
-| Total Lines of Code | 115713 |
-| Total Exports | 1276 |
+| Total TypeScript Files | 234 |
+| Total Modules | 14 |
+| Total Lines of Code | 115132 |
+| Total Exports | 1280 |
 | Total Re-exports | 571 |
-| Total Classes | 145 |
-| Total Interfaces | 536 |
-| Total Functions | 429 |
+| Total Classes | 143 |
+| Total Interfaces | 525 |
+| Total Functions | 430 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
-| Type-only Imports | 316 |
+| Type-only Imports | 313 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 57 |
 
 ---
 
 *Last Updated*: 2026-08-03
-*Version*: 9.2.0
+*Version*: 9.3.0

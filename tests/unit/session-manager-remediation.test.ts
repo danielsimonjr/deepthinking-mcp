@@ -254,3 +254,55 @@ describe('SessionManager audit remediations', () => {
     });
   });
 });
+
+/**
+ * Regression: session expiry was only half-wired.
+ *
+ * getLiveSession() correctly evicts an expired session, and the mutating paths
+ * (addThought/switchMode/generateSummary) go through it. But getSession() --
+ * which backs the `get_session` and `export` MCP actions -- falls back to
+ * storage.loadSession() when the in-memory lookup misses, and that branch
+ * cached and returned the session WITHOUT an expiry check. With SESSION_DIR
+ * configured (sessions auto-save by default), a caller holding a session ID
+ * could keep reading it indefinitely after sessionTimeoutMs elapsed: every call
+ * evicted it from memory and immediately reloaded it from disk.
+ *
+ * Found by security review of v9.3.0, i.e. of the release that added expiry.
+ */
+describe('session expiry: storage-reload path (regression)', () => {
+  afterEach(() => {
+    resetConfig();
+  });
+
+  it('does not resurrect an expired session from storage', async () => {
+    updateConfig({ sessionTimeoutMs: 1000 });
+
+    // Minimal in-memory stand-in for FileSessionStore: getSession() only needs
+    // loadSession() to return something for the fallback branch to be taken.
+    const saved = new Map<string, unknown>();
+    const storage = {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      saveSession: async (s: any) => {
+        saved.set(s.id, s);
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      loadSession: async (id: string) => (saved.get(id) ?? null) as any,
+      deleteSession: async (id: string) => {
+        saved.delete(id);
+      },
+      exists: async (id: string) => saved.has(id),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any;
+
+    const manager = new SessionManager({}, undefined, storage);
+    const session = await manager.createSession();
+    await storage.saveSession(session);
+
+    // Age it past the timeout.
+    session.updatedAt = new Date(Date.now() - 5000);
+    saved.set(session.id, session);
+
+    const got = await manager.getSession(session.id);
+    expect(got).toBeNull();
+  });
+});

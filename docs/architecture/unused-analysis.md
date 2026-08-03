@@ -5,7 +5,7 @@
 ## Summary
 
 - **Potentially unused files**: 16
-- **Potentially unused exports**: 479
+- **Potentially unused exports**: 466
 
 ## Potentially Unused Files
 
@@ -14,7 +14,7 @@ These files are not imported by any other file in the codebase:
 - `src/modes/stochastic/analysis/statistics.ts`
 - `src/modes/stochastic/models/distribution.ts`
 - `src/modes/stochastic/sampling/rng.ts`
-- `src/search/index.ts`
+- `src/taxonomy/classifier.ts`
 - `src/taxonomy/multi-modal-analyzer.ts`
 - `src/taxonomy/suggestion-engine.ts`
 - `src/validation/validators/modes/algorithmic.ts`
@@ -198,31 +198,9 @@ These exports are not imported by any other file in the codebase:
 
 - `ProofVerifierConfig` (interface)
 
-### `src/search/tokenizer.ts`
-
-- `TokenizerOptions` (interface)
-- `DEFAULT_TOKENIZER_OPTIONS` (constant)
-
-### `src/search/types.ts`
-
-- `SearchQuery` (interface)
-- `SortOptions` (interface)
-- `PaginationOptions` (interface)
-- `SearchResult` (interface)
-- `SearchHighlight` (interface)
-- `SearchResults` (interface)
-- `AdvancedQuery` (interface)
-- `FacetedResults` (interface)
-- `SearchField` (type)
-- `SortField` (type)
-
 ### `src/services/ThoughtFactory.ts`
 
 - `ThoughtFactoryConfig` (interface)
-
-### `src/taxonomy/classifier.ts`
-
-- `ThoughtClassification` (interface)
 
 ### `src/taxonomy/navigator.ts`
 
@@ -315,6 +293,7 @@ These exports are not imported by any other file in the codebase:
 
 ### `src/tools/schemas/shared.ts`
 
+- `boundedArray` (function)
 - `Confidence` (type)
 - `Level` (type)
 - `Impact` (type)
@@ -334,6 +313,7 @@ These exports are not imported by any other file in the codebase:
 ### `src/tools/thinking.ts`
 
 - `ThinkingToolSchema` (constant)
+- `thinkingTool` (constant)
 
 ### `src/types/handlers.ts`
 
@@ -683,12 +663,10 @@ These exports are not imported by any other file in the codebase:
 - `InvalidModeError` (class)
 - `ThoughtProcessingError` (class)
 - `ExportError` (class)
-- `ResourceLimitError` (class)
 - `ErrorFactory` (class)
 - `RateLimitError` (class)
 - `SecurityError` (class)
 - `PathTraversalError` (class)
-- `StorageError` (class)
 - `BackupError` (class)
 
 ### `src/utils/file-lock.ts`
