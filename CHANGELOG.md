@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Security
+
+- **Cleared the open `@hono/node-server` alert (moderate, `< 2.0.5`) — `npm audit` now reports 0.**
+  It was **runtime** scope, reaching the tree transitively through
+  `@modelcontextprotocol/sdk` (`^1.29.0`, resolved 1.29.0). The parent's own range already permitted
+  a patched version, so this was a **stale lockfile resolution** rather than a manifest constraint;
+  fixed at the parent (`^1.29.0` → **`^1.30.0`**) plus a lock refresh instead of overriding the leaf.
+  Verified in the lockfile: `@hono/node-server` 1.19.14 → **2.0.12**, `hono` → **4.12.31**,
+  `fast-uri` → **3.1.4**. Gate: build clean, **5065/5065 tests passing** across 177 files.
+
+  This package is **deprecated** (superseded by `deepthinking-plugin`), but its deprecation notice
+  commits to security fixes through **2026-10-12**, so this fix is inside the promised window.
+
+  > **Not yet published — deliberately.** Publishing this as 9.1.4 would create a version that is
+  > *not* deprecated while every existing version (1.0.0 – 9.1.3) is, so `npm install
+  > deepthinking-mcp` would stop emitting a deprecation warning and the package would silently read
+  > as supported again. Releasing it therefore requires pairing `npm publish` with
+  > `npm deprecate deepthinking-mcp@9.1.4 "<message>"` in the same operation. Both are outward-facing
+  > registry mutations, so they are Daniel's call — see the workspace TODO.
+
 ### CI
 - **Removed both npm-publish paths from CI; publishing is now local-only.** Deleted `.github/workflows/publish.yml` (a publish-only workflow) and the `publish-npm` job in `release.yml`. Neither had ever successfully published: `gh api repos/danielsimonjr/deepthinking-mcp/actions/secrets` returns an empty list, so `secrets.NPM_TOKEN` resolved to an empty string and `npm publish` authenticated with nothing. Corroborated from the registry side — `npm view deepthinking-mcp dist.attestations` is empty, meaning no version was ever published from a CI OIDC context. Every release has in fact been published from a workstation, exactly as this repo's own `CLAUDE.md` build-and-publish workflow documents (step 6: `npm publish`). `publish.yml` also duplicated `release.yml`'s trigger (`push: tags: v*`), so a single tag push fired two concurrent `npm publish` runs — a double-publish race that stayed invisible only because both failed to authenticate. Note that `publish.yml` had `id-token: write` and looked OIDC-capable, but `actions/setup-node` with `registry-url:` writes an `.npmrc` containing `_authToken=${NODE_AUTH_TOKEN}`; with the secret unset npm sees an empty-but-present token, commits to the token path, and never falls through to trusted publishing. Also dropped the now-unused `packages: write` from `release.yml`'s top-level `permissions:` (least-privilege). `release.yml` still runs test → build → GitHub release → notify; the `notify` job's `needs` and summary line were updated so it no longer references the deleted job.
 - **Removed the dead `.github/workflows/ci.yml` ("Continuous Integration").** Its triggers were `push`/`pull_request` on `branches: [main, develop]`, but this repo's default branch is `master` — the workflow had never run (zero "Continuous Integration" runs in history). It also fully duplicated `.github/workflows/test.yml` ("Test Suite", which already triggers on `master` and produces the `Build Package`/`Test on <os> (Node <ver>)` jobs required by branch protection) plus `.github/workflows/coverage.yml` (which already uploads to Codecov with more detail than `ci.yml`'s bare `codecov-action` step). Diffed line-by-line against both before deleting: no unique job or step was lost, so nothing needed porting. `test.yml`'s required job names (`Build Package`, `Test on ubuntu-latest (Node 20.x)`, `Test on ubuntu-latest (Node 22.x)`) are unchanged.
