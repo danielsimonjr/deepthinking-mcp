@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.3.1] - 2026-08-03
+
+Findings from a four-agent code + security review **of the v9.3.0 release diff itself**. Three real
+defects, **two of them in fixes v9.3.0 had just shipped** — the release that made config stop lying
+had left two code paths still telling the old story.
+
+### Security
+
+- **Session expiry was only half-wired.** `getLiveSession()` correctly evicts expired sessions and
+  every *mutating* path went through it — but `getSession()`, which backs the `get_session` and
+  `export` actions, fell back to `storage.loadSession()` and cached the result with **no expiry
+  check**. A reload leaves `updatedAt` untouched, so each read repeated the cycle: evict, reload,
+  return. With `SESSION_DIR` configured (sessions auto-save by default), **a caller holding a
+  session ID could read it indefinitely after `MCP_SESSION_TIMEOUT_MS` elapsed.** Mutating paths
+  were correctly blocked throughout; only reads leaked. Regression test added.
+- **`listSessions()` bypassed expiry the same way**, reading raw LRU contents — it reported expired
+  sessions as active with a stale `updatedAt` while `getSession()` on the same id returned `null`.
+- **Record entry counts were unbounded.** v9.3.0's bounding pass capped string *lengths* and array
+  *lengths*, but Zod records have no built-in cap on key **count** — so bounding the key string and
+  value type still left the map itself unbounded at ~100k entries. Added `boundedRecord()` and
+  applied it to all 6 record sites in the legacy schema, **which remains callable by name** even
+  though it is hidden from `tools/list`. v9.3.0's H-2 was therefore incomplete as shipped.
+  *(Surfaced only because the security reviewers were asked to report DoS-class findings as
+  out-of-policy rather than suppress them — the standard exclusion would have buried it.)*
+
+### Fixed
+
+- **Silent session data loss, made 10× more likely by v9.3.0.** The LRU `onEvict` callback
+  persisted only `if (this.storage && enableAutoSave)`, with no `else` — so in the **default**
+  in-memory deployment an evicted session's thoughts vanished with no log line at all, and the next
+  call just returned `SessionNotFoundError` with nothing explaining why. Pre-existing, but v9.3.0
+  dropped the effective cap from 1000 to **100**, firing it ten times sooner. Now warns with the
+  discarded thought count and a remediation hint.
+- **The GC guard covered 1 of 9 call sites.** v9.3.0 fixed T-PRF-011's flake by asserting `global.gc`
+  is available — but only inside that one test. The other eight gate their assertions behind
+  `if (delta > 0)`, which never skips because `heapUsed` is never 0; a silent `gc` acquisition
+  failure would have returned them to asserting against allocator noise. Hoisted into `forceGC()`.
+- Removed the dead `@search/*` `tsconfig` path alias (pointed at the deleted directory), and
+  excluded `.claude/worktrees/**` from vitest — a local run had ballooned to 25,430 tests by
+  globbing into agent worktrees.
+
+### Documentation
+
+- **Eight docs still advertised the deleted `src/search/` subsystem** as a shipped feature: a README
+  feature bullet and directory tree, ARCHITECTURE's "Search System" section, COMPONENTS' documented
+  `searchByText`/`getStats` API, DATA_FLOW's search-query flow diagram, DIRECTORY_STRUCTURE, both
+  OVERVIEW variants, and CLAUDE.md's Key Directories entry. A reader would have gone looking for an
+  API that no longer exists. Verified after removal: zero module-level references remain, no
+  dangling Mermaid edges, and code fences balanced in all eight files.
+  `DEPENDENCY_GRAPH.md`/`unused-analysis.md` are generated and were regenerated, not hand-edited.
+
+### Review outcome
+
+Also independently confirmed **sound**: bounding is complete across all 13 tools plus the legacy
+one; zero `.passthrough()`/`.catchall()`/`z.lazy()` anywhere in `src/`; no subprocess sinks; the
+session-store read path is gated by a UUID-v4 regex; the prototype-pollution guard covers every
+deserialization entry point; `StorageError` leaks nothing beyond operator-supplied paths; and the
+new CI jobs use `pull_request` (not `pull_request_target`), so fork PRs get read-only tokens.
+
 ## [9.3.0] - 2026-08-03
 
 Remediation of the [2026-08-03 audit](docs/audits/2026-08-03-audit.md), implemented by four parallel

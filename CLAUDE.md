@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types + 4 advanced runtime) with taxonomy-based classification (69 implemented reasoning types across 12 categories), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 9.3.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
+**Version**: 9.3.1 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
 
 ## Project Metrics
 
