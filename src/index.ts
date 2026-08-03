@@ -51,7 +51,6 @@ import {
   toolList,
   toolSchemas,
 } from "./tools/definitions.js";
-import { thinkingTool } from "./tools/thinking.js"; // Legacy tool for backward compatibility
 import {
   ThinkingMode,
   isFullyImplemented,
@@ -121,13 +120,14 @@ async function getSessionManager(): Promise<SessionManager> {
   return _sessionManagerPromise;
 }
 
-// Register tool list handler - now returns all 9 focused tools + legacy
+// Register tool list handler - returns the 13 focused tools.
+// L-2 (2026-08-03 audit): the legacy "deepthinking" tool is intentionally
+// hidden from tools/list (it advertised itself as deprecated to every
+// client) but its handler below is kept so existing callers that already
+// hardcode the tool name continue to work.
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
-    tools: [
-      ...toolList, // 9 new focused tools
-      thinkingTool, // Legacy tool for backward compatibility
-    ],
+    tools: [...toolList], // 13 focused tools
   };
 });
 
