@@ -27,6 +27,7 @@ import {
   type LockOptions,
 } from "../../utils/file-lock.js";
 import { validateSessionId } from "../../utils/sanitization.js";
+import { StorageError } from "../../utils/errors.js";
 
 /**
  * Default lock options for file operations
@@ -86,14 +87,38 @@ export class FileSessionStore implements SessionStorage {
         config: this.config,
       });
     } catch (error) {
-      logger.error(
-        "Failed to initialize FileSessionStore",
-        error instanceof Error ? error : new Error(String(error)),
+      const cause = error instanceof Error ? error : new Error(String(error));
+      logger.error("Failed to initialize FileSessionStore", cause, {
+        baseDir: this.baseDir,
+      });
+
+      // Audit 2026-08-03 M-5: this used to rethrow the raw Node fs error
+      // (e.g. `Error: ENOENT: no such file or directory, mkdir '\\?'`) —
+      // no StorageError, no mention of SESSION_DIR, and on Windows a
+      // recursive mkdir() against a non-existent drive TRUNCATES the
+      // reported path to the `\\?\` long-path prefix, so even the raw
+      // message was misleading. Use this.baseDir/this.sessionsDir (values
+      // we already know are correct) rather than trusting error.path/
+      // error.message for the path shown to the caller.
+      const code =
+        typeof (cause as NodeJS.ErrnoException).code === "string"
+          ? (cause as NodeJS.ErrnoException).code
+          : undefined;
+
+      throw new StorageError(
+        `Failed to initialize session storage at "${this.baseDir}" ` +
+          `(configured via the SESSION_DIR environment variable). ` +
+          `Check that the path's drive/parent exists and that the process ` +
+          `has permission to create directories there. ` +
+          `Original error: ${cause.message}`,
         {
           baseDir: this.baseDir,
+          sessionsDir: this.sessionsDir,
+          metadataDir: path.dirname(this.metadataFile),
+          code,
+          cause: cause.message,
         },
       );
-      throw error;
     }
   }
 

@@ -3,16 +3,37 @@
  *
  * All configurable values should be defined here to enable
  * easy environment-based configuration and deployment flexibility.
+ *
+ * `maxActiveSessions` (`MCP_MAX_SESSIONS`) and `sessionTimeoutMs`
+ * (`MCP_SESSION_TIMEOUT_MS`) are consumed by `SessionManager` in
+ * `src/session/manager.ts` (audit 2026-08-03, M-1).
+ *
+ * 2026-08-03 audit (H-3): `maxThoughtsInMemory` / `compressionThreshold`
+ * below (this server-level `ServerConfig`, from `MCP_MAX_THOUGHTS` /
+ * `MCP_COMPRESSION_THRESHOLD`) are parsed and validated but NOT enforced
+ * anywhere — see the environment variable table in CLAUDE.md. This is a
+ * DIFFERENT field from `SessionManager`'s own per-session
+ * `maxThoughtsInMemory` (on `SessionConfig`, set per-session, defaulting to
+ * 1000): that one IS enforced — `SessionManager.addThought()` rejects once a
+ * session is at capacity. See the H-3 note in `src/session/manager.ts`.
  */
 
 /**
  * Server configuration
  */
 export interface ServerConfig {
-  /** Maximum number of thoughts to keep in memory per session */
+  /**
+   * Maximum number of thoughts to keep in memory per session.
+   * NOT enforced anywhere in `src/` (audit 2026-08-03, H-3). Kept for
+   * env-var compatibility; see the class-level comment above.
+   */
   maxThoughtsInMemory: number;
 
-  /** Threshold for compressing old thoughts */
+  /**
+   * Threshold for compressing old thoughts.
+   * NOT enforced anywhere in `src/` (audit 2026-08-03, H-3) — no
+   * compression logic exists. Kept for env-var compatibility.
+   */
   compressionThreshold: number;
 
   /** Maximum content length in characters */
