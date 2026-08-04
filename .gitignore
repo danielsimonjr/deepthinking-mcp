@@ -30,7 +30,21 @@ tests/test-results/summary/
 
 # Claude Code settings (local only)
 .claude/
-.mcp.json
+
+# Un-ignore .mcp.json. The GLOBAL excludes file
+# (C:/Users/danie/.gitignore_global:3) lists `.mcp.json`, which is correct for
+# a local Claude Code client config but wrong here, where .mcp.json IS the
+# plugin's MCP server manifest and must ship. A repo-level negation overrides
+# the global rule without changing machine-wide behaviour for other repos.
+!.mcp.json
+
+# NOTE: .mcp.json is deliberately NOT ignored.
+# It was ignored here until 2026-08-04, which silently broke this repo as a
+# Claude Code plugin: .mcp.json is the plugin's MCP server manifest, so the
+# marketplace clone had no server config and the server could never start.
+# The failure was invisible locally -- the file exists on disk, so every local
+# test passed -- and `git add` skipped it without comment on every commit.
+# If it ever needs to be local-only again, the plugin packaging has to change too.
 
 # OS
 .DS_Store

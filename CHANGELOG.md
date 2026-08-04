@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.3.3] - 2026-08-04
+
+### Fixed — the plugin could never have started
+
+**`.mcp.json` had never been committed, in the repo's entire history.** It is the plugin's MCP
+server manifest, so the marketplace clone contained no server config and the server could not start.
+Confirmed after a real `/plugin marketplace update` + `/reload-plugins`: the cache populated, the
+skills and reference files loaded — and **no `deepthinking-mcp` server process existed at all.**
+
+Root cause was not in this repo. The machine's **global** excludes file
+(`core.excludesFile` → `.gitignore_global:3`) lists `.mcp.json` — correct for a local Claude Code
+client config, wrong here, where `.mcp.json` *is* the shipped plugin manifest. The repo's own
+`.gitignore:33` listed it too. So `git add` skipped the file **silently, on every commit**, and
+every version pin written into it since 9.2.0 existed only on the author's disk.
+
+This is why it stayed invisible: the file is present locally, so every local test passed, every
+smoke test passed, and `npx -y deepthinking-mcp@<version>` worked when run by hand. Nothing
+exercised the path that actually matters — the clone.
+
+Fixed with a repo-level `!.mcp.json` negation (overrides the global rule without changing
+machine-wide behaviour for other repos), the stale repo-level rule removed, and the file committed.
+Audited the other 10 `local-marketplace` plugin repos: all already track theirs, so this was
+isolated to the one manifest created most recently.
+
+### Note on the plugin cache
+
+The 9.3.2 cache clone was also missing `.claude-plugin/`, `commands/`, `agents/` and `dist/`, all of
+which are present and correct on the remote — a stale/partial fetch, not a repo defect. Bumping the
+version forces a fresh clone into a new cache directory.
+
 ## [9.3.2] - 2026-08-03
 
 ### ⚠️ Correction to the [9.3.0] and [9.3.1] entries
