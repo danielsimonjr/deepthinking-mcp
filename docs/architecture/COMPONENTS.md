@@ -1,846 +1,130 @@
-# Component Architecture
-
-**Version**: 9.0.0 | **Last Updated**: 2025-12-30
-
-## Core Components
-
-### MCP Server Layer
-
-#### `src/index.ts` - MCP Server Entry Point
-**Purpose**: Main server implementation and tool request orchestration
-
-**13 Focused Tools** (v8.5.0):
-- `deepthinking_core` - Fundamental reasoning (inductive, deductive, abductive)
-- `deepthinking_standard` - Standard workflows (sequential, shannon, hybrid)
-- `deepthinking_mathematics` - Mathematical/physical/computability reasoning
-- `deepthinking_temporal` - Time-based reasoning
-- `deepthinking_probabilistic` - Probability reasoning (bayesian, evidential)
-- `deepthinking_causal` - Causal analysis (causal, counterfactual)
-- `deepthinking_strategic` - Strategic decision-making (gametheory, optimization)
-- `deepthinking_analytical` - Analytical reasoning (analogical, firstprinciples, metareasoning, cryptanalytic)
-- `deepthinking_scientific` - Scientific methods (scientificmethod, systemsthinking, formallogic)
-- `deepthinking_engineering` - Engineering/algorithmic reasoning
-- `deepthinking_academic` - Academic research (synthesis, argumentation, critique, analysis)
-- `deepthinking_session` - Session management
-- `deepthinking_analyze` - Multi-mode analysis with presets and merge strategies
-
-**Dependencies**:
-- ThoughtFactory
-- ExportService
-- SessionManager
-
-**Line Count**: ~350
-
-**Testing**: Comprehensive integration tests in `tests/integration/index-handlers.test.ts`
-
----
-
-## Service Layer Components
-
-### `src/services/ThoughtFactory.ts` - Thought Creation Service
-
-**Purpose**: Centralized factory for creating mode-specific thought objects
-
-**Key Method**:
-```typescript
-createThought(input: ThinkingToolInput, sessionId: string): Thought
-```
-
-**Supported Modes** (33 total, 29 with dedicated thought types):
-
-**Core Modes** (5):
-1. **Sequential** - Step-by-step linear reasoning
-2. **Shannon** - Information theory with uncertainty quantification
-3. **Mathematics** - Formal mathematical reasoning with proofs
-4. **Physics** - Physical reasoning with tensor analysis
-5. **Hybrid** - Combined reasoning approaches
-
-**Historical Computing** (2) - v7.2.0 (Turing & von Neumann tributes):
-6. **Computability** - Turing machines, decidability, reductions, diagonalization
-7. **Cryptanalytic** - Deciban evidence system, Banburismus, frequency analysis
-
-**Algorithmic** (1) - v7.3.0 (CLRS comprehensive coverage):
-8. **Algorithmic** - Algorithm design, complexity analysis, 100+ CLRS algorithms
-
-**Academic Research** (4) - v7.4.0 (PhD students & scientific writing):
-9. **Synthesis** - Literature review, knowledge integration, theme extraction
-10. **Argumentation** - Toulmin model, dialectics, rhetorical structures
-11. **Critique** - Critical analysis, peer review, methodology evaluation
-12. **Analysis** - Qualitative analysis (thematic, grounded theory, discourse)
-
-**Fundamental** (2) - v5.0.0+:
-13. **Inductive** - Observations → general principles
-14. **Deductive** - General principles → specific conclusions
-
-**Advanced Runtime** (6):
-15. **Metareasoning** - Strategic oversight of reasoning (v6.0.0)
-16. **Recursive** - Self-referential analysis
-17. **Modal** - Possibility/necessity logic
-18. **Stochastic** - Probabilistic state transitions
-19. **Constraint** - Constraint satisfaction
-20. **Optimization** - Constraint optimization
-
-**Experimental** (13):
-21. **Abductive** - Inference to best explanation
-22. **Causal** - Causal relationship analysis
-23. **Bayesian** - Probabilistic inference
-24. **Counterfactual** - "What if" analysis
-25. **Analogical** - Reasoning by analogy
-26. **Temporal** - Time-based reasoning
-27. **Game Theory** - Strategic decision making + von Neumann extensions (v7.2.0)
-28. **Evidential** - Dempster-Shafer theory
-29. **First Principles** - Fundamental reasoning
-30. **Systems Thinking** - Holistic system analysis
-31. **Scientific Method** - Hypothesis testing
-32. **Formal Logic** - Logical inference
-33. **Engineering** - Engineering analysis (v7.1.0)
-
-**Line Count**: ~800 lines (with handler integration)
-
-**Testing**: Covered by mode-specific unit tests and integration tests
-
----
-
-### ModeHandler Architecture (v8.x)
-
-#### `src/modes/handlers/` - Specialized Mode Handlers
-
-**Purpose**: Strategy pattern implementation for mode-specific validation and enhancement
-
-**36 Specialized Handlers** (all 33 modes covered):
-
-| Category | Handlers | Key Features |
-|----------|----------|--------------|
-| **Core (5)** | Sequential, Shannon, Mathematics, Physics, Hybrid | Mode-specific validation and thought creation |
-| **Fundamental (3)** | Inductive, Deductive, Abductive | Reasoning triad implementation |
-| **Causal/Probabilistic (6)** | Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential | Auto computation (posteriors, equilibria), validation |
-| **Analogical (2)** | Analogical, FirstPrinciples | Mapping and decomposition logic |
-| **Systems/Scientific (3)** | SystemsThinking, ScientificMethod, FormalLogic | 8 Archetypes detection, proof logic |
-| **Academic (4)** | Synthesis, Argumentation, Critique, Analysis | Coverage tracking, Socratic questions |
-| **Engineering (4)** | Engineering, Computability, Cryptanalytic, Algorithmic | CLRS coverage, Turing machines, Decibans |
-| **Advanced Runtime (6)** | MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization | Strategic oversight, constraint solving |
-| **Fallback (3)** | GenericModeHandler, CustomHandler, utility | Default behavior, user-defined modes |
-
-**ModeHandler Interface**:
-```typescript
-interface ModeHandler {
-  mode: ThinkingMode;
-  validate(input: ThinkingToolInput): ValidationResult;
-  enhance(thought: Thought, context: SessionContext): Thought;
-  getSuggestions(thought: Thought): string[];
-}
-```
-
-**ModeHandlerRegistry**:
-- Singleton pattern for global handler access
-- `hasSpecializedHandler(mode)` - Check if handler exists
-- `replace(handler)` - Register/update handler
-- `createThought(input, sessionId)` - Delegate thought creation
-
----
-
-### `src/services/ExportService.ts` - Export Service
-
-**Purpose**: Unified export logic for multiple output formats with mode-specific structured data extraction (v8.3.2)
-
-**Key Methods**:
-```typescript
-exportSession(session: ThinkingSession, format: ExportFormat): string
-extractModeSpecificMarkdown(thought: Thought): string  // v8.3.2
-extractModeSpecificLatex(thought: Thought): string     // v8.3.2
-```
-
-**Supported Formats**:
-- **JSON**: Structured data export
-- **Markdown**: Human-readable documentation with mode-specific sections (v8.3.2)
-- **LaTeX**: Academic paper format with mode-specific formatting (v8.3.2)
-- **HTML**: Web-ready output with styling
-- **Jupyter**: Interactive notebook with mode-specific cells (v8.3.2)
-- **Mermaid**: Diagram-based visualization
-- **DOT**: GraphViz format
-- **ASCII**: Terminal-friendly tree view
-
-**Key Features**:
-- Format-specific transformations
-- Metadata preservation
-- Thought hierarchy rendering
-- **Mode-specific structured data extraction** (v8.3.2):
-  - Causal graphs with nodes, edges, interventions
-  - Bayesian probabilities with hypotheses and evidence
-  - Temporal events with timelines and intervals
-  - Game theory matrices with players and strategies
-  - First principles with fundamentals and derivations
-  - Systems thinking with components and feedback loops
-  - Academic modes with sources, themes, claims, codes
-
-**Line Count**: ~700 lines (expanded with mode-specific helpers)
-
-**Dependencies**:
-- VisualExporter (for Mermaid, DOT, ASCII)
-- Type guards (isCausalThought, isBayesianThought, etc.)
-
----
-
-## Session Management Components
-
-### `src/session/manager.ts` - Session Manager
-
-**Purpose**: Core session lifecycle and state management
-
-**Key Methods**:
-```typescript
-createSession(options): Promise<ThinkingSession>
-getSession(sessionId): Promise<ThinkingSession | null>
-addThought(sessionId, thought): Promise<ThinkingSession>
-switchMode(sessionId, newMode, reason): Promise<ThinkingSession>
-listSessions(includeStoredSessions): Promise<SessionMetadata[]>
-deleteSession(sessionId): Promise<void>
-generateSummary(sessionId): Promise<string>
-```
-
-**Key Features**:
-- LRU cache for active sessions (default: 100 sessions)
-- Mode transition management
-- Summary generation
-- Metrics tracking delegation
-
-**Line Count**: ~550 lines
-
-**Performance**:
-- O(1) session access (LRU cache)
-- O(1) metrics updates (via SessionMetricsCalculator)
-- Configurable cache size
-
-**Dependencies**:
-- SessionMetricsCalculator
-
-**Testing**: Unit tests in `tests/unit/session-manager.test.ts`
-
----
-
-### `src/session/SessionMetricsCalculator.ts` - Metrics Calculator
-
-**Purpose**: Session metrics calculation and tracking
-
-**Key Methods**:
-```typescript
-initializeMetrics(): SessionMetrics
-updateMetrics(session, thought): void
-updateModeSpecificMetrics(metrics, thought): void
-updateCacheStats(session): void
-```
-
-**Tracked Metrics**:
-- Total thoughts count
-- Thoughts by type distribution
-- Average uncertainty (for probabilistic modes)
-- Revision count
-- Time spent
-- Dependency depth
-- Cache statistics (hits, misses, hit rate)
-
-**Performance**:
-- O(1) metric initialization
-- O(1) incremental updates (vs O(n) recalculation)
-- Memory efficient (no historical data storage)
-
-**Line Count**: 241 lines
-
----
-
-## Validation & Security Components
-
-### `src/validation/constants.ts` - Validation Constants (v4.3.0)
-
-**Purpose**: Centralized validation enums and helper functions
-
-**Constants**:
-```typescript
-// Severity levels
-export const IssueSeverity = { ERROR: 'error', WARNING: 'warning', INFO: 'info' };
-
-// Issue categories
-export const IssueCategory = { STRUCTURAL: 'structural', LOGICAL: 'logical', MATHEMATICAL: 'mathematical', PHYSICAL: 'physical' };
-
-// Validation thresholds
-export const ValidationThresholds = {
-  MIN_PROBABILITY: 0, MAX_PROBABILITY: 1,
-  MIN_CONFIDENCE: 0, MAX_CONFIDENCE: 1,
-  MIN_PROGRESS: 0, MAX_PROGRESS: 100,
-  MIN_WEIGHT: 0, MAX_WEIGHT: 1
-};
-```
-
-**Helper Functions**:
-- `isInRange(value, min, max)` - Generic range check
-- `isValidProbability(value)` - Probability validation (0-1)
-- `isValidConfidence(value)` - Confidence validation (0-1)
-- `ValidationMessages` - Factory functions for consistent error messages
-
----
-
-### `src/validation/validators/registry.ts` - Validator Registry (v4.3.0)
-
-**Purpose**: Lazy-loading validator management
-
-**Key Features**:
-- **Lazy Loading**: Validators loaded on-demand via dynamic imports
-- **Caching**: Loaded validators cached for reuse
-- **Preloading**: Optional preload for known high-use modes
-
-**Key Methods**:
-```typescript
-getAsync(mode: string): Promise<ModeValidator | undefined>  // Lazy load
-get(mode: string): ModeValidator | undefined                 // Sync (cached only)
-preload(modes: string[]): Promise<void>                      // Preload specific modes
-has(mode: string): boolean                                   // Check if mode supported
-```
-
-**Registry Structure** (consolidated in v4.3.0, expanded in v8.5.0):
-```typescript
-const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
-  sequential: { module: './modes/sequential.js', className: 'SequentialValidator' },
-  // ... 27 more modes (28 total)
-};
-```
-
----
-
-### `src/validation/validators/base.ts` - Base Validator (v4.3.0)
-
-**Purpose**: Abstract base class with reusable validation methods
-
-**Reusable Methods** (added in v4.3.0):
-```typescript
-validateNumberRange(thought, value, fieldName, min, max, severity, category)
-validateProbability(thought, value, fieldName)
-validateConfidence(thought, value, fieldName)
-validateRequired(thought, value, fieldName, category)
-validateNonEmptyArray(thought, arr, fieldName, category)
-```
-
-**Benefits**: Consolidates 56+ range check patterns across validators
-
----
-
-### `src/validation/schemas.ts` - Input Validation
-
-**Purpose**: Type-safe input validation using Zod
-
-**Schemas**:
-- AddThoughtSchema
-- CreateSessionSchema
-- SwitchModeSchema
-- ExportSessionSchema
-- GetRecommendationsSchema
-
-**Features**:
-- UUID v4 validation
-- String length limits
-- Enum validation
-- Custom error messages
-
----
-
-### `src/utils/sanitization.ts` - Data Sanitization
-
-**Purpose**: Security-focused input sanitization
-
-**Functions**:
-- `sanitizeFilename()`: Remove path traversal attempts
-- `validatePath()`: Ensure path is within allowed directory
-- `validateSessionId()`: UUID v4 validation
-- `sanitizeForLogging()`: PII redaction (15 field types)
-
----
-
-## Taxonomy System Components
-
-### `src/taxonomy/reasoning-types.ts` - Reasoning Type Definitions
-
-**Purpose**: 69 reasoning type definitions (110 planned) organized hierarchically across 12 categories
-
-**Categories**:
-- Logical Reasoning
-- Scientific Reasoning
-- Creative Reasoning
-- Practical Reasoning
-- Exploratory Reasoning
-
-### `src/taxonomy/classifier.ts` - Taxonomy Classifier
-
-**Purpose**: Classify thoughts by reasoning type
-
-**Key Methods**:
-```typescript
-classifyThought(thought): ThoughtClassification
-```
-
-**Features**:
-- Primary and secondary type identification
-- Category assignment
-- Confidence scoring
-
-### `src/taxonomy/navigator.ts` - Taxonomy Navigator
-
-**Purpose**: Navigate reasoning type hierarchy
-
-**Features**:
-- Get reasoning type metadata
-- Find related types
-- Traverse hierarchy
-- Type recommendations
-
-### `src/taxonomy/suggestion-engine.ts` - Suggestion Engine
-
-**Purpose**: Intelligent mode recommendations based on problem characteristics
-
-**Input**: Problem characteristics (uncertainty, complexity, domain, etc.)
-**Output**: Ranked mode recommendations with rationale
-
-### `src/taxonomy/multi-modal.ts` - Multi-Modal Analyzer
-
-**Purpose**: Analyze combined reasoning patterns
-
-**Features**:
-- Mode synergy detection
-- Multi-modal pattern analysis
-- Combination recommendations
-
----
-
-## Proof Decomposition Components (v7.0.0)
-
-### `src/proof/decomposer.ts` - Proof Decomposer
-
-**Purpose**: Breaks proofs into atomic statements with dependency tracking
-
-**Key Methods**:
-```typescript
-decompose(proof: ProofStep[] | string, theorem?: string): ProofDecomposition
-computeMetrics(decomposition: ProofDecomposition): DecompositionMetrics
-```
-
-**Features**:
-- Pattern-based statement type detection (axiom, hypothesis, derived, conclusion)
-- Inference rule identification (algebraic_manipulation, substitution, etc.)
-- Dependency chain construction
-- Support for text and structured proof input
-
----
-
-### `src/proof/gap-analyzer.ts` - Gap Analyzer
-
-**Purpose**: Detects gaps and implicit assumptions in proofs
-
-**Key Methods**:
-```typescript
-analyzeGaps(decomposition: ProofDecomposition): GapAnalysisResult
-```
-
-**Gap Types Detected**:
-- `missing_step`: Steps skipped in derivation
-- `unjustified_leap`: Conclusions without proper justification
-- `implicit_assumption`: Unstated assumptions relied upon
-
-**Severity Levels**: minor, significant, critical
-
----
-
-### `src/proof/assumption-tracker.ts` - Assumption Tracker
-
-**Purpose**: Traces conclusions back to their supporting assumptions
-
-**Key Methods**:
-```typescript
-traceToAssumptions(conclusionId: string, graph: DependencyGraph): AssumptionChain
-analyzeAssumptions(decomposition: ProofDecomposition): AssumptionAnalysis
-checkAssumptionDischarge(decomposition: ProofDecomposition): DischargeStatus[]
-findUnusedAssumptions(decomposition: ProofDecomposition): string[]
-validateStructure(decomposition: ProofDecomposition): StructureValidation
-```
-
----
-
-### `src/proof/inconsistency-detector.ts` - Inconsistency Detector
-
-**Purpose**: Detects logical inconsistencies in reasoning chains
-
-**Key Methods**:
-```typescript
-detectInconsistencies(decomposition: ProofDecomposition): Inconsistency[]
-```
-
-**Inconsistency Types**:
-- Circular dependencies
-- Contradictory statements
-- Invalid inference chains
-
----
-
-### `src/proof/circular-detector.ts` - Circular Reasoning Detector
-
-**Purpose**: Detects circular reasoning patterns in proofs
-
-**Key Methods**:
-```typescript
-detectCircularReasoning(decomposition: ProofDecomposition): CircularReasoningResult
-```
-
----
-
-## Visual Export Components (v7.0.0)
-
-### `src/export/visual/` - Modular Visual Exporters
-
-**Purpose**: Mode-specific visual export generation
-
-**Structure** (23 files total, 20 mode-specific exporters):
-```
-src/export/visual/
-├── index.ts              # Unified VisualExporter class
-├── types.ts              # VisualFormat, VisualExportOptions
-├── utils.ts              # sanitizeId utility
-├── proof-decomposition.ts # Proof decomposition export (v7.0.0)
-└── [19 mode-specific exporters]
-    causal.ts, temporal.ts, game-theory.ts, bayesian.ts,
-    sequential.ts, shannon.ts, abductive.ts, counterfactual.ts,
-    analogical.ts, evidential.ts, first-principles.ts,
-    systems-thinking.ts, scientific-method.ts, optimization.ts, formal-logic.ts,
-    mathematics.ts, physics.ts, hybrid.ts, metareasoning.ts (v6.1.0)
-```
-
-**Key Types** (v7.0.0):
-```typescript
-type VisualFormat = 'mermaid' | 'dot' | 'ascii' | 'svg';
-
-interface VisualExportOptions {
-  format: VisualFormat;
-  colorScheme?: 'default' | 'monochrome' | 'pastel';
-  includeLabels?: boolean;
-  includeMetrics?: boolean;
-  // SVG-specific options
-  svgWidth?: number;
-  svgHeight?: number;
-  nodeSpacing?: number;
-}
-```
-
-**Unified Exporter Class**:
-```typescript
-class VisualExporter {
-  exportCausalGraph(thought: CausalThought, options: VisualExportOptions): string
-  exportTemporalTimeline(thought: TemporalThought, options: VisualExportOptions): string
-  // ... 15 mode-specific methods
-}
-```
-
-**Benefits**:
-- **Lazy loading**: Only load exporters when specific mode needed
-- **Tree-shaking**: Unused exporters eliminated during bundling
-- **Maintainability**: ~100-150 lines per file vs 2,546 line monolith
-- **Backward compatibility**: Unified class preserved for existing consumers
-
----
-
-## Utility Components
-
-### `src/utils/errors.ts` - Error Definitions
-
-Custom error types:
-- `SessionNotFoundError`
-- `InvalidThoughtError`
-- `ValidationError`
-
-### `src/utils/logger.ts` - Logger
-
-**Purpose**: Structured logging with levels
-
-**Levels**: error, warn, info, debug
-
-**Features**:
-- Timestamp tracking
-- Level filtering
-- PII sanitization
-
-**Interface**: Implements `ILogger` for dependency injection
-
----
-
-## Type System Architecture
-
-### Base Types (`src/types/core.ts`)
-
-**BaseThought**: Common fields for all thoughts
-```typescript
-interface BaseThought {
-  id: string;
-  sessionId: string;
-  mode: ThinkingMode;
-  thoughtNumber: number;
-  totalThoughts: number;
-  content: string;
-  timestamp: Date;
-  nextThoughtNeeded: boolean;
-  isRevision?: boolean;
-  revisesThought?: string;
-}
-```
-
-**ThinkingSession**: Session state container
-```typescript
-interface ThinkingSession {
-  id: string;
-  title: string;
-  mode: ThinkingMode;
-  thoughts: Thought[];
-  createdAt: Date;
-  updatedAt: Date;
-  isComplete: boolean;
-  metrics: SessionMetrics;
-  config: SessionConfig;
-  // ... additional fields
-}
-```
-
-### Mode-Specific Types (`src/types/modes/*.ts`)
-
-Each mode extends BaseThought with mode-specific fields:
-
-**Example - ShannonThought**:
-```typescript
-interface ShannonThought extends BaseThought {
-  mode: ThinkingMode.SHANNON;
-  thoughtType: ExtendedThoughtType;
-  stage: ShannonStage;
-  uncertainty?: number;
-  dependencies?: string[];
-  assumptions?: string[];
-}
-```
-
-**Example - MathematicsThought**:
-```typescript
-interface MathematicsThought extends BaseThought {
-  mode: ThinkingMode.MATHEMATICS;
-  thoughtType: ExtendedThoughtType;
-  mathematicalModel?: MathematicalModel;
-  proofStrategy?: ProofStrategy;
-}
-```
-
-### Discriminated Unions
-
-**Thought Union**:
-```typescript
-type Thought =
-  | SequentialThought
-  | ShannonThought
-  | MathematicsThought
-  | PhysicsThought
-  | HybridThought
-  | InductiveThought      // v5.0.0
-  | DeductiveThought      // v5.0.0
-  | MetaReasoningThought  // v6.0.0
-  | AbductiveThought
-  | CausalThought
-  | BayesianThought
-  | CounterfactualThought
-  | AnalogicalThought
-  | TemporalThought
-  | GameTheoryThought
-  | EvidentialThought
-  | FirstPrinciplesThought
-  | SystemsThinkingThought
-  | ScientificMethodThought
-  | OptimizationThought
-  | FormalLogicThought    // 21 total thought types
-```
-
-Note: The 4 advanced runtime modes (Recursive, Modal, Stochastic, Constraint) have mode entries but share generic thought handling.
-
-Enables type-safe pattern matching and mode-specific handling.
-
----
-
-## Component Interactions
-
-### Session Creation Flow
-
-```
-Client Request
-    ↓
-index.ts: handleCreateSession()
-    ↓
-SessionManager.createSession()
-    ↓
-SessionMetricsCalculator.initializeMetrics()
-    ↓
-Return ThinkingSession
-```
-
-### Thought Addition Flow
-
-```
-Client Request
-    ↓
-index.ts: handleAddThought()
-    ↓
-ThoughtFactory.createThought()
-    ↓
-SessionManager.addThought()
-    ↓
-SessionMetricsCalculator.updateMetrics()
-    ↓
-Return updated ThinkingSession
-```
-
-### Export Flow
-
-```
-Client Request
-    ↓
-index.ts: handleExport()
-    ↓
-SessionManager.getSession()
-    ↓
-ExportService.exportSession()
-    ↓
-VisualExporter (if visual format)
-    ↓
-Return formatted output
-```
-
-### Mode Switching Flow
-
-```
-Client Request
-    ↓
-index.ts: handleSwitchMode()
-    ↓
-SessionManager.switchMode()
-    ↓
-Update session.mode
-    ↓
-Return updated session
-```
-
----
-
-## Component Dependencies
-
-### Dependency Graph
-
-```
-index.ts
-├── ThoughtFactory
-│   └── ModeHandlerRegistry (36 handlers)
-├── ExportService
-│   └── VisualExporter (22 mode exporters)
-└── SessionManager
-    └── SessionMetricsCalculator
-
-TaxonomySystem
-├── TaxonomyClassifier
-├── TaxonomyNavigator
-├── SuggestionEngine
-└── MultiModalAnalyzer
-```
-
-### Circular Dependencies
-
-**55 type-only circular dependencies** (0 runtime)
-
-**Design Principle**: Services depend on managers, no runtime circular dependencies.
-
----
-
-## Extension Points
-
-### Adding a New Thinking Mode
-
-1. **Define Type** in `src/types/modes/new-mode.ts`:
-   ```typescript
-   export interface NewModeThought extends BaseThought {
-     mode: ThinkingMode.NEW_MODE;
-     // mode-specific fields
-   }
-   ```
-
-2. **Update Enum** in `src/types/core.ts`:
-   ```typescript
-   export enum ThinkingMode {
-     // ...
-     NEW_MODE = 'new_mode',
-   }
-   ```
-
-3. **Add to Union** in `src/types/core.ts`:
-   ```typescript
-   export type Thought = ... | NewModeThought;
-   ```
-
-4. **Implement in Factory** (`src/services/ThoughtFactory.ts`):
-   ```typescript
-   case 'new_mode':
-     return { ...baseThought, mode: ThinkingMode.NEW_MODE, ... };
-   ```
-
-5. **Add Tests** in `tests/unit/new-mode.test.ts`
-
-### Adding a New Export Format
-
-1. **Implement Method** in `src/services/ExportService.ts`:
-   ```typescript
-   private exportToNewFormat(session: ThinkingSession): string {
-     // format implementation
-   }
-   ```
-
-2. **Add to Switch** in `exportSession()`:
-   ```typescript
-   case 'new_format':
-     return this.exportToNewFormat(session);
-   ```
-
-3. **Add Tests**
-
----
-
-## Performance Optimization
-
-### Session Management
-- **LRU Cache**: Keep hot sessions in memory
-- **Lazy Loading**: Validators and exporters loaded on-demand
-- **Incremental Metrics**: O(1) updates instead of O(n) recalculation
-
----
-
-## Testing Strategy
-
-### Unit Tests
-- **Service Layer**: ThoughtFactory, ExportService
-- **Session Management**: SessionManager, SessionMetricsCalculator
-- **Validation**: All 35 mode validators
-- **Mode Handlers**: All 36 specialized handlers
-
-### Integration Tests
-- **MCP Protocol**: Full request/response cycles
-- **Session Workflows**: End-to-end session operations
-- **Multi-Session**: Concurrent session handling
-- **Error Handling**: Error propagation and recovery
-- **Production Features**: Real-world usage scenarios
-
-### Coverage Targets
-- **Critical Paths**: 80%+ coverage ✅
-- **Tests**: 5,011 passing
-- **Test Files**: 177
-- **Type Safety**: 100% (0 type suppressions)
-- **Mode Coverage**: All 33 modes have validators (35 total)
-- **Handler Coverage**: All 36 specialized handlers tested
-- **Proof Decomposition**: Full coverage for Phase 8 components
-
----
-
-*Last Updated*: 2025-12-30
-*Component Version*: 9.0.0
+# Component Guide
+
+This is a subsystem-level guide. For per-file dependency detail (who imports whom, which
+exports are used where), see `DEPENDENCY_GRAPH.md` — this document does not repeat its
+per-file listings.
+
+## MCP Server Layer — `src/index.ts`
+
+The entry point. Registers 13 tools, holds all `CallToolRequestSchema` handlers, and lazily
+initializes the service layer on first use. No mode logic lives here by convention — it
+delegates to `src/services/` and `src/modes/`. See `DATA_FLOW.md` for the request sequence and
+`OVERVIEW.md` for the full 13-tool list.
+
+## Service Layer — `src/services/`
+
+- **`ThoughtFactory.ts`** — builds the correctly-typed thought object for any of the 34 modes.
+  Delegates mode-specific construction to `ModeHandlerRegistry`.
+- **`ExportService.ts`** — orchestrates multi-format export, delegating to the format-specific
+  exporters in `src/export/`. Contains the codebase's one confirmed type suppression
+  (`@ts-expect-error` at `ExportService.ts:1043`, "unused method kept for future use").
+
+## Mode Layer — `src/modes/`
+
+- **`registry.ts`** — `ModeHandlerRegistry`, a Strategy-pattern singleton. `getHandler(mode)`
+  returns a specialized handler or a generic fallback; `hasSpecializedHandler(mode)` checks
+  coverage.
+- **`handlers/`** — 37 handler files. Category breakdown (from `CLAUDE.md`, source-verified):
+  Core (5): Sequential, Shannon, Mathematics, Physics, Hybrid. Fundamental (3): Inductive,
+  Deductive, Abductive. Causal/Probabilistic (7): Causal, Bayesian, Counterfactual, Temporal,
+  Historical, GameTheory, Evidential. Analogical (2): Analogical, FirstPrinciples.
+  Systems/Scientific (3): SystemsThinking, ScientificMethod, FormalLogic. Academic (4):
+  Synthesis, Argumentation, Critique, Analysis. Engineering (4): Engineering, Computability,
+  Cryptanalytic, Algorithmic. Advanced Runtime (4): MetaReasoning, Recursive, Modal,
+  Stochastic. Fallback (2): GenericModeHandler, CustomHandler. Constraint and Optimization are
+  covered by validators plus the generic handler, not a dedicated handler.
+- **`combinations/`** — multi-mode analysis (`MultiModeAnalyzer`), reached only through a
+  dynamic `import()` at `src/index.ts:918`. This is why repo_map's static-import scan flags
+  `combinations/index.ts` and `analyzer.ts` as orphaned — they are live, just not statically
+  reachable.
+- **`stochastic/`** — stochastic-mode types, sampling, and distribution models. repo_map
+  classifies these as test-only reachable (imported by tests but not by any non-test `src/`
+  file through a static path); confirm against `DEPENDENCY_GRAPH.md` before assuming dead.
+
+## Validation & Security Components — `src/validation/`
+
+- **`validator.ts`** — top-level entry, imports `getValidatorForMode` from `validators/index.ts`.
+- **`validators/registry.ts`** — a lazy-loading table keyed by mode name. Each entry names a
+  module path and class name; `registry.ts:186` does `await import(config.module)`. This is
+  the mechanism, confirmed by direct read, behind the 10 mode-validator files repo_map flags as
+  orphaned (`algorithmic.ts`, `analysis.ts`, `argumentation.ts`, `critique.ts`,
+  `engineering.ts`, `firstprinciples.ts`, `formallogic.ts`, `scientificmethod.ts`,
+  `synthesis.ts`, `systemsthinking.ts`) — they are live, loaded by mode name at runtime, not by
+  static import.
+- **`validators/index.ts`** — a separate, static barrel that re-exports the other 24 mode
+  validators (sequential, mathematics, bayesian, etc.) by name. The split between this static
+  barrel and the dynamic `registry.ts` is why some mode validators show as reachable and others
+  show as orphaned in repo_map's report, despite all 35 being equally live.
+- **`schemas.ts`, `schema-utils.ts`** — dead-candidates. Their only importer is the also-dead
+  `validation/index.ts` barrel; confirmed by grep, no other importer in `src/` or `tests/`.
+
+## Session Management — `src/session/`
+
+`manager.ts` holds `SessionManager`: lazy async init via a cached promise, in-memory storage by
+default, file-based storage under `SESSION_DIR` for multi-instance sharing with cross-process
+file locking (`src/session/locks/`). See `DATA_FLOW.md` for the session lifecycle and the
+distinction between this live `SESSION_DIR` mechanism and the separate, dead
+`MCP_ENABLE_PERSISTENCE` feature.
+
+## Export System — `src/export/`
+
+Two families: document exporters (Markdown, JSON, and other flat formats) at the top level,
+and `src/export/visual/` for diagram formats (Mermaid, DOT, ASCII, native SVG, TikZ, and
+more) — 24 mode-specific exporter files plus 14 shared utility files, driven by 14 fluent
+builder classes (`DOTGraphBuilder`, `MermaidGraphBuilder`, `SVGBuilder`, and 11 others; full
+list and file paths in `CLAUDE.md`'s "Visual Builder APIs" table). `src/export/index.ts` is a
+dead-candidate barrel — its exports (`VisualExporter` and others) are imported directly from
+their concrete files elsewhere in the codebase, not through this barrel.
+
+## Taxonomy System — `src/taxonomy/`
+
+`reasoning-types.ts` defines all 69 reasoning types. `navigator.ts` and `suggestion-engine.ts`
+are reachable only from tests per repo_map — check `DEPENDENCY_GRAPH.md` before assuming they
+run in production. `classifier.ts` is a dead-candidate: its only hit anywhere in `src/index.ts`
+is a JSDoc comment mentioning "taxonomy classifier," not an import.
+
+## Proof Decomposition — `src/proof/`
+
+13 files implementing proof decomposition, gap analysis, assumption tracking, inconsistency
+detection, and circular-reasoning detection. repo_map classifies the whole subsystem as
+test-only reachable — imported by the test suite but not reached from `src/index.ts` through a
+static path at the time of this scan. `proof/index.ts`, the barrel, is a dead-candidate for the
+same reason as the other three dead barrels: its symbols are imported directly from their
+concrete files elsewhere, not through it.
+
+## Type System — `src/types/`
+
+- **`core.ts`** — the `ThinkingMode` enum (34 real modes + `CUSTOM`), the `Thought`
+  discriminated union, and one `isXThought` guard per mode.
+- **`modes/*.ts`** — 33 files, one per mode with a dedicated thought type. Each also defines
+  its own `isXThought` guard, duplicating the one in `core.ts`. See `ARCHITECTURE.md`'s "Key
+  Findings" section for why this duplication is a drift risk, not just a style choice.
+
+## Duplicate Symbols — what to check before editing a type guard or a shared name
+
+63 names are exported by 2+ files in `src/`. Do not assume a name collision is cosmetic:
+
+- **32 pairs** are the `isXThought` guards above — real drift risk, not cosmetic.
+- **29 pairs** are type-only names that collide by English word only (e.g. `Constraint` in
+  `stochastic/types.ts` vs. `optimization.ts`) — different concepts, already disambiguated by
+  the hand-curated `types/index.ts` barrel, not a defect.
+- **2 pairs** are real duplicated logic or a genuine footgun: `escapeLatex` (duplicated logic,
+  consolidation candidate) and `ValidationError` (same name, unrelated interface vs. class —
+  see `ARCHITECTURE.md`).
+
+## Verification
+
+Generated 2026-08-05 by `repo_map.py map`.
+Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/Architecture`
+
+| Claim | Value | Source |
+|---|---|---|
+| totalTypeScriptFiles | 436 | dependency-graph.json |
+| orphanedFiles | 24 | dependency-graph.json |
+| noImporterFileCount | 21 | unused-analysis.json (summary) |
+| unusedExportsCount | 195 | dependency-graph.json |
+
+Handler count (37), validator count (35), mode count (34), and visual-exporter file counts
+(24 mode-specific + 14 utils) are source-verified against `CLAUDE.md`'s regenerated Project
+Metrics table and, for validators, an independent `ls src/validation/validators/modes/` count —
+not repo_map metric names, so not repeated in the table above.

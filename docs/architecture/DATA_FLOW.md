@@ -1,656 +1,112 @@
-# Data Flow Architecture
-
-**Version**: 9.0.0 | **Last Updated**: 2025-12-30
+# Data Flow
 
 ## Overview
 
-This document describes how data flows through the DeepThinking MCP system, from client requests to persistence and back.
+This document traces a request from the MCP client through the server and back, the session
+lifecycle, and the export flow. Tool names and the request path below are read directly from
+`src/index.ts`, not carried over from an older doc revision — a prior revision of this document
+described a pre-refactor tool surface (`add_thought`, `create_session`, and other names) that
+predates the current 13-tool architecture and no longer exists as callable tools.
 
-## Request/Response Flow
+## Request Processing Pipeline
 
-### MCP Protocol Layer
+A client calls one of 13 tools, listed here exactly as `src/index.ts` registers them:
 
-```
-┌─────────┐                    ┌──────────────┐
-│ Claude  │◄──────JSON-RPC────►│  MCP Server  │
-│ Client  │                    │  (index.ts)  │
-└─────────┘                    └──────┬───────┘
-                                      │
-                    ┌─────────────────┴─────────────────┐
-                    │  Tool Request Routing             │
-                    │  • add_thought                    │
-                    │  • create_session                 │
-                    │  • export_session                 │
-                    │  • switch_mode                    │
-                    │  • get_summary                    │
-                    │  • get_recommendations            │
-                    └───────────────────────────────────┘
-```
+`deepthinking_core`, `deepthinking_standard`, `deepthinking_mathematics`,
+`deepthinking_temporal`, `deepthinking_probabilistic`, `deepthinking_causal`,
+`deepthinking_strategic`, `deepthinking_analytical`, `deepthinking_scientific`,
+`deepthinking_engineering`, `deepthinking_academic`, `deepthinking_session`,
+`deepthinking_analyze`.
 
-### Request Processing Pipeline
+The first 10 are mode-grouping tools — each carries 2-4 related reasoning modes as an input
+parameter (for example `deepthinking_core` covers inductive, deductive, and abductive).
+`deepthinking_session` is different in kind: it bundles session-lifecycle **actions** (create,
+list, delete, export, get_session, switch_mode, recommend_mode) as one tool's action enum, not
+as six separate tools. `deepthinking_analyze` runs multi-mode analysis with presets and merge
+strategies.
 
 ```
-1. JSON-RPC Request
-   ↓
-2. Protocol Parsing (MCP)
-   ↓
-3. Tool Identification
-   ↓
-4. Input Validation (Zod)
-   ↓
-5. Sanitization (Security)
-   ↓
-6. Handler Execution
-   ↓
-7. Business Logic (Services)
-   ↓
-8. State Management (SessionManager)
-   ↓
-9. Response Formation
-   ↓
-10. JSON-RPC Response
+Client → tools/call (MCP JSON-RPC over stdio)
+  → src/index.ts: CallToolRequestSchema handler
+    → validate input (Zod schema, src/validation/)
+    → ThoughtFactory.createThought()   [src/services/ThoughtFactory.ts]
+      → ModeHandlerRegistry.getHandler(mode)   [src/modes/registry.ts]
+        → specialized handler or generic fallback   [src/modes/handlers/]
+      → returns typed Thought
+    → SessionManager.addThought()   [src/session/manager.ts]
+  ← tool result (JSON-RPC response)
 ```
 
----
+A legacy `deepthinking` tool still exists in the handler map for backward compatibility. It is
+hidden from `tools/list` as of the 2026-08-03 audit, so a fresh client handshake never
+advertises it, but a client that already hardcodes the name still gets a response — with a
+deprecation warning and the same input-size caps as the 13 focused tools.
 
-## Data Flow by Operation
+## Session Lifecycle
 
-### 1. Session Creation
+1. **First tool call** — `SessionManager` initializes lazily via a cached promise. All handlers
+   `await getSessionManager()` before use; there is no eager init at module load.
+2. **Storage backend** — in-memory by default. Setting `SESSION_DIR` switches to file-based
+   storage with cross-process file locking (`src/session/locks/`), enabling multiple server
+   instances to share sessions safely (concurrent reads, exclusive writes).
+3. **Thought accumulation** — each `add_thought`-equivalent action appends a typed thought to
+   the session, tracked by `SessionMetricsCalculator`.
+4. **Export** — `deepthinking_session` with `action: "export"` (or `export_all`) routes through
+   `ExportService` to a format-specific exporter in `src/export/` (document formats) or
+   `src/export/visual/` (diagram formats).
+5. **Mode switching** — `action: "switch_mode"` changes which mode new thoughts use within the
+   same session; prior thoughts keep their original mode.
 
-```
-Client                    Server                    Storage
-  │                         │                         │
-  ├─ create_session ────────►                        │
-  │   {                     │                         │
-  │     title: "Problem",   │                         │
-  │     mode: "sequential"  │                         │
-  │   }                     │                         │
-  │                         │                         │
-  │                         ├─ validateInput()       │
-  │                         │  (Zod schema)           │
-  │                         │                         │
-  │                         ├─ SessionManager        │
-  │                         │   .createSession()      │
-  │                         │   │                     │
-  │                         │   ├─ Generate UUID      │
-  │                         │   ├─ MetricsCalculator  │
-  │                         │   │   .initialize()     │
-  │                         │   └─ Build session      │
-  │                         │                         │
-  │◄────────────────────────┤                         │
-  │  {                      │                         │
-  │    id: "uuid-1234",     │                         │
-  │    title: "Problem",    │                         │
-  │    mode: "sequential",  │                         │
-  │    thoughts: [],        │                         │
-  │    metrics: {...}       │                         │
-  │  }                      │                         │
-```
-
-**Key Steps**:
-1. Client sends session creation request
-2. Server validates input with CreateSessionSchema
-3. SessionManager generates UUID and initializes session
-4. SessionMetricsCalculator creates initial metrics
-5. Response contains complete session object
-
-**Data Transformations**:
-- Input: Simple request parameters
-- Processing: Rich session object with defaults
-- Output: Complete ThinkingSession with metadata
-
----
-
-### 2. Adding a Thought
+## Export Flow
 
 ```
-Client                    Server                    Storage
-  │                         │                         │
-  ├─ add_thought ───────────►                        │
-  │   {                     │                         │
-  │     sessionId: "uuid",  │                         │
-  │     thought: "First",   │                         │
-  │     mode: "sequential", │                         │
-  │     thoughtNumber: 1    │                         │
-  │   }                     │                         │
-  │                         │                         │
-  │                         ├─ validateInput()       │
-  │                         │  (AddThoughtSchema)     │
-  │                         │                         │
-  │                         ├─ ThoughtFactory        │
-  │                         │   .createThought()      │
-  │                         │   │                     │
-  │                         │   ├─ baseThought {}     │
-  │                         │   ├─ mode-specific      │
-  │                         │   │   fields            │
-  │                         │   └─ return Thought     │
-  │                         │                         │
-  │                         ├─ SessionManager        │
-  │                         │   .addThought()         │
-  │                         │   │                     │
-  │                         │   ├─ getSession()       │
-  │                         │   ├─ thoughts.push()    │
-  │                         │   ├─ updateState()      │
-  │                         │   └─ MetricsCalculator  │
-  │                         │       .update()         │
-  │                         │                         │
-  │◄────────────────────────┤                         │
-  │  {                      │                         │
-  │    id: "uuid",          │                         │
-  │    thoughts: [          │                         │
-  │      {thought1}         │                         │
-  │    ],                   │                         │
-  │    currentThoughtNumber: 1,                       │
-  │    metrics: {updated}   │                         │
-  │  }                      │                         │
+deepthinking_session (action: export) or deepthinking_analyze
+  → ExportService   [src/services/ExportService.ts]
+    → format-specific exporter
+       document formats → src/export/*.ts
+       visual formats    → src/export/visual/modes/<mode>.ts  (24 mode-specific files)
+                            using shared builders in src/export/visual/utils/  (14 files)
+  ← exported content (returned inline, or written to disk if MCP_EXPORT_PATH is set)
 ```
 
-**Key Steps**:
-1. Client sends thought with session ID
-2. Server validates with AddThoughtSchema
-3. ThoughtFactory creates mode-specific thought object
-   - **v8.x**: Checks `registry.hasSpecializedHandler(mode)` first
-   - If handler exists: delegates to handler for validation and enhancement
-   - Otherwise: falls back to switch statement
-4. SessionManager adds thought to session
-5. SessionMetricsCalculator updates metrics incrementally (O(1))
-6. Response contains updated session
+## Data Persistence — one live mechanism, one dead one
 
-**Data Transformations**:
-- Input: Flat thought parameters
-- ModeHandler (v8.x): Validates, enhances with auto-calculations (posteriors, archetypes, etc.)
-- ThoughtFactory: Rich Thought object with mode-specific fields
-- SessionManager: Updated session state
-- Metrics: Incremental calculations (avg uncertainty, etc.)
-- Output: Complete updated session with `hasSpecializedHandler` flag
+Do not confuse these two. They read similarly from the environment-variable names but only one
+does anything.
 
-**Performance**:
-- O(1) thought addition
-- O(1) metrics update (incremental)
-
----
-
-### 3. Mode Switching
-
-```
-Client                    Server
-  │                         │
-  ├─ switch_mode ───────────►
-  │   {                     │
-  │     sessionId: "uuid",  │
-  │     newMode: "shannon", │
-  │     reason: "need       │
-  │       systematic"       │
-  │   }                     │
-  │                         │
-  │                         ├─ SessionManager
-  │                         │   .switchMode()
-  │                         │   │
-  │                         │   ├─ Validate transition
-  │                         │   ├─ Update mode
-  │                         │   ├─ Update config
-  │                         │   └─ Record reason
-  │                         │
-  │◄────────────────────────┤
-  │  {                      │
-  │    id: "uuid",          │
-  │    mode: "shannon",     │
-  │    config: {            │
-  │      modeConfig: {      │
-  │        mode: "shannon"  │
-  │      }                  │
-  │    }                    │
-  │  }                      │
-```
-
-**Key Steps**:
-1. Client requests mode switch
-2. SessionManager validates transition
-3. SessionManager updates mode and config
-4. Mode switch reason recorded in session history
-5. Response confirms new mode
-
-**Data Transformations**:
-- session.mode: old → new mode
-
----
-
-### 4. Session Export
-
-```
-Client                    Server                    Storage
-  │                         │                         │
-  ├─ export_session ────────►                        │
-  │   {                     │                         │
-  │     sessionId: "uuid",  │                         │
-  │     format: "markdown"  │                         │
-  │   }                     │                         │
-  │                         │                         │
-  │                         ├─ SessionManager        │
-  │                         │   .getSession()         │
-  │                         │                         │
-  │                         ├◄────────────────────────┤
-  │                         │   session data          │
-  │                         │                         │
-  │                         ├─ ExportService         │
-  │                         │   .exportSession()      │
-  │                         │   │                     │
-  │                         │   ├─ Format switch      │
-  │                         │   ├─ Transform data     │
-  │                         │   ├─ Add metadata       │
-  │                         │   ├─ Format thoughts    │
-  │                         │   └─ Generate output    │
-  │                         │                         │
-  │◄────────────────────────┤                         │
-  │  # Session: Problem     │                         │
-  │                         │                         │
-  │  ## Metadata            │                         │
-  │  - Mode: sequential     │                         │
-  │  - Thoughts: 5          │                         │
-  │                         │                         │
-  │  ## Thoughts            │                         │
-  │  1. First thought...    │                         │
-  │  2. Second thought...   │                         │
-```
-
-**Key Steps**:
-1. Client requests export in specific format
-2. SessionManager retrieves session from storage/cache
-3. ExportService transforms to requested format
-4. **Mode-specific data extraction** via `extractModeSpecificMarkdown()` or `extractModeSpecificLatex()` (v8.3.2)
-5. Response contains formatted output with structured data
-
-**Supported Formats & Transformations**:
-
-| Format | Output | Use Case |
-|--------|---------|----------|
-| JSON | `{"id": "...", "thoughts": [...]}` | API integration, backup |
-| Markdown | `# Session\n## Thoughts\n...` + mode-specific sections | Documentation, sharing |
-| LaTeX | `\documentclass{article}...` + `\itemize` for structured data | Academic papers |
-| HTML | `<html><body>...</body></html>` | Web display |
-| Jupyter | `{"cells": [...]}` + separate cells for mode data | Interactive analysis |
-| Mermaid | `graph TD; A-->B;` | Visual diagrams |
-| DOT | `digraph G { A -> B; }` | GraphViz |
-| ASCII | `├── Thought 1\n└── Thought 2` | Terminal display |
-
-**Mode-Specific Data Extraction** (v8.3.2):
-- Causal: Nodes, edges with strengths, interventions
-- Bayesian: Hypotheses, priors, posteriors, evidence
-- Temporal: Events, intervals, timelines with relations
-- Game Theory: Players, strategies, payoff matrices
-- Systems Thinking: Components, feedback loops, archetypes
-
-**No Storage Write**: Export is read-only operation
-
----
-
-## State Management
-
-### Session State Lifecycle
-
-```
-┌──────────────┐
-│   Created    │ ← createSession()
-│   (pending)  │
-└──────┬───────┘
-       │ addThought()
-       ▼
-┌──────────────┐
-│  In Progress │ ← thoughts being added
-│   (active)   │   nextThoughtNeeded: true
-└──────┬───────┘
-       │ addThought(nextThoughtNeeded: false)
-       ▼
-┌──────────────┐
-│   Complete   │ ← isComplete: true
-│  (finished)  │
-└──────┬───────┘
-       │ Optional: reopen, export
-       ▼
-┌──────────────┐
-│   Archived   │ ← Removed from active cache
-│  (stored)    │   Still in persistent storage
-└──────────────┘
-```
-
-### Metrics Evolution
-
-```typescript
-// Initial state (after createSession)
-{
-  totalThoughts: 0,
-  thoughtsByType: {},
-  averageUncertainty: 0,
-  revisionCount: 0,
-  timeSpent: 0,
-  dependencyDepth: 0
-}
-
-// After first thought
-{
-  totalThoughts: 1,
-  thoughtsByType: { "sequential": 1 },
-  averageUncertainty: 0,
-  revisionCount: 0,
-  timeSpent: 120, // seconds
-  dependencyDepth: 0
-}
-
-// After revision
-{
-  totalThoughts: 2,
-  thoughtsByType: { "sequential": 2 },
-  averageUncertainty: 0,
-  revisionCount: 1,  // ← incremented
-  timeSpent: 300,
-  dependencyDepth: 1  // ← updated
-}
-
-// With Shannon thought (uncertainty tracking)
-{
-  totalThoughts: 3,
-  thoughtsByType: { "sequential": 2, "shannon": 1 },
-  averageUncertainty: 0.25,  // ← O(1) incremental avg
-  revisionCount: 1,
-  timeSpent: 450,
-  dependencyDepth: 1
-}
-```
-
-**Incremental Updates** (O(1)):
-```typescript
-// Instead of recalculating from all thoughts (O(n))
-const sum = thoughts.reduce((acc, t) => acc + t.uncertainty, 0);
-const avg = sum / thoughts.length;
-
-// We maintain running sums (O(1))
-metrics._uncertaintySum += newThought.uncertainty;
-metrics._uncertaintyCount += 1;
-metrics.averageUncertainty = metrics._uncertaintySum / metrics._uncertaintyCount;
-```
-
----
-
-## Caching Strategy
-
-### LRU Cache for Active Sessions
-
-```
-Memory (Fast)                      Storage (Slow)
-┌──────────────────┐              ┌──────────────────┐
-│   LRU Cache      │              │  FileSystem      │
-│  (100 sessions)  │              │  (Unlimited)     │
-│                  │              │                  │
-│  Most Recent ──┐ │              │                  │
-│  [session-1  ] │ │              │                  │
-│  [session-2  ] │ │              │                  │
-│  [session-3  ] │ │              │                  │
-│  ...           │ │              │  [session-101]   │
-│  [session-99 ] │ │              │  [session-102]   │
-│  [session-100] │◄┼──evict──────┼► [session-103]   │
-│  Least Recent ─┘ │              │  ...             │
-│                  │              │                  │
-└──────────────────┘              └──────────────────┘
-```
-
-**Cache Operations**:
-
-**Read (getSession)**:
-```
-1. Check LRU cache
-   ├─ Hit: Return session (O(1)), move to front
-   └─ Miss: Load from storage (O(1) file read)
-       ├─ Add to cache
-       ├─ Evict LRU if full
-       └─ Return session
-```
-
-**Write (addThought, switchMode)**:
-```
-1. Update session in cache (O(1))
-2. Mark as dirty
-3. Async persist to storage
-4. Move to front of LRU
-```
-
-**Benefits**:
-- O(1) access for active sessions
-- Automatic memory management
-- Transparent to client
-
----
-
-## Data Persistence
-
-### File Structure
-
-```
-.deepthinking-sessions/
-├── sessions/
-│   ├── session-uuid-1.json
-│   ├── session-uuid-2.json
-│   └── session-uuid-3.json
-└── metadata/
-    └── sessions.json  (index of all sessions)
-```
-
-### Session File Format
-
-```json
-{
-  "id": "uuid-1234",
-  "title": "Problem Analysis",
-  "mode": "sequential",
-  "thoughts": [
-    {
-      "id": "thought-1",
-      "sessionId": "uuid-1234",
-      "mode": "sequential",
-      "thoughtNumber": 1,
-      "totalThoughts": 3,
-      "content": "First thought...",
-      "timestamp": "2025-11-25T10:00:00Z",
-      "nextThoughtNeeded": true
-    }
-  ],
-  "createdAt": "2025-11-25T10:00:00Z",
-  "updatedAt": "2025-11-25T10:05:00Z",
-  "metrics": {
-    "totalThoughts": 1,
-    "thoughtsByType": { "sequential": 1 },
-    "averageUncertainty": 0
-  },
-  "config": {
-    "modeConfig": {
-      "mode": "sequential",
-      "strictValidation": false
-    },
-    "enableAutoSave": true
-  }
-}
-```
-
-**Persistence Guarantees**:
-- Atomic writes (write to temp → rename)
-- Crash recovery (sessions in cache marked dirty)
-- No data loss (synchronous critical operations)
-
----
+- **Live**: `SESSION_DIR` (read in `src/session/`, not `src/config/`) enables file-based session
+  storage shared across multiple server instances, with atomic cross-process locking. This is
+  the multi-instance mechanism described under "Session Lifecycle" above.
+- **Dead**: `MCP_ENABLE_PERSISTENCE` and `MCP_PERSISTENCE_DIR` are read into
+  `config.enablePersistence` / `config.persistenceDir` at `src/config/index.ts:96-97`, defaulting
+  to `./.deepthinking-sessions`. A repo-wide grep found zero other references to either config
+  field anywhere in `src/`. Setting these environment variables changes nothing today — no code
+  path consumes them. Treat any documentation of atomic-write guarantees, crash recovery, or a
+  `.deepthinking-sessions/sessions/*.json` file format as describing a feature that does not
+  currently run, not as a description of live behavior.
 
 ## Error Flow
 
-### Error Propagation
+Errors extend `DeepThinkingError` (`src/utils/errors.ts`) — `SessionNotFoundError`,
+`ValidationError`, and others, each raised where the corresponding failure is detected
+(session lookup, input validation, mode dispatch) and propagated back through the tool handler
+as a structured MCP error response. This is a stdio JSON-RPC server, not an HTTP server; if you
+see HTTP status codes attached to these error types elsewhere, treat that as informal severity
+shorthand, not a literal transport-layer status.
 
-```
-Component Error
-    ↓
-Try/Catch Block
-    ↓
-Custom Error Type
-    ↓
-Error Handler
-    ↓
-Logger.error()
-    ↓
-Sanitized Response
-    ↓
-Client
-```
+## Verification
 
-### Example: Session Not Found
+Generated 2026-08-05 by `repo_map.py map`; tool names and line numbers confirmed by direct
+`grep` of `src/index.ts` and `src/config/index.ts` on 2026-08-05, not by repo_map's metrics.
+Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/Architecture`
 
-```
-Client Request
-    ↓
-SessionManager.getSession("invalid-id")
-    ↓
-Session not in cache
-    ↓
-FileSessionStore.load("invalid-id")
-    ↓
-File not found
-    ↓
-return null
-    ↓
-throw new SessionNotFoundError("Session not found: invalid-id")
-    ↓
-Handler catches error
-    ↓
-Log sanitized error (no sensitive data)
-    ↓
-Return error response to client
-{
-  error: {
-    code: "SESSION_NOT_FOUND",
-    message: "Session not found: invalid-id"
-  }
-}
-```
+| Claim | Value | Source |
+|---|---|---|
+| totalTypeScriptFiles | 436 | dependency-graph.json |
+| entryRoots | 1 | dependency-graph.json |
+| runtimeCircularDeps | 0 | dependency-graph.json |
 
-**Error Types**:
-- `SessionNotFoundError` → HTTP 404
-- `ValidationError` → HTTP 400
-- `InvalidThoughtError` → HTTP 400
-- Generic `Error` → HTTP 500
-
----
-
-## Performance Optimization
-
-### Key Optimizations
-
-1. **LRU Cache**: O(1) session access for hot data
-2. **Incremental Metrics**: O(1) updates vs O(n) recalculation
-3. **Async Persistence**: Non-blocking saves
-4. **Lazy Loading**: Only load what's needed
-
-### Bottlenecks & Solutions
-
-| Bottleneck | Impact | Solution |
-|------------|--------|----------|
-| Large sessions | Memory | Compression, lazy thought loading |
-| Many sessions | Memory | LRU eviction, pagination |
-| Export | CPU | Stream large exports, worker threads |
-| Storage I/O | Latency | Async writes, write coalescing |
-
----
-
-## Proof Decomposition Flow (v7.0.0)
-
-### Proof Analysis Pipeline
-
-```
-Proof Input (text or steps)
-    ↓
-ProofDecomposer.decompose()
-    ├─ Parse proof into steps
-    ├─ Identify statement types (axiom, hypothesis, derived, conclusion)
-    ├─ Detect inference rules
-    ├─ Build dependency graph
-    └─ Calculate metrics (completeness, rigor)
-    ↓
-ProofDecomposition
-    ↓
-┌────────────┬──────────────┬────────────────┐
-│            │              │                │
-▼            ▼              ▼                ▼
-GapAnalyzer  AssumptionTracker  InconsistencyDetector  VisualExport
-    │              │                    │                   │
-    ▼              ▼                    ▼                   ▼
-GapAnalysis  AssumptionAnalysis  Inconsistency[]    Mermaid/DOT/ASCII/SVG
-```
-
-### ProofDecomposition Data Structure
-
-```typescript
-interface ProofDecomposition {
-  id: string;
-  originalProof: string;
-  theorem?: string;
-  atoms: AtomicStatement[];           // Atomic statements
-  dependencies: DependencyGraph;       // Node → edges
-  assumptionChains: AssumptionChain[]; // Conclusion → assumptions
-  gaps: ProofGap[];                    // Detected gaps
-  implicitAssumptions: ImplicitAssumption[];
-  completeness: number;                // 0-1 score
-  rigorLevel: 'informal' | 'textbook' | 'rigorous' | 'formal';
-  atomCount: number;
-  maxDependencyDepth: number;
-}
-```
-
-### Visual Export Flow (SVG)
-
-```
-ProofDecomposition
-    ↓
-exportProofDecomposition(decomposition, { format: 'svg' })
-    ↓
-proofDecompositionToSVG()
-    ├─ Group atoms by type (axiom, hypothesis, derived, conclusion)
-    ├─ Calculate layered positions
-    ├─ Apply color scheme (default/pastel/monochrome)
-    ├─ Render nodes (rect/polygon/diamond shapes)
-    ├─ Render edges (Bezier curves with arrowheads)
-    ├─ Add gap indicators (dashed red lines)
-    ├─ Include metrics panel (if requested)
-    └─ Include legend
-    ↓
-SVG String (XML)
-```
-
----
-
-## Security & Privacy
-
-### Data Sanitization Pipeline
-
-```
-User Input
-    ↓
-Zod Validation (type safety)
-    ↓
-Sanitization (security)
-    ├─ File paths: Remove traversal attempts
-    ├─ Session IDs: Validate UUID format
-    └─ Content: Length limits
-    ↓
-Business Logic
-    ↓
-Logging
-    ├─ PII Redaction
-    │   • author → [REDACTED]
-    │   • email → [REDACTED]
-    │   • IP → [REDACTED]
-    ├─ Content Truncation (max 100 chars)
-    └─ Safe logging
-    ↓
-Storage
-    ├─ Path Validation (within allowed dir)
-    └─ Safe File Operations
-```
-
----
-
-*Last Updated*: 2025-12-30
-*Data Flow Version*: 9.0.0
+MCP tool count (13) and names, `MCP_ENABLE_PERSISTENCE`/`MCP_PERSISTENCE_DIR` dead-code status,
+and `resolveSandboxedOutputDir`'s dynamic-import call sites (`src/index.ts:407-409`,
+`:591-593`) are confirmed by direct source grep, not by a repo_map metric name — repo_map does
+not model MCP tool registration or environment-variable usage.

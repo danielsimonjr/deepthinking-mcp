@@ -1,456 +1,159 @@
-# DeepThinking MCP - Codebase Overview
+# DeepThinking MCP — Codebase Overview
 
 ## Project Summary
 
-DeepThinking MCP is a TypeScript-based **Model Context Protocol (MCP) server** that provides advanced reasoning capabilities through 33 specialized thinking modes (29 with dedicated thought types). The system enables AI assistants to perform structured, multi-step reasoning with taxonomy-based classification, meta-reasoning for strategic oversight, enterprise security features, proof decomposition for mathematical reasoning, and comprehensive export capabilities including native SVG generation.
+DeepThinking MCP is a TypeScript Model Context Protocol (MCP) server. It gives an LLM client
+34 structured reasoning modes through 13 focused MCP tools. Each mode has typed thought
+records, validation, session tracking, and multi-format export (Markdown, JSON, Mermaid, DOT,
+SVG, and more).
 
-**Version**: 9.0.0 | **Node**: >=18.0.0 | **License**: MIT
-
----
+The server runs as an ESM Node process (Node >=18) over stdio. It has one entry point:
+`src/index.ts`. It has zero runtime circular dependencies. It publishes to npm as
+`deepthinking-mcp`.
 
 ## Key Metrics
 
-| Metric | Value |
-|--------|-------|
-| Total Lines of Code | ~100,600 |
-| TypeScript Files | 233 |
-| Test Files | 177 |
-| Passing Tests | 5,011 |
-| Type Suppressions | 0 |
-| Thinking Modes | 33 (29 with thought types) |
-| Specialized Handlers | 36 (all modes covered) |
-| MCP Tools | 13 focused |
-| Export Formats | 8 + native SVG |
-| Visual Exporters | 41 files (23 mode-specific) |
-| Builder Classes | 14 fluent APIs |
-| Reasoning Types | 69 (110 planned) |
-| Total Exports | 1,267 (568 re-exports) |
-| Modules | 15 |
-| Circular Dependencies | 55 (all type-only, 0 runtime) |
-| Mode Validators | 35 |
+Two different tools measured this codebase, at different scopes. Keep them separate:
 
----
+- **repo_map** (`python repo_map.py map`, 2026-08-05) scans the whole repository: `src/`,
+  `tests/`, `tools/`, `config/`, and `docs/` — 436 TypeScript files total.
+- **DEPENDENCY_GRAPH.md** (`npm run docs:deps`, 2026-08-03) scans `src/` only — 234 files,
+  14 module directories. Use it for per-file, per-module detail; this document does not
+  repeat that detail.
+
+| Metric | Value | Scope | Source |
+|---|---|---|---|
+| Version | 9.3.3 | package | `package.json` |
+| TypeScript files, whole repo | 436 | repo-wide | repo_map |
+| TypeScript files, `src/` | 221 | src only | repo_map (`file-inventory.json`, area=src) |
+| Lines of code, whole repo | 213,625 | repo-wide | repo_map |
+| Lines of code, `src/` | 110,538 | src only | repo_map |
+| Total exports, whole repo | 2,195 | repo-wide | repo_map |
+| Total exports, `src/` | 1,276 (571 re-exports) | src only | DEPENDENCY_GRAPH.md |
+| Entry roots | 1 (`src/index.ts`) | src | repo_map |
+| Runtime circular dependencies | 0 | src | repo_map, confirmed by direct edge inspection |
+| Type-only circular dependencies | 57 | src | repo_map |
+| Orphan-flagged files | 24 (17 live, 7 dead-candidate) | src | repo_map, hand-verified — see below |
+| Duplicate symbol names | 63 (32 drift-risk, 29 benign, 2 real duplicates) | src | repo_map, hand-verified — see below |
+| Reasoning modes | 34 (30 with dedicated thought types, 4 advanced-runtime) | src | `src/types/core.ts` `ThinkingMode` enum |
+| Reasoning types (taxonomy) | 69 | src | `src/taxonomy/reasoning-types.ts` |
+| MCP tools | 13 | src | `src/index.ts` tool registrations, live-checked below |
+| Specialized mode handlers | 37 | src | `src/modes/handlers/` |
+| Mode validators | 35 | src | `src/validation/validators/modes/` |
+| Visual exporters | 42 files (24 mode-specific, 15 utils, 3 root) | src | `src/export/visual/` |
+| Fluent builder classes | 14 | src | `src/export/visual/utils/` |
+
+The whole-repo and `src`-only export counts (2,195 vs 1,276) are not a contradiction. They
+count different file sets — the gap is `tests/` (146 files) and `tools/` (64 files), which
+also export symbols.
 
 ## Project Structure
 
 ```
 deepthinking-mcp/
-├── src/                    # Source code (~100,600 lines)
-│   ├── index.ts            # MCP server entry point
-│   ├── types/              # Type definitions (33 modes)
-│   ├── services/           # Business logic layer (ThoughtFactory, ExportService)
-│   ├── session/            # Session management
-│   ├── validation/         # Zod schemas & validators (35 mode validators)
-│   ├── export/             # Export system (8 formats)
-│   ├── taxonomy/           # 69 reasoning types (110 planned)
-│   ├── cache/              # LRU caching
-│   ├── config/             # Server configuration
-│   ├── modes/              # Mode implementations & handlers (36 handlers)
-│   ├── proof/              # Proof decomposition system
-│   ├── tools/              # MCP tool definitions (13 tools)
-│   ├── interfaces/         # Core interfaces
-│   └── utils/              # Utility functions (errors, logger)
-├── tests/                  # Test suite (177 files, 5,011 tests)
-│   ├── unit/               # Unit tests
-│   └── integration/        # Integration tests
-├── docs/                   # Documentation
-│   └── architecture/       # Architecture docs
-├── dist/                   # Compiled output
-└── package.json            # Project configuration
+├── src/                # 221 files, 110,538 LOC — the package
+│   ├── index.ts        # entry point, all 13 tool handlers
+│   ├── types/           # ThinkingMode enum, Thought union, per-mode types
+│   ├── modes/            # mode handlers, registry, combinations, stochastic
+│   ├── services/       # ThoughtFactory, ExportService
+│   ├── session/         # SessionManager, storage, locks
+│   ├── validation/       # Zod schemas + per-mode validators
+│   ├── export/           # document + visual exporters
+│   ├── proof/             # proof decomposition engine
+│   ├── taxonomy/         # reasoning-type classification
+│   ├── cache/             # LRU/LFU/FIFO strategies
+│   ├── config/            # environment-variable configuration
+│   ├── interfaces/       # DI interfaces
+│   └── utils/             # errors, logger, sanitization
+├── tests/               # 146 files, 67,958 LOC
+├── tools/                # 64 files, 33,222 LOC — standalone CLI utilities
+├── templates/mode-scaffolding/  # 5 copy-paste templates for authoring a new mode
+└── docs/Architecture/   # this document set + generated reports
 ```
 
----
-
-## Core Source Directories
-
-### `src/types/` - Type System
-
-Comprehensive TypeScript definitions for 33 reasoning modes (29 with dedicated thought types):
-
-```
-src/types/
-├── core.ts                 # ThinkingMode enum (33 modes), Thought union type (29 types)
-├── config.ts               # Configuration types
-├── session.ts              # Session & validation types
-├── events.ts               # Event system types
-└── modes/                  # Mode-specific types (23 files)
-    ├── sequential.ts       # Sequential thinking
-    ├── shannon.ts          # Information theory
-    ├── mathematics.ts      # Mathematical reasoning
-    ├── physics.ts          # Physical modeling
-    ├── causal.ts           # Causal inference
-    ├── bayesian.ts         # Bayesian reasoning
-    ├── gametheory.ts       # Game theoretic analysis + von Neumann extensions (v7.2.0)
-    ├── metareasoning.ts    # Meta-reasoning (v6.0.0)
-    ├── computability.ts    # Turing machines, decidability (v7.2.0)
-    ├── cryptanalytic.ts    # Turing's deciban system (v7.2.0)
-    ├── algorithmic.ts      # Algorithm design & analysis - CLRS (v7.3.0)
-    ├── synthesis.ts        # Literature synthesis (v7.4.0)
-    ├── argumentation.ts    # Academic argumentation (v7.4.0)
-    ├── critique.ts         # Critical analysis (v7.4.0)
-    ├── analysis.ts         # Qualitative analysis (v7.4.0)
-    └── [8 more modes]
-```
-
-### `src/services/` - Business Logic Layer
-
-Core services extracted from the entry point:
-
-| Service | File | Responsibility |
-|---------|------|----------------|
-| **ThoughtFactory** | `ThoughtFactory.ts` | Mode-specific thought creation for all 33 modes with handler integration (v8.x) |
-| **ExportService** | `ExportService.ts` | Multi-format export (8 formats) |
-
-### `src/modes/handlers/` - Specialized Mode Handlers (v8.4.0)
-
-**36 specialized handlers** implementing the ModeHandler pattern (all 33 modes covered):
-
-| Category | Handlers | Key Features |
-|----------|----------|--------------|
-| **Core (5)** | Sequential, Shannon, Mathematics, Physics, Hybrid | Mode-specific validation and thought creation |
-| **Fundamental (3)** | Inductive, Deductive, Abductive | Reasoning triad implementation |
-| **Causal/Probabilistic (6)** | Causal, Bayesian, Counterfactual, Temporal, GameTheory, Evidential | Auto computation (posteriors, equilibria), validation |
-| **Analogical (2)** | Analogical, FirstPrinciples | Mapping and decomposition logic |
-| **Systems/Scientific (3)** | SystemsThinking, ScientificMethod, FormalLogic | 8 Archetypes detection, proof logic |
-| **Academic (4)** | Synthesis, Argumentation, Critique, Analysis | Coverage tracking, Socratic questions |
-| **Engineering (4)** | Engineering, Computability, Cryptanalytic, Algorithmic | CLRS coverage, Turing machines, Decibans |
-| **Advanced Runtime (6)** | MetaReasoning, Recursive, Modal, Stochastic, Constraint, Optimization | Strategic oversight, constraint solving |
-| **Fallback (3)** | GenericModeHandler, CustomHandler, utility | Default behavior, user-defined modes |
-
-### `src/session/` - Session Management
-
-```
-src/session/
-├── manager.ts                    # SessionManager - lifecycle management
-└── SessionMetricsCalculator.ts   # O(1) incremental metrics
-```
-
-### `src/validation/` - Validation System (v4.3.0)
-
-```
-src/validation/
-├── index.ts              # Public exports
-├── constants.ts          # IssueSeverity, IssueCategory, ValidationThresholds
-├── validator.ts          # Main validation orchestrator
-├── schemas.ts            # Zod schemas
-└── validators/
-    ├── base.ts           # BaseValidator with reusable methods
-    ├── registry.ts       # Lazy-loading ValidatorRegistry
-    └── modes/            # 25+ mode-specific validators
-```
-
-### `src/export/` - Export System
-
-```
-src/export/
-├── index.ts              # Unified ExportService
-├── visual/               # Visual exporters (22 files)
-│   ├── index.ts          # VisualExporter class
-│   ├── types.ts          # VisualFormat, VisualExportOptions
-│   ├── utils.ts          # sanitizeId utility
-│   └── [19 mode-specific exporters]
-└── formats/              # Document format exporters
-    ├── markdown.ts
-    ├── latex.ts
-    ├── html.ts
-    ├── jupyter.ts
-    └── json.ts
-```
-
-### `src/taxonomy/` - Taxonomy System
-
-```
-src/taxonomy/
-├── reasoning-types.ts       # 69 reasoning type definitions (110 planned)
-├── navigator.ts             # Hierarchy navigation (TaxonomyNavigator)
-├── suggestion-engine.ts     # Mode recommendations
-├── classifier.ts            # TaxonomyClassifier for mode analysis
-└── multi-modal.ts           # Combined reasoning analysis (MultiModalAnalyzer)
-```
-
----
-
-## The 33 Thinking Modes
-
-The server supports 33 reasoning modes organized into categories:
-- **Core Modes (5)**: Sequential, Shannon, Mathematics, Physics, Hybrid
-- **Historical Computing (2)**: Computability (Turing), Cryptanalytic (Turing) - *v7.2.0*
-- **Algorithmic (1)**: Algorithmic (CLRS) - *v7.3.0*
-- **Academic Research (4)**: Synthesis, Argumentation, Critique, Analysis - *v7.4.0*
-- **Advanced Runtime Modes (6)**: Metareasoning, Recursive, Modal, Stochastic, Constraint, Optimization
-- **Fundamental Modes (2)**: Inductive, Deductive
-- **Experimental Modes (13)**: Abductive, Causal, Bayesian, Counterfactual, Analogical, Temporal, Game Theory (+ von Neumann extensions), Evidential, First Principles, Systems Thinking, Scientific Method, Formal Logic, Engineering
-
-### Core Reasoning Modes (Fundamental) - v5.0.0+
-| Mode | Purpose | Tool |
-|------|---------|------|
-| **Inductive** | Specific observations → general principles | `deepthinking_core` |
-| **Deductive** | General principles → specific conclusions | `deepthinking_core` |
-| **Abductive** | Inference to best explanation | `deepthinking_core` |
-
-### Standard Workflow Modes (Full Runtime)
-| Mode | Purpose | Tool |
-|------|---------|------|
-| **Sequential** | Step-by-step linear reasoning | `deepthinking_standard` |
-| **Shannon** | Information theory, entropy analysis | `deepthinking_standard` |
-| **Hybrid** | Multi-approach combination | `deepthinking_standard` |
-
-### Math/Physics Modes
-| Mode | Purpose | Tool |
-|------|---------|------|
-| **Mathematics** | Formal proofs, theorems | `deepthinking_mathematics` |
-| **Physics** | Physical models, conservation laws | `deepthinking_mathematics` |
-
-### Advanced Runtime Modes (Full Runtime)
-| Mode | Purpose | Tool |
-|------|---------|------|
-| **Metareasoning** | Strategic oversight of reasoning (v6.0.0) | `deepthinking_analytical` |
-| **Recursive** | Divide-and-conquer, subproblem decomposition | (runtime only) |
-| **Modal** | Possibility/necessity logic | (runtime only) |
-| **Stochastic** | Probabilistic state transitions | (runtime only) |
-| **Constraint** | Constraint satisfaction problems | (runtime only) |
-| **Optimization** | Objective function optimization | `deepthinking_strategic` |
-
-### Analytical & Causal Modes
-| Mode | Purpose | Tool |
-|------|---------|------|
-| **Causal** | Cause-effect relationships | `deepthinking_causal` |
-| **Counterfactual** | "What-if" scenarios | `deepthinking_causal` |
-| **Bayesian** | Probability updates | `deepthinking_probabilistic` |
-| **Evidential** | Dempster-Shafer theory | `deepthinking_probabilistic` |
-| **Temporal** | Time-based reasoning | `deepthinking_temporal` |
-
-### Scientific & Systematic Modes
-| Mode | Purpose | Tool |
-|------|---------|------|
-| **Analogical** | Reasoning by analogy | `deepthinking_analytical` |
-| **First Principles** | Fundamental decomposition | `deepthinking_analytical` |
-| **Game Theory** | Strategic decision-making + von Neumann extensions | `deepthinking_strategic` |
-| **Systems Thinking** | Holistic system analysis | `deepthinking_scientific` |
-| **Scientific Method** | Hypothesis → experiment → conclusion | `deepthinking_scientific` |
-| **Formal Logic** | Formal logical proofs | `deepthinking_scientific` |
-
-### Historical Computing Modes (v7.2.0) - Turing & von Neumann
-| Mode | Purpose | Tool |
-|------|---------|------|
-| **Computability** | Turing machines, decidability, reductions, diagonalization | `deepthinking_mathematics` |
-| **Cryptanalytic** | Deciban evidence system, Banburismus, frequency analysis | `deepthinking_analytical` |
-
-### Engineering & Algorithmic Modes (v7.1.0, v7.3.0)
-| Mode | Purpose | Tool |
-|------|---------|------|
-| **Engineering** | Requirements, trade studies, FMEA, ADRs | `deepthinking_engineering` |
-| **Algorithmic** | Algorithm design, complexity analysis, CLRS algorithms | `deepthinking_engineering` |
-
-### Academic Research Modes (v7.4.0) - PhD Students & Scientific Writing
-| Mode | Purpose | Tool |
-|------|---------|------|
-| **Synthesis** | Literature review, knowledge integration, theme extraction | `deepthinking_academic` |
-| **Argumentation** | Toulmin model, dialectics, rhetorical structures | `deepthinking_academic` |
-| **Critique** | Critical analysis, peer review, methodology evaluation | `deepthinking_academic` |
-| **Analysis** | Qualitative analysis (thematic, grounded theory, discourse) | `deepthinking_academic` |
-
----
-
-## Key Files Reference
-
-### Entry Points
-| File | Purpose |
-|------|---------|
-| `src/index.ts` | MCP server entry, tool handlers |
-| `dist/index.js` | Compiled output (runtime entry) |
-
-### Core Types
-| File | Purpose |
-|------|---------|
-| `src/types/core.ts` | ThinkingMode enum, Thought union type, type guards |
-| `src/types/session.ts` | Session, ValidationIssue types |
-
-### Services
-| File | Purpose |
-|------|---------|
-| `src/services/ThoughtFactory.ts` | Thought creation for all 33 modes |
-| `src/services/ExportService.ts` | Export orchestration |
-
-### Session
-| File | Purpose |
-|------|---------|
-| `src/session/manager.ts` | SessionManager class |
-| `src/session/SessionMetricsCalculator.ts` | Metrics calculation |
-
-### Validation
-| File | Purpose |
-|------|---------|
-| `src/validation/constants.ts` | Centralized validation constants |
-| `src/validation/validators/base.ts` | Reusable validation methods |
-| `src/validation/validators/registry.ts` | Lazy-loading validator registry |
-
----
-
-## Architecture Patterns
-
-### 1. Service-Oriented Architecture
-Business logic extracted into focused service classes with single responsibilities.
-
-### 2. Factory Pattern
-`ThoughtFactory` centralizes mode-specific thought creation with handler delegation.
-
-### 3. Strategy Pattern (ModeHandler - v8.x)
-Different thinking modes implemented as interchangeable handlers via `ModeHandler` interface:
-- `validate()` - Mode-specific input validation
-- `enhance()` - Automatic thought enhancements (posteriors, equilibria, archetypes)
-- `getSuggestions()` - Context-aware suggestions and warnings
-
-### 4. Lazy Loading Pattern (v4.3.0)
-- Validators loaded on-demand via dynamic imports
-- Schemas loaded when first accessed
-- Visual exporters loaded per-mode
-
-### 5. Observer Pattern
-Progress callbacks and event handlers for async operations.
-
-### 6. Registry Pattern (v8.x)
-`ModeHandlerRegistry` manages specialized handlers with singleton access.
-
----
-
-## Build & Development
-
-### Commands
-```bash
-npm run build        # Compile with tsup → dist/
-npm run dev          # Watch mode compilation
-npm run typecheck    # Type check without emitting
-npm run lint         # ESLint checks
-npm run format       # Prettier auto-format
-npm test             # Run tests (watch mode)
-npm run test:run     # Run tests once (CI)
-npm run test:coverage # Coverage reports
-```
-
-### Configuration Files
-| File | Purpose |
-|------|---------|
-| `tsconfig.json` | TypeScript configuration with path aliases |
-| `tsup.config.ts` | Build configuration (tree-shaking enabled) |
-| `vitest.config.ts` | Test configuration |
-| `.eslintrc.json` | Linting rules |
-| `.prettierrc` | Formatting rules |
-
-### Path Aliases
-Configured in `tsconfig.json`:
-- `@/*` → `src/*`
-- `@types/*` → `src/types/*`
-- `@validation/*` → `src/validation/*`
-- `@session/*`, `@batch/*`, `@export/*`, `@taxonomy/*`
-
----
-
-## MCP Integration
-
-### The 13 Focused Tools (v8.5.0)
-
-| Tool | Description | Modes Supported |
-|------|-------------|-----------------|
-| `deepthinking_core` | Fundamental reasoning | inductive, deductive, abductive |
-| `deepthinking_standard` | Standard workflows | sequential, shannon, hybrid |
-| `deepthinking_mathematics` | Mathematical/physical/computability | mathematics, physics, computability |
-| `deepthinking_temporal` | Time-based reasoning | temporal |
-| `deepthinking_probabilistic` | Probability reasoning | bayesian, evidential |
-| `deepthinking_causal` | Causal analysis | causal, counterfactual |
-| `deepthinking_strategic` | Strategic decision-making | gametheory, optimization |
-| `deepthinking_analytical` | Analytical reasoning | analogical, firstprinciples, metareasoning, cryptanalytic |
-| `deepthinking_scientific` | Scientific methods | scientificmethod, systemsthinking, formallogic |
-| `deepthinking_engineering` | Engineering/algorithmic | engineering, algorithmic |
-| `deepthinking_academic` | Academic research | synthesis, argumentation, critique, analysis |
-| `deepthinking_session` | Session management | All (create, list, delete, export) |
-
-### Configuration
-```json
-{
-  "mcpServers": {
-    "deepthinking": {
-      "command": "node",
-      "args": ["/path/to/deepthinking-mcp/dist/index.js"]
-    }
-  }
-}
-```
-
----
-
-## Export Capabilities
-
-### Document Formats
-| Format | Extension | Use Case |
-|--------|-----------|----------|
-| JSON | `.json` | API integration, backup |
-| Markdown | `.md` | Documentation |
-| LaTeX | `.tex` | Academic papers |
-| HTML | `.html` | Web display |
-| Jupyter | `.ipynb` | Interactive analysis |
-
-### Visual Formats (v7.0.0)
-| Format | Output | Use Case |
-|--------|--------|----------|
-| Mermaid | Flowcharts | Documentation |
-| DOT | GraphViz graphs | Visualization tools |
-| ASCII | Text diagrams | Terminal display |
-| **SVG** | Native vector graphics | Direct rendering without external tools |
-
----
-
-## Proof Decomposition (v7.0.0)
-
-| Component | Purpose |
-|-----------|---------|
-| **ProofDecomposer** | Breaks proofs into atomic statements |
-| **GapAnalyzer** | Detects gaps and implicit assumptions |
-| **AssumptionTracker** | Traces conclusions to assumptions |
-| **MathematicsReasoningEngine** | Advanced mathematical analysis |
-| **InconsistencyDetector** | Detects logical inconsistencies |
-
----
-
-## Testing
-
-### Test Structure (Phase 11 Complete)
-```
-tests/
-├── unit/                       # Unit tests (50+ files)
-│   ├── session/                # Session management tests
-│   ├── validation/             # Validator tests
-│   ├── services/               # Service layer tests
-│   ├── modes/handlers/         # ModeHandler tests
-│   └── proof/                  # Proof decomposition tests
-├── integration/                # Integration tests
-│   ├── handlers/               # 7 handler integration tests
-│   ├── tools/                  # 37 MCP tool tests
-│   ├── exports/                # 9 export format tests
-│   └── scenarios/              # 4 real-world workflow tests
-├── edge-cases/                 # 6 edge case test files
-├── performance/                # 4 performance/stress tests
-└── utils/                      # 5 test utility files
-```
-
-### Coverage (v9.0.0)
-- **Test Files**: 177 total
-- **Passing Tests**: 5,011
-- **Test Categories**: 19 (COR, STD, PAR, MTH, TMP, PRB, CSL, STR, ANL, SCI, ENG, ACD, SES, EXP, HDL, EDG, REG, INT, PRF)
-- **Phase 11**: Comprehensive coverage across all tools, modes, handlers, and exports
-
----
-
-## Further Documentation
-
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed system architecture
-- **[COMPONENTS.md](COMPONENTS.md)** - Component deep-dive
-- **[DATA_FLOW.md](DATA_FLOW.md)** - Data flow diagrams
-- **[DEPENDENCY_GRAPH.md](DEPENDENCY_GRAPH.md)** - Module dependency analysis
-- **[docs/modes/METAREASONING.md](../modes/METAREASONING.md)** - Meta-reasoning mode guide (v6.0.0)
-- **[CHANGELOG.md](../../CHANGELOG.md)** - Version history
-
----
-
-*Last Updated*: 2025-12-30
-*Version*: 9.0.0
+Do not treat `templates/mode-scaffolding/*.ts` as source code that runs. Those 5 files are
+scaffolding a human copies to start a new mode. No code imports them — that is by design (see
+"Reading the generated reports" below).
+
+## MCP Tools
+
+The server lists exactly 13 tools. Confirmed live from `src/index.ts`:
+
+`deepthinking_core`, `deepthinking_standard`, `deepthinking_mathematics`,
+`deepthinking_temporal`, `deepthinking_probabilistic`, `deepthinking_causal`,
+`deepthinking_strategic`, `deepthinking_analytical`, `deepthinking_scientific`,
+`deepthinking_engineering`, `deepthinking_academic`, `deepthinking_session`,
+`deepthinking_analyze`.
+
+Each mode-grouping tool (`deepthinking_core` through `deepthinking_academic`) carries 2-4
+related reasoning modes. `deepthinking_session` bundles session-lifecycle actions
+(create/list/delete/export/switch_mode/recommend_mode). `deepthinking_analyze` runs multi-mode
+analysis. See `DATA_FLOW.md` for the full tool-to-mode mapping and the request path.
+
+## Reading the generated reports
+
+Two automated reports live alongside this document: `DEPENDENCY_GRAPH.md` (dependency graph,
+cycles, per-module detail) and `unused-analysis.md` (candidate dead code). Both are useful and
+both have known blind spots. Read a flagged file before deleting it — do not treat either
+report as a deletion queue.
+
+**Orphan files are not automatically dead.** repo_map flags 24 `src/` files as having no
+static importer. A file-by-file check found:
+
+- **17 are live**, reached only through mechanisms static analysis cannot see:
+  - 10 mode validators (`algorithmic.ts`, `analysis.ts`, `argumentation.ts`, `critique.ts`,
+    `engineering.ts`, `firstprinciples.ts`, `formallogic.ts`, `scientificmethod.ts`,
+    `synthesis.ts`, `systemsthinking.ts` under `src/validation/validators/modes/`) — loaded by
+    a string-keyed dynamic `import()` in `src/validation/validators/registry.ts:186`.
+  - `src/modes/combinations/index.ts` and `analyzer.ts` — loaded by a dynamic `import()` in
+    `src/index.ts:918`.
+  - 5 files under `templates/mode-scaffolding/` — intentionally never imported; they are
+    copy-paste starting points for a new mode, documented in the repo's own README and
+    CLAUDE.md.
+- **7 are genuine dead-candidates**, with no importer of any kind found: the barrel files
+  `src/cache/index.ts`, `src/export/index.ts`, `src/proof/index.ts`,
+  `src/validation/index.ts`; `src/validation/schema-utils.ts` and `schemas.ts` (imported only
+  by the dead `validation/index.ts` barrel); and `src/taxonomy/classifier.ts` (its only hit
+  anywhere is a JSDoc comment, not an import).
+
+**A static scanner cannot see a dynamic `import()`.** That is the root cause behind both
+findings above and a documented, narrow gap in `unused-analysis.json`'s own methodology
+(the export `resolveSandboxedOutputDir` in `src/export/file-exporter.ts` is reported
+unreferenced, but it is called twice from `src/index.ts:407-409` and `:591-593` via a
+multi-line destructured dynamic import — a formatting-sensitive miss, not a general blind
+spot; single-line destructured dynamic imports elsewhere in the same file are correctly
+excluded).
+
+**`unusedExportsCount` (195) and `unreferencedAnywhereCount` (69) are different buckets**, not
+the same number reported twice. `unreferencedAnywhereCount` is the stricter one: exports with
+zero references anywhere in the repo, including their own defining file. A 23-export sample
+against that stricter bucket found 22 true dead code (96%) and the 1 false positive above.
+
+**This package publishes to npm.** An export unused inside the repo may still be public API
+consumed by an external caller. Do not delete an "unused" export from `src/index.ts` or a
+barrel file without checking whether removing it is a breaking change.
+
+## Verification
+
+Generated 2026-08-05 by `repo_map.py map`.
+Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/Architecture`
+
+| Claim | Value | Source |
+|---|---|---|
+| totalTypeScriptFiles | 436 | dependency-graph.json |
+| totalLinesOfCode | 213625 | dependency-graph.json |
+| totalExports | 2195 | dependency-graph.json |
+| totalModules | 5 | dependency-graph.json |
+| entryRoots | 1 | dependency-graph.json |
+| reachableFiles | 140 | dependency-graph.json |
+| dormantFiles | 81 | dependency-graph.json |
+| orphanedFiles | 24 | dependency-graph.json |
+| testOnlyFiles | 57 | dependency-graph.json |
+| runtimeCircularDeps | 0 | dependency-graph.json |
+| typeOnlyCircularDeps | 57 | dependency-graph.json |
+| noImporterFileCount | 21 | unused-analysis.json (summary) |
+| unusedExportsCount | 195 | dependency-graph.json |
+
+Note on `totalModules`: repo_map counts 5 top-level project areas (`docs`, `config`, `src`,
+`tools`, `tests`), not `src/` subdirectories. DEPENDENCY_GRAPH.md's "14 modules" counts `src/`
+subdirectories only — a different unit, not a disagreement.
