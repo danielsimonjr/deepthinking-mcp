@@ -19,7 +19,7 @@ hand-editing the numbers below — they have drifted from source repeatedly.
 | TypeScript Files | ~237 |
 | Lines of Code | ~102,000 (`src/*.ts`) |
 | Total Exports | 1,276 (571 re-exports) |
-| Passing Tests | 5,065 (177 test files) |
+| Passing Tests | 5,116 (183 test files) |
 | Reasoning Modes | 34 (30 with dedicated types + 4 advanced runtime) |
 | MCP Tools | 13 listed (legacy `deepthinking` still callable but hidden, see below) |
 | Export Formats | 8 + native SVG + file export |
