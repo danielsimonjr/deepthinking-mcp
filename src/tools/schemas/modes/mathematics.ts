@@ -62,7 +62,10 @@ export const MathSchema = BaseThoughtSchema.extend({
   physicalInterpretation: PhysicalInterpretationSchema.optional(),
 
   // Phase 8: Proof decomposition fields
-  proofSteps: z.array(ProofStepInputSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  proofSteps: z
+    .array(ProofStepInputSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
   theorem: TextSchema.optional(),
   hypotheses: IdArraySchema.optional(),
   analysisDepth: z.enum(["shallow", "standard", "deep"]).optional(),

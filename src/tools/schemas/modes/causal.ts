@@ -50,8 +50,14 @@ const InterventionSchema = z.object({
 export const CausalSchema = BaseThoughtSchema.extend({
   mode: z.enum(["causal", "counterfactual", "abductive"]),
   // Causal graph properties (top-level for JSON schema compatibility)
-  nodes: z.array(CausalNodeSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  edges: z.array(CausalEdgeSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  nodes: z
+    .array(CausalNodeSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  edges: z
+    .array(CausalEdgeSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
   // Nested causalGraph for backwards compatibility
   causalGraph: z
     .object({
@@ -62,7 +68,10 @@ export const CausalSchema = BaseThoughtSchema.extend({
   // Counterfactual properties
   counterfactual: CounterfactualSchema.optional(),
   // Intervention properties
-  interventions: z.array(InterventionSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  interventions: z
+    .array(InterventionSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
   // Observations for abductive reasoning
   observations: IdArraySchema.optional(),
   explanations: z

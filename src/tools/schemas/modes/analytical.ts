@@ -42,7 +42,10 @@ export const AnalyticalSchema = BaseThoughtSchema.extend({
   // Analogical reasoning
   sourceAnalogy: DomainSchema.optional(),
   targetAnalogy: DomainSchema.optional(),
-  mappings: z.array(MappingSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  mappings: z
+    .array(MappingSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
 
   // First principles reasoning
   fundamentals: IdArraySchema.optional(),

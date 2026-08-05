@@ -6,7 +6,13 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { ConfidenceSchema, IdSchema, TextSchema, IdArraySchema , boundedRecord} from "../shared.js";
+import {
+  ConfidenceSchema,
+  IdSchema,
+  TextSchema,
+  IdArraySchema,
+  boundedRecord,
+} from "../shared.js";
 import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 /**
@@ -34,7 +40,10 @@ export const ProbabilisticSchema = BaseThoughtSchema.extend({
   mode: z.enum(["bayesian", "evidential"]),
 
   // Bayesian reasoning
-  hypotheses: z.array(HypothesisSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  hypotheses: z
+    .array(HypothesisSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
   priorProbability: ConfidenceSchema.optional(),
   likelihood: ConfidenceSchema.optional(),
   posteriorProbability: ConfidenceSchema.optional(),
@@ -42,7 +51,10 @@ export const ProbabilisticSchema = BaseThoughtSchema.extend({
 
   // Evidential (Dempster-Shafer) reasoning
   frameOfDiscernment: IdArraySchema.optional(),
-  beliefMasses: z.array(BeliefMassSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  beliefMasses: z
+    .array(BeliefMassSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
   massFunction: boundedRecord(IdSchema, ConfidenceSchema).optional(),
   beliefFunction: boundedRecord(IdSchema, ConfidenceSchema).optional(),
   plausibilityFunction: boundedRecord(IdSchema, ConfidenceSchema).optional(),

@@ -592,8 +592,7 @@ export class SessionManager {
         thoughtCount: session.thoughts.length,
         mode: session.mode,
         isComplete: session.isComplete,
-      }),
-    );
+      }));
 
     // If no storage or not including stored sessions, return memory sessions only
     if (!this.storage || !includeStoredSessions) {

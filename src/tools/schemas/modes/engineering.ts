@@ -6,7 +6,13 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { IdSchema, NameSchema, TextSchema, IdArraySchema , boundedRecord} from "../shared.js";
+import {
+  IdSchema,
+  NameSchema,
+  TextSchema,
+  IdArraySchema,
+  boundedRecord,
+} from "../shared.js";
 
 /**
  * Trade study schema

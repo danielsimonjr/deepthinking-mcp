@@ -84,11 +84,10 @@ export const TextArraySchema = boundedArray(TextSchema);
  * Implemented with superRefine rather than a wrapper type so the inferred type
  * is unchanged and call sites keep their existing shape.
  */
-export function boundedRecord<K extends z.ZodType<string>, V extends z.ZodTypeAny>(
-  key: K,
-  value: V,
-  maxEntries: number = MAX_LENGTHS.ARRAY_ITEMS,
-) {
+export function boundedRecord<
+  K extends z.ZodType<string>,
+  V extends z.ZodTypeAny,
+>(key: K, value: V, maxEntries: number = MAX_LENGTHS.ARRAY_ITEMS) {
   return z.record(key, value).superRefine((val, ctx) => {
     const size = Object.keys(val ?? {}).length;
     if (size > maxEntries) {

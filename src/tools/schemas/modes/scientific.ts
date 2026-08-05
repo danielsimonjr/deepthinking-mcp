@@ -53,12 +53,24 @@ export const ScientificSchema = BaseThoughtSchema.extend({
   // Scientific method
   hypothesis: TextSchema.optional(),
   predictions: IdArraySchema.optional(),
-  experiments: z.array(ExperimentSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  experiments: z
+    .array(ExperimentSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
 
   // Systems thinking
-  systemComponents: z.array(SystemComponentSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  interactions: z.array(InteractionSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  feedbackLoops: z.array(FeedbackLoopSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  systemComponents: z
+    .array(SystemComponentSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  interactions: z
+    .array(InteractionSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  feedbackLoops: z
+    .array(FeedbackLoopSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
 
   // Formal logic
   premises: IdArraySchema.optional(),

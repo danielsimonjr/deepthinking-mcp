@@ -6,7 +6,14 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { ConfidenceSchema, IdSchema, NameSchema, TextSchema, IdArraySchema , boundedRecord} from "../shared.js";
+import {
+  ConfidenceSchema,
+  IdSchema,
+  NameSchema,
+  TextSchema,
+  IdArraySchema,
+  boundedRecord,
+} from "../shared.js";
 import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 const PlayerSchema = z.object({
@@ -59,7 +66,10 @@ export const StrategicSchema = BaseThoughtSchema.extend({
 
   // Game theory specific
   players: z.array(PlayerSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  strategies: z.array(StrategySchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  strategies: z
+    .array(StrategySchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
   payoffMatrix: PayoffMatrixSchema.optional(),
 
   // Optimization specific

@@ -7,7 +7,13 @@
 
 import { z } from "zod";
 import { BaseThoughtSchema } from "../base.js";
-import { ConfidenceSchema, IdSchema, NameSchema, TextSchema, IdArraySchema } from "../shared.js";
+import {
+  ConfidenceSchema,
+  IdSchema,
+  NameSchema,
+  TextSchema,
+  IdArraySchema,
+} from "../shared.js";
 import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
 /**
@@ -198,9 +204,18 @@ export const AcademicSchema = BaseThoughtSchema.extend({
 
   // Argumentation properties (Toulmin model)
   claims: z.array(ClaimSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  grounds: z.array(GroundsSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  warrants: z.array(WarrantSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  rebuttals: z.array(RebuttalSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  grounds: z
+    .array(GroundsSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  warrants: z
+    .array(WarrantSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  rebuttals: z
+    .array(RebuttalSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
   argumentStrength: ConfidenceSchema.optional(),
 
   // Critique properties

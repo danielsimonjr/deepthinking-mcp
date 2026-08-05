@@ -137,7 +137,10 @@ const HistoricalActorSchema = z.object({
   period: IdSchema.optional(),
   roles: IdArraySchema.optional(),
   motivations: IdArraySchema.optional(),
-  relationships: z.array(ActorRelationshipSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  relationships: z
+    .array(ActorRelationshipSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
   significance: z
     .enum(["minor", "moderate", "major", "transformative"])
     .optional(),
@@ -207,18 +210,45 @@ export const TemporalSchema = BaseThoughtSchema.extend({
 
   // Temporal-specific properties
   timeline: TimelineSchema.optional(),
-  events: z.array(TemporalEventSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  constraints: z.array(TemporalConstraintSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  intervals: z.array(TemporalIntervalSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  relations: z.array(TemporalRelationSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  events: z
+    .array(TemporalEventSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  constraints: z
+    .array(TemporalConstraintSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  intervals: z
+    .array(TemporalIntervalSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  relations: z
+    .array(TemporalRelationSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
 
   // Historical-specific properties (v9.1.0)
   thoughtType: HistoricalThoughtTypeSchema.optional(),
-  historicalEvents: z.array(HistoricalEventSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  historicalSources: z.array(HistoricalSourceSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  periods: z.array(HistoricalPeriodSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  causalChains: z.array(CausalChainSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
-  actors: z.array(HistoricalActorSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  historicalEvents: z
+    .array(HistoricalEventSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  historicalSources: z
+    .array(HistoricalSourceSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  periods: z
+    .array(HistoricalPeriodSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  causalChains: z
+    .array(CausalChainSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  actors: z
+    .array(HistoricalActorSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
   historiographicalSchool: IdSchema.optional(),
 });
 

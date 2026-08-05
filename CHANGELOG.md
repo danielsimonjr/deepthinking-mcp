@@ -26,6 +26,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and two analyzer blind spots found during verification.
 - Removed the empty `src/search/` directory left on disk after commit 5857f90.
 
+### Fixed
+
+- **CI Test Suite un-broken: `prettier --write` on 12 src files.** The format check had
+  been red for at least five consecutive commits — the 9.3.x remediation waves edited
+  `session/manager.ts`, `tools/schemas/**`, and `tools/thinking.ts` without running
+  prettier. Formatting-only: verified semantically null (`tsc --noEmit` clean, 5,116/5,116
+  unit tests pass).
+
 ## [9.3.3] - 2026-08-04
 
 ### Fixed — the plugin could never have started
