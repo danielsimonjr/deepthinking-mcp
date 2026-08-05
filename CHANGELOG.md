@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Documentation
+
+- **Refreshed the six stale authored architecture docs** (`OVERVIEW`, `ARCHITECTURE`,
+  `COMPONENTS`, `DATA_FLOW`, `DIRECTORY_STRUCTURE`, `OVERVIEW.compact`) — frozen at
+  v9.0.0/2025-12-30, seven months behind the code. Every numeric claim is now pinned by a
+  Verification block that `repo_map.py check` (skills repo, architecture-docs tooling)
+  verifies against a fresh parse; proven both ways before commit, including catching the
+  historical wrong cycle count (55) the old docs carried. Right-sized 3,078 → ~900 lines.
+  The fresh 2026-08-03 generated batch (`DEPENDENCY_GRAPH.md`, `unused-analysis.md`, JSON/
+  YAML artifacts) is untouched and carries explicit gate opt-outs naming its own generator.
+- **Added `docs/Architecture/DRIFT_REPORT.md`** — the refresh record: per-doc stale-claim
+  counts, the worst drift (a Data Persistence section documenting dead code —
+  `MCP_ENABLE_PERSISTENCE`/`MCP_PERSISTENCE_DIR` are read into config and consumed by
+  nothing; four mutually-contradicting file counts; pre-refactor tool names), verified
+  maintainer findings (`escapeLatex` defined twice, `ValidationError` interface-vs-class
+  name collision, 32 `isXThought` core-vs-mode duplicate pairs, 7 dead-candidate files),
+  and two analyzer blind spots found during verification.
+- Removed the empty `src/search/` directory left on disk after commit 5857f90.
+
 ## [9.3.3] - 2026-08-04
 
 ### Fixed — the plugin could never have started
