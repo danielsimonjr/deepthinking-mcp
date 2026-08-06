@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Schema contract: the advertised JSON Schema and the enforcing Zod schema now agree.** Every
+  tool description returned by `tools/list` was diverging from the validation that actually runs,
+  and every divergence failed silently. Client-visible effects, per tool:
+  - **`deepthinking_academic` no longer advertises fields it throws away.** `researchGaps`,
+    `analysisMethod` and `categories` appeared in the advertised schema but had no Zod field, so
+    Zod's strip mode discarded them: no error, no effect, data gone. Nothing in `src/` ever read
+    them. They are removed from the advertised schema; the working equivalents `gaps` and
+    `methodology` — the ones the handlers read — are unchanged. Callers that sent the removed
+    names were already being ignored, so nothing that previously worked stops working.
+  - **`deepthinking_academic` now advertises `thoughtType`.** All four academic handlers read it
+    to select their guidance and Socratic questions, but no client could discover it.
+  - **`deepthinking_engineering` now accepts the partial objects it advertises.** `tradeStudy`,
+    `fmeaEntry`, `complexityAnalysis` and `correctnessProof` are advertised with no required
+    sub-fields, but Zod demanded nine of them, so a request that passed client-side validation was
+    rejected by the real call. The same defect is fixed in `deepthinking_mathematics`
+    (`tensorProperties`), `deepthinking_strategic` (`solution`), `deepthinking_analytical`
+    (`sourceAnalogy`/`targetAnalogy`) and `deepthinking_scientific` (`feedbackLoops`). Value
+    bounds — such as the 1-10 range on FMEA ratings — are unchanged; only the presence
+    requirement is relaxed, and the handlers already defaulted every one of these fields.
+  - **`deepthinking_causal` now advertises `causalGraph`.** `CausalHandler` reads this nested form
+    directly, and it was the only way to supply a graph other than the top-level `nodes`/`edges`
+    pair, yet no client could discover it.
+  - **`deepthinking_causal` no longer accepts `mode: "abductive"`.** Abductive reasoning moved to
+    `deepthinking_core`, as this tool's own description states; the value survived in Zod only.
+  - **`deepthinking_probabilistic` no longer accepts `beliefMasses`.** It was superseded by
+    `massFunction`, which is the only form `EvidentialHandler` reads, and was accepted then
+    ignored.
+- **Added a contract guard so the next divergence fails in CI rather than reaching a client.**
+  `tests/unit/tools/schemas/schema-contract.test.ts` walks all 13 tools and enforces four kinds of
+  parity between advertised and enforced schemas: top-level property presence in both directions,
+  required sub-fields of advertised objects, required sub-fields of advertised array items, and
+  enum value sets. It also pins its own zod introspection against known structure, so a zod
+  upgrade that changes those internals fails loudly instead of quietly disarming the guard.
+
 ### Documentation
 
 - **Architecture docs rewritten at reference depth — 600 → 5,651 authored lines.** The previous
