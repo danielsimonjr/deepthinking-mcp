@@ -321,15 +321,15 @@ act on.
   even imported by their own sibling files. The single `taxonomy-system.test.ts` unit test is
   the entire test surface for this module, and — like `proof/` — it tests code that a running
   server never calls.
-- **25 of 35 mode validators in `src/validation/validators/modes/` have no dedicated unit
-  test.** Only `computability`, `constraint`, `cryptanalytic`, `deductive`, `inductive`,
-  `metareasoning`, `modal`, `optimization`, `recursive`, and `stochastic` do. The other 25
-  (including `abductive`, `bayesian`, `causal`, `mathematics`, `physics`, `temporal`, and 19
-  more) are validated only as a side effect of `tests/integration/tools/*.test.ts` sending
-  payloads through the full tool pipeline, or via the one cross-cutting
-  `tests/integration/validators/mode-validators.test.ts`. A validator-specific regression
-  (an accepted value that should be rejected, or vice versa) in one of the 25 could pass
-  every integration test that happens to send only valid input for that mode.
+- **Mode validators: 14 covered deeply, all 35 covered by contract.** Ten had dedicated unit
+  tests already; `causal`, `evidential`, `bayesian` and `gametheory` were added for their real
+  computation (DFS cycle detection including the diamond case, Dempster-Shafer mass sums and
+  Bel ≤ Pl, the four probability paths, cross-field dimension agreement). The remaining 21 are
+  covered by `tests/unit/validation/validator-contract.test.ts`, which discovers validator files
+  via `import.meta.glob` and asserts the shared contract — issues carry valid severities, a
+  minimal valid thought of the mode never throws, absent optional fields are handled. **A new
+  validator is covered the moment its file exists.** A mode-specific regression in the 21 is
+  still possible where it concerns that mode's own rules rather than the shared contract.
 - **`src/cache/` (`index.ts`, `lru.ts`, `types.ts`) has no dedicated test file at all.** It is
   a distinct LRU cache implementation from the one built into
   `src/validation/cache.ts` (which has its own tests via `validation-performance.test.ts`).

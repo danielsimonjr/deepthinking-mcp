@@ -123,8 +123,11 @@ points. **Five implemented formats are unreachable through the MCP API.** The `v
 subagent reaches them by a different path, so the capability is real but not available where the
 tool schema implies.
 
-**Dead constants.** `MAX_LENGTHS.HYPOTHESIS` and `MAX_LENGTHS.SESSION_ID` are defined and
-referenced nowhere in `src/`.
+**Dead constants.** *(Resolved.)* `MAX_LENGTHS.SESSION_ID` was **wired** — `sessionId` had been
+bounded three different ways (10,000 chars via the legacy tool, 1,000 via the focused tools, 36
+once `validateSessionId` ran); a `SessionIdSchema` now enforces one bound at the boundary.
+`MAX_LENGTHS.HYPOTHESIS` was **deleted**: every hypothesis field already sits at the 10,000-char
+`TextSchema` tier, so a bespoke 5,000 would have forked the tier system rather than closed a gap.
 
 **Taxonomy was unwired.** *(Fixed — `recommend_mode` now returns reasoning-type advice.)* Nothing outside `src/taxonomy/` imported any of its five files.
 `recommend_mode` uses `ModeRecommender` (`src/index.ts:91`, `:814`), not the taxonomy. The 69

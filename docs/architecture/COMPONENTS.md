@@ -25,8 +25,15 @@ listings. For request-flow sequencing, see `DATA_FLOW.md`. For the full 13-tool 
 
 ## Services
 
-`src/services/` holds the two classes that sit between the MCP handlers in `src/index.ts` and the
-mode/export subsystems. Neither contains mode-specific logic itself — both delegate.
+`src/services/` sits between the MCP handlers in `src/index.ts` and the mode/export subsystems.
+`ThoughtFactory` and `ExportService` are classes; `RecommendationService` is a module of pure
+functions. None contains mode-specific logic itself — all delegate.
+
+`RecommendationService` exists for a structural reason worth knowing: `src/index.ts` calls `main()`
+at module scope, so a test cannot import it. Response-building logic that lives there is only
+reachable by re-implementation in tests, which is how several subsystems went dead. Moving
+`recommend_mode`'s response construction here made it testable. Extending that treatment to the
+remaining handlers is tracked work.
 
 ### ThoughtFactory (`src/services/ThoughtFactory.ts`)
 
@@ -56,6 +63,29 @@ auto-registers all 34 mode handlers via `registerAllHandlers()` unless
 `autoRegisterHandlers: false` is passed. The legacy per-mode switch statement this factory used to
 contain was removed; every mode now has a dedicated handler, so `createThought` throws only if
 registry initialization itself failed (a condition the code treats as "should never happen").
+
+### RecommendationService (`src/services/RecommendationService.ts`)
+
+**Purpose**: Builds the `recommend_mode` response — the `ModeRecommender` recommendation plus
+advisory reasoning-type advice from the taxonomy.
+
+```typescript
+export interface RecommendModeInput {
+  problemType?: string
+  problemCharacteristics?: ProblemCharacteristics
+  includeCombinations?: boolean
+  includeReasoningTypes?: boolean   // default true
+}
+
+export function buildModeRecommendation(input: RecommendModeInput): string
+```
+
+Two input paths: `problemType` alone gives a quick recommendation; `problemCharacteristics` gives
+the comprehensive one. The taxonomy section is **appended** — set `includeReasoningTypes: false`
+and the response is byte-identical to what it was before the taxonomy was wired, which is asserted
+by test. A throwing advisory engine degrades to a one-line note; the recommendation still returns.
+
+---
 
 ### ExportService (`src/services/ExportService.ts`)
 
@@ -1361,6 +1391,29 @@ private copies were not equivalent — they chained `.replace()` calls and re-es
 inserted braces, so a literal backslash rendered as `\{}`. `LatexMermaidIntegrator` converts
 Mermaid diagram source to TikZ (`convertMermaidToTikZ`) so a LaTeX document can embed a native
 vector diagram instead of a rasterized Mermaid render.
+
+---
+
+### Session graph renderer (`src/export/visual/session-graph.ts`)
+
+**Purpose**: Renders a whole multi-thought session in any visual format, using the same builders
+the single-thought path uses.
+
+```typescript
+export interface SessionGraphNode { /* one per thought */ }
+export interface SessionGraphEdge { /* thought-to-thought links */ }
+export interface SessionGraphModel { nodes: SessionGraphNode[]; edges: SessionGraphEdge[] }
+
+export function renderSessionGraph(model: SessionGraphModel, format: VisualFormat): string
+```
+
+This closes a real defect. `exportSessionWithThoughtDetails` previously implemented only
+`mermaid`, `dot` and `ascii`; the other eight visual formats fell through to a plain-text
+`"Session: …"` dump, so `html` returned text rather than HTML and `visual-json` returned
+non-JSON. The single-thought path had always rendered every format and **threw** on an unknown
+one — it never degraded — so the session path was the outlier. Normalising the session to a
+node/edge model and handing it to the existing builders fixed all eight at once, and the
+plain-text fallback was removed from both paths.
 
 ---
 
