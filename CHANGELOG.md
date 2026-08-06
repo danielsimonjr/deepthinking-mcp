@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
+- **Rewrote README.md as a README rather than a changelog** — 1,069 → 221 lines. It opened with two
+  dated announcement banners (a repo merge and a deprecation reversal) before saying what the
+  project does; eight section headings carried the release that introduced them
+  (`Historical Computing Modes (v7.2.0)`); the intro ran release announcements
+  (`🎉 v9.1.0 added…`, `Current release: v9.2.0` — stale, actual 9.3.3); three stat blocks were
+  stale (237 files / 102k LOC / 5,065 tests vs a measured 5,116 in 183 files); and 36% of the file
+  was a mode catalog duplicating the 34 per-mode guides in `docs/modes/`.
+  Now: what it is, what ships, install, configure, quick start, tools, modes grouped **by what you
+  would use them for** (linked to their guides), capabilities, architecture, development. Version
+  history lives in this file; no dates or release tags in the README.
+  Also fixes a stale tool row — `deepthinking_temporal` covers `temporal, historical`, not
+  `temporal` alone (verified against `src/tools/json-schemas.ts`), and documents the real
+  `deepthinking_session` / `deepthinking_analyze` action sets.
+
 - **Refreshed the six stale authored architecture docs** (`OVERVIEW`, `ARCHITECTURE`,
   `COMPONENTS`, `DATA_FLOW`, `DIRECTORY_STRUCTURE`, `OVERVIEW.compact`) — frozen at
   v9.0.0/2025-12-30, seven months behind the code. Every numeric claim is now pinned by a
