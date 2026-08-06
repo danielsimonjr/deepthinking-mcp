@@ -7,7 +7,46 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Every thought-creating call now returns advisory validation feedback.** `src/validation/` — 45
+  files, 37 classes, 35 per-mode validators — was complete, tested, and never invoked: nothing
+  outside the directory imported `validator.ts`, so only the Zod schema check at the tool boundary
+  ran. It is now wired into `SessionManager.addThought()`, the single funnel every thought passes
+  through, so all 11 thought-creating tools plus `deepthinking_analyze` are covered. Clients receive
+  a `validation` object on the `AddThoughtResponse`, and the same object is retained on the stored
+  thought (`Thought.validation`), so it survives into `get_session` and exports.
+  The object carries `confidence`, `strengthMetrics` (logicalSoundness, empiricalSupport,
+  mathematicalRigor, physicalConsistency), severity-tagged `issues`, and `suggestions`.
+- **Validation is advisory and never rejects a request.** `ValidationResult.isValid` is
+  `errors.length === 0` and the mode validators hold 156 error-severity issue sites, so gating on it
+  would break working clients. Nothing in the request path reads `isValid`: a thought that fails
+  validation is created, stored and returned exactly as before, with the verdict attached as
+  feedback. A validator that throws is caught and degrades to
+  `{ available: false, reason }` rather than failing the call.
+- **Bounded payload.** `issues` is capped at 20 entries, ordered errors first then warnings then
+  info, alongside `totalIssues` and `issuesTruncated` so a client can tell it was truncated.
+  `suggestions` is deduplicated and capped at 10. Constants live in `src/validation/advisory.ts`.
+- **Per-session opt-out.** `SessionConfig.enableValidation` was defined and read nowhere; it now
+  switches advisory validation off for a session, and no `validation` field is attached.
+
 ### Fixed
+
+- **The validation cache could never hit.** `ThoughtValidator` hashed the entire thought — including
+  `id` (a fresh uuid per request) and `timestamp` — so two identical requests produced different
+  keys. The cache cost a SHA-256 per call and returned nothing; `session.metrics.cacheStats` was
+  permanently zero. The key is now derived from the validation-relevant fields only (identity and
+  timestamp dropped, top-level field order normalised) plus `strictMode`. A context carrying
+  `existingThoughts` bypasses the cache entirely, because the result then depends on state outside
+  the key. Measured on a representative `deepthinking_mathematics` call: validation adds 0.085 ms on
+  a cache miss and 0.035 ms on a hit, against a 0.014 ms unvalidated baseline.
+- **The unknown-mode suggestion named the wrong modes.** Validating a mode with no registered
+  validator emitted a hardcoded list that omitted modes which do have validators (`engineering`,
+  `algorithmic`, the four academic modes, and others) while recommending four that do not
+  (`recursive`, `modal`, `stochastic`, `constraint`) — advice that would reproduce the same warning.
+  The list is now derived from the validator registry. The branch stays at `warning` severity and is
+  unreachable through the MCP tools (every mode in every tool schema has a validator); it remains
+  reachable for library callers and for the five `ThinkingMode` members with no validator.
 
 - **`switch_mode` now rejects an unknown mode instead of silently storing it.** The
   `deepthinking_session` tool accepts `newMode` as a free string and `src/index.ts` cast it straight

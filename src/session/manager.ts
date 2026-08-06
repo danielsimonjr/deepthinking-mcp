@@ -36,6 +36,7 @@ import {
 } from "../utils/sanitization.js";
 import { createLogger, LogLevel } from "../utils/logger.js";
 import { ILogger } from "../interfaces/ILogger.js";
+import { validateAdvisory } from "../validation/advisory.js";
 import { SessionStorage } from "./storage/interface.js";
 import { LRUCache } from "../cache/lru.js";
 import type { CacheStats } from "../cache/types.js";
@@ -453,6 +454,14 @@ export class SessionManager {
     // Update thought with session metadata
     thought.sessionId = sessionId;
     thought.timestamp = new Date();
+
+    // Advisory validation (v9.4.0). Runs on the sanitized, session-stamped
+    // thought so the client sees feedback on what was actually stored.
+    // It is FEEDBACK ONLY: `validation.isValid === false` never rejects the
+    // thought, and a validator that throws degrades to `available: false`.
+    if (session.config.enableValidation) {
+      thought.validation = await validateAdvisory(thought);
+    }
 
     // Add thought to session
     session.thoughts.push(thought);

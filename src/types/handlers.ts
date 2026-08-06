@@ -6,6 +6,7 @@
  */
 
 import { ThinkingMode } from "./core.js";
+import type { AdvisoryValidation } from "./session.js";
 import type { SessionActionInput } from "../tools/schemas/base.js";
 import type { AnalyzeInput } from "../tools/schemas/analyze.js";
 
@@ -166,6 +167,11 @@ export interface AddThoughtResponse {
   sessionComplete: boolean;
   totalThoughts: number;
   modeStatus: ModeStatus;
+  /**
+   * Advisory validation feedback for the thought just created. Absent only
+   * when the session has `enableValidation: false`.
+   */
+  validation?: AdvisoryValidation;
   decomposition?: unknown;
   consistencyReport?: unknown;
   gapAnalysis?: unknown;

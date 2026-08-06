@@ -19,6 +19,14 @@ export {
 // Validator exports
 export { ThoughtValidator, type ValidationContext } from "./validator.js";
 
+// Advisory wrapper - the entry point used by the live request path
+export {
+  validateAdvisory,
+  MAX_ADVISORY_ISSUES,
+  MAX_ADVISORY_SUGGESTIONS,
+  type AdvisoryValidatorLike,
+} from "./advisory.js";
+
 // Schema exports
 export {
   SessionIdSchema,

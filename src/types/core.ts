@@ -15,6 +15,9 @@
 // IMPORTS FROM MODE-SPECIFIC FILES
 // ============================================================================
 
+// Advisory validation attached to a stored thought (type-only: no runtime edge)
+import type { AdvisoryValidation } from "./session.js";
+
 // Core modes
 import type { SequentialThought } from "./modes/sequential.js";
 import type { ShannonThought } from "./modes/shannon.js";
@@ -279,6 +282,12 @@ export interface BaseThought {
   assumptions?: string[];
   tags?: string[];
   importance?: number;
+
+  /**
+   * Advisory validation feedback, attached by `SessionManager.addThought()`.
+   * Never gates thought creation - see `src/validation/advisory.ts`.
+   */
+  validation?: AdvisoryValidation;
 }
 
 // ============================================================================

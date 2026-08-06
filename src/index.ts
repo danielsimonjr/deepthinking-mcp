@@ -316,6 +316,9 @@ async function handleAddThought(
     sessionComplete: session.isComplete,
     totalThoughts: session.thoughts.length,
     modeStatus, // Phase 10 Sprint 1: API transparency
+    // Advisory validation feedback attached by SessionManager.addThought().
+    // Present unless the session disables validation. Never gates the call.
+    validation: thought.validation,
     // Include analysis results in response if available
     decomposition: thoughtRecord.decomposition,
     consistencyReport: thoughtRecord.consistencyReport,

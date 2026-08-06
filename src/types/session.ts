@@ -161,6 +161,39 @@ export interface ValidationResult {
 }
 
 /**
+ * Advisory validation attached to a stored thought and returned to the client.
+ *
+ * Advisory means exactly that: nothing in the request path gates on `isValid`.
+ * A thought that fails validation is still created, stored and returned.
+ *
+ * `issues` and `suggestions` are bounded (see `src/validation/advisory.ts`) so
+ * that a mode with many issue sites cannot dominate the response payload.
+ */
+export interface AdvisoryValidationResult extends ValidationResult {
+  available: true;
+
+  /** Issue count before truncation; `issues.length` is the bounded count. */
+  totalIssues: number;
+
+  /** True when `issues` holds fewer entries than `totalIssues`. */
+  issuesTruncated: boolean;
+}
+
+/**
+ * Returned when the validator itself failed. The request still succeeded —
+ * a broken validator must never take down thought creation.
+ */
+export interface AdvisoryValidationUnavailable {
+  available: false;
+
+  /** Why validation could not be produced. */
+  reason: string;
+}
+
+export type AdvisoryValidation =
+  AdvisoryValidationResult | AdvisoryValidationUnavailable;
+
+/**
  * Validation issue
  */
 export interface ValidationIssue {
