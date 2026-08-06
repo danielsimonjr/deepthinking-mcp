@@ -39,21 +39,18 @@ const CATEGORIES = [
  * registering one of these must fail it too, so the decision is visible
  * either way.
  *
- * - constraint, modal, recursive, stochastic: their ThinkingMode members
- *   exist and ThoughtFactory builds thoughts for them, but no registry entry
- *   maps the mode to the validator, so a thought of one of these modes gets
- *   "No validator registered for thinking mode: X" instead of the validation
- *   the file implements.
  * - meta: there is no `meta` ThinkingMode at all, so nothing can produce a
- *   thought this validator would run on.
+ *   thought this validator would run on. `metareasoning` is the real mode and
+ *   has its own registered validator.
+ *
+ * constraint, modal, recursive and stochastic were listed here until v9.4.1.
+ * Their ThinkingMode members exist and ThoughtFactory builds thoughts for
+ * them, so leaving them unmapped meant a client got "No validator registered
+ * for thinking mode: X" while the validator sat unreferenced. They are now
+ * registered; the mapping is pinned in both directions by
+ * tests/unit/validation/registry-mode-coverage.test.ts.
  */
-const UNREGISTERED_VALIDATORS = [
-  'constraint',
-  'meta',
-  'modal',
-  'recursive',
-  'stochastic',
-];
+const UNREGISTERED_VALIDATORS = ['meta'];
 
 interface DiscoveredValidator {
   file: string;

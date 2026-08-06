@@ -118,6 +118,27 @@ const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
     module: "./modes/historical.js",
     className: "HistoricalValidator",
   }, // v9.1.0
+  // Advanced runtime modes. Their validators existed from Phase 10 Sprint 3
+  // but were never mapped here, so every thought in one of these modes got
+  // "No validator registered for thinking mode: X" instead. v9.4.1
+  constraint: {
+    module: "./modes/constraint.js",
+    className: "ConstraintValidator",
+  },
+  modal: { module: "./modes/modal.js", className: "ModalValidator" },
+  recursive: {
+    module: "./modes/recursive.js",
+    className: "RecursiveValidator",
+  },
+  stochastic: {
+    module: "./modes/stochastic.js",
+    className: "StochasticValidator",
+  },
+  // Not registered: `meta` (src/validation/validators/modes/meta.ts). Its
+  // getMode() returns "meta", but no such ThinkingMode member exists —
+  // `metareasoning` is the real mode and has its own entry above — so no
+  // thought could ever reach it. ThinkingMode.CUSTOM is also absent: a
+  // user-defined mode has no fixed shape a mode validator could check.
 };
 
 /**
