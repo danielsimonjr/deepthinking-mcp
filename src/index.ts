@@ -432,8 +432,10 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
         (s, f) => exportService.exportSession(s, f as any),
       );
 
-      const formats = profile.formats.filter((f: string) => f !== "svg");
-      const batchResult = await fileExporter.exportToFiles(session, formats);
+      const batchResult = await fileExporter.exportToFiles(
+        session,
+        profile.formats,
+      );
 
       return {
         content: [
@@ -473,8 +475,6 @@ async function handleExport(input: SessionInput): Promise<MCPResponse> {
 
     for (const format of profile.formats) {
       try {
-        // Skip SVG for now as it may not be in all exporters
-        if (format === "svg") continue;
         const exported = exportService.exportSession(session, format as any);
         results.push({ format, success: true, content: exported });
       } catch (error) {
@@ -619,8 +619,8 @@ async function handleExportAll(input: SessionInput): Promise<MCPResponse> {
       );
     }
 
-    // Use only the formats defined in the profile (excluding svg which isn't widely supported)
-    formats = profile.formats.filter((f: string) => f !== "svg");
+    // Use only the formats defined in the profile
+    formats = profile.formats;
   }
 
   // Phase 16: If outputDir provided, use FileExporter

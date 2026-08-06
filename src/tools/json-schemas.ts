@@ -7,6 +7,18 @@
  * - Zod schemas remain for runtime validation only
  */
 
+import { EXPORT_PROFILES, listExportProfileIds } from "../export/profiles.js";
+
+/**
+ * The advertised profile list is derived from EXPORT_PROFILES rather than
+ * restated, because the hand-written copy drifted: it claimed formats no
+ * profile contained ("archive: all formats", "presentation: Mermaid+HTML+ASCII")
+ * and a client has no way to see the real list.
+ */
+const exportProfileDescription = `Pre-configured export bundle. ${listExportProfileIds()
+  .map((id) => `${id}: ${EXPORT_PROFILES[id].formats.join("+")}`)
+  .join(", ")}`;
+
 /**
  * Base properties shared by all thought-adding tools
  */
@@ -1837,8 +1849,7 @@ export const deepthinking_session_schema = {
           "archive",
           "minimal",
         ],
-        description:
-          "Pre-configured export bundle. academic: LaTeX+Mermaid+JSON, presentation: Mermaid+HTML+ASCII, documentation: Markdown+HTML+JSON, archive: all formats, minimal: Markdown+JSON",
+        description: exportProfileDescription,
       },
       includeContent: {
         type: "boolean",

@@ -19,6 +19,8 @@ import {
   type ExportProfileId,
   type ExportFormatType,
 } from '../../../src/export/profiles.js';
+import { tools } from '../../../src/tools/definitions.js';
+import { ExportFormatEnum } from '../../../src/tools/schemas/shared.js';
 
 describe('Export Profiles', () => {
   describe('EXPORT_PROFILES constant', () => {
@@ -94,8 +96,10 @@ describe('Export Profiles', () => {
       expect(profile.formats).toContain('mermaid');
     });
 
-    it('should include svg format', () => {
-      expect(profile.formats).toContain('svg');
+    it('should not include svg, which the export API cannot produce', () => {
+      // svg is absent from ExportFormatEnum and was stripped before every
+      // export, so advertising it here only ever promised an empty result.
+      expect(profile.formats).not.toContain('svg');
     });
 
     it('should have simplifyDiagrams enabled', () => {
@@ -471,7 +475,6 @@ describe('Export Profiles', () => {
         'mermaid',
         'dot',
         'ascii',
-        'svg',
       ];
 
       const profiles = getAllExportProfiles();
@@ -489,6 +492,42 @@ describe('Export Profiles', () => {
       profiles.forEach((profile) => {
         expect(profile.formats.length).toBeGreaterThan(0);
       });
+    });
+  });
+});
+
+/**
+ * A profile is a promise about what a client gets back. Two ways that promise
+ * was broken: the `presentation` profile listed `svg`, which is not in
+ * `ExportFormatEnum` and was stripped unconditionally before every export, so
+ * it could never be produced; and the `exportProfile` description advertised
+ * to clients listed formats that no profile actually contains.
+ */
+describe('profiles match what the export API can actually deliver', () => {
+  it('lists only formats the export API accepts', () => {
+    const supported = ExportFormatEnum.options as readonly string[];
+
+    getAllExportProfiles().forEach((profile) => {
+      profile.formats.forEach((format) => {
+        expect(
+          supported,
+          `profile "${profile.id}" advertises "${format}", which deepthinking_session cannot export`,
+        ).toContain(format);
+      });
+    });
+  });
+
+  it('advertises each profile with its real format list', () => {
+    const sessionTool = tools.deepthinking_session as {
+      inputSchema: {
+        properties: { exportProfile: { description: string } };
+      };
+    };
+    const advertised = sessionTool.inputSchema.properties.exportProfile.description;
+
+    listExportProfileIds().forEach((id) => {
+      const formats = EXPORT_PROFILES[id].formats.join('+');
+      expect(advertised).toContain(`${id}: ${formats}`);
     });
   });
 });

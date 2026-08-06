@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Export profiles now describe what a client actually receives.** The `deepthinking_session`
+  description advertised format lists that no profile contained — "archive: all formats" (it is
+  json+markdown+latex+jupyter), "presentation: Mermaid+HTML+ASCII" and "documentation:
+  Markdown+HTML+JSON" (neither profile contains HTML at all). The description is now generated from
+  the profile registry, so it cannot drift again, and reads e.g. `academic: latex+markdown+json`.
+- **The `presentation` profile no longer promises SVG it cannot deliver.** `svg` is not in
+  `ExportFormatEnum` and was filtered out unconditionally at all three export paths, so requesting
+  the profile never produced an SVG file — it silently returned one fewer output than advertised.
+  `svg` is removed from the profile and from the profile format vocabulary, which makes those three
+  filters dead code; they are removed too. Exposing SVG through the export API remains a separate
+  decision. A new test asserts every profile format is one the export API accepts.
 - **One bound for `sessionId` instead of three.** `MAX_LENGTHS.SESSION_ID` (100) was defined and
   wired to nothing, so the same field was bounded differently depending on which door a caller used:
   10,000 characters on the legacy `deepthinking` tool, 1,000 on the 13 focused tools, and — once the

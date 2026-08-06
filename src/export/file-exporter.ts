@@ -186,7 +186,6 @@ const FORMAT_EXTENSIONS: Record<ExportFormatType, string> = {
   mermaid: ".mmd",
   dot: ".dot",
   ascii: ".txt",
-  svg: ".svg",
 };
 
 // ============================================================================

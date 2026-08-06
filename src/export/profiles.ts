@@ -20,8 +20,7 @@ export type ExportFormatType =
   | "jupyter"
   | "mermaid"
   | "dot"
-  | "ascii"
-  | "svg";
+  | "ascii";
 
 /**
  * Profile-specific export options
@@ -122,7 +121,7 @@ const PRESENTATION_PROFILE: ExportProfile = {
   id: "presentation",
   name: "Presentation",
   description: "Optimized for slides, visual presentations, and diagrams",
-  formats: ["mermaid", "svg", "markdown"],
+  formats: ["mermaid", "markdown"],
   options: {
     simplifyDiagrams: true,
     abbreviateModeNames: true,
