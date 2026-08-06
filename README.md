@@ -24,7 +24,7 @@ This repository is one Claude Code plugin with four surfaces:
 | **MCP server** | 13 tools across 34 reasoning modes, session management, proof decomposition |
 | **Slash commands** | `/think` and `/think-render` (canonically `/deepthinking-mcp:think`) |
 | **Skills** | 14 reasoning skills covering 46 modes — including frameworks the server does not implement (SWOT, decision matrix, 5 Whys, fishbone, PESTLE, force-field, Pareto, stakeholder, gap/risk, cost-benefit) |
-| **Subagent** | `visual-exporter` — renders a thought to 11 diagram/document formats plus an interactive HTML dashboard |
+| **Subagent** | `visual-exporter` — renders a thought to 13 diagram/document formats (plus SVG/PNG via a render script) and a standalone interactive HTML dashboard. This path reaches formats the MCP tool API does not — see Capabilities. |
 
 ## Installation
 
@@ -163,7 +163,7 @@ validates.
 | Supervise your own reasoning and switch approach when it stalls | metareasoning, recursive, modal, stochastic |
 
 Not sure which applies? `deepthinking_session` with `action: "recommend_mode"` picks one from a
-problem description, backed by a taxonomy of 69 reasoning types across 12 categories.
+problem description or a set of problem characteristics.
 
 ## Capabilities
 
@@ -171,16 +171,23 @@ problem description, backed by a taxonomy of 69 reasoning types across 12 catego
 justifications, unstated assumptions, circular reasoning, and inconsistencies. Reports a verified
 dependency graph of the argument rather than a verdict.
 
-**Visual export** — Mermaid, DOT, GraphML, ASCII, native SVG, LaTeX/TikZ, UML, Modelica, HTML, JSON,
-Markdown. SVG generates directly, with no external renderer. Exports go to a response or to disk via
+**Visual export** — a session exports to **8 formats over the tool API**: `markdown`, `latex`,
+`json`, `html`, `jupyter`, `mermaid`, `dot`, `ascii`. Exports return inline or write to disk via
 `MCP_EXPORT_PATH`.
+
+> `ExportService` also implements SVG, GraphML, TikZ, Modelica, and UML, with working builder
+> classes behind them — but `ExportFormatEnum` (`src/tools/schemas/shared.ts`) does not accept
+> those names, and `src/index.ts` strips `svg` from profile exports. **They are not reachable
+> through the MCP API today.** See [`docs/architecture/API.md`](docs/architecture/API.md).
 
 **Session management** — thoughts accumulate in a session you can summarise, export, branch, or
 switch modes within. File-backed storage with cross-process locking supports several server
 instances over one session store.
 
-**Validation and safety** — every tool input is Zod-validated with bounded string, array, and record
-sizes. Export paths are sandboxed; content is PII-redacted before it is written.
+**Validation and safety** — every tool input is Zod-validated with bounded string, array, and
+record sizes (`src/tools/schemas/shared.ts`), and export paths are sandboxed to
+`MCP_EXPORT_PATH`. Content is length-capped and cleaned by `src/utils/sanitization.ts`; there is
+**no PII redaction** — do not put sensitive content in a thought you intend to export.
 
 ## Architecture
 

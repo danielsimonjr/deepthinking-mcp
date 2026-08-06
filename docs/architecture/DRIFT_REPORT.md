@@ -94,6 +94,34 @@ file (via `types/index.ts`'s named re-export), the other 20 by `core.ts` — a s
 inconsistent precedence that `CLAUDE.md` currently documents as if `core.ts` were the single
 source for all of them.
 
+## Defects found while documenting the API
+
+Writing `API.md` required reading every tool's advertised JSON Schema against the Zod schema that
+actually enforces it. The two disagree in ways a client cannot detect. Each is verified against
+source, not inferred:
+
+| Tool | Divergence | Consequence |
+|---|---|---|
+| `deepthinking_academic` | `researchGaps` and `analysisMethod` are advertised in the JSON Schema but have **no Zod field** (`src/tools/schemas/modes/academic.ts` defines `gaps` and `methodology`). | A client reads `tools/list`, sends the advertised names, and Zod's strip mode **silently discards them**. No error. The data is simply lost. |
+| `deepthinking_probabilistic` | `beliefMasses` is enforced by Zod but absent from the advertised schema. | Undiscoverable — no client can learn the field exists. |
+| `deepthinking_causal` | Zod additionally accepts a legacy `causalGraph` object and an `"abductive"` mode value; neither is advertised. | Undiscoverable. |
+| `deepthinking_engineering` | Zod requires sub-fields of `tradeStudy`, `fmeaEntry`, `complexityAnalysis` and `correctnessProof` that the JSON Schema marks optional. | A request that validates against the advertised schema **fails the real call**. |
+
+**Export formats.** `ExportService.exportSession()` implements 16 formats including `svg`,
+`graphml`, `tikz`, `modelica` and `uml`, each with a working builder class. `ExportFormatEnum`
+(`src/tools/schemas/shared.ts`) accepts only 8 — `markdown`, `latex`, `json`, `html`, `jupyter`,
+`mermaid`, `dot`, `ascii` — and `src/index.ts` strips `svg` from profile exports at three separate
+points. **Five implemented formats are unreachable through the MCP API.** The `visual-exporter`
+subagent reaches them by a different path, so the capability is real but not available where the
+tool schema implies.
+
+**Dead constants.** `MAX_LENGTHS.HYPOTHESIS` and `MAX_LENGTHS.SESSION_ID` are defined and
+referenced nowhere in `src/`.
+
+**Taxonomy is unwired.** Nothing outside `src/taxonomy/` imports any of its five files.
+`recommend_mode` uses `ModeRecommender` (`src/index.ts:91`, `:814`), not the taxonomy. The 69
+reasoning types are defined but no production path consumes them.
+
 ## Analysis limitations
 
 Two blind spots in the static analysis, found while writing this refresh:

@@ -36,7 +36,7 @@ document does not repeat it.
 | Files with no static importer | 24 (17 loaded dynamically or by design, 7 unused) | src | repo_map, hand-verified — see below |
 | Duplicate symbol names | 63 (32 drift-risk, 29 benign, 2 real duplicates) | src | repo_map, hand-verified — see below |
 | Reasoning modes | 34 (30 with dedicated thought types, 4 advanced-runtime) | src | `src/types/core.ts` `ThinkingMode` enum |
-| Reasoning types (taxonomy) | 69 | src | `src/taxonomy/reasoning-types.ts` |
+| Reasoning types defined | 69 | src | `src/taxonomy/reasoning-types.ts` (unwired — see Unused code) |
 | MCP tools | 13 | src | `src/index.ts` tool registrations, live-checked below |
 | Specialized mode handlers | 37 | src | `src/modes/handlers/` |
 | Mode validators | 35 | src | `src/validation/validators/modes/` |
@@ -60,7 +60,7 @@ deepthinking-mcp/
 │   ├── validation/       # Zod schemas + per-mode validators
 │   ├── export/           # document + visual exporters
 │   ├── proof/             # proof decomposition engine
-│   ├── taxonomy/         # reasoning-type classification
+│   ├── taxonomy/         # reasoning-type definitions (not wired to production)
 │   ├── cache/             # LRU/LFU/FIFO strategies
 │   ├── config/            # environment-variable configuration
 │   ├── interfaces/       # DI interfaces
@@ -112,7 +112,7 @@ Seven files under `src/` have no importer anywhere — not in `src/`, not in `te
 |---|---|
 | `cache/index.ts`, `export/index.ts`, `proof/index.ts`, `validation/index.ts` | Barrel files. Consumers import the concrete modules directly. |
 | `validation/schema-utils.ts`, `validation/schemas.ts` | Imported only by `validation/index.ts`, itself unused. |
-| `taxonomy/classifier.ts` | The only occurrence of its name in `src/index.ts` is a JSDoc comment. |
+| `taxonomy/` (all 5 files) | Nothing outside the directory imports any of them. `recommend_mode` uses `ModeRecommender`, not the taxonomy. |
 
 Roughly 195 exports have no importer, of which 69 have no reference at all — not even inside
 their own file. A 23-export sample of that stricter set was 96% genuinely dead.

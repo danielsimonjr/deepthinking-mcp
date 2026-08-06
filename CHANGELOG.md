@@ -9,6 +9,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
+- **Architecture docs rewritten at reference depth — 600 → 5,651 authored lines.** The previous
+  refresh was accurate but far too thin: a paragraph per directory where the memoryjs baseline
+  gives per-component API signature blocks and per-operation flow traces. `COMPONENTS.md` was 121
+  lines against that baseline's 2,043. Three documents were missing entirely.
+  Now: **`COMPONENTS.md`** (2,252) with real TypeScript signature blocks for every cross-module
+  class; **`API.md`** (1,545, new) documenting all 13 MCP tools with full input schemas, bounds and
+  worked examples; **`DATA_FLOW.md`** (820) tracing 10 named flows through source with `file:line`
+  branch points; **`TEST_COVERAGE.md`** (398, new) mapping 183 test files to the code they cover
+  and naming the gaps.
+
+  **Reading the source at this depth surfaced defects no summary could have.** All recorded in
+  `DRIFT_REPORT.md` under "Defects found while documenting the API":
+  - `deepthinking_academic` advertises `researchGaps` and `analysisMethod` in its JSON Schema with
+    **no corresponding Zod field** — a client sends them and Zod's strip mode silently discards
+    them. The working names are `gaps` and `methodology`.
+  - `deepthinking_engineering` requires sub-fields the advertised schema marks optional: a request
+    that validates client-side fails the real call. `deepthinking_probabilistic` and
+    `deepthinking_causal` enforce fields they never advertise.
+  - **Five implemented export formats are unreachable.** `ExportService` handles svg, graphml,
+    tikz, modelica and uml with working builders; `ExportFormatEnum` accepts none of them, and
+    `src/index.ts` strips `svg` at three points.
+  - **The per-mode validation engine is never invoked.** 45 files and 37 classes, complete and
+    tested; `src/index.ts` calls none of it. Only the Zod boundary check runs.
+  - `src/taxonomy/` has no importer outside itself — `recommend_mode` uses `ModeRecommender`.
+  - `src/proof/` is never auto-invoked; `MAX_LENGTHS.HYPOTHESIS`/`SESSION_ID` are unreferenced.
+
+  Corrects three false claims this session introduced or inherited into README.md: **there is no
+  PII redaction** (inherited from the old README and never verified — the export path does length
+  capping and injection cleaning, nothing more); the export list overstated what the API accepts;
+  and `recommend_mode` is not taxonomy-backed.
+
 - **Architecture docs now document the repository, not the tool that measured it.** The refreshed
   docs described the codebase in terms of what a static analyzer made of it — "repo_map's
   static-import scan flags `combinations/index.ts` as orphaned", "`classifier.ts` is a
