@@ -18,19 +18,23 @@ import {
  * Trade study schema
  */
 const TradeStudySchema = z.object({
-  options: IdArraySchema,
-  criteria: IdArraySchema,
+  options: IdArraySchema.optional(),
+  criteria: IdArraySchema.optional(),
   weights: boundedRecord(IdSchema, z.number()).optional(),
 });
 
 /**
  * FMEA entry schema
+ *
+ * Ratings stay bounded 1-10 when supplied, but none is mandatory: the advertised
+ * JSON Schema declares no `required` list, and EngineeringHandler defaults every
+ * rating when computing RPN.
  */
 const FmeaEntrySchema = z.object({
-  failureMode: TextSchema,
-  severity: z.number().int().min(1).max(10),
-  occurrence: z.number().int().min(1).max(10),
-  detection: z.number().int().min(1).max(10),
+  failureMode: TextSchema.optional(),
+  severity: z.number().int().min(1).max(10).optional(),
+  occurrence: z.number().int().min(1).max(10).optional(),
+  detection: z.number().int().min(1).max(10).optional(),
   rpn: z.number().int().optional(),
 });
 
@@ -38,7 +42,7 @@ const FmeaEntrySchema = z.object({
  * Complexity analysis schema
  */
 const ComplexityAnalysisSchema = z.object({
-  timeComplexity: IdSchema,
+  timeComplexity: IdSchema.optional(),
   spaceComplexity: IdSchema.optional(),
   bestCase: IdSchema.optional(),
   averageCase: IdSchema.optional(),
@@ -49,9 +53,9 @@ const ComplexityAnalysisSchema = z.object({
  * Correctness proof schema
  */
 const CorrectnessProofSchema = z.object({
-  invariant: TextSchema,
-  termination: TextSchema,
-  correctness: TextSchema,
+  invariant: TextSchema.optional(),
+  termination: TextSchema.optional(),
+  correctness: TextSchema.optional(),
 });
 
 /**

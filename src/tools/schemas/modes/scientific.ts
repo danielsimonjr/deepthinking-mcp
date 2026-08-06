@@ -40,8 +40,8 @@ const InteractionSchema = z.object({
  * Feedback loop schema for systems thinking
  */
 const FeedbackLoopSchema = z.object({
-  type: z.enum(["positive", "negative", "neutral"]),
-  components: IdArraySchema,
+  type: z.enum(["positive", "negative", "neutral"]).optional(),
+  components: IdArraySchema.optional(),
 });
 
 /**

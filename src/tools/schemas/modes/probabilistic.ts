@@ -25,15 +25,6 @@ const HypothesisSchema = z.object({
 });
 
 /**
- * Belief mass schema for Dempster-Shafer
- */
-const BeliefMassSchema = z.object({
-  hypothesisSet: IdArraySchema,
-  mass: ConfidenceSchema,
-  justification: TextSchema,
-});
-
-/**
  * Probabilistic reasoning schema (Bayesian + Evidential)
  */
 export const ProbabilisticSchema = BaseThoughtSchema.extend({
@@ -51,10 +42,7 @@ export const ProbabilisticSchema = BaseThoughtSchema.extend({
 
   // Evidential (Dempster-Shafer) reasoning
   frameOfDiscernment: IdArraySchema.optional(),
-  beliefMasses: z
-    .array(BeliefMassSchema)
-    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
-    .optional(),
+  // `beliefMasses` was superseded by `massFunction`, the only form EvidentialHandler reads.
   massFunction: boundedRecord(IdSchema, ConfidenceSchema).optional(),
   beliefFunction: boundedRecord(IdSchema, ConfidenceSchema).optional(),
   plausibilityFunction: boundedRecord(IdSchema, ConfidenceSchema).optional(),

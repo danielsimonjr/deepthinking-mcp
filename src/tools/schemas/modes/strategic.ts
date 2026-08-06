@@ -54,7 +54,7 @@ const PayoffMatrixSchema = z.object({
  * Solution schema for optimization
  */
 const SolutionSchema = z.object({
-  value: TextSchema,
+  value: TextSchema.optional(),
   variables: boundedRecord(IdSchema, z.number()).optional(),
 });
 

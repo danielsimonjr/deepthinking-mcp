@@ -48,7 +48,8 @@ const InterventionSchema = z.object({
 });
 
 export const CausalSchema = BaseThoughtSchema.extend({
-  mode: z.enum(["causal", "counterfactual", "abductive"]),
+  // "abductive" migrated to deepthinking_core; this tool advertises only these two.
+  mode: z.enum(["causal", "counterfactual"]),
   // Causal graph properties (top-level for JSON schema compatibility)
   nodes: z
     .array(CausalNodeSchema)

@@ -31,8 +31,8 @@ const TensorPropertiesSchema = z.object({
   rank: z.tuple([z.number(), z.number()]),
   components: TextSchema,
   latex: TextSchema,
-  symmetries: IdArraySchema,
-  invariants: IdArraySchema,
+  symmetries: IdArraySchema.optional(),
+  invariants: IdArraySchema.optional(),
   transformation: TransformationEnum,
 });
 

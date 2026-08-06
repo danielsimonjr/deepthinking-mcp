@@ -951,6 +951,42 @@ export const deepthinking_causal_schema = {
         },
         description: "Causal edges in the graph",
       },
+      causalGraph: {
+        type: "object",
+        properties: {
+          nodes: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                name: { type: "string" },
+                description: { type: "string" },
+              },
+              required: ["id", "name"],
+              additionalProperties: false,
+            },
+          },
+          edges: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                from: { type: "string" },
+                to: { type: "string" },
+                strength: { type: "number", minimum: 0, maximum: 1 },
+                type: { type: "string" },
+              },
+              required: ["from", "to"],
+              additionalProperties: false,
+            },
+          },
+        },
+        required: ["nodes", "edges"],
+        additionalProperties: false,
+        description:
+          "Causal graph in nested form; equivalent to the top-level nodes/edges pair",
+      },
       interventions: {
         type: "array",
         items: {
@@ -1454,6 +1490,11 @@ export const deepthinking_academic_schema = {
         enum: ["synthesis", "argumentation", "critique", "analysis"],
         description: "Academic research reasoning mode",
       },
+      thoughtType: {
+        type: "string",
+        description:
+          "Reasoning type within the mode; steers handler guidance and Socratic questions",
+      },
       // Synthesis-specific properties
       sources: {
         type: "array",
@@ -1491,11 +1532,6 @@ export const deepthinking_academic_schema = {
           required: ["id", "name"],
         },
         description: "Identified themes across sources",
-      },
-      researchGaps: {
-        type: "array",
-        items: { type: "string" },
-        description: "Identified gaps in the literature",
       },
       gaps: {
         type: "array",
@@ -1654,18 +1690,6 @@ export const deepthinking_academic_schema = {
         description: "Improvement suggestions",
       },
       // Analysis-specific properties
-      analysisMethod: {
-        type: "string",
-        enum: [
-          "thematic",
-          "grounded-theory",
-          "discourse",
-          "content",
-          "narrative",
-          "phenomenological",
-        ],
-        description: "Qualitative analysis method (simplified)",
-      },
       methodology: {
         type: "string",
         enum: [
@@ -1747,11 +1771,6 @@ export const deepthinking_academic_schema = {
           required: ["id", "content"],
         },
         description: "Analytical memos",
-      },
-      categories: {
-        type: "array",
-        items: { type: "string" },
-        description: "Categories derived from codes",
       },
       saturationReached: {
         type: "boolean",

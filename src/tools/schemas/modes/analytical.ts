@@ -14,7 +14,7 @@ import { MAX_LENGTHS } from "../../../utils/sanitization.js";
  * Domain schema for analogical reasoning
  */
 const DomainSchema = z.object({
-  domain: IdSchema,
+  domain: IdSchema.optional(),
   elements: IdArraySchema.optional(),
   relations: IdArraySchema.optional(),
 });
