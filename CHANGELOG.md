@@ -7,7 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`LRUCache` double-counted `memoryUsage` when a key was overwritten.** `set()` on an existing
+  key deleted the old entry from the map but never released its estimated size from
+  `CacheStats.memoryUsage`, so repeatedly re-setting one key grew the reported memory without bound
+  while the entry count stayed at 1. Twenty overwrites of a single key reported 146 bytes for a
+  6-byte value. `src/cache/lru.ts` now subtracts the replaced entry's size.
+- **`LRUCache` never evicted an empty-string key, letting the cache exceed `maxSize`.**
+  `evictLRU()` tested the candidate key for truthiness, and `""` is falsy, so the eviction was
+  skipped and the entry was still inserted — a cache built with `maxSize: 2` held 3 entries. The
+  check now compares against `undefined`.
+
 ### Added
+
+- **Dedicated unit tests for `src/cache/`** (`tests/unit/cache/lru.test.ts`, 37 tests). The module
+  backs `SessionManager` and had no test file of its own. Covers eviction order at capacity,
+  recency promotion by `get()` and by overwrite, `onEvict`, TTL expiry (cache-wide, per-entry, and
+  `cleanExpired()`), hit/miss accounting and every `CacheStats` field, statistics disabled, and the
+  two defects above.
+- **Dedicated unit tests for `ThoughtFactory` and `ExportService`**
+  (`tests/unit/services/`, 39 tests). Both were exercised only incidentally by 63 other test files.
+  Covers mode resolution and registry delegation for the factory, and for the export service: all
+  15 format names, the `visual-json`/`visual-markdown` → `VisualFormat` mapping asserted against
+  the standard `json`/`markdown` documents it can be confused with, the empty-session throw, and
+  the LaTeX/Jupyter/Markdown/JSON document contracts.
 
 - **`recommend_mode` now returns advisory reasoning-type advice from the taxonomy.**
   `src/taxonomy/` — 69 reasoning types across 12 categories, a classifier, a navigator and a

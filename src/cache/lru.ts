@@ -95,6 +95,11 @@ export class LRUCache<T> implements Cache<T> {
     const existing = this.cache.get(key);
     if (existing) {
       this.cache.delete(key);
+      if (this.config.enableStats) {
+        // Release the replaced entry's estimated size, or memoryUsage climbs
+        // without bound while the entry count stays flat.
+        this.stats.memoryUsage -= existing.size || 0;
+      }
     } else if (this.cache.size >= this.config.maxSize) {
       // Evict least recently used (first entry)
       this.evictLRU();
@@ -211,7 +216,9 @@ export class LRUCache<T> implements Cache<T> {
   private evictLRU(): void {
     // First entry is least recently used
     const firstKey = this.cache.keys().next().value;
-    if (firstKey) {
+    // Compare against undefined: an empty-string key is falsy but valid, and a
+    // truthiness check here would skip its eviction and exceed maxSize.
+    if (firstKey !== undefined) {
       const entry = this.cache.get(firstKey);
       this.cache.delete(firstKey);
 
