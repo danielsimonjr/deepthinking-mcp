@@ -11,7 +11,7 @@ import {
   createValidationError,
   createValidationWarning,
   type ValidationResult,
-  type ValidationError,
+  type HandlerValidationError,
   type ValidationWarning,
   type ModeStatus,
 } from '../../../../src/modes/handlers/ModeHandler.js';
@@ -48,7 +48,7 @@ describe('ModeHandler Interface', () => {
 
     describe('validationFailure', () => {
       it('should create a failed validation result with errors', () => {
-        const errors: ValidationError[] = [
+        const errors: HandlerValidationError[] = [
           {
             field: 'thought',
             message: 'Thought content is required',
@@ -65,7 +65,7 @@ describe('ModeHandler Interface', () => {
       });
 
       it('should create a failed validation result with errors and warnings', () => {
-        const errors: ValidationError[] = [
+        const errors: HandlerValidationError[] = [
           createValidationError('field1', 'Error message', 'ERR_CODE'),
         ];
         const warnings: ValidationWarning[] = [

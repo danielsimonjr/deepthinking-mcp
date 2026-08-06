@@ -20,7 +20,7 @@ import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
-  ValidationError,
+  HandlerValidationError,
   ValidationWarning,
   ModeEnhancements,
   DetectedArchetype,
@@ -496,7 +496,7 @@ export class SystemsThinkingHandler implements ModeHandler {
     index: number,
     existingIds: Set<string>,
   ): ValidationResult {
-    const errors: ValidationError[] = [];
+    const errors: HandlerValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
     if (!component.id || component.id.trim().length === 0) {
@@ -547,7 +547,7 @@ export class SystemsThinkingHandler implements ModeHandler {
     index: number,
     componentIds: Set<string>,
   ): ValidationResult {
-    const errors: ValidationError[] = [];
+    const errors: HandlerValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
     if (!loop.id || loop.id.trim().length === 0) {

@@ -13,7 +13,7 @@ export * from "./session.js";
 export {
   type ModeHandler,
   type ValidationResult,
-  type ValidationError,
+  type HandlerValidationError,
   type ValidationWarning,
   type ModeEnhancements,
   type ModeStatus,

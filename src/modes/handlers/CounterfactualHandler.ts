@@ -23,7 +23,7 @@ import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
-  ValidationError,
+  HandlerValidationError,
   ValidationWarning,
   ModeEnhancements,
   validationSuccess,
@@ -130,7 +130,7 @@ export class CounterfactualHandler implements ModeHandler {
    * Validate counterfactual-specific input
    */
   validate(input: ThinkingToolInput): ValidationResult {
-    const errors: ValidationError[] = [];
+    const errors: HandlerValidationError[] = [];
     const warnings: ValidationWarning[] = [];
     const inputAny = input as any;
 
@@ -333,7 +333,7 @@ export class CounterfactualHandler implements ModeHandler {
    * Validate a scenario
    */
   private validateScenario(scenario: Scenario, path: string): ValidationResult {
-    const errors: ValidationError[] = [];
+    const errors: HandlerValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
     if (!scenario.name || scenario.name.trim().length === 0) {
@@ -458,7 +458,7 @@ export class CounterfactualHandler implements ModeHandler {
     chain: CausalChain,
     index: number,
   ): ValidationResult {
-    const errors: ValidationError[] = [];
+    const errors: HandlerValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
     if (!chain.id || chain.id.trim().length === 0) {

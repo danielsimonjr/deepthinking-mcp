@@ -20,15 +20,17 @@ export interface ValidationResult {
   /** Whether the input is valid */
   valid: boolean;
   /** Validation errors if any */
-  errors: ValidationError[];
+  errors: HandlerValidationError[];
   /** Non-blocking warnings */
   warnings: ValidationWarning[];
 }
 
 /**
- * Validation error detail
+ * A single blocking problem found by a handler's `validate()`, reported inside
+ * a `ValidationResult`. It is plain data and is never thrown — the throwable
+ * `ValidationError` class in `src/utils/errors.ts` is a different thing.
  */
-export interface ValidationError {
+export interface HandlerValidationError {
   /** Which field has the error */
   field: string;
   /** Error message */
@@ -198,7 +200,7 @@ export function validationSuccess(
  * Create a failed validation result
  */
 export function validationFailure(
-  errors: ValidationError[],
+  errors: HandlerValidationError[],
   warnings: ValidationWarning[] = [],
 ): ValidationResult {
   return {
@@ -209,13 +211,14 @@ export function validationFailure(
 }
 
 /**
- * Create a validation error
+ * Create one entry for a `ValidationResult.errors` list. Returns data; throws
+ * nothing.
  */
 export function createValidationError(
   field: string,
   message: string,
   code: string,
-): ValidationError {
+): HandlerValidationError {
   return { field, message, code };
 }
 

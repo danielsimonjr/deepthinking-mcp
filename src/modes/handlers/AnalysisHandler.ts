@@ -21,7 +21,7 @@ import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
-  ValidationError,
+  HandlerValidationError,
   ValidationWarning,
   ModeEnhancements,
   validationSuccess,
@@ -208,7 +208,7 @@ export class AnalysisHandler implements ModeHandler {
    * Validate analysis-specific input
    */
   validate(input: ThinkingToolInput): ValidationResult {
-    const errors: ValidationError[] = [];
+    const errors: HandlerValidationError[] = [];
     const warnings: ValidationWarning[] = [];
     const inputAny = input as any;
 
@@ -533,7 +533,7 @@ export class AnalysisHandler implements ModeHandler {
    * Validate codebook structure
    */
   private validateCodebook(codebook: Codebook): ValidationResult {
-    const errors: ValidationError[] = [];
+    const errors: HandlerValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
     // Check for codes without definitions

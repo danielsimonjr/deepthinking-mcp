@@ -21,7 +21,7 @@
 export {
   ModeHandler,
   ValidationResult,
-  ValidationError,
+  HandlerValidationError,
   ValidationWarning,
   ModeEnhancements,
   ModeStatus,

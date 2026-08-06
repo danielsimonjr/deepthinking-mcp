@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`ValidationError` no longer names two unrelated things.** `src/modes/handlers/ModeHandler.ts`
+  declared a `ValidationError` interface — plain data listed in `ValidationResult.errors`, never
+  thrown — while `src/utils/errors.ts` declares a throwable `ValidationError` class, and both were
+  reachable from `src/types/index.ts`. Anyone reading a handler's `validate()` had to guess which
+  one was in scope. The interface is now `HandlerValidationError`; the class keeps the conventional
+  name. `ValidationIssue` was not available as a replacement — `src/types/session.ts` already uses
+  it for a third, different shape. The factory `createValidationError()` is unchanged, so handler
+  code is unaffected; only the exported type name changed.
 - **TikZ export no longer mangles a literal backslash.** `escapeLatex` existed twice — once in
   `src/export/visual/utils/tikz.ts` and once in `src/utils/sanitization.ts` — and the two were not
   equivalent, despite escaping the same character set. The TikZ copy chained `.replace()` calls, so

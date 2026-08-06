@@ -22,7 +22,7 @@ import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
-  ValidationError,
+  HandlerValidationError,
   ValidationWarning,
   ModeEnhancements,
   validationSuccess,
@@ -119,7 +119,7 @@ export class HistoricalHandler implements ModeHandler {
    * Validate historical-specific input
    */
   validate(input: ThinkingToolInput): ValidationResult {
-    const errors: ValidationError[] = [];
+    const errors: HandlerValidationError[] = [];
     const warnings: ValidationWarning[] = [];
     const inputAny = input as any;
 

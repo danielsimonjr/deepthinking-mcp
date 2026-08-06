@@ -22,7 +22,7 @@ import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
-  ValidationError,
+  HandlerValidationError,
   ValidationWarning,
   ModeEnhancements,
   validationSuccess,
@@ -522,7 +522,7 @@ export class CritiqueHandler implements ModeHandler {
   private validateMethodologyEvaluation(
     meth: MethodologyEvaluation,
   ): ValidationResult {
-    const errors: ValidationError[] = [];
+    const errors: HandlerValidationError[] = [];
     const warnings: ValidationWarning[] = [];
 
     // Validate rating ranges

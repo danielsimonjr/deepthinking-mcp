@@ -14,7 +14,7 @@ import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
   ModeHandler,
   ValidationResult,
-  ValidationError,
+  HandlerValidationError,
   ValidationWarning,
   ModeEnhancements,
   validationSuccess,
@@ -86,7 +86,7 @@ export class TemporalHandler implements ModeHandler {
    * Validate temporal-specific input
    */
   validate(input: ThinkingToolInput): ValidationResult {
-    const errors: ValidationError[] = [];
+    const errors: HandlerValidationError[] = [];
     const warnings: ValidationWarning[] = [];
     const inputAny = input as any;
 
