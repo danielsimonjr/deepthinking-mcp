@@ -13,27 +13,27 @@ The server runs as an ESM Node process (Node >=18) over stdio. It has one entry 
 
 ## Key Metrics
 
-Two different tools measured this codebase, at different scopes. Keep them separate:
+Numbers below are given at two scopes, because the repository is much larger than the shipped
+package. **Whole repo** counts `src/`, `tests/`, `tools/`, `config/`, and `docs/`; **`src/`
+only** counts what ships. A metric quoted at the wrong scope looks like a contradiction, so
+each row names its scope and its origin.
 
-- **repo_map** (`python repo_map.py map`, 2026-08-05) scans the whole repository: `src/`,
-  `tests/`, `tools/`, `config/`, and `docs/` — 436 TypeScript files total.
-- **DEPENDENCY_GRAPH.md** (`npm run docs:deps`, 2026-08-03) scans `src/` only — 234 files,
-  14 module directories. Use it for per-file, per-module detail; this document does not
-  repeat that detail.
+For per-file and per-module detail, see [`DEPENDENCY_GRAPH.md`](DEPENDENCY_GRAPH.md) — this
+document does not repeat it.
 
 | Metric | Value | Scope | Source |
 |---|---|---|---|
 | Version | 9.3.3 | package | `package.json` |
 | TypeScript files, whole repo | 436 | repo-wide | repo_map |
 | TypeScript files, `src/` | 221 | src only | repo_map (`file-inventory.json`, area=src) |
-| Lines of code, whole repo | 213,625 | repo-wide | repo_map |
-| Lines of code, `src/` | 110,538 | src only | repo_map |
+| Lines of code, whole repo | 213,993 | repo-wide | repo_map |
+| Lines of code, `src/` | 110,537 | src only | repo_map |
 | Total exports, whole repo | 2,195 | repo-wide | repo_map |
 | Total exports, `src/` | 1,276 (571 re-exports) | src only | DEPENDENCY_GRAPH.md |
 | Entry roots | 1 (`src/index.ts`) | src | repo_map |
 | Runtime circular dependencies | 0 | src | repo_map, confirmed by direct edge inspection |
 | Type-only circular dependencies | 57 | src | repo_map |
-| Orphan-flagged files | 24 (17 live, 7 dead-candidate) | src | repo_map, hand-verified — see below |
+| Files with no static importer | 24 (17 loaded dynamically or by design, 7 unused) | src | repo_map, hand-verified — see below |
 | Duplicate symbol names | 63 (32 drift-risk, 29 benign, 2 real duplicates) | src | repo_map, hand-verified — see below |
 | Reasoning modes | 34 (30 with dedicated thought types, 4 advanced-runtime) | src | `src/types/core.ts` `ThinkingMode` enum |
 | Reasoning types (taxonomy) | 69 | src | `src/taxonomy/reasoning-types.ts` |
@@ -51,7 +51,7 @@ also export symbols.
 
 ```
 deepthinking-mcp/
-├── src/                # 221 files, 110,538 LOC — the package
+├── src/                # 221 files, 110,537 LOC — the package
 │   ├── index.ts        # entry point, all 13 tool handlers
 │   ├── types/           # ThinkingMode enum, Thought union, per-mode types
 │   ├── modes/            # mode handlers, registry, combinations, stochastic
@@ -73,7 +73,7 @@ deepthinking-mcp/
 
 Do not treat `templates/mode-scaffolding/*.ts` as source code that runs. Those 5 files are
 scaffolding a human copies to start a new mode. No code imports them — that is by design (see
-"Reading the generated reports" below).
+"How code gets loaded" below).
 
 ## MCP Tools
 
@@ -90,48 +90,38 @@ related reasoning modes. `deepthinking_session` bundles session-lifecycle action
 (create/list/delete/export/switch_mode/recommend_mode). `deepthinking_analyze` runs multi-mode
 analysis. See `DATA_FLOW.md` for the full tool-to-mode mapping and the request path.
 
-## Reading the generated reports
+## How code gets loaded
 
-Two automated reports live alongside this document: `DEPENDENCY_GRAPH.md` (dependency graph,
-cycles, per-module detail) and `unused-analysis.md` (candidate dead code). Both are useful and
-both have known blind spots. Read a flagged file before deleting it — do not treat either
-report as a deletion queue.
+Three mechanisms bring code in besides a plain `import` statement. Each is deliberate, and
+together they account for most of what looks unreferenced at a glance:
 
-**Orphan files are not automatically dead.** repo_map flags 24 `src/` files as having no
-static importer. A file-by-file check found:
+- **Mode validators load by name.** Ten of the 34 (`algorithmic`, `analysis`, `argumentation`,
+  `critique`, `engineering`, `firstprinciples`, `formallogic`, `scientificmethod`, `synthesis`,
+  `systemsthinking`) are resolved at runtime by `validators/registry.ts:186` from a
+  module-path table; the other 24 come through the static `validators/index.ts` barrel.
+- **Multi-mode analysis loads on demand.** `src/index.ts:918` pulls in
+  `src/modes/combinations/` only when a combination request arrives.
+- **Scaffolding templates are never imported.** The 5 files under
+  `templates/mode-scaffolding/` are copy-paste starting points for authoring a new mode.
 
-- **17 are live**, reached only through mechanisms static analysis cannot see:
-  - 10 mode validators (`algorithmic.ts`, `analysis.ts`, `argumentation.ts`, `critique.ts`,
-    `engineering.ts`, `firstprinciples.ts`, `formallogic.ts`, `scientificmethod.ts`,
-    `synthesis.ts`, `systemsthinking.ts` under `src/validation/validators/modes/`) — loaded by
-    a string-keyed dynamic `import()` in `src/validation/validators/registry.ts:186`.
-  - `src/modes/combinations/index.ts` and `analyzer.ts` — loaded by a dynamic `import()` in
-    `src/index.ts:918`.
-  - 5 files under `templates/mode-scaffolding/` — intentionally never imported; they are
-    copy-paste starting points for a new mode, documented in the repo's own README and
-    CLAUDE.md.
-- **7 are genuine dead-candidates**, with no importer of any kind found: the barrel files
-  `src/cache/index.ts`, `src/export/index.ts`, `src/proof/index.ts`,
-  `src/validation/index.ts`; `src/validation/schema-utils.ts` and `schemas.ts` (imported only
-  by the dead `validation/index.ts` barrel); and `src/taxonomy/classifier.ts` (its only hit
-  anywhere is a JSDoc comment, not an import).
+## Unused code
 
-**A static scanner cannot see a dynamic `import()`.** That is the root cause behind both
-findings above and a documented, narrow gap in `unused-analysis.json`'s own methodology
-(the export `resolveSandboxedOutputDir` in `src/export/file-exporter.ts` is reported
-unreferenced, but it is called twice from `src/index.ts:407-409` and `:591-593` via a
-multi-line destructured dynamic import — a formatting-sensitive miss, not a general blind
-spot; single-line destructured dynamic imports elsewhere in the same file are correctly
-excluded).
+Seven files under `src/` have no importer anywhere — not in `src/`, not in `tests/`:
 
-**`unusedExportsCount` (195) and `unreferencedAnywhereCount` (69) are different buckets**, not
-the same number reported twice. `unreferencedAnywhereCount` is the stricter one: exports with
-zero references anywhere in the repo, including their own defining file. A 23-export sample
-against that stricter bucket found 22 true dead code (96%) and the 1 false positive above.
+| File | Why it is unused |
+|---|---|
+| `cache/index.ts`, `export/index.ts`, `proof/index.ts`, `validation/index.ts` | Barrel files. Consumers import the concrete modules directly. |
+| `validation/schema-utils.ts`, `validation/schemas.ts` | Imported only by `validation/index.ts`, itself unused. |
+| `taxonomy/classifier.ts` | The only occurrence of its name in `src/index.ts` is a JSDoc comment. |
 
-**This package publishes to npm.** An export unused inside the repo may still be public API
-consumed by an external caller. Do not delete an "unused" export from `src/index.ts` or a
-barrel file without checking whether removing it is a breaking change.
+Roughly 195 exports have no importer, of which 69 have no reference at all — not even inside
+their own file. A 23-export sample of that stricter set was 96% genuinely dead.
+
+> **Before deleting any of it:** this package publishes to npm, so an export nothing uses
+> in-repo may still be public API that an external caller depends on. Removing one from
+> `src/index.ts` or a barrel is a breaking change. The methodology behind these numbers, and
+> the two cases where it is known to be wrong, are in
+> [`DRIFT_REPORT.md`](DRIFT_REPORT.md#analysis-limitations).
 
 ## Verification
 
@@ -141,7 +131,7 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | Claim | Value | Source |
 |---|---|---|
 | totalTypeScriptFiles | 436 | dependency-graph.json |
-| totalLinesOfCode | 213625 | dependency-graph.json |
+| totalLinesOfCode | 213993 | dependency-graph.json |
 | totalExports | 2195 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |

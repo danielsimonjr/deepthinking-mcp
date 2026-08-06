@@ -33,30 +33,24 @@ delegates to `src/services/` and `src/modes/`. See `DATA_FLOW.md` for the reques
   Cryptanalytic, Algorithmic. Advanced Runtime (4): MetaReasoning, Recursive, Modal,
   Stochastic. Fallback (2): GenericModeHandler, CustomHandler. Constraint and Optimization are
   covered by validators plus the generic handler, not a dedicated handler.
-- **`combinations/`** — multi-mode analysis (`MultiModeAnalyzer`), reached only through a
-  dynamic `import()` at `src/index.ts:918`. This is why repo_map's static-import scan flags
-  `combinations/index.ts` and `analyzer.ts` as orphaned — they are live, just not statically
-  reachable.
-- **`stochastic/`** — stochastic-mode types, sampling, and distribution models. repo_map
-  classifies these as test-only reachable (imported by tests but not by any non-test `src/`
-  file through a static path); confirm against `DEPENDENCY_GRAPH.md` before assuming dead.
+- **`combinations/`** — multi-mode analysis (`MultiModeAnalyzer`). Loaded on demand: the only
+  path in is a dynamic `import()` at `src/index.ts:918`, so nothing imports it statically.
+- **`stochastic/`** — stochastic-mode types, sampling, and distribution models. No non-test
+  `src/` file imports these; the test suite is their only static consumer.
 
 ## Validation & Security Components — `src/validation/`
 
 - **`validator.ts`** — top-level entry, imports `getValidatorForMode` from `validators/index.ts`.
-- **`validators/registry.ts`** — a lazy-loading table keyed by mode name. Each entry names a
-  module path and class name; `registry.ts:186` does `await import(config.module)`. This is
-  the mechanism, confirmed by direct read, behind the 10 mode-validator files repo_map flags as
-  orphaned (`algorithmic.ts`, `analysis.ts`, `argumentation.ts`, `critique.ts`,
-  `engineering.ts`, `firstprinciples.ts`, `formallogic.ts`, `scientificmethod.ts`,
-  `synthesis.ts`, `systemsthinking.ts`) — they are live, loaded by mode name at runtime, not by
-  static import.
-- **`validators/index.ts`** — a separate, static barrel that re-exports the other 24 mode
-  validators (sequential, mathematics, bayesian, etc.) by name. The split between this static
-  barrel and the dynamic `registry.ts` is why some mode validators show as reachable and others
-  show as orphaned in repo_map's report, despite all 35 being equally live.
-- **`schemas.ts`, `schema-utils.ts`** — dead-candidates. Their only importer is the also-dead
-  `validation/index.ts` barrel; confirmed by grep, no other importer in `src/` or `tests/`.
+- **Mode validators load two different ways, and this is the one thing to know about this
+  directory.** `validators/registry.ts` is a lazy-loading table keyed by mode name: each entry
+  names a module path and a class name, and `registry.ts:186` resolves it with
+  `await import(config.module)`. Ten validators arrive exclusively this way — `algorithmic`,
+  `analysis`, `argumentation`, `critique`, `engineering`, `firstprinciples`, `formallogic`,
+  `scientificmethod`, `synthesis`, `systemsthinking`. The other 24 are re-exported statically by
+  `validators/index.ts`. All 34 are equally live; only the loading mechanism differs. Adding a
+  validator means choosing which path it takes, and registering it accordingly.
+- **`schemas.ts`, `schema-utils.ts`** — unused. Their only importer is `validation/index.ts`,
+  which is itself unused (see "Unused code" below).
 
 ## Session Management — `src/session/`
 
@@ -72,25 +66,22 @@ Two families: document exporters (Markdown, JSON, and other flat formats) at the
 and `src/export/visual/` for diagram formats (Mermaid, DOT, ASCII, native SVG, TikZ, and
 more) — 24 mode-specific exporter files plus 14 shared utility files, driven by 14 fluent
 builder classes (`DOTGraphBuilder`, `MermaidGraphBuilder`, `SVGBuilder`, and 11 others; full
-list and file paths in `CLAUDE.md`'s "Visual Builder APIs" table). `src/export/index.ts` is a
-dead-candidate barrel — its exports (`VisualExporter` and others) are imported directly from
-their concrete files elsewhere in the codebase, not through this barrel.
+list and file paths in `CLAUDE.md`'s "Visual Builder APIs" table). Consumers import the
+concrete exporter files directly, so `src/export/index.ts` sits unused.
 
 ## Taxonomy System — `src/taxonomy/`
 
-`reasoning-types.ts` defines all 69 reasoning types. `navigator.ts` and `suggestion-engine.ts`
-are reachable only from tests per repo_map — check `DEPENDENCY_GRAPH.md` before assuming they
-run in production. `classifier.ts` is a dead-candidate: its only hit anywhere in `src/index.ts`
-is a JSDoc comment mentioning "taxonomy classifier," not an import.
+`reasoning-types.ts` defines all 69 reasoning types and backs `recommend_mode`. `navigator.ts`
+and `suggestion-engine.ts` are imported only by tests — no production path reaches them.
+`classifier.ts` is unused: the only occurrence of its name in `src/index.ts` is a JSDoc comment,
+not an import.
 
 ## Proof Decomposition — `src/proof/`
 
 13 files implementing proof decomposition, gap analysis, assumption tracking, inconsistency
-detection, and circular-reasoning detection. repo_map classifies the whole subsystem as
-test-only reachable — imported by the test suite but not reached from `src/index.ts` through a
-static path at the time of this scan. `proof/index.ts`, the barrel, is a dead-candidate for the
-same reason as the other three dead barrels: its symbols are imported directly from their
-concrete files elsewhere, not through it.
+detection, and circular-reasoning detection. The test suite is currently its only static
+consumer; no path from `src/index.ts` reaches it directly. Its `index.ts` barrel is unused —
+consumers import the concrete modules.
 
 ## Type System — `src/types/`
 

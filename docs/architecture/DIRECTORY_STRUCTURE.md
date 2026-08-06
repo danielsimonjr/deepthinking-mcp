@@ -24,9 +24,8 @@ Type definitions for all reasoning modes. `core.ts` holds the `ThinkingMode` enu
 ### `modes/`
 Reasoning-mode implementations. `handlers/` holds one Strategy-pattern handler per mode
 family. `registry.ts` is the `ModeHandlerRegistry` singleton. `combinations/` implements
-multi-mode analysis, reached only through a dynamic import from `src/index.ts` — see
-`ARCHITECTURE.md` for why this makes it look orphaned to a static scanner. `stochastic/` holds
-stochastic-mode sampling and distribution models.
+multi-mode analysis and is loaded on demand by a dynamic import from `src/index.ts`.
+`stochastic/` holds stochastic-mode sampling and distribution models.
 
 ### `services/`
 Business logic extracted out of `index.ts`: `ThoughtFactory.ts` (thought creation) and
@@ -41,29 +40,28 @@ non-functional `MCP_ENABLE_PERSISTENCE` config field.
 ### `validation/`
 Zod schemas and validation logic. `validators/index.ts` is a static barrel covering most mode
 validators; `validators/registry.ts` is a separate lazy-loading table that dynamically imports
-the remaining mode validators by name at runtime — the split between the two is why some mode
-validators appear reachable and others appear orphaned in an automated scan, despite all being
-equally live. `schemas.ts` and `schema-utils.ts` are dead-candidates (see `ARCHITECTURE.md`).
+the remaining mode validators by name at runtime. Both paths are live; only the loading
+mechanism differs. `schemas.ts` and `schema-utils.ts` are unused (see `COMPONENTS.md`).
 
 ### `export/`
 Document exporters at the top level. `visual/` holds diagram-format exporters:
 `visual/modes/` (one file per mode) and `visual/utils/` (shared builder classes — DOT,
-Mermaid, SVG, TikZ, and others). `export/index.ts` is a dead-candidate barrel; its exports are
-imported directly from their concrete files elsewhere, not through it.
+Mermaid, SVG, TikZ, and others). `export/index.ts` is unused — consumers import the
+concrete exporter files directly.
 
 ### `proof/`
 Proof decomposition: decomposition, gap analysis, assumption tracking, inconsistency
 detection, circular-reasoning detection, hierarchical proof structures, and a strategy
-recommender. `proof/index.ts` is a dead-candidate barrel for the same reason as `export/index.ts`.
+recommender. `proof/index.ts` is unused, for the same reason as `export/index.ts`.
 
 ### `taxonomy/`
 Reasoning-type classification. `reasoning-types.ts` defines all 69 reasoning types.
-`classifier.ts` is a dead-candidate — the only hit for its name in `src/index.ts` is a JSDoc
+`classifier.ts` is unused — the only occurrence of its name in `src/index.ts` is a JSDoc
 comment, not an import.
 
 ### `cache/`
-Caching strategies (LRU, LFU, FIFO). `cache/index.ts` is a dead-candidate barrel; its exports
-are imported directly from their concrete files elsewhere.
+Caching strategies (LRU, LFU, FIFO). `cache/index.ts` is unused — consumers import the
+concrete strategy files directly.
 
 ### `config/`
 Centralized environment-variable configuration. See `DATA_FLOW.md`'s "Data Persistence"

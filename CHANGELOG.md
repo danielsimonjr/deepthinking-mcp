@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
+- **Architecture docs now document the repository, not the tool that measured it.** The refreshed
+  docs described the codebase in terms of what a static analyzer made of it — "repo_map's
+  static-import scan flags `combinations/index.ts` as orphaned", "`classifier.ts` is a
+  dead-candidate", "why this makes it look orphaned to a static scanner". The subject of those
+  sentences was the analyzer; a reader of this repository has never heard of it. Rewritten so the
+  codebase is the subject: the dynamic-loading mechanisms are now documented as **design facts**
+  (`validators/registry.ts:186` resolves ten validators by name from a module-path table;
+  `src/index.ts:918` loads multi-mode analysis on demand; `templates/mode-scaffolding/` is
+  copy-paste material), and the seven files nothing imports are simply listed as unused with the
+  reason for each. Tool methodology and its two known failure cases moved to `DRIFT_REPORT.md`
+  under "Analysis limitations". Provenance stays where it belongs — in the Verification blocks and
+  the metrics table's `Source` column, so a reader can still tell a machine-checked number from a
+  hand-verified one.
+  Also corrects `totalLinesOfCode` (213,625 → 213,993): the earlier `prettier --write` commit
+  reformatted 12 source files and moved the count. The drift gate caught it.
+
 - **Rewrote README.md as a README rather than a changelog** — 1,069 → 221 lines. It opened with two
   dated announcement banners (a repo merge and a deprecation reversal) before saying what the
   project does; eight section headings carried the release that introduced them

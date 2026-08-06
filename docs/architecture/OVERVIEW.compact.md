@@ -4,17 +4,17 @@ TypeScript MCP server. 34 reasoning modes, 13 focused MCP tools, session trackin
 export. ESM, Node >=18, stdio transport. Entry point: `src/index.ts`. Publishes to npm as
 `deepthinking-mcp`. Full detail: `OVERVIEW.md`.
 
-## Metrics (repo-wide, repo_map 2026-08-05, unless marked src-only)
+## Metrics (repo-wide unless marked src-only; measured 2026-08-05)
 
 | Metric | Value |
 |---|---|
 | Version | 9.3.3 |
 | TS files, whole repo / `src/` only | 436 / 221 |
-| LOC, whole repo / `src/` only | 213,625 / 110,538 |
+| LOC, whole repo / `src/` only | 213,993 / 110,537 |
 | Exports, whole repo / `src/` only | 2,195 / 1,276 (571 re-exports) |
 | Runtime circular deps | 0 |
 | Type-only circular deps | 57 |
-| Orphan-flagged files | 24 (17 live, 7 dead-candidate) |
+| Files with no static importer | 24 (17 loaded dynamically or by design, 7 unused) |
 | Duplicate symbol names | 63 (32 drift-risk, 29 benign, 2 real duplicates) |
 | Reasoning modes | 34 (30 dedicated types + 4 advanced-runtime) |
 | MCP tools | 13 |
@@ -40,13 +40,13 @@ docs/Architecture/  this doc set + generated reports
 tools, 2-4 modes each), `_session` (create/list/delete/export/switch_mode/recommend_mode as one
 tool's actions), `_analyze` (multi-mode analysis).
 
-## Orphan files — 24 flagged, verified individually
+## Files with no static importer — 24, each checked
 
-- **17 live**: 10 mode validators + `combinations/{index,analyzer}.ts`, all reached only by a
-  dynamic `import()` a static scanner cannot see; 5 mode-scaffolding templates, live by design
-  (human copy-paste, never imported).
-- **7 dead-candidate**: 4 barrel files (`cache/`, `export/`, `proof/`, `validation/index.ts`),
-  `validation/{schema-utils,schemas}.ts`, `taxonomy/classifier.ts`.
+- **17 are live.** 10 mode validators and `combinations/{index,analyzer}.ts` load through a
+  dynamic `import()`; 5 `templates/mode-scaffolding/` files are copy-paste starting points and
+  are never meant to be imported.
+- **7 are unused.** 4 barrels (`cache/`, `export/`, `proof/`, `validation/index.ts`),
+  `validation/{schema-utils,schemas}.ts`, and `taxonomy/classifier.ts`.
 
 ## Known issues worth tracking
 

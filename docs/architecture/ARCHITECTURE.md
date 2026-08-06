@@ -54,18 +54,18 @@ format-specific exporters. See `DATA_FLOW.md` for the full sequence.
 
 ## Circular Dependencies — the honest story
 
-repo_map reports **57 type-only circular dependencies and 0 runtime circular dependencies** in
-`src/`. Both numbers are real, but the "type-only" label needs a caveat before you trust it as
-proof of safety.
+`src/` has **57 circular dependencies, all type-only, and 0 runtime cycles**. That is safe —
+type-only edges erase at compile time — but the claim rests on how the edges were classified,
+so it is worth knowing the shape before relying on it.
 
 **The shape.** All 57 cycles have the same two-file form: `src/types/core.ts` importing from a
 `src/types/modes/<mode>.ts` file, and that file importing back from `core.ts`. For example,
 `core.ts <-> types/modes/sequential.ts` and `core.ts <-> types/modes/engineering.ts` are two of
 the 57.
 
-**The nuance.** repo_map's `typeOnly` flag is set per edge by looking for the literal `type`
-keyword in the import statement — it does not check how the imported name is actually used.
-Spot-checking 3 of the 57 cycles by reading both files directly found:
+**The caveat.** The type-only classification is made syntactically — by the presence of the
+`type` keyword on the import — not by how the imported name is used. Reading three of the 57
+cycles directly found:
 
 - `core.ts`'s outbound edge to a mode file is **always** `typeOnly: true` — it only ever
   imports the mode's `Thought` interface as a type.
@@ -87,8 +87,8 @@ single edge's `typeOnly: false` as evidence of a real runtime cycle without read
 
 ## Key Findings for Maintainers
 
-Two automated scans (repo_map's duplicate-symbol detector and orphan-file detector) surfaced
-four findings worth tracking. None are currently causing a bug; two are drift risks.
+Four findings worth tracking. None is causing a bug today; two are drift risks that will
+bite a future change.
 
 **1. `isXThought` type guards are defined twice, with silent, inconsistent precedence.**
 `src/types/core.ts` and each `src/types/modes/<mode>.ts` file both independently define a
@@ -114,13 +114,11 @@ extending `DeepThinkingError`. TypeScript's type/value namespace split means the
 collide at compile time, but `import { ValidationError }` resolves to one or the other
 depending on the source module — a landmine for a future reader.
 
-**4. Four barrel files and two files behind them are dead-candidates.**
-`src/cache/index.ts`, `src/export/index.ts`, `src/proof/index.ts`, `src/validation/index.ts`,
-plus `src/validation/schema-utils.ts` and `schemas.ts` (imported only by the dead
-`validation/index.ts`), and `src/taxonomy/classifier.ts`, have no importer anywhere in `src/`
-or `tests/` — confirmed by grep, not just the analyzer. See `OVERVIEW.md`'s "Reading the
-generated reports" section for the 17 orphan-flagged files that are live despite having no
-static importer, and why they were not included here.
+**4. Seven files have no importer anywhere.** The barrels `src/cache/index.ts`,
+`src/export/index.ts`, `src/proof/index.ts` and `src/validation/index.ts`; behind them
+`src/validation/schema-utils.ts` and `schemas.ts`; and `src/taxonomy/classifier.ts`. Nothing in
+`src/` or `tests/` imports any of them. `OVERVIEW.md` lists them with the reason for each, and
+explains why the other files that lack a static importer are nonetheless live.
 
 The other 29 of the 63 total duplicate-name pairs are benign: unrelated types in different
 mode files that happen to share an English word (e.g. `Constraint` in `stochastic/types.ts`

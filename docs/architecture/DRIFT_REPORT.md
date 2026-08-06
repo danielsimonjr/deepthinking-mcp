@@ -73,7 +73,7 @@ re-deriving every number by hand. `DIRECTORY_STRUCTURE.md` now carries no hand-m
 per-directory file counts at all — the self-contradiction that caused finding #5 above cannot
 recur if the number is never copied into prose in the first place.
 
-## Dead-candidates and real duplication — findings for maintainers
+## Findings for maintainers: unused code and real duplication
 
 **7 dead-candidate files**, no importer found anywhere in `src/` or `tests/`:
 `src/cache/index.ts`, `src/export/index.ts`, `src/proof/index.ts`, `src/validation/index.ts`
@@ -94,7 +94,9 @@ file (via `types/index.ts`'s named re-export), the other 20 by `core.ts` — a s
 inconsistent precedence that `CLAUDE.md` currently documents as if `core.ts` were the single
 source for all of them.
 
-## Two analyzer blind spots found while writing this refresh
+## Analysis limitations
+
+Two blind spots in the static analysis, found while writing this refresh:
 
 1. **`unused-analysis.json`'s multi-line destructured dynamic import is invisible to it.**
    `resolveSandboxedOutputDir` (`src/export/file-exporter.ts:46`) is flagged unreferenced, but
