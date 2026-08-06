@@ -9,6 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`tests/performance/memory.test.ts` T-PRF-011 "consistent memory per session" was flaky by
+  construction.** It sampled `heapUsed` around each of ten sessions and required 70% of the signed
+  deltas to fall within 5x their MEAN. The band is anchored to a signed mean floored at 1 byte
+  (`Math.max(avgSize, 1)`), so a single negative delta — an ordinary `gc()` returning more than the
+  loop allocated — drags the mean toward zero and collapses the band with it. Measured: nine
+  samples of ~16 KB plus one of -138 KB takes the filter from 9/10 inside the band to 0/10, an
+  inversion at a cliff rather than a gradual degradation; the same loop was observed producing
+  +590 KB and +422 KB single-sample excursions. The `sessionSizes[0] > 0` guard inspected only the
+  first sample and did not protect the computation. A ~16 KB per-iteration signed heap delta cannot
+  be measured reliably in-process, so the assertion is replaced rather than widened: retained
+  payload per session is now measured deterministically with `v8.serialize()` (ten identical
+  sessions measured 6519-6527 bytes, a 0.12% spread) and required to stay within 5% of the median
+  and not trend upward, plus a one-sided 20 MB bound on aggregate heap growth — the same robust
+  form every other assertion in this file already uses. Verified to still catch the defect class it
+  exists for: retaining one extra thought per session fails it at 38.9% deviation.
+
 - **`LRUCache` double-counted `memoryUsage` when a key was overwritten.** `set()` on an existing
   key deleted the old entry from the map but never released its estimated size from
   `CacheStats.memoryUsage`, so repeatedly re-setting one key grew the reported memory without bound

@@ -123,12 +123,42 @@ describe('Memory Performance Tests', () => {
     });
 
     it('should maintain consistent memory per session', async () => {
-      const sessionSizes: number[] = [];
+      // Regression note: this test used to sample heapUsed before and after
+      // each session and require 70% of the ten signed deltas to fall within
+      // 5x the MEAN delta. That assertion is degenerate, and it failed and
+      // passed on identical code.
+      //
+      // The band is anchored to a signed mean, and `Math.max(avgSize, 1)`
+      // floors that scale at 1 byte. One negative delta -- a gc() call that
+      // returns more than the loop allocated, which is ordinary in a worker
+      // shared with other test files -- drags the mean toward zero and
+      // collapses the band with it. Measured on this machine, nine samples of
+      // ~16 KB plus a single -138 KB sample takes the filter from 9/10 inside
+      // the band to 0/10, so the assertion does not degrade gradually: it
+      // inverts at a cliff. The same loop was observed producing +590 KB and
+      // +422 KB single-sample excursions, so excursions of that size plainly
+      // occur; nothing bounds them below. The `sessionSizes[0] > 0` guard did
+      // not help, since it inspects only the first sample.
+      //
+      // A per-iteration signed heap delta of ~16 KB cannot be measured
+      // reliably in-process: one GC cycle is larger than the signal. Every
+      // other memory assertion in this file is therefore a one-sided bound on
+      // an AGGREGATE delta, which is robust, and this one now matches them --
+      // plus a deterministic proxy for the property the test is named for.
+      //
+      // The property: ten structurally identical sessions must retain
+      // structurally identical amounts of data. A per-session leak (state
+      // accumulating in the manager and attaching to each new session) makes
+      // the retained payload grow with the session index. v8.serialize()
+      // measures that payload exactly and does not depend on GC timing. It
+      // measures retained structure, not V8's heap accounting -- which is the
+      // trade: determinism for a slightly narrower question.
+      const retainedSizes: number[] = [];
+
+      forceGC();
+      const beforeAll = getMemoryUsage();
 
       for (let i = 0; i < 10; i++) {
-        forceGC();
-        const before = getMemoryUsage();
-
         const session = await manager.createSession();
         for (let j = 1; j <= 10; j++) {
           const thought = factory.createThought(createValidInput({
@@ -139,26 +169,41 @@ describe('Memory Performance Tests', () => {
           await manager.addThought(session.id, thought);
         }
 
-        forceGC();
-        const after = getMemoryUsage();
-        sessionSizes.push(after - before);
+        const stored = await manager.getSession(session.id);
+        expect(stored?.thoughts).toHaveLength(10);
+        retainedSizes.push(v8.serialize(stored).length);
       }
 
-      // The gc-availability precondition is now asserted inside forceGC()
-      // itself, so it covers every call site in this file rather than only
-      // this test.
+      forceGC();
+      const afterAll = getMemoryUsage();
 
-      // Memory growth per session should be relatively consistent.
-      if (sessionSizes[0] > 0) {
-        const avgSize = sessionSizes.reduce((a, b) => a + b, 0) / sessionSizes.length;
-        const positiveAvg = Math.max(avgSize, 1); // Avoid division issues with small values
-        // Allow 5x variance due to GC non-determinism
-        const withinVariance = sessionSizes.filter(size =>
-          Math.abs(size - avgSize) < positiveAvg * 5
-        ).length;
-        // At least 70% of samples should be within variance
-        expect(withinVariance / sessionSizes.length).toBeGreaterThanOrEqual(0.7);
+      // Deterministic: every session must retain the same amount of data.
+      // Sessions differ only in their UUIDs and timestamps, so the measured
+      // spread is a few bytes; 5% leaves ample room for that while catching
+      // any growth trend. A leak of one extra thought per session shows up
+      // here as roughly +25%.
+      const median = [...retainedSizes].sort((a, b) => a - b)[
+        Math.floor(retainedSizes.length / 2)
+      ];
+      expect(median).toBeGreaterThan(0);
+      for (const [index, size] of retainedSizes.entries()) {
+        expect(
+          Math.abs(size - median) / median,
+          `session ${index} retained ${size} bytes against a median of ${median}`,
+        ).toBeLessThan(0.05);
       }
+
+      // The retained payload must not trend upward across sessions, which is
+      // what a per-session leak looks like even when every step is small.
+      expect(retainedSizes[retainedSizes.length - 1]).toBeLessThan(
+        retainedSizes[0] * 1.05,
+      );
+
+      // One-sided aggregate heap bound, in the style of the other tests here:
+      // 10 sessions of 10 thoughts retain ~65 KB of payload, so 20 MB of heap
+      // growth would mean something is badly wrong. Robust because it is a
+      // single large-scale delta, not ten small signed ones.
+      expect(afterAll - beforeAll).toBeLessThan(20 * 1024 * 1024);
     });
   });
 
