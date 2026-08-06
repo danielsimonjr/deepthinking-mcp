@@ -24,11 +24,11 @@ document does not repeat it.
 | Metric | Value | Scope | Source |
 |---|---|---|---|
 | Version | 9.3.3 | package | `package.json` |
-| TypeScript files, whole repo | 457 | repo-wide | repo_map |
+| TypeScript files, whole repo | 459 | repo-wide | repo_map |
 | TypeScript files, `src/` | 225 | src only | repo_map (`file-inventory.json`, area=src) |
-| Lines of code, whole repo | 220,202 | repo-wide | repo_map |
+| Lines of code, whole repo | 220,901 | repo-wide | repo_map |
 | Lines of code, `src/` | 111,644 | src only | repo_map |
-| Total exports, whole repo | 2,238 | repo-wide | repo_map |
+| Total exports, whole repo | 2,242 | repo-wide | repo_map |
 | Total exports, `src/` | 1,276 (571 re-exports) | src only | DEPENDENCY_GRAPH.md |
 | Entry roots | 1 (`src/index.ts`) | src | repo_map |
 | Runtime circular dependencies | 0 | src | repo_map, confirmed by direct edge inspection |
@@ -130,19 +130,19 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 457 | dependency-graph.json |
-| totalLinesOfCode | 220202 | dependency-graph.json |
-| totalExports | 2238 | dependency-graph.json |
+| totalTypeScriptFiles | 459 | dependency-graph.json |
+| totalLinesOfCode | 220901 | dependency-graph.json |
+| totalExports | 2242 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
-| reachableFiles | 185 | dependency-graph.json |
+| reachableFiles | 186 | dependency-graph.json |
 | dormantFiles | 40 | dependency-graph.json |
 | orphanedFiles | 23 | dependency-graph.json |
 | testOnlyFiles | 17 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
 | typeOnlyCircularDeps | 59 | dependency-graph.json |
 | noImporterFileCount | 20 | unused-analysis.json (summary) |
-| unusedExportsCount | 201 | dependency-graph.json |
+| unusedExportsCount | 203 | dependency-graph.json |
 
 Note on `totalModules`: repo_map counts 5 top-level project areas (`docs`, `config`, `src`,
 `tools`, `tests`), not `src/` subdirectories. DEPENDENCY_GRAPH.md's "14 modules" counts `src/`

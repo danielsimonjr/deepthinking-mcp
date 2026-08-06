@@ -2243,11 +2243,11 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 457 | dependency-graph.json |
-| totalLinesOfCode | 220202 | dependency-graph.json |
-| totalExports | 2238 | dependency-graph.json |
+| totalTypeScriptFiles | 459 | dependency-graph.json |
+| totalLinesOfCode | 220901 | dependency-graph.json |
+| totalExports | 2242 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
-| reachableFiles | 185 | dependency-graph.json |
+| reachableFiles | 186 | dependency-graph.json |
 | orphanedFiles | 23 | dependency-graph.json |
 | noImporterFileCount | 20 | dependency-graph.json |
 

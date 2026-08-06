@@ -70,6 +70,6 @@ Check: `python repo_map.py check <repo> --docs docs/Architecture`
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 457 | dependency-graph.json |
+| totalTypeScriptFiles | 459 | dependency-graph.json |
 | typeOnlyCircularDeps | 59 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
