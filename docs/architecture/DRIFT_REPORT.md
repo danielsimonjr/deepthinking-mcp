@@ -96,6 +96,12 @@ source for all of them.
 
 ## Defects found while documenting the API
 
+> **Status: the schema divergences below were FIXED in commits 8df0eb2 / 58fa3d4.** The table is
+> kept as the record of what was wrong and why, because the fix is only legible against it. A
+> contract test (`tests/unit/tools/schemas/schema-contract.test.ts`) now enforces advertised-vs-
+> enforced parity across all 13 tools on four axes, so this class cannot recur silently. The
+> export-format and unwired-subsystem findings further down remain open.
+
 Writing `API.md` required reading every tool's advertised JSON Schema against the Zod schema that
 actually enforces it. The two disagree in ways a client cannot detect. Each is verified against
 source, not inferred:
