@@ -43,7 +43,7 @@ const packageJson = JSON.parse(
 import { ThoughtFactory } from "./services/ThoughtFactory.js";
 import { ExportService } from "./services/ExportService.js";
 import { SessionManager } from "./session/manager.js";
-import { ModeRecommender } from "./types/modes/recommendations.js";
+import { buildModeRecommendation } from "./services/RecommendationService.js";
 import { FileSessionStore } from "./session/storage/file-store.js";
 import {
   isValidTool,
@@ -86,9 +86,6 @@ const exportService = new ExportService();
 // SessionManager - may need async init for file storage
 let _sessionManager: SessionManager | null = null;
 let _sessionManagerPromise: Promise<SessionManager> | null = null;
-
-// ModeRecommender - Phase 15A Sprint 2: Inlined from ModeRouter
-const modeRecommender = new ModeRecommender();
 
 /**
  * Get or create SessionManager with optional file-based storage.
@@ -228,6 +225,7 @@ type ThoughtInput = Omit<
   | "problemType"
   | "problemCharacteristics"
   | "includeCombinations"
+  | "includeReasoningTypes"
 > & {
   // Override sessionId to be properly typed
   sessionId?: string;
@@ -808,86 +806,26 @@ async function handleGetSession(input: SessionInput): Promise<MCPResponse> {
 /**
  * Handle recommend_mode action
  * Phase 15A Sprint 2: Inlined from ModeRouter, uses ModeRecommender directly
+ * v9.4.0: Response built by RecommendationService, which also attaches
+ * advisory reasoning-type advice from the taxonomy.
  */
 async function handleRecommendMode(input: SessionInput): Promise<MCPResponse> {
-  const problemType = input.problemType as string | undefined;
-  const problemCharacteristics = input.problemCharacteristics as
-    ProblemCharacteristics | undefined;
-  const includeCombinations = input.includeCombinations as boolean | undefined;
+  const response = buildModeRecommendation({
+    problemType: input.problemType as string | undefined,
+    problemCharacteristics: input.problemCharacteristics as
+      ProblemCharacteristics | undefined,
+    includeCombinations: input.includeCombinations as boolean | undefined,
+    includeReasoningTypes: input.includeReasoningTypes as boolean | undefined,
+  });
 
-  // Quick recommendation based on problem type
-  if (problemType && !problemCharacteristics) {
-    const recommendedMode = modeRecommender.quickRecommend(problemType);
-    const response = `Quick recommendation for "${problemType}":\n\n**Recommended Mode**: ${recommendedMode}\n\nFor more detailed recommendations, provide problemCharacteristics.`;
-
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: response,
-        },
-      ],
-    };
-  }
-
-  // Comprehensive recommendations based on problem characteristics
-  if (problemCharacteristics) {
-    const modeRecs = modeRecommender.recommendModes(problemCharacteristics);
-    const combinationRecs = includeCombinations
-      ? modeRecommender.recommendCombinations(problemCharacteristics)
-      : [];
-
-    let response = "# Mode Recommendations\n\n";
-
-    // Single mode recommendations
-    response += "## Individual Modes\n\n";
-    for (const rec of modeRecs) {
-      response += `### ${rec.mode} (Score: ${rec.score})\n`;
-      response += `**Reasoning**: ${rec.reasoning}\n\n`;
-      response += `**Strengths**:\n`;
-      for (const strength of rec.strengths) {
-        response += `- ${strength}\n`;
-      }
-      response += `\n**Limitations**:\n`;
-      for (const limitation of rec.limitations) {
-        response += `- ${limitation}\n`;
-      }
-      response += `\n**Examples**: ${rec.examples.join(", ")}\n\n`;
-      response += "---\n\n";
-    }
-
-    // Mode combinations
-    if (combinationRecs.length > 0) {
-      response += "## Recommended Mode Combinations\n\n";
-      for (const combo of combinationRecs) {
-        response += `### ${combo.modes.join(" + ")} (${combo.sequence})\n`;
-        response += `**Rationale**: ${combo.rationale}\n\n`;
-        response += `**Benefits**:\n`;
-        for (const benefit of combo.benefits) {
-          response += `- ${benefit}\n`;
-        }
-        response += `\n**Synergies**:\n`;
-        for (const synergy of combo.synergies) {
-          response += `- ${synergy}\n`;
-        }
-        response += "\n---\n\n";
-      }
-    }
-
-    return {
-      content: [
-        {
-          type: "text" as const,
-          text: response,
-        },
-      ],
-    };
-  }
-
-  // No valid input provided - throw error for consistent error handling
-  throw new Error(
-    "Please provide either problemType or problemCharacteristics for mode recommendations.",
-  );
+  return {
+    content: [
+      {
+        type: "text" as const,
+        text: response,
+      },
+    ],
+  };
 }
 /**
  * Handle delete_session action

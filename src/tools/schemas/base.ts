@@ -68,6 +68,7 @@ export const SessionActionSchema = z.object({
     })
     .optional(),
   includeCombinations: z.boolean().optional(),
+  includeReasoningTypes: z.boolean().optional(),
 });
 
 export type SessionActionInput = z.infer<typeof SessionActionSchema>;

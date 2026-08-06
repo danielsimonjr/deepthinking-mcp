@@ -9,6 +9,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`recommend_mode` now returns advisory reasoning-type advice from the taxonomy.**
+  `src/taxonomy/` — 69 reasoning types across 12 categories, a classifier, a navigator and a
+  suggestion engine — was complete and never invoked: nothing outside the directory imported any of
+  it, while the README and CLAUDE.md advertised "taxonomy-based classification" as a shipped
+  feature. `recommend_mode`, the action a reader would assume used it, called `ModeRecommender`
+  alone. The taxonomy is now wired into the `recommend_mode` response through
+  `src/taxonomy/advisory.ts`. The response gains a `## Reasoning Types (advisory)` section naming
+  the reasoning types the problem implicates, each with its category, difficulty, estimated effort,
+  cognitive load, success probability, rationale and warnings; when the request carries a free-text
+  problem description, the classifier's closest matching type and category are reported alongside.
+- **The mode recommendation is unchanged.** The advice is appended, never substituted. The
+  `ModeRecommender` verdict, its scores, strengths, limitations, examples and mode combinations are
+  byte-for-byte what they were; the new section follows them. `includeReasoningTypes: false`
+  returns the pre-taxonomy response verbatim.
+- **Advisory and non-throwing.** Nothing in the request path reads the advice, and it can never
+  refuse a call. An engine that throws degrades to `{ available: false, reason }`, which is rendered
+  as a one-line note rather than failing the recommendation. Classification is guarded separately
+  from suggestion, so a classifier failure costs only the classification.
+- **Bounded payload, with truncation stated explicitly.** At most 5 reasoning types are returned,
+  each projected down to the fields a client can act on — the raw `ReasoningType` (keywords,
+  aliases, examples, strengths, limitations) and the raw metadata (eight quality metrics plus five
+  further string lists) are not returned. Rationale and warnings are capped at 3 each. A `totals`
+  object reports the full counts and a `truncated` object states which lists were cut. Measured on
+  a representative call: the taxonomy adds **0.21 ms** to the characteristics path (0.050 ms →
+  0.256 ms) and **0.09 ms** to the quick path, growing the response by ~1.2 KB and ~0.4 KB.
+- **`recommend_mode` is now testable.** Its response construction moved from `src/index.ts` to
+  `src/services/RecommendationService.ts`. `src/index.ts` calls `main()` at module scope, so
+  importing it from a test starts an MCP server on stdio — no test could reach the handler, which is
+  how the taxonomy sat unreferenced behind this action. `tests/unit/taxonomy/taxonomy-wiring.test.ts`
+  is a regression guard that fails the moment `recommend_mode` stops consulting the taxonomy.
+- **`TaxonomyClassifier.classifyText()`** classifies free-standing prose. `classifyThought()` has
+  only ever read `thought.content`, so it now delegates to the new method; a problem description
+  supplied to `recommend_mode` is not a thought and never becomes one.
+- Added `includeReasoningTypes` (optional, default true) to the `deepthinking_session` schemas.
 - **Proof-bearing thoughts now return an advisory proof analysis.** `src/proof/` — 13 modules
   (decomposer, gap analyser, assumption tracker, inconsistency detector, circular detector,
   dependency graph, verifier, strategy recommender and more), with 10 test files — was complete and

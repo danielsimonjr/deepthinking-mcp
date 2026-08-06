@@ -131,6 +131,7 @@ export interface RecommendModeInput {
     hasAlternatives: boolean;
   };
   includeCombinations?: boolean;
+  includeReasoningTypes?: boolean;
 }
 
 /**

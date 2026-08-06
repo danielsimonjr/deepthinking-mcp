@@ -1937,6 +1937,11 @@ export const deepthinking_session_schema = {
         type: "boolean",
         description: "Include mode combinations in recommendations",
       },
+      includeReasoningTypes: {
+        type: "boolean",
+        description:
+          "Include advisory reasoning-type advice from the 69-type taxonomy (default true)",
+      },
     },
     required: ["action"],
     additionalProperties: false,

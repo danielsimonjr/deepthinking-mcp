@@ -1425,6 +1425,7 @@ export const ThinkingToolSchema = z.object({
     })
     .optional(),
   includeCombinations: z.boolean().optional(),
+  includeReasoningTypes: z.boolean().optional(),
 });
 
 export type ThinkingToolInput = z.infer<typeof ThinkingToolSchema>;

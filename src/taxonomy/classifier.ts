@@ -78,7 +78,18 @@ export class TaxonomyClassifier {
    * Classify a thought by analyzing its content
    */
   classifyThought(thought: Thought): ThoughtClassification {
-    const content = thought.content.toLowerCase();
+    return this.classifyText(thought.content);
+  }
+
+  /**
+   * Classify free-standing text.
+   *
+   * `classifyThought` has only ever read `thought.content`, so the same
+   * scoring applies to any prose - including a problem description supplied to
+   * `recommend_mode`, which is not a thought and never becomes one.
+   */
+  classifyText(text: string): ThoughtClassification {
+    const content = text.toLowerCase();
     const tokens = this.tokenize(content);
 
     // Find matching reasoning types
