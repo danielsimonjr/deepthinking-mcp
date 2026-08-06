@@ -26,9 +26,9 @@ document does not repeat it.
 | Version | 9.3.3 | package | `package.json` |
 | TypeScript files, whole repo | 437 | repo-wide | repo_map |
 | TypeScript files, `src/` | 221 | src only | repo_map (`file-inventory.json`, area=src) |
-| Lines of code, whole repo | 214,416 | repo-wide | repo_map |
+| Lines of code, whole repo | 214,644 | repo-wide | repo_map |
 | Lines of code, `src/` | 110,537 | src only | repo_map |
-| Total exports, whole repo | 2,195 | repo-wide | repo_map |
+| Total exports, whole repo | 2,196 | repo-wide | repo_map |
 | Total exports, `src/` | 1,276 (571 re-exports) | src only | DEPENDENCY_GRAPH.md |
 | Entry roots | 1 (`src/index.ts`) | src | repo_map |
 | Runtime circular dependencies | 0 | src | repo_map, confirmed by direct edge inspection |
@@ -131,14 +131,14 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | Claim | Value | Source |
 |---|---|---|
 | totalTypeScriptFiles | 437 | dependency-graph.json |
-| totalLinesOfCode | 214416 | dependency-graph.json |
-| totalExports | 2195 | dependency-graph.json |
+| totalLinesOfCode | 214644 | dependency-graph.json |
+| totalExports | 2196 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
-| reachableFiles | 140 | dependency-graph.json |
-| dormantFiles | 81 | dependency-graph.json |
+| reachableFiles | 141 | dependency-graph.json |
+| dormantFiles | 80 | dependency-graph.json |
 | orphanedFiles | 24 | dependency-graph.json |
-| testOnlyFiles | 57 | dependency-graph.json |
+| testOnlyFiles | 56 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
 | typeOnlyCircularDeps | 57 | dependency-graph.json |
 | noImporterFileCount | 21 | unused-analysis.json (summary) |

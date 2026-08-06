@@ -101,18 +101,22 @@ so those 12 guards' public behavior comes from the mode file while the other 20 
 behavior invisibly, and which copy actually wins depends on export order, not on which file a
 reader expects.
 
-**2. `escapeLatex` is duplicated logic**, not a naming collision. Defined independently in
-`src/export/visual/utils/tikz.ts:124` and `src/utils/sanitization.ts:195` — same character set,
-same replacements, different implementation style. Not currently drifted, but a consolidation
-candidate; `sanitization.ts`'s version is the one whose docstring states an injection-prevention
-purpose.
+**2. `escapeLatex` was implemented three times, and two copies were wrong.** *(Fixed.)* The
+copies in `tikz.ts` and `latex.ts` chained `.replace()` calls, so the braces each inserted for
+`	extbackslash{}` were re-escaped by its own later brace passes. Any backslash in a node label,
+edge label, title or metric typeset as `\{}` instead of `\` — Windows paths, LaTeX commands and
+escape sequences were all corrupted, in TikZ output and in every LaTeX export. `sanitization.ts`
+held the correct single-pass implementation. Both export paths now import it.
 
-**3. `ValidationError` means two different things depending on the import.**
-`src/modes/handlers/ModeHandler.ts:31` declares it as a plain data interface
-(`{field, message, code}`). `src/utils/errors.ts:103` declares it as a throwable class
-extending `DeepThinkingError`. TypeScript's type/value namespace split means these do not
-collide at compile time, but `import { ValidationError }` resolves to one or the other
-depending on the source module — a landmine for a future reader.
+The lesson is worth keeping: duplication did not cause this bug, it **hid** it. Three
+implementations, two wrong, and no test comparing their output.
+
+**3. `ValidationError` named two unrelated things.** *(Fixed.)* A plain data interface in
+`ModeHandler.ts` and a throwable class in `utils/errors.ts`. TypeScript's type/value namespace
+split kept them from colliding at compile time, so `import { ValidationError }` silently resolved
+to whichever the source module meant. The interface is now `HandlerValidationError`; the class
+keeps the conventional name. (`ValidationIssue` was not available as a rename target —
+`src/types/session.ts:166` already uses it for a third shape.)
 
 **4. Seven files have no importer anywhere.** The barrels `src/cache/index.ts`,
 `src/export/index.ts`, `src/proof/index.ts` and `src/validation/index.ts`; behind them

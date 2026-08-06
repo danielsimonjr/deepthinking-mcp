@@ -1352,9 +1352,10 @@ export class LatexMermaidIntegrator {
 
 `LaTeXExporter.export()` is the full-document entry point; its private `formatXThought` methods
 switch on mode the same way `ExportService`'s private markdown/HTML formatters do — a duplicated
-shape, not shared code. `LaTeXExporter` has its own private `escapeLatex()`, independent of the
-exported `escapeLatex()` in `src/utils/sanitization.ts` that `ExportService` uses — two different
-implementations of the same escaping logic (see Utils, below). `LatexMermaidIntegrator` converts
+shape, not shared code. `LaTeXExporter` previously carried its own `escapeLatex()`; it now imports
+the canonical one from `src/utils/sanitization.ts`, as `TikZBuilder` and `ExportService` do. The
+private copies were not equivalent — they chained `.replace()` calls and re-escaped their own
+inserted braces, so a literal backslash rendered as `\{}`. `LatexMermaidIntegrator` converts
 Mermaid diagram source to TikZ (`convertMermaidToTikZ`) so a LaTeX document can embed a native
 vector diagram instead of a rasterized Mermaid render.
 
@@ -2240,10 +2241,10 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | Claim | Value | Source |
 |---|---|---|
 | totalTypeScriptFiles | 437 | dependency-graph.json |
-| totalLinesOfCode | 214416 | dependency-graph.json |
-| totalExports | 2195 | dependency-graph.json |
+| totalLinesOfCode | 214644 | dependency-graph.json |
+| totalExports | 2196 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
-| reachableFiles | 140 | dependency-graph.json |
+| reachableFiles | 141 | dependency-graph.json |
 | orphanedFiles | 24 | dependency-graph.json |
 | noImporterFileCount | 21 | dependency-graph.json |
 
