@@ -92,8 +92,12 @@ describe('Session Actions Integration Tests', () => {
       expect(result).toBeDefined();
       expect(typeof result).toBe('string');
       expect(result.length).toBeGreaterThan(0);
-      // Multi-thought sessions currently use text fallback; single-thought uses HTML
-      expect(result).toContain('Session:');
+      // Until v9.4.1 a multi-thought session fell through to a plain-text
+      // `Session: ...` dump, so this asserted the degradation instead of the
+      // format. `html` is the only degrading format the MCP tool API can
+      // request, which made it the client-visible half of that defect.
+      expect(result).toContain('<!DOCTYPE html>');
+      expect(result).toContain('</html>');
     });
 
     it('should export to mermaid format', async () => {

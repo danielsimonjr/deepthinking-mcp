@@ -9,6 +9,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Four live reasoning modes had a validator that was never registered, so clients got a
+  "no validator" notice instead of validation.** `VALIDATOR_REGISTRY`
+  (`src/validation/validators/registry.ts`) omitted `constraint`, `modal`, `recursive` and
+  `stochastic`. All four are `ThinkingMode` members that `ThoughtFactory` builds thoughts for, and
+  each has a ~430-line validator with its own unit tests. Since advisory validation was wired into
+  `SessionManager.addThought()`, a thought in one of those modes carried
+  `"No validator registered for thinking mode: X"` as its advisory output while the real
+  implementation sat unreferenced. The four are now registered, and a `constraint` thought with an
+  empty `constraints` array reports that validator's own warning through the live `addThought()`
+  path. A fifth validator file, `meta.ts`, is deliberately **not** registered: its `getMode()`
+  returns `"meta"`, but no `meta` `ThinkingMode` exists — `metareasoning` is the real mode and was
+  already registered — so nothing could ever produce a thought it would run on.
+  `ThinkingMode.CUSTOM` stays unregistered too, because a user-defined mode has no fixed shape a
+  mode validator could check. `tests/unit/validation/registry-mode-coverage.test.ts` now pins the
+  mapping in both directions, so a new mode added without a validator fails at test time instead of
+  surfacing as an advisory message to a client.
+
+- **8 of 15 export formats silently returned a plain-text dump for any multi-thought session.**
+  `exportSessionWithThoughtDetails()` implemented only `mermaid`, `dot` and `ascii`; `svg`,
+  `graphml`, `tikz`, `modelica`, `html`, `uml`, `visual-json` and `visual-markdown` all fell
+  through to a trailing `` `Session: ...` `` fallback. So a client that asked for `html` received
+  text that was not HTML, and `visual-json` returned text that was not JSON — every consumer that
+  parsed it threw. `html` is the only one of the eight the MCP tool API can request today, which
+  made it the client-visible half of the defect; the rest were reachable for a library caller. All
+  eight are now rendered by a new `src/export/visual/session-graph.ts`, which turns the session
+  into a normalized node/edge graph and renders it with the same builders the single-thought
+  exporters already use, so the output shapes match. The plain-text fallback is gone from both the
+  session-level and generic single-thought paths, and an unsupported format now throws — matching
+  the single-thought exporters, which never degraded. Two tests that pinned the old behaviour
+  (the `KNOWN LIMITATION` case in `tests/unit/services/ExportService.test.ts` and the `html`
+  export case in `tests/integration/tools/session-actions.test.ts`, which asserted the output
+  contained `Session:`) now assert the requested format instead.
+
+- **Removed the unreachable `ExportService.exportToHTML()`.** The visual branch intercepted `html`
+  before it, so the method was dead, carried a `@ts-expect-error` suppression to stay compiled, and
+  produced strictly less than the visual HTML path now does for both single- and multi-thought
+  sessions.
+
 - **`tests/performance/memory.test.ts` T-PRF-011 "consistent memory per session" was flaky by
   construction.** It sampled `heapUsed` around each of ten sessions and required 70% of the signed
   deltas to fall within 5x their MEAN. The band is anchored to a signed mean floored at 1 byte

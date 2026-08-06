@@ -154,25 +154,77 @@ describe('ExportService', () => {
       expect(service.exportSession(session, 'ascii')).toContain('╔');
     });
 
-    it('KNOWN LIMITATION: other visual formats degrade to plain text', async () => {
-      // exportSessionWithThoughtDetails() implements only mermaid, dot and
-      // ascii; every other visual format hits exportGenericThoughtSequence()'s
-      // trailing fallback, which returns a plain-text summary. So a
-      // multi-thought session asked for 'visual-json' gets text that is not
-      // JSON, and asked for 'svg' gets text that is not SVG.
-      //
-      // This test pins the current behaviour so that implementing those
-      // formats is a deliberate, visible change rather than a silent one.
+    // Superseded the "KNOWN LIMITATION: other visual formats degrade to plain
+    // text" pin (v9.4.1). That pin recorded exportSessionWithThoughtDetails()
+    // implementing only mermaid, dot and ascii while the other eight names
+    // fell through to a plain-text `Session: ...` dump — so a client asking a
+    // multi-thought session for 'html' got text that is not HTML, and
+    // 'visual-json' returned text that is not JSON. The single-thought path
+    // renders all eleven and THROWS on anything else; the session-level path
+    // now does the same, so the pin no longer describes the code.
+    //
+    // Each assertion below is a structural marker of the requested format, not
+    // a snapshot: it fails if the output silently becomes some other format.
+    const FORMAT_MARKERS: Array<[ExportFormat, (out: string) => boolean]> = [
+      ['svg', (o) => o.startsWith('<?xml') && o.includes('<svg')],
+      ['graphml', (o) => o.includes('<graphml') && o.includes('<node ')],
+      ['tikz', (o) => o.includes('\\begin{tikzpicture}')],
+      ['modelica', (o) => o.includes('package ') && o.includes('end ')],
+      ['html', (o) => o.includes('<!DOCTYPE html>') && o.includes('</html>')],
+      ['uml', (o) => o.startsWith('@startuml') && o.includes('@enduml')],
+      ['visual-markdown', (o) => o.includes('## Thoughts')],
+    ];
+
+    it.each(FORMAT_MARKERS)(
+      'renders a real %s document from the session-level path',
+      async (format, isWellFormed) => {
+        const session = await buildSession(3);
+
+        const output = service.exportSession(session, format);
+
+        expect(output.startsWith('Session: '), 'degraded to plain text').toBe(
+          false,
+        );
+        expect(isWellFormed(output), `malformed ${format}: ${output.slice(0, 80)}`).toBe(true);
+      },
+    );
+
+    it('returns parseable JSON for visual-json', async () => {
       const session = await buildSession(3);
 
-      for (const format of ['visual-json', 'svg', 'graphml', 'tikz', 'modelica', 'html', 'uml', 'visual-markdown'] as ExportFormat[]) {
-        const output = service.exportSession(session, format);
-        expect(output.startsWith('Session: '), `format ${format}`).toBe(true);
-      }
+      const output = service.exportSession(session, 'visual-json');
 
-      expect(() =>
-        JSON.parse(service.exportSession(session, 'visual-json')),
-      ).toThrow();
+      // The defect that mattered most: a format named `visual-json` returned
+      // a plain-text dump, so every consumer that parsed it threw.
+      const parsed = JSON.parse(output);
+      expect(parsed.type).toBe('deepthinking-visual-graph');
+      expect(Array.isArray(parsed.nodes)).toBe(true);
+      expect(Array.isArray(parsed.edges)).toBe(true);
+    });
+
+    it('represents every thought as a node in the graph formats', async () => {
+      const session = await buildSession(4);
+
+      const parsed = JSON.parse(service.exportSession(session, 'visual-json'));
+      const thoughtNodes = parsed.nodes.filter(
+        (n: { type?: string }) => n.type === 'thought',
+      );
+
+      expect(thoughtNodes).toHaveLength(4);
+    });
+
+    it('leaves no visual format on a plain-text fallback', async () => {
+      // The trailing `return \`Session: ...\`` was what let eight formats go
+      // unnoticed: adding a VisualFormat without session support degraded
+      // silently instead of failing. Asserted over the whole list so a newly
+      // added format is caught here rather than by a client.
+      const session = await buildSession(3);
+
+      for (const format of VISUAL_FORMATS) {
+        const output = service.exportSession(session, format);
+        expect(output.startsWith('Session: '), `format ${format}`).toBe(false);
+        expect(output.length, `format ${format}`).toBeGreaterThan(0);
+      }
     });
 
     it('includes every thought in the session-level ascii rendering', async () => {

@@ -56,7 +56,12 @@ import type { PhysicsThought } from "../types/modes/physics.js";
 import type { MetaReasoningThought } from "../types/modes/metareasoning.js";
 import type { EngineeringThought } from "../types/modes/engineering.js";
 import { VisualExporter, type VisualFormat } from "../export/visual/index.js";
-import { escapeHtml, escapeLatex } from "../utils/sanitization.js";
+import {
+  renderSessionGraph,
+  type SessionGraphNode,
+  type SessionGraphEdge,
+} from "../export/visual/session-graph.js";
+import { escapeLatex } from "../utils/sanitization.js";
 import { ILogger } from "../interfaces/ILogger.js";
 import { createLogger, LogLevel } from "../utils/logger.js";
 
@@ -611,12 +616,15 @@ export class ExportService {
       return ascii;
     }
 
-    // Fallback for other visual formats
-    const thoughtsText = thoughts
-      .map((t, i) => `Thought ${i + 1} (${t.mode}):\n${t.content}\n`)
-      .join("\n");
-
-    return `Session: ${title}\nMode: ${mode}\n\n${thoughtsText}`;
+    // Same treatment as the session-level path: render the graph rather than
+    // returning a plain-text dump under the requested format's name. Reached
+    // for a single-thought session in a mode with no dedicated exporter.
+    return this.renderSessionAsGraph(session, format, {
+      branchCount: 0,
+      revisionCount: 0,
+      revisions: [],
+      dependencies: [],
+    });
   }
 
   /**
@@ -886,8 +894,93 @@ export class ExportService {
       return ascii;
     }
 
-    // Fallback: use generic sequence
-    return this.exportGenericThoughtSequence(session, format);
+    return this.renderSessionAsGraph(session, format, {
+      branchCount: branches.size,
+      revisionCount: revisions.length,
+      revisions,
+      dependencies,
+    });
+  }
+
+  /**
+   * Render the session as a normalized node/edge graph in any visual format
+   * that is not mermaid, dot or ascii.
+   *
+   * Those three are hand-built above; the remaining eight used to fall through
+   * to a plain-text `Session: ...` dump, so `html` returned text that was not
+   * HTML and `visual-json` returned text that was not JSON. Delegating here
+   * gives them the same output shapes the single-thought exporters produce,
+   * and throws on an unknown format instead of degrading silently.
+   */
+  private renderSessionAsGraph(
+    session: ThinkingSession,
+    format: VisualFormat,
+    relations: {
+      branchCount: number;
+      revisionCount: number;
+      revisions: Array<{ from: number; to: number }>;
+      dependencies: Array<{ from: number; to: number }>;
+    },
+  ): string {
+    const thoughts = session.thoughts;
+    const title = session.title || "Thinking Session";
+    const nodeId = (n: number) => `T${n}`;
+
+    const nodes: SessionGraphNode[] = [
+      {
+        id: "SESSION",
+        label: `Session: ${session.mode}`,
+        type: "session",
+        mode: session.mode,
+      },
+      ...thoughts.map((t, i) => ({
+        id: nodeId(i + 1),
+        label: `Thought ${i + 1}`,
+        type: "thought" as const,
+        detail: t.content,
+        mode: t.mode,
+        thoughtNumber: i + 1,
+      })),
+    ];
+
+    const edges: SessionGraphEdge[] = [];
+    if (thoughts.length > 0) {
+      edges.push({ source: "SESSION", target: nodeId(1), type: "sequence" });
+    }
+    for (let i = 1; i < thoughts.length; i++) {
+      edges.push({
+        source: nodeId(i),
+        target: nodeId(i + 1),
+        type: "sequence",
+      });
+    }
+    for (const r of relations.revisions) {
+      edges.push({
+        source: nodeId(r.to),
+        target: nodeId(r.from),
+        type: "revision",
+      });
+    }
+    for (const d of relations.dependencies) {
+      edges.push({
+        source: nodeId(d.from),
+        target: nodeId(d.to),
+        type: "dependency",
+      });
+    }
+
+    return renderSessionGraph(
+      {
+        title,
+        mode: session.mode,
+        thoughtCount: thoughts.length,
+        branchCount: relations.branchCount,
+        revisionCount: relations.revisionCount,
+        nodes,
+        edges,
+      },
+      format,
+    );
   }
 
   /**
@@ -1026,47 +1119,6 @@ export class ExportService {
 
     latex += `\\end{document}\n`;
     return latex;
-  }
-
-  /**
-   * Export session to HTML format
-   *
-   * Generates a standalone HTML page with XSS protection via escaping.
-   * Includes basic styling for readability.
-   *
-   * Note: Currently unused as HTML export is handled by visual exporters.
-   * Kept for potential future use as a session-level HTML export.
-   *
-   * @param session - The session to export
-   * @returns HTML document as string
-   */
-  // @ts-expect-error - Unused method kept for future use
-  private exportToHTML(session: ThinkingSession): string {
-    const status = session.isComplete ? "Complete" : "In Progress";
-    const safeTitle = escapeHtml(session.title);
-    const safeMode = escapeHtml(session.mode);
-    const safeStatus = escapeHtml(status);
-
-    let html = `<!DOCTYPE html>\n<html>\n<head>\n`;
-    html += `  <meta charset="UTF-8">\n`;
-    html += `  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n`;
-    html += `  <title>${safeTitle}</title>\n`;
-    html += `  <style>body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 0 20px; }</style>\n`;
-    html += `</head>\n<body>\n`;
-    html += `  <h1>${safeTitle}</h1>\n`;
-    html += `  <p><strong>Mode:</strong> ${safeMode}</p>\n`;
-    html += `  <p><strong>Status:</strong> ${safeStatus}</p>\n`;
-    html += `  <h2>Thoughts</h2>\n`;
-
-    for (const thought of session.thoughts) {
-      html += `  <div>\n`;
-      html += `    <h3>Thought ${thought.thoughtNumber}/${session.thoughts.length}</h3>\n`;
-      html += `    <p>${escapeHtml(thought.content)}</p>\n`;
-      html += `  </div>\n`;
-    }
-
-    html += `</body>\n</html>\n`;
-    return html;
   }
 
   /**
