@@ -130,6 +130,21 @@ referenced nowhere in `src/`.
 `recommend_mode` uses `ModeRecommender` (`src/index.ts:91`, `:814`), not the taxonomy. The 69
 reasoning types are defined but no production path consumes them.
 
+## Why code went dead here in the first place
+
+`src/index.ts` calls `main()` at module scope, so **importing it starts the stdio server**. No test
+can import it. `tests/integration/index-handlers.test.ts` therefore *re-implements* the handlers it
+means to cover, rather than exercising the real ones.
+
+That is the mechanism behind all three dead subsystems. An untestable entry point means tests
+exercise copies; the real handlers drift unobserved; anything reachable only from them dies quietly
+and the suite stays green throughout. Wiring the subsystems treats the symptom — this is the cause.
+
+The taxonomy wiring took the first step by moving response construction into
+`src/services/RecommendationService.ts`, which a test *can* import. Finishing the job means
+extracting the remaining handlers the same way and guarding `main()` so importing the module does
+not start a server.
+
 ## What the wiring changed
 
 Three subsystems were complete, tested, and unreachable from `src/index.ts`. They are now wired,
