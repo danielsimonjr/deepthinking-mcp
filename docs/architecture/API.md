@@ -1469,11 +1469,10 @@ Every free-text string, array, and record across all 13 tools is bounded. The co
 | `THOUGHT_CONTENT` | 100,000 chars | The `thought` field itself (`ThoughtTextSchema`), and `deepthinking_analyze`'s `thought`. |
 | `DESCRIPTION` | 10,000 chars | Free-text content — descriptions, explanations, justifications, statements (`TextSchema`). |
 | `TITLE` | 500 chars | Names/titles/labels (`NameSchema`). |
-| `STRING_FIELD` | 1,000 chars | Short identifiers/enum-like strings — ids, `from`/`to`, node refs, session IDs passed as request fields (`IdSchema`). |
-| `HYPOTHESIS` | 5,000 chars | Defined in `MAX_LENGTHS` but not referenced anywhere in `src/` (verified by grep) — reserved for future use. |
+| `STRING_FIELD` | 1,000 chars | Short identifiers/enum-like strings — ids, `from`/`to`, node refs (`IdSchema`). Session IDs use the narrower `SESSION_ID` below. |
 | `DOMAIN` | 200 chars | Bounds `SessionManager.createSession()`'s internal `domain` option, not any MCP tool field — no tool's input schema exposes a `domain` argument that reaches it. |
 | `AUTHOR` | 300 chars | Bounds `SessionManager.createSession()`'s internal `author` option, same as `DOMAIN` above — not reachable from any tool input. Author-name fields exposed via tools (e.g. `deepthinking_academic`'s `SourceSchema.authors`) use `IdArraySchema` instead. |
-| `SESSION_ID` | 100 chars | Defined in `MAX_LENGTHS` but not referenced anywhere in `src/` (verified by grep) — the actual `sessionId` field everywhere uses `IdSchema` (1,000 chars), not this constant. |
+| `SESSION_ID` | 100 chars | The `sessionId` request field on every tool — the 13 focused tools (`SessionIdSchema`), `deepthinking_analyze`, and the legacy `deepthinking` tool. A session ID is always a UUID v4 (36 chars); `validateSessionId()` rejects any other shape once the value reaches `SessionManager`. |
 | `ARRAY_ITEMS` | 1,000 items | Default cap for arrays of primitive strings (evidence, tags, dependencies, and similar). |
 | `NESTED_ARRAY_ITEMS` | 500 items | Cap for arrays of structured objects (hypotheses, sources, proof steps, and similar) — heavier per element, so capped lower. |
 

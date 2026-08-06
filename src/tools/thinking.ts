@@ -14,7 +14,7 @@ import { boundedRecord } from "./schemas/shared.js";
  * Zod schema for runtime validation (internal use)
  */
 export const ThinkingToolSchema = z.object({
-  sessionId: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
+  sessionId: z.string().max(MAX_LENGTHS.SESSION_ID).optional(),
   mode: z
     .enum([
       "sequential",

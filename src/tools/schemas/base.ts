@@ -13,6 +13,7 @@ import {
   ExportProfileEnum,
   LevelEnum,
   IdSchema,
+  SessionIdSchema,
   TextSchema,
   ThoughtTextSchema,
   IdArraySchema,
@@ -22,7 +23,7 @@ import {
  * Base schema with properties common to all thought types
  */
 export const BaseThoughtSchema = z.object({
-  sessionId: IdSchema.optional(),
+  sessionId: SessionIdSchema.optional(),
   thought: ThoughtTextSchema.min(1),
   thoughtNumber: PositiveIntSchema,
   totalThoughts: PositiveIntSchema,
@@ -43,7 +44,7 @@ export type BaseThoughtInput = z.infer<typeof BaseThoughtSchema>;
  * Session action schema for non-thought operations
  */
 export const SessionActionSchema = z.object({
-  sessionId: IdSchema.optional(),
+  sessionId: SessionIdSchema.optional(),
   action: SessionActionEnum,
   exportFormat: ExportFormatEnum.optional(),
   exportProfile: ExportProfileEnum.optional(), // Phase 12: Pre-configured export bundles

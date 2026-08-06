@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **One bound for `sessionId` instead of three.** `MAX_LENGTHS.SESSION_ID` (100) was defined and
+  wired to nothing, so the same field was bounded differently depending on which door a caller used:
+  10,000 characters on the legacy `deepthinking` tool, 1,000 on the 13 focused tools, and — once the
+  value reached `SessionManager` — exactly 36, because `validateSessionId()` requires a UUID v4.
+  Every entry point now enforces the 100-character bound via the new `SessionIdSchema`. Real session
+  IDs are 36 characters, so no working call changes; an oversized one is now rejected at the schema
+  boundary with a clear message instead of being echoed back inside a format error.
+- **Removed `MAX_LENGTHS.HYPOTHESIS`.** Unlike `SESSION_ID`, it had no correct call site: every
+  hypothesis-bearing field (`deepthinking_probabilistic`'s `hypotheses[].description`,
+  `deepthinking_scientific`'s `hypothesis`, `deepthinking_causal`'s `hypothesis`, and the legacy
+  tool's equivalents) is already bounded at the 10,000-character free-text tier. Applying a bespoke
+  5,000 limit to one field name would have forked the centralised tier system rather than closing a
+  gap. Every remaining `MAX_LENGTHS` entry is now enforced somewhere.
 - **`ValidationError` no longer names two unrelated things.** `src/modes/handlers/ModeHandler.ts`
   declared a `ValidationError` interface — plain data listed in `ValidationResult.errors`, never
   thrown — while `src/utils/errors.ts` declares a throwable `ValidationError` class, and both were

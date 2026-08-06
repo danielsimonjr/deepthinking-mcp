@@ -45,6 +45,15 @@ export const PositiveIntSchema = z.number().int().min(1);
 /** Short identifier/enum-like string (ids, from/to, node refs, etc.) */
 export const IdSchema = z.string().max(MAX_LENGTHS.STRING_FIELD);
 
+/**
+ * Session identifier. Narrower than IdSchema because a session ID is always a
+ * UUID v4 (36 chars) — `validateSessionId()` in src/utils/sanitization.ts
+ * rejects anything else once the value reaches SessionManager. Before this was
+ * wired, the same field was bounded three different ways: 10,000 chars on the
+ * legacy tool, 1,000 on the focused tools, 36 in the session layer.
+ */
+export const SessionIdSchema = z.string().max(MAX_LENGTHS.SESSION_ID);
+
 /** Name/title/label-like string */
 export const NameSchema = z.string().max(MAX_LENGTHS.TITLE);
 

@@ -11,8 +11,7 @@ export const MAX_LENGTHS = {
   TITLE: 500,
   DOMAIN: 200,
   AUTHOR: 300,
-  SESSION_ID: 100,
-  HYPOTHESIS: 5000,
+  SESSION_ID: 100, // session IDs are UUID v4 (36 chars); see validateSessionId
   DESCRIPTION: 10000,
   STRING_FIELD: 1000,
   // H-2 remediation (2026-08-03 audit): bounds for the mode-schema layer

@@ -424,3 +424,80 @@ describe('array-of-object length bounds (empirical)', () => {
     expect(result.success).toBe(false);
   });
 });
+
+/**
+ * `MAX_LENGTHS.SESSION_ID` was defined but wired to nothing, so the same
+ * `sessionId` field was bounded three different ways depending on which door a
+ * caller used: 10,000 chars on the legacy `deepthinking` tool, 1,000 on the 13
+ * focused tools, and — once it reached `SessionManager` — exactly 36, because
+ * `validateSessionId()` requires a UUID v4. These pin the single bound.
+ */
+describe('sessionId length bound (MAX_LENGTHS.SESSION_ID)', () => {
+  const oversized = 'a'.repeat(MAX_LENGTHS.SESSION_ID + 1);
+  const realistic = '550e8400-e29b-41d4-a716-446655440000';
+
+  const thought = {
+    thought: 'x',
+    thoughtNumber: 1,
+    totalThoughts: 1,
+    nextThoughtNeeded: false,
+  };
+
+  it('rejects an oversized sessionId on a focused thought tool', () => {
+    expect(
+      toolSchemas.deepthinking_core.safeParse({
+        ...thought,
+        mode: 'inductive',
+        sessionId: oversized,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejects an oversized sessionId on the session tool', () => {
+    expect(
+      toolSchemas.deepthinking_session.safeParse({
+        action: 'summarize',
+        sessionId: oversized,
+      }).success,
+    ).toBe(false);
+  });
+
+  it('rejects an oversized sessionId on the analyze tool', () => {
+    const analyze = (sessionId: string) => ({
+      thought: 'x',
+      preset: 'root_cause' as const,
+      sessionId,
+    });
+    // Positive control: the payload is otherwise valid, so a rejection is
+    // attributable to sessionId and nothing else.
+    expect(analyzeInputSchema.safeParse(analyze(realistic)).success).toBe(true);
+    expect(analyzeInputSchema.safeParse(analyze(oversized)).success).toBe(false);
+  });
+
+  it('rejects an oversized sessionId on the legacy tool', () => {
+    const legacy = (sessionId: string) => ({
+      ...thought,
+      action: 'add_thought' as const,
+      mode: 'inductive' as const,
+      sessionId,
+    });
+    expect(ThinkingToolSchema.safeParse(legacy(realistic)).success).toBe(true);
+    expect(ThinkingToolSchema.safeParse(legacy(oversized)).success).toBe(false);
+  });
+
+  it('accepts a real UUID session ID on the focused tools', () => {
+    expect(
+      toolSchemas.deepthinking_core.safeParse({
+        ...thought,
+        mode: 'inductive',
+        sessionId: realistic,
+      }).success,
+    ).toBe(true);
+    expect(
+      toolSchemas.deepthinking_session.safeParse({
+        action: 'summarize',
+        sessionId: realistic,
+      }).success,
+    ).toBe(true);
+  });
+});

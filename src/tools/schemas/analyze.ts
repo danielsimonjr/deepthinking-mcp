@@ -90,7 +90,7 @@ export const analyzeInputSchema = z.object({
   /** Optional session ID for tracking */
   sessionId: z
     .string()
-    .max(MAX_LENGTHS.STRING_FIELD)
+    .max(MAX_LENGTHS.SESSION_ID)
     .optional()
     .describe("Session ID to associate this analysis with an existing session"),
 
