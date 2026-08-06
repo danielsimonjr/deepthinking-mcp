@@ -42,6 +42,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   recency promotion by `get()` and by overwrite, `onEvict`, TTL expiry (cache-wide, per-entry, and
   `cleanExpired()`), hit/miss accounting and every `CacheStats` field, statistics disabled, and the
   two defects above.
+- **Dedicated unit tests for 4 mode validators plus a contract table covering all 35**
+  (`tests/unit/validation/validators/modes/`, 473 tests). Ten of the 35 mode validators had a
+  dedicated test; 25 did not, and the one cross-cutting integration test named as covering them
+  (`tests/integration/validators/mode-validators.test.ts`) in fact exercises only the same 10.
+  `causal`, `evidential`, `bayesian` and `gametheory` are now covered deeply — chosen because they
+  compute rather than check presence (a DFS cycle detector, Dempster-Shafer mass/belief/plausibility
+  arithmetic, four probability paths, and cross-field dimension agreement). The remaining validators
+  are covered by `validator-contract.test.ts`, which DISCOVERS the validator files with
+  `import.meta.glob` rather than listing them, so a newly added validator is covered the moment its
+  file exists. The contract: mode name matches file name, registration in `VALIDATOR_REGISTRY`, no
+  throw on a minimal factory-built thought of its own mode, well-formed issues (valid severity and
+  category, non-empty description and suggestion, correct thought number), purity, determinism, and
+  the shared `validateCommon` checks.
 - **Dedicated unit tests for `ThoughtFactory` and `ExportService`**
   (`tests/unit/services/`, 39 tests). Both were exercised only incidentally by 63 other test files.
   Covers mode resolution and registry delegation for the factory, and for the export service: all
