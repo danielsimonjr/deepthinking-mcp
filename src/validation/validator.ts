@@ -10,7 +10,7 @@ import { Thought } from "../types/core.js";
 import { ValidationResult, ValidationIssue } from "../types/session.js";
 import { validationCache } from "./cache.js";
 import { getConfig } from "../config/index.js";
-import { getValidatorForMode } from "./validators/index.js";
+import { getSupportedModes, getValidatorForMode } from "./validators/index.js";
 import type { ValidationContext } from "./constants.js";
 
 /**
@@ -31,6 +31,17 @@ const STRENGTH_PENALTY = {
 } as const;
 
 /**
+ * Thought fields that differ on every request but change no validator output.
+ * Hashing them made a cross-request cache hit impossible.
+ */
+const VOLATILE_THOUGHT_FIELDS: readonly string[] = [
+  "id",
+  "sessionId",
+  "timestamp",
+  "validation",
+];
+
+/**
  * Main validator class
  */
 export class ThoughtValidator {
@@ -42,10 +53,12 @@ export class ThoughtValidator {
     context: ValidationContext = {},
   ): Promise<ValidationResult> {
     const config = getConfig();
+    const cacheable =
+      config.enableValidationCache && context.existingThoughts === undefined;
+    const cacheKey = cacheable ? this.cacheKeySource(thought, context) : null;
 
-    // Check cache if enabled
-    if (config.enableValidationCache) {
-      const cached = validationCache.get(thought);
+    if (cacheKey !== null) {
+      const cached = validationCache.get(cacheKey);
       if (cached) {
         // Cache hit - return cached result
         return cached.result;
@@ -55,12 +68,40 @@ export class ThoughtValidator {
     // Cache miss or caching disabled - perform validation
     const result = await this.performValidation(thought, context);
 
-    // Cache result if enabled
-    if (config.enableValidationCache) {
-      validationCache.set(thought, result);
+    if (cacheKey !== null) {
+      validationCache.set(cacheKey, result);
     }
 
     return result;
+  }
+
+  /**
+   * Build the value the cache hashes.
+   *
+   * Two requests carrying the same reasoning content must produce the same
+   * key, so per-request identity fields are dropped and the remaining
+   * top-level fields are ordered. `strictMode` changes what validators emit,
+   * so it is part of the key; a context carrying `existingThoughts` is not
+   * cached at all (the caller bypasses caching before reaching this method),
+   * because the result then depends on thoughts outside this key.
+   *
+   * @param thought - The thought being validated
+   * @param context - Validation context
+   * @returns A stable value to hash
+   */
+  private cacheKeySource(
+    thought: Thought,
+    context: ValidationContext,
+  ): unknown {
+    const record = thought as unknown as Record<string, unknown>;
+    const stable: Record<string, unknown> = {};
+
+    for (const key of Object.keys(record).sort()) {
+      if (VOLATILE_THOUGHT_FIELDS.includes(key)) continue;
+      stable[key] = record[key];
+    }
+
+    return { thought: stable, strictMode: context.strictMode ?? false };
   }
 
   /**
@@ -79,13 +120,17 @@ export class ThoughtValidator {
       // Use mode-specific validator
       issues.push(...validator.validate(thought, context));
     } else {
-      // Unknown mode - add warning
+      // No validator registered for this mode. Unreachable through the MCP
+      // tools - every mode in the focused tools' schemas and in the legacy
+      // tool has a validator - but reachable for a library caller and for the
+      // ThinkingMode members with no registry entry (recursive, modal,
+      // stochastic, constraint, custom). Warning severity on purpose: an
+      // unvalidated mode is not an invalid thought.
       issues.push({
         severity: "warning",
         thoughtNumber: thought.thoughtNumber,
-        description: `Unknown thinking mode: ${thought.mode}`,
-        suggestion:
-          "Use a supported mode (sequential, shannon, mathematics, physics, hybrid, abductive, causal, bayesian, counterfactual, analogical, temporal, gametheory, evidential, firstprinciple, meta, modal, constraint, optimization, stochastic, recursive)",
+        description: `No validator registered for thinking mode: ${thought.mode}`,
+        suggestion: `Use a mode with a validator (${getSupportedModes().sort().join(", ")})`,
         category: "structural",
       });
     }
