@@ -202,8 +202,11 @@ multiple concurrent sessions. `error-handling.test.ts` and `index-handlers.test.
 `modes/causal-graph.test.ts` covers causal graph construction through the tool layer.
 `proof/decomposition.test.ts` is the only test that reaches `assumption-tracker.ts`,
 `decomposer.ts`, and `gap-analyzer.ts` — none of which has a dedicated unit test.
-`validators/mode-validators.test.ts` is the one cross-cutting test that touches all 35 mode
-validators together, partially offsetting the 25 without a dedicated unit test.
+`validators/mode-validators.test.ts` imports **the same 10 validators that already have dedicated
+unit tests** — it does not offset the others, contrary to what this document previously claimed.
+The real cross-cutting coverage is `tests/unit/validation/validator-contract.test.ts`, which
+discovers validator files via `import.meta.glob` and asserts the shared contract across all 35, so
+a new validator is covered the moment its file exists.
 
 ## 5. Edge cases and performance
 
