@@ -17,6 +17,7 @@ import type {
   FirstPrinciplesThought,
 } from "../../../types/index.js";
 import { VisualExporter } from "../visual-exporter.js";
+import { escapeLatex } from "../../../utils/sanitization.js";
 
 /**
  * LaTeX export options
@@ -1384,11 +1385,10 @@ ${content}
   private escapeLatex(text: string): string {
     if (!text) return "";
 
-    return text
-      .replace(/\\/g, "\\textbackslash{}")
-      .replace(/[&%$#_{}]/g, "\\$&")
-      .replace(/~/g, "\\textasciitilde{}")
-      .replace(/\^/g, "\\textasciicircum{}");
+    // Delegates to the canonical single-pass escaper. The former local
+    // chained-replace version re-escaped the braces it had just inserted for
+    // \textbackslash{}, so a literal backslash typeset as \{}.
+    return escapeLatex(text);
   }
 
   /**

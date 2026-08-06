@@ -55,7 +55,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   backslash in any node label, edge label, title or metric typeset as `\{}` instead of `\`. Windows
   paths, LaTeX commands and escape sequences in a diagram label were all affected. TikZ now uses the
   single-pass implementation in `src/utils/sanitization.ts`, which is also what the LaTeX exporter
-  uses, so both export paths escape identically.
+  uses, so both export paths escape identically. `LaTeXExporter` held a third private copy with the
+  same defect, affecting every `latex` export of a title or thought containing a backslash; it now
+  delegates to the same function.
 - **Schema contract: the advertised JSON Schema and the enforcing Zod schema now agree.** Every
   tool description returned by `tools/list` was diverging from the validation that actually runs,
   and every divergence failed silently. Client-visible effects, per tool:

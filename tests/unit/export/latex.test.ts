@@ -580,5 +580,19 @@ describe('LaTeX Export', () => {
       expect(latex).toContain('\\{');
       expect(latex).toContain('\\}');
     });
+
+    // LaTeXExporter carried a third private copy of escapeLatex with the same
+    // chained-replace defect as the TikZ one: the braces it inserted for
+    // \textbackslash{} were re-escaped by its own later brace pass, so a
+    // backslash typeset as \{} instead of \.
+    it('emits an intact \\textbackslash{} for a literal backslash', () => {
+      const session = createTestSession();
+      session.title = 'C:\\path';
+
+      const latex = exporter.export(session);
+
+      expect(latex).toContain('C:\\textbackslash{}path');
+      expect(latex).not.toContain('\\textbackslash\\{\\}');
+    });
   });
 });
