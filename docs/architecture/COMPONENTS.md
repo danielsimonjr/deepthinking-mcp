@@ -654,15 +654,18 @@ constants (`constants.ts`), 35 per-mode validator classes under `validators/mode
 schema files (`schemas.ts`, `schema-utils.ts`) plus a top-level barrel (`index.ts`) that nothing in
 `src/` imports.
 
-> ### This engine is built but not wired
+> ### This engine runs advisorily on every thought
 >
-> Nothing outside `src/validation/` imports `validator.ts`, and `src/index.ts` never calls
-> `ThoughtValidator`, `ModeHandlerRegistry.validate()`, or `ThoughtFactory.validate()`. **The only
-> validation that runs on a live request is the Zod schema check at the tool boundary**
-> (`src/tools/schemas/`). Everything documented in this section — the two loading paths, the 35
-> per-mode validators, the cache, the scoring — is complete, tested, and currently unreachable in
-> production. Read it as designed-but-unwired infrastructure, not as the request path. The request
-> path is in [`DATA_FLOW.md`](DATA_FLOW.md).
+> `SessionManager.addThought()` calls `validateAdvisory()` (`src/validation/advisory.ts`) after
+> sanitising a thought, and attaches the result to `Thought.validation` and to the tool response.
+> **It is feedback only** — `isValid === false` never rejects a thought, and a validator that
+> throws degrades to `{available: false, reason}` without failing the request. Issues are capped
+> at 20 (ordered errors → warnings → info) with `totalIssues` and `issuesTruncated` alongside;
+> suggestions are deduplicated and capped at 10. Gated per session by
+> `SessionConfig.enableValidation`. Cost is 0.035–0.085 ms per call.
+>
+> Zod still validates at the tool boundary; that is the layer that can reject. This engine grades
+> what Zod accepted.
 
 ### ThoughtValidator (`src/validation/validator.ts`)
 
@@ -2240,13 +2243,13 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 437 | dependency-graph.json |
-| totalLinesOfCode | 214644 | dependency-graph.json |
-| totalExports | 2196 | dependency-graph.json |
+| totalTypeScriptFiles | 449 | dependency-graph.json |
+| totalLinesOfCode | 217238 | dependency-graph.json |
+| totalExports | 2238 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
-| reachableFiles | 141 | dependency-graph.json |
-| orphanedFiles | 24 | dependency-graph.json |
-| noImporterFileCount | 21 | dependency-graph.json |
+| reachableFiles | 185 | dependency-graph.json |
+| orphanedFiles | 23 | dependency-graph.json |
+| noImporterFileCount | 20 | dependency-graph.json |
 
 Class counts, handler counts and validator counts in this document are verified directly
 against `src/` by listing and reading the files named at each claim. They are not graph metrics,

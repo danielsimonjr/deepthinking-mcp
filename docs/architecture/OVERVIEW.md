@@ -24,19 +24,19 @@ document does not repeat it.
 | Metric | Value | Scope | Source |
 |---|---|---|---|
 | Version | 9.3.3 | package | `package.json` |
-| TypeScript files, whole repo | 437 | repo-wide | repo_map |
-| TypeScript files, `src/` | 221 | src only | repo_map (`file-inventory.json`, area=src) |
-| Lines of code, whole repo | 214,644 | repo-wide | repo_map |
-| Lines of code, `src/` | 110,537 | src only | repo_map |
-| Total exports, whole repo | 2,196 | repo-wide | repo_map |
+| TypeScript files, whole repo | 449 | repo-wide | repo_map |
+| TypeScript files, `src/` | 225 | src only | repo_map (`file-inventory.json`, area=src) |
+| Lines of code, whole repo | 217,238 | repo-wide | repo_map |
+| Lines of code, `src/` | 111,644 | src only | repo_map |
+| Total exports, whole repo | 2,238 | repo-wide | repo_map |
 | Total exports, `src/` | 1,276 (571 re-exports) | src only | DEPENDENCY_GRAPH.md |
 | Entry roots | 1 (`src/index.ts`) | src | repo_map |
 | Runtime circular dependencies | 0 | src | repo_map, confirmed by direct edge inspection |
-| Type-only circular dependencies | 57 | src | repo_map |
+| Type-only circular dependencies | 59 | src | repo_map |
 | Files with no static importer | 24 (17 loaded dynamically or by design, 7 unused) | src | repo_map, hand-verified — see below |
 | Duplicate symbol names | 63 (32 drift-risk, 29 benign, 2 real duplicates) | src | repo_map, hand-verified — see below |
 | Reasoning modes | 34 (30 with dedicated thought types, 4 advanced-runtime) | src | `src/types/core.ts` `ThinkingMode` enum |
-| Reasoning types defined | 69 | src | `src/taxonomy/reasoning-types.ts` (unwired — see Unused code) |
+| Reasoning types defined | 69 | src | `src/taxonomy/reasoning-types.ts` (surfaced by `recommend_mode`) |
 | MCP tools | 13 | src | `src/index.ts` tool registrations, live-checked below |
 | Specialized mode handlers | 37 | src | `src/modes/handlers/` |
 | Mode validators | 35 | src | `src/validation/validators/modes/` |
@@ -51,7 +51,7 @@ also export symbols.
 
 ```
 deepthinking-mcp/
-├── src/                # 221 files, 110,537 LOC — the package
+├── src/                # 225 files, 111,644 LOC — the package
 │   ├── index.ts        # entry point, all 13 tool handlers
 │   ├── types/           # ThinkingMode enum, Thought union, per-mode types
 │   ├── modes/            # mode handlers, registry, combinations, stochastic
@@ -60,7 +60,7 @@ deepthinking-mcp/
 │   ├── validation/       # Zod schemas + per-mode validators
 │   ├── export/           # document + visual exporters
 │   ├── proof/             # proof decomposition engine
-│   ├── taxonomy/         # reasoning-type definitions (not wired to production)
+│   ├── taxonomy/         # reasoning-type definitions, surfaced by recommend_mode
 │   ├── cache/             # LRU/LFU/FIFO strategies
 │   ├── config/            # environment-variable configuration
 │   ├── interfaces/       # DI interfaces
@@ -130,19 +130,19 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 437 | dependency-graph.json |
-| totalLinesOfCode | 214644 | dependency-graph.json |
-| totalExports | 2196 | dependency-graph.json |
+| totalTypeScriptFiles | 449 | dependency-graph.json |
+| totalLinesOfCode | 217238 | dependency-graph.json |
+| totalExports | 2238 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
-| reachableFiles | 141 | dependency-graph.json |
-| dormantFiles | 80 | dependency-graph.json |
-| orphanedFiles | 24 | dependency-graph.json |
-| testOnlyFiles | 56 | dependency-graph.json |
+| reachableFiles | 185 | dependency-graph.json |
+| dormantFiles | 40 | dependency-graph.json |
+| orphanedFiles | 23 | dependency-graph.json |
+| testOnlyFiles | 17 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
-| typeOnlyCircularDeps | 57 | dependency-graph.json |
-| noImporterFileCount | 21 | unused-analysis.json (summary) |
-| unusedExportsCount | 195 | dependency-graph.json |
+| typeOnlyCircularDeps | 59 | dependency-graph.json |
+| noImporterFileCount | 20 | unused-analysis.json (summary) |
+| unusedExportsCount | 201 | dependency-graph.json |
 
 Note on `totalModules`: repo_map counts 5 top-level project areas (`docs`, `config`, `src`,
 `tools`, `tests`), not `src/` subdirectories. DEPENDENCY_GRAPH.md's "14 modules" counts `src/`

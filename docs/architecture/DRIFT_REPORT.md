@@ -100,7 +100,9 @@ source for all of them.
 > kept as the record of what was wrong and why, because the fix is only legible against it. A
 > contract test (`tests/unit/tools/schemas/schema-contract.test.ts`) now enforces advertised-vs-
 > enforced parity across all 13 tools on four axes, so this class cannot recur silently. The
-> export-format and unwired-subsystem findings further down remain open.
+> export-format finding further down remains open. The three unwired subsystems (validation, proof,
+> taxonomy) were wired in 7471e79 / de63c8b / 7aa41f7 — see each section for what is now live and
+> what deliberately is not.
 
 Writing `API.md` required reading every tool's advertised JSON Schema against the Zod schema that
 actually enforces it. The two disagree in ways a client cannot detect. Each is verified against
@@ -124,9 +126,33 @@ tool schema implies.
 **Dead constants.** `MAX_LENGTHS.HYPOTHESIS` and `MAX_LENGTHS.SESSION_ID` are defined and
 referenced nowhere in `src/`.
 
-**Taxonomy is unwired.** Nothing outside `src/taxonomy/` imports any of its five files.
+**Taxonomy was unwired.** *(Fixed — `recommend_mode` now returns reasoning-type advice.)* Nothing outside `src/taxonomy/` imported any of its five files.
 `recommend_mode` uses `ModeRecommender` (`src/index.ts:91`, `:814`), not the taxonomy. The 69
 reasoning types are defined but no production path consumes them.
+
+## What the wiring changed
+
+Three subsystems were complete, tested, and unreachable from `src/index.ts`. They are now wired,
+all advisory — none of them can reject a request:
+
+| Subsystem | Wiring | Live surface |
+|---|---|---|
+| `validation/` | `SessionManager.addThought()` → `validateAdvisory()` | Every thought carries `validation`: confidence, strength metrics, capped issues, suggestions. 0.035–0.085 ms. |
+| `proof/` | `addThought()`, gated on **proof content** not mode | Proof-bearing thoughts carry `proofAnalysis`: decomposition, gaps, circularity, consistency. 1.85 ms typical, 13.59 ms at the 200-step cap. **5 of 13 modules** — the other 8 need a session-level home, not a per-thought hook. |
+| `taxonomy/` | `recommend_mode` via `RecommendationService` | Reasoning-type advice alongside the existing `ModeRecommender` output, which is unchanged. |
+
+The reachability shift is the measure of it:
+
+| | before | after |
+|---|---|---|
+| reachableFiles | 140 | **185** |
+| testOnlyFiles | 57 | **17** |
+| dormantFiles | 81 | **40** |
+
+Forty files that only the test suite could reach are now reachable from the entry point.
+
+Each wiring carries a regression test asserting a live call produces its result — the guard against
+this becoming dead code a second time, which is how it got here.
 
 ## Analysis limitations
 

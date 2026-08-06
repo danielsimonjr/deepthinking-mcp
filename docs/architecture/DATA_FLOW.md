@@ -238,7 +238,7 @@ derived from calling `validate()`.
 names and exports, like the server's validation layer. It is fully implemented and fully tested.
 Tracing every import of `ThoughtValidator` and of `src/validation/index.ts` across `src/` finds
 none outside `src/validation/` itself — `src/index.ts` never imports anything from
-`src/validation/`. This subsystem is not wired into the live request path at all.
+`src/validation/`. This subsystem now runs advisorily on every stored thought — see the advisory-validation step in the thought-creation flow.
 
 Within that unreachable subsystem, mode resolution itself has two paths, worth documenting
 because they resolve differently:
@@ -809,11 +809,11 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 437 | dependency-graph.json |
+| totalTypeScriptFiles | 449 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
-| reachableFiles | 141 | dependency-graph.json |
+| reachableFiles | 185 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
-| typeOnlyCircularDeps | 57 | dependency-graph.json |
+| typeOnlyCircularDeps | 59 | dependency-graph.json |
 
 Every flow above was traced by reading the cited source. Tool names, action names, the
 mode-to-tool mapping, and which function calls which are confirmed by direct grep, with the file
