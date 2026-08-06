@@ -841,6 +841,17 @@ describe('TikZBuilder', () => {
       expect(escapeLatex('item #1')).toContain('\\#');
       expect(escapeLatex('under_score')).toContain('\\_');
     });
+
+    it('should emit an intact \\textbackslash{} for a literal backslash', () => {
+      // A chained-replace implementation re-escapes the braces it just
+      // inserted, producing \textbackslash\{\} - which typesets as "\{}".
+      expect(escapeLatex('C:\\path')).toBe('C:\\textbackslash{}path');
+    });
+
+    it('should escape braces without corrupting an escaped backslash', () => {
+      expect(escapeLatex('{a}')).toBe('\\{a\\}');
+      expect(escapeLatex('\\{')).toBe('\\textbackslash{}\\{');
+    });
   });
 
   describe('chaining', () => {

@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **TikZ export no longer mangles a literal backslash.** `escapeLatex` existed twice — once in
+  `src/export/visual/utils/tikz.ts` and once in `src/utils/sanitization.ts` — and the two were not
+  equivalent, despite escaping the same character set. The TikZ copy chained `.replace()` calls, so
+  the braces it inserted for `\textbackslash{}` were re-escaped by its own later brace passes and a
+  backslash in any node label, edge label, title or metric typeset as `\{}` instead of `\`. Windows
+  paths, LaTeX commands and escape sequences in a diagram label were all affected. TikZ now uses the
+  single-pass implementation in `src/utils/sanitization.ts`, which is also what the LaTeX exporter
+  uses, so both export paths escape identically.
 - **Schema contract: the advertised JSON Schema and the enforcing Zod schema now agree.** Every
   tool description returned by `tools/list` was diverging from the validation that actually runs,
   and every divergence failed silently. Client-visible effects, per tool:

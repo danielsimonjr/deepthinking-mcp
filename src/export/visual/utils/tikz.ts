@@ -10,6 +10,8 @@
  * - Books and theses
  */
 
+import { escapeLatex } from "../../../utils/sanitization.js";
+
 export interface TikZNode {
   id: string;
   label: string;
@@ -119,21 +121,15 @@ export function getTikZColor(
 }
 
 /**
- * Escape special LaTeX characters
+ * Escape special LaTeX characters.
+ *
+ * Re-exported from the canonical implementation in `src/utils/sanitization.ts`
+ * so TikZ output and the LaTeX exporter escape identically. The former local
+ * copy chained `.replace()` calls, so the braces it inserted for
+ * `\textbackslash{}` were re-escaped by the later brace passes and a literal
+ * backslash typeset as `\{}`.
  */
-export function escapeLatex(str: string): string {
-  return str
-    .replace(/\\/g, "\\textbackslash{}")
-    .replace(/%/g, "\\%")
-    .replace(/\$/g, "\\$")
-    .replace(/&/g, "\\&")
-    .replace(/#/g, "\\#")
-    .replace(/_/g, "\\_")
-    .replace(/{/g, "\\{")
-    .replace(/}/g, "\\}")
-    .replace(/\^/g, "\\textasciicircum{}")
-    .replace(/~/g, "\\textasciitilde{}");
-}
+export { escapeLatex };
 
 /**
  * Generate TikZ document header with required packages
