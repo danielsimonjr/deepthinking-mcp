@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`switch_mode` now rejects an unknown mode instead of silently storing it.** The
+  `deepthinking_session` tool accepts `newMode` as a free string and `src/index.ts` cast it straight
+  to `ThinkingMode`, so `switch_mode` with a typo — or any value that is not a real mode — succeeded,
+  wrote the bogus value onto the session, and left every later thought, summary and export
+  attributed to a mode that does not exist. `SessionManager.switchMode()` now throws the
+  already-defined-but-never-thrown `InvalidModeError`, naming the offending value and carrying the
+  list of valid modes, and the session is left untouched. Every real mode still switches as before.
 - **Export profiles now describe what a client actually receives.** The `deepthinking_session`
   description advertised format lists that no profile contained — "archive: all formats" (it is
   json+markdown+latex+jupyter), "presentation: Mermaid+HTML+ASCII" and "documentation:

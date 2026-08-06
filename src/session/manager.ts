@@ -23,7 +23,11 @@ import {
   QualityMetrics,
   SessionContext,
 } from "../types/modes/metareasoning.js";
-import { SessionNotFoundError, ResourceLimitError } from "../utils/errors.js";
+import {
+  InvalidModeError,
+  ResourceLimitError,
+  SessionNotFoundError,
+} from "../utils/errors.js";
 import {
   sanitizeString,
   sanitizeThoughtContent,
@@ -505,7 +509,11 @@ export class SessionManager {
    * @param newMode - New thinking mode to switch to
    * @param reason - Optional reason for the mode switch
    * @returns Promise resolving to the updated session
-   * @throws Error if session is not found
+   * @throws SessionNotFoundError if the session is not found
+   * @throws InvalidModeError if newMode is not a known thinking mode. The
+   * parameter is typed, but `deepthinking_session`'s `newMode` field is a
+   * caller-supplied string that index.ts casts, so the check has to run at
+   * runtime or an unknown mode is stored and used for every later thought.
    *
    * @example
    * ```typescript
@@ -523,6 +531,15 @@ export class SessionManager {
   ): Promise<ThinkingSession> {
     // Validate session ID
     validateSessionId(sessionId);
+
+    const validModes = Object.values(ThinkingMode) as string[];
+    if (!validModes.includes(newMode)) {
+      this.logger.error("Invalid thinking mode", undefined, {
+        sessionId,
+        newMode,
+      });
+      throw new InvalidModeError(newMode, validModes);
+    }
 
     const session = this.getLiveSession(sessionId);
     if (!session) {

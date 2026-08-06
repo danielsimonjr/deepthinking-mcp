@@ -11,7 +11,7 @@ import { ThoughtFactory } from '../../src/services/ThoughtFactory.js';
 import { ThinkingMode } from '../../src/types/core.js';
 import type { ThinkingToolInput } from '../../src/tools/thinking.js';
 import { getConfig, updateConfig, resetConfig } from '../../src/config/index.js';
-import { ResourceLimitError } from '../../src/utils/errors.js';
+import { InvalidModeError, ResourceLimitError } from '../../src/utils/errors.js';
 
 function createValidInput(
   overrides: Partial<ThinkingToolInput> = {},
@@ -304,5 +304,58 @@ describe('session expiry: storage-reload path (regression)', () => {
 
     const got = await manager.getSession(session.id);
     expect(got).toBeNull();
+  });
+});
+
+/**
+ * switchMode() took a ThinkingMode-typed argument but ran no runtime check,
+ * and the deepthinking_session tool reaches it by casting the caller's free
+ * `newMode` string straight through (`newMode as ThinkingMode` in index.ts;
+ * the field is a bounded string, not a mode enum). An unrecognised mode was
+ * therefore stored on the session and used for every later thought and export.
+ */
+describe('switchMode rejects an unrecognised mode', () => {
+  it('throws InvalidModeError instead of storing the value', async () => {
+    const manager = new SessionManager();
+    const session = await manager.createSession({ mode: ThinkingMode.SEQUENTIAL });
+    const modeBefore = session.mode;
+    const configuredModeBefore = session.config.modeConfig.mode;
+
+    await expect(
+      manager.switchMode(session.id, 'banana' as ThinkingMode),
+    ).rejects.toBeInstanceOf(InvalidModeError);
+
+    const after = await manager.getSession(session.id);
+    expect(after?.mode).toBe(modeBefore);
+    expect(after?.config.modeConfig.mode).toBe(configuredModeBefore);
+  });
+
+  it('names the offending mode and lists the valid ones', async () => {
+    const manager = new SessionManager();
+    const session = await manager.createSession();
+
+    await expect(
+      manager.switchMode(session.id, 'banana' as ThinkingMode),
+    ).rejects.toThrow(/banana/);
+
+    try {
+      await manager.switchMode(session.id, 'banana' as ThinkingMode);
+      expect.unreachable('switchMode should have thrown');
+    } catch (error) {
+      const context = (error as InvalidModeError).context as {
+        validModes: string[];
+      };
+      expect(context.validModes).toContain(ThinkingMode.SEQUENTIAL);
+    }
+  });
+
+  it('still accepts every real mode', async () => {
+    const manager = new SessionManager();
+    const session = await manager.createSession();
+
+    for (const mode of Object.values(ThinkingMode)) {
+      const updated = await manager.switchMode(session.id, mode);
+      expect(updated.mode).toBe(mode);
+    }
   });
 });
