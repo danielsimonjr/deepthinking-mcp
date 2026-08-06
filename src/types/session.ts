@@ -3,6 +3,13 @@
  */
 
 import { Thought, ThinkingMode } from "./core.js";
+import type {
+  AtomicStatement,
+  CircularPath,
+  ImplicitAssumption,
+  Inconsistency,
+  ProofGap,
+} from "./modes/mathematics.js";
 
 /**
  * Thinking session
@@ -49,6 +56,15 @@ export interface SessionConfig {
   enableAutoSave: boolean;
   enableValidation: boolean;
   enableVisualization: boolean;
+
+  /**
+   * Run advisory proof analysis on thoughts that carry proof content.
+   *
+   * Defaults to `true`. It costs nothing for the 32 modes that cannot carry a
+   * proof, and only a proof-bearing mathematics or formal-logic thought pays
+   * for it. Set `false` to opt out entirely — see `src/proof/advisory.ts`.
+   */
+  enableProofAnalysis?: boolean;
 
   // Integration settings
   integrations: {
@@ -192,6 +208,114 @@ export interface AdvisoryValidationUnavailable {
 
 export type AdvisoryValidation =
   AdvisoryValidationResult | AdvisoryValidationUnavailable;
+
+/**
+ * Where the analysed proof content was found on the thought.
+ */
+export type ProofAnalysisSource =
+  | "formallogic.proof.steps"
+  | "theorem.proof"
+  | "proofStrategy.steps"
+  | "thought.content"
+  | "caller.decomposition";
+
+/** Per-list truncation flags for one proof analysis. */
+export interface ProofAnalysisTruncation {
+  /** Proof steps beyond the analysis budget were never fed to the decomposer. */
+  input: boolean;
+  atoms: boolean;
+  gaps: boolean;
+  implicitAssumptions: boolean;
+  inconsistencies: boolean;
+  cycles: boolean;
+  suggestions: boolean;
+  unjustifiedSteps: boolean;
+
+  /** True when any other flag in this object is true. */
+  any: boolean;
+}
+
+/** Pre-truncation counts, so a bounded list is never mistaken for a total. */
+export interface ProofAnalysisTotals {
+  steps: number;
+  atoms: number;
+  gaps: number;
+  implicitAssumptions: number;
+  inconsistencies: number;
+  cycles: number;
+  suggestions: number;
+  unjustifiedSteps: number;
+}
+
+/**
+ * Advisory proof analysis attached to a stored thought and returned to the
+ * client.
+ *
+ * Advisory means exactly that: a gap, a circular chain, or an inconsistency is
+ * feedback. Nothing in the request path gates on it, and a thought whose proof
+ * is full of holes is still created, stored and returned.
+ *
+ * Every list is bounded (see `src/proof/advisory.ts`). `totals` carries the
+ * pre-truncation counts and `truncated` says which lists were capped, so a
+ * truncated result can never be read as a complete one.
+ */
+export interface ProofAnalysisResult {
+  available: true;
+
+  /** Where the proof content came from. */
+  source: ProofAnalysisSource;
+
+  /**
+   * `caller-supplied` when the thought already carried a `decomposition`. That
+   * decomposition is reused as-is and never overwritten; only the downstream
+   * gap, circularity, and consistency analyses are added.
+   */
+  decompositionSource: "caller-supplied" | "derived";
+
+  theorem?: string;
+
+  /** Decomposition completeness, 0-1. */
+  completeness: number;
+
+  rigorLevel: "informal" | "textbook" | "rigorous" | "formal";
+
+  maxDependencyDepth: number;
+
+  /** Gap-analysis completeness, 0-1. Distinct from `completeness`. */
+  gapCompleteness: number;
+
+  /** Proof steps actually fed to the decomposer. */
+  stepsAnalyzed: number;
+
+  atoms: AtomicStatement[];
+  gaps: ProofGap[];
+  implicitAssumptions: ImplicitAssumption[];
+  suggestions: string[];
+  unjustifiedSteps: string[];
+
+  hasCircularReasoning: boolean;
+  circularSummary: string;
+  cycles: CircularPath[];
+
+  inconsistencies: Inconsistency[];
+
+  totals: ProofAnalysisTotals;
+  truncated: ProofAnalysisTruncation;
+}
+
+/**
+ * Returned when a proof analyser itself failed. The request still succeeded —
+ * a broken analyser must never take down thought creation.
+ */
+export interface ProofAnalysisUnavailable {
+  available: false;
+
+  /** Why the proof analysis could not be produced. */
+  reason: string;
+}
+
+export type AdvisoryProofAnalysis =
+  ProofAnalysisResult | ProofAnalysisUnavailable;
 
 /**
  * Validation issue

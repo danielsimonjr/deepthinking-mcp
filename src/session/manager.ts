@@ -37,6 +37,7 @@ import {
 import { createLogger, LogLevel } from "../utils/logger.js";
 import { ILogger } from "../interfaces/ILogger.js";
 import { validateAdvisory } from "../validation/advisory.js";
+import { analyzeProofAdvisory } from "../proof/advisory.js";
 import { SessionStorage } from "./storage/interface.js";
 import { LRUCache } from "../cache/lru.js";
 import type { CacheStats } from "../cache/types.js";
@@ -94,6 +95,7 @@ const DEFAULT_CONFIG: SessionConfig = {
   enableAutoSave: true,
   enableValidation: true,
   enableVisualization: true,
+  enableProofAnalysis: true,
   integrations: {},
   exportFormats: ["markdown", "latex", "json"],
   autoExportOnComplete: false,
@@ -461,6 +463,17 @@ export class SessionManager {
     // thought, and a validator that throws degrades to `available: false`.
     if (session.config.enableValidation) {
       thought.validation = await validateAdvisory(thought);
+    }
+
+    // Advisory proof analysis (v9.4.0). Selective on purpose: it costs 2-60 ms
+    // and only runs when the thought actually carries proof content, which
+    // only mathematics and formallogic thoughts can. It is FEEDBACK ONLY - a
+    // gap, cycle, or inconsistency never rejects the thought, an analyser that
+    // throws degrades to `available: false`, and a caller-supplied
+    // `decomposition` is reused rather than overwritten.
+    if (session.config.enableProofAnalysis !== false) {
+      const proofAnalysis = analyzeProofAdvisory(thought);
+      if (proofAnalysis) thought.proofAnalysis = proofAnalysis;
     }
 
     // Add thought to session

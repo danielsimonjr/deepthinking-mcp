@@ -16,7 +16,7 @@
 // ============================================================================
 
 // Advisory validation attached to a stored thought (type-only: no runtime edge)
-import type { AdvisoryValidation } from "./session.js";
+import type { AdvisoryProofAnalysis, AdvisoryValidation } from "./session.js";
 
 // Core modes
 import type { SequentialThought } from "./modes/sequential.js";
@@ -288,6 +288,14 @@ export interface BaseThought {
    * Never gates thought creation - see `src/validation/advisory.ts`.
    */
   validation?: AdvisoryValidation;
+
+  /**
+   * Advisory proof analysis, attached by `SessionManager.addThought()` when
+   * the thought carries proof content. Never gates thought creation, and
+   * never overwrites a caller-supplied `decomposition` - see
+   * `src/proof/advisory.ts`.
+   */
+  proofAnalysis?: AdvisoryProofAnalysis;
 }
 
 // ============================================================================

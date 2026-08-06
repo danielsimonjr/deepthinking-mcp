@@ -9,6 +9,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Proof-bearing thoughts now return an advisory proof analysis.** `src/proof/` — 13 modules
+  (decomposer, gap analyser, assumption tracker, inconsistency detector, circular detector,
+  dependency graph, verifier, strategy recommender and more), with 10 test files — was complete and
+  never invoked: nothing outside the directory imported any of it, and `MathematicsHandler` stored a
+  `decomposition` only if the caller happened to supply one, which nothing in the codebase ever
+  generated. It is now wired into `SessionManager.addThought()`. Clients receive a `proofAnalysis`
+  object on the `AddThoughtResponse`, and the same object is retained on the stored thought
+  (`Thought.proofAnalysis`), so it survives into `get_session` and exports. The object carries the
+  atomic statements, the dependency depth, completeness and rigor level, identified gaps and
+  implicit assumptions, unjustified steps, suggested fixes, detected inconsistencies, and a
+  circular-reasoning verdict with the cycles that produced it.
+- **It runs on the presence of proof content, not on the mode.** Decomposition is not free, so it is
+  never run on every thought. It triggers on a formal-logic thought carrying `proof.steps`, on a
+  mathematics thought carrying a `theorems[].proof` or a `proofStrategy.steps` array, or on the
+  content of a mathematics thought whose `thoughtType` is one that holds an argument
+  (`proof_construction`, `lemma_derivation`, `proof_decomposition`, and similar). A statement-only
+  type such as `theorem_statement` or `numerical_analysis`, or content that is a single sentence,
+  carries no proof and is skipped — no `proofAnalysis` field is attached at all.
+- **A caller-supplied decomposition is reused, never overwritten.** When the thought already carries
+  a `decomposition`, that object is passed through untouched and used as the input to the gap,
+  circularity, and consistency analyses; `decompositionSource` reports `caller-supplied` rather than
+  `derived`. A caller-supplied `gapAnalysis` is reused the same way.
+- **Proof analysis is advisory and never rejects a request.** A gap, a circular chain, or an
+  inconsistency is feedback. Nothing in the request path reads the verdict: a thought whose proof is
+  full of holes is created, stored and returned exactly as before. An analyser that throws is caught
+  and degrades to `{ available: false, reason }` rather than failing the call.
+- **Bounded payload, with truncation stated explicitly.** The input itself is capped at 200 proof
+  steps, which bounds the worst case; `atoms` is capped at 50, `gaps` and `inconsistencies` at 20,
+  `implicitAssumptions`, `cycles`, `suggestions` and `unjustifiedSteps` at 10. A `totals` object
+  carries the pre-truncation count of every list and a `truncated` object flags which lists were
+  capped (plus `truncated.any`), so a truncated result cannot be read as a complete one. Constants
+  live in `src/proof/advisory.ts`.
+- **Per-session opt-out.** `SessionConfig.enableProofAnalysis` (default `true`) switches the
+  analysis off for a session, and no `proofAnalysis` field is attached. Measured cost on the live
+  path: `addThought` goes from 0.06 ms to 1.85 ms on a representative 8-step proof, and to 13.6 ms
+  at the 200-step input cap. Thoughts that carry no proof are unaffected.
 - **Every thought-creating call now returns advisory validation feedback.** `src/validation/` — 45
   files, 37 classes, 35 per-mode validators — was complete, tested, and never invoked: nothing
   outside the directory imported `validator.ts`, so only the Zod schema check at the tool boundary

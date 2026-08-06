@@ -319,6 +319,9 @@ async function handleAddThought(
     // Advisory validation feedback attached by SessionManager.addThought().
     // Present unless the session disables validation. Never gates the call.
     validation: thought.validation,
+    // Advisory proof analysis attached by SessionManager.addThought(). Present
+    // only when the thought carried proof content. Never gates the call.
+    proofAnalysis: thought.proofAnalysis,
     // Include analysis results in response if available
     decomposition: thoughtRecord.decomposition,
     consistencyReport: thoughtRecord.consistencyReport,
