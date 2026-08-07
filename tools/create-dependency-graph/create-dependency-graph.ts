@@ -146,6 +146,28 @@ const ROOT_DIR = getProjectRoot();
 const SRC_DIR = join(ROOT_DIR, 'src');
 const OUTPUT_DIR = join(ROOT_DIR, 'docs', 'architecture');
 
+/**
+ * Opt-out banner emitted at the top of every generated Markdown report.
+ *
+ * `docs/architecture/` is also checked by repo_map's drift gate, which fails any
+ * doc that carries no `## Verification` section rather than skipping it silently.
+ * These two reports are generated here, on a different methodology (this tool
+ * censuses `src/` only; repo_map counts test imports too), so repo_map cannot
+ * meaningfully verify their numbers -- their freshness is governed by re-running
+ * `npm run docs:deps`, not by that gate.
+ *
+ * The marker MUST be emitted by the generator, not hand-added afterwards: it was
+ * hand-added once and the next regeneration silently stripped it, which is what
+ * made the gate fail. Never hand-edit a generated file.
+ */
+const GENERATED_REPORT_BANNER = [
+  '<!-- repo-map:no-verification -->',
+  '<!-- GENERATED FILE -- do not edit by hand.',
+  '     Regenerate with `npm run docs:deps`',
+  '     (npx tsx tools/create-dependency-graph/create-dependency-graph.ts). -->',
+  '',
+].join('\n');
+
 // Read package.json for version and name
 let packageJson: PackageJson = { name: 'unknown', version: '0.0.0' };
 try {
@@ -875,6 +897,7 @@ function generateMarkdown(files: ParsedFile[], modules: ModuleMap, stats: Statis
   const lines: string[] = [];
   const projectName = packageJson.name || 'Project';
 
+  lines.push(GENERATED_REPORT_BANNER);
   lines.push(`# ${projectName} - Dependency Graph`);
   lines.push('');
   lines.push(`**Version**: ${packageJson.version} | **Last Updated**: ${today}`);
@@ -1281,7 +1304,7 @@ async function main(): Promise<void> {
 
   // Write full unused analysis to a separate file
   const unusedReportPath = join(OUTPUT_DIR, 'unused-analysis.md');
-  let unusedReport = '# Unused Files and Exports Analysis\n\n';
+  let unusedReport = `${GENERATED_REPORT_BANNER}\n# Unused Files and Exports Analysis\n\n`;
   unusedReport += `**Generated**: ${new Date().toISOString().split('T')[0]}\n\n`;
   unusedReport += `## Summary\n\n`;
   unusedReport += `- **Potentially unused files**: ${unusedAnalysis.unusedFiles.length}\n`;

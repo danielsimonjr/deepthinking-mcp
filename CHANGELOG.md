@@ -9,6 +9,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The dependency-graph generator stripped the drift gate's opt-out marker on every run, so
+  regenerating the docs broke the gate.** `docs/architecture/` is checked by `repo_map.py check`,
+  which fails any doc lacking a `## Verification` section rather than skipping it silently, and
+  offers `<!-- repo-map:no-verification -->` as an explicit opt-out for docs with no verifiable
+  claims. That marker had been added by hand to `DEPENDENCY_GRAPH.md` and `unused-analysis.md` —
+  both of which `npm run docs:deps` overwrites wholesale — so the next regeneration deleted it and
+  the gate started reporting two missing-Verification failures. `create-dependency-graph.ts` now
+  emits the marker itself, together with a `GENERATED FILE -- do not edit by hand` banner naming
+  the regeneration command, so the opt-out survives regeneration and the reason it exists is
+  visible in the artifact. The two reports are exempt because this tool censuses `src/` only while
+  `repo_map` also counts test imports; neither can meaningfully verify the other's numbers.
+
+- **The dependency-graph tool could not be typechecked at all.** `npx tsc -p
+  tools/create-dependency-graph/tsconfig.json` failed immediately with TS5107 — `moduleResolution:
+  "Node"` (node10) is deprecated and now errors rather than warns — so the tool's own type gate had
+  been dead, and the repo-level `npm run typecheck` does not cover `tools/` (confirmed with `tsc
+  --listFiles`). Behind that error sat 25 more: `console` and `Buffer` were unresolved because
+  automatic `@types` inclusion does not walk past the tool's own `package.json` boundary. The
+  config also contradicted how the tool actually runs — it declared `module: "CommonJS"` while the
+  adjacent `package.json` declares `"type": "module"` and the tool is executed as ESM by `tsx`.
+  Now `module`/`moduleResolution: "NodeNext"` with an explicit `"types": ["node"]`; the tool
+  typechecks clean with no CLI flags. Note that `create-dependency-graph.exe` is **not** rebuilt
+  by this change and was already stale — it was last committed 2025-12-26 against a `.ts` that
+  changed on 2026-08-03. `npm run docs:deps` runs the `.ts` directly and is unaffected.
+
+- **Eight architecture docs documented a command that fails on a case-sensitive filesystem.**
+  Ten references spelled the docs directory `docs/Architecture`, but the tracked directory is
+  `docs/architecture`. The commands worked when copy-pasted on Windows and would fail on Linux or
+  macOS with a case-sensitive volume. (The same mismatch previously caused a `git add
+  docs/Architecture/` to stage nothing at all.)
+
 - **Four live reasoning modes had a validator that was never registered, so clients got a
   "no validator" notice instead of validation.** `VALIDATOR_REGISTRY`
   (`src/validation/validators/registry.ts`) omitted `constraint`, `modal`, `recursive` and

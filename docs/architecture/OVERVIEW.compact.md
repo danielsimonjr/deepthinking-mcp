@@ -30,7 +30,7 @@ src/            221 files — index.ts, types/, modes/, services/, session/,
 tests/          146 files, mirrors src/
 tools/          64 files — standalone CLI utilities
 templates/mode-scaffolding/  5 copy-paste files, by-design unimported
-docs/Architecture/  this doc set + generated reports
+docs/architecture/  this doc set + generated reports
 ```
 
 ## MCP tools (13, confirmed live from `src/index.ts`)
@@ -66,7 +66,7 @@ Full detail and sourcing for every claim above: `OVERVIEW.md`, `ARCHITECTURE.md`
 
 ## Verification
 Generated 2026-08-05 by `repo_map.py map`.
-Check: `python repo_map.py check <repo> --docs docs/Architecture`
+Check: `python repo_map.py check <repo> --docs docs/architecture`
 
 | Claim | Value | Source |
 |---|---|---|

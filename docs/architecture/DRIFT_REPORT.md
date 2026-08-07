@@ -172,6 +172,31 @@ Forty files that only the test suite could reach are now reachable from the entr
 Each wiring carries a regression test asserting a live call produces its result — the guard against
 this becoming dead code a second time, which is how it got here.
 
+## A fourth unwired subsystem, found by re-running the repo's own generator
+
+Re-running `npm run docs:deps` after the fix waves surfaced something the earlier survey missed:
+**`src/modes/stochastic/` carries an analysis layer nothing uses.**
+
+| File | Lines |
+|---|---|
+| `analysis/statistics.ts` | 580 |
+| `models/distribution.ts` | 651 |
+| `sampling/rng.ts` | 323 |
+
+No file under `src/` imports any of them — the single apparent importer is a false match on a
+`distribution?:` *field* in `causal/graph/types.ts`. `StochasticHandler` imports none of them.
+Only the test suite does. That is the same pattern as `validation/`, `proof/` and `taxonomy/`:
+a complete, tested layer with no production consumer.
+
+It was missed because the two tools disagree by scope, and the disagreement reads as noise unless
+you check it. `repo_map` counts a file reachable if *anything* imports it, tests included, so these
+three are "test-only" rather than orphaned. The repo's own generator censuses `src/` alone, so
+"not imported by any other file" means what a reader assumes it means. **Running both and
+reconciling the difference is what surfaced this — either tool alone would have hidden it.**
+
+Not wired here: unlike the other three, there is no obvious call site. `StochasticHandler` would
+have to want sampling, and whether it should is a design question, not a wiring one.
+
 ## Analysis limitations
 
 Two blind spots in the static analysis, found while writing this refresh:

@@ -1537,7 +1537,7 @@ by reading the named file — no automated check will catch it for you when a sc
 ## Verification
 
 Generated 2026-08-05 by `repo_map.py map`.
-Check: `python repo_map.py check <repo> --docs docs/Architecture`
+Check: `python repo_map.py check <repo> --docs docs/architecture`
 
 | Claim | Value | Source |
 |---|---|---|

@@ -98,7 +98,7 @@ Standalone CLI utilities, compiled to executables separately from the main packa
 markdown-file chunker/merger, a context-compression tool, and the dependency-graph generator
 (`create-dependency-graph`) that produces `DEPENDENCY_GRAPH.md`.
 
-## `docs/Architecture/`
+## `docs/architecture/`
 
 This document set, plus the machine-generated reports it points to
 (`DEPENDENCY_GRAPH.md`, `unused-analysis.md`, and their JSON/YAML equivalents).

@@ -68,7 +68,7 @@ deepthinking-mcp/
 ├── tests/               # 146 files, 67,958 LOC
 ├── tools/                # 64 files, 33,222 LOC — standalone CLI utilities
 ├── templates/mode-scaffolding/  # 5 copy-paste templates for authoring a new mode
-└── docs/Architecture/   # this document set + generated reports
+└── docs/architecture/   # this document set + generated reports
 ```
 
 Do not treat `templates/mode-scaffolding/*.ts` as source code that runs. Those 5 files are
@@ -126,12 +126,12 @@ their own file. A 23-export sample of that stricter set was 96% genuinely dead.
 ## Verification
 
 Generated 2026-08-05 by `repo_map.py map`.
-Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/Architecture`
+Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/architecture`
 
 | Claim | Value | Source |
 |---|---|---|
 | totalTypeScriptFiles | 459 | dependency-graph.json |
-| totalLinesOfCode | 220901 | dependency-graph.json |
+| totalLinesOfCode | 220924 | dependency-graph.json |
 | totalExports | 2242 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |

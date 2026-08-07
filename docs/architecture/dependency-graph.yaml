@@ -1,10 +1,10 @@
 metadata:
   name: deepthinking-mcp
-  version: 9.3.0
-  lastUpdated: '2026-08-03'
-  totalFiles: 234
+  version: 9.3.3
+  lastUpdated: '2026-08-07'
+  totalFiles: 239
   totalModules: 14
-  totalExports: 1280
+  totalExports: 1306
 entryPoints:
   - file: src/index.ts
     type: main
@@ -2340,6 +2340,75 @@ modules:
         - exportTemporalTimeline
       functions:
         - exportTemporalTimeline
+    src/export/visual/session-graph.ts:
+      description: Session-level graph rendering (v9.4.1)
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./types.js
+          imports:
+            - VisualFormat
+          typeOnly: true
+        - file: ./utils.js
+          imports:
+            - sanitizeId
+        - file: ./utils/graphml.js
+          imports:
+            - generateGraphML
+            - GraphMLNode
+            - GraphMLEdge
+        - file: ./utils/tikz.js
+          imports:
+            - generateTikZ
+            - TikZNode
+            - TikZEdge
+        - file: ./utils/uml.js
+          imports:
+            - generateUmlDiagram
+            - UmlNode
+            - UmlEdge
+        - file: ./utils/modelica.js
+          imports:
+            - generateModelicaPackageHeader
+            - generateModelicaPackageFooter
+            - generateModelicaModel
+        - file: ./utils/svg.js
+          imports:
+            - generateSVGHeader
+            - generateSVGFooter
+            - renderRectNode
+            - renderStadiumNode
+            - renderEdge
+            - getNodeColor
+            - DEFAULT_SVG_OPTIONS
+            - SVGNodePosition
+        - file: ./utils/html.js
+          imports:
+            - generateHTMLHeader
+            - generateHTMLFooter
+            - escapeHTML
+            - renderMetricCard
+            - renderSection
+        - file: ./utils/json.js
+          imports:
+            - createJsonGraph
+            - addNode
+            - addEdge
+            - addMetric
+            - serializeGraph
+        - file: ./utils/markdown.js
+          imports:
+            - heading
+            - list
+            - table
+      exports:
+        - renderSessionGraph
+      interfaces:
+        - SessionGraphNode
+        - SessionGraphEdge
+        - SessionGraphModel
+      functions:
+        - renderSessionGraph
     src/export/visual/types.ts:
       description: Visual Export Types (v7.1.0)
       externalDependencies: []
@@ -2687,6 +2756,9 @@ modules:
         - file: ../visual-exporter.js
           imports:
             - VisualExporter
+        - file: ../../../utils/sanitization.js
+          imports:
+            - escapeLatex
       exports:
         - LaTeXExporter
       classes:
@@ -2924,11 +2996,14 @@ modules:
       description: TikZ Export Utilities (v8.5.0)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../../../utils/sanitization.js
+          imports:
+            - escapeLatex
       exports:
+        - escapeLatex
         - DEFAULT_TIKZ_OPTIONS
         - getTikZColor
-        - escapeLatex
         - generateTikZHeader
         - generateTikZFooter
         - renderTikZNode
@@ -2952,7 +3027,6 @@ modules:
         - TikZScopeOptions
       functions:
         - getTikZColor
-        - escapeLatex
         - generateTikZHeader
         - generateTikZFooter
         - renderTikZNode
@@ -3132,9 +3206,9 @@ modules:
         - file: ./session/manager.js
           imports:
             - SessionManager
-        - file: ./types/modes/recommendations.js
+        - file: ./services/RecommendationService.js
           imports:
-            - ModeRecommender
+            - buildModeRecommendation
         - file: ./session/storage/file-store.js
           imports:
             - FileSessionStore
@@ -3709,7 +3783,7 @@ modules:
           imports:
             - ModeHandler
             - ValidationResult
-            - ValidationError
+            - HandlerValidationError
             - ValidationWarning
             - ModeEnhancements
             - validationSuccess
@@ -3747,7 +3821,7 @@ modules:
           imports:
             - ModeHandler
             - ValidationResult
-            - ValidationError
+            - HandlerValidationError
             - ValidationWarning
             - ModeEnhancements
             - validationSuccess
@@ -3949,7 +4023,7 @@ modules:
           imports:
             - ModeHandler
             - ValidationResult
-            - ValidationError
+            - HandlerValidationError
             - ValidationWarning
             - ModeEnhancements
             - validationSuccess
@@ -3989,7 +4063,7 @@ modules:
           imports:
             - ModeHandler
             - ValidationResult
-            - ValidationError
+            - HandlerValidationError
             - ValidationWarning
             - ModeEnhancements
             - validationSuccess
@@ -4155,7 +4229,7 @@ modules:
           imports:
             - ModeHandler
             - ValidationResult
-            - ValidationError
+            - HandlerValidationError
             - ValidationWarning
             - ModeEnhancements
             - validationSuccess
@@ -4332,7 +4406,7 @@ modules:
           imports:
             - ModeHandler
             - ValidationResult
-            - ValidationError
+            - HandlerValidationError
             - ValidationWarning
             - ModeEnhancements
             - validationSuccess
@@ -4545,7 +4619,7 @@ modules:
         - createValidationWarning
       interfaces:
         - ValidationResult
-        - ValidationError
+        - HandlerValidationError
         - ValidationWarning
         - DetectedArchetype
         - ModeEnhancements
@@ -4852,7 +4926,7 @@ modules:
           imports:
             - ModeHandler
             - ValidationResult
-            - ValidationError
+            - HandlerValidationError
             - ValidationWarning
             - ModeEnhancements
             - DetectedArchetype
@@ -4884,7 +4958,7 @@ modules:
           imports:
             - ModeHandler
             - ValidationResult
-            - ValidationError
+            - HandlerValidationError
             - ValidationWarning
             - ModeEnhancements
             - validationSuccess
@@ -5012,7 +5086,7 @@ modules:
           imports:
             - ModeHandler
             - ValidationResult
-            - ValidationError
+            - HandlerValidationError
             - ValidationWarning
             - ModeEnhancements
             - ModeStatus
@@ -5177,7 +5251,7 @@ modules:
       exports:
         - ModeHandler
         - ValidationResult
-        - ValidationError
+        - HandlerValidationError
         - ValidationWarning
         - ModeEnhancements
         - ModeStatus
@@ -5231,7 +5305,7 @@ modules:
       reExported:
         - ModeHandler
         - ValidationResult
-        - ValidationError
+        - HandlerValidationError
         - ValidationWarning
         - ModeEnhancements
         - ModeStatus
@@ -5462,6 +5536,70 @@ modules:
         - SamplerConfig
         - SamplingResult
   proof:
+    src/proof/advisory.ts:
+      description: Advisory proof-analysis wrapper
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/core.js
+          imports:
+            - Thought
+          typeOnly: true
+        - file: ../types/session.js
+          imports:
+            - AdvisoryProofAnalysis
+            - ProofAnalysisSource
+          typeOnly: true
+        - file: ../types/modes/mathematics.js
+          imports:
+            - GapAnalysis
+            - Inconsistency
+            - ProofDecomposition
+            - ProofStrategy
+            - Theorem
+          typeOnly: true
+        - file: ../types/modes/formallogic.js
+          imports:
+            - LogicalProof
+          typeOnly: true
+        - file: ../types/core.js
+          imports:
+            - ThinkingMode
+        - file: ./decomposer.js
+          imports:
+            - ProofDecomposer
+            - ProofStep
+        - file: ./gap-analyzer.js
+          imports:
+            - GapAnalyzer
+        - file: ./circular-detector.js
+          imports:
+            - CircularReasoningDetector
+            - CircularReasoningResult
+        - file: ./inconsistency-detector.js
+          imports:
+            - InconsistencyDetector
+      exports:
+        - MAX_PROOF_STEPS
+        - MAX_PROOF_ATOMS
+        - MAX_PROOF_GAPS
+        - MAX_PROOF_ASSUMPTIONS
+        - MAX_PROOF_INCONSISTENCIES
+        - MAX_PROOF_CYCLES
+        - MAX_PROOF_NOTES
+        - analyzeProofAdvisory
+      interfaces:
+        - ProofAnalysisDeps
+      functions:
+        - analyzeProofAdvisory
+      constants:
+        - MAX_PROOF_STEPS
+        - MAX_PROOF_ATOMS
+        - MAX_PROOF_GAPS
+        - MAX_PROOF_ASSUMPTIONS
+        - MAX_PROOF_INCONSISTENCIES
+        - MAX_PROOF_CYCLES
+        - MAX_PROOF_NOTES
     src/proof/assumption-tracker.ts:
       description: Assumption Tracker - Phase 8 Sprint 2
       externalDependencies: []
@@ -5918,9 +6056,13 @@ modules:
           imports:
             - VisualExporter
             - VisualFormat
+        - file: ../export/visual/session-graph.js
+          imports:
+            - renderSessionGraph
+            - SessionGraphNode
+            - SessionGraphEdge
         - file: ../utils/sanitization.js
           imports:
-            - escapeHtml
             - escapeLatex
         - file: ../interfaces/ILogger.js
           imports:
@@ -5933,6 +6075,25 @@ modules:
         - ExportService
       classes:
         - ExportService
+    src/services/RecommendationService.ts:
+      description: Recommendation service
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/modes/recommendations.js
+          imports:
+            - ModeRecommender
+            - ProblemCharacteristics
+        - file: ../taxonomy/advisory.js
+          imports:
+            - renderReasoningTypeAdvice
+            - suggestReasoningTypesAdvisory
+      exports:
+        - buildModeRecommendation
+      interfaces:
+        - RecommendModeInput
+      functions:
+        - buildModeRecommendation
     src/services/ThoughtFactory.ts:
       description: Thought Factory Service (v9.0.0)
       externalDependencies: []
@@ -5988,8 +6149,9 @@ modules:
             - SessionContext
         - file: ../utils/errors.js
           imports:
-            - SessionNotFoundError
+            - InvalidModeError
             - ResourceLimitError
+            - SessionNotFoundError
         - file: ../utils/sanitization.js
           imports:
             - sanitizeString
@@ -6003,6 +6165,12 @@ modules:
         - file: ../interfaces/ILogger.js
           imports:
             - ILogger
+        - file: ../validation/advisory.js
+          imports:
+            - validateAdvisory
+        - file: ../proof/advisory.js
+          imports:
+            - analyzeProofAdvisory
         - file: ./storage/interface.js
           imports:
             - SessionStorage
@@ -6109,6 +6277,51 @@ modules:
       constants:
         - DEFAULT_STORAGE_CONFIG
   taxonomy:
+    src/taxonomy/advisory.ts:
+      description: Advisory reasoning-type wrapper
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./reasoning-types.js
+          imports:
+            - REASONING_TAXONOMY
+        - file: ./classifier.js
+          imports:
+            - TaxonomyClassifier
+            - ThoughtClassification
+        - file: ./suggestion-engine.js
+          imports:
+            - SuggestionEngine
+            - ProblemCharacteristics
+            - ReasoningSuggestion
+        - file: ../types/modes/recommendations.js
+          imports:
+            - ProblemCharacteristics
+          typeOnly: true
+      exports:
+        - MAX_TAXONOMY_SUGGESTIONS
+        - MAX_TAXONOMY_RATIONALE
+        - MAX_TAXONOMY_WARNINGS
+        - MAX_TAXONOMY_KEYWORDS
+        - toTaxonomyCharacteristics
+        - suggestReasoningTypesAdvisory
+        - renderReasoningTypeAdvice
+      interfaces:
+        - SuggestedReasoningType
+        - ProblemClassification
+        - TaxonomyAdviceAvailable
+        - TaxonomyAdviceUnavailable
+        - TaxonomyAdviceInput
+        - TaxonomyAdviceDeps
+      functions:
+        - toTaxonomyCharacteristics
+        - suggestReasoningTypesAdvisory
+        - renderReasoningTypeAdvice
+      constants:
+        - MAX_TAXONOMY_SUGGESTIONS
+        - MAX_TAXONOMY_RATIONALE
+        - MAX_TAXONOMY_WARNINGS
+        - MAX_TAXONOMY_KEYWORDS
     src/taxonomy/classifier.ts:
       description: Taxonomy Classifier (v3.4.0)
       externalDependencies: []
@@ -6295,7 +6508,11 @@ modules:
       description: Hand-Written JSON Schemas for MCP Tools (v4.4.0)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../export/profiles.js
+          imports:
+            - EXPORT_PROFILES
+            - listExportProfileIds
       exports:
         - deepthinking_core_schema
         - deepthinking_standard_schema
@@ -6365,6 +6582,7 @@ modules:
             - ExportProfileEnum
             - LevelEnum
             - IdSchema
+            - SessionIdSchema
             - TextSchema
             - ThoughtTextSchema
             - IdArraySchema
@@ -6588,6 +6806,7 @@ modules:
             - NameSchema
             - TextSchema
             - IdArraySchema
+            - boundedRecord
       exports:
         - EngineeringSchema
       constants:
@@ -6731,6 +6950,7 @@ modules:
             - IdSchema
             - TextSchema
             - IdArraySchema
+            - boundedRecord
         - file: ../../../utils/sanitization.js
           imports:
             - MAX_LENGTHS
@@ -6780,6 +7000,7 @@ modules:
             - NameSchema
             - TextSchema
             - IdArraySchema
+            - boundedRecord
         - file: ../../../utils/sanitization.js
           imports:
             - MAX_LENGTHS
@@ -6809,6 +7030,7 @@ modules:
             - NameSchema
             - TextSchema
             - IdArraySchema
+            - boundedRecord
         - file: ../../../utils/sanitization.js
           imports:
             - MAX_LENGTHS
@@ -6831,6 +7053,7 @@ modules:
         - ConfidenceSchema
         - PositiveIntSchema
         - IdSchema
+        - SessionIdSchema
         - NameSchema
         - TextSchema
         - ThoughtTextSchema
@@ -6851,12 +7074,15 @@ modules:
         - EntitySchema
         - DescribedEntitySchema
         - boundedArray
+        - boundedRecord
       functions:
         - boundedArray
+        - boundedRecord
       constants:
         - ConfidenceSchema
         - PositiveIntSchema
         - IdSchema
+        - SessionIdSchema
         - NameSchema
         - TextSchema
         - ThoughtTextSchema
@@ -6887,6 +7113,9 @@ modules:
         - file: ../utils/sanitization.js
           imports:
             - MAX_LENGTHS
+        - file: ./schemas/shared.js
+          imports:
+            - boundedRecord
       exports:
         - ThinkingToolSchema
         - thinkingTool
@@ -6899,6 +7128,11 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./session.js
+          imports:
+            - AdvisoryProofAnalysis
+            - AdvisoryValidation
+          typeOnly: true
         - file: ./modes/sequential.js
           imports:
             - SequentialThought
@@ -7128,6 +7362,11 @@ modules:
         - file: ./core.js
           imports:
             - ThinkingMode
+        - file: ./session.js
+          imports:
+            - AdvisoryProofAnalysis
+            - AdvisoryValidation
+          typeOnly: true
         - file: ../tools/schemas/base.js
           imports:
             - SessionActionInput
@@ -7179,7 +7418,7 @@ modules:
           imports:
             - type ModeHandler
             - type ValidationResult
-            - type ValidationError
+            - type HandlerValidationError
             - type ValidationWarning
             - type ModeEnhancements
             - type ModeStatus
@@ -7421,7 +7660,7 @@ modules:
       exports:
         - type ModeHandler
         - type ValidationResult
-        - type ValidationError
+        - type HandlerValidationError
         - type ValidationWarning
         - type ModeEnhancements
         - type ModeStatus
@@ -7622,7 +7861,7 @@ modules:
         - '* from ./modes/recommendations.js'
         - type ModeHandler
         - type ValidationResult
-        - type ValidationError
+        - type HandlerValidationError
         - type ValidationWarning
         - type ModeEnhancements
         - type ModeStatus
@@ -8626,6 +8865,14 @@ modules:
           imports:
             - Thought
             - ThinkingMode
+        - file: ./modes/mathematics.js
+          imports:
+            - AtomicStatement
+            - CircularPath
+            - ImplicitAssumption
+            - Inconsistency
+            - ProofGap
+          typeOnly: true
       exports: []
       interfaces:
         - ThinkingSession
@@ -8635,6 +8882,12 @@ modules:
         - SessionMetadata
         - Attachment
         - ValidationResult
+        - AdvisoryValidationResult
+        - AdvisoryValidationUnavailable
+        - ProofAnalysisTruncation
+        - ProofAnalysisTotals
+        - ProofAnalysisResult
+        - ProofAnalysisUnavailable
         - ValidationIssue
   utils:
     src/utils/errors.ts:
@@ -8816,6 +9069,39 @@ modules:
         - isPlainObject
         - safeCast
   validation:
+    src/validation/advisory.ts:
+      description: Advisory validation wrapper
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/core.js
+          imports:
+            - Thought
+          typeOnly: true
+        - file: ../types/session.js
+          imports:
+            - AdvisoryValidation
+            - ValidationIssue
+            - ValidationResult
+          typeOnly: true
+        - file: ./constants.js
+          imports:
+            - ValidationContext
+          typeOnly: true
+        - file: ./validator.js
+          imports:
+            - ThoughtValidator
+      exports:
+        - MAX_ADVISORY_ISSUES
+        - MAX_ADVISORY_SUGGESTIONS
+        - validateAdvisory
+      interfaces:
+        - AdvisoryValidatorLike
+      functions:
+        - validateAdvisory
+      constants:
+        - MAX_ADVISORY_ISSUES
+        - MAX_ADVISORY_SUGGESTIONS
     src/validation/cache.ts:
       description: Validation result caching for performance optimization
       externalDependencies: []
@@ -8886,6 +9172,13 @@ modules:
           imports:
             - ThoughtValidator
             - type ValidationContext
+          reExport: true
+        - file: ./advisory.js
+          imports:
+            - validateAdvisory
+            - MAX_ADVISORY_ISSUES
+            - MAX_ADVISORY_SUGGESTIONS
+            - type AdvisoryValidatorLike
           reExport: true
         - file: ./schemas.js
           imports:
@@ -9018,6 +9311,10 @@ modules:
         - isValidConfidence
         - ThoughtValidator
         - type ValidationContext
+        - validateAdvisory
+        - MAX_ADVISORY_ISSUES
+        - MAX_ADVISORY_SUGGESTIONS
+        - type AdvisoryValidatorLike
         - SessionIdSchema
         - ThinkingModeSchema
         - CreateSessionSchema
@@ -9143,6 +9440,10 @@ modules:
         - isValidConfidence
         - ThoughtValidator
         - type ValidationContext
+        - validateAdvisory
+        - MAX_ADVISORY_ISSUES
+        - MAX_ADVISORY_SUGGESTIONS
+        - type AdvisoryValidatorLike
         - SessionIdSchema
         - ThinkingModeSchema
         - CreateSessionSchema
@@ -9425,6 +9726,7 @@ modules:
             - getConfig
         - file: ./validators/index.js
           imports:
+            - getSupportedModes
             - getValidatorForMode
         - file: ./constants.js
           imports:
@@ -10707,6 +11009,9 @@ dependencyGraph:
   circularDependencies:
     runtime: []
     typeOnly:
+      - - src/types/session.ts
+        - src/types/core.ts
+        - src/types/session.ts
       - - src/types/core.ts
         - src/types/modes/sequential.ts
         - src/types/core.ts
@@ -10903,9 +11208,9 @@ dependencyGraph:
         - src/validation/validators/index.ts
         - src/validation/validators/modes/cryptanalytic.ts
         - src/validation/validator.ts
-    total: 57
+    total: 58
     runtimeCount: 0
-    typeOnlyCount: 57
+    typeOnlyCount: 58
   layers:
     - name: Cache
       files:
@@ -10945,6 +11250,7 @@ dependencyGraph:
         - src/export/visual/modes/shannon.ts
         - src/export/visual/modes/systems-thinking.ts
         - src/export/visual/modes/temporal.ts
+        - src/export/visual/session-graph.ts
         - src/export/visual/types.ts
         - src/export/visual/utils/ascii.ts
         - src/export/visual/utils/dot.ts
@@ -11025,6 +11331,7 @@ dependencyGraph:
         - src/modes/stochastic/types.ts
     - name: Proof
       files:
+        - src/proof/advisory.ts
         - src/proof/assumption-tracker.ts
         - src/proof/branch-analyzer.ts
         - src/proof/branch-types.ts
@@ -11041,6 +11348,7 @@ dependencyGraph:
     - name: Services
       files:
         - src/services/ExportService.ts
+        - src/services/RecommendationService.ts
         - src/services/ThoughtFactory.ts
     - name: Session
       files:
@@ -11050,6 +11358,7 @@ dependencyGraph:
         - src/session/storage/interface.ts
     - name: Taxonomy
       files:
+        - src/taxonomy/advisory.ts
         - src/taxonomy/classifier.ts
         - src/taxonomy/multi-modal-analyzer.ts
         - src/taxonomy/navigator.ts
@@ -11124,6 +11433,7 @@ dependencyGraph:
         - src/utils/type-guards.ts
     - name: Validation
       files:
+        - src/validation/advisory.ts
         - src/validation/cache.ts
         - src/validation/constants.ts
         - src/validation/index.ts
@@ -11170,19 +11480,19 @@ dependencyGraph:
         - src/validation/validators/registry.ts
         - src/validation/validators/validation-utils.ts
 statistics:
-  totalTypeScriptFiles: 234
+  totalTypeScriptFiles: 239
   totalModules: 14
-  totalLinesOfCode: 115132
-  totalExports: 1280
+  totalLinesOfCode: 117192
+  totalExports: 1306
   totalClasses: 143
-  totalInterfaces: 525
-  totalFunctions: 430
+  totalInterfaces: 543
+  totalFunctions: 437
   totalTypeGuards: 87
   totalEnums: 3
-  totalConstants: 149
-  totalReExports: 571
-  totalTypeOnlyImports: 313
+  totalConstants: 163
+  totalReExports: 575
+  totalTypeOnlyImports: 325
   runtimeCircularDeps: 0
-  typeOnlyCircularDeps: 57
-  unusedFilesCount: 16
-  unusedExportsCount: 466
+  typeOnlyCircularDeps: 58
+  unusedFilesCount: 14
+  unusedExportsCount: 490
