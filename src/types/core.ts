@@ -73,7 +73,12 @@ import type { CustomThought } from "./modes/custom.js";
 // ============================================================================
 
 /**
- * Available thinking modes (33 total)
+ * Available thinking modes: 35 members — the 34 reasoning modes listed in
+ * `FULLY_IMPLEMENTED_MODES`, plus `CUSTOM` for user-defined modes.
+ *
+ * The count had said 33 since before `constraint` and `optimization` were
+ * added. A stale count here is not cosmetic: it is what a reviewer checks the
+ * handler and validator registries against.
  */
 export enum ThinkingMode {
   // ===== Core Modes =====
