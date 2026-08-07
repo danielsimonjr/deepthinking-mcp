@@ -24,9 +24,9 @@ document does not repeat it.
 | Metric | Value | Scope | Source |
 |---|---|---|---|
 | Version | 9.3.3 | package | `package.json` |
-| TypeScript files, whole repo | 484 | repo-wide | repo_map |
+| TypeScript files, whole repo | 485 | repo-wide | repo_map |
 | TypeScript files, `src/` | 228 | src only | repo_map (`file-inventory.json`, area=src) |
-| Lines of code, whole repo | 226,231 | repo-wide | repo_map |
+| Lines of code, whole repo | 226,382 | repo-wide | repo_map |
 | Lines of code, `src/` | 112,917 | src only | repo_map |
 | Total exports, whole repo | 2,143 | repo-wide | repo_map |
 | Total exports, `src/` | 1,306 (575 re-exports) | src only | DEPENDENCY_GRAPH.md |
@@ -134,8 +134,8 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 484 | dependency-graph.json |
-| totalLinesOfCode | 226231 | dependency-graph.json |
+| totalTypeScriptFiles | 485 | dependency-graph.json |
+| totalLinesOfCode | 226382 | dependency-graph.json |
 | totalExports | 2143 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
