@@ -1541,4 +1541,4 @@ Check: `python repo_map.py check <repo> --docs docs/architecture`
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 467 | dependency-graph.json |
+| totalTypeScriptFiles | 471 | dependency-graph.json |

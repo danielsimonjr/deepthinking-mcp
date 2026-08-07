@@ -390,8 +390,8 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 467 | dependency-graph.json |
-| testOnlyFiles | 17 | dependency-graph.json |
+| totalTypeScriptFiles | 471 | dependency-graph.json |
+| testOnlyFiles | 15 | dependency-graph.json |
 | orphanedFiles | 23 | dependency-graph.json |
 
 Test counts (183 files, 5,116 tests; 101 unit / 72 integration / 6 edge-case / 4 performance)

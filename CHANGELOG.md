@@ -7,6 +7,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **`src/modes/stochastic/models/moments.ts`** — closed-form mean and variance for the 11
+  distributions this codebase accepts, in one place. Two rules its callers depend on: an unknown
+  distribution returns `{}` rather than a guess, and out-of-domain parameters return `{}` rather
+  than `NaN` or `Infinity` (`1/0` is `Infinity` in JavaScript, and a non-finite number formatted
+  into a response reads exactly like a computed one). Parameter aliases are accepted because the
+  tool schema, the handler's old private table and `stochastic/types.ts` each name them
+  differently.
+
+### Fixed
+
+- **`sampleWithStatistics` threw `RangeError` on any large Monte Carlo run.** It computed bounds
+  with `Math.min(...samples)`, which passes every sample as a separate argument; that exceeds the
+  engine's argument limit above roughly 100,000 elements. Measured on this Node: 100,000 succeeds,
+  250,000 throws `RangeError: Maximum call stack size exceeded`. The handler's own validation tells
+  callers to "use at least 1000 iterations", and Monte Carlo at 250k is unremarkable, so this was
+  reachable by any caller doing what the mode advises. Now reduced iteratively; an empty sample set
+  still yields `Infinity`/`-Infinity`, matching the previous behaviour exactly. The population-vs-
+  unbiased variance split between this function and `analysis/statistics.ts` is now documented at
+  both sites rather than left as a silent trap — the two answer different questions and were not
+  unified.
+
+- **`StochasticHandler` discarded client-supplied samples and could report a confident zero.**
+  Three defects, all from the handler carrying a private 5-distribution moment table beside a
+  1,554-line engine that models 11 distributions properly:
+  - Its private `RandomVariable` interface had no `samples` field, although the public type in
+    `types/modes/stochastic.ts` does — so any draws a client sent were dropped and the moments
+    always came from the declared distribution, even when measurements contradicted it.
+  - `normalizeSimulationResult` used `mean: sr.mean || 0`, so a client who supplied samples but no
+    mean received `0`, and a genuine mean of `0` was indistinguishable from a missing one.
+  - The private table knew `normal`, `uniform`, `exponential`, `poisson` and `binomial`; `beta`,
+    `gamma`, `lognormal`, `triangular`, `bernoulli` and `geometric` silently produced
+    `expectedValue: undefined`.
+
+  The handler now uses `analysis/statistics.ts` and the new `moments.ts`: observed samples take
+  precedence over the declared distribution (they describe what happened; a declared distribution
+  can be stale), a 95% equal-tailed interval is derived when none was supplied, and client-supplied
+  statistics are never overwritten. Distribution-parameter validation gained the six missing
+  distributions and remains **advisory** — it warns, it never rejects.
+
+  Known and deliberately not addressed here: **`stochastic` is not exposed by any MCP tool**, nor
+  are `constraint`, `modal` and `recursive` (verified two ways — no occurrence in `src/tools/`, and
+  the legacy tool's enum lists 20 other modes). `recommend_mode` nonetheless recommends
+  `stochastic` for Monte Carlo, Markov and queueing problems, so clients are pointed at a mode they
+  cannot select. `models/distribution.ts` and `sampling/rng.ts` therefore remain unimported by
+  `src/`: wiring them needs a sampling entry point, which is new client-facing input, and adding it
+  for one of four stranded modes would leave the surface inconsistent. See `DRIFT_REPORT.md`.
+
 ### Changed
 
 - **`create-dependency-graph` split into layered modules, and the committed binary rebuilt.** The

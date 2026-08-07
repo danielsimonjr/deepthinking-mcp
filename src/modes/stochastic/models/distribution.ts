@@ -638,10 +638,26 @@ export function sampleWithStatistics(
   const sampler = createSampler(dist, rng);
   const samples = sampler.sampleMany(count);
 
+  // NOTE: this is the POPULATION variance (divide by n) of the drawn samples,
+  // deliberately not the unbiased estimator in `analysis/statistics.ts`
+  // (divide by n-1). The two conventions coexist in this subsystem: this
+  // function describes the sample it just drew, while `statistics.variance`
+  // estimates the underlying distribution. Do not "unify" them without
+  // deciding which question each caller is asking.
   const mean = samples.reduce((a, b) => a + b, 0) / count;
   const variance = samples.reduce((sum, x) => sum + (x - mean) ** 2, 0) / count;
-  const min = Math.min(...samples);
-  const max = Math.max(...samples);
+
+  // Reduce iteratively rather than `Math.min(...samples)`: the spread form
+  // passes every sample as a separate argument and throws
+  // "RangeError: Maximum call stack size exceeded" somewhere above 100,000 --
+  // a sample count Monte Carlo reaches routinely. An empty sample set still
+  // yields Infinity/-Infinity, matching what Math.min()/Math.max() returned.
+  let min = Infinity;
+  let max = -Infinity;
+  for (const value of samples) {
+    if (value < min) min = value;
+    if (value > max) max = value;
+  }
 
   return {
     samples,

@@ -22,6 +22,12 @@ import {
   createValidationError,
   createValidationWarning,
 } from "./ModeHandler.js";
+import { analyticMoments } from "../stochastic/models/moments.js";
+import {
+  equalTailedInterval,
+  mean as sampleMean,
+  variance as sampleVariance,
+} from "../stochastic/analysis/statistics.js";
 
 // Re-export for backwards compatibility
 export type { StochasticThought };
@@ -57,6 +63,14 @@ interface RandomVariable {
   name: string;
   distribution: string; // e.g., 'uniform', 'normal', 'exponential', 'poisson'
   parameters: Record<string, number>;
+  /**
+   * Observed draws, when the client has them. Carried through deliberately:
+   * this field exists on the public `RandomVariable` in
+   * `types/modes/stochastic.ts`, but was missing here, so any samples a client
+   * sent were silently discarded and the moments fell back to the analytic
+   * form of the declared distribution.
+   */
+  samples?: number[];
   expectedValue?: number;
   variance?: number;
 }
@@ -623,24 +637,38 @@ export class StochasticHandler implements ModeHandler {
    * Normalize random variable
    */
   private normalizeRandomVariable(rv: any): RandomVariable {
+    const samples = Array.isArray(rv.samples) ? rv.samples : undefined;
+
     const normalized: RandomVariable = {
       id: rv.id || randomUUID(),
       name: rv.name || "",
       distribution: rv.distribution || "uniform",
       parameters: rv.parameters || {},
+      samples,
       expectedValue: rv.expectedValue,
       variance: rv.variance,
     };
 
-    // Calculate expected value and variance if not provided
+    // Fill in whichever moments the client did not state.
+    //
+    // Observed samples win over the declared distribution: they describe what
+    // actually happened, and a declared distribution can be wrong or stale.
+    // Only when there are no samples do we fall back to the closed form.
     if (
       normalized.expectedValue === undefined ||
       normalized.variance === undefined
     ) {
-      const stats = this.calculateDistributionStats(
-        normalized.distribution,
-        normalized.parameters,
-      );
+      const stats =
+        samples && samples.length > 0
+          ? {
+              mean: sampleMean(samples),
+              // Unbiased (n-1) -- estimating the variable's variance from a
+              // sample, not describing the sample itself.
+              variance:
+                samples.length > 1 ? sampleVariance(samples) : undefined,
+            }
+          : analyticMoments(normalized.distribution, normalized.parameters);
+
       if (normalized.expectedValue === undefined)
         normalized.expectedValue = stats.mean;
       if (normalized.variance === undefined)
@@ -654,12 +682,37 @@ export class StochasticHandler implements ModeHandler {
    * Normalize simulation result
    */
   private normalizeSimulationResult(sr: any): SimulationResult {
+    const samples: number[] | undefined = Array.isArray(sr.samples)
+      ? sr.samples
+      : undefined;
+    const hasSamples = samples !== undefined && samples.length > 0;
+
+    // Compare against undefined, not truthiness: a simulation whose mean is
+    // genuinely 0 is not a missing mean, and `sr.mean || 0` also meant a
+    // client who sent samples WITHOUT a mean got a confident 0 back.
+    let mean = sr.mean !== undefined ? sr.mean : undefined;
+    let variance = sr.variance !== undefined ? sr.variance : undefined;
+    let confidenceInterval = sr.confidenceInterval;
+
+    if (hasSamples) {
+      if (mean === undefined) mean = sampleMean(samples!);
+      if (variance === undefined && samples!.length > 1) {
+        variance = sampleVariance(samples!);
+      }
+      if (confidenceInterval === undefined) {
+        const interval = equalTailedInterval(samples!, 0.95);
+        confidenceInterval = [interval.lower, interval.upper];
+      }
+    }
+
     return {
       id: sr.id || randomUUID(),
       iterations: sr.iterations || 0,
-      mean: sr.mean || 0,
-      variance: sr.variance || 0,
-      confidenceInterval: sr.confidenceInterval,
+      // With no samples and no client value there is nothing to compute; keep
+      // the historical 0 rather than emitting undefined into a numeric field.
+      mean: mean ?? 0,
+      variance: variance ?? 0,
+      confidenceInterval,
       samples: sr.samples,
     };
   }
@@ -746,45 +799,65 @@ export class StochasticHandler implements ModeHandler {
           issues.push("Binomial p must be in [0, 1]");
         }
         break;
+      case "bernoulli":
+        if (params.p !== undefined && (params.p < 0 || params.p > 1)) {
+          issues.push("Bernoulli p must be in [0, 1]");
+        }
+        break;
+      case "geometric":
+        if (params.p !== undefined && (params.p <= 0 || params.p > 1)) {
+          issues.push("Geometric p must be in (0, 1]");
+        }
+        break;
+      case "beta": {
+        const alpha = params.alpha ?? params.a;
+        const beta = params.beta ?? params.b;
+        if (alpha !== undefined && alpha <= 0) {
+          issues.push("Beta alpha must be positive");
+        }
+        if (beta !== undefined && beta <= 0) {
+          issues.push("Beta beta must be positive");
+        }
+        break;
+      }
+      case "gamma": {
+        const shape = params.shape ?? params.k ?? params.alpha;
+        const scale = params.scale ?? params.theta;
+        if (shape !== undefined && shape <= 0) {
+          issues.push("Gamma shape must be positive");
+        }
+        if (scale !== undefined && scale <= 0) {
+          issues.push("Gamma scale must be positive");
+        }
+        break;
+      }
+      case "lognormal": {
+        const sigma = params.sigma ?? params.stdDev;
+        if (sigma !== undefined && sigma <= 0) {
+          issues.push("Lognormal sigma must be positive");
+        }
+        break;
+      }
+      case "triangular": {
+        const min = params.min ?? params.a;
+        const mode = params.mode ?? params.c;
+        const max = params.max ?? params.b;
+        if (min !== undefined && max !== undefined && min >= max) {
+          issues.push("Triangular distribution requires min < max");
+        }
+        if (
+          mode !== undefined &&
+          min !== undefined &&
+          max !== undefined &&
+          (mode < min || mode > max)
+        ) {
+          issues.push("Triangular mode must lie between min and max");
+        }
+        break;
+      }
     }
 
     return issues;
   }
 
-  /**
-   * Calculate distribution statistics
-   */
-  private calculateDistributionStats(
-    distribution: string,
-    params: Record<string, number>,
-  ): { mean?: number; variance?: number } {
-    switch (distribution) {
-      case "normal":
-      case "gaussian":
-        return {
-          mean: params.mu || params.mean || 0,
-          variance: params.variance || params.sigma2 || 1,
-        };
-      case "exponential": {
-        const lambda = params.lambda || params.rate || 1;
-        return { mean: 1 / lambda, variance: 1 / (lambda * lambda) };
-      }
-      case "poisson": {
-        const poissonLambda = params.lambda || 1;
-        return { mean: poissonLambda, variance: poissonLambda };
-      }
-      case "uniform": {
-        const a = params.a ?? params.min ?? 0;
-        const b = params.b ?? params.max ?? 1;
-        return { mean: (a + b) / 2, variance: (b - a) ** 2 / 12 };
-      }
-      case "binomial": {
-        const n = params.n || 1;
-        const p = params.p || 0.5;
-        return { mean: n * p, variance: n * p * (1 - p) };
-      }
-      default:
-        return {};
-    }
-  }
 }

@@ -194,8 +194,56 @@ three are "test-only" rather than orphaned. The repo's own generator censuses `s
 "not imported by any other file" means what a reader assumes it means. **Running both and
 reconciling the difference is what surfaced this — either tool alone would have hidden it.**
 
-Not wired here: unlike the other three, there is no obvious call site. `StochasticHandler` would
-have to want sampling, and whether it should is a design question, not a wiring one.
+### Investigated 2026-08-07: not a duplicate, and the reason it was dead is one level up
+
+The engine duplicates nothing. `mean`, `variance`, `stdDev`, `median`, `percentile`,
+`correlation` and `histogram` exist **only** here — no other file under `src/` defines them.
+
+What it did duplicate was in the other direction: `StochasticHandler` carried a **private,
+5-distribution moment table** (`calculateDistributionStats`) alongside an engine that models 11
+distributions properly. Three client-visible defects followed from that split:
+
+| Defect | Effect |
+|---|---|
+| Handler's private `RandomVariable` had no `samples` field | Client-supplied draws were silently discarded; moments always came from the declared distribution |
+| `mean: sr.mean \|\| 0` in `normalizeSimulationResult` | A client who sent samples but no mean got a confident `0` — and a genuine mean of `0` was indistinguishable from a missing one |
+| Private table knew 5 distributions | `beta`, `gamma`, `lognormal`, `triangular`, `bernoulli`, `geometric` returned `expectedValue: undefined` with no indication the mode did not know them |
+
+Plus one defect inside the engine itself: `sampleWithStatistics` used `Math.min(...samples)`, which
+passes every sample as a separate argument and throws `RangeError: Maximum call stack size
+exceeded` above ~100,000 samples — a size Monte Carlo reaches routinely, and one the handler's own
+validation encourages ("use at least 1000 iterations"). Measured, not assumed: it throws at
+250,000 on this Node and succeeds at 100,000.
+
+All four are fixed, and `analysis/statistics.ts` is now genuinely imported by
+`StochasticHandler` through a new `models/moments.ts` that holds the closed forms in one place.
+
+### …but the mode itself is unreachable, and that is the larger finding
+
+**`stochastic` appears in no MCP tool.** Neither do `constraint`, `modal`, and `recursive`.
+Confirmed two ways: no occurrence of those strings anywhere in `src/tools/`, and the legacy
+`deepthinking` tool's mode enum lists 20 modes, none of them these four.
+
+So `StochasticHandler` — and the engine behind it — can only be invoked by a library caller
+holding `ThoughtFactory` directly. No MCP client can select the mode.
+
+Two consequences worth naming:
+
+- **`recommend_mode` recommends a mode clients cannot use.** `types/modes/recommendations.ts`
+  maps `monte-carlo`, `markov`, `queueing`, `random-walk` and `random-process` to
+  `ThinkingMode.STOCHASTIC`. A client asks what to use for a queueing problem, is told
+  "stochastic", and then finds no tool that accepts it.
+- **The 2026-08-06 validator registration covered these same four modes.** Registering
+  `constraint`, `modal`, `recursive` and `stochastic` validators was correct, but they validate
+  input that no MCP client can currently send.
+
+`models/distribution.ts` and `sampling/rng.ts` are deliberately **still unimported by `src/`**.
+Wiring them needs a sampling entry point — "draw N samples from this distribution with this seed"
+— which is new client-facing input, and adding it for 1 of the 4 stranded modes would leave the
+surface inconsistent. Making these four modes reachable is one decision about the tool contract,
+not four wiring tasks. Importing the two files into the handler purely to drop the orphan count
+was considered and rejected: it would move the metric without making a line of it reachable, which
+is the failure mode this report exists to document.
 
 ## Analysis limitations
 
