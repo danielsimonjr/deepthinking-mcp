@@ -15,6 +15,7 @@ import type {
   MergeStatistics,
   ConflictingInsight,
 } from "./combination-types.js";
+import { SYNTHESIS_CONFIDENCE_NOTE } from "./combination-types.js";
 
 /**
  * Configuration for the merger
@@ -52,6 +53,29 @@ export class InsightMerger {
       minConfidence: config.minConfidence ?? 0.3,
       preserveOriginals: config.preserveOriginals ?? false,
     };
+  }
+
+  /**
+   * Whether an insight carries a real confidence.
+   *
+   * An insight with `confidenceBasis: "unavailable"` is UNSCORED, not
+   * low-confidence, and must never be dropped by a confidence threshold.
+   * Doing so discards a mode's real output because nothing measured it.
+   *
+   * This mattered the moment fabricated confidences were removed: every
+   * strategy filtered on `confidence`, and `mergeWeighted` multiplied by a
+   * mode weight before comparing to its threshold. With the old placeholder
+   * 0.8, `0.8 x 0.9 = 0.72` cleared the 0.5 threshold; the unscored weight
+   * gives `0.5 x 0.9 = 0.45` and every insight was silently dropped, leaving
+   * an empty analysis. The threshold was only ever cleared by the fabrication.
+   */
+  private isScored(insight: Insight): boolean {
+    return insight.confidenceBasis !== "unavailable";
+  }
+
+  /** Keep an insight if it is unscored, or if its real confidence clears `min`. */
+  private clearsConfidence(insight: Insight, min: number): boolean {
+    return !this.isScored(insight) || insight.confidence >= min;
   }
 
   /**
@@ -114,8 +138,8 @@ export class InsightMerger {
     const { unique, duplicatesRemoved } = this.deduplicateInsights(allInsights);
 
     // Filter by minimum confidence
-    const filtered = unique.filter(
-      (i) => i.confidence >= this.config.minConfidence,
+    const filtered = unique.filter((i) =>
+      this.clearsConfidence(i, this.config.minConfidence),
     );
 
     // Detect conflicts among remaining insights
@@ -164,8 +188,8 @@ export class InsightMerger {
     }
 
     // Filter by confidence
-    const filtered = intersected.filter(
-      (i) => i.confidence >= this.config.minConfidence,
+    const filtered = intersected.filter((i) =>
+      this.clearsConfidence(i, this.config.minConfidence),
     );
 
     return {
@@ -196,6 +220,9 @@ export class InsightMerger {
 
     // Apply weights to insight confidence
     const weightedInsights = allInsights.map((insight) => {
+      // Weighting an unscored insight would manufacture a ranking from a
+      // number that measures nothing, and then filter on it.
+      if (!this.isScored(insight)) return insight;
       const weight = config?.weights?.get(insight.sourceMode) ?? defaultWeight;
       return {
         ...insight,
@@ -217,11 +244,11 @@ export class InsightMerger {
         );
         const merged_insight = this.mergeInsightGroup(group);
         merged_insight.confidence = combinedConfidence;
-        if (combinedConfidence >= threshold) {
+        if (this.clearsConfidence(merged_insight, threshold)) {
           merged.push(merged_insight);
         }
         duplicatesRemoved += group.length - 1;
-      } else if (group[0].confidence >= threshold) {
+      } else if (this.clearsConfidence(group[0], threshold)) {
         merged.push(group[0]);
       }
     }
@@ -315,8 +342,8 @@ export class InsightMerger {
     }
 
     // Filter by confidence
-    const filtered = result.filter(
-      (i) => i.confidence >= this.config.minConfidence,
+    const filtered = result.filter((i) =>
+      this.clearsConfidence(i, this.config.minConfidence),
     );
 
     return {
@@ -406,6 +433,8 @@ export class InsightMerger {
             content: `Considering both "${thesis.content.substring(0, 30)}..." and "${antithesis.content.substring(0, 30)}...", a balanced view suggests examining both perspectives.`,
             sourceMode: config.thesisMode, // Attribute to thesis mode
             confidence: (thesis.confidence + antithesis.confidence) / 2,
+            confidenceBasis: "unavailable",
+            confidenceNote: SYNTHESIS_CONFIDENCE_NOTE,
             evidence: [
               `Thesis: ${thesis.content}`,
               `Antithesis: ${antithesis.content}`,
@@ -444,8 +473,8 @@ export class InsightMerger {
     }
 
     // Filter by confidence
-    const filtered = result.filter(
-      (i) => i.confidence >= this.config.minConfidence,
+    const filtered = result.filter((i) =>
+      this.clearsConfidence(i, this.config.minConfidence),
     );
 
     return {

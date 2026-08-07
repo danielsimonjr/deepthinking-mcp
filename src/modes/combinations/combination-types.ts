@@ -109,6 +109,42 @@ export interface ModeCombination {
 // ============================================================================
 
 /**
+ * Where a `confidence` number came from.
+ *
+ * - `derived` — computed from a value the mode's handler actually calculated
+ *   for this input.
+ * - `unavailable` — nothing computed one. The accompanying `confidence` is
+ *   {@link UNSCORED_INSIGHT_WEIGHT}, a neutral ordering weight, and **must not
+ *   be presented to a caller as a confidence**. `confidenceNote` says why.
+ *
+ * This distinction exists because the analyzer used to emit
+ * `0.8 x <a per-mode literal>` as a confidence. It looked computed, varied by
+ * mode, and was identical for two completely different problems.
+ */
+export type ConfidenceBasis = "derived" | "unavailable";
+
+/**
+ * The weight carried by an insight with no derived confidence.
+ *
+ * Deliberately a single constant for every such insight, so an average of them
+ * is exactly this value — a visible tell — rather than a plausible-looking
+ * number like 0.76. It orders nothing and means nothing.
+ */
+export const UNSCORED_INSIGHT_WEIGHT = 0.5;
+
+/**
+ * Why a synthesized insight carries no confidence of its own.
+ *
+ * Both synthesis paths (dialectical merge, conflict resolution by synthesis)
+ * average their two parents' `confidence` values. The mean of two claims'
+ * confidences is not a measurement of the third, different claim built from
+ * them — it is only a weight for ordering the result among its peers.
+ */
+export const SYNTHESIS_CONFIDENCE_NOTE =
+  "Synthesized from two insights. The value shown is the mean of their " +
+  "weights, which is not a measured confidence in the synthesis itself.";
+
+/**
  * An insight derived from a reasoning mode
  */
 export interface Insight {
@@ -121,8 +157,19 @@ export interface Insight {
   /** The mode that produced this insight */
   sourceMode: ThinkingMode;
 
-  /** Confidence score (0-1) */
+  /**
+   * Confidence score (0-1).
+   *
+   * Read `confidenceBasis` before using this. When the basis is
+   * `unavailable` this is {@link UNSCORED_INSIGHT_WEIGHT}, not a confidence.
+   */
   confidence: number;
+
+  /** Where `confidence` came from. Never omit — a bare number is not a claim. */
+  confidenceBasis: ConfidenceBasis;
+
+  /** Why no confidence was derived. Present iff `confidenceBasis` is `unavailable`. */
+  confidenceNote?: string;
 
   /** Evidence or reasoning supporting this insight */
   evidence?: string[];
@@ -224,8 +271,21 @@ export interface MergedAnalysis {
   /** Synthesized conclusion from all modes */
   synthesizedConclusion: string;
 
-  /** Overall confidence score for the analysis */
+  /**
+   * Overall confidence score for the analysis.
+   *
+   * Read `confidenceBasis` before using this. It is the mean of the
+   * contributing insights' `confidence` values, so when no insight has a
+   * derived confidence it is exactly {@link UNSCORED_INSIGHT_WEIGHT} and means
+   * nothing.
+   */
   confidenceScore: number;
+
+  /** Where `confidenceScore` came from. `derived` iff any insight's basis is. */
+  confidenceBasis: ConfidenceBasis;
+
+  /** Why no confidence was derived. Present iff `confidenceBasis` is `unavailable`. */
+  confidenceNote?: string;
 
   /** The modes that contributed to this analysis */
   contributingModes: ThinkingMode[];

@@ -11,6 +11,7 @@ import type {
   ConflictResolution,
   ConflictType,
 } from "./combination-types.js";
+import { SYNTHESIS_CONFIDENCE_NOTE } from "./combination-types.js";
 
 /**
  * Configuration for conflict resolution
@@ -436,6 +437,8 @@ export class ConflictResolver {
       sourceMode: conflict.insight1.mode, // Primary attribution
       confidence:
         (conflict.insight1.confidence + conflict.insight2.confidence) / 2,
+      confidenceBasis: "unavailable",
+      confidenceNote: SYNTHESIS_CONFIDENCE_NOTE,
       evidence: [
         `Synthesized from ${conflict.insight1.mode}: "${conflict.insight1.content.substring(0, 50)}..."`,
         `And ${conflict.insight2.mode}: "${conflict.insight2.content.substring(0, 50)}..."`,

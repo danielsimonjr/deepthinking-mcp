@@ -8,7 +8,10 @@
  */
 
 import { randomUUID } from "crypto";
-import { ThinkingMode } from "../../types/core.js";
+import { ThinkingMode, type Thought } from "../../types/core.js";
+import type { ThinkingToolInput } from "../../tools/thinking.js";
+import { ThoughtFactory } from "../../services/ThoughtFactory.js";
+import type { ValidationResult } from "../handlers/ModeHandler.js";
 import type {
   MultiModeAnalysisRequest,
   MultiModeAnalysisResponse,
@@ -17,7 +20,9 @@ import type {
   Insight,
   ModeError,
   MergeStatistics,
+  ConfidenceBasis,
 } from "./combination-types.js";
+import { UNSCORED_INSIGHT_WEIGHT } from "./combination-types.js";
 import { InsightMerger, MergeResult } from "./merger.js";
 import { ConflictResolver } from "./conflict-resolver.js";
 import { getPreset, isValidPresetId, PresetId } from "./presets.js";
@@ -41,6 +46,15 @@ export interface MultiModeAnalyzerConfig {
 
   /** Enable verbose logging */
   verbose?: boolean;
+
+  /**
+   * Factory used to run each mode's real handler.
+   *
+   * Injectable so a test can substitute one and prove the analyzer's output
+   * actually comes from it. Defaults to a `ThoughtFactory` with all handlers
+   * registered.
+   */
+  thoughtFactory?: ThoughtFactory;
 }
 
 /**
@@ -56,11 +70,64 @@ const ANALYZER_CONSTANTS = {
   MAX_PARALLEL_MODES: 5,
   /** Minimum confidence threshold for insights */
   MIN_CONFIDENCE_THRESHOLD: 0.3,
-  /** Base confidence for placeholder insights (pending ThoughtFactory integration) */
-  BASE_INSIGHT_CONFIDENCE: 0.8,
+  /** Most mode-specific fields named in one insight before truncating. */
+  MAX_FIELDS_LISTED: 8,
+  /** Most handler advisories quoted in one insight before truncating. */
+  MAX_ADVISORIES_LISTED: 3,
+  /** Hard cap on a derived insight's content length. */
+  MAX_INSIGHT_CONTENT: 600,
 } as const;
 
-const DEFAULT_CONFIG: Required<MultiModeAnalyzerConfig> = {
+/**
+ * `BaseThought` keys. Everything else on a created thought is mode-specific,
+ * which is how a derived insight reports what a handler actually populated
+ * without a per-mode switch that would drift as modes are added.
+ */
+const BASE_THOUGHT_KEYS: ReadonlySet<string> = new Set([
+  "id",
+  "sessionId",
+  "thoughtNumber",
+  "totalThoughts",
+  "content",
+  "timestamp",
+  "mode",
+  "nextThoughtNeeded",
+  "isRevision",
+  "revisesThought",
+  "revisionReason",
+  "branchFrom",
+  "branchId",
+  "uncertainty",
+  "dependencies",
+  "assumptions",
+  "tags",
+  "importance",
+  "validation",
+  "proofAnalysis",
+]);
+
+/**
+ * Why no mode can report a confidence on this path.
+ *
+ * `deepthinking_analyze` accepts `thought`, `preset`, `customModes`,
+ * `mergeStrategy`, `sessionId`, `context` and `timeoutPerMode` — and no
+ * mode-specific field. A handler computes a confidence FROM mode data (a
+ * Bayesian posterior from a prior and a likelihood, an inductive confidence
+ * from observations, an evidential belief from masses). Given only a problem
+ * statement there is nothing to compute from, so any number emitted here would
+ * be invented. Callers wanting a real confidence must run the mode through its
+ * own focused tool with that mode's inputs.
+ */
+const NO_CONFIDENCE_NOTE =
+  "No confidence was computed. deepthinking_analyze supplies only the problem " +
+  "statement, and this mode's handler derives confidence from mode-specific " +
+  "inputs it was not given. Run the mode through its own tool with those " +
+  "inputs to obtain a real confidence.";
+
+const DEFAULT_CONFIG: Omit<
+  Required<MultiModeAnalyzerConfig>,
+  "thoughtFactory"
+> = {
   defaultTimeoutPerMode: ANALYZER_CONSTANTS.DEFAULT_TIMEOUT_MS,
   continueOnError: true,
   maxParallelModes: ANALYZER_CONSTANTS.MAX_PARALLEL_MODES,
@@ -128,14 +195,22 @@ export interface AnalysisProgress {
  * ```
  */
 export class MultiModeAnalyzer {
-  private readonly config: Required<MultiModeAnalyzerConfig>;
+  private readonly config: Omit<
+    Required<MultiModeAnalyzerConfig>,
+    "thoughtFactory"
+  >;
   private readonly merger: InsightMerger;
   private readonly conflictResolver: ConflictResolver;
+  private readonly factory: ThoughtFactory;
 
   constructor(config: MultiModeAnalyzerConfig = {}) {
-    this.config = { ...DEFAULT_CONFIG, ...config };
+    const { thoughtFactory, ...rest } = config;
+    this.config = { ...DEFAULT_CONFIG, ...rest };
     this.merger = new InsightMerger();
     this.conflictResolver = new ConflictResolver();
+    // Registers every handler on construction, so each mode below runs the
+    // same code path a single-mode tool call runs.
+    this.factory = thoughtFactory ?? new ThoughtFactory();
   }
 
   /**
@@ -328,40 +403,20 @@ export class MultiModeAnalyzer {
   }
 
   /**
-   * Get supported modes for analysis
+   * Modes this analyzer can execute.
+   *
+   * Derived from the handler registry, not from a list. The former hardcoded
+   * list named 29 modes and omitted `historical`, `recursive`, `modal`,
+   * `stochastic`, `constraint` and `custom` — all of which have registered
+   * handlers and all of which the analyzer executes, so the list understated
+   * what the code does.
+   *
+   * NOTE: `deepthinking_analyze`'s own `customModes` enum in
+   * `src/tools/schemas/analyze.ts` still lists the same 29. Widening it is a
+   * separate, deliberate change in `src/tools/`.
    */
   getSupportedModes(): ThinkingMode[] {
-    return [
-      ThinkingMode.SEQUENTIAL,
-      ThinkingMode.SHANNON,
-      ThinkingMode.MATHEMATICS,
-      ThinkingMode.PHYSICS,
-      ThinkingMode.HYBRID,
-      ThinkingMode.INDUCTIVE,
-      ThinkingMode.DEDUCTIVE,
-      ThinkingMode.ABDUCTIVE,
-      ThinkingMode.CAUSAL,
-      ThinkingMode.BAYESIAN,
-      ThinkingMode.COUNTERFACTUAL,
-      ThinkingMode.TEMPORAL,
-      ThinkingMode.GAMETHEORY,
-      ThinkingMode.EVIDENTIAL,
-      ThinkingMode.ANALOGICAL,
-      ThinkingMode.FIRSTPRINCIPLES,
-      ThinkingMode.SYSTEMSTHINKING,
-      ThinkingMode.SCIENTIFICMETHOD,
-      ThinkingMode.FORMALLOGIC,
-      ThinkingMode.OPTIMIZATION,
-      ThinkingMode.ENGINEERING,
-      ThinkingMode.COMPUTABILITY,
-      ThinkingMode.CRYPTANALYTIC,
-      ThinkingMode.ALGORITHMIC,
-      ThinkingMode.SYNTHESIS,
-      ThinkingMode.ARGUMENTATION,
-      ThinkingMode.CRITIQUE,
-      ThinkingMode.ANALYSIS,
-      ThinkingMode.METAREASONING,
-    ];
+    return this.factory.getRegistry().getRegisteredModes();
   }
 
   // ============================================================================
@@ -421,13 +476,7 @@ export class MultiModeAnalyzer {
         try {
           onModeComplete?.(completed, mode);
 
-          // Simulate mode execution - in real implementation, this would call ThoughtFactory
-          // For now, we generate representative insights for each mode
-          const insights = this.generateModeInsights(
-            mode,
-            request.thought,
-            request.context,
-          );
+          const insights = this.runMode(mode, request);
 
           const result: ModeAnalysisResult = {
             mode,
@@ -471,199 +520,183 @@ export class MultiModeAnalyzer {
   }
 
   /**
-   * Generate representative insights for a mode
-   * This is a placeholder - in production, this would integrate with ThoughtFactory
+   * Run one reasoning mode for real and derive insights from what it produced.
+   *
+   * This used to be `generateModeInsights`, which returned a hardcoded English
+   * sentence per mode with the caller's own question spliced into it, plus a
+   * fabricated confidence (`0.8 x <a per-mode literal>`). No handler ran. The
+   * confidence was identical for two unrelated problems, because it was a
+   * function of which modes were selected and nothing else.
+   *
+   * Now the mode's real handler runs through `ThoughtFactory`, and every field
+   * below is read back off what it produced.
    */
-  private generateModeInsights(
+  private runMode(
     mode: ThinkingMode,
-    thought: string,
-    context?: string,
+    request: MultiModeAnalysisRequest,
   ): Insight[] {
-    // Use deterministic confidence based on mode characteristics
-    // TODO: Replace with actual ThoughtFactory integration for real confidence scoring
-    const baseConfidence = ANALYZER_CONSTANTS.BASE_INSIGHT_CONFIDENCE;
-    const timestamp = new Date();
+    const input = this.buildModeInput(mode, request);
+    const sessionId = request.sessionId ?? `analysis-${randomUUID()}`;
 
-    // Generate mode-appropriate insights
-    const insights: Insight[] = [];
+    // The real handler, via ModeHandlerRegistry.
+    const thought = this.factory.createThought(input, sessionId);
+    // The handler's own advisory feedback. Advisory throughout: it is reported,
+    // never used to reject a mode or fail the analysis.
+    const validation = this.factory.validate(input);
 
-    switch (mode) {
-      case ThinkingMode.DEDUCTIVE:
-        insights.push({
-          id: randomUUID(),
-          content: `Logical deduction from premises: ${thought.substring(0, 50)}...`,
-          sourceMode: mode,
-          confidence: baseConfidence,
-          evidence: ["Premise analysis", "Logical inference"],
-          timestamp,
-          category: "deductive_conclusion",
-          priority: 8,
-        });
-        break;
+    return [this.deriveInsight(mode, thought, validation)];
+  }
 
-      case ThinkingMode.INDUCTIVE:
-        insights.push({
-          id: randomUUID(),
-          content: `Pattern identified from analysis: Generalizing observations about ${thought.substring(0, 30)}...`,
-          sourceMode: mode,
-          confidence: baseConfidence * 0.9,
-          evidence: ["Pattern recognition", "Statistical inference"],
-          timestamp,
-          category: "inductive_generalization",
-          priority: 7,
-        });
-        break;
+  /**
+   * Build the handler input for one mode.
+   *
+   * `context` is folded into the thought text rather than passed as a field:
+   * `ThinkingToolInput` has no context field, and inventing one would put data
+   * somewhere no handler reads.
+   */
+  private buildModeInput(
+    mode: ThinkingMode,
+    request: MultiModeAnalysisRequest,
+  ): ThinkingToolInput {
+    const text = request.context
+      ? `${request.thought}
 
-      case ThinkingMode.ABDUCTIVE:
-        insights.push({
-          id: randomUUID(),
-          content: `Best explanation hypothesis: Most likely cause for ${thought.substring(0, 30)}...`,
-          sourceMode: mode,
-          confidence: baseConfidence * 0.85,
-          evidence: ["Inference to best explanation"],
-          timestamp,
-          category: "abductive_hypothesis",
-          priority: 6,
-        });
-        break;
+Context: ${request.context}`
+      : request.thought;
 
-      case ThinkingMode.CAUSAL:
-        insights.push({
-          id: randomUUID(),
-          content: `Causal relationship identified: Factors influencing ${thought.substring(0, 30)}...`,
-          sourceMode: mode,
-          confidence: baseConfidence,
-          evidence: ["Causal graph analysis", "Intervention analysis"],
-          timestamp,
-          category: "causal_mechanism",
-          priority: 8,
-        });
-        break;
+    return {
+      thought: text,
+      thoughtNumber: 1,
+      totalThoughts: 1,
+      nextThoughtNeeded: false,
+      mode,
+    } as ThinkingToolInput;
+  }
 
-      case ThinkingMode.BAYESIAN:
-        insights.push({
-          id: randomUUID(),
-          content: `Probability assessment: Updated belief about ${thought.substring(0, 30)}...`,
-          sourceMode: mode,
-          confidence: baseConfidence,
-          evidence: [
-            "Prior probability",
-            "Evidence likelihood",
-            "Posterior calculation",
-          ],
-          timestamp,
-          category: "probabilistic_assessment",
-          priority: 7,
-        });
-        break;
+  /**
+   * Turn one handler's output into an insight, inventing nothing.
+   *
+   * Content comes from two real sources: the mode-specific fields the handler
+   * populated, and the handler's own advisories, which name exactly what the
+   * mode would need to reason about this problem. Where the old code asserted
+   * "Nash equilibrium considerations for ...", this reports that the game
+   * theory handler ran, populated no game, and says players and payoffs are
+   * required — which is true, and actionable.
+   */
+  private deriveInsight(
+    mode: ThinkingMode,
+    thought: Thought,
+    validation: ValidationResult,
+  ): Insight {
+    const populated = this.populatedModeFields(thought);
+    const advisories = validation.warnings ?? [];
 
-      case ThinkingMode.SYSTEMSTHINKING:
-        insights.push({
-          id: randomUUID(),
-          content: `System dynamics: Feedback loops and interactions in ${thought.substring(0, 30)}...`,
-          sourceMode: mode,
-          confidence: baseConfidence * 0.9,
-          evidence: ["Feedback loop analysis", "Stock-flow modeling"],
-          timestamp,
-          category: "systems_insight",
-          priority: 7,
-        });
-        break;
+    const parts: string[] = [];
 
-      case ThinkingMode.FIRSTPRINCIPLES:
-        insights.push({
-          id: randomUUID(),
-          content: `First principles analysis: Core assumptions about ${thought.substring(0, 30)}...`,
-          sourceMode: mode,
-          confidence: baseConfidence,
-          evidence: ["Fundamental axioms", "Deconstruction analysis"],
-          timestamp,
-          category: "foundational_insight",
-          priority: 9,
-        });
-        break;
-
-      case ThinkingMode.GAMETHEORY:
-        insights.push({
-          id: randomUUID(),
-          content: `Strategic analysis: Nash equilibrium considerations for ${thought.substring(0, 30)}...`,
-          sourceMode: mode,
-          confidence: baseConfidence * 0.95,
-          evidence: ["Payoff matrix", "Equilibrium analysis"],
-          timestamp,
-          category: "strategic_insight",
-          priority: 7,
-        });
-        break;
-
-      case ThinkingMode.COUNTERFACTUAL:
-        insights.push({
-          id: randomUUID(),
-          content: `Counterfactual scenario: Alternative outcomes if ${thought.substring(0, 30)}...`,
-          sourceMode: mode,
-          confidence: baseConfidence * 0.8,
-          evidence: ["World state modeling", "Alternative history analysis"],
-          timestamp,
-          category: "counterfactual_scenario",
-          priority: 6,
-        });
-        break;
-
-      case ThinkingMode.TEMPORAL:
-        insights.push({
-          id: randomUUID(),
-          content: `Temporal analysis: Timeline and sequencing for ${thought.substring(0, 30)}...`,
-          sourceMode: mode,
-          confidence: baseConfidence,
-          evidence: ["Event sequencing", "Allen interval analysis"],
-          timestamp,
-          category: "temporal_insight",
-          priority: 7,
-        });
-        break;
-
-      case ThinkingMode.OPTIMIZATION:
-        insights.push({
-          id: randomUUID(),
-          content: `Optimization insight: Optimal approach for ${thought.substring(0, 30)}...`,
-          sourceMode: mode,
-          confidence: baseConfidence,
-          evidence: ["Constraint satisfaction", "Objective optimization"],
-          timestamp,
-          category: "optimization_result",
-          priority: 8,
-        });
-        break;
-
-      default:
-        // Generic insight for other modes
-        insights.push({
-          id: randomUUID(),
-          content: `Analysis via ${mode}: Key observations about ${thought.substring(0, 40)}...`,
-          sourceMode: mode,
-          confidence: baseConfidence * 0.85,
-          evidence: [`${mode} methodology`],
-          timestamp,
-          category: "general_insight",
-          priority: 5,
-        });
+    if (populated.names.length > 0) {
+      parts.push(
+        `${mode}: handler populated ${this.describeList(populated.names, populated.truncated)}.`,
+      );
+    } else {
+      parts.push(
+        `${mode}: handler ran and populated no mode-specific field from the problem statement alone.`,
+      );
     }
 
-    // Add context-based insight if context provided
-    if (context) {
-      insights.push({
-        id: randomUUID(),
-        content: `Context-aware insight: Considering ${context.substring(0, 30)} in relation to the problem...`,
-        sourceMode: mode,
-        confidence: baseConfidence * 0.9,
-        evidence: ["Contextual analysis"],
-        timestamp,
-        category: "contextual_insight",
-        priority: 6,
-      });
+    if (advisories.length > 0) {
+      const shown = advisories.slice(
+        0,
+        ANALYZER_CONSTANTS.MAX_ADVISORIES_LISTED,
+      );
+      const missing = shown
+        .map((w) => w.suggestion ?? w.message)
+        .filter((t): t is string => Boolean(t));
+      const overflow = advisories.length - shown.length;
+      parts.push(
+        `To reason about this problem it needs: ${missing.join("; ")}` +
+          (overflow > 0 ? ` (+${overflow} more)` : "") +
+          ".",
+      );
+    } else {
+      parts.push("The handler reported no missing inputs.");
     }
 
-    return insights;
+    const content = this.truncate(
+      parts.join(" "),
+      ANALYZER_CONSTANTS.MAX_INSIGHT_CONTENT,
+    );
+
+    // Evidence is the provenance of the two sources above - not prose about
+    // what the mode is for. The old code listed "Payoff matrix" as evidence
+    // for a game theory insight that had never seen a payoff matrix.
+    const evidence = [
+      `handler: ${thought.mode}`,
+      `populated fields: ${populated.names.length}`,
+      `handler advisories: ${advisories.length}`,
+    ];
+
+    return {
+      id: randomUUID(),
+      content,
+      sourceMode: mode,
+      // Nothing computed a confidence. See NO_CONFIDENCE_NOTE.
+      confidence: UNSCORED_INSIGHT_WEIGHT,
+      confidenceBasis: "unavailable",
+      confidenceNote: NO_CONFIDENCE_NOTE,
+      evidence,
+      timestamp: new Date(),
+      category: this.deriveCategory(mode, thought),
+    };
+  }
+
+  /**
+   * The mode-specific fields a handler actually filled in.
+   *
+   * Derived by subtracting the `BaseThought` keys, so a new mode needs no
+   * change here. Empty arrays, empty objects and empty strings do not count as
+   * populated: a handler that defaults a field to `[]` has not analysed
+   * anything.
+   */
+  private populatedModeFields(thought: Thought): {
+    names: string[];
+    truncated: number;
+  } {
+    const all = Object.entries(thought as unknown as Record<string, unknown>)
+      .filter(([key, value]) => {
+        if (BASE_THOUGHT_KEYS.has(key)) return false;
+        if (value === undefined || value === null || value === "") return false;
+        if (Array.isArray(value)) return value.length > 0;
+        if (value instanceof Date) return true;
+        if (typeof value === "object") {
+          return Object.keys(value as Record<string, unknown>).length > 0;
+        }
+        return true;
+      })
+      .map(([key]) => key);
+
+    const shown = all.slice(0, ANALYZER_CONSTANTS.MAX_FIELDS_LISTED);
+    return { names: shown, truncated: all.length - shown.length };
+  }
+
+  /**
+   * Category from the thought's own `thoughtType` where the handler set one,
+   * falling back to the mode name. Never invented.
+   */
+  private deriveCategory(mode: ThinkingMode, thought: Thought): string {
+    const thoughtType = (thought as unknown as Record<string, unknown>)
+      .thoughtType;
+    return typeof thoughtType === "string" && thoughtType.length > 0
+      ? thoughtType
+      : `${mode}_thought`;
+  }
+
+  private describeList(names: string[], truncated: number): string {
+    const joined = names.join(", ");
+    return truncated > 0 ? `${joined} (+${truncated} more)` : joined;
+  }
+
+  private truncate(text: string, max: number): string {
+    return text.length <= max ? text : `${text.slice(0, max - 3)}...`;
   }
 
   /**
@@ -739,10 +772,26 @@ export class MultiModeAnalyzer {
       supportingEvidence.set(insight.id, existing);
     }
 
+    // An overall confidence exists only if some contributing insight has a
+    // derived one. Otherwise the mean below is exactly UNSCORED_INSIGHT_WEIGHT
+    // and is reported as unavailable rather than dressed up as a score.
+    //
+    // On today's tool surface `derived` never occurs: `deepthinking_analyze`
+    // accepts no mode-specific input, so no handler has anything to compute a
+    // confidence from. The branch is the contract for when it does - a mode
+    // run with a real prior and likelihood can report a real posterior - and
+    // keeping it means that change needs no rework here.
+    const derived = mergeResult.insights.filter(
+      (i) => i.confidenceBasis === "derived",
+    );
+    const confidenceBasis: ConfidenceBasis =
+      derived.length > 0 ? "derived" : "unavailable";
+
     // Create synthesized conclusion
     const synthesizedConclusion = this.synthesizeConclusion(
       mergeResult.insights,
       conflicts,
+      confidenceBasis,
     );
 
     return {
@@ -754,6 +803,10 @@ export class MultiModeAnalyzer {
       confidenceScore:
         mergeResult.insights.reduce((acc, i) => acc + i.confidence, 0) /
         Math.max(mergeResult.insights.length, 1),
+      confidenceBasis,
+      ...(confidenceBasis === "unavailable"
+        ? { confidenceNote: NO_CONFIDENCE_NOTE }
+        : {}),
       contributingModes: modes,
       mergeStrategy,
       statistics,
@@ -767,6 +820,7 @@ export class MultiModeAnalyzer {
   private synthesizeConclusion(
     insights: Insight[],
     conflicts: ReturnType<ConflictResolver["detectConflicts"]>,
+    confidenceBasis: ConfidenceBasis = "unavailable",
   ): string {
     if (insights.length === 0) {
       return "No insights generated from the analysis.";
@@ -788,6 +842,14 @@ export class MultiModeAnalyzer {
 
     if (conflicts.length > 0) {
       conclusion += ` Note: ${conflicts.length} conflict(s) were detected and resolved during synthesis.`;
+    }
+
+    // Stated in the conclusion, not only in a sibling field, because this is
+    // the string a caller reads. `confidenceScore` is required by the tool's
+    // output schema and so is still emitted; without this sentence a caller
+    // would read that number as a confidence.
+    if (confidenceBasis === "unavailable") {
+      conclusion += ` ${NO_CONFIDENCE_NOTE} Treat the reported confidenceScore as unset.`;
     }
 
     return conclusion;
@@ -837,6 +899,8 @@ export class MultiModeAnalyzer {
         conflicts: [],
         synthesizedConclusion: errorMessage,
         confidenceScore: 0,
+        confidenceBasis: "unavailable",
+        confidenceNote: "No modes ran, so nothing could be scored.",
         contributingModes: [],
         mergeStrategy: "union",
         statistics: {
