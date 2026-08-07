@@ -219,15 +219,27 @@ the old tool name.
 | `deepthinking_standard` | sequential, shannon, hybrid |
 | `deepthinking_mathematics` | mathematics, physics, computability |
 | `deepthinking_temporal` | temporal, historical |
-| `deepthinking_probabilistic` | bayesian, evidential |
+| `deepthinking_probabilistic` | bayesian, evidential, stochastic |
 | `deepthinking_causal` | causal, counterfactual |
-| `deepthinking_strategic` | gametheory, optimization |
+| `deepthinking_strategic` | gametheory, optimization, constraint |
 | `deepthinking_analytical` | analogical, firstprinciples, metareasoning, cryptanalytic |
-| `deepthinking_scientific` | scientificmethod, systemsthinking, formallogic |
-| `deepthinking_engineering` | engineering, algorithmic |
+| `deepthinking_scientific` | scientificmethod, systemsthinking, formallogic, modal |
+| `deepthinking_engineering` | engineering, algorithmic, recursive |
 | `deepthinking_academic` | synthesis, argumentation, critique, analysis |
 | `deepthinking_session` | Session management (create, list, delete, export, get_session, switch_mode, recommend_mode) |
 | `deepthinking_analyze` | Multi-mode analysis with presets and merge strategies |
+
+All 34 modes in `FULLY_IMPLEMENTED_MODES` are selectable through the table above; the guard that
+enforces it is `tests/unit/tools/mode-reachability.test.ts`. `custom` is deliberately excluded — it
+is the one `ThinkingMode` outside `FULLY_IMPLEMENTED_MODES`, and its arbitrary payload cannot be
+bounded by `MAX_LENGTHS`.
+
+> **`deepthinking_analyze` is a separate surface with its own, narrower mode list.** Its
+> `customModes` enum covers 29 modes and omits `historical` as well as the four above. Widening it
+> is not just a schema edit: `MultiModeAnalyzer.executeModes()` does not call `ThoughtFactory` at
+> all — it generates canned per-mode insights from a `switch` (see the "Simulate mode execution"
+> comment in `src/modes/combinations/analyzer.ts`), so a mode added to the enum without a `case`
+> would produce generic filler, not reasoning.
 
 ## Adding New Features
 

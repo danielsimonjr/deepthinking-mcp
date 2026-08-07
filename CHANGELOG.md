@@ -9,6 +9,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Four implemented reasoning modes are now selectable through the MCP surface: `stochastic`,
+  `constraint`, `modal` and `recursive`.** Each already had a specialized handler, a registered
+  validator and a place in `FULLY_IMPLEMENTED_MODES`, but no tool's `mode` enum accepted the value,
+  so no client could ever reach them — while `recommend_mode` actively recommended `stochastic` for
+  Monte Carlo, Markov, queueing and random-walk problems. They were placed with their nearest
+  relatives rather than in a new tool:
+
+  | Mode | Tool | Why there |
+  |---|---|---|
+  | `stochastic` | `deepthinking_probabilistic` | The process-over-time member of the same family — bayesian updates a belief, evidential combines masses, stochastic evolves a distribution. `StochasticHandler.relatedModes` names BAYESIAN first. |
+  | `constraint` | `deepthinking_strategic` | A CSP is the feasibility half of the search problem `optimization` already owns — same variables, same constraint set, different question. |
+  | `modal` | `deepthinking_scientific` | Modal logic is `formallogic` extended with necessity/possibility operators, one Kripke frame deeper. |
+  | `recursive` | `deepthinking_engineering` | Recursion is algorithm design: its strategies are the CLRS design patterns `algorithmic` already advertises. |
+
+  Purely additive — no accepted value was removed or renamed, and no existing field changed
+  meaning. In particular the CSP constraint objects ride **`cspConstraints`**, not `constraints`:
+  `constraints` is already the optimization mode's array of strings on the same tool, and
+  `ConstraintHandler` already read `input.constraints || input.cspConstraints`, so the alias needed
+  no handler change.
+
+  Both layers were updated together — the advertised JSON Schema in `src/tools/json-schemas.ts` and
+  the enforcing Zod schema in `src/tools/schemas/modes/**` — and every added field carries a
+  `MAX_LENGTHS` bound (object arrays at `NESTED_ARRAY_ITEMS`, string arrays and record entry counts
+  at `ARRAY_ITEMS`, free text at `DESCRIPTION`), so the H-2 caps still hold. Mode-specific
+  vocabulary fields (`thoughtType`, `processType`, `strategy`, `modalLogicType`, `solutionStatus`,
+  constraint `type`/`priority`) are bounded **strings, not Zod enums**, on purpose: the handlers
+  *warn* on an unrecognised value and carry on, and an enum would convert that advisory warning
+  into a hard call failure. The accepted values are listed in each field's advertised description.
+
+  `custom` remains off the tool surface, and that is the intended state: it is the only
+  `ThinkingMode` absent from `FULLY_IMPLEMENTED_MODES`, and its payload (`customFields[].value`,
+  `metadata`) is arbitrary user data the input caps cannot bound.
+
+- **`tests/unit/tools/mode-reachability.test.ts`** — the guard that would have caught this. Every
+  existing test asked "does the handler work?"; none asked "can anyone reach the handler?". This
+  one derives the reachable set from the *advertised* `mode` enums (not from `modeToToolMap`, which
+  could agree with itself while both are wrong) and fails if any mode in `FULLY_IMPLEMENTED_MODES`
+  is stranded. It also proves, per mode, that a fully-populated payload survives Zod (Zod strips
+  unknown keys silently, so an accepted mode with stripped fields is still useless), that the real
+  handler then reads those exact fields off the parsed input, that the caps reject an over-sized
+  payload, and that an unrecognised vocabulary value still only warns. Verified by mutation: with
+  `stochastic` removed from both enums, 7 of its assertions fail.
+
 - **`src/modes/stochastic/models/moments.ts`** — closed-form mean and variance for the 11
   distributions this codebase accepts, in one place. Two rules its callers depend on: an unknown
   distribution returns `{}` rather than a guess, and out-of-domain parameters return `{}` rather
@@ -55,6 +98,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cannot select. `models/distribution.ts` and `sampling/rng.ts` therefore remain unimported by
   `src/`: wiring them needs a sampling entry point, which is new client-facing input, and adding it
   for one of four stranded modes would leave the surface inconsistent. See `DRIFT_REPORT.md`.
+
+  **Update, same release cycle:** the stranding is fixed — see the "Four implemented reasoning modes
+  are now selectable" entry above. `models/distribution.ts` and `sampling/rng.ts` are still
+  unimported by `src/`; that gap is now about a sampling entry point alone, not about reachability.
 
 ### Changed
 

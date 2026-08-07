@@ -76,6 +76,16 @@ export const toolSchemas = {
  * Mode to tool name mapping for routing
  * Phase 14: All 29 modes with dedicated thought types are now accessible
  * v9.1.0: Added historical mode to temporal tool
+ * v9.3.4: Added stochastic, constraint, modal and recursive. Each had a full
+ *   handler, a registered validator and a place in FULLY_IMPLEMENTED_MODES, but
+ *   no tool accepted the value -- so a client told by `recommend_mode` to use
+ *   e.g. `stochastic` for a Monte Carlo problem had no tool that would take it.
+ *   `custom` is deliberately still absent: it is the one mode NOT in
+ *   FULLY_IMPLEMENTED_MODES, and its payload (`customFields[].value`,
+ *   `metadata`) is arbitrary user data that the MAX_LENGTHS input caps cannot
+ *   bound. Exposing it is a separate decision, not an oversight to patch here.
+ *
+ * This map covers all 34 fully-implemented modes.
  */
 export const modeToToolMap: Record<string, string> = {
   // Core reasoning modes (fundamental)
@@ -100,6 +110,7 @@ export const modeToToolMap: Record<string, string> = {
   // Probabilistic modes
   bayesian: "deepthinking_probabilistic",
   evidential: "deepthinking_probabilistic",
+  stochastic: "deepthinking_probabilistic",
 
   // Causal modes
   causal: "deepthinking_causal",
@@ -108,6 +119,7 @@ export const modeToToolMap: Record<string, string> = {
   // Strategic modes
   gametheory: "deepthinking_strategic",
   optimization: "deepthinking_strategic",
+  constraint: "deepthinking_strategic",
 
   // Analytical modes (includes cryptanalytic)
   analogical: "deepthinking_analytical",
@@ -119,10 +131,12 @@ export const modeToToolMap: Record<string, string> = {
   scientificmethod: "deepthinking_scientific",
   systemsthinking: "deepthinking_scientific",
   formallogic: "deepthinking_scientific",
+  modal: "deepthinking_scientific",
 
   // Engineering modes (Phase 14)
   engineering: "deepthinking_engineering",
   algorithmic: "deepthinking_engineering",
+  recursive: "deepthinking_engineering",
 
   // Academic research modes (Phase 14)
   synthesis: "deepthinking_academic",

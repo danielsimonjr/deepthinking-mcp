@@ -846,15 +846,21 @@ export const deepthinking_temporal_schema = {
  */
 export const deepthinking_probabilistic_schema = {
   name: "deepthinking_probabilistic",
-  description: "Probabilistic: Bayesian updates, Dempster-Shafer belief",
+  description:
+    "Probabilistic: Bayesian updates, Dempster-Shafer belief, stochastic processes (Markov chains, Monte Carlo)",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["bayesian", "evidential"],
+        enum: ["bayesian", "evidential", "stochastic"],
         description: "Probabilistic reasoning mode",
+      },
+      thoughtType: {
+        type: "string",
+        description:
+          "Step within the mode. Stochastic: 'process_definition', 'transition_analysis', 'steady_state_analysis', 'random_variable_definition', 'monte_carlo_simulation', 'convergence_analysis', 'hitting_time_analysis'. An unrecognised value is accepted with a warning.",
       },
       priorProbability: {
         type: "number",
@@ -912,6 +918,156 @@ export const deepthinking_probabilistic_schema = {
         type: "object",
         additionalProperties: { type: "number", minimum: 0, maximum: 1 },
         description: "Plausibility function values",
+      },
+      // --- Stochastic mode (v9.3.4) ---
+      processType: {
+        type: "string",
+        description:
+          "Kind of stochastic process: 'discrete_time', 'continuous_time', 'random_walk', 'birth_death' or 'queueing'. An unrecognised value is accepted with a warning.",
+      },
+      stepCount: {
+        type: "integer",
+        minimum: 0,
+        description: "Current step index in the process",
+      },
+      currentState: {
+        type: "string",
+        description: "ID of the state the process currently occupies",
+      },
+      stateHistory: {
+        type: "array",
+        items: { type: "string" },
+        description: "IDs of the states visited so far, in order",
+      },
+      markovChain: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          name: { type: "string" },
+          states: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                name: { type: "string" },
+                description: { type: "string" },
+                probability: { type: "number", minimum: 0, maximum: 1 },
+                isAbsorbing: { type: "boolean" },
+                isTransient: { type: "boolean" },
+              },
+              additionalProperties: false,
+            },
+            description: "States of the chain",
+          },
+          transitions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                fromState: { type: "string" },
+                toState: { type: "string" },
+                probability: { type: "number", minimum: 0, maximum: 1 },
+                condition: { type: "string" },
+              },
+              additionalProperties: false,
+            },
+            description:
+              "Transitions between states. Outgoing probabilities from a state should sum to 1; they are warned about, not rejected.",
+          },
+          initialDistribution: {
+            type: "object",
+            additionalProperties: { type: "number" },
+            description: "Initial probability per state ID; should sum to 1",
+          },
+          isIrreducible: { type: "boolean" },
+          isErgodic: { type: "boolean" },
+          period: { type: "integer", minimum: 1 },
+        },
+        additionalProperties: false,
+        description: "Markov chain under analysis",
+      },
+      randomVariables: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            distribution: {
+              type: "string",
+              description:
+                "'uniform', 'normal', 'exponential', 'poisson', 'binomial', 'geometric', 'bernoulli' or 'custom'",
+            },
+            parameters: {
+              type: "object",
+              additionalProperties: { type: "number" },
+              description: "Distribution parameters, e.g. { mu: 0, sigma: 1 }",
+            },
+            samples: {
+              type: "array",
+              items: { type: "number" },
+              description:
+                "Observed draws. When present these override the declared distribution for the computed moments.",
+            },
+            expectedValue: { type: "number" },
+            variance: { type: "number" },
+          },
+          additionalProperties: false,
+        },
+        description: "Random variables in the model",
+      },
+      simulations: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            iterations: { type: "integer", minimum: 0 },
+            mean: { type: "number" },
+            variance: { type: "number" },
+            confidenceInterval: {
+              type: "array",
+              items: { type: "number" },
+              minItems: 2,
+              maxItems: 2,
+              description: "[lower, upper]; derived from samples if omitted",
+            },
+            samples: {
+              type: "array",
+              items: { type: "number" },
+            },
+          },
+          additionalProperties: false,
+        },
+        description: "Monte Carlo simulation results",
+      },
+      simulationResults: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            iterations: { type: "integer", minimum: 0 },
+            mean: { type: "number" },
+            variance: { type: "number" },
+            confidenceInterval: {
+              type: "array",
+              items: { type: "number" },
+              minItems: 2,
+              maxItems: 2,
+              description: "[lower, upper]; derived from samples if omitted",
+            },
+            samples: {
+              type: "array",
+              items: { type: "number" },
+            },
+          },
+          additionalProperties: false,
+        },
+        description:
+          "Alias for `simulations`. Both are accepted; this is the form checked for a too-low iteration count.",
       },
     },
     required: [...baseThoughtRequired],
@@ -1052,15 +1208,21 @@ export const deepthinking_causal_schema = {
  */
 export const deepthinking_strategic_schema = {
   name: "deepthinking_strategic",
-  description: "Strategic: game theory, Nash equilibria, optimization",
+  description:
+    "Strategic: game theory, Nash equilibria, optimization, constraint satisfaction (CSP)",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["gametheory", "optimization"],
+        enum: ["gametheory", "optimization", "constraint"],
         description: "Strategic reasoning mode",
+      },
+      thoughtType: {
+        type: "string",
+        description:
+          "Step within the mode. Constraint: 'problem_formulation', 'variable_definition', 'constraint_definition', 'domain_reduction', 'arc_consistency', 'propagation', 'solution_search', 'backtracking', 'feasibility_check'. An unrecognised value is accepted with a warning.",
       },
       players: {
         type: "array",
@@ -1180,6 +1342,114 @@ export const deepthinking_strategic_schema = {
         additionalProperties: false,
         description: "Optimization solution",
       },
+      // --- Constraint satisfaction mode (v9.3.4) ---
+      variables: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            domain: {
+              type: "array",
+              items: { type: ["string", "number"] },
+              description: "Values the variable may take",
+            },
+            currentValue: { type: ["string", "number"] },
+            domainReduced: { type: "boolean" },
+            assignedAt: { type: "integer", minimum: 0 },
+          },
+          additionalProperties: false,
+        },
+        description: "CSP decision variables",
+      },
+      cspConstraints: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            type: {
+              type: "string",
+              description:
+                "'unary', 'binary', 'n_ary' or 'global'. Inferred from arity when omitted; an unrecognised value falls back to 'binary'.",
+            },
+            variables: {
+              type: "array",
+              items: { type: "string" },
+              description: "IDs of the variables this constraint relates",
+            },
+            expression: { type: "string" },
+            satisfied: { type: "boolean" },
+            priority: {
+              type: "string",
+              description: "'required', 'soft' or 'preference'",
+            },
+            weight: { type: "number" },
+          },
+          additionalProperties: false,
+        },
+        description:
+          "CSP constraints. Named `cspConstraints` because `constraints` is already the optimization mode's array of strings. Send this one for mode 'constraint' and do NOT send `constraints` in the same call: `constraints` takes precedence in the handler, so its strings would be read as constraint objects.",
+      },
+      currentAssignments: {
+        type: "object",
+        additionalProperties: { type: ["string", "number"] },
+        description: "Value currently assigned to each variable ID",
+      },
+      assignmentHistory: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            variableId: { type: "string" },
+            value: { type: ["string", "number"] },
+            step: { type: "integer", minimum: 0 },
+            backtracked: { type: "boolean" },
+          },
+          additionalProperties: false,
+        },
+        description: "Search trace: one entry per assignment or backtrack",
+      },
+      arcs: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            from: { type: "string" },
+            to: { type: "string" },
+            constraintId: { type: "string" },
+          },
+          additionalProperties: false,
+        },
+        description:
+          "Arcs of the constraint graph. Derived from variables and constraints when omitted.",
+      },
+      backtracks: {
+        type: "integer",
+        minimum: 0,
+        description: "Number of backtracks performed so far",
+      },
+      searchStep: {
+        type: "integer",
+        minimum: 0,
+        description: "Current search step",
+      },
+      isArcConsistent: {
+        type: "boolean",
+        description:
+          "Whether the problem is arc consistent; computed if omitted",
+      },
+      solutionStatus: {
+        type: "string",
+        description: "'searching', 'found', 'infeasible' or 'timeout'",
+      },
+      solutionCount: {
+        type: "integer",
+        minimum: 0,
+        description: "Number of solutions found so far",
+      },
     },
     required: [...baseThoughtRequired],
     additionalProperties: false,
@@ -1275,15 +1545,21 @@ export const deepthinking_analytical_schema = {
  */
 export const deepthinking_scientific_schema = {
   name: "deepthinking_scientific",
-  description: "Scientific: hypothesis testing, systems thinking, formal logic",
+  description:
+    "Scientific: hypothesis testing, systems thinking, formal logic, modal logic (possible worlds)",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["scientificmethod", "systemsthinking", "formallogic"],
+        enum: ["scientificmethod", "systemsthinking", "formallogic", "modal"],
         description: "Scientific reasoning mode",
+      },
+      thoughtType: {
+        type: "string",
+        description:
+          "Step within the mode. Modal: 'world_definition', 'proposition_analysis', 'accessibility_analysis', 'necessity_proof', 'possibility_proof', 'modal_inference', 'countermodel'. An unrecognised value is accepted with a warning.",
       },
       hypothesis: {
         type: "string",
@@ -1367,6 +1643,119 @@ export const deepthinking_scientific_schema = {
         type: "string",
         description: "Type of logical inference used",
       },
+      // --- Modal logic mode (v9.3.4) ---
+      worlds: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            description: { type: "string" },
+            propositions: {
+              type: "object",
+              additionalProperties: { type: "boolean" },
+              description:
+                "Truth assignment in this world, keyed by proposition content",
+            },
+            isActual: { type: "boolean" },
+            accessibility: {
+              type: "array",
+              items: { type: "string" },
+              description: "IDs of worlds reachable from this one",
+            },
+          },
+          additionalProperties: false,
+        },
+        description:
+          "Possible worlds of the Kripke model. A default world is created when none is given.",
+      },
+      actualWorld: {
+        type: "string",
+        description:
+          "ID of the designated actual world; inferred from `isActual` when omitted",
+      },
+      propositions: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            content: { type: "string" },
+            operator: {
+              type: "string",
+              description:
+                "'necessary', 'possible', 'contingent', 'impossible', 'known', 'believed', 'obligatory', 'permitted', 'always' or 'eventually'. Defaults to 'contingent'.",
+            },
+            truthValue: { type: "boolean" },
+            worldsTrue: {
+              type: "array",
+              items: { type: "string" },
+              description: "Derived from the worlds when omitted",
+            },
+            worldsFalse: {
+              type: "array",
+              items: { type: "string" },
+              description: "Derived from the worlds when omitted",
+            },
+          },
+          additionalProperties: false,
+        },
+        description: "Modal propositions being evaluated",
+      },
+      accessibilityRelations: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            fromWorld: { type: "string" },
+            toWorld: { type: "string" },
+            type: {
+              type: "string",
+              description:
+                "'reflexive', 'symmetric', 'transitive', 'euclidean' or 'serial'. Defaults to 'reflexive'.",
+            },
+            modalType: {
+              type: "string",
+              description:
+                "Overrides modalDomain for this relation: 'alethic', 'epistemic', 'deontic' or 'temporal'",
+            },
+          },
+          additionalProperties: false,
+        },
+        description: "Accessibility relation R of the Kripke frame",
+      },
+      inferences: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            premises: {
+              type: "array",
+              items: { type: "string" },
+            },
+            conclusion: { type: "string" },
+            rule: { type: "string" },
+            valid: { type: "boolean" },
+            justification: { type: "string" },
+          },
+          additionalProperties: false,
+        },
+        description:
+          "Modal inferences. Distinct from `inference`, the formal-logic rule name.",
+      },
+      modalLogicType: {
+        type: "string",
+        description:
+          "Modal system: 'K', 'T', 'S4', 'S5', 'D', 'B' or 'custom'. An unrecognised value is accepted with a warning.",
+      },
+      modalDomain: {
+        type: "string",
+        description:
+          "'alethic', 'epistemic', 'deontic' or 'temporal'. Defaults to 'alethic'.",
+      },
     },
     required: [...baseThoughtRequired],
     additionalProperties: false,
@@ -1380,15 +1769,20 @@ export const deepthinking_scientific_schema = {
 export const deepthinking_engineering_schema = {
   name: "deepthinking_engineering",
   description:
-    "Engineering: requirements, trade studies, FMEA, ADRs, algorithm design (CLRS)",
+    "Engineering: requirements, trade studies, FMEA, ADRs, algorithm design (CLRS), recursive decomposition",
   inputSchema: {
     type: "object",
     properties: {
       ...baseThoughtProperties,
       mode: {
         type: "string",
-        enum: ["engineering", "algorithmic"],
+        enum: ["engineering", "algorithmic", "recursive"],
         description: "Engineering reasoning mode",
+      },
+      thoughtType: {
+        type: "string",
+        description:
+          "Step within the mode. Recursive: 'problem_decomposition', 'base_case_identification', 'recursive_step', 'subproblem_solution', 'solution_combination', 'termination_analysis'. An unrecognised value is accepted with a warning.",
       },
       // Engineering-specific properties
       requirementId: {
@@ -1477,6 +1871,85 @@ export const deepthinking_engineering_schema = {
         },
         additionalProperties: false,
         description: "Algorithm correctness proof",
+      },
+      // --- Recursive mode (v9.3.4) ---
+      subproblems: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            name: { type: "string" },
+            description: { type: "string" },
+            size: {
+              type: ["string", "number"],
+              description: "Problem size, numeric (n/2) or symbolic ('n-1')",
+            },
+            depth: { type: "integer", minimum: 0 },
+            parentId: { type: "string" },
+            status: {
+              type: "string",
+              description:
+                "'pending', 'in_progress', 'solving' or 'solved'. Defaults to 'pending'.",
+            },
+            result: { type: "string" },
+          },
+          additionalProperties: false,
+        },
+        description: "Subproblems produced by the decomposition",
+      },
+      baseCases: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            condition: { type: "string" },
+            result: { type: "string" },
+            verified: { type: "boolean" },
+          },
+          additionalProperties: false,
+        },
+        description: "Terminating cases of the recursion",
+      },
+      baseCaseReached: {
+        type: "boolean",
+        description:
+          "Whether a base case has been reached; inferred from verified base cases when omitted",
+      },
+      currentDepth: {
+        type: "integer",
+        minimum: 0,
+        description:
+          "Current recursion depth; inferred from subproblems when omitted",
+      },
+      maxDepth: {
+        type: "integer",
+        minimum: 0,
+        description: "Maximum allowed recursion depth",
+      },
+      recurrence: {
+        type: "object",
+        properties: {
+          formula: {
+            type: "string",
+            description: "e.g. T(n) = 2T(n/2) + O(n)",
+          },
+          baseCase: { type: "string" },
+          closedForm: { type: "string" },
+          complexity: { type: "string", description: "e.g. O(n log n)" },
+        },
+        additionalProperties: false,
+        description: "Recurrence relation for the decomposition",
+      },
+      strategy: {
+        type: "string",
+        description:
+          "Decomposition strategy: 'divide_and_conquer', 'decrease_and_conquer', 'transform_and_conquer' or 'dynamic_programming'. Underscored, unlike the hyphenated `designPattern` values.",
+      },
+      divisionFactor: {
+        type: "number",
+        description: "Branching factor for divide and conquer",
       },
     },
     required: [...baseThoughtRequired],
