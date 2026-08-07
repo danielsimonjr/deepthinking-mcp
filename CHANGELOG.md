@@ -83,6 +83,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`deepthinking_analyze` returned generated filler with a fabricated confidence, presented as
+  reasoning output.** `MultiModeAnalyzer.executeModes()` called `generateModeInsights()` — a
+  `switch` over eleven modes returning a hardcoded English sentence with the caller's own question
+  spliced into it (`"Strategic analysis: Nash equilibrium considerations for <first 30 chars>..."`).
+  No handler ever ran; `ThoughtFactory` was not imported. Measured before the fix: the same
+  `confidenceScore` of **0.76 for two completely different problems**, because it was `0.8 x <a
+  per-mode literal>` and therefore a function of which modes were selected and nothing else.
+  `evidence` listed `"Payoff matrix"` for a game-theory insight that had never seen one. The 24
+  modes with no `case` — including `historical` — got `"Analysis via <mode>: Key observations
+  about ..."`. `conflictsDetected` was always 0 and `success` always `true`, because the templates
+  never contradict and the `try/catch` guarded pure string building.
+
+  Each mode now runs its real handler through `ThoughtFactory.createThought()`, the same path a
+  single-mode tool call takes, and every field of the insight is read back off what the handler
+  produced: the mode-specific fields it populated (derived by subtracting the `BaseThought` keys,
+  so a new mode needs no change), its own advisory feedback naming what the mode would need, and
+  `category` from the thought's `thoughtType`. Output is bounded (8 fields, 3 advisories, 600
+  chars) and flags its own truncation.
+
+- **The analyzer's confidence is now absent-with-a-reason rather than invented.** `Insight` and
+  `MergedAnalysis` carry `confidenceBasis: "derived" | "unavailable"` plus a `confidenceNote`.
+  On today's tool surface the basis is always `unavailable`, and that is the honest answer:
+  `deepthinking_analyze` accepts no mode-specific field, so no handler has a prior, a likelihood,
+  an observation set or a payoff matrix to compute a confidence from. `confidenceScore` is still
+  emitted because `analyzeOutputSchema` requires it, but it is now the single constant
+  `UNSCORED_INSIGHT_WEIGHT` (0.5) for every insight — a visible tell rather than a plausible 0.76 —
+  and `synthesizedConclusion` states in words that no confidence was computed. Synthesized insights
+  (dialectical merge, conflict resolution) are also `unavailable`: the mean of two parents'
+  confidences is not a measurement of the third claim built from them.
+
+- **Every merge strategy dropped insights that carry no confidence.** All four `minConfidence`
+  filters and `mergeWeighted`'s threshold treated "unscored" as "low confidence".
+  `mergeWeighted` multiplied by a mode weight first, so the fabricated 0.8 cleared its 0.5
+  threshold (`0.8 x 0.9 = 0.72`) while a real unscored insight did not (`0.5 x 0.9 = 0.45`) — the
+  `comprehensive_analysis` preset returned an **empty analysis**. The threshold had only ever been
+  cleared by the fabrication. Unscored insights are now exempt from confidence thresholds; they
+  are not low-confidence, they are unmeasured.
+
+- **`MultiModeAnalyzer.getSupportedModes()` is derived from the handler registry.** The hardcoded
+  list named 29 modes and omitted `historical`, `recursive`, `modal`, `stochastic`, `constraint`
+  and `custom` — all of which have registered handlers and all of which the analyzer executes, so
+  the list understated what the code does. `deepthinking_analyze`'s own `customModes` enum in
+  `src/tools/schemas/analyze.ts` still lists the same 29; widening it is a separate change in
+  `src/tools/`.
+
 - **Six of the twelve mathematical-fallacy patterns did not match their own documented examples.**
   Found by running `checkStatement` over each pattern's `examples` array while wiring
   `src/proof/patterns/warnings.ts` into the request path. Four of the six had unit tests — which
