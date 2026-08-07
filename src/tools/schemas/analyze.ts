@@ -145,8 +145,26 @@ export const analyzeOutputSchema = z.object({
   /** Synthesized conclusion from all modes */
   synthesizedConclusion: z.string(),
 
-  /** Overall confidence score (0-1) */
-  confidenceScore: z.number().min(0).max(1),
+  /**
+   * Overall confidence (0-1) — OPTIONAL, and absent whenever nothing derived
+   * one.
+   *
+   * It used to be required, which forced a number out even when the analysis
+   * had computed nothing: clients received a constant `0.5` they could not
+   * distinguish from "half confident". A required numeric field is not a
+   * neutral default. When this is absent, read `confidenceBasis` and
+   * `confidenceNote` for why.
+   */
+  confidenceScore: z.number().min(0).max(1).optional(),
+
+  /**
+   * How `confidenceScore` was arrived at. `"unavailable"` means no confidence
+   * was computed and none is reported — not that it was low.
+   */
+  confidenceBasis: z.enum(["derived", "unavailable"]).optional(),
+
+  /** Why no confidence was computed, when `confidenceBasis` is "unavailable". */
+  confidenceNote: z.string().optional(),
 
   /** Primary insights from the analysis */
   primaryInsights: z.array(
@@ -154,7 +172,10 @@ export const analyzeOutputSchema = z.object({
       id: z.string(),
       content: z.string(),
       sourceMode: z.string(),
-      confidence: z.number(),
+      // Optional for the same reason as the top-level score above.
+      confidence: z.number().optional(),
+      confidenceBasis: z.enum(["derived", "unavailable"]).optional(),
+      confidenceNote: z.string().optional(),
       category: z.string().optional(),
       priority: z.number().optional(),
     }),

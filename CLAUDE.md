@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types + 4 advanced runtime) with taxonomy-based classification (69 implemented reasoning types across 12 categories), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 9.5.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
+**Version**: 9.5.1 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
 
 ## Project Metrics
 
@@ -446,15 +446,21 @@ The `tools/` directory contains standalone utilities compiled to executables wit
 |------|---------|
 | `tools/chunking-for-files/chunking-for-files.exe` | Split large files into editable sections, merge back |
 | `tools/compress-for-context/compress-for-context.exe` | CTON context compression for LLM context windows |
-| `tools/create-dependency-graph/create-dependency-graph.exe` | Generates dependency graph documentation |
+| `tools/create-dependency-graph/create-dependency-graph.ts` | Generates dependency graph documentation — run via `npm run docs:deps` |
 
-> **⚠ Rebuild `create-dependency-graph.exe` whenever you change that tool** — `cd
-> tools/create-dependency-graph && npm run build` (needs Bun). A stale binary generates output from
-> the old sources and says nothing about it. That already happened once: the committed binary sat
-> 8 months behind its source, and running it would have stripped the drift-gate banner the
-> generator now emits. Verify a rebuild by generating with `npm run docs:deps`, saving the five
-> outputs, running the `.exe`, and diffing — they must be byte-identical. The tool's sources are
-> layered under `tools/create-dependency-graph/src/`; see that directory's README.
+> **`create-dependency-graph.exe` is no longer tracked in git** (2026-08-07). Use `npm run
+> docs:deps`, which runs the `.ts` through tsx and is the supported path. The binary embeds the Bun
+> runtime at ~95 MB, so every rebuild added that much to history permanently — and the committed
+> copy had drifted 8 months behind its source, silently generating stale output that would have
+> stripped the drift-gate banner the generator now emits. It ships as a **GitHub release asset**;
+> `cd tools/create-dependency-graph && npm run build` rebuilds it locally (needs Bun).
+>
+> If you do rebuild it, verify it the way the release did: generate with `npm run docs:deps`, save
+> the five outputs, run the `.exe`, and diff — they must be byte-identical. Bun and Node resolve
+> `js-yaml` differently and take different branches of the interop fallback, so a compiled binary
+> is a genuinely different runtime from its source.
+>
+> The tool's sources are layered under `tools/create-dependency-graph/src/`; see that README.
 
 ### Usage
 

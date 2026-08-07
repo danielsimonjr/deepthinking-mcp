@@ -64,6 +64,11 @@ npm run build       # Bun compiles create-dependency-graph.exe
 The build needs Bun. The binary contains the Bun runtime, so it is
 approximately 95 MB.
 
+**The binary is not tracked in git.** Each rebuild added ~95 MB to the history
+permanently, and the committed copy had drifted 8 months behind these sources.
+It ships as a **GitHub release asset** instead. Use `npm run docs:deps` unless
+you specifically need the standalone executable.
+
 **Rebuild the binary each time you change this tool.** If you do not, the binary
 writes output from the old sources and gives no warning. Verify a rebuild in
 this way: run `npm run docs:deps`, keep a copy of the five output files, run the

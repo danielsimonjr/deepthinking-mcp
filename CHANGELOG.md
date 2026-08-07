@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.5.1] - 2026-08-07
+
+### Fixed
+
+- **`deepthinking_analyze` no longer reports a confidence it did not compute.** 9.4.0 stopped
+  fabricating the score and marked each insight `confidenceBasis: "unavailable"` — but
+  `analyzeOutputSchema` still *required* `confidenceScore`, so a constant `0.5` kept reaching
+  clients while the explanation stayed behind in the analysis object. A client reading `0.5` could
+  not tell "half confident" from "nothing computed this"; **a required numeric field is not a
+  neutral default.** `confidenceScore` and `primaryInsights[].confidence` are now optional and are
+  emitted **only** when `confidenceBasis === "derived"`, and `confidenceBasis`/`confidenceNote` now
+  travel with the MCP response. Nothing in this path can derive a confidence today —
+  `analyzeInputSchema` accepts no mode-specific field, so no handler has a prior, likelihood or
+  payoff matrix to work from — so in practice the number is now absent and the reason is present.
+
+- **`ExportService.exportSession` returned a JSON session dump for an unrecognised format.** A
+  JavaScript caller asking for a format that does not exist received a dump labelled as their
+  format. This is the same silent-wrong-kind defect already fixed on the visual path, where an
+  unsupported format throws to match the single-thought exporters (which never degraded); the
+  standard-format `switch` had been left behind. It now throws and names the supported formats.
+  Unreachable from TypeScript, where `format` is a union.
+
+### Changed
+
+- **`create-dependency-graph.exe` is no longer tracked in git.** The repository's `.gitignore` said
+  `*.exe` while three binaries totalling 166 MB were tracked anyway — ignore rules do not apply to
+  already-tracked files, so the stated policy and the contents had silently diverged. Resolved
+  deliberately rather than uniformly: this binary is the only one that **grows** (~95 MB added to
+  history on every rebuild), it is **not needed** for the supported path (`npm run docs:deps` runs
+  the `.ts` via tsx), and it is the only one that has actually caused harm — the committed copy sat
+  8 months behind its source and would have stripped the drift-gate banner the generator now emits.
+  It ships as a **GitHub release asset**, and `npm run build` in its directory rebuilds it. Its
+  blobs remain in history; nothing was destroyed and the file stays on disk.
+
+  `chunking-for-files.exe` and `compress-for-context.exe` **remain tracked**: unchanged since
+  2025-12-24, so they accumulate nothing, and untracking them would remove working tooling from a
+  fresh clone for no benefit.
+
 ## [9.5.0] - 2026-08-07
 
 ### Added

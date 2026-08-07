@@ -181,8 +181,15 @@ export class ExportService {
         result = this.exportToJupyter(session);
         break;
       default:
-        // Fallback to JSON for unknown formats
-        result = this.exportToJSON(session);
+        // Do NOT fall back to JSON. Returning a session dump under the
+        // caller's format name is the silent-wrong-kind defect already fixed
+        // on the visual path, where an unsupported format throws to match the
+        // single-thought exporters. Unreachable from TypeScript (`format` is a
+        // union), but a JavaScript caller could reach it and would otherwise
+        // parse a JSON dump as though it were the format they asked for.
+        throw new Error(
+          `Unsupported export format: ${String(format)}. Supported: json, markdown, latex, html, jupyter, mermaid, dot, ascii, svg, graphml, tikz, modelica, uml, visual-json, visual-markdown.`,
+        );
     }
 
     this.logger.debug("Export completed", {

@@ -87,7 +87,23 @@ add-to-config.cjs
 # Archives (don't track zip files)
 *.zip
 
-# Compiled executables (Bun compiled, ~114MB each)
+# Compiled executables (Bun compiled, ~95MB each).
+#
+# This rule and the repo contents used to contradict each other: `*.exe` was
+# ignored while three binaries totalling 166 MB were tracked anyway (ignore
+# rules do not apply to already-tracked files). Resolved 2026-08-07:
+#
+#   - create-dependency-graph.exe is NO LONGER tracked. It is the only one that
+#     grows -- every rebuild adds ~95 MB to history permanently -- and it is not
+#     needed for the supported path, since `npm run docs:deps` runs the .ts via
+#     tsx. It had also drifted 8 months behind its source and would have
+#     silently generated stale output. It ships as a GitHub release asset, and
+#     `npm run build` in its directory rebuilds it. Its old blobs remain in
+#     history; nothing was destroyed.
+#   - chunking-for-files.exe and compress-for-context.exe REMAIN tracked. They
+#     have not changed since 2025-12-24, so they accumulate nothing, and
+#     untracking them would remove working tooling from a fresh clone for no
+#     benefit.
 *.exe
 /output
 /.claude

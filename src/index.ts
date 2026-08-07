@@ -933,12 +933,21 @@ async function handleAnalyze(input: AnalyzeInputType): Promise<MCPResponse> {
     modesUsed: response.analysis.contributingModes.length,
     contributingModes: response.analysis.contributingModes,
     synthesizedConclusion: response.analysis.synthesizedConclusion,
-    confidenceScore: response.analysis.confidenceScore,
+    // Emit the number only when something actually derived it. Passing it
+    // through unconditionally is how a constant 0.5 reached clients while the
+    // explanation stayed behind in the analysis object.
+    ...(response.analysis.confidenceBasis === "derived"
+      ? { confidenceScore: response.analysis.confidenceScore }
+      : {}),
+    confidenceBasis: response.analysis.confidenceBasis,
+    confidenceNote: response.analysis.confidenceNote,
     primaryInsights: response.analysis.primaryInsights.map((i) => ({
       id: i.id,
       content: i.content,
       sourceMode: String(i.sourceMode),
-      confidence: i.confidence,
+      ...(i.confidenceBasis === "derived" ? { confidence: i.confidence } : {}),
+      confidenceBasis: i.confidenceBasis,
+      confidenceNote: i.confidenceNote,
       category: i.category,
       priority: i.priority,
     })),

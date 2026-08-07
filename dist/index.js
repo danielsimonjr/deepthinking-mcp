@@ -46433,7 +46433,9 @@ var ExportService = class {
         result = this.exportToJupyter(session);
         break;
       default:
-        result = this.exportToJSON(session);
+        throw new Error(
+          `Unsupported export format: ${String(format)}. Supported: json, markdown, latex, html, jupyter, mermaid, dot, ascii, svg, graphml, tikz, modelica, uml, visual-json, visual-markdown.`
+        );
     }
     this.logger.debug("Export completed", {
       sessionId: session.id,
@@ -62945,15 +62947,34 @@ z.object({
   contributingModes: z.array(z.string()),
   /** Synthesized conclusion from all modes */
   synthesizedConclusion: z.string(),
-  /** Overall confidence score (0-1) */
-  confidenceScore: z.number().min(0).max(1),
+  /**
+   * Overall confidence (0-1) — OPTIONAL, and absent whenever nothing derived
+   * one.
+   *
+   * It used to be required, which forced a number out even when the analysis
+   * had computed nothing: clients received a constant `0.5` they could not
+   * distinguish from "half confident". A required numeric field is not a
+   * neutral default. When this is absent, read `confidenceBasis` and
+   * `confidenceNote` for why.
+   */
+  confidenceScore: z.number().min(0).max(1).optional(),
+  /**
+   * How `confidenceScore` was arrived at. `"unavailable"` means no confidence
+   * was computed and none is reported — not that it was low.
+   */
+  confidenceBasis: z.enum(["derived", "unavailable"]).optional(),
+  /** Why no confidence was computed, when `confidenceBasis` is "unavailable". */
+  confidenceNote: z.string().optional(),
   /** Primary insights from the analysis */
   primaryInsights: z.array(
     z.object({
       id: z.string(),
       content: z.string(),
       sourceMode: z.string(),
-      confidence: z.number(),
+      // Optional for the same reason as the top-level score above.
+      confidence: z.number().optional(),
+      confidenceBasis: z.enum(["derived", "unavailable"]).optional(),
+      confidenceNote: z.string().optional(),
       category: z.string().optional(),
       priority: z.number().optional()
     })
@@ -63662,12 +63683,19 @@ ${response.analysis.primaryInsights.map((i) => `- [${i.sourceMode}] ${i.content}
     modesUsed: response.analysis.contributingModes.length,
     contributingModes: response.analysis.contributingModes,
     synthesizedConclusion: response.analysis.synthesizedConclusion,
-    confidenceScore: response.analysis.confidenceScore,
+    // Emit the number only when something actually derived it. Passing it
+    // through unconditionally is how a constant 0.5 reached clients while the
+    // explanation stayed behind in the analysis object.
+    ...response.analysis.confidenceBasis === "derived" ? { confidenceScore: response.analysis.confidenceScore } : {},
+    confidenceBasis: response.analysis.confidenceBasis,
+    confidenceNote: response.analysis.confidenceNote,
     primaryInsights: response.analysis.primaryInsights.map((i) => ({
       id: i.id,
       content: i.content,
       sourceMode: String(i.sourceMode),
-      confidence: i.confidence,
+      ...i.confidenceBasis === "derived" ? { confidence: i.confidence } : {},
+      confidenceBasis: i.confidenceBasis,
+      confidenceNote: i.confidenceNote,
       category: i.category,
       priority: i.priority
     })),

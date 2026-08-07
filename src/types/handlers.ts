@@ -194,12 +194,22 @@ export interface AnalyzeResponse {
   modesUsed: number;
   contributingModes: string[];
   synthesizedConclusion: string;
-  confidenceScore: number;
+  /**
+   * Absent whenever nothing derived a confidence. Read `confidenceBasis`
+   * first: `"unavailable"` means none was computed, NOT that it was low. This
+   * was once a required `number`, which forced a constant out and left clients
+   * unable to tell "half confident" from "nothing computed this".
+   */
+  confidenceScore?: number;
+  confidenceBasis?: "derived" | "unavailable";
+  confidenceNote?: string;
   primaryInsights: Array<{
     id: string;
     content: string;
     sourceMode: string;
-    confidence: number;
+    confidence?: number;
+    confidenceBasis?: "derived" | "unavailable";
+    confidenceNote?: string;
     category?: string;
     priority?: number;
   }>;

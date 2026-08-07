@@ -84,15 +84,20 @@ describe('ExportService', () => {
       }
     });
 
-    it('falls back to the JSON session dump for an unrecognized format', async () => {
+    it('throws on an unrecognized format instead of returning a JSON dump', async () => {
+      // This previously fell back to the JSON session dump, so a JavaScript
+      // caller asking for a format that does not exist received a session dump
+      // LABELLED as their format -- the same silent-wrong-kind defect already
+      // fixed on the visual path, where an unsupported format now throws to
+      // match the single-thought exporters (which never degraded). The
+      // standard-format switch was left behind; this closes it.
+      //
+      // Unreachable from TypeScript, where `format` is a union.
       const session = await buildSession(1);
 
-      const output = service.exportSession(
-        session,
-        'no-such-format' as ExportFormat,
-      );
-
-      expect(output).toBe(service.exportSession(session, 'json'));
+      expect(() =>
+        service.exportSession(session, 'no-such-format' as ExportFormat),
+      ).toThrow(/no-such-format/);
     });
   });
 
