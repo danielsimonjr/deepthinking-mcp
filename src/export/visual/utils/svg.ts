@@ -8,6 +8,8 @@
  * schemes, and edge styling.
  */
 
+import { truncateWithSuffix } from "../utils.js";
+
 /**
  * SVG-specific export options
  */
@@ -144,8 +146,7 @@ export function escapeSVGText(text: string): string {
  * Truncate text to fit within a character limit
  */
 export function truncateText(text: string, maxChars: number = 30): string {
-  if (text.length <= maxChars) return text;
-  return text.substring(0, maxChars - 3) + "...";
+  return truncateWithSuffix(text, maxChars);
 }
 
 /**

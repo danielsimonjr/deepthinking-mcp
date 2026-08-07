@@ -4,6 +4,8 @@
  * Phase 13: Added MermaidGraphBuilder fluent API
  */
 
+import { truncateWithSuffix } from "../utils.js";
+
 // =============================================================================
 // Types
 // =============================================================================
@@ -117,8 +119,7 @@ export function escapeMermaidLabel(label: string): string {
  * Truncate a label to a maximum length
  */
 export function truncateLabel(label: string, maxLength: number = 40): string {
-  if (label.length <= maxLength) return label;
-  return label.substring(0, maxLength - 3) + "...";
+  return truncateWithSuffix(label, maxLength);
 }
 
 // =============================================================================

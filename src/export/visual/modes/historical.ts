@@ -14,6 +14,12 @@ import { sanitizeId } from "../utils.js";
 import { DOTGraphBuilder } from "../utils/dot.js";
 import { ASCIIDocBuilder } from "../utils/ascii.js";
 import { MermaidGraphBuilder, MermaidGanttBuilder } from "../utils/mermaid.js";
+import {
+  renderGraphModel,
+  type GraphRenderModel,
+  type GraphRenderNode,
+  type GraphRenderEdge,
+} from "../graph-render.js";
 
 /**
  * Export historical thought to visual format
@@ -31,10 +37,118 @@ export function exportHistoricalTimeline(
       return historicalToDOT(thought, includeLabels);
     case "ascii":
       return historicalToASCII(thought);
+    // The other eight formats used to fall through to a `default:` that
+    // returned Mermaid, so a caller asking a historical session for `svg` got
+    // a Mermaid flowchart, and one asking for `visual-json` got text that is
+    // not JSON and threw on parse. They now render the same normalized graph
+    // the session-level path renders.
     default:
-      // Fallback to Mermaid for unsupported formats
-      return historicalToMermaid(thought, includeLabels);
+      return renderGraphModel(historicalToGraphModel(thought), format);
   }
+}
+
+/**
+ * Map a historical thought onto the normalized node/edge model.
+ *
+ * Nodes: one analysis root, plus every event, actor and source. Edges: the
+ * causal-chain links and the actor relationships. A thought with no data still
+ * yields the root node, so every format returns a well-formed document rather
+ * than an empty string.
+ */
+function historicalToGraphModel(thought: HistoricalThought): GraphRenderModel {
+  const events = thought.events ?? [];
+  const actors = thought.actors ?? [];
+  const sources = thought.sources ?? [];
+  const chains = thought.causalChains ?? [];
+  const periods = thought.periods ?? [];
+
+  const nodes: GraphRenderNode[] = [
+    {
+      id: "ANALYSIS",
+      label: "Historical Analysis",
+      type: "analysis",
+      metadata: {
+        ...(thought.thoughtType ? { thoughtType: thought.thoughtType } : {}),
+        ...(thought.historiographicalSchool
+          ? { school: thought.historiographicalSchool }
+          : {}),
+      },
+    },
+    ...events.map((e) => ({
+      id: e.id,
+      label: e.name,
+      type: "event",
+      detail: `${formatDate(e.date)}${e.location ? ` — ${e.location}` : ""}`,
+      metadata: { significance: e.significance, date: formatDate(e.date) },
+    })),
+    ...actors.map((a) => ({
+      id: `actor_${a.id}`,
+      label: a.name,
+      type: "actor",
+      detail: a.roles?.length ? a.roles.join(", ") : a.type,
+      metadata: { actorType: a.type },
+    })),
+    ...sources.map((s) => ({
+      id: `source_${s.id}`,
+      label: s.title,
+      type: "source",
+      detail: s.author ?? s.type,
+      metadata: {
+        sourceType: s.type,
+        reliability: Math.round(s.reliability * 100),
+      },
+    })),
+  ];
+
+  const known = new Set(nodes.map((n) => n.id));
+  const edges: GraphRenderEdge[] = [];
+
+  for (const chain of chains) {
+    for (const link of chain.links) {
+      if (!known.has(link.cause) || !known.has(link.effect)) continue;
+      edges.push({
+        source: link.cause,
+        target: link.effect,
+        type: "causal",
+        label: link.mechanism || `${Math.round(link.confidence * 100)}%`,
+      });
+    }
+  }
+
+  for (const actor of actors) {
+    for (const rel of actor.relationships ?? []) {
+      if (!known.has(`actor_${rel.actorId}`)) continue;
+      edges.push({
+        source: `actor_${actor.id}`,
+        target: `actor_${rel.actorId}`,
+        type: "relationship",
+        label: rel.type,
+      });
+    }
+  }
+
+  return {
+    title: "Historical Analysis",
+    subjectLabel: "Analysis",
+    subject: thought.thoughtType ?? "historical",
+    metrics: [
+      { label: "Events", value: events.length },
+      { label: "Chains", value: chains.length },
+      { label: "Sources", value: sources.length },
+      { label: "Actors", value: actors.length },
+      { label: "Periods", value: periods.length },
+    ],
+    primaryType: "analysis",
+    primaryEdgeType: "causal",
+    itemsHeading: "Events, actors and sources",
+    relationsHeading: "Relationships",
+    emptyRelations: "No causal links or actor relationships recorded.",
+    modelName: "HistoricalAnalysis",
+    packageName: "HistoricalAnalysis",
+    description: `Historical analysis (${thought.thoughtType ?? "historical"})`,
+    nodes,
+    edges,
+  };
 }
 
 // ===== MERMAID EXPORT =====

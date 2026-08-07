@@ -657,14 +657,13 @@ export class GraphMLBuilder {
 }
 
 /**
- * Internal XML escape function for GraphMLBuilder
- * (duplicated to avoid circular dependencies)
+ * Retained name for `GraphMLBuilder`, now one line.
+ *
+ * This was a byte-identical copy of `escapeXML` above, justified by a comment
+ * claiming it avoided a circular dependency - impossible, since both live in
+ * this same module. Two copies of an escaper is how `escapeLatex` acquired two
+ * wrong implementations that corrupted every backslash for months.
  */
 function escapeXMLInternal(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+  return escapeXML(str);
 }

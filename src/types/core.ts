@@ -445,6 +445,30 @@ export type Thought =
   // User-defined
   | CustomThought;
 
+/**
+ * Compile-time invariant: `ThinkingMode` and the `Thought` union describe the
+ * same set of modes.
+ *
+ * Adding a member to the enum without adding its thought type to the union
+ * above (or the reverse) makes the assignment below a type error under
+ * `npm run typecheck`. That is the only place the mismatch is visible: no
+ * runtime value carries the union's membership, and `tsconfig.json` excludes
+ * `tests/`, so an equivalent assertion in a test file would never be compiled.
+ *
+ * The runtime half of the same invariant - one type guard per mode, each
+ * exclusive - is pinned in `tests/unit/types/thought-guard-coverage.test.ts`.
+ */
+type SameModeSet<A, B> = [A] extends [B]
+  ? [B] extends [A]
+    ? true
+    : never
+  : never;
+const THOUGHT_UNION_COVERS_THINKING_MODE: SameModeSet<
+  Thought["mode"],
+  ThinkingMode
+> = true;
+void THOUGHT_UNION_COVERS_THINKING_MODE;
+
 // ============================================================================
 // TYPE GUARDS
 // ============================================================================

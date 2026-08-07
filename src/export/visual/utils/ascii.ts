@@ -4,6 +4,8 @@
  * Phase 13: Added ASCIIDocBuilder fluent API
  */
 
+import { truncateWithSuffix } from "../utils.js";
+
 // =============================================================================
 // Types
 // =============================================================================
@@ -177,8 +179,7 @@ export function truncateAscii(
   maxLength: number,
   suffix: string = "...",
 ): string {
-  if (str.length <= maxLength) return str;
-  return str.substring(0, maxLength - suffix.length) + suffix;
+  return truncateWithSuffix(str, maxLength, suffix);
 }
 
 /**

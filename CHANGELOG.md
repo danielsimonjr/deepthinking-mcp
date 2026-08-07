@@ -9,6 +9,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Registration completeness is now derived from `ThinkingMode`, not from hand-maintained lists.**
+  Four new suites assert every direction of the wiring, and each was mutation-verified against the
+  pre-existing coverage:
+  - `tests/unit/modes/handler-registration-coverage.test.ts` — every mode has a specialized,
+    correctly-keyed handler, with an exact set comparison rather than `>=`. Deleting
+    `registry.replace(new HistoricalHandler())` fails 5 of its assertions; the pre-existing
+    120-test `mode-handler-delegation.test.ts` passes unchanged, because its mode list is hardcoded
+    and omits `historical`.
+  - `tests/unit/validation/validator-file-coverage.test.ts` — reads
+    `src/validation/validators/modes/` and resolves all 34 registry entries, asserting each
+    validator's `getMode()` equals its key. Typoing one `className` fails it; the pre-existing
+    `registry-mode-coverage.test.ts` passes, because `loadValidator` swallows the failure.
+    `meta.ts` remains the one deliberate orphan, verified rather than assumed.
+  - `tests/unit/types/thought-guard-coverage.test.ts` — one guard per mode, each accepting its own
+    mode and rejecting all 34 others.
+  - `tests/unit/export/mode-exporter-format-matrix.test.ts` — every mode with a dedicated exporter
+    × every visual format, asserting the OUTPUT SHAPE (JSON parses, HTML has markup, TikZ/UML/DOT
+    match their grammar). Plus a reachability check that every exporter `VisualExporter` publishes
+    is actually called by `ExportService`.
+
+- **A compile-time invariant in `src/types/core.ts`** that `ThinkingMode` and the `Thought` union
+  describe the same set of modes. Adding an enum member without its thought type is now a
+  `npm run typecheck` error. It lives in `src/` deliberately: `tsconfig.json` excludes `tests/`, so
+  the same assertion written in a test file is never compiled and can never fail.
+
 - **Four implemented reasoning modes are now selectable through the MCP surface: `stochastic`,
   `constraint`, `modal` and `recursive`.** Each already had a specialized handler, a registered
   validator and a place in `FULLY_IMPLEMENTED_MODES`, but no tool's `mode` enum accepted the value,

@@ -6,6 +6,8 @@
  * Provides reusable functions for generating Markdown exports across all modes.
  */
 
+import { truncateWithSuffix } from "../utils.js";
+
 /**
  * Markdown heading levels
  */
@@ -462,8 +464,7 @@ export function escapeMarkdown(text: string): string {
  * Truncate text with ellipsis
  */
 export function truncate(text: string, maxLength: number = 100): string {
-  if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength - 3) + "...";
+  return truncateWithSuffix(text, maxLength);
 }
 
 // =============================================================================

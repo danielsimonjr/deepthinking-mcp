@@ -15,6 +15,12 @@ import type {
 } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
 import { sanitizeId } from "../utils.js";
+import {
+  renderGraphModel,
+  type GraphRenderModel,
+  type GraphRenderNode,
+  type GraphRenderEdge,
+} from "../graph-render.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder, type DotNodeStyle } from "../utils/dot.js";
 import {
@@ -95,9 +101,86 @@ export function exportComputability(
       return computabilityToJSON(thought, options);
     case "markdown":
       return computabilityToMarkdown(thought, options);
+    // `modelica` and `uml` had no case and hit the throw below, which is why
+    // this exporter could not be wired into `ExportService`: two of the eleven
+    // formats would have thrown where the generic path returned a diagram.
+    // They now render the normalized graph, same as every other mode.
     default:
-      throw new Error(`Unsupported format: ${format}`);
+      return renderGraphModel(computabilityToGraphModel(thought), format);
   }
+}
+
+/**
+ * Map a computability thought onto the normalized node/edge model.
+ *
+ * Nodes: an analysis root, plus every Turing machine and decision problem.
+ * Edges: the reductions between problems. A thought with no machines or
+ * problems still yields the root, so the output is always well-formed.
+ */
+function computabilityToGraphModel(
+  thought: ComputabilityThought,
+): GraphRenderModel {
+  const machines = thought.machines ?? [];
+  const problems = thought.problems ?? [];
+  const reductions = thought.reductions ?? [];
+
+  const nodes: GraphRenderNode[] = [
+    {
+      id: "ANALYSIS",
+      label: "Computability Analysis",
+      type: "analysis",
+      metadata: { thoughtType: thought.thoughtType },
+    },
+    ...machines.map((m) => ({
+      id: `machine_${m.id}`,
+      label: m.name,
+      type: "machine",
+      detail: m.description ?? `${m.states.length} states`,
+      metadata: { states: m.states.length, transitions: m.transitions.length },
+    })),
+    ...problems.map((p) => ({
+      id: `problem_${p.id}`,
+      label: p.name,
+      type: "problem",
+      detail: p.description,
+      metadata: { question: p.question },
+    })),
+  ];
+
+  const known = new Set(nodes.map((n) => n.id));
+  const edges: GraphRenderEdge[] = reductions
+    .filter(
+      (r) =>
+        known.has(`problem_${r.fromProblem}`) &&
+        known.has(`problem_${r.toProblem}`),
+    )
+    .map((r) => ({
+      source: `problem_${r.fromProblem}`,
+      target: `problem_${r.toProblem}`,
+      type: "reduction",
+      label: r.type,
+    }));
+
+  return {
+    title: "Computability Analysis",
+    subjectLabel: "Analysis",
+    subject: thought.thoughtType,
+    metrics: [
+      { label: "Machines", value: machines.length },
+      { label: "Problems", value: problems.length },
+      { label: "Reductions", value: reductions.length },
+    ],
+    primaryType: "analysis",
+    primaryEdgeType: "reduction",
+    itemsHeading: "Machines and problems",
+    relationsHeading: "Reductions",
+    emptyRelations: "No reductions recorded.",
+    modelName: "ComputabilityAnalysis",
+    packageName: "ComputabilityAnalysis",
+    description: `Computability analysis (${thought.thoughtType})`,
+    nodes,
+    edges,
+  };
 }
 
 /**

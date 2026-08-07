@@ -38,6 +38,7 @@ import {
   isAlgorithmicThought,
   isScientificMethodThought,
   isHistoricalThought,
+  isComputabilityThought,
   HybridThought,
   // Sprint 1: Visual export integration types
   SequentialThought,
@@ -517,6 +518,22 @@ export class ExportService {
           includeMetrics: true,
         },
       );
+    }
+
+    // Phase 11: Computability visual export.
+    //
+    // `exportComputability` shipped with a full eleven-format exporter that
+    // nothing on the session path ever called: it was exported from
+    // `VisualExporter` but absent from this dispatch chain, so a computability
+    // session fell through to the generic thought sequence below. It could not
+    // be wired in earlier because two of its formats threw; they render now.
+    if (isComputabilityThought(lastThought)) {
+      return this.visualExporter.exportComputability(lastThought, {
+        format,
+        colorScheme: "default",
+        includeLabels: true,
+        includeMetrics: true,
+      });
     }
 
     // Generic thought sequence export for modes without specific visual exporters

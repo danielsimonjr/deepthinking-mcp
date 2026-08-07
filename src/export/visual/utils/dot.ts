@@ -4,6 +4,8 @@
  * Phase 13: Added DOTGraphBuilder fluent API
  */
 
+import { truncateWithSuffix } from "../utils.js";
+
 // =============================================================================
 // Types
 // =============================================================================
@@ -178,8 +180,7 @@ export function truncateDotLabel(
   label: string,
   maxLength: number = 50,
 ): string {
-  if (label.length <= maxLength) return label;
-  return label.substring(0, maxLength - 3) + "...";
+  return truncateWithSuffix(label, maxLength);
 }
 
 // =============================================================================
