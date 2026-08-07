@@ -35,6 +35,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   procedure is written down under "Entry-point guard" in `CLAUDE.md`; re-run it after touching that
   function, because a passing unit suite proves nothing about it.
 
+  A second file, `tests/integration/index-importable.test.ts`, pins the same property
+  deterministically: it mocks `StdioServerTransport` and asserts the constructor is never called on
+  import. That matters because `main()` was called but not awaited, so its startup log lands on a
+  later tick — a test that merely checked "nothing logged yet" would pass vacuously with the bug
+  still present. Its 60s timeout is headroom for the ~10s one-time transform of the full import
+  graph, **not** a performance assertion; nothing in that file gates on elapsed time.
+
 - **The five remaining `src/proof/` engines are wired into the live request path.** The 2026-08-06
   wave wired the decomposer, gap analyser, circular detector and inconsistency detector and stopped
   there, on the recorded theory that `assumption-tracker`, `verifier`, `branch-analyzer`,
