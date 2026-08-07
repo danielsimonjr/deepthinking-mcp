@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.5.0] - 2026-08-07
+
+### Added
+
+- **`deepthinking_analyze` can now select all 34 implemented modes.** Its `customModes` enum listed
+  29, omitting `historical` and the four made reachable in 9.4.0 (`stochastic`, `constraint`,
+  `modal`, `recursive`). 9.4.0 deliberately did not widen it: at that point the analyser had only
+  just been wired to `ThoughtFactory`, and adding a mode to the enum before execution is real for
+  it produces generic filler under a new mode name — which is the defect, not the fix. Execution is
+  now genuinely real for every mode in the list, so widening is safe. Both the advertised JSON
+  schema and the enforced Zod schema were updated together, as the schema-contract guard requires.
+  `custom` stays excluded by design: a user-defined mode has no fixed shape, so its payload cannot
+  be bounded by `MAX_LENGTHS`.
+
+### Fixed
+
+- **`CLAUDE.md` understated the export surface.** It claimed "8 + native SVG"; `exportSession`
+  accepts **15** format names (5 document — `json`, `markdown`, `latex`, `html`, `jupyter` — plus
+  the visual set, which `VisualFormat` defines as 11, with `json`/`markdown` overlapping under the
+  `visual-` prefixes). Counted from the signature and the type, not from the previous claim.
+
 ## [9.4.0] - 2026-08-07
 
 ### Summary

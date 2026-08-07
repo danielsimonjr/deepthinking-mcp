@@ -3,9 +3,9 @@
     "deepthinking-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "deepthinking-mcp@9.4.0"],
+      "args": ["-y", "deepthinking-mcp@9.5.0"],
       "env": {
-        "_RETRY": "2026-08-07-v9.4.0-connectivity"
+        "_RETRY": "2026-08-07-v9.5.0-analyze-modes"
       }
     }
   }

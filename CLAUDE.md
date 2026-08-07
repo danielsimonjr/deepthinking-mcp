@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types + 4 advanced runtime) with taxonomy-based classification (69 implemented reasoning types across 12 categories), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 9.4.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
+**Version**: 9.5.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
 
 ## Project Metrics
 
@@ -22,7 +22,7 @@ hand-editing the numbers below — they have drifted from source repeatedly.
 | Passing Tests | 6,347 (213 test files) |
 | Reasoning Modes | 34 (30 with dedicated types + 4 advanced runtime) |
 | MCP Tools | 13 listed (legacy `deepthinking` still callable but hidden, see below) |
-| Export Formats | 8 + native SVG + file export |
+| Export Formats | 15 accepted by `ExportService.exportSession` (5 document: json, markdown, latex, html, jupyter; 11 visual incl. native SVG, minus overlap) + file export |
 | Visual Exporters | 42 files (24 mode-specific, 15 utils, 3 root) |
 | Specialized Handlers | 37 (34 modes + GenericModeHandler + CustomHandler + utility) |
 | Builder Classes | 14 fluent APIs |
