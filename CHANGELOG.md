@@ -62,6 +62,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A single-thought `historical` session returned a Mermaid diagram for eight of the eleven visual
+  formats.** `exportHistoricalTimeline` implemented `mermaid`, `dot` and `ascii`, and its `default:`
+  branch returned Mermaid for everything else — so `svg`, `graphml`, `tikz`, `modelica`, `html`,
+  `uml`, `visual-json` and `visual-markdown` all returned a Mermaid flowchart under the requested
+  format's name, and every consumer that parsed `visual-json` threw. This is the same defect class
+  fixed on the multi-thought path in 9.4.1; the single-thought path was never checked. Those eight
+  formats now render the session's normalized node/edge graph.
+
+- **`exportComputability` was published but never called.** `VisualExporter` exposed a nine-format
+  computability exporter that `ExportService.exportVisual()`'s dispatch chain did not mention, so a
+  computability session fell through to the generic thought-sequence diagram. It could not be wired
+  in earlier because `modelica` and `uml` had no case and hit its `throw`; both now render, and the
+  exporter is on the session path.
+
+- **`escapeXMLInternal` was a byte-identical copy of `escapeXML` in the same module**, justified by
+  a comment claiming it avoided a circular dependency — impossible between two functions in one
+  file. Now one line delegating to the original. Two copies of an escaper is how `escapeLatex`
+  acquired two wrong implementations.
+
 - **`sampleWithStatistics` threw `RangeError` on any large Monte Carlo run.** It computed bounds
   with `Math.min(...samples)`, which passes every sample as a separate argument; that exceeds the
   engine's argument limit above roughly 100,000 elements. Measured on this Node: 100,000 succeeds,
@@ -104,6 +123,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   unimported by `src/`; that gap is now about a sampling entry point alone, not about reachability.
 
 ### Changed
+
+- **The eight mechanical visual formats have one implementation, in
+  `src/export/visual/graph-render.ts`.** `session-graph.ts` owned a copy of `svg`, `graphml`,
+  `tikz`, `modelica`, `html`, `uml`, `json` and `markdown` rendering over a normalized node/edge
+  graph; `historical` and `computability` needed the same eight. Rather than adding a second and
+  third copy, the renderer was generalized and `session-graph.ts` reduced to an adapter. Session
+  output is byte-identical across all eleven formats (verified against captured output; only
+  `visual-json`'s `exportedAt` timestamp differs, as it did before).
+
+- **The five `truncate*` helpers now delegate to one implementation**
+  (`truncateWithSuffix` in `src/export/visual/utils.ts`). `truncateLabel`, `truncateText`,
+  `truncateDotLabel`, `truncate` and `truncateAscii` were five separate copies of the same three
+  lines. All five remain exported with their own default lengths — this is published API — but
+  there is now one behaviour to be wrong, and
+  `tests/unit/export/duplicate-implementations.test.ts` compares their output directly.
+
+- **`tests/performance/**` no longer asserts on wall-clock time.** Every test in the four
+  performance files gated on elapsed milliseconds — `expect(createDuration).toBeLessThan(100)`,
+  `expect(thoughtsPerSecond).toBeGreaterThanOrEqual(100)`, `expect(duration).toBeLessThan(30000)`.
+  Those assertions measure how busy the machine is, not what the code does: T-PRF-007 (10 concurrent
+  sessions) and T-PRF-016 (10,000 thoughts) both passed when their file ran alone and failed on the
+  same commit while other work ran alongside. Creating 10 sessions was measured at 3.4–14.9 ms
+  against the 100 ms bound — a margin that already varies 4x sample to sample, so a single long GC
+  or scheduler stall crosses it.
+
+  Each test now asserts **counted work** instead, via `tests/performance/helpers/work-probe.ts`:
+
+  | Probe | What it counts | What it catches |
+  |---|---|---|
+  | `cacheLedger(manager)` | exact `sets`/`hits`/`misses`/`deletes`/`evictions` from `SessionManager.getSessionCacheStats()` | session creation that scans existing sessions (`hits` 0 → 45 for ten creations), sessions silently evicted or reloaded, an unbalanced create/delete ledger |
+  | `probeReads(thought)` | property reads on one stored thought | per-thought work that grows with session size — `addThought()` is documented O(1), so a stored thought must never be read again (0 reads, versus 199 on a metrics recompute) |
+
+  The replacements were **mutation-verified**, not assumed. Three regressions were injected at
+  runtime (`vi.spyOn`, no source file touched) and reverted: an O(n) metrics recompute in
+  `SessionMetricsCalculator.updateMetrics` (caught by 8 tests), a duplicate scan over existing
+  sessions in `createSession` (caught by 8), and a uniform O(n²) exporter (caught by 4). No bound
+  was widened, no test was retried, skipped, or quarantined. Catastrophic slowness is now covered by
+  vitest's per-test timeout, which is a wall-clock backstop nobody is tempted to nudge upward to
+  silence a flake.
+
+  Three defects were found while doing it, all previously invisible:
+  - T-PRF-019 asserted `expect(duration).toBeGreaterThan(0)` after 5,000 mixed operations.
+    `performance.now()` deltas are always positive, so **it could not fail**. It now asserts an
+    exact operation ledger plus a conservation identity (every created session is resident,
+    deleted, or evicted — none may go missing or be double-counted).
+  - T-PRF-020's edge-case loop substituted `tc.thought || 'fallback'`, so the empty-content case
+    never ran, and it swallowed every rejection. Running the cases for real shows an asymmetry:
+    empty content is **accepted** while whitespace-only content (`'\n' * 1000`, `'\t\t\t'`) is
+    **rejected**. Pinned in the test and reported; the fix belongs in the content validator.
+  - T-PRF-001's "rich Bayesian payload" sent `priorProbability`/`posteriorProbability` (no such
+    fields on `ThinkingToolInput`) and bare strings for `evidence` (an array of objects). `tsc`
+    rejects all three, but `tsconfig.json` excludes `tests/` and vitest transpiles without
+    type-checking, so the handler had been receiving an essentially empty bayesian thought. Now
+    uses the fields the schema declares (`prior`, `posterior`, object-shaped `evidence`).
 
 - **`create-dependency-graph` split into layered modules, and the committed binary rebuilt.** The
   tool was 1,341 lines in one file. It is now an orchestration-only entry point over

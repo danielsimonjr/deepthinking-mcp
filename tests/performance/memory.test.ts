@@ -13,8 +13,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { SessionManager } from '../../src/session/manager.js';
 import { ThoughtFactory } from '../../src/services/ThoughtFactory.js';
 import { ExportService } from '../../src/services/ExportService.js';
-import { ThinkingMode } from '../../src/types/core.js';
 import type { ThinkingToolInput } from '../../src/tools/thinking.js';
+import { cacheLedger, probeReads } from './helpers/work-probe.js';
 
 describe('Memory Performance Tests', () => {
   let manager: SessionManager;
@@ -419,9 +419,26 @@ describe('Memory Performance Tests', () => {
     });
 
     it('should maintain cache under memory pressure', async () => {
-      // Create many sessions to potentially trigger cache eviction
-      const sessions: { id: string }[] = [];
+      // Regression note: this test used to finish with
+      // `expect(duration).toBeLessThan(100)` on a single addThought() after
+      // filling the cache. That is a wall-clock bound on a microsecond
+      // operation, so it measured scheduler noise; see
+      // helpers/work-probe.ts. What "the cache still works under pressure"
+      // means is that an operation on a fresh session costs exactly what it
+      // costs on an empty manager -- same lookups, same touches -- which is
+      // directly countable.
+      const baseline = await manager.createSession();
+      const baselineProbe = probeReads(factory.createThought(createValidInput({
+        thought: 'Baseline before cache pressure',
+        thoughtNumber: 1,
+        totalThoughts: 1,
+      }), baseline.id));
+      const baselineLedger = cacheLedger(manager);
+      await manager.addThought(baseline.id, baselineProbe.value);
+      const baselineWork = baselineLedger();
 
+      // Create many sessions to drive the LRU cache to its cap
+      const sessions: { id: string }[] = [];
       for (let s = 0; s < 100; s++) {
         const session = await manager.createSession();
         sessions.push(session);
@@ -434,18 +451,20 @@ describe('Memory Performance Tests', () => {
         await manager.addThought(session.id, thought);
       }
 
-      // System should still be responsive
       const testSession = await manager.createSession();
-      const start = performance.now();
-      const thought = factory.createThought(createValidInput({
+      const pressuredProbe = probeReads(factory.createThought(createValidInput({
         thought: 'Test after cache pressure',
         thoughtNumber: 1,
         totalThoughts: 1,
-      }), testSession.id);
-      await manager.addThought(testSession.id, thought);
-      const duration = performance.now() - start;
+      }), testSession.id));
+      const pressuredLedger = cacheLedger(manager);
+      await manager.addThought(testSession.id, pressuredProbe.value);
+      const pressuredWork = pressuredLedger();
 
-      expect(duration).toBeLessThan(100);
+      expect(baselineProbe.reads).toBeGreaterThan(0);
+      expect(pressuredProbe.reads).toBe(baselineProbe.reads);
+      expect(pressuredWork.hits).toBe(baselineWork.hits);
+      expect(pressuredWork.misses).toBe(0);
     });
   });
 
