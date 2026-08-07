@@ -407,16 +407,15 @@ The `tools/` directory contains standalone utilities compiled to executables wit
 |------|---------|
 | `tools/chunking-for-files/chunking-for-files.exe` | Split large files into editable sections, merge back |
 | `tools/compress-for-context/compress-for-context.exe` | CTON context compression for LLM context windows |
-| `tools/create-dependency-graph/create-dependency-graph.exe` | Generates dependency graph documentation — **STALE, do not run**, see below |
+| `tools/create-dependency-graph/create-dependency-graph.exe` | Generates dependency graph documentation |
 
-> **⚠ Use `npm run docs:deps` — never `create-dependency-graph.exe`.** The committed binary was
-> last built 2025-12-26; the `.ts` has changed several times since. It therefore predates the
-> `<!-- repo-map:no-verification -->` banner the generator now emits, so **running the `.exe` would
-> strip that marker from `DEPENDENCY_GRAPH.md` and `unused-analysis.md` and break the repo_map
-> drift gate again.** `npm run docs:deps` runs the `.ts` through `tsx` and is the only supported
-> path. Rebuilding requires Bun (`bun build --compile`), which is not installed on this machine.
-> Open decision in `~/Github/TODO.md`: rebuild the binary, or drop it and document `tsx` as the
-> sole entry point.
+> **⚠ Rebuild `create-dependency-graph.exe` whenever you change that tool** — `cd
+> tools/create-dependency-graph && npm run build` (needs Bun). A stale binary generates output from
+> the old sources and says nothing about it. That already happened once: the committed binary sat
+> 8 months behind its source, and running it would have stripped the drift-gate banner the
+> generator now emits. Verify a rebuild by generating with `npm run docs:deps`, saving the five
+> outputs, running the `.exe`, and diffing — they must be byte-identical. The tool's sources are
+> layered under `tools/create-dependency-graph/src/`; see that directory's README.
 
 ### Usage
 

@@ -809,7 +809,7 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 459 | dependency-graph.json |
+| totalTypeScriptFiles | 467 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 | reachableFiles | 186 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |

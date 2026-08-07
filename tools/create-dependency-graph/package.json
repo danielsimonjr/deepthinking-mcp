@@ -4,9 +4,9 @@
   "description": "Shared tools for MCP servers",
   "type": "module",
    "scripts": {
-    "build": "bun build create-dependency-graph.ts --compile --outfile create-dependency-graph.exe",
+    "build": "bun build create-dependency-graph.ts --compile --minify --bytecode --outfile create-dependency-graph.exe",
     "build:ts": "tsc",
-    "build:exe": "npm run build:ts && pkg dist/create-dependency-graph.js --target node18-win-x64 --output create-dependency-graph.exe",
+    "typecheck": "tsc --noEmit",
     "start": "bun run create-dependency-graph.ts"
   },
   "bin": {

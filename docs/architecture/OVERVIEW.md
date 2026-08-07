@@ -24,12 +24,12 @@ document does not repeat it.
 | Metric | Value | Scope | Source |
 |---|---|---|---|
 | Version | 9.3.3 | package | `package.json` |
-| TypeScript files, whole repo | 459 | repo-wide | repo_map |
-| TypeScript files, `src/` | 225 | src only | repo_map (`file-inventory.json`, area=src) |
-| Lines of code, whole repo | 220,901 | repo-wide | repo_map |
-| Lines of code, `src/` | 111,644 | src only | repo_map |
-| Total exports, whole repo | 2,242 | repo-wide | repo_map |
-| Total exports, `src/` | 1,276 (571 re-exports) | src only | DEPENDENCY_GRAPH.md |
+| TypeScript files, whole repo | 467 | repo-wide | repo_map |
+| TypeScript files, `src/` | 226 | src only | repo_map (`file-inventory.json`, area=src) |
+| Lines of code, whole repo | 221,046 | repo-wide | repo_map |
+| Lines of code, `src/` | 112,129 | src only | repo_map |
+| Total exports, whole repo | 2,275 | repo-wide | repo_map |
+| Total exports, `src/` | 1,306 (575 re-exports) | src only | DEPENDENCY_GRAPH.md |
 | Entry roots | 1 (`src/index.ts`) | src | repo_map |
 | Runtime circular dependencies | 0 | src | repo_map, confirmed by direct edge inspection |
 | Type-only circular dependencies | 59 | src | repo_map |
@@ -43,15 +43,15 @@ document does not repeat it.
 | Visual exporters | 42 files (24 mode-specific, 15 utils, 3 root) | src | `src/export/visual/` |
 | Fluent builder classes | 14 | src | `src/export/visual/utils/` |
 
-The whole-repo and `src`-only export counts (2,195 vs 1,276) are not a contradiction. They
-count different file sets — the gap is `tests/` (146 files) and `tools/` (64 files), which
+The whole-repo and `src`-only export counts (2,275 vs 1,306) are not a contradiction. They
+count different file sets — the gap is `tests/` (163 files) and `tools/` (73 files), which
 also export symbols.
 
 ## Project Structure
 
 ```
 deepthinking-mcp/
-├── src/                # 225 files, 111,644 LOC — the package
+├── src/                # 226 files, 112,129 LOC — the package
 │   ├── index.ts        # entry point, all 13 tool handlers
 │   ├── types/           # ThinkingMode enum, Thought union, per-mode types
 │   ├── modes/            # mode handlers, registry, combinations, stochastic
@@ -65,8 +65,8 @@ deepthinking-mcp/
 │   ├── config/            # environment-variable configuration
 │   ├── interfaces/       # DI interfaces
 │   └── utils/             # errors, logger, sanitization
-├── tests/               # 146 files, 67,958 LOC
-├── tools/                # 64 files, 33,222 LOC — standalone CLI utilities
+├── tests/               # 163 files, 72,742 LOC
+├── tools/                # 73 files, 34,268 LOC — standalone CLI utilities
 ├── templates/mode-scaffolding/  # 5 copy-paste templates for authoring a new mode
 └── docs/architecture/   # this document set + generated reports
 ```
@@ -130,9 +130,9 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 459 | dependency-graph.json |
-| totalLinesOfCode | 220924 | dependency-graph.json |
-| totalExports | 2242 | dependency-graph.json |
+| totalTypeScriptFiles | 467 | dependency-graph.json |
+| totalLinesOfCode | 221046 | dependency-graph.json |
+| totalExports | 2275 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 | reachableFiles | 186 | dependency-graph.json |

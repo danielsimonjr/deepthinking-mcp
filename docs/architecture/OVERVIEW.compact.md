@@ -9,11 +9,11 @@ export. ESM, Node >=18, stdio transport. Entry point: `src/index.ts`. Publishes 
 | Metric | Value |
 |---|---|
 | Version | 9.3.3 |
-| TS files, whole repo / `src/` only | 436 / 221 |
-| LOC, whole repo / `src/` only | 213,993 / 110,537 |
-| Exports, whole repo / `src/` only | 2,195 / 1,276 (571 re-exports) |
+| TS files, whole repo / `src/` only | 467 / 226 |
+| LOC, whole repo / `src/` only | 221,046 / 112,129 |
+| Exports, whole repo / `src/` only | 2,275 / 1,306 (575 re-exports) |
 | Runtime circular deps | 0 |
-| Type-only circular deps | 57 |
+| Type-only circular deps | 59 |
 | Files with no static importer | 24 (17 loaded dynamically or by design, 7 unused) |
 | Duplicate symbol names | 63 (32 drift-risk, 29 benign, 2 real duplicates) |
 | Reasoning modes | 34 (30 dedicated types + 4 advanced-runtime) |
@@ -24,11 +24,11 @@ export. ESM, Node >=18, stdio transport. Entry point: `src/index.ts`. Publishes 
 ## Structure
 
 ```
-src/            221 files — index.ts, types/, modes/, services/, session/,
+src/            226 files — index.ts, types/, modes/, services/, session/,
                  validation/, export/, proof/, taxonomy/, cache/, config/,
                  interfaces/, utils/
-tests/          146 files, mirrors src/
-tools/          64 files — standalone CLI utilities
+tests/          163 files, mirrors src/
+tools/          73 files — standalone CLI utilities
 templates/mode-scaffolding/  5 copy-paste files, by-design unimported
 docs/architecture/  this doc set + generated reports
 ```
@@ -70,6 +70,6 @@ Check: `python repo_map.py check <repo> --docs docs/architecture`
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 459 | dependency-graph.json |
+| totalTypeScriptFiles | 467 | dependency-graph.json |
 | typeOnlyCircularDeps | 59 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |

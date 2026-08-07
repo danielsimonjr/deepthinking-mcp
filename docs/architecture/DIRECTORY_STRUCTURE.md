@@ -98,6 +98,12 @@ Standalone CLI utilities, compiled to executables separately from the main packa
 markdown-file chunker/merger, a context-compression tool, and the dependency-graph generator
 (`create-dependency-graph`) that produces `DEPENDENCY_GRAPH.md`.
 
+`create-dependency-graph/` keeps orchestration in its entry file and the work in `src/`, layered
+so the module graph stays acyclic: `types.ts` and `paths.ts` are leaves, `config.ts` resolves the
+project root and output paths, `scanner.ts` is the only layer that reads source text, `analysis.ts`
+derives the graph, and `reporters/` render it without re-reading source. Each committed `.exe` here
+is built from those sources and **goes stale silently** — rebuild it whenever the tool changes.
+
 ## `docs/architecture/`
 
 This document set, plus the machine-generated reports it points to

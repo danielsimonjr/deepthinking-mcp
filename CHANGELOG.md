@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **`create-dependency-graph` split into layered modules, and the committed binary rebuilt.** The
+  tool was 1,341 lines in one file. It is now an orchestration-only entry point over
+  `tools/create-dependency-graph/src/`: `types.ts` and `paths.ts` (leaves), `config.ts` (root
+  resolution, output paths, generated-file banner), `scanner.ts` (the only layer that reads source
+  text), `analysis.ts` (modules, matrix, cycles, unused, statistics), and `reporters/` (render the
+  analysis; never re-read source). The layering is acyclic by construction — `resolvePath` lives in
+  its own leaf precisely so the reporters need no edge into the analysis module.
+
+  The refactor is behaviour-preserving and was verified as such rather than assumed: function
+  bodies were sliced programmatically instead of retyped, and all five generated outputs are
+  **byte-identical by SHA256** to the pre-refactor baseline.
+
+  `create-dependency-graph.exe` is rebuilt from these sources and is **also byte-identical** —
+  checked because a compiled binary is a different runtime, and this one proves it: Bun resolves
+  `js-yaml` to `js-yaml.mjs` (no default export) while Node/tsx gets the CommonJS build, so the two
+  take different branches of the interop fallback. Same output; now documented at the call site.
+  The binary grew 36.7 MB → 94.5 MB because it embeds the Bun 1.3.14 runtime; the previous one was
+  a `pkg`/node18 build, and that dead `build:exe` script has been removed so the committed artifact
+  is reproducible from `npm run build`. Added a `typecheck` script.
+
+  Prior state, for the record: the binary was last built 2025-12-26 against sources that changed
+  repeatedly through 2026-08, so it silently generated stale output — including stripping the
+  drift-gate banner the generator now emits. `CLAUDE.md` and the tool README now state the rebuild
+  requirement and how to verify it.
+
+- **`tools/create-dependency-graph/README.md` corrected.** It documented the run path as
+  `tools/create-dependency-graph.ts` (missing the subdirectory, so the command failed) and listed
+  2 generated files when the tool writes 5.
+
 ### Fixed
 
 - **The dependency-graph generator stripped the drift gate's opt-out marker on every run, so
