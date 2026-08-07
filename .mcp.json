@@ -3,9 +3,9 @@
     "deepthinking-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "deepthinking-mcp@9.3.3"],
+      "args": ["-y", "deepthinking-mcp@9.4.0"],
       "env": {
-        "_RETRY": "2026-08-03-v9.3.3-mcp-manifest-shipped"
+        "_RETRY": "2026-08-07-v9.4.0-connectivity"
       }
     }
   }
