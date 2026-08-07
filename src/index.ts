@@ -28,7 +28,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
-import { readFileSync } from "fs";
+import { readFileSync, realpathSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 
@@ -60,8 +60,18 @@ import {
   type ProblemCharacteristics,
 } from "./types/index.js";
 
-// Initialize server
-const server = new Server(
+/**
+ * The MCP server, with every tool handler registered on it by the
+ * `setRequestHandler` calls below.
+ *
+ * Exported so a test can drive the REAL dispatch path over an in-memory
+ * transport instead of re-implementing it. Before this, `main()` ran at module
+ * scope, so importing this file started a stdio server -- no test could import
+ * it, `tests/integration/index-handlers.test.ts` re-implemented the handlers
+ * against `SessionManager` directly, and the real ones drifted and died while
+ * the suite stayed green. See `tests/integration/index-server.test.ts`.
+ */
+export const server = new Server(
   {
     name: packageJson.name,
     version: packageJson.version,
@@ -961,13 +971,63 @@ async function handleAnalyze(input: AnalyzeInputType): Promise<MCPResponse> {
 /**
  * Main server startup
  */
-async function main() {
+export async function main() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("DeepThinking MCP server running on stdio");
 }
 
-main().catch((error) => {
-  console.error("Fatal error:", error);
-  process.exit(1);
-});
+/**
+ * Is this module the process entry point, rather than an import?
+ *
+ * `main()` used to be called unconditionally at module scope, which made this
+ * file impossible to import: any test that tried would connect a stdio
+ * transport. That is the root cause of this repo's dead-code problem -- the
+ * entry point holds all 13 tool handlers and the whole dispatch, and none of it
+ * could be reached by a test, so handlers drifted out of use while the suite
+ * stayed green.
+ *
+ * `realpathSync` on BOTH sides is what makes this correct for the shipped
+ * artifact, not just for `node dist/index.js`:
+ *   - `npm`/`npx` install `bin.deepthinking-mcp` as `node_modules/.bin/
+ *     deepthinking-mcp`. On POSIX that is a SYMLINK to `dist/index.js`, so
+ *     `argv[1]` is the symlink path and a raw string compare fails -- the
+ *     server would exit 0, silently, having served nothing. Resolving both
+ *     sides to their real paths makes them equal.
+ *   - On Windows npm writes a `.cmd`/`.ps1` shim that invokes `node` with the
+ *     real path, so `argv[1]` already matches; `realpathSync` is a no-op there.
+ *
+ * VERIFICATION IS MANUAL AND MANDATORY AFTER TOUCHING THIS FUNCTION. There is
+ * deliberately no automated test for it, because the only honest one would run
+ * the BUILT artifact, and `dist/` is committed and usually stale during
+ * development -- such a test would either pass against a stale bundle that does
+ * not contain this code (a tautology) or sit permanently red. See
+ * "Entry-point guard" in CLAUDE.md for the four-case handshake procedure.
+ *
+ * What IS automated is the opposite direction: `tests/integration/
+ * index-server.test.ts` imports this module, so if the guard ever starts
+ * returning `true` unconditionally, that file fails at setup with "Already
+ * connected to a transport".
+ *
+ * Do not "simplify" this to a string compare or an `import.meta.main` check
+ * without re-running the manual procedure: every way of getting this wrong
+ * fails by exiting 0 with no output, which is indistinguishable from a healthy
+ * start unless you complete a real handshake.
+ */
+function isProcessEntryPoint(): boolean {
+  const entry = process.argv[1];
+  if (!entry) return false;
+  try {
+    return realpathSync(entry) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    // A path that cannot be resolved is not this module.
+    return false;
+  }
+}
+
+if (isProcessEntryPoint()) {
+  main().catch((error) => {
+    console.error("Fatal error:", error);
+    process.exit(1);
+  });
+}

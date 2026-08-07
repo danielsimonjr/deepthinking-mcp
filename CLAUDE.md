@@ -367,6 +367,33 @@ For parallel reasoning or handling multiple concurrent sessions:
 7. git push origin master     # Push to GitHub
 ```
 
+### Entry-point guard (`src/index.ts`)
+
+`main()` is called only when `isProcessEntryPoint()` is true, so the module can be imported by a
+test without starting a stdio server. That guard is what makes
+`tests/integration/index-server.test.ts` possible — before it, nothing in `src/` or `tests/` imported
+`src/index.ts` at all, and its 13 tool handlers had no test that ran them.
+
+**Every way of getting this guard wrong fails by exiting 0 with no output**, which is
+indistinguishable from a healthy start. So after ANY change to `isProcessEntryPoint()` or to the
+`bin`/`main` fields in `package.json`, re-run this by hand — a passing unit suite proves nothing here:
+
+```bash
+npm run build
+# 1. Direct launch
+node dist/index.js
+# 2. POSIX npm/npx bin: a SYMLINK to dist/index.js must also start
+#    (on Windows use PowerShell New-Item -ItemType SymbolicLink; Git Bash's `ln -s` silently COPIES)
+# 3. Packed + installed: npm pack, install the tarball in a clean dir,
+#    then run node_modules/deepthinking-mcp/dist/index.js
+# 4. The bin shim: node_modules/.bin/deepthinking-mcp
+```
+
+Each must complete a real `initialize` + `tools/list` handshake returning **13 tools**. "The process
+didn't crash" is not a pass — check the tool count. (A `.cmd` shim cannot be probed this way: cmd.exe
+consumes piped stdin as commands. Test the `.ps1`/POSIX shim or the resolved `dist/index.js` path,
+which is what the `.cmd` invokes anyway.)
+
 ### Cleanup Before Committing
 
 **CRITICAL**: Remove temporary debug/test artifacts before committing:

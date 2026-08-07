@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`src/index.ts` can now be imported, and its handlers are tested by running them.** `main()` was
+  called unconditionally at module scope, so importing the entry point started a stdio server. The
+  consequence, verified by grep: **zero files in `src/` or `tests/` imported `src/index.ts`** — its
+  973 lines, holding all 13 tool handlers and the whole `CallToolRequestSchema` dispatch, had no
+  test that ran them. `tests/integration/index-handlers.test.ts` (1,087 lines) papered over the gap
+  by **re-implementing** the handlers against `SessionManager`, which is worse than no coverage: it
+  goes green whether or not the real handler still exists, so the real one can rot, be bypassed or
+  silently drop a field and nothing notices. This is the mechanism behind this repo's dead code.
+
+  `main()` is now called only when `isProcessEntryPoint()` is true, and `server` and `main` are
+  exported. New `tests/integration/index-server.test.ts` connects a real MCP `Client` to the real
+  `server` over `InMemoryTransport` and exercises the production path end to end —
+  `Client → transport → dispatch → Zod → handleAddThought/handleSessionAction → ThoughtFactory →
+  ModeHandlerRegistry → SessionManager`. Nothing is re-implemented. It covers `tools/list` (13
+  tools, legacy tool hidden), thought creation, session append, export, all four newly-wired modes,
+  three error paths, and confirms the unlisted legacy `deepthinking` tool still answers — a
+  documented claim nothing had ever verified.
+
+  **The guard is entry-point detection, which fails silently when wrong**, so it uses `realpathSync`
+  on *both* sides: `npm`/`npx` install the bin as a symlink to `dist/index.js` on POSIX, and a raw
+  string compare would leave the published server exiting 0 having served nothing. Verified by a
+  real `initialize` + `tools/list` handshake (13 tools) against the built artifact in four launch
+  shapes — direct, via a real symlink, via a packed-and-installed copy, and via the `.bin` shim. The
+  procedure is written down under "Entry-point guard" in `CLAUDE.md`; re-run it after touching that
+  function, because a passing unit suite proves nothing about it.
+
 - **The five remaining `src/proof/` engines are wired into the live request path.** The 2026-08-06
   wave wired the decomposer, gap analyser, circular detector and inconsistency detector and stopped
   there, on the recorded theory that `assumption-tracker`, `verifier`, `branch-analyzer`,
