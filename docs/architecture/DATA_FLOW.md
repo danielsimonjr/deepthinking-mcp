@@ -809,11 +809,11 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 471 | dependency-graph.json |
+| totalTypeScriptFiles | 484 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
-| reachableFiles | 189 | dependency-graph.json |
+| reachableFiles | 200 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
-| typeOnlyCircularDeps | 59 | dependency-graph.json |
+| typeOnlyCircularDeps | 61 | dependency-graph.json |
 
 Every flow above was traced by reading the cited source. Tool names, action names, the
 mode-to-tool mapping, and which function calls which are confirmed by direct grep, with the file

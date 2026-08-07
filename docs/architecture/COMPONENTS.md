@@ -2296,12 +2296,12 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 471 | dependency-graph.json |
-| totalLinesOfCode | 221708 | dependency-graph.json |
-| totalExports | 2277 | dependency-graph.json |
+| totalTypeScriptFiles | 484 | dependency-graph.json |
+| totalLinesOfCode | 226231 | dependency-graph.json |
+| totalExports | 2143 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
-| reachableFiles | 189 | dependency-graph.json |
-| orphanedFiles | 23 | dependency-graph.json |
+| reachableFiles | 200 | dependency-graph.json |
+| orphanedFiles | 20 | dependency-graph.json |
 | noImporterFileCount | 20 | dependency-graph.json |
 
 Class counts, handler counts and validator counts in this document are verified directly

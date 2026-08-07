@@ -98,3 +98,9 @@ venv/
 __pycache__/
 memory.db
 memory.db.backup.*
+
+# npm auth. Publishing is done locally and needs an .npmrc holding
+# `//registry.npmjs.org/:_authToken=${NPM_TOKEN}` -- a variable REFERENCE, never
+# the token itself. Ignored so neither the reference nor an accidental literal
+# can be committed.
+.npmrc

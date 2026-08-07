@@ -5,7 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [9.4.0] - 2026-08-07
+
+### Summary
+
+A connectivity release. An audit of the whole codebase asked one question of every subsystem —
+*can a client actually reach this, and does it do what it says?* — and the answers were worse than
+expected. Four reasoning modes were unreachable, one of the 13 advertised tools ran nothing at all,
+and the entry point could not be imported by a test, which is why so much had been able to rot
+unnoticed. Tests went **5,791 → 6,347**. Reachable files **189 → 200**, dormant **38 → 28**,
+test-only **15 → 8**.
+
+Nothing here changes an existing accepted input or removes an export, so upgrading from 9.3.3
+requires no client change.
+
+**One limitation is worth stating plainly rather than burying:** `deepthinking_analyze` previously
+reported a confidence score that was fabricated — `0.8 × <a per-mode literal>`, with no handler
+running, which came out *identical for two unrelated problems*. It now runs the real handlers, and
+where a confidence genuinely cannot be derived it reports `confidenceBasis: "unavailable"` with the
+reason, instead of a number. Callers that read `confidenceScore` from that tool were reading
+nothing meaningful before, and should treat an `"unavailable"` basis as exactly that.
+
 
 ### Added
 

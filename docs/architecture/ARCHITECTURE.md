@@ -135,11 +135,11 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 471 | dependency-graph.json |
+| totalTypeScriptFiles | 484 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
-| typeOnlyCircularDeps | 59 | dependency-graph.json |
-| orphanedFiles | 23 | dependency-graph.json |
+| typeOnlyCircularDeps | 61 | dependency-graph.json |
+| orphanedFiles | 20 | dependency-graph.json |
 | noImporterFileCount | 20 | unused-analysis.json (summary) |
 
 Duplicate-symbol counts (63 total = 32 drift-risk + 29 benign + 2 real duplicates) come from

@@ -859,5 +859,4 @@ export class StochasticHandler implements ModeHandler {
 
     return issues;
   }
-
 }

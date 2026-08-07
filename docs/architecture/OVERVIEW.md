@@ -24,15 +24,15 @@ document does not repeat it.
 | Metric | Value | Scope | Source |
 |---|---|---|---|
 | Version | 9.3.3 | package | `package.json` |
-| TypeScript files, whole repo | 467 | repo-wide | repo_map |
-| TypeScript files, `src/` | 226 | src only | repo_map (`file-inventory.json`, area=src) |
-| Lines of code, whole repo | 221,046 | repo-wide | repo_map |
-| Lines of code, `src/` | 112,129 | src only | repo_map |
-| Total exports, whole repo | 2,275 | repo-wide | repo_map |
+| TypeScript files, whole repo | 484 | repo-wide | repo_map |
+| TypeScript files, `src/` | 228 | src only | repo_map (`file-inventory.json`, area=src) |
+| Lines of code, whole repo | 226,231 | repo-wide | repo_map |
+| Lines of code, `src/` | 112,917 | src only | repo_map |
+| Total exports, whole repo | 2,143 | repo-wide | repo_map |
 | Total exports, `src/` | 1,306 (575 re-exports) | src only | DEPENDENCY_GRAPH.md |
 | Entry roots | 1 (`src/index.ts`) | src | repo_map |
 | Runtime circular dependencies | 0 | src | repo_map, confirmed by direct edge inspection |
-| Type-only circular dependencies | 59 | src | repo_map |
+| Type-only circular dependencies | 61 | src | repo_map |
 | Files with no static importer | 24 (17 loaded dynamically or by design, 7 unused) | src | repo_map, hand-verified — see below |
 | Duplicate symbol names | 63 (32 drift-risk, 29 benign, 2 real duplicates) | src | repo_map, hand-verified — see below |
 | Reasoning modes | 34 (30 with dedicated thought types, 4 advanced-runtime) | src | `src/types/core.ts` `ThinkingMode` enum |
@@ -43,15 +43,15 @@ document does not repeat it.
 | Visual exporters | 42 files (24 mode-specific, 15 utils, 3 root) | src | `src/export/visual/` |
 | Fluent builder classes | 14 | src | `src/export/visual/utils/` |
 
-The whole-repo and `src`-only export counts (2,275 vs 1,306) are not a contradiction. They
-count different file sets — the gap is `tests/` (163 files) and `tools/` (73 files), which
+The whole-repo and `src`-only export counts (2,143 vs 1,306) are not a contradiction. They
+count different file sets — the gap is `tests/` (177 files) and `tools/` (74 files), which
 also export symbols.
 
 ## Project Structure
 
 ```
 deepthinking-mcp/
-├── src/                # 226 files, 112,129 LOC — the package
+├── src/                # 228 files, 112,917 LOC — the package
 │   ├── index.ts        # entry point, all 13 tool handlers
 │   ├── types/           # ThinkingMode enum, Thought union, per-mode types
 │   ├── modes/            # mode handlers, registry, combinations, stochastic
@@ -65,8 +65,8 @@ deepthinking-mcp/
 │   ├── config/            # environment-variable configuration
 │   ├── interfaces/       # DI interfaces
 │   └── utils/             # errors, logger, sanitization
-├── tests/               # 163 files, 72,742 LOC
-├── tools/                # 73 files, 34,268 LOC — standalone CLI utilities
+├── tests/               # 177 files, 75,703 LOC
+├── tools/                # 74 files, 35,704 LOC — standalone CLI utilities
 ├── templates/mode-scaffolding/  # 5 copy-paste templates for authoring a new mode
 └── docs/architecture/   # this document set + generated reports
 ```
@@ -112,7 +112,11 @@ Seven files under `src/` have no importer anywhere — not in `src/`, not in `te
 |---|---|
 | `cache/index.ts`, `export/index.ts`, `proof/index.ts`, `validation/index.ts` | Barrel files. Consumers import the concrete modules directly. |
 | `validation/schema-utils.ts`, `validation/schemas.ts` | Imported only by `validation/index.ts`, itself unused. |
-| `taxonomy/` (all 5 files) | Nothing outside the directory imports any of them. `recommend_mode` uses `ModeRecommender`, not the taxonomy. |
+
+`taxonomy/` is **no longer in that list.** `src/services/RecommendationService.ts` imports
+`taxonomy/advisory.js`, so `recommend_mode` now returns `ModeRecommender`'s recommendation with
+reasoning-type advice appended. Likewise `modes/stochastic/analysis/statistics.ts`, reached through
+`models/moments.ts` from `StochasticHandler`. Both were dead when this table was first written.
 
 Roughly 195 exports have no importer, of which 69 have no reference at all — not even inside
 their own file. A 23-export sample of that stricter set was 96% genuinely dead.
@@ -130,19 +134,19 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 471 | dependency-graph.json |
-| totalLinesOfCode | 221708 | dependency-graph.json |
-| totalExports | 2277 | dependency-graph.json |
+| totalTypeScriptFiles | 484 | dependency-graph.json |
+| totalLinesOfCode | 226231 | dependency-graph.json |
+| totalExports | 2143 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
-| reachableFiles | 189 | dependency-graph.json |
-| dormantFiles | 38 | dependency-graph.json |
-| orphanedFiles | 23 | dependency-graph.json |
-| testOnlyFiles | 15 | dependency-graph.json |
+| reachableFiles | 200 | dependency-graph.json |
+| dormantFiles | 28 | dependency-graph.json |
+| orphanedFiles | 20 | dependency-graph.json |
+| testOnlyFiles | 8 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
-| typeOnlyCircularDeps | 59 | dependency-graph.json |
+| typeOnlyCircularDeps | 61 | dependency-graph.json |
 | noImporterFileCount | 20 | unused-analysis.json (summary) |
-| unusedExportsCount | 204 | dependency-graph.json |
+| unusedExportsCount | 214 | dependency-graph.json |
 
 Note on `totalModules`: repo_map counts 5 top-level project areas (`docs`, `config`, `src`,
 `tools`, `tests`), not `src/` subdirectories. DEPENDENCY_GRAPH.md's "14 modules" counts `src/`

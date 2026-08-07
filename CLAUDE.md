@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types + 4 advanced runtime) with taxonomy-based classification (69 implemented reasoning types across 12 categories), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 9.3.3 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
+**Version**: 9.4.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
 
 ## Project Metrics
 
@@ -16,17 +16,17 @@ hand-editing the numbers below — they have drifted from source repeatedly.
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | ~237 |
-| Lines of Code | ~102,000 (`src/*.ts`) |
+| TypeScript Files | 228 (`src/`) |
+| Lines of Code | 112,917 (`src/*.ts`) |
 | Total Exports | 1,276 (571 re-exports) |
-| Passing Tests | 5,116 (183 test files) |
+| Passing Tests | 6,347 (213 test files) |
 | Reasoning Modes | 34 (30 with dedicated types + 4 advanced runtime) |
 | MCP Tools | 13 listed (legacy `deepthinking` still callable but hidden, see below) |
 | Export Formats | 8 + native SVG + file export |
 | Visual Exporters | 42 files (24 mode-specific, 15 utils, 3 root) |
 | Specialized Handlers | 37 (34 modes + GenericModeHandler + CustomHandler + utility) |
 | Builder Classes | 14 fluent APIs |
-| Circular Dependencies | 57 (all type-only, 0 runtime) |
+| Circular Dependencies | 61 (all type-only, 0 runtime) |
 
 ## Build & Development Commands
 

@@ -2,9 +2,9 @@ metadata:
   name: deepthinking-mcp
   version: 9.3.3
   lastUpdated: '2026-08-07'
-  totalFiles: 239
+  totalFiles: 241
   totalModules: 14
-  totalExports: 1306
+  totalExports: 1184
 entryPoints:
   - file: src/index.ts
     type: main
@@ -302,6 +302,80 @@ modules:
         - recommendExportProfile
       constants:
         - EXPORT_PROFILES
+    src/export/visual/graph-render.ts:
+      description: Generic node/edge rendering for the eight non-hand-built visual formats.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ./types.js
+          imports:
+            - VisualFormat
+          typeOnly: true
+        - file: ./utils.js
+          imports:
+            - sanitizeId
+        - file: ./utils/graphml.js
+          imports:
+            - generateGraphML
+            - GraphMLNode
+            - GraphMLEdge
+        - file: ./utils/tikz.js
+          imports:
+            - generateTikZ
+            - TikZNode
+            - TikZEdge
+        - file: ./utils/uml.js
+          imports:
+            - generateUmlDiagram
+            - UmlNode
+            - UmlEdge
+        - file: ./utils/modelica.js
+          imports:
+            - generateModelicaPackageHeader
+            - generateModelicaPackageFooter
+            - generateModelicaModel
+        - file: ./utils/svg.js
+          imports:
+            - generateSVGHeader
+            - generateSVGFooter
+            - renderRectNode
+            - renderStadiumNode
+            - renderEdge
+            - getNodeColor
+            - DEFAULT_SVG_OPTIONS
+            - SVGNodePosition
+        - file: ./utils/html.js
+          imports:
+            - generateHTMLHeader
+            - generateHTMLFooter
+            - escapeHTML
+            - renderMetricCard
+            - renderSection
+        - file: ./utils/json.js
+          imports:
+            - createJsonGraph
+            - addNode
+            - addEdge
+            - addMetric
+            - serializeGraph
+        - file: ./utils/markdown.js
+          imports:
+            - heading
+            - list
+            - table
+      exports:
+        - GRAPH_RENDER_FORMATS
+        - renderGraphModel
+        - truncateGraphLabel
+      interfaces:
+        - GraphRenderNode
+        - GraphRenderEdge
+        - GraphRenderModel
+      functions:
+        - renderGraphModel
+        - truncateGraphLabel
+      constants:
+        - GRAPH_RENDER_FORMATS
     src/export/visual/index.ts:
       description: Visual Export Module (v8.3.0)
       externalDependencies: []
@@ -690,6 +764,12 @@ modules:
         - file: ../utils.js
           imports:
             - sanitizeId
+        - file: ../graph-render.js
+          imports:
+            - renderGraphModel
+            - GraphRenderModel
+            - GraphRenderNode
+            - GraphRenderEdge
         - file: ../utils/dot.js
           imports:
             - DOTGraphBuilder
@@ -1297,6 +1377,12 @@ modules:
           imports:
             - MermaidGraphBuilder
             - MermaidGanttBuilder
+        - file: ../graph-render.js
+          imports:
+            - renderGraphModel
+            - GraphRenderModel
+            - GraphRenderNode
+            - GraphRenderEdge
       exports:
         - exportHistoricalTimeline
       functions:
@@ -2349,58 +2435,11 @@ modules:
           imports:
             - VisualFormat
           typeOnly: true
-        - file: ./utils.js
+        - file: ./graph-render.js
           imports:
-            - sanitizeId
-        - file: ./utils/graphml.js
-          imports:
-            - generateGraphML
-            - GraphMLNode
-            - GraphMLEdge
-        - file: ./utils/tikz.js
-          imports:
-            - generateTikZ
-            - TikZNode
-            - TikZEdge
-        - file: ./utils/uml.js
-          imports:
-            - generateUmlDiagram
-            - UmlNode
-            - UmlEdge
-        - file: ./utils/modelica.js
-          imports:
-            - generateModelicaPackageHeader
-            - generateModelicaPackageFooter
-            - generateModelicaModel
-        - file: ./utils/svg.js
-          imports:
-            - generateSVGHeader
-            - generateSVGFooter
-            - renderRectNode
-            - renderStadiumNode
-            - renderEdge
-            - getNodeColor
-            - DEFAULT_SVG_OPTIONS
-            - SVGNodePosition
-        - file: ./utils/html.js
-          imports:
-            - generateHTMLHeader
-            - generateHTMLFooter
-            - escapeHTML
-            - renderMetricCard
-            - renderSection
-        - file: ./utils/json.js
-          imports:
-            - createJsonGraph
-            - addNode
-            - addEdge
-            - addMetric
-            - serializeGraph
-        - file: ./utils/markdown.js
-          imports:
-            - heading
-            - list
-            - table
+            - renderGraphModel
+            - GRAPH_RENDER_FORMATS
+            - GraphRenderModel
       exports:
         - renderSessionGraph
       interfaces:
@@ -2421,7 +2460,10 @@ modules:
       description: ASCII Art Utilities (v8.5.0)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils.js
+          imports:
+            - truncateWithSuffix
       exports:
         - BOX_CHARS
         - ARROWS
@@ -2490,7 +2532,10 @@ modules:
       description: DOT/GraphViz Utilities (v8.5.0)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils.js
+          imports:
+            - truncateWithSuffix
       exports:
         - DOT_COLORS
         - sanitizeDotId
@@ -2769,7 +2814,10 @@ modules:
       description: Markdown Export Utilities (v8.5.0)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils.js
+          imports:
+            - truncateWithSuffix
       exports:
         - heading
         - bold
@@ -2841,7 +2889,10 @@ modules:
       description: Mermaid Utilities (v8.5.0)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils.js
+          imports:
+            - truncateWithSuffix
       exports:
         - MERMAID_COLORS
         - sanitizeMermaidId
@@ -2932,7 +2983,10 @@ modules:
       description: SVG Export Utilities (v8.5.0)
       externalDependencies: []
       nodeDependencies: []
-      internalDependencies: []
+      internalDependencies:
+        - file: ../utils.js
+          imports:
+            - truncateWithSuffix
       exports:
         - DEFAULT_SVG_OPTIONS
         - COLOR_PALETTES
@@ -3090,8 +3144,10 @@ modules:
       internalDependencies: []
       exports:
         - sanitizeId
+        - truncateWithSuffix
       functions:
         - sanitizeId
+        - truncateWithSuffix
     src/export/visual/visual-exporter.ts:
       description: Visual Exporter Class (v9.1.0)
       externalDependencies: []
@@ -3189,6 +3245,7 @@ modules:
         - module: fs
           imports:
             - readFileSync
+            - realpathSync
         - module: path
           imports:
             - dirname
@@ -3230,8 +3287,13 @@ modules:
           imports:
             - ThinkingToolInput
       exports:
+        - server
         - format
+        - main
+      functions:
+        - main
       constants:
+        - server
         - format
   interfaces:
     src/interfaces/ILogger.ts:
@@ -3404,6 +3466,18 @@ modules:
         - file: ../../types/core.js
           imports:
             - ThinkingMode
+            - Thought
+        - file: ../../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+        - file: ../../services/ThoughtFactory.js
+          imports:
+            - ThoughtFactory
+        - file: ../handlers/ModeHandler.js
+          imports:
+            - ValidationResult
+          typeOnly: true
         - file: ./combination-types.js
           imports:
             - MultiModeAnalysisRequest
@@ -3413,7 +3487,11 @@ modules:
             - Insight
             - ModeError
             - MergeStatistics
+            - ConfidenceBasis
           typeOnly: true
+        - file: ./combination-types.js
+          imports:
+            - UNSCORED_INSIGHT_WEIGHT
         - file: ./merger.js
           imports:
             - InsightMerger
@@ -3449,7 +3527,9 @@ modules:
           imports:
             - ThinkingMode
           typeOnly: true
-      exports: []
+      exports:
+        - UNSCORED_INSIGHT_WEIGHT
+        - SYNTHESIS_CONFIDENCE_NOTE
       interfaces:
         - WeightedMergeConfig
         - HierarchicalMergeConfig
@@ -3464,6 +3544,9 @@ modules:
         - MultiModeAnalysisResponse
         - ModeAnalysisResult
         - ModeError
+      constants:
+        - UNSCORED_INSIGHT_WEIGHT
+        - SYNTHESIS_CONFIDENCE_NOTE
     src/modes/combinations/conflict-resolver.ts:
       description: Conflict Resolver - Phase 12 Sprint 3
       externalDependencies: []
@@ -3479,6 +3562,9 @@ modules:
             - ConflictResolution
             - ConflictType
           typeOnly: true
+        - file: ./combination-types.js
+          imports:
+            - SYNTHESIS_CONFIDENCE_NOTE
       exports:
         - ConflictResolver
       classes:
@@ -3601,6 +3687,9 @@ modules:
             - MergeStatistics
             - ConflictingInsight
           typeOnly: true
+        - file: ./combination-types.js
+          imports:
+            - SYNTHESIS_CONFIDENCE_NOTE
       exports:
         - InsightMerger
       classes:
@@ -4858,6 +4947,14 @@ modules:
             - validationFailure
             - createValidationError
             - createValidationWarning
+        - file: ../stochastic/models/moments.js
+          imports:
+            - analyticMoments
+        - file: ../stochastic/analysis/statistics.js
+          imports:
+            - equalTailedInterval
+            - mean
+            - variance
       exports:
         - StochasticHandler
       classes:
@@ -5494,6 +5591,17 @@ modules:
       functions:
         - createSampler
         - sampleWithStatistics
+    src/modes/stochastic/models/moments.ts:
+      description: Closed-form mean and variance for the distributions this codebase accepts.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - analyticMoments
+      interfaces:
+        - DistributionMoments
+      functions:
+        - analyticMoments
     src/modes/stochastic/sampling/rng.ts:
       description: Seeded Random Number Generator - Phase 12 Sprint 5
       externalDependencies: []
@@ -5579,6 +5687,10 @@ modules:
         - file: ./inconsistency-detector.js
           imports:
             - InconsistencyDetector
+        - file: ./extended-advisory.js
+          imports:
+            - analyzeProofExtended
+            - ExtendedProofDeps
       exports:
         - MAX_PROOF_STEPS
         - MAX_PROOF_ATOMS
@@ -5728,6 +5840,78 @@ modules:
         - DependencyGraphBuilder
       classes:
         - DependencyGraphBuilder
+    src/proof/extended-advisory.ts:
+      description: Extended advisory proof analysis — the five engines the first wiring wave
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/session.js
+          imports:
+            - AssumptionDependencyEntry
+            - ProofAssumptionAnalysis
+            - ProofBranchAnalysis
+            - ProofExtendedAnalysis
+            - ProofFallacyAnalysis
+            - ProofFallacyHit
+            - ProofStrategyAnalysis
+            - ProofStructureAnalysis
+            - ProofVerificationAnalysis
+          typeOnly: true
+        - file: ../types/modes/mathematics.js
+          imports:
+            - ProofDecomposition
+          typeOnly: true
+        - file: ./decomposer.js
+          imports:
+            - ProofStep
+          typeOnly: true
+        - file: ./assumption-tracker.js
+          imports:
+            - AssumptionTracker
+        - file: ./verifier.js
+          imports:
+            - ProofVerifier
+        - file: ./branch-analyzer.js
+          imports:
+            - BranchAnalyzer
+        - file: ./hierarchical-proof.js
+          imports:
+            - HierarchicalProofManager
+        - file: ./strategy-recommender.js
+          imports:
+            - StrategyRecommender
+        - file: ./patterns/warnings.js
+          imports:
+            - checkStatement
+      exports:
+        - MAX_EXTENDED_PROOF_STEPS
+        - MAX_EXTENDED_ASSUMPTIONS
+        - MAX_EXTENDED_CONCLUSIONS
+        - MAX_VERIFICATION_ITEMS
+        - MAX_PROOF_BRANCHES
+        - MAX_SUB_PROOFS
+        - MAX_STRATEGY_RECOMMENDATIONS
+        - MAX_FALLACY_HITS
+        - MAX_EXTENDED_NOTES
+        - MAX_FALLACY_STATEMENT_CHARS
+        - MAX_FALLACY_EXCERPT_CHARS
+        - analyzeProofExtended
+      interfaces:
+        - ExtendedProofDeps
+      functions:
+        - analyzeProofExtended
+      constants:
+        - MAX_EXTENDED_PROOF_STEPS
+        - MAX_EXTENDED_ASSUMPTIONS
+        - MAX_EXTENDED_CONCLUSIONS
+        - MAX_VERIFICATION_ITEMS
+        - MAX_PROOF_BRANCHES
+        - MAX_SUB_PROOFS
+        - MAX_STRATEGY_RECOMMENDATIONS
+        - MAX_FALLACY_HITS
+        - MAX_EXTENDED_NOTES
+        - MAX_FALLACY_STATEMENT_CHARS
+        - MAX_FALLACY_EXCERPT_CHARS
     src/proof/gap-analyzer.ts:
       description: Gap Analyzer - Phase 8 Sprint 2
       externalDependencies: []
@@ -5796,6 +5980,17 @@ modules:
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
+        - file: ./advisory.js
+          imports:
+            - analyzeProofAdvisory
+            - type ProofAnalysisDeps
+          reExport: true
+        - file: ./extended-advisory.js
+          imports:
+            - analyzeProofExtended
+            - type ExtendedProofDeps
+            - MAX_EXTENDED_PROOF_STEPS
+          reExport: true
         - file: ./dependency-graph.js
           imports:
             - DependencyGraphBuilder
@@ -5856,6 +6051,11 @@ modules:
             - type ProofElementInput
           reExport: true
       exports:
+        - analyzeProofAdvisory
+        - type ProofAnalysisDeps
+        - analyzeProofExtended
+        - type ExtendedProofDeps
+        - MAX_EXTENDED_PROOF_STEPS
         - DependencyGraphBuilder
         - ProofDecomposer
         - type ProofStep
@@ -5883,6 +6083,11 @@ modules:
         - type HierarchicalProofOptions
         - type ProofElementInput
       reExported:
+        - analyzeProofAdvisory
+        - type ProofAnalysisDeps
+        - analyzeProofExtended
+        - type ExtendedProofDeps
+        - MAX_EXTENDED_PROOF_STEPS
         - DependencyGraphBuilder
         - ProofDecomposer
         - type ProofStep
@@ -6023,6 +6228,7 @@ modules:
             - isAlgorithmicThought
             - isScientificMethodThought
             - isHistoricalThought
+            - isComputabilityThought
             - HybridThought
             - |-
               // Sprint 1: Visual export integration types
@@ -6171,6 +6377,9 @@ modules:
         - file: ../proof/advisory.js
           imports:
             - analyzeProofAdvisory
+        - file: ../taxonomy/flow-advisory.js
+          imports:
+            - summarizeReasoningFlow
         - file: ./storage/interface.js
           imports:
             - SessionStorage
@@ -6342,6 +6551,32 @@ modules:
         - TaxonomyClassifier
       interfaces:
         - ThoughtClassification
+    src/taxonomy/flow-advisory.ts:
+      description: Advisory multi-modal reasoning-flow wrapper
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types/index.js
+          imports:
+            - ThinkingSession
+          typeOnly: true
+        - file: ./multi-modal-analyzer.js
+          imports:
+            - MultiModalAnalyzer
+            - ReasoningFlow
+      exports:
+        - MIN_FLOW_THOUGHTS
+        - MAX_FLOW_REPORT_CHARS
+        - FLOW_TRUNCATION_MARKER
+        - summarizeReasoningFlow
+      interfaces:
+        - FlowAdvisoryDeps
+      functions:
+        - summarizeReasoningFlow
+      constants:
+        - MIN_FLOW_THOUGHTS
+        - MAX_FLOW_REPORT_CHARS
+        - FLOW_TRUNCATION_MARKER
     src/taxonomy/multi-modal-analyzer.ts:
       description: Multi-Modal Reasoning Analyzer (v3.4.0)
       externalDependencies: []
@@ -6807,6 +7042,9 @@ modules:
             - TextSchema
             - IdArraySchema
             - boundedRecord
+        - file: ../../../utils/sanitization.js
+          imports:
+            - MAX_LENGTHS
       exports:
         - EngineeringSchema
       constants:
@@ -6948,6 +7186,7 @@ modules:
           imports:
             - ConfidenceSchema
             - IdSchema
+            - NameSchema
             - TextSchema
             - IdArraySchema
             - boundedRecord
@@ -6975,6 +7214,7 @@ modules:
             - NameSchema
             - TextSchema
             - IdArraySchema
+            - boundedRecord
         - file: ../../../utils/sanitization.js
           imports:
             - MAX_LENGTHS
@@ -8873,6 +9113,14 @@ modules:
             - Inconsistency
             - ProofGap
           typeOnly: true
+        - file: ../proof/branch-types.js
+          imports:
+            - HierarchicalProofType
+            - ProofStrategyType
+            - VerificationCoverage
+            - VerificationError
+            - VerificationWarning
+          typeOnly: true
       exports: []
       interfaces:
         - ThinkingSession
@@ -8887,6 +9135,19 @@ modules:
         - ProofAnalysisTruncation
         - ProofAnalysisTotals
         - ProofAnalysisResult
+        - AssumptionDependencyEntry
+        - ExplicitAssumptionSummary
+        - ProofAssumptionAnalysis
+        - ProofVerificationAnalysis
+        - ProofBranchSummary
+        - ProofBranchAnalysis
+        - SubProofSummary
+        - ProofStructureAnalysis
+        - ProofStrategySuggestion
+        - ProofStrategyAnalysis
+        - ProofFallacyHit
+        - ProofFallacyAnalysis
+        - ProofExtendedAnalysis
         - ProofAnalysisUnavailable
         - ValidationIssue
   utils:
@@ -9180,127 +9441,6 @@ modules:
             - MAX_ADVISORY_SUGGESTIONS
             - type AdvisoryValidatorLike
           reExport: true
-        - file: ./schemas.js
-          imports:
-            - SessionIdSchema
-            - ThinkingModeSchema
-            - CreateSessionSchema
-            - type CreateSessionInput
-            - AddThoughtSchema
-            - type AddThoughtInput
-            - CompleteSessionSchema
-            - type CompleteSessionInput
-            - GetSessionSchema
-            - type GetSessionInput
-            - ListSessionsSchema
-            - type ListSessionsInput
-            - ExportSessionSchema
-            - type ExportSessionInput
-            - SearchSessionsSchema
-            - type SearchSessionsInput
-            - BatchOperationSchema
-            - type BatchOperationInput
-            - validateInput
-            - safeValidateInput
-          reExport: true
-        - file: ./schema-utils.js
-          imports:
-            - |-
-              // Primitive schemas
-                probabilitySchema
-            - confidenceSchema
-            - progressSchema
-            - weightSchema
-            - nonNegativeSchema
-            - positiveSchema
-            - nonEmptyStringSchema
-            - uuidSchema
-            - timestampSchema
-            - |-
-              // Composite schemas - Hypothesis & Evidence
-                hypothesisSchema
-            - probabilityWithJustificationSchema
-            - probabilityWithCalculationSchema
-            - evidenceSchema
-            - evidenceWithSupportSchema
-            - type HypothesisInput
-            - type ProbabilityWithJustification
-            - type ProbabilityWithCalculation
-            - type EvidenceInput
-            - type EvidenceWithSupport
-            - |-
-              // Graph schemas
-                createNodeSchema
-            - createEdgeSchema
-            - nodeSchema
-            - weightedNodeSchema
-            - edgeSchema
-            - weightedEdgeSchema
-            - causalEdgeSchema
-            - type NodeInput
-            - type WeightedNodeInput
-            - type EdgeInput
-            - type WeightedEdgeInput
-            - type CausalEdgeInput
-            - |-
-              // Temporal schemas
-                timePointSchema
-            - timeIntervalSchema
-            - temporalEventSchema
-            - type TimePointInput
-            - type TimeIntervalInput
-            - type TemporalEventInput
-            - |-
-              // Mathematical schemas
-                mathExpressionSchema
-            - valueWithUnitSchema
-            - measurementSchema
-            - type MathExpressionInput
-            - type ValueWithUnitInput
-            - type MeasurementInput
-            - |-
-              // Game Theory schemas
-                playerSchema
-            - strategySchema
-            - payoffSchema
-            - type PlayerInput
-            - type StrategyInput
-            - type PayoffInput
-            - |-
-              // Reasoning schemas
-                reasoningStepSchema
-            - propositionSchema
-            - inferenceRuleSchema
-            - type ReasoningStepInput
-            - type PropositionInput
-            - type InferenceRuleInput
-            - |-
-              // Optimization schemas
-                constraintSchema
-            - objectiveSchema
-            - solutionSchema
-            - type ConstraintInput
-            - type ObjectiveInput
-            - type SolutionInput
-            - |-
-              // Base schemas
-                baseThoughtSchema
-            - sequentialThoughtExtensionSchema
-            - bayesianThoughtExtensionSchema
-            - type BaseThoughtInput
-            - |-
-              // Helpers
-                createRangeSchema
-            - createEnumSchema
-            - createOptionalStringWithDefault
-            - createOptionalNumberWithDefault
-            - createOptionalBooleanWithDefault
-            - uniqueIdArraySchema
-            - createGraphSchema
-            - |-
-              // Namespace export
-                SchemaUtils
-          reExport: true
       exports:
         - IssueSeverity
         - IssueCategory
@@ -9315,121 +9455,6 @@ modules:
         - MAX_ADVISORY_ISSUES
         - MAX_ADVISORY_SUGGESTIONS
         - type AdvisoryValidatorLike
-        - SessionIdSchema
-        - ThinkingModeSchema
-        - CreateSessionSchema
-        - type CreateSessionInput
-        - AddThoughtSchema
-        - type AddThoughtInput
-        - CompleteSessionSchema
-        - type CompleteSessionInput
-        - GetSessionSchema
-        - type GetSessionInput
-        - ListSessionsSchema
-        - type ListSessionsInput
-        - ExportSessionSchema
-        - type ExportSessionInput
-        - SearchSessionsSchema
-        - type SearchSessionsInput
-        - BatchOperationSchema
-        - type BatchOperationInput
-        - validateInput
-        - safeValidateInput
-        - |-
-          // Primitive schemas
-            probabilitySchema
-        - confidenceSchema
-        - progressSchema
-        - weightSchema
-        - nonNegativeSchema
-        - positiveSchema
-        - nonEmptyStringSchema
-        - uuidSchema
-        - timestampSchema
-        - |-
-          // Composite schemas - Hypothesis & Evidence
-            hypothesisSchema
-        - probabilityWithJustificationSchema
-        - probabilityWithCalculationSchema
-        - evidenceSchema
-        - evidenceWithSupportSchema
-        - type HypothesisInput
-        - type ProbabilityWithJustification
-        - type ProbabilityWithCalculation
-        - type EvidenceInput
-        - type EvidenceWithSupport
-        - |-
-          // Graph schemas
-            createNodeSchema
-        - createEdgeSchema
-        - nodeSchema
-        - weightedNodeSchema
-        - edgeSchema
-        - weightedEdgeSchema
-        - causalEdgeSchema
-        - type NodeInput
-        - type WeightedNodeInput
-        - type EdgeInput
-        - type WeightedEdgeInput
-        - type CausalEdgeInput
-        - |-
-          // Temporal schemas
-            timePointSchema
-        - timeIntervalSchema
-        - temporalEventSchema
-        - type TimePointInput
-        - type TimeIntervalInput
-        - type TemporalEventInput
-        - |-
-          // Mathematical schemas
-            mathExpressionSchema
-        - valueWithUnitSchema
-        - measurementSchema
-        - type MathExpressionInput
-        - type ValueWithUnitInput
-        - type MeasurementInput
-        - |-
-          // Game Theory schemas
-            playerSchema
-        - strategySchema
-        - payoffSchema
-        - type PlayerInput
-        - type StrategyInput
-        - type PayoffInput
-        - |-
-          // Reasoning schemas
-            reasoningStepSchema
-        - propositionSchema
-        - inferenceRuleSchema
-        - type ReasoningStepInput
-        - type PropositionInput
-        - type InferenceRuleInput
-        - |-
-          // Optimization schemas
-            constraintSchema
-        - objectiveSchema
-        - solutionSchema
-        - type ConstraintInput
-        - type ObjectiveInput
-        - type SolutionInput
-        - |-
-          // Base schemas
-            baseThoughtSchema
-        - sequentialThoughtExtensionSchema
-        - bayesianThoughtExtensionSchema
-        - type BaseThoughtInput
-        - |-
-          // Helpers
-            createRangeSchema
-        - createEnumSchema
-        - createOptionalStringWithDefault
-        - createOptionalNumberWithDefault
-        - createOptionalBooleanWithDefault
-        - uniqueIdArraySchema
-        - createGraphSchema
-        - |-
-          // Namespace export
-            SchemaUtils
       reExported:
         - IssueSeverity
         - IssueCategory
@@ -9444,268 +9469,6 @@ modules:
         - MAX_ADVISORY_ISSUES
         - MAX_ADVISORY_SUGGESTIONS
         - type AdvisoryValidatorLike
-        - SessionIdSchema
-        - ThinkingModeSchema
-        - CreateSessionSchema
-        - type CreateSessionInput
-        - AddThoughtSchema
-        - type AddThoughtInput
-        - CompleteSessionSchema
-        - type CompleteSessionInput
-        - GetSessionSchema
-        - type GetSessionInput
-        - ListSessionsSchema
-        - type ListSessionsInput
-        - ExportSessionSchema
-        - type ExportSessionInput
-        - SearchSessionsSchema
-        - type SearchSessionsInput
-        - BatchOperationSchema
-        - type BatchOperationInput
-        - validateInput
-        - safeValidateInput
-        - |-
-          // Primitive schemas
-            probabilitySchema
-        - confidenceSchema
-        - progressSchema
-        - weightSchema
-        - nonNegativeSchema
-        - positiveSchema
-        - nonEmptyStringSchema
-        - uuidSchema
-        - timestampSchema
-        - |-
-          // Composite schemas - Hypothesis & Evidence
-            hypothesisSchema
-        - probabilityWithJustificationSchema
-        - probabilityWithCalculationSchema
-        - evidenceSchema
-        - evidenceWithSupportSchema
-        - type HypothesisInput
-        - type ProbabilityWithJustification
-        - type ProbabilityWithCalculation
-        - type EvidenceInput
-        - type EvidenceWithSupport
-        - |-
-          // Graph schemas
-            createNodeSchema
-        - createEdgeSchema
-        - nodeSchema
-        - weightedNodeSchema
-        - edgeSchema
-        - weightedEdgeSchema
-        - causalEdgeSchema
-        - type NodeInput
-        - type WeightedNodeInput
-        - type EdgeInput
-        - type WeightedEdgeInput
-        - type CausalEdgeInput
-        - |-
-          // Temporal schemas
-            timePointSchema
-        - timeIntervalSchema
-        - temporalEventSchema
-        - type TimePointInput
-        - type TimeIntervalInput
-        - type TemporalEventInput
-        - |-
-          // Mathematical schemas
-            mathExpressionSchema
-        - valueWithUnitSchema
-        - measurementSchema
-        - type MathExpressionInput
-        - type ValueWithUnitInput
-        - type MeasurementInput
-        - |-
-          // Game Theory schemas
-            playerSchema
-        - strategySchema
-        - payoffSchema
-        - type PlayerInput
-        - type StrategyInput
-        - type PayoffInput
-        - |-
-          // Reasoning schemas
-            reasoningStepSchema
-        - propositionSchema
-        - inferenceRuleSchema
-        - type ReasoningStepInput
-        - type PropositionInput
-        - type InferenceRuleInput
-        - |-
-          // Optimization schemas
-            constraintSchema
-        - objectiveSchema
-        - solutionSchema
-        - type ConstraintInput
-        - type ObjectiveInput
-        - type SolutionInput
-        - |-
-          // Base schemas
-            baseThoughtSchema
-        - sequentialThoughtExtensionSchema
-        - bayesianThoughtExtensionSchema
-        - type BaseThoughtInput
-        - |-
-          // Helpers
-            createRangeSchema
-        - createEnumSchema
-        - createOptionalStringWithDefault
-        - createOptionalNumberWithDefault
-        - createOptionalBooleanWithDefault
-        - uniqueIdArraySchema
-        - createGraphSchema
-        - |-
-          // Namespace export
-            SchemaUtils
-    src/validation/schema-utils.ts:
-      description: Schema Utilities (v7.1.0)
-      externalDependencies:
-        - package: zod
-          imports:
-            - z
-      nodeDependencies: []
-      internalDependencies:
-        - file: ./constants.js
-          imports:
-            - ValidationThresholds
-            - ValidationMessages
-      exports:
-        - probabilitySchema
-        - confidenceSchema
-        - progressSchema
-        - weightSchema
-        - nonNegativeSchema
-        - positiveSchema
-        - nonEmptyStringSchema
-        - uuidSchema
-        - timestampSchema
-        - hypothesisSchema
-        - probabilityWithJustificationSchema
-        - probabilityWithCalculationSchema
-        - evidenceSchema
-        - evidenceWithSupportSchema
-        - nodeSchema
-        - weightedNodeSchema
-        - edgeSchema
-        - weightedEdgeSchema
-        - causalEdgeSchema
-        - timePointSchema
-        - timeIntervalSchema
-        - temporalEventSchema
-        - mathExpressionSchema
-        - valueWithUnitSchema
-        - measurementSchema
-        - playerSchema
-        - strategySchema
-        - payoffSchema
-        - reasoningStepSchema
-        - propositionSchema
-        - inferenceRuleSchema
-        - constraintSchema
-        - objectiveSchema
-        - solutionSchema
-        - baseThoughtSchema
-        - sequentialThoughtExtensionSchema
-        - bayesianThoughtExtensionSchema
-        - SchemaUtils
-        - createNodeSchema
-        - createEdgeSchema
-        - createRangeSchema
-        - createEnumSchema
-        - createOptionalStringWithDefault
-        - createOptionalNumberWithDefault
-        - createOptionalBooleanWithDefault
-        - uniqueIdArraySchema
-        - createGraphSchema
-      functions:
-        - createNodeSchema
-        - createEdgeSchema
-        - createRangeSchema
-        - createEnumSchema
-        - createOptionalStringWithDefault
-        - createOptionalNumberWithDefault
-        - createOptionalBooleanWithDefault
-        - uniqueIdArraySchema
-        - createGraphSchema
-      constants:
-        - probabilitySchema
-        - confidenceSchema
-        - progressSchema
-        - weightSchema
-        - nonNegativeSchema
-        - positiveSchema
-        - nonEmptyStringSchema
-        - uuidSchema
-        - timestampSchema
-        - hypothesisSchema
-        - probabilityWithJustificationSchema
-        - probabilityWithCalculationSchema
-        - evidenceSchema
-        - evidenceWithSupportSchema
-        - nodeSchema
-        - weightedNodeSchema
-        - edgeSchema
-        - weightedEdgeSchema
-        - causalEdgeSchema
-        - timePointSchema
-        - timeIntervalSchema
-        - temporalEventSchema
-        - mathExpressionSchema
-        - valueWithUnitSchema
-        - measurementSchema
-        - playerSchema
-        - strategySchema
-        - payoffSchema
-        - reasoningStepSchema
-        - propositionSchema
-        - inferenceRuleSchema
-        - constraintSchema
-        - objectiveSchema
-        - solutionSchema
-        - baseThoughtSchema
-        - sequentialThoughtExtensionSchema
-        - bayesianThoughtExtensionSchema
-        - SchemaUtils
-    src/validation/schemas.ts:
-      description: Input Validation Schemas (v3.4.5)
-      externalDependencies:
-        - package: zod
-          imports:
-            - z
-      nodeDependencies: []
-      internalDependencies:
-        - file: ../types/index.js
-          imports:
-            - ThinkingMode
-      exports:
-        - SessionIdSchema
-        - ThinkingModeSchema
-        - CreateSessionSchema
-        - AddThoughtSchema
-        - CompleteSessionSchema
-        - GetSessionSchema
-        - ListSessionsSchema
-        - ExportSessionSchema
-        - SearchSessionsSchema
-        - BatchOperationSchema
-        - validateInput
-        - safeValidateInput
-      functions:
-        - validateInput
-        - safeValidateInput
-      constants:
-        - SessionIdSchema
-        - ThinkingModeSchema
-        - CreateSessionSchema
-        - AddThoughtSchema
-        - CompleteSessionSchema
-        - GetSessionSchema
-        - ListSessionsSchema
-        - ExportSessionSchema
-        - SearchSessionsSchema
-        - BatchOperationSchema
     src/validation/validator.ts:
       description: Validation engine for DeepThinking MCP (v4.3.0)
       externalDependencies: []
@@ -11225,6 +10988,7 @@ dependencyGraph:
         - src/export/file-exporter.ts
         - src/export/index.ts
         - src/export/profiles.ts
+        - src/export/visual/graph-render.ts
         - src/export/visual/index.ts
         - src/export/visual/modes/abductive.ts
         - src/export/visual/modes/analogical.ts
@@ -11327,6 +11091,7 @@ dependencyGraph:
         - src/modes/registry.ts
         - src/modes/stochastic/analysis/statistics.ts
         - src/modes/stochastic/models/distribution.ts
+        - src/modes/stochastic/models/moments.ts
         - src/modes/stochastic/sampling/rng.ts
         - src/modes/stochastic/types.ts
     - name: Proof
@@ -11338,6 +11103,7 @@ dependencyGraph:
         - src/proof/circular-detector.ts
         - src/proof/decomposer.ts
         - src/proof/dependency-graph.ts
+        - src/proof/extended-advisory.ts
         - src/proof/gap-analyzer.ts
         - src/proof/hierarchical-proof.ts
         - src/proof/inconsistency-detector.ts
@@ -11360,6 +11126,7 @@ dependencyGraph:
       files:
         - src/taxonomy/advisory.ts
         - src/taxonomy/classifier.ts
+        - src/taxonomy/flow-advisory.ts
         - src/taxonomy/multi-modal-analyzer.ts
         - src/taxonomy/navigator.ts
         - src/taxonomy/reasoning-types.ts
@@ -11437,8 +11204,6 @@ dependencyGraph:
         - src/validation/cache.ts
         - src/validation/constants.ts
         - src/validation/index.ts
-        - src/validation/schema-utils.ts
-        - src/validation/schemas.ts
         - src/validation/validator.ts
         - src/validation/validators/base.ts
         - src/validation/validators/index.ts
@@ -11480,19 +11245,19 @@ dependencyGraph:
         - src/validation/validators/registry.ts
         - src/validation/validators/validation-utils.ts
 statistics:
-  totalTypeScriptFiles: 239
+  totalTypeScriptFiles: 241
   totalModules: 14
-  totalLinesOfCode: 117192
-  totalExports: 1306
+  totalLinesOfCode: 118828
+  totalExports: 1184
   totalClasses: 143
-  totalInterfaces: 543
-  totalFunctions: 437
+  totalInterfaces: 562
+  totalFunctions: 433
   totalTypeGuards: 87
   totalEnums: 3
-  totalConstants: 163
-  totalReExports: 575
-  totalTypeOnlyImports: 325
+  totalConstants: 133
+  totalReExports: 487
+  totalTypeOnlyImports: 333
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 58
-  unusedFilesCount: 14
-  unusedExportsCount: 490
+  unusedFilesCount: 12
+  unusedExportsCount: 491

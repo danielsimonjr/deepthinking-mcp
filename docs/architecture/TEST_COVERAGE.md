@@ -390,9 +390,9 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 471 | dependency-graph.json |
-| testOnlyFiles | 15 | dependency-graph.json |
-| orphanedFiles | 23 | dependency-graph.json |
+| totalTypeScriptFiles | 484 | dependency-graph.json |
+| testOnlyFiles | 8 | dependency-graph.json |
+| orphanedFiles | 20 | dependency-graph.json |
 
 Test counts (183 files, 5,116 tests; 101 unit / 72 integration / 6 edge-case / 4 performance)
 are **source-measured** — a full `npx vitest run` on 2026-08-05 plus direct directory listings —

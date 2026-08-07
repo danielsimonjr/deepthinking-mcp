@@ -59,8 +59,10 @@ export function analyticMoments(
       // Accept a variance directly, or a standard deviation to square.
       const varianceDirect = param(params, "variance", "sigma2");
       const sd = param(params, "stdDev", "sigma", "standardDeviation");
-      const variance = varianceDirect ?? (sd !== undefined ? sd * sd : undefined);
-      if (mean === undefined || variance === undefined || variance < 0) return {};
+      const variance =
+        varianceDirect ?? (sd !== undefined ? sd * sd : undefined);
+      if (mean === undefined || variance === undefined || variance < 0)
+        return {};
       return { mean, variance };
     }
 
@@ -144,7 +146,8 @@ export function analyticMoments(
       const min = param(params, "min", "a");
       const mode = param(params, "mode", "c");
       const max = param(params, "max", "b");
-      if (min === undefined || mode === undefined || max === undefined) return {};
+      if (min === undefined || mode === undefined || max === undefined)
+        return {};
       if (!(min < max) || mode < min || mode > max) return {};
       return {
         mean: (min + mode + max) / 3,

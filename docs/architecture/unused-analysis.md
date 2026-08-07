@@ -9,17 +9,15 @@
 
 ## Summary
 
-- **Potentially unused files**: 14
-- **Potentially unused exports**: 490
+- **Potentially unused files**: 12
+- **Potentially unused exports**: 491
 
 ## Potentially Unused Files
 
 These files are not imported by any other file in the codebase:
 
-- `src/modes/stochastic/analysis/statistics.ts`
 - `src/modes/stochastic/models/distribution.ts`
 - `src/modes/stochastic/sampling/rng.ts`
-- `src/taxonomy/multi-modal-analyzer.ts`
 - `src/validation/validators/modes/algorithmic.ts`
 - `src/validation/validators/modes/analysis.ts`
 - `src/validation/validators/modes/argumentation.ts`
@@ -61,6 +59,10 @@ These exports are not imported by any other file in the codebase:
 - `ProfileExportOptions` (interface)
 - `ExportProfile` (interface)
 - `ExportProfileMetadata` (interface)
+
+### `src/export/visual/graph-render.ts`
+
+- `truncateGraphLabel` (function)
 
 ### `src/export/visual/modes/engineering.ts`
 
@@ -135,6 +137,38 @@ These exports are not imported by any other file in the codebase:
 
 - `HybridThought` (interface)
 
+### `src/modes/stochastic/analysis/statistics.ts`
+
+- `stdDev` (function)
+- `median` (function)
+- `percentile` (function)
+- `percentiles` (function)
+- `skewness` (function)
+- `kurtosis` (function)
+- `mode` (function)
+- `covariance` (function)
+- `correlation` (function)
+- `correlationMatrix` (function)
+- `covarianceMatrix` (function)
+- `hpdInterval` (function)
+- `computeSampleStatistics` (function)
+- `mcse` (function)
+- `estimateESS` (function)
+- `summarizePosterior` (function)
+- `summarizeAllPosteriors` (function)
+- `probExceedsThreshold` (function)
+- `probInRange` (function)
+- `probAExceedsB` (function)
+- `histogram` (function)
+- `kde` (function)
+- `CredibleInterval` (interface)
+- `PosteriorSummary` (interface)
+- `HistogramBin` (interface)
+
+### `src/modes/stochastic/models/moments.ts`
+
+- `DistributionMoments` (interface)
+
 ### `src/modes/stochastic/types.ts`
 
 - `StochasticVariable` (interface)
@@ -169,6 +203,19 @@ These exports are not imported by any other file in the codebase:
 - `VerificationSeverity` (type)
 - `VerificationErrorType` (type)
 - `JustificationType` (type)
+
+### `src/proof/extended-advisory.ts`
+
+- `MAX_EXTENDED_ASSUMPTIONS` (constant)
+- `MAX_EXTENDED_CONCLUSIONS` (constant)
+- `MAX_VERIFICATION_ITEMS` (constant)
+- `MAX_PROOF_BRANCHES` (constant)
+- `MAX_SUB_PROOFS` (constant)
+- `MAX_STRATEGY_RECOMMENDATIONS` (constant)
+- `MAX_FALLACY_HITS` (constant)
+- `MAX_EXTENDED_NOTES` (constant)
+- `MAX_FALLACY_STATEMENT_CHARS` (constant)
+- `MAX_FALLACY_EXCERPT_CHARS` (constant)
 
 ### `src/proof/gap-analyzer.ts`
 
@@ -230,6 +277,21 @@ These exports are not imported by any other file in the codebase:
 - `MAX_TAXONOMY_RATIONALE` (constant)
 - `MAX_TAXONOMY_WARNINGS` (constant)
 - `MAX_TAXONOMY_KEYWORDS` (constant)
+
+### `src/taxonomy/flow-advisory.ts`
+
+- `FlowAdvisoryDeps` (interface)
+- `MIN_FLOW_THOUGHTS` (constant)
+- `MAX_FLOW_REPORT_CHARS` (constant)
+- `FLOW_TRUNCATION_MARKER` (constant)
+
+### `src/taxonomy/multi-modal-analyzer.ts`
+
+- `ModeTransition` (interface)
+- `ModeCombination` (interface)
+- `MultiModalPattern` (interface)
+- `ModeSynergy` (interface)
+- `MultiModalRecommendation` (interface)
 
 ### `src/taxonomy/navigator.ts`
 
@@ -740,55 +802,4 @@ These exports are not imported by any other file in the codebase:
 
 - `ValidationCache` (class)
 - `ValidationCacheEntry` (interface)
-
-### `src/validation/schema-utils.ts`
-
-- `createNodeSchema` (function)
-- `createRangeSchema` (function)
-- `HypothesisInput` (type)
-- `ProbabilityWithJustification` (type)
-- `ProbabilityWithCalculation` (type)
-- `EvidenceInput` (type)
-- `EvidenceWithSupport` (type)
-- `NodeInput` (type)
-- `WeightedNodeInput` (type)
-- `EdgeInput` (type)
-- `WeightedEdgeInput` (type)
-- `CausalEdgeInput` (type)
-- `TimePointInput` (type)
-- `TimeIntervalInput` (type)
-- `TemporalEventInput` (type)
-- `MathExpressionInput` (type)
-- `ValueWithUnitInput` (type)
-- `MeasurementInput` (type)
-- `PlayerInput` (type)
-- `StrategyInput` (type)
-- `PayoffInput` (type)
-- `ReasoningStepInput` (type)
-- `PropositionInput` (type)
-- `InferenceRuleInput` (type)
-- `ConstraintInput` (type)
-- `ObjectiveInput` (type)
-- `SolutionInput` (type)
-- `BaseThoughtInput` (type)
-- `probabilitySchema` (constant)
-- `hypothesisSchema` (constant)
-- `timePointSchema` (constant)
-- `mathExpressionSchema` (constant)
-- `playerSchema` (constant)
-- `reasoningStepSchema` (constant)
-- `constraintSchema` (constant)
-- `baseThoughtSchema` (constant)
-- `SchemaUtils` (constant)
-
-### `src/validation/schemas.ts`
-
-- `CreateSessionInput` (type)
-- `AddThoughtInput` (type)
-- `CompleteSessionInput` (type)
-- `GetSessionInput` (type)
-- `ListSessionsInput` (type)
-- `ExportSessionInput` (type)
-- `SearchSessionsInput` (type)
-- `BatchOperationInput` (type)
 

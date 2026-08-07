@@ -41,18 +41,18 @@ The codebase is organized into the following modules:
 
 - **cache**: 3 files
 - **config**: 1 file
-- **export**: 46 files
+- **export**: 47 files
 - **entry**: 1 file
 - **interfaces**: 1 file
-- **modes**: 53 files
-- **proof**: 14 files
+- **modes**: 54 files
+- **proof**: 15 files
 - **services**: 3 files
 - **session**: 4 files
-- **taxonomy**: 6 files
+- **taxonomy**: 7 files
 - **tools**: 18 files
 - **types**: 37 files
 - **utils**: 6 files
-- **validation**: 46 files
+- **validation**: 44 files
 
 ---
 
@@ -145,6 +145,29 @@ The codebase is organized into the following modules:
 - Interfaces: `ProfileExportOptions`, `ExportProfile`, `ExportProfileMetadata`
 - Functions: `getExportProfile`, `getAllExportProfiles`, `getExportProfilesByTag`, `getExportProfilesByFormat`, `isValidExportProfileId`, `listExportProfileIds`, `getExportProfileMetadata`, `combineExportProfiles`, `recommendExportProfile`
 - Constants: `EXPORT_PROFILES`
+
+---
+
+### `src/export/visual/graph-render.ts` - Generic node/edge rendering for the eight non-hand-built visual formats.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `./types.js` | `VisualFormat` | Import (type-only) |
+| `./utils.js` | `sanitizeId` | Import |
+| `./utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
+| `./utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
+| `./utils/uml.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
+| `./utils/modelica.js` | `generateModelicaPackageHeader, generateModelicaPackageFooter, generateModelicaModel` | Import |
+| `./utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderStadiumNode, renderEdge, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
+| `./utils/html.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection` | Import |
+| `./utils/json.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
+| `./utils/markdown.js` | `heading, list, table` | Import |
+
+**Exports:**
+- Interfaces: `GraphRenderNode`, `GraphRenderEdge`, `GraphRenderModel`
+- Functions: `renderGraphModel`, `truncateGraphLabel`
+- Constants: `GRAPH_RENDER_FORMATS`
 
 ---
 
@@ -271,6 +294,7 @@ The codebase is organized into the following modules:
 | `../../../types/index.js` | `ComputabilityThought, TuringMachine, Reduction` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
+| `../graph-render.js` | `renderGraphModel, GraphRenderModel, GraphRenderNode, GraphRenderEdge` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder, DotNodeStyle` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder, MermaidStateDiagramBuilder` | Import |
 | `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
@@ -446,6 +470,7 @@ The codebase is organized into the following modules:
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder, MermaidGanttBuilder` | Import |
+| `../graph-render.js` | `renderGraphModel, GraphRenderModel, GraphRenderNode, GraphRenderEdge` | Import |
 
 **Exports:**
 - Functions: `exportHistoricalTimeline`
@@ -764,15 +789,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `./types.js` | `VisualFormat` | Import (type-only) |
-| `./utils.js` | `sanitizeId` | Import |
-| `./utils/graphml.js` | `generateGraphML, GraphMLNode, GraphMLEdge` | Import |
-| `./utils/tikz.js` | `generateTikZ, TikZNode, TikZEdge` | Import |
-| `./utils/uml.js` | `generateUmlDiagram, UmlNode, UmlEdge` | Import |
-| `./utils/modelica.js` | `generateModelicaPackageHeader, generateModelicaPackageFooter, generateModelicaModel` | Import |
-| `./utils/svg.js` | `generateSVGHeader, generateSVGFooter, renderRectNode, renderStadiumNode, renderEdge, getNodeColor, DEFAULT_SVG_OPTIONS, SVGNodePosition` | Import |
-| `./utils/html.js` | `generateHTMLHeader, generateHTMLFooter, escapeHTML, renderMetricCard, renderSection` | Import |
-| `./utils/json.js` | `createJsonGraph, addNode, addEdge, addMetric, serializeGraph` | Import |
-| `./utils/markdown.js` | `heading, list, table` | Import |
+| `./graph-render.js` | `renderGraphModel, GRAPH_RENDER_FORMATS, GraphRenderModel` | Import |
 
 **Exports:**
 - Interfaces: `SessionGraphNode`, `SessionGraphEdge`, `SessionGraphModel`
@@ -786,6 +803,11 @@ The codebase is organized into the following modules:
 
 ### `src/export/visual/utils/ascii.ts` - ASCII Art Utilities (v8.5.0)
 
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils.js` | `truncateWithSuffix` | Import |
+
 **Exports:**
 - Classes: `ASCIIDocBuilder`
 - Interfaces: `AsciiNode`, `AsciiEdge`, `AsciiSection`, `AsciiTableColumn`, `AsciiOptions`, `AsciiTreeNode`, `ASCIIDocBuilderOptions`
@@ -795,6 +817,11 @@ The codebase is organized into the following modules:
 ---
 
 ### `src/export/visual/utils/dot.ts` - DOT/GraphViz Utilities (v8.5.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils.js` | `truncateWithSuffix` | Import |
 
 **Exports:**
 - Classes: `DOTGraphBuilder`
@@ -889,6 +916,11 @@ The codebase is organized into the following modules:
 
 ### `src/export/visual/utils/markdown.ts` - Markdown Export Utilities (v8.5.0)
 
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils.js` | `truncateWithSuffix` | Import |
+
 **Exports:**
 - Classes: `MarkdownBuilder`
 - Interfaces: `MarkdownBuilderOptions`
@@ -897,6 +929,11 @@ The codebase is organized into the following modules:
 ---
 
 ### `src/export/visual/utils/mermaid.ts` - Mermaid Utilities (v8.5.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils.js` | `truncateWithSuffix` | Import |
 
 **Exports:**
 - Classes: `MermaidGraphBuilder`, `MermaidGanttBuilder`, `MermaidStateDiagramBuilder`
@@ -916,6 +953,11 @@ The codebase is organized into the following modules:
 ---
 
 ### `src/export/visual/utils/svg.ts` - SVG Export Utilities (v8.5.0)
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../utils.js` | `truncateWithSuffix` | Import |
 
 **Exports:**
 - Classes: `SVGGroupBuilder`, `SVGBuilder`
@@ -952,7 +994,7 @@ The codebase is organized into the following modules:
 ### `src/export/visual/utils.ts` - Visual Export Utilities (v4.3.0)
 
 **Exports:**
-- Functions: `sanitizeId`
+- Functions: `sanitizeId`, `truncateWithSuffix`
 
 ---
 
@@ -989,7 +1031,7 @@ The codebase is organized into the following modules:
 **Node.js Built-in Dependencies:**
 | Module | Import |
 |--------|--------|
-| `fs` | `readFileSync` |
+| `fs` | `readFileSync, realpathSync` |
 | `path` | `dirname, join` |
 | `url` | `fileURLToPath` |
 
@@ -1006,7 +1048,8 @@ The codebase is organized into the following modules:
 | `./tools/thinking.js` | `ThinkingToolInput` | Import |
 
 **Exports:**
-- Constants: `format`
+- Functions: `main`
+- Constants: `server`, `format`
 
 ---
 
@@ -1074,8 +1117,12 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../types/core.js` | `ThinkingMode` | Import |
-| `./combination-types.js` | `MultiModeAnalysisRequest, MultiModeAnalysisResponse, ModeAnalysisResult, MergedAnalysis, Insight, ModeError, MergeStatistics` | Import (type-only) |
+| `../../types/core.js` | `ThinkingMode, Thought` | Import |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `../../services/ThoughtFactory.js` | `ThoughtFactory` | Import |
+| `../handlers/ModeHandler.js` | `ValidationResult` | Import (type-only) |
+| `./combination-types.js` | `MultiModeAnalysisRequest, MultiModeAnalysisResponse, ModeAnalysisResult, MergedAnalysis, Insight, ModeError, MergeStatistics, ConfidenceBasis` | Import (type-only) |
+| `./combination-types.js` | `UNSCORED_INSIGHT_WEIGHT` | Import |
 | `./merger.js` | `InsightMerger, MergeResult` | Import |
 | `./conflict-resolver.js` | `ConflictResolver` | Import |
 | `./presets.js` | `getPreset, isValidPresetId, PresetId` | Import |
@@ -1095,6 +1142,10 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../types/core.js` | `ThinkingMode` | Import (type-only) |
 
+**Exports:**
+- Interfaces: `WeightedMergeConfig`, `HierarchicalMergeConfig`, `DialecticalMergeConfig`, `ModeCombination`, `Insight`, `ConflictingInsight`, `ConflictResolution`, `MergedAnalysis`, `MergeStatistics`, `MultiModeAnalysisRequest`, `MultiModeAnalysisResponse`, `ModeAnalysisResult`, `ModeError`
+- Constants: `UNSCORED_INSIGHT_WEIGHT`, `SYNTHESIS_CONFIDENCE_NOTE`
+
 ---
 
 ### `src/modes/combinations/conflict-resolver.ts` - Conflict Resolver - Phase 12 Sprint 3
@@ -1108,6 +1159,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `./combination-types.js` | `Insight, ConflictingInsight, ConflictResolution, ConflictType` | Import (type-only) |
+| `./combination-types.js` | `SYNTHESIS_CONFIDENCE_NOTE` | Import |
 
 **Exports:**
 - Classes: `ConflictResolver`
@@ -1143,6 +1195,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../types/core.js` | `ThinkingMode` | Import (type-only) |
 | `./combination-types.js` | `Insight, MergeStrategy, WeightedMergeConfig, HierarchicalMergeConfig, DialecticalMergeConfig, MergeStatistics, ConflictingInsight` | Import (type-only) |
+| `./combination-types.js` | `SYNTHESIS_CONFIDENCE_NOTE` | Import |
 
 **Exports:**
 - Classes: `InsightMerger`
@@ -1831,6 +1884,8 @@ The codebase is organized into the following modules:
 | `../../types/modes/stochastic.js` | `StochasticThought` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
 | `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationWarning, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `../stochastic/models/moments.js` | `analyticMoments` | Import |
+| `../stochastic/analysis/statistics.js` | `equalTailedInterval, mean, variance` | Import |
 
 **Exports:**
 - Classes: `StochasticHandler`
@@ -2026,6 +2081,14 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/modes/stochastic/models/moments.ts` - Closed-form mean and variance for the distributions this codebase accepts.
+
+**Exports:**
+- Interfaces: `DistributionMoments`
+- Functions: `analyticMoments`
+
+---
+
 ### `src/modes/stochastic/sampling/rng.ts` - Seeded Random Number Generator - Phase 12 Sprint 5
 
 **Internal Dependencies:**
@@ -2059,6 +2122,7 @@ The codebase is organized into the following modules:
 | `./gap-analyzer.js` | `GapAnalyzer` | Import |
 | `./circular-detector.js` | `CircularReasoningDetector, CircularReasoningResult` | Import |
 | `./inconsistency-detector.js` | `InconsistencyDetector` | Import |
+| `./extended-advisory.js` | `analyzeProofExtended, ExtendedProofDeps` | Import |
 
 **Exports:**
 - Interfaces: `ProofAnalysisDeps`
@@ -2156,6 +2220,28 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/proof/extended-advisory.ts` - Extended advisory proof analysis — the five engines the first wiring wave
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/session.js` | `AssumptionDependencyEntry, ProofAssumptionAnalysis, ProofBranchAnalysis, ProofExtendedAnalysis, ProofFallacyAnalysis, ProofFallacyHit, ProofStrategyAnalysis, ProofStructureAnalysis, ProofVerificationAnalysis` | Import (type-only) |
+| `../types/modes/mathematics.js` | `ProofDecomposition` | Import (type-only) |
+| `./decomposer.js` | `ProofStep` | Import (type-only) |
+| `./assumption-tracker.js` | `AssumptionTracker` | Import |
+| `./verifier.js` | `ProofVerifier` | Import |
+| `./branch-analyzer.js` | `BranchAnalyzer` | Import |
+| `./hierarchical-proof.js` | `HierarchicalProofManager` | Import |
+| `./strategy-recommender.js` | `StrategyRecommender` | Import |
+| `./patterns/warnings.js` | `checkStatement` | Import |
+
+**Exports:**
+- Interfaces: `ExtendedProofDeps`
+- Functions: `analyzeProofExtended`
+- Constants: `MAX_EXTENDED_PROOF_STEPS`, `MAX_EXTENDED_ASSUMPTIONS`, `MAX_EXTENDED_CONCLUSIONS`, `MAX_VERIFICATION_ITEMS`, `MAX_PROOF_BRANCHES`, `MAX_SUB_PROOFS`, `MAX_STRATEGY_RECOMMENDATIONS`, `MAX_FALLACY_HITS`, `MAX_EXTENDED_NOTES`, `MAX_FALLACY_STATEMENT_CHARS`, `MAX_FALLACY_EXCERPT_CHARS`
+
+---
+
 ### `src/proof/gap-analyzer.ts` - Gap Analyzer - Phase 8 Sprint 2
 
 **Internal Dependencies:**
@@ -2206,6 +2292,8 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
+| `./advisory.js` | `analyzeProofAdvisory, type ProofAnalysisDeps` | Re-export |
+| `./extended-advisory.js` | `analyzeProofExtended, type ExtendedProofDeps, MAX_EXTENDED_PROOF_STEPS` | Re-export |
 | `./dependency-graph.js` | `DependencyGraphBuilder` | Re-export |
 | `./decomposer.js` | `ProofDecomposer, type ProofStep` | Re-export |
 | `./gap-analyzer.js` | `GapAnalyzer, type GapAnalyzerConfig` | Re-export |
@@ -2219,7 +2307,7 @@ The codebase is organized into the following modules:
 | `./hierarchical-proof.js` | `HierarchicalProofManager, type HierarchicalProofOptions, type ProofElementInput` | Re-export |
 
 **Exports:**
-- Re-exports: `DependencyGraphBuilder`, `ProofDecomposer`, `type ProofStep`, `GapAnalyzer`, `type GapAnalyzerConfig`, `AssumptionTracker`, `InconsistencyDetector`, `type InconsistencyDetectorConfig`, `CircularReasoningDetector`, `type CircularReasoningResult`, `type WarningPattern`, `type WarningCategory`, `ALL_WARNING_PATTERNS`, `getPatternsByCategory`, `getPatternsBySeverity`, `checkStatement`, `checkProof`, `BranchAnalyzer`, `type BranchAnalyzerOptions`, `StrategyRecommender`, `type StrategyRecommenderConfig`, `ProofVerifier`, `type ProofVerifierConfig`, `HierarchicalProofManager`, `type HierarchicalProofOptions`, `type ProofElementInput`
+- Re-exports: `analyzeProofAdvisory`, `type ProofAnalysisDeps`, `analyzeProofExtended`, `type ExtendedProofDeps`, `MAX_EXTENDED_PROOF_STEPS`, `DependencyGraphBuilder`, `ProofDecomposer`, `type ProofStep`, `GapAnalyzer`, `type GapAnalyzerConfig`, `AssumptionTracker`, `InconsistencyDetector`, `type InconsistencyDetectorConfig`, `CircularReasoningDetector`, `type CircularReasoningResult`, `type WarningPattern`, `type WarningCategory`, `ALL_WARNING_PATTERNS`, `getPatternsByCategory`, `getPatternsBySeverity`, `checkStatement`, `checkProof`, `BranchAnalyzer`, `type BranchAnalyzerOptions`, `StrategyRecommender`, `type StrategyRecommenderConfig`, `ProofVerifier`, `type ProofVerifierConfig`, `HierarchicalProofManager`, `type HierarchicalProofOptions`, `type ProofElementInput`
 
 ---
 
@@ -2266,7 +2354,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../types/index.js` | `ThinkingSession, ThinkingMode, Thought, CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrinciplesThought, isMetaReasoningThought, isCausalThought, isBayesianThought, isTemporalThought, isGameTheoryThought, isFirstPrinciplesThought, isSystemsThinkingThought, isSynthesisThought, isArgumentationThought, isAnalysisThought, isAlgorithmicThought, isScientificMethodThought, isHistoricalThought, HybridThought, // Sprint 1: Visual export integration types
+| `../types/index.js` | `ThinkingSession, ThinkingMode, Thought, CausalThought, TemporalThought, GameTheoryThought, BayesianThought, FirstPrinciplesThought, isMetaReasoningThought, isCausalThought, isBayesianThought, isTemporalThought, isGameTheoryThought, isFirstPrinciplesThought, isSystemsThinkingThought, isSynthesisThought, isArgumentationThought, isAnalysisThought, isAlgorithmicThought, isScientificMethodThought, isHistoricalThought, isComputabilityThought, HybridThought, // Sprint 1: Visual export integration types
   SequentialThought, ShannonThought, AbductiveThought, CounterfactualThought, AnalogicalThought, EvidentialThought, SystemsThinkingThought, ScientificMethodThought, OptimizationThought, FormalLogicThought` | Import |
 | `../types/modes/mathematics.js` | `MathematicsThought` | Import (type-only) |
 | `../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
@@ -2334,6 +2422,7 @@ The codebase is organized into the following modules:
 | `../interfaces/ILogger.js` | `ILogger` | Import |
 | `../validation/advisory.js` | `validateAdvisory` | Import |
 | `../proof/advisory.js` | `analyzeProofAdvisory` | Import |
+| `../taxonomy/flow-advisory.js` | `summarizeReasoningFlow` | Import |
 | `./storage/interface.js` | `SessionStorage` | Import |
 | `../cache/lru.js` | `LRUCache` | Import |
 | `../cache/types.js` | `CacheStats` | Import (type-only) |
@@ -2427,6 +2516,21 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `TaxonomyClassifier`
 - Interfaces: `ThoughtClassification`
+
+---
+
+### `src/taxonomy/flow-advisory.ts` - Advisory multi-modal reasoning-flow wrapper
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types/index.js` | `ThinkingSession` | Import (type-only) |
+| `./multi-modal-analyzer.js` | `MultiModalAnalyzer, ReasoningFlow` | Import |
+
+**Exports:**
+- Interfaces: `FlowAdvisoryDeps`
+- Functions: `summarizeReasoningFlow`
+- Constants: `MIN_FLOW_THOUGHTS`, `MAX_FLOW_REPORT_CHARS`, `FLOW_TRUNCATION_MARKER`
 
 ---
 
@@ -2664,6 +2768,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
 | `../shared.js` | `IdSchema, NameSchema, TextSchema, IdArraySchema, boundedRecord` | Import |
+| `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
 - Constants: `EngineeringSchema`
@@ -2721,7 +2826,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ConfidenceSchema, IdSchema, TextSchema, IdArraySchema, boundedRecord` | Import |
+| `../shared.js` | `ConfidenceSchema, IdSchema, NameSchema, TextSchema, IdArraySchema, boundedRecord` | Import |
 | `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
@@ -2740,7 +2845,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `IdSchema, NameSchema, TextSchema, IdArraySchema` | Import |
+| `../shared.js` | `IdSchema, NameSchema, TextSchema, IdArraySchema, boundedRecord` | Import |
 | `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
@@ -3354,6 +3459,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `./core.js` | `Thought, ThinkingMode` | Import |
 | `./modes/mathematics.js` | `AtomicStatement, CircularPath, ImplicitAssumption, Inconsistency, ProofGap` | Import (type-only) |
+| `../proof/branch-types.js` | `HierarchicalProofType, ProofStrategyType, VerificationCoverage, VerificationError, VerificationWarning` | Import (type-only) |
 
 ---
 
@@ -3492,69 +3598,9 @@ The codebase is organized into the following modules:
 | `./constants.js` | `IssueSeverity, IssueCategory, ValidationThresholds, ValidationMessages, isInRange, isValidProbability, isValidConfidence` | Re-export |
 | `./validator.js` | `ThoughtValidator, type ValidationContext` | Re-export |
 | `./advisory.js` | `validateAdvisory, MAX_ADVISORY_ISSUES, MAX_ADVISORY_SUGGESTIONS, type AdvisoryValidatorLike` | Re-export |
-| `./schemas.js` | `SessionIdSchema, ThinkingModeSchema, CreateSessionSchema, type CreateSessionInput, AddThoughtSchema, type AddThoughtInput, CompleteSessionSchema, type CompleteSessionInput, GetSessionSchema, type GetSessionInput, ListSessionsSchema, type ListSessionsInput, ExportSessionSchema, type ExportSessionInput, SearchSessionsSchema, type SearchSessionsInput, BatchOperationSchema, type BatchOperationInput, validateInput, safeValidateInput` | Re-export |
-| `./schema-utils.js` | `// Primitive schemas
-  probabilitySchema, confidenceSchema, progressSchema, weightSchema, nonNegativeSchema, positiveSchema, nonEmptyStringSchema, uuidSchema, timestampSchema, // Composite schemas - Hypothesis & Evidence
-  hypothesisSchema, probabilityWithJustificationSchema, probabilityWithCalculationSchema, evidenceSchema, evidenceWithSupportSchema, type HypothesisInput, type ProbabilityWithJustification, type ProbabilityWithCalculation, type EvidenceInput, type EvidenceWithSupport, // Graph schemas
-  createNodeSchema, createEdgeSchema, nodeSchema, weightedNodeSchema, edgeSchema, weightedEdgeSchema, causalEdgeSchema, type NodeInput, type WeightedNodeInput, type EdgeInput, type WeightedEdgeInput, type CausalEdgeInput, // Temporal schemas
-  timePointSchema, timeIntervalSchema, temporalEventSchema, type TimePointInput, type TimeIntervalInput, type TemporalEventInput, // Mathematical schemas
-  mathExpressionSchema, valueWithUnitSchema, measurementSchema, type MathExpressionInput, type ValueWithUnitInput, type MeasurementInput, // Game Theory schemas
-  playerSchema, strategySchema, payoffSchema, type PlayerInput, type StrategyInput, type PayoffInput, // Reasoning schemas
-  reasoningStepSchema, propositionSchema, inferenceRuleSchema, type ReasoningStepInput, type PropositionInput, type InferenceRuleInput, // Optimization schemas
-  constraintSchema, objectiveSchema, solutionSchema, type ConstraintInput, type ObjectiveInput, type SolutionInput, // Base schemas
-  baseThoughtSchema, sequentialThoughtExtensionSchema, bayesianThoughtExtensionSchema, type BaseThoughtInput, // Helpers
-  createRangeSchema, createEnumSchema, createOptionalStringWithDefault, createOptionalNumberWithDefault, createOptionalBooleanWithDefault, uniqueIdArraySchema, createGraphSchema, // Namespace export
-  SchemaUtils` | Re-export |
 
 **Exports:**
-- Re-exports: `IssueSeverity`, `IssueCategory`, `ValidationThresholds`, `ValidationMessages`, `isInRange`, `isValidProbability`, `isValidConfidence`, `ThoughtValidator`, `type ValidationContext`, `validateAdvisory`, `MAX_ADVISORY_ISSUES`, `MAX_ADVISORY_SUGGESTIONS`, `type AdvisoryValidatorLike`, `SessionIdSchema`, `ThinkingModeSchema`, `CreateSessionSchema`, `type CreateSessionInput`, `AddThoughtSchema`, `type AddThoughtInput`, `CompleteSessionSchema`, `type CompleteSessionInput`, `GetSessionSchema`, `type GetSessionInput`, `ListSessionsSchema`, `type ListSessionsInput`, `ExportSessionSchema`, `type ExportSessionInput`, `SearchSessionsSchema`, `type SearchSessionsInput`, `BatchOperationSchema`, `type BatchOperationInput`, `validateInput`, `safeValidateInput`, `// Primitive schemas
-  probabilitySchema`, `confidenceSchema`, `progressSchema`, `weightSchema`, `nonNegativeSchema`, `positiveSchema`, `nonEmptyStringSchema`, `uuidSchema`, `timestampSchema`, `// Composite schemas - Hypothesis & Evidence
-  hypothesisSchema`, `probabilityWithJustificationSchema`, `probabilityWithCalculationSchema`, `evidenceSchema`, `evidenceWithSupportSchema`, `type HypothesisInput`, `type ProbabilityWithJustification`, `type ProbabilityWithCalculation`, `type EvidenceInput`, `type EvidenceWithSupport`, `// Graph schemas
-  createNodeSchema`, `createEdgeSchema`, `nodeSchema`, `weightedNodeSchema`, `edgeSchema`, `weightedEdgeSchema`, `causalEdgeSchema`, `type NodeInput`, `type WeightedNodeInput`, `type EdgeInput`, `type WeightedEdgeInput`, `type CausalEdgeInput`, `// Temporal schemas
-  timePointSchema`, `timeIntervalSchema`, `temporalEventSchema`, `type TimePointInput`, `type TimeIntervalInput`, `type TemporalEventInput`, `// Mathematical schemas
-  mathExpressionSchema`, `valueWithUnitSchema`, `measurementSchema`, `type MathExpressionInput`, `type ValueWithUnitInput`, `type MeasurementInput`, `// Game Theory schemas
-  playerSchema`, `strategySchema`, `payoffSchema`, `type PlayerInput`, `type StrategyInput`, `type PayoffInput`, `// Reasoning schemas
-  reasoningStepSchema`, `propositionSchema`, `inferenceRuleSchema`, `type ReasoningStepInput`, `type PropositionInput`, `type InferenceRuleInput`, `// Optimization schemas
-  constraintSchema`, `objectiveSchema`, `solutionSchema`, `type ConstraintInput`, `type ObjectiveInput`, `type SolutionInput`, `// Base schemas
-  baseThoughtSchema`, `sequentialThoughtExtensionSchema`, `bayesianThoughtExtensionSchema`, `type BaseThoughtInput`, `// Helpers
-  createRangeSchema`, `createEnumSchema`, `createOptionalStringWithDefault`, `createOptionalNumberWithDefault`, `createOptionalBooleanWithDefault`, `uniqueIdArraySchema`, `createGraphSchema`, `// Namespace export
-  SchemaUtils`
-
----
-
-### `src/validation/schema-utils.ts` - Schema Utilities (v7.1.0)
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `zod` | `z` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `./constants.js` | `ValidationThresholds, ValidationMessages` | Import |
-
-**Exports:**
-- Functions: `createNodeSchema`, `createEdgeSchema`, `createRangeSchema`, `createEnumSchema`, `createOptionalStringWithDefault`, `createOptionalNumberWithDefault`, `createOptionalBooleanWithDefault`, `uniqueIdArraySchema`, `createGraphSchema`
-- Constants: `probabilitySchema`, `confidenceSchema`, `progressSchema`, `weightSchema`, `nonNegativeSchema`, `positiveSchema`, `nonEmptyStringSchema`, `uuidSchema`, `timestampSchema`, `hypothesisSchema`, `probabilityWithJustificationSchema`, `probabilityWithCalculationSchema`, `evidenceSchema`, `evidenceWithSupportSchema`, `nodeSchema`, `weightedNodeSchema`, `edgeSchema`, `weightedEdgeSchema`, `causalEdgeSchema`, `timePointSchema`, `timeIntervalSchema`, `temporalEventSchema`, `mathExpressionSchema`, `valueWithUnitSchema`, `measurementSchema`, `playerSchema`, `strategySchema`, `payoffSchema`, `reasoningStepSchema`, `propositionSchema`, `inferenceRuleSchema`, `constraintSchema`, `objectiveSchema`, `solutionSchema`, `baseThoughtSchema`, `sequentialThoughtExtensionSchema`, `bayesianThoughtExtensionSchema`, `SchemaUtils`
-
----
-
-### `src/validation/schemas.ts` - Input Validation Schemas (v3.4.5)
-
-**External Dependencies:**
-| Package | Import |
-|---------|--------|
-| `zod` | `z` |
-
-**Internal Dependencies:**
-| File | Imports | Type |
-|------|---------|------|
-| `../types/index.js` | `ThinkingMode` | Import |
-
-**Exports:**
-- Functions: `validateInput`, `safeValidateInput`
-- Constants: `SessionIdSchema`, `ThinkingModeSchema`, `CreateSessionSchema`, `AddThoughtSchema`, `CompleteSessionSchema`, `GetSessionSchema`, `ListSessionsSchema`, `ExportSessionSchema`, `SearchSessionsSchema`, `BatchOperationSchema`
+- Re-exports: `IssueSeverity`, `IssueCategory`, `ValidationThresholds`, `ValidationMessages`, `isInRange`, `isValidProbability`, `isValidConfidence`, `ThoughtValidator`, `type ValidationContext`, `validateAdvisory`, `MAX_ADVISORY_ISSUES`, `MAX_ADVISORY_SUGGESTIONS`, `type AdvisoryValidatorLike`
 
 ---
 
@@ -4211,19 +4257,20 @@ The codebase is organized into the following modules:
 | `file-exporter` | 2 files | 1 files |
 | `index` | 4 files | 0 files |
 | `profiles` | 0 files | 3 files |
+| `graph-render` | 10 files | 3 files |
 | `index` | 5 files | 2 files |
 | `abductive` | 14 files | 1 files |
 | `analogical` | 14 files | 1 files |
 | `bayesian` | 13 files | 1 files |
 | `causal` | 14 files | 1 files |
-| `computability` | 12 files | 1 files |
+| `computability` | 13 files | 1 files |
 | `counterfactual` | 14 files | 1 files |
 | `engineering` | 13 files | 1 files |
 | `evidential` | 14 files | 1 files |
 | `first-principles` | 14 files | 1 files |
 | `formal-logic` | 14 files | 1 files |
 | `game-theory` | 14 files | 1 files |
-| `historical` | 6 files | 1 files |
+| `historical` | 7 files | 1 files |
 | `hybrid` | 14 files | 1 files |
 | `index` | 23 files | 2 files |
 | `mathematics` | 14 files | 1 files |
@@ -4233,7 +4280,6 @@ The codebase is organized into the following modules:
 | `proof-decomposition` | 11 files | 1 files |
 | `scientific-method` | 14 files | 1 files |
 | `sequential` | 14 files | 1 files |
-| `shannon` | 14 files | 1 files |
 
 ---
 
@@ -4280,9 +4326,9 @@ graph TD
         N4[file-exporter]
         N5[index]
         N6[profiles]
-        N7[index]
-        N8[abductive]
-        N9[...41 more]
+        N7[graph-render]
+        N8[index]
+        N9[...42 more]
     end
 
     subgraph Entry
@@ -4299,7 +4345,7 @@ graph TD
         N14[intervention]
         N15[types]
         N16[analyzer]
-        N17[...48 more]
+        N17[...49 more]
     end
 
     subgraph Proof
@@ -4308,7 +4354,7 @@ graph TD
         N20[branch-analyzer]
         N21[branch-types]
         N22[circular-detector]
-        N23[...9 more]
+        N23[...10 more]
     end
 
     subgraph Services
@@ -4327,10 +4373,10 @@ graph TD
     subgraph Taxonomy
         N31[advisory]
         N32[classifier]
-        N33[multi-modal-analyzer]
-        N34[navigator]
-        N35[reasoning-types]
-        N36[...1 more]
+        N33[flow-advisory]
+        N34[multi-modal-analyzer]
+        N35[navigator]
+        N36[...2 more]
     end
 
     subgraph Tools
@@ -4365,17 +4411,16 @@ graph TD
         N56[cache]
         N57[constants]
         N58[index]
-        N59[schema-utils]
-        N60[...41 more]
+        N59[validator]
+        N60[...39 more]
     end
 
     N0 --> N1
     N1 --> N2
     N4 --> N6
-    N5 --> N7
+    N5 --> N8
     N5 --> N6
     N5 --> N4
-    N8 --> N45
     N10 --> N26
     N10 --> N24
     N10 --> N27
@@ -4389,11 +4434,12 @@ graph TD
     N14 --> N15
     N14 --> N13
     N16 --> N43
+    N16 --> N26
     N18 --> N43
     N18 --> N22
     N20 --> N21
     N24 --> N45
-    N24 --> N7
+    N24 --> N8
     N24 --> N53
     N24 --> N11
     N24 --> N52
@@ -4407,17 +4453,17 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 239 |
+| Total TypeScript Files | 241 |
 | Total Modules | 14 |
-| Total Lines of Code | 117192 |
-| Total Exports | 1306 |
-| Total Re-exports | 575 |
+| Total Lines of Code | 118828 |
+| Total Exports | 1184 |
+| Total Re-exports | 487 |
 | Total Classes | 143 |
-| Total Interfaces | 543 |
-| Total Functions | 437 |
+| Total Interfaces | 562 |
+| Total Functions | 433 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
-| Type-only Imports | 325 |
+| Type-only Imports | 333 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 58 |
 

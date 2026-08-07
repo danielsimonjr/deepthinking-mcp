@@ -3,9 +3,9 @@
     "name": "deepthinking-mcp",
     "version": "9.3.3",
     "lastUpdated": "2026-08-07",
-    "totalFiles": 239,
+    "totalFiles": 241,
     "totalModules": 14,
-    "totalExports": 1306
+    "totalExports": 1184
   },
   "entryPoints": [
     {
@@ -368,6 +368,116 @@
         ],
         "constants": [
           "EXPORT_PROFILES"
+        ]
+      },
+      "src/export/visual/graph-render.ts": {
+        "description": "Generic node/edge rendering for the eight non-hand-built visual formats.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "./types.js",
+            "imports": [
+              "VisualFormat"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./utils.js",
+            "imports": [
+              "sanitizeId"
+            ]
+          },
+          {
+            "file": "./utils/graphml.js",
+            "imports": [
+              "generateGraphML",
+              "GraphMLNode",
+              "GraphMLEdge"
+            ]
+          },
+          {
+            "file": "./utils/tikz.js",
+            "imports": [
+              "generateTikZ",
+              "TikZNode",
+              "TikZEdge"
+            ]
+          },
+          {
+            "file": "./utils/uml.js",
+            "imports": [
+              "generateUmlDiagram",
+              "UmlNode",
+              "UmlEdge"
+            ]
+          },
+          {
+            "file": "./utils/modelica.js",
+            "imports": [
+              "generateModelicaPackageHeader",
+              "generateModelicaPackageFooter",
+              "generateModelicaModel"
+            ]
+          },
+          {
+            "file": "./utils/svg.js",
+            "imports": [
+              "generateSVGHeader",
+              "generateSVGFooter",
+              "renderRectNode",
+              "renderStadiumNode",
+              "renderEdge",
+              "getNodeColor",
+              "DEFAULT_SVG_OPTIONS",
+              "SVGNodePosition"
+            ]
+          },
+          {
+            "file": "./utils/html.js",
+            "imports": [
+              "generateHTMLHeader",
+              "generateHTMLFooter",
+              "escapeHTML",
+              "renderMetricCard",
+              "renderSection"
+            ]
+          },
+          {
+            "file": "./utils/json.js",
+            "imports": [
+              "createJsonGraph",
+              "addNode",
+              "addEdge",
+              "addMetric",
+              "serializeGraph"
+            ]
+          },
+          {
+            "file": "./utils/markdown.js",
+            "imports": [
+              "heading",
+              "list",
+              "table"
+            ]
+          }
+        ],
+        "exports": [
+          "GRAPH_RENDER_FORMATS",
+          "renderGraphModel",
+          "truncateGraphLabel"
+        ],
+        "interfaces": [
+          "GraphRenderNode",
+          "GraphRenderEdge",
+          "GraphRenderModel"
+        ],
+        "functions": [
+          "renderGraphModel",
+          "truncateGraphLabel"
+        ],
+        "constants": [
+          "GRAPH_RENDER_FORMATS"
         ]
       },
       "src/export/visual/index.ts": {
@@ -965,6 +1075,15 @@
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
+            ]
+          },
+          {
+            "file": "../graph-render.js",
+            "imports": [
+              "renderGraphModel",
+              "GraphRenderModel",
+              "GraphRenderNode",
+              "GraphRenderEdge"
             ]
           },
           {
@@ -1894,6 +2013,15 @@
             "imports": [
               "MermaidGraphBuilder",
               "MermaidGanttBuilder"
+            ]
+          },
+          {
+            "file": "../graph-render.js",
+            "imports": [
+              "renderGraphModel",
+              "GraphRenderModel",
+              "GraphRenderNode",
+              "GraphRenderEdge"
             ]
           }
         ],
@@ -3526,82 +3654,11 @@
             "typeOnly": true
           },
           {
-            "file": "./utils.js",
+            "file": "./graph-render.js",
             "imports": [
-              "sanitizeId"
-            ]
-          },
-          {
-            "file": "./utils/graphml.js",
-            "imports": [
-              "generateGraphML",
-              "GraphMLNode",
-              "GraphMLEdge"
-            ]
-          },
-          {
-            "file": "./utils/tikz.js",
-            "imports": [
-              "generateTikZ",
-              "TikZNode",
-              "TikZEdge"
-            ]
-          },
-          {
-            "file": "./utils/uml.js",
-            "imports": [
-              "generateUmlDiagram",
-              "UmlNode",
-              "UmlEdge"
-            ]
-          },
-          {
-            "file": "./utils/modelica.js",
-            "imports": [
-              "generateModelicaPackageHeader",
-              "generateModelicaPackageFooter",
-              "generateModelicaModel"
-            ]
-          },
-          {
-            "file": "./utils/svg.js",
-            "imports": [
-              "generateSVGHeader",
-              "generateSVGFooter",
-              "renderRectNode",
-              "renderStadiumNode",
-              "renderEdge",
-              "getNodeColor",
-              "DEFAULT_SVG_OPTIONS",
-              "SVGNodePosition"
-            ]
-          },
-          {
-            "file": "./utils/html.js",
-            "imports": [
-              "generateHTMLHeader",
-              "generateHTMLFooter",
-              "escapeHTML",
-              "renderMetricCard",
-              "renderSection"
-            ]
-          },
-          {
-            "file": "./utils/json.js",
-            "imports": [
-              "createJsonGraph",
-              "addNode",
-              "addEdge",
-              "addMetric",
-              "serializeGraph"
-            ]
-          },
-          {
-            "file": "./utils/markdown.js",
-            "imports": [
-              "heading",
-              "list",
-              "table"
+              "renderGraphModel",
+              "GRAPH_RENDER_FORMATS",
+              "GraphRenderModel"
             ]
           }
         ],
@@ -3631,7 +3688,14 @@
         "description": "ASCII Art Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils.js",
+            "imports": [
+              "truncateWithSuffix"
+            ]
+          }
+        ],
         "exports": [
           "BOX_CHARS",
           "ARROWS",
@@ -3706,7 +3770,14 @@
         "description": "DOT/GraphViz Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils.js",
+            "imports": [
+              "truncateWithSuffix"
+            ]
+          }
+        ],
         "exports": [
           "DOT_COLORS",
           "sanitizeDotId",
@@ -4080,7 +4151,14 @@
         "description": "Markdown Export Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils.js",
+            "imports": [
+              "truncateWithSuffix"
+            ]
+          }
+        ],
         "exports": [
           "heading",
           "bold",
@@ -4157,7 +4235,14 @@
         "description": "Mermaid Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils.js",
+            "imports": [
+              "truncateWithSuffix"
+            ]
+          }
+        ],
         "exports": [
           "MERMAID_COLORS",
           "sanitizeMermaidId",
@@ -4259,7 +4344,14 @@
         "description": "SVG Export Utilities (v8.5.0)",
         "externalDependencies": [],
         "nodeDependencies": [],
-        "internalDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../utils.js",
+            "imports": [
+              "truncateWithSuffix"
+            ]
+          }
+        ],
         "exports": [
           "DEFAULT_SVG_OPTIONS",
           "COLOR_PALETTES",
@@ -4437,10 +4529,12 @@
         "nodeDependencies": [],
         "internalDependencies": [],
         "exports": [
-          "sanitizeId"
+          "sanitizeId",
+          "truncateWithSuffix"
         ],
         "functions": [
-          "sanitizeId"
+          "sanitizeId",
+          "truncateWithSuffix"
         ]
       },
       "src/export/visual/visual-exporter.ts": {
@@ -4579,7 +4673,8 @@
           {
             "module": "fs",
             "imports": [
-              "readFileSync"
+              "readFileSync",
+              "realpathSync"
             ]
           },
           {
@@ -4655,9 +4750,15 @@
           }
         ],
         "exports": [
-          "format"
+          "server",
+          "format",
+          "main"
+        ],
+        "functions": [
+          "main"
         ],
         "constants": [
+          "server",
           "format"
         ]
       }
@@ -4870,8 +4971,29 @@
           {
             "file": "../../types/core.js",
             "imports": [
-              "ThinkingMode"
+              "ThinkingMode",
+              "Thought"
             ]
+          },
+          {
+            "file": "../../tools/thinking.js",
+            "imports": [
+              "ThinkingToolInput"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../../services/ThoughtFactory.js",
+            "imports": [
+              "ThoughtFactory"
+            ]
+          },
+          {
+            "file": "../handlers/ModeHandler.js",
+            "imports": [
+              "ValidationResult"
+            ],
+            "typeOnly": true
           },
           {
             "file": "./combination-types.js",
@@ -4882,9 +5004,16 @@
               "MergedAnalysis",
               "Insight",
               "ModeError",
-              "MergeStatistics"
+              "MergeStatistics",
+              "ConfidenceBasis"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "./combination-types.js",
+            "imports": [
+              "UNSCORED_INSIGHT_WEIGHT"
+            ]
           },
           {
             "file": "./merger.js",
@@ -4943,7 +5072,10 @@
             "typeOnly": true
           }
         ],
-        "exports": [],
+        "exports": [
+          "UNSCORED_INSIGHT_WEIGHT",
+          "SYNTHESIS_CONFIDENCE_NOTE"
+        ],
         "interfaces": [
           "WeightedMergeConfig",
           "HierarchicalMergeConfig",
@@ -4958,6 +5090,10 @@
           "MultiModeAnalysisResponse",
           "ModeAnalysisResult",
           "ModeError"
+        ],
+        "constants": [
+          "UNSCORED_INSIGHT_WEIGHT",
+          "SYNTHESIS_CONFIDENCE_NOTE"
         ]
       },
       "src/modes/combinations/conflict-resolver.ts": {
@@ -4981,6 +5117,12 @@
               "ConflictType"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "./combination-types.js",
+            "imports": [
+              "SYNTHESIS_CONFIDENCE_NOTE"
+            ]
           }
         ],
         "exports": [
@@ -5137,6 +5279,12 @@
               "ConflictingInsight"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "./combination-types.js",
+            "imports": [
+              "SYNTHESIS_CONFIDENCE_NOTE"
+            ]
           }
         ],
         "exports": [
@@ -7070,6 +7218,20 @@
               "createValidationError",
               "createValidationWarning"
             ]
+          },
+          {
+            "file": "../stochastic/models/moments.js",
+            "imports": [
+              "analyticMoments"
+            ]
+          },
+          {
+            "file": "../stochastic/analysis/statistics.js",
+            "imports": [
+              "equalTailedInterval",
+              "mean",
+              "variance"
+            ]
           }
         ],
         "exports": [
@@ -8030,6 +8192,21 @@
           "sampleWithStatistics"
         ]
       },
+      "src/modes/stochastic/models/moments.ts": {
+        "description": "Closed-form mean and variance for the distributions this codebase accepts.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "analyticMoments"
+        ],
+        "interfaces": [
+          "DistributionMoments"
+        ],
+        "functions": [
+          "analyticMoments"
+        ]
+      },
       "src/modes/stochastic/sampling/rng.ts": {
         "description": "Seeded Random Number Generator - Phase 12 Sprint 5",
         "externalDependencies": [],
@@ -8151,6 +8328,13 @@
             "file": "./inconsistency-detector.js",
             "imports": [
               "InconsistencyDetector"
+            ]
+          },
+          {
+            "file": "./extended-advisory.js",
+            "imports": [
+              "analyzeProofExtended",
+              "ExtendedProofDeps"
             ]
           }
         ],
@@ -8370,6 +8554,111 @@
           "DependencyGraphBuilder"
         ]
       },
+      "src/proof/extended-advisory.ts": {
+        "description": "Extended advisory proof analysis — the five engines the first wiring wave",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/session.js",
+            "imports": [
+              "AssumptionDependencyEntry",
+              "ProofAssumptionAnalysis",
+              "ProofBranchAnalysis",
+              "ProofExtendedAnalysis",
+              "ProofFallacyAnalysis",
+              "ProofFallacyHit",
+              "ProofStrategyAnalysis",
+              "ProofStructureAnalysis",
+              "ProofVerificationAnalysis"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../types/modes/mathematics.js",
+            "imports": [
+              "ProofDecomposition"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./decomposer.js",
+            "imports": [
+              "ProofStep"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./assumption-tracker.js",
+            "imports": [
+              "AssumptionTracker"
+            ]
+          },
+          {
+            "file": "./verifier.js",
+            "imports": [
+              "ProofVerifier"
+            ]
+          },
+          {
+            "file": "./branch-analyzer.js",
+            "imports": [
+              "BranchAnalyzer"
+            ]
+          },
+          {
+            "file": "./hierarchical-proof.js",
+            "imports": [
+              "HierarchicalProofManager"
+            ]
+          },
+          {
+            "file": "./strategy-recommender.js",
+            "imports": [
+              "StrategyRecommender"
+            ]
+          },
+          {
+            "file": "./patterns/warnings.js",
+            "imports": [
+              "checkStatement"
+            ]
+          }
+        ],
+        "exports": [
+          "MAX_EXTENDED_PROOF_STEPS",
+          "MAX_EXTENDED_ASSUMPTIONS",
+          "MAX_EXTENDED_CONCLUSIONS",
+          "MAX_VERIFICATION_ITEMS",
+          "MAX_PROOF_BRANCHES",
+          "MAX_SUB_PROOFS",
+          "MAX_STRATEGY_RECOMMENDATIONS",
+          "MAX_FALLACY_HITS",
+          "MAX_EXTENDED_NOTES",
+          "MAX_FALLACY_STATEMENT_CHARS",
+          "MAX_FALLACY_EXCERPT_CHARS",
+          "analyzeProofExtended"
+        ],
+        "interfaces": [
+          "ExtendedProofDeps"
+        ],
+        "functions": [
+          "analyzeProofExtended"
+        ],
+        "constants": [
+          "MAX_EXTENDED_PROOF_STEPS",
+          "MAX_EXTENDED_ASSUMPTIONS",
+          "MAX_EXTENDED_CONCLUSIONS",
+          "MAX_VERIFICATION_ITEMS",
+          "MAX_PROOF_BRANCHES",
+          "MAX_SUB_PROOFS",
+          "MAX_STRATEGY_RECOMMENDATIONS",
+          "MAX_FALLACY_HITS",
+          "MAX_EXTENDED_NOTES",
+          "MAX_FALLACY_STATEMENT_CHARS",
+          "MAX_FALLACY_EXCERPT_CHARS"
+        ]
+      },
       "src/proof/gap-analyzer.ts": {
         "description": "Gap Analyzer - Phase 8 Sprint 2",
         "externalDependencies": [],
@@ -8470,6 +8759,23 @@
         "nodeDependencies": [],
         "internalDependencies": [
           {
+            "file": "./advisory.js",
+            "imports": [
+              "analyzeProofAdvisory",
+              "type ProofAnalysisDeps"
+            ],
+            "reExport": true
+          },
+          {
+            "file": "./extended-advisory.js",
+            "imports": [
+              "analyzeProofExtended",
+              "type ExtendedProofDeps",
+              "MAX_EXTENDED_PROOF_STEPS"
+            ],
+            "reExport": true
+          },
+          {
             "file": "./dependency-graph.js",
             "imports": [
               "DependencyGraphBuilder"
@@ -8563,6 +8869,11 @@
           }
         ],
         "exports": [
+          "analyzeProofAdvisory",
+          "type ProofAnalysisDeps",
+          "analyzeProofExtended",
+          "type ExtendedProofDeps",
+          "MAX_EXTENDED_PROOF_STEPS",
           "DependencyGraphBuilder",
           "ProofDecomposer",
           "type ProofStep",
@@ -8591,6 +8902,11 @@
           "type ProofElementInput"
         ],
         "reExported": [
+          "analyzeProofAdvisory",
+          "type ProofAnalysisDeps",
+          "analyzeProofExtended",
+          "type ExtendedProofDeps",
+          "MAX_EXTENDED_PROOF_STEPS",
           "DependencyGraphBuilder",
           "ProofDecomposer",
           "type ProofStep",
@@ -8759,6 +9075,7 @@
               "isAlgorithmicThought",
               "isScientificMethodThought",
               "isHistoricalThought",
+              "isComputabilityThought",
               "HybridThought",
               "// Sprint 1: Visual export integration types\n  SequentialThought",
               "ShannonThought",
@@ -8996,6 +9313,12 @@
             "file": "../proof/advisory.js",
             "imports": [
               "analyzeProofAdvisory"
+            ]
+          },
+          {
+            "file": "../taxonomy/flow-advisory.js",
+            "imports": [
+              "summarizeReasoningFlow"
             ]
           },
           {
@@ -9272,6 +9595,44 @@
         ],
         "interfaces": [
           "ThoughtClassification"
+        ]
+      },
+      "src/taxonomy/flow-advisory.ts": {
+        "description": "Advisory multi-modal reasoning-flow wrapper",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types/index.js",
+            "imports": [
+              "ThinkingSession"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "./multi-modal-analyzer.js",
+            "imports": [
+              "MultiModalAnalyzer",
+              "ReasoningFlow"
+            ]
+          }
+        ],
+        "exports": [
+          "MIN_FLOW_THOUGHTS",
+          "MAX_FLOW_REPORT_CHARS",
+          "FLOW_TRUNCATION_MARKER",
+          "summarizeReasoningFlow"
+        ],
+        "interfaces": [
+          "FlowAdvisoryDeps"
+        ],
+        "functions": [
+          "summarizeReasoningFlow"
+        ],
+        "constants": [
+          "MIN_FLOW_THOUGHTS",
+          "MAX_FLOW_REPORT_CHARS",
+          "FLOW_TRUNCATION_MARKER"
         ]
       },
       "src/taxonomy/multi-modal-analyzer.ts": {
@@ -9963,6 +10324,12 @@
               "IdArraySchema",
               "boundedRecord"
             ]
+          },
+          {
+            "file": "../../../utils/sanitization.js",
+            "imports": [
+              "MAX_LENGTHS"
+            ]
           }
         ],
         "exports": [
@@ -10168,6 +10535,7 @@
             "imports": [
               "ConfidenceSchema",
               "IdSchema",
+              "NameSchema",
               "TextSchema",
               "IdArraySchema",
               "boundedRecord"
@@ -10211,7 +10579,8 @@
               "IdSchema",
               "NameSchema",
               "TextSchema",
-              "IdArraySchema"
+              "IdArraySchema",
+              "boundedRecord"
             ]
           },
           {
@@ -12632,6 +13001,17 @@
               "ProofGap"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../proof/branch-types.js",
+            "imports": [
+              "HierarchicalProofType",
+              "ProofStrategyType",
+              "VerificationCoverage",
+              "VerificationError",
+              "VerificationWarning"
+            ],
+            "typeOnly": true
           }
         ],
         "exports": [],
@@ -12648,6 +13028,19 @@
           "ProofAnalysisTruncation",
           "ProofAnalysisTotals",
           "ProofAnalysisResult",
+          "AssumptionDependencyEntry",
+          "ExplicitAssumptionSummary",
+          "ProofAssumptionAnalysis",
+          "ProofVerificationAnalysis",
+          "ProofBranchSummary",
+          "ProofBranchAnalysis",
+          "SubProofSummary",
+          "ProofStructureAnalysis",
+          "ProofStrategySuggestion",
+          "ProofStrategyAnalysis",
+          "ProofFallacyHit",
+          "ProofFallacyAnalysis",
+          "ProofExtendedAnalysis",
           "ProofAnalysisUnavailable",
           "ValidationIssue"
         ]
@@ -13048,111 +13441,6 @@
               "type AdvisoryValidatorLike"
             ],
             "reExport": true
-          },
-          {
-            "file": "./schemas.js",
-            "imports": [
-              "SessionIdSchema",
-              "ThinkingModeSchema",
-              "CreateSessionSchema",
-              "type CreateSessionInput",
-              "AddThoughtSchema",
-              "type AddThoughtInput",
-              "CompleteSessionSchema",
-              "type CompleteSessionInput",
-              "GetSessionSchema",
-              "type GetSessionInput",
-              "ListSessionsSchema",
-              "type ListSessionsInput",
-              "ExportSessionSchema",
-              "type ExportSessionInput",
-              "SearchSessionsSchema",
-              "type SearchSessionsInput",
-              "BatchOperationSchema",
-              "type BatchOperationInput",
-              "validateInput",
-              "safeValidateInput"
-            ],
-            "reExport": true
-          },
-          {
-            "file": "./schema-utils.js",
-            "imports": [
-              "// Primitive schemas\n  probabilitySchema",
-              "confidenceSchema",
-              "progressSchema",
-              "weightSchema",
-              "nonNegativeSchema",
-              "positiveSchema",
-              "nonEmptyStringSchema",
-              "uuidSchema",
-              "timestampSchema",
-              "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
-              "probabilityWithJustificationSchema",
-              "probabilityWithCalculationSchema",
-              "evidenceSchema",
-              "evidenceWithSupportSchema",
-              "type HypothesisInput",
-              "type ProbabilityWithJustification",
-              "type ProbabilityWithCalculation",
-              "type EvidenceInput",
-              "type EvidenceWithSupport",
-              "// Graph schemas\n  createNodeSchema",
-              "createEdgeSchema",
-              "nodeSchema",
-              "weightedNodeSchema",
-              "edgeSchema",
-              "weightedEdgeSchema",
-              "causalEdgeSchema",
-              "type NodeInput",
-              "type WeightedNodeInput",
-              "type EdgeInput",
-              "type WeightedEdgeInput",
-              "type CausalEdgeInput",
-              "// Temporal schemas\n  timePointSchema",
-              "timeIntervalSchema",
-              "temporalEventSchema",
-              "type TimePointInput",
-              "type TimeIntervalInput",
-              "type TemporalEventInput",
-              "// Mathematical schemas\n  mathExpressionSchema",
-              "valueWithUnitSchema",
-              "measurementSchema",
-              "type MathExpressionInput",
-              "type ValueWithUnitInput",
-              "type MeasurementInput",
-              "// Game Theory schemas\n  playerSchema",
-              "strategySchema",
-              "payoffSchema",
-              "type PlayerInput",
-              "type StrategyInput",
-              "type PayoffInput",
-              "// Reasoning schemas\n  reasoningStepSchema",
-              "propositionSchema",
-              "inferenceRuleSchema",
-              "type ReasoningStepInput",
-              "type PropositionInput",
-              "type InferenceRuleInput",
-              "// Optimization schemas\n  constraintSchema",
-              "objectiveSchema",
-              "solutionSchema",
-              "type ConstraintInput",
-              "type ObjectiveInput",
-              "type SolutionInput",
-              "// Base schemas\n  baseThoughtSchema",
-              "sequentialThoughtExtensionSchema",
-              "bayesianThoughtExtensionSchema",
-              "type BaseThoughtInput",
-              "// Helpers\n  createRangeSchema",
-              "createEnumSchema",
-              "createOptionalStringWithDefault",
-              "createOptionalNumberWithDefault",
-              "createOptionalBooleanWithDefault",
-              "uniqueIdArraySchema",
-              "createGraphSchema",
-              "// Namespace export\n  SchemaUtils"
-            ],
-            "reExport": true
           }
         ],
         "exports": [
@@ -13168,100 +13456,7 @@
           "validateAdvisory",
           "MAX_ADVISORY_ISSUES",
           "MAX_ADVISORY_SUGGESTIONS",
-          "type AdvisoryValidatorLike",
-          "SessionIdSchema",
-          "ThinkingModeSchema",
-          "CreateSessionSchema",
-          "type CreateSessionInput",
-          "AddThoughtSchema",
-          "type AddThoughtInput",
-          "CompleteSessionSchema",
-          "type CompleteSessionInput",
-          "GetSessionSchema",
-          "type GetSessionInput",
-          "ListSessionsSchema",
-          "type ListSessionsInput",
-          "ExportSessionSchema",
-          "type ExportSessionInput",
-          "SearchSessionsSchema",
-          "type SearchSessionsInput",
-          "BatchOperationSchema",
-          "type BatchOperationInput",
-          "validateInput",
-          "safeValidateInput",
-          "// Primitive schemas\n  probabilitySchema",
-          "confidenceSchema",
-          "progressSchema",
-          "weightSchema",
-          "nonNegativeSchema",
-          "positiveSchema",
-          "nonEmptyStringSchema",
-          "uuidSchema",
-          "timestampSchema",
-          "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
-          "probabilityWithJustificationSchema",
-          "probabilityWithCalculationSchema",
-          "evidenceSchema",
-          "evidenceWithSupportSchema",
-          "type HypothesisInput",
-          "type ProbabilityWithJustification",
-          "type ProbabilityWithCalculation",
-          "type EvidenceInput",
-          "type EvidenceWithSupport",
-          "// Graph schemas\n  createNodeSchema",
-          "createEdgeSchema",
-          "nodeSchema",
-          "weightedNodeSchema",
-          "edgeSchema",
-          "weightedEdgeSchema",
-          "causalEdgeSchema",
-          "type NodeInput",
-          "type WeightedNodeInput",
-          "type EdgeInput",
-          "type WeightedEdgeInput",
-          "type CausalEdgeInput",
-          "// Temporal schemas\n  timePointSchema",
-          "timeIntervalSchema",
-          "temporalEventSchema",
-          "type TimePointInput",
-          "type TimeIntervalInput",
-          "type TemporalEventInput",
-          "// Mathematical schemas\n  mathExpressionSchema",
-          "valueWithUnitSchema",
-          "measurementSchema",
-          "type MathExpressionInput",
-          "type ValueWithUnitInput",
-          "type MeasurementInput",
-          "// Game Theory schemas\n  playerSchema",
-          "strategySchema",
-          "payoffSchema",
-          "type PlayerInput",
-          "type StrategyInput",
-          "type PayoffInput",
-          "// Reasoning schemas\n  reasoningStepSchema",
-          "propositionSchema",
-          "inferenceRuleSchema",
-          "type ReasoningStepInput",
-          "type PropositionInput",
-          "type InferenceRuleInput",
-          "// Optimization schemas\n  constraintSchema",
-          "objectiveSchema",
-          "solutionSchema",
-          "type ConstraintInput",
-          "type ObjectiveInput",
-          "type SolutionInput",
-          "// Base schemas\n  baseThoughtSchema",
-          "sequentialThoughtExtensionSchema",
-          "bayesianThoughtExtensionSchema",
-          "type BaseThoughtInput",
-          "// Helpers\n  createRangeSchema",
-          "createEnumSchema",
-          "createOptionalStringWithDefault",
-          "createOptionalNumberWithDefault",
-          "createOptionalBooleanWithDefault",
-          "uniqueIdArraySchema",
-          "createGraphSchema",
-          "// Namespace export\n  SchemaUtils"
+          "type AdvisoryValidatorLike"
         ],
         "reExported": [
           "IssueSeverity",
@@ -13276,271 +13471,7 @@
           "validateAdvisory",
           "MAX_ADVISORY_ISSUES",
           "MAX_ADVISORY_SUGGESTIONS",
-          "type AdvisoryValidatorLike",
-          "SessionIdSchema",
-          "ThinkingModeSchema",
-          "CreateSessionSchema",
-          "type CreateSessionInput",
-          "AddThoughtSchema",
-          "type AddThoughtInput",
-          "CompleteSessionSchema",
-          "type CompleteSessionInput",
-          "GetSessionSchema",
-          "type GetSessionInput",
-          "ListSessionsSchema",
-          "type ListSessionsInput",
-          "ExportSessionSchema",
-          "type ExportSessionInput",
-          "SearchSessionsSchema",
-          "type SearchSessionsInput",
-          "BatchOperationSchema",
-          "type BatchOperationInput",
-          "validateInput",
-          "safeValidateInput",
-          "// Primitive schemas\n  probabilitySchema",
-          "confidenceSchema",
-          "progressSchema",
-          "weightSchema",
-          "nonNegativeSchema",
-          "positiveSchema",
-          "nonEmptyStringSchema",
-          "uuidSchema",
-          "timestampSchema",
-          "// Composite schemas - Hypothesis & Evidence\n  hypothesisSchema",
-          "probabilityWithJustificationSchema",
-          "probabilityWithCalculationSchema",
-          "evidenceSchema",
-          "evidenceWithSupportSchema",
-          "type HypothesisInput",
-          "type ProbabilityWithJustification",
-          "type ProbabilityWithCalculation",
-          "type EvidenceInput",
-          "type EvidenceWithSupport",
-          "// Graph schemas\n  createNodeSchema",
-          "createEdgeSchema",
-          "nodeSchema",
-          "weightedNodeSchema",
-          "edgeSchema",
-          "weightedEdgeSchema",
-          "causalEdgeSchema",
-          "type NodeInput",
-          "type WeightedNodeInput",
-          "type EdgeInput",
-          "type WeightedEdgeInput",
-          "type CausalEdgeInput",
-          "// Temporal schemas\n  timePointSchema",
-          "timeIntervalSchema",
-          "temporalEventSchema",
-          "type TimePointInput",
-          "type TimeIntervalInput",
-          "type TemporalEventInput",
-          "// Mathematical schemas\n  mathExpressionSchema",
-          "valueWithUnitSchema",
-          "measurementSchema",
-          "type MathExpressionInput",
-          "type ValueWithUnitInput",
-          "type MeasurementInput",
-          "// Game Theory schemas\n  playerSchema",
-          "strategySchema",
-          "payoffSchema",
-          "type PlayerInput",
-          "type StrategyInput",
-          "type PayoffInput",
-          "// Reasoning schemas\n  reasoningStepSchema",
-          "propositionSchema",
-          "inferenceRuleSchema",
-          "type ReasoningStepInput",
-          "type PropositionInput",
-          "type InferenceRuleInput",
-          "// Optimization schemas\n  constraintSchema",
-          "objectiveSchema",
-          "solutionSchema",
-          "type ConstraintInput",
-          "type ObjectiveInput",
-          "type SolutionInput",
-          "// Base schemas\n  baseThoughtSchema",
-          "sequentialThoughtExtensionSchema",
-          "bayesianThoughtExtensionSchema",
-          "type BaseThoughtInput",
-          "// Helpers\n  createRangeSchema",
-          "createEnumSchema",
-          "createOptionalStringWithDefault",
-          "createOptionalNumberWithDefault",
-          "createOptionalBooleanWithDefault",
-          "uniqueIdArraySchema",
-          "createGraphSchema",
-          "// Namespace export\n  SchemaUtils"
-        ]
-      },
-      "src/validation/schema-utils.ts": {
-        "description": "Schema Utilities (v7.1.0)",
-        "externalDependencies": [
-          {
-            "package": "zod",
-            "imports": [
-              "z"
-            ]
-          }
-        ],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "./constants.js",
-            "imports": [
-              "ValidationThresholds",
-              "ValidationMessages"
-            ]
-          }
-        ],
-        "exports": [
-          "probabilitySchema",
-          "confidenceSchema",
-          "progressSchema",
-          "weightSchema",
-          "nonNegativeSchema",
-          "positiveSchema",
-          "nonEmptyStringSchema",
-          "uuidSchema",
-          "timestampSchema",
-          "hypothesisSchema",
-          "probabilityWithJustificationSchema",
-          "probabilityWithCalculationSchema",
-          "evidenceSchema",
-          "evidenceWithSupportSchema",
-          "nodeSchema",
-          "weightedNodeSchema",
-          "edgeSchema",
-          "weightedEdgeSchema",
-          "causalEdgeSchema",
-          "timePointSchema",
-          "timeIntervalSchema",
-          "temporalEventSchema",
-          "mathExpressionSchema",
-          "valueWithUnitSchema",
-          "measurementSchema",
-          "playerSchema",
-          "strategySchema",
-          "payoffSchema",
-          "reasoningStepSchema",
-          "propositionSchema",
-          "inferenceRuleSchema",
-          "constraintSchema",
-          "objectiveSchema",
-          "solutionSchema",
-          "baseThoughtSchema",
-          "sequentialThoughtExtensionSchema",
-          "bayesianThoughtExtensionSchema",
-          "SchemaUtils",
-          "createNodeSchema",
-          "createEdgeSchema",
-          "createRangeSchema",
-          "createEnumSchema",
-          "createOptionalStringWithDefault",
-          "createOptionalNumberWithDefault",
-          "createOptionalBooleanWithDefault",
-          "uniqueIdArraySchema",
-          "createGraphSchema"
-        ],
-        "functions": [
-          "createNodeSchema",
-          "createEdgeSchema",
-          "createRangeSchema",
-          "createEnumSchema",
-          "createOptionalStringWithDefault",
-          "createOptionalNumberWithDefault",
-          "createOptionalBooleanWithDefault",
-          "uniqueIdArraySchema",
-          "createGraphSchema"
-        ],
-        "constants": [
-          "probabilitySchema",
-          "confidenceSchema",
-          "progressSchema",
-          "weightSchema",
-          "nonNegativeSchema",
-          "positiveSchema",
-          "nonEmptyStringSchema",
-          "uuidSchema",
-          "timestampSchema",
-          "hypothesisSchema",
-          "probabilityWithJustificationSchema",
-          "probabilityWithCalculationSchema",
-          "evidenceSchema",
-          "evidenceWithSupportSchema",
-          "nodeSchema",
-          "weightedNodeSchema",
-          "edgeSchema",
-          "weightedEdgeSchema",
-          "causalEdgeSchema",
-          "timePointSchema",
-          "timeIntervalSchema",
-          "temporalEventSchema",
-          "mathExpressionSchema",
-          "valueWithUnitSchema",
-          "measurementSchema",
-          "playerSchema",
-          "strategySchema",
-          "payoffSchema",
-          "reasoningStepSchema",
-          "propositionSchema",
-          "inferenceRuleSchema",
-          "constraintSchema",
-          "objectiveSchema",
-          "solutionSchema",
-          "baseThoughtSchema",
-          "sequentialThoughtExtensionSchema",
-          "bayesianThoughtExtensionSchema",
-          "SchemaUtils"
-        ]
-      },
-      "src/validation/schemas.ts": {
-        "description": "Input Validation Schemas (v3.4.5)",
-        "externalDependencies": [
-          {
-            "package": "zod",
-            "imports": [
-              "z"
-            ]
-          }
-        ],
-        "nodeDependencies": [],
-        "internalDependencies": [
-          {
-            "file": "../types/index.js",
-            "imports": [
-              "ThinkingMode"
-            ]
-          }
-        ],
-        "exports": [
-          "SessionIdSchema",
-          "ThinkingModeSchema",
-          "CreateSessionSchema",
-          "AddThoughtSchema",
-          "CompleteSessionSchema",
-          "GetSessionSchema",
-          "ListSessionsSchema",
-          "ExportSessionSchema",
-          "SearchSessionsSchema",
-          "BatchOperationSchema",
-          "validateInput",
-          "safeValidateInput"
-        ],
-        "functions": [
-          "validateInput",
-          "safeValidateInput"
-        ],
-        "constants": [
-          "SessionIdSchema",
-          "ThinkingModeSchema",
-          "CreateSessionSchema",
-          "AddThoughtSchema",
-          "CompleteSessionSchema",
-          "GetSessionSchema",
-          "ListSessionsSchema",
-          "ExportSessionSchema",
-          "SearchSessionsSchema",
-          "BatchOperationSchema"
+          "type AdvisoryValidatorLike"
         ]
       },
       "src/validation/validator.ts": {
@@ -15947,6 +15878,7 @@
           "src/export/file-exporter.ts",
           "src/export/index.ts",
           "src/export/profiles.ts",
+          "src/export/visual/graph-render.ts",
           "src/export/visual/index.ts",
           "src/export/visual/modes/abductive.ts",
           "src/export/visual/modes/analogical.ts",
@@ -16058,6 +15990,7 @@
           "src/modes/registry.ts",
           "src/modes/stochastic/analysis/statistics.ts",
           "src/modes/stochastic/models/distribution.ts",
+          "src/modes/stochastic/models/moments.ts",
           "src/modes/stochastic/sampling/rng.ts",
           "src/modes/stochastic/types.ts"
         ]
@@ -16072,6 +16005,7 @@
           "src/proof/circular-detector.ts",
           "src/proof/decomposer.ts",
           "src/proof/dependency-graph.ts",
+          "src/proof/extended-advisory.ts",
           "src/proof/gap-analyzer.ts",
           "src/proof/hierarchical-proof.ts",
           "src/proof/inconsistency-detector.ts",
@@ -16103,6 +16037,7 @@
         "files": [
           "src/taxonomy/advisory.ts",
           "src/taxonomy/classifier.ts",
+          "src/taxonomy/flow-advisory.ts",
           "src/taxonomy/multi-modal-analyzer.ts",
           "src/taxonomy/navigator.ts",
           "src/taxonomy/reasoning-types.ts",
@@ -16192,8 +16127,6 @@
           "src/validation/cache.ts",
           "src/validation/constants.ts",
           "src/validation/index.ts",
-          "src/validation/schema-utils.ts",
-          "src/validation/schemas.ts",
           "src/validation/validator.ts",
           "src/validation/validators/base.ts",
           "src/validation/validators/index.ts",
@@ -16239,21 +16172,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 239,
+    "totalTypeScriptFiles": 241,
     "totalModules": 14,
-    "totalLinesOfCode": 117192,
-    "totalExports": 1306,
+    "totalLinesOfCode": 118828,
+    "totalExports": 1184,
     "totalClasses": 143,
-    "totalInterfaces": 543,
-    "totalFunctions": 437,
+    "totalInterfaces": 562,
+    "totalFunctions": 433,
     "totalTypeGuards": 87,
     "totalEnums": 3,
-    "totalConstants": 163,
-    "totalReExports": 575,
-    "totalTypeOnlyImports": 325,
+    "totalConstants": 133,
+    "totalReExports": 487,
+    "totalTypeOnlyImports": 333,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 58,
-    "unusedFilesCount": 14,
-    "unusedExportsCount": 490
+    "unusedFilesCount": 12,
+    "unusedExportsCount": 491
   }
 }
