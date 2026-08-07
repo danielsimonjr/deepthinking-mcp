@@ -10,6 +10,13 @@ import type {
   Inconsistency,
   ProofGap,
 } from "./modes/mathematics.js";
+import type {
+  HierarchicalProofType,
+  ProofStrategyType,
+  VerificationCoverage,
+  VerificationError,
+  VerificationWarning,
+} from "../proof/branch-types.js";
 
 /**
  * Thinking session
@@ -301,6 +308,206 @@ export interface ProofAnalysisResult {
 
   totals: ProofAnalysisTotals;
   truncated: ProofAnalysisTruncation;
+
+  /**
+   * Output of the five `src/proof/` engines that the first wiring wave left
+   * unreachable. Absent when every one of them failed or produced nothing.
+   *
+   * Kept in its own object rather than flattened into the fields above so a
+   * client can tell the original four analysers apart from these five, and so
+   * the whole block can be skipped when the proof exceeds the extended budget.
+   */
+  extended?: ProofExtendedAnalysis;
+}
+
+/**
+ * A conclusion and the assumption ids it rests on.
+ *
+ * `AssumptionAnalysis.conclusionDependencies` and `.minimalSets` are `Map`s.
+ * `JSON.stringify(new Map([["a", ["b"]]]))` is `"{}"`, so returning either one
+ * unprojected over MCP would send the client an empty object with no error —
+ * measured, not assumed. This array is the wire form.
+ */
+export interface AssumptionDependencyEntry {
+  conclusion: string;
+  assumptions: string[];
+}
+
+/** Explicit assumption, projected down from a full `AtomicStatement`. */
+export interface ExplicitAssumptionSummary {
+  id: string;
+  statement: string;
+  type: AtomicStatement["type"];
+}
+
+/** `AssumptionTracker` output, bounded and Map-free. */
+export interface ProofAssumptionAnalysis {
+  explicit: ExplicitAssumptionSummary[];
+  unused: string[];
+  conclusionDependencies: AssumptionDependencyEntry[];
+  minimalSets: AssumptionDependencyEntry[];
+  suggestions: string[];
+  /** Structural problems found by `validateStructure` (advisory only). */
+  structureIssues: string[];
+  totals: {
+    explicit: number;
+    unused: number;
+    conclusionDependencies: number;
+    minimalSets: number;
+    suggestions: number;
+    structureIssues: number;
+  };
+  truncated: {
+    explicit: boolean;
+    unused: boolean;
+    conclusionDependencies: boolean;
+    minimalSets: boolean;
+    suggestions: boolean;
+    structureIssues: boolean;
+    any: boolean;
+  };
+}
+
+/**
+ * `ProofVerifier` output.
+ *
+ * `VerificationResult.isValid` is deliberately NOT carried through. It is
+ * `errors.length === 0`, it is false for almost every prose-derived proof
+ * (an unjustified step is an "error"), and a boolean named `isValid` on a
+ * thought invites a caller to gate on it — which this whole subsystem must
+ * never do. `coverage.percentage` and the counts say the same thing without
+ * pretending to be a verdict.
+ */
+export interface ProofVerificationAnalysis {
+  errors: VerificationError[];
+  warnings: VerificationWarning[];
+  coverage: VerificationCoverage;
+  /** Justification kinds the verifier recognised (e.g. `modus_ponens`). */
+  justificationTypes: string[];
+  totals: { errors: number; warnings: number; unverifiedSteps: number };
+  truncated: {
+    errors: boolean;
+    warnings: boolean;
+    unverifiedSteps: boolean;
+    any: boolean;
+  };
+}
+
+/** One independent branch, without its steps (the caller already has them). */
+export interface ProofBranchSummary {
+  id: string;
+  name: string;
+  stepCount: number;
+  isIndependent: boolean;
+  estimatedComplexity: number;
+  dependencies: string[];
+  dependents: string[];
+}
+
+/** `BranchAnalyzer` output, bounded. */
+export interface ProofBranchAnalysis {
+  branches: ProofBranchSummary[];
+  /** Branch count per execution level; same level can be analysed in parallel. */
+  executionLevelSizes: number[];
+  independentCount: number;
+  totalComplexity: number;
+  canParallelize: boolean;
+  totals: { branches: number; executionLevels: number };
+  truncated: { branches: boolean; executionLevels: boolean; any: boolean };
+}
+
+/** One extracted lemma/claim, without its steps. */
+export interface SubProofSummary {
+  id: string;
+  type: HierarchicalProofType;
+  name?: string;
+  statement: string;
+  stepCount: number;
+  isComplete: boolean;
+}
+
+/** `HierarchicalProofManager` output, bounded. */
+export interface ProofStructureAnalysis {
+  type: HierarchicalProofType;
+  statement: string;
+  name?: string;
+  stepCount: number;
+  isComplete: boolean;
+  dependencies: string[];
+  subProofs: SubProofSummary[];
+  totals: { subProofs: number; dependencies: number };
+  truncated: { subProofs: boolean; dependencies: boolean; any: boolean };
+}
+
+/** One strategy suggestion, projected down from a full `ProofTemplate`. */
+export interface ProofStrategySuggestion {
+  strategy: ProofStrategyType;
+  confidence: number;
+  reasoning: string;
+  matchedFeatures: string[];
+  /** Section names of the suggested skeleton. The skeleton text is omitted. */
+  sections: string[];
+}
+
+/** `StrategyRecommender` output, bounded. */
+export interface ProofStrategyAnalysis {
+  theorem: string;
+  recommendations: ProofStrategySuggestion[];
+  totals: { recommendations: number };
+  truncated: { recommendations: boolean };
+}
+
+/** One fallacy-pattern hit on one proof statement. */
+export interface ProofFallacyHit {
+  /** Index into the analysed steps, 0-based. */
+  stepIndex: number;
+  patternId: string;
+  name: string;
+  category: string;
+  severity: "info" | "warning" | "error" | "critical";
+  suggestion: string;
+  /** The matched substring, capped. Advisory context, not a verdict. */
+  excerpt: string;
+}
+
+/** `patterns/warnings.ts` output, bounded. */
+export interface ProofFallacyAnalysis {
+  hits: ProofFallacyHit[];
+  statementsScanned: number;
+  totals: { hits: number };
+  truncated: { hits: boolean; statements: boolean; any: boolean };
+}
+
+/**
+ * Output of the five previously-unreachable `src/proof/` engines.
+ *
+ * Every sub-analysis is independent: one engine throwing costs only its own
+ * field and is named in `failed`, so a single broken analyser never hides the
+ * other four. Nothing here can reject a thought.
+ */
+export interface ProofExtendedAnalysis {
+  /**
+   * Steps fed to these engines. Lower than `ProofAnalysisResult.stepsAnalyzed`
+   * when the proof exceeded the extended budget — verification cost grows
+   * super-linearly (measured: 2.4 ms at 100 steps, 20.5 ms at 200).
+   */
+  stepsAnalyzed: number;
+
+  assumptions?: ProofAssumptionAnalysis;
+  verification?: ProofVerificationAnalysis;
+  branches?: ProofBranchAnalysis;
+  structure?: ProofStructureAnalysis;
+  strategies?: ProofStrategyAnalysis;
+  fallacies?: ProofFallacyAnalysis;
+
+  /** Analysers that threw. Their field is absent; the others still ran. */
+  failed: string[];
+
+  truncated: {
+    /** Steps beyond the extended budget were not fed to these engines. */
+    input: boolean;
+    any: boolean;
+  };
 }
 
 /**

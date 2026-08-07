@@ -38,6 +38,7 @@ import { createLogger, LogLevel } from "../utils/logger.js";
 import { ILogger } from "../interfaces/ILogger.js";
 import { validateAdvisory } from "../validation/advisory.js";
 import { analyzeProofAdvisory } from "../proof/advisory.js";
+import { summarizeReasoningFlow } from "../taxonomy/flow-advisory.js";
 import { SessionStorage } from "./storage/interface.js";
 import { LRUCache } from "../cache/lru.js";
 import type { CacheStats } from "../cache/types.js";
@@ -752,6 +753,15 @@ export class SessionManager {
     summary += `## Key Thoughts:\n\n`;
     for (const thought of session.thoughts) {
       summary += `${thought.thoughtNumber}. ${thought.content.substring(0, 100)}...\n`;
+    }
+
+    // Advisory multi-modal reasoning-flow analysis (v9.4.0). Appended, never
+    // substituted: everything above this line is unchanged. Returns undefined
+    // for a single-thought session or a failed analyser, in which case the
+    // summary is exactly what it was before. See taxonomy/flow-advisory.ts.
+    const flowReport = summarizeReasoningFlow(session);
+    if (flowReport) {
+      summary += `\n${flowReport}\n`;
     }
 
     return summary;

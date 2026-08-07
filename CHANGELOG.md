@@ -9,6 +9,90 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **The five remaining `src/proof/` engines are wired into the live request path.** The 2026-08-06
+  wave wired the decomposer, gap analyser, circular detector and inconsistency detector and stopped
+  there, on the recorded theory that `assumption-tracker`, `verifier`, `branch-analyzer`,
+  `hierarchical-proof`, `strategy-recommender` and `patterns/warnings` were stateful or
+  unserialisable and needed a session-level home. **Neither held.** Every one of those classes
+  stores only its options object — `analyze`, `verify`, `createProof`, `recommend` and
+  `analyzeAssumptions` are pure functions of their arguments — and the verifier's input is the same
+  `ProofStep[]` the decomposer already receives. They needed a projection, not a new home.
+
+  A proof-bearing thought's `proofAnalysis` now carries an `extended` block with implicit- and
+  explicit-assumption tracing, step-justification verification with coverage, independent-branch
+  detection, lemma extraction, proof-strategy recommendations, and fallacy-pattern hits. New module:
+  `src/proof/extended-advisory.ts`. It obeys the same contract as the earlier wave — never throws,
+  never rejects a thought, every list bounded with a truncation flag — and adds per-engine
+  degradation: one analyser throwing costs its own field only and is named in `extended.failed`.
+
+  - **The serialisation trap was real and is handled.** `AssumptionAnalysis.conclusionDependencies`
+    and `.minimalSets` are `Map`s, and `JSON.stringify(new Map(...))` is `"{}"` — measured, not
+    assumed. Both are projected to arrays before they reach a client, and a test walks the whole
+    payload after a round-trip asserting no `Map` or `Set` survives.
+  - **Cost, measured:** the extended block runs at most 100 steps (`MAX_EXTENDED_PROOF_STEPS`)
+    where the decomposer runs 200, because verification cost grows super-linearly — 2.4 ms at 100
+    steps, 20.5 ms at 200. The whole extended block is ~5 ms at its cap.
+  - **`VerificationResult.isValid` is deliberately not carried through.** It is `errors.length === 0`,
+    it is false for almost every prose-derived proof, and a boolean named `isValid` on a thought
+    invites a caller to gate on it. `coverage.percentage` and the counts say the same thing.
+  - Branch and sub-proof summaries omit the steps themselves: echoing them turned a 200-step
+    proof's branch analysis into a 48 KB payload.
+  - Guarded by `tests/unit/session/proof-extended-wiring.test.ts` (8 tests), all mutation-verified.
+
+- **The multi-modal reasoning-flow analyser is reachable.** `src/taxonomy/multi-modal-analyzer.ts`
+  — mode transitions, mode combinations, flow complexity, coherence, adaptability — was reachable
+  only from the test suite. The 2026-08-06 taxonomy wiring went through `recommend_mode`, which
+  takes a problem description rather than a session, so it had no use for a session-level analyser.
+  `deepthinking_session` action `summarize` does: `SessionManager.generateSummary()` now appends a
+  bounded markdown flow report for any session with two or more thoughts. New module:
+  `src/taxonomy/flow-advisory.ts`. Advisory — a failing analyser costs the section, never the
+  summary. Guarded by `tests/unit/session/reasoning-flow-wiring.test.ts`.
+
+### Fixed
+
+- **Six of the twelve mathematical-fallacy patterns did not match their own documented examples.**
+  Found by running `checkStatement` over each pattern's `examples` array while wiring
+  `src/proof/patterns/warnings.ts` into the request path. Four of the six had unit tests — which
+  asserted only `severity` and `category`, so regexes that matched nothing stayed green.
+  `affirming_consequent` captured the antecedent's trailing comma and then searched for it in the
+  conclusion; `denying_antecedent` had the same defect; `hasty_generalization` required the case
+  list and the generalisation to be adjacent; `illegal_cancellation` demanded the literal word
+  "term" or "factor"; `necessary_sufficient_confusion` required the two words to be adjacent;
+  `sqrt_sign_error` demanded an ASCII hyphen and so missed `±`; `infinity_arithmetic` missed `0 × ∞`
+  because `×` was absent from its operator class. All fixed, and
+  `tests/unit/proof/warning-patterns.test.ts` now asserts the invariant mechanically: every pattern
+  must match every one of its own examples, and stay quiet on ten correct proof statements.
+
+- **ReDoS in the fallacy scanner.** `AFFIRMING_CONSEQUENT` took **7,672 ms** on a 2,000-character
+  statement of the form `"if a, then b."` repeated — two unbounded lazy captures plus two free `.*`
+  spans under `/s`. `DENYING_ANTECEDENT` took 387 ms on the same input. Capping each capture to one
+  clause and each gap to 400 characters brings both under 1.1 ms, a 7,100× reduction, with a
+  500 ms budget test as the regression guard. This was latent before the wiring; scanning proof
+  text on the request path is what would have made it reachable.
+
+- **`AMBIGUOUS_MIDDLE` is no longer scanned.** It tested "does any 3+ letter word appear three
+  times", which failed in both directions at once: it did not match its own example (`continuous`
+  vs `continuity`), and it fired on ordinary proof prose containing "the" three times. A
+  permanently-firing advisory finding trains a reader to skim past the whole list. The constant is
+  still exported.
+
+### Removed
+
+- **`src/validation/schemas.ts` and `src/validation/schema-utils.ts`** (897 lines, no consumer, no
+  test). `schemas.ts` validated six MCP tools that no longer exist (`create_session`,
+  `add_thought`, `complete_session`, `get_session`, `list_sessions`, `export_session`,
+  `search_sessions`) and exported a second `SessionIdSchema` — `z.string().uuid()` — that
+  contradicted the live one in `src/tools/schemas/shared.ts`
+  (`z.string().max(MAX_LENGTHS.SESSION_ID)`), so the same symbol name carried two different rules
+  depending on the import path. Both files were reachable only through `src/validation/index.ts`,
+  which nothing imports.
+
+  Removing them cannot break an external consumer: `tsup` builds the single entry `src/index.ts`,
+  which has **zero exports**, so the published `dist/index.d.ts` is one shebang line and the package
+  has no library API at all. Verified against the built artifact, not inferred.
+
+### Added
+
 - **Registration completeness is now derived from `ThinkingMode`, not from hand-maintained lists.**
   Four new suites assert every direction of the wiring, and each was mutation-verified against the
   pre-existing coverage:

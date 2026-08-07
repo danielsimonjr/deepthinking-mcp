@@ -4,7 +4,25 @@
  * Provides proof decomposition, dependency analysis, inconsistency detection,
  * branch analysis, strategy recommendations, verification, and hierarchical proofs
  * for the Mathematics reasoning mode.
+ *
+ * ## Status: not on the live request path (verified 2026-08-07)
+ *
+ * Nothing under `src/` imports this barrel. The live path enters through
+ * `./advisory.js` — which `SessionManager.addThought()` calls — and that in
+ * turn calls `./extended-advisory.js`. Between them they reach **every**
+ * module in this directory, so no file here is dead any more; only the barrel
+ * itself is unimported, and the published package exposes no library API for
+ * it to serve (`dist/index.d.ts` is one shebang line). It is kept as the
+ * conventional import surface, not as a claim that anything routes through it.
  */
+
+// Advisory entry points - what the live request path actually uses
+export { analyzeProofAdvisory, type ProofAnalysisDeps } from "./advisory.js";
+export {
+  analyzeProofExtended,
+  type ExtendedProofDeps,
+  MAX_EXTENDED_PROOF_STEPS,
+} from "./extended-advisory.js";
 
 // Core infrastructure
 export { DependencyGraphBuilder } from "./dependency-graph.js";

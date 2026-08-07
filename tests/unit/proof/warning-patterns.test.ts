@@ -16,9 +16,90 @@ import {
   HASTY_GENERALIZATION,
   INFINITY_ARITHMETIC,
   EXISTENTIAL_INSTANTIATION_ERROR,
+  AMBIGUOUS_MIDDLE,
 } from '../../../src/proof/patterns/warnings.js';
 
 describe('Warning Patterns', () => {
+  /**
+   * The invariant that was missing.
+   *
+   * Six of the twelve patterns did not match their own documented examples
+   * when this module was first scanned by the live request path. Four of the
+   * six had unit tests here — but those tests asserted only `severity` and
+   * `category`, so a regex that matched nothing stayed green for months.
+   *
+   * These three tests are the mechanical guard: what a pattern advertises it
+   * detects, it must detect; a pattern must stay quiet on correct prose; and
+   * it must do both inside a bounded time budget.
+   */
+  describe('every pattern detects what it advertises', () => {
+    it.each(ALL_WARNING_PATTERNS.map((p) => [p.id, p] as const))(
+      '%s matches every one of its own examples',
+      (_id, pattern) => {
+        expect(pattern.examples.length).toBeGreaterThan(0);
+        for (const example of pattern.examples) {
+          const ids = checkStatement(example).map((w) => w.pattern.id);
+          expect(
+            ids,
+            `${pattern.id} does not detect its own example: "${example}"`,
+          ).toContain(pattern.id);
+        }
+      },
+    );
+
+    it('stays quiet on ordinary, correct proof prose', () => {
+      // Every one of these is a valid step. A pattern that fires here is
+      // noise, and noise trains a reader to skim past the real findings.
+      const clean = [
+        'Assume n is an even integer.',
+        'By definition, there exists an integer k such that n = 2k.',
+        'Then n^2 = (2k)^2 = 4k^2 by algebraic manipulation.',
+        'Since 4k^2 = 2(2k^2), n^2 is even by definition of evenness.',
+        'Therefore, if n is even then n^2 is even, by direct implication.',
+        'Let n be a natural number. Therefore n is even.',
+        'We compute lim a_n = lim b_n for the two sequences.',
+        'The sum of angles in a triangle equals 180 degrees.',
+        'We cancel the noise from the measurement.',
+        'By the previous step and modus ponens, the claim follows.',
+      ];
+
+      for (const statement of clean) {
+        expect(
+          checkStatement(statement).map((w) => w.pattern.id),
+          `false positive on: "${statement}"`,
+        ).toEqual([]);
+      }
+    });
+
+    it('scans an adversarial statement in bounded time', () => {
+      // Regression guard for a measured ReDoS. Before the capture groups were
+      // bounded to one clause, this exact input took 7,672 ms in
+      // AFFIRMING_CONSEQUENT alone. It now takes ~1 ms. The 500 ms budget is
+      // deliberately loose: it is three orders of magnitude below the bug and
+      // two above the fix, so it catches a regression without flaking on a
+      // loaded machine.
+      const adversarial = [
+        'if ' + 'a, then b. '.repeat(180) + ' therefore ',
+        'if a, then b. ' + 'not a. '.repeat(280) + ' therefore not ',
+        'assume that ' + 'ab '.repeat(660) + '. therefore thus hence ',
+      ].map((s) => s.slice(0, 2000));
+
+      for (const statement of adversarial) {
+        const start = performance.now();
+        checkStatement(statement);
+        expect(performance.now() - start).toBeLessThan(500);
+      }
+    });
+
+    it('excludes AMBIGUOUS_MIDDLE from the scanned set', () => {
+      // It is still exported (removing the export would break an importer),
+      // but it neither matches its own example nor stays quiet on ordinary
+      // prose, so it is not scanned. See its doc comment.
+      expect(ALL_WARNING_PATTERNS).not.toContain(AMBIGUOUS_MIDDLE);
+      expect(AMBIGUOUS_MIDDLE.id).toBe('ambiguous_middle');
+    });
+  });
+
   describe('Pattern Catalog', () => {
     it('should have all expected patterns', () => {
       expect(ALL_WARNING_PATTERNS.length).toBeGreaterThanOrEqual(10);

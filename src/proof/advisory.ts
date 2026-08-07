@@ -37,6 +37,10 @@ import {
   type CircularReasoningResult,
 } from "./circular-detector.js";
 import { InconsistencyDetector } from "./inconsistency-detector.js";
+import {
+  analyzeProofExtended,
+  type ExtendedProofDeps,
+} from "./extended-advisory.js";
 
 /** Maximum proof steps fed to the decomposer. Bounds the worst-case cost. */
 export const MAX_PROOF_STEPS = 200;
@@ -100,6 +104,19 @@ export interface ProofAnalysisDeps {
     detectCircularReasoning(d: ProofDecomposition): CircularReasoningResult;
   };
   inconsistencyDetector?: { analyze(d: ProofDecomposition): Inconsistency[] };
+
+  /**
+   * Substitutes for the five extended engines (assumption tracker, verifier,
+   * branch analyser, hierarchical proof, strategy recommender, fallacy
+   * patterns). See `./extended-advisory.js`.
+   */
+  extended?: ExtendedProofDeps;
+
+  /**
+   * Set to `false` to skip the extended engines entirely. Defaults to on.
+   * Provided so a caller measuring the base four analysers can isolate them.
+   */
+  runExtended?: boolean;
 }
 
 const defaultDecomposer = new ProofDecomposer();
@@ -281,6 +298,29 @@ export function analyzeProofAdvisory(
     };
     truncated.any = Object.values(truncated).some((v) => v === true);
 
+    // When the caller supplied a decomposition there are no raw steps to feed
+    // the step-based engines, so reconstitute them from the atoms. Without
+    // this, a caller-supplied decomposition silently got verification,
+    // branch and fallacy analysis over an empty proof.
+    const extendedSteps: ProofStep[] =
+      analysedSteps.length > 0
+        ? analysedSteps
+        : atoms.map((a) => ({
+            content: a.statement,
+            justification: a.justification,
+            latex: a.latex,
+          }));
+
+    const extended =
+      deps.runExtended === false
+        ? undefined
+        : analyzeProofExtended(
+            decomposition,
+            extendedSteps,
+            decomposition.theorem ?? content?.theorem,
+            deps.extended,
+          );
+
     return {
       available: true,
       source: supplied ? "caller.decomposition" : content!.source,
@@ -311,6 +351,7 @@ export function analyzeProofAdvisory(
         unjustifiedSteps: unjustified.length,
       },
       truncated,
+      extended,
     };
   } catch (error) {
     return {
