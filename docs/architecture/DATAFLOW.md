@@ -811,7 +811,7 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 |---|---|---|
 | totalTypeScriptFiles | 491 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
-| reachableFiles | 200 | dependency-graph.json |
+| reachableFiles | 216 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
 | typeOnlyCircularDeps | 61 | dependency-graph.json |
 

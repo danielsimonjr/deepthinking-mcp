@@ -2300,9 +2300,9 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | totalLinesOfCode | 226965 | dependency-graph.json |
 | totalExports | 2154 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
-| reachableFiles | 200 | dependency-graph.json |
-| orphanedFiles | 20 | dependency-graph.json |
-| noImporterFileCount | 20 | dependency-graph.json |
+| reachableFiles | 216 | dependency-graph.json |
+| orphanedFiles | 22 | dependency-graph.json |
+| noImporterFileCount | 22 | dependency-graph.json |
 
 Class counts, handler counts and validator counts in this document are verified directly
 against `src/` by listing and reading the files named at each claim. They are not graph metrics,

@@ -139,14 +139,14 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | totalExports | 2154 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
-| reachableFiles | 200 | dependency-graph.json |
-| dormantFiles | 28 | dependency-graph.json |
-| orphanedFiles | 20 | dependency-graph.json |
+| reachableFiles | 216 | dependency-graph.json |
+| dormantFiles | 30 | dependency-graph.json |
+| orphanedFiles | 22 | dependency-graph.json |
 | testOnlyFiles | 8 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
 | typeOnlyCircularDeps | 61 | dependency-graph.json |
-| noImporterFileCount | 20 | unused-analysis.json (summary) |
-| unusedExportsCount | 214 | dependency-graph.json |
+| noImporterFileCount | 22 | unused-analysis.json (summary) |
+| unusedExportsCount | 251 | dependency-graph.json |
 
 Note on `totalModules`: repo_map counts 5 top-level project areas (`docs`, `config`, `src`,
 `tools`, `tests`), not `src/` subdirectories. DEPENDENCY_GRAPH.md's "14 modules" counts `src/`

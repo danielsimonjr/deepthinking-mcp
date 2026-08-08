@@ -139,8 +139,8 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 | totalModules | 5 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
 | typeOnlyCircularDeps | 61 | dependency-graph.json |
-| orphanedFiles | 20 | dependency-graph.json |
-| noImporterFileCount | 20 | unused-analysis.json (summary) |
+| orphanedFiles | 22 | dependency-graph.json |
+| noImporterFileCount | 22 | unused-analysis.json (summary) |
 
 Duplicate-symbol counts (63 total = 32 drift-risk + 29 benign + 2 real duplicates) come from
 `duplicate-symbols.json` (`duplicateCount: 63`, `totalSymbols: 1257`), hand-classified by
