@@ -1,0 +1,927 @@
+{
+  "summary": {
+    "duplicateSymbolCount": 65,
+    "driftRiskCount": 61,
+    "nameCollisionCount": 4
+  },
+  "duplicates": [
+    {
+      "name": "CausalChain",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/modes/counterfactual.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/historical.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "CausalGraph",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/modes/causal/graph/types.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/causal.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "CausalLink",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/modes/historical.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/systemsthinking.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "Constraint",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/modes/stochastic/types.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/optimization.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "ConstraintType",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/modes/constraint.ts",
+          "kind": "type"
+        },
+        {
+          "file": "src/types/modes/optimization.ts",
+          "kind": "type"
+        }
+      ]
+    },
+    {
+      "name": "Contradiction",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/modes/formallogic.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/synthesis.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "CustomThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/modes/handlers/CustomHandler.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/custom.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "Domain",
+      "category": "NAME_COLLISION",
+      "definitions": [
+        {
+          "file": "src/modes/stochastic/types.ts",
+          "kind": "type"
+        },
+        {
+          "file": "src/types/modes/analogical.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/optimization.ts",
+          "kind": "type"
+        }
+      ]
+    },
+    {
+      "name": "Evidence",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/evidential.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "ExportFormat",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/tools/schemas/shared.ts",
+          "kind": "type"
+        },
+        {
+          "file": "src/types/session.ts",
+          "kind": "type"
+        }
+      ]
+    },
+    {
+      "name": "HybridThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/modes/handlers/HybridHandler.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/hybrid.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "Hypothesis",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/evidential.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/scientificmethod.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "Inference",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/modes/analogical.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/formallogic.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "InferenceRule",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/modes/formallogic.ts",
+          "kind": "type"
+        },
+        {
+          "file": "src/types/modes/mathematics.ts",
+          "kind": "type"
+        }
+      ]
+    },
+    {
+      "name": "Insight",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/modes/combinations/combination-types.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/analogical.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "Intervention",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/modes/causal/graph/types.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/causal.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "isAlgorithmicThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/algorithmic.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isAnalogicalThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/analogical.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isAnalysisThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/analysis.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isArgumentationThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/argumentation.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isBayesianThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/bayesian.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isCausalThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/causal.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isComputabilityThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/computability.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isConstraintThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/constraint.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isCounterfactualThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/counterfactual.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isCritiqueThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/critique.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isCryptanalyticThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/cryptanalytic.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isCustomThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/custom.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isEngineeringThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/engineering.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isEvidentialThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/evidential.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isFirstPrinciplesThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/firstprinciples.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isFormalLogicThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/formallogic.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isGameTheoryThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/gametheory.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isHistoricalThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/historical.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isHybridThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/hybrid.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isMathematicsThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/mathematics.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isMetaReasoningThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/metareasoning.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isModalThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/modal.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isOptimizationThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/optimization.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isPhysicsThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/physics.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isRecursiveThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/recursive.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isScientificMethodThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/scientificmethod.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isSequentialThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/sequential.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isShannonThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/shannon.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isStochasticThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/stochastic.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isSynthesisThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/synthesis.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isSystemsThinkingThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/systemsthinking.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "isTemporalThought",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "function"
+        },
+        {
+          "file": "src/types/modes/temporal.ts",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "name": "MathematicalModel",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/modes/hybrid.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/mathematics.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "ModeCombination",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/modes/combinations/combination-types.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/taxonomy/multi-modal-analyzer.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "ModeStatus",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/modes/handlers/ModeHandler.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/handlers.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "Observation",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/core.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/scientificmethod.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "PhysicalInterpretation",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/modes/hybrid.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/physics.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "ProblemCharacteristics",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/taxonomy/suggestion-engine.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/recommendations.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "ProofStep",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/proof/decomposer.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/formallogic.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "QualityMetrics",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/taxonomy/suggestion-engine.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/metareasoning.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "RecommendModeInput",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/services/RecommendationService.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/handlers.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "SensitivityAnalysis",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/modes/bayesian.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/optimization.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "ShannonStage",
+      "category": "NAME_COLLISION",
+      "definitions": [
+        {
+          "file": "src/tools/schemas/shared.ts",
+          "kind": "type"
+        },
+        {
+          "file": "src/types/core.ts",
+          "kind": "enum"
+        }
+      ]
+    },
+    {
+      "name": "StateTransition",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/export/visual/utils/mermaid.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/stochastic.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "StrategyRecommendation",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/proof/branch-types.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/metareasoning.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "TemporalConstraint",
+      "category": "NAME_COLLISION",
+      "definitions": [
+        {
+          "file": "src/tools/schemas/shared.ts",
+          "kind": "type"
+        },
+        {
+          "file": "src/types/modes/temporal.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "TemporalRelation",
+      "category": "NAME_COLLISION",
+      "definitions": [
+        {
+          "file": "src/tools/schemas/shared.ts",
+          "kind": "type"
+        },
+        {
+          "file": "src/types/modes/temporal.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "TensorProperties",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/types/modes/hybrid.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/modes/physics.ts",
+          "kind": "interface"
+        }
+      ]
+    },
+    {
+      "name": "ValidationResult",
+      "category": "DRIFT_RISK",
+      "definitions": [
+        {
+          "file": "src/modes/handlers/ModeHandler.ts",
+          "kind": "interface"
+        },
+        {
+          "file": "src/types/session.ts",
+          "kind": "interface"
+        }
+      ]
+    }
+  ]
+}

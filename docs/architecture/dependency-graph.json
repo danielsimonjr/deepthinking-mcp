@@ -1,8 +1,8 @@
 {
   "metadata": {
     "name": "deepthinking-mcp",
-    "version": "9.3.3",
-    "lastUpdated": "2026-08-07",
+    "version": "9.5.1",
+    "lastUpdated": "2026-08-08",
     "totalFiles": 241,
     "totalModules": 14,
     "totalExports": 1184
@@ -16174,7 +16174,7 @@
   "statistics": {
     "totalTypeScriptFiles": 241,
     "totalModules": 14,
-    "totalLinesOfCode": 118828,
+    "totalLinesOfCode": 118885,
     "totalExports": 1184,
     "totalClasses": 143,
     "totalInterfaces": 562,

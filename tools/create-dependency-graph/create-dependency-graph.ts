@@ -22,7 +22,7 @@ import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import * as yamlNs from 'js-yaml';
 
-import { OUTPUT_DIR, SRC_DIR } from './src/config.js';
+import { OUTPUT_DIR, ROOT_DIR, SRC_DIR } from './src/config.js';
 import { getAllTsFiles, parseFile } from './src/scanner.js';
 import {
   buildDependencyMatrix,
@@ -34,6 +34,12 @@ import {
 import { generateCompactSummary, generateJSON } from './src/reporters/json-reports.js';
 import { generateMarkdown } from './src/reporters/markdown-report.js';
 import { buildUnusedReport, logUnusedSummary } from './src/reporters/unused-report.js';
+import { detectDuplicateSymbols } from './src/duplicates.js';
+import { buildFileInventory } from './src/inventory.js';
+import {
+  generateDuplicateSymbolsMarkdown,
+  generateFileInventoryMarkdown,
+} from './src/reporters/census-reports.js';
 
 // The two runtimes resolve js-yaml differently and take different branches
 // here: under Node/tsx it resolves to the CJS build, where the namespace
@@ -129,6 +135,33 @@ async function main(): Promise<void> {
   const unusedReportPath = join(OUTPUT_DIR, 'unused-analysis.md');
   writeFileSync(unusedReportPath, buildUnusedReport(unusedAnalysis));
   console.log(`\nWritten: ${unusedReportPath}`);
+
+  // Cross-file duplicate symbols. Two files sharing a name is usually benign;
+  // this report exists for the drift-risk half, where copies meant to agree
+  // diverge silently. Three copies of `escapeLatex` did exactly that here --
+  // two were wrong for a long time and no test compared their output.
+  const duplicates = detectDuplicateSymbols(parsedFiles);
+  writeFileSync(join(OUTPUT_DIR, 'duplicate-symbols.json'), JSON.stringify(duplicates, null, 2));
+  writeFileSync(
+    join(OUTPUT_DIR, 'duplicate-symbols.md'),
+    generateDuplicateSymbolsMarkdown(duplicates),
+  );
+  console.log(
+    `Written: docs/architecture/duplicate-symbols.md (${duplicates.summary.driftRiskCount} drift-risk, ${duplicates.summary.nameCollisionCount} name collisions)`,
+  );
+
+  // Complete file census. Deliberately walks the REPO, not just src/: the
+  // dependency graph censuses src/ alone and is blind to tests, tools and
+  // config by construction, so a whole area can go unrepresented.
+  const reachableSrc = new Set(
+    parsedFiles.map((f) => f.path).filter((p) => !unusedAnalysis.unusedFiles.includes(p)),
+  );
+  const inventory = buildFileInventory(ROOT_DIR, reachableSrc);
+  writeFileSync(join(OUTPUT_DIR, 'file-inventory.json'), JSON.stringify(inventory, null, 2));
+  writeFileSync(join(OUTPUT_DIR, 'FILE_INVENTORY.md'), generateFileInventoryMarkdown(inventory));
+  console.log(
+    `Written: docs/architecture/FILE_INVENTORY.md (${inventory.summary.totalFiles} files)`,
+  );
 }
 
 main().catch(console.error);

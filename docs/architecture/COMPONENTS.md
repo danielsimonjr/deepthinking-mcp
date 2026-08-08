@@ -2,7 +2,7 @@
 
 This is a signature-level reference. For per-file dependency detail (who imports whom, which
 exports are used where), see `DEPENDENCY_GRAPH.md` — this document does not repeat its per-file
-listings. For request-flow sequencing, see `DATA_FLOW.md`. For the full 13-tool MCP surface, see
+listings. For request-flow sequencing, see `DATAFLOW.md`. For the full 13-tool MCP surface, see
 `OVERVIEW.md`.
 
 ---
@@ -262,7 +262,7 @@ Private helpers handle the metadata-index round trip (`updateMetadata`, `loadMet
 `saveMetadataIndex`), lazy initialization guarding (`ensureInitialized`), path construction from a
 session ID (`getSessionPath`), and `Date`/complex-field round-tripping through JSON
 (`prepareForSerialization` / `restoreFromSerialization`). This is the backend `SessionManager`
-uses whenever `SESSION_DIR` is set — see `DATA_FLOW.md` for the multi-instance sharing sequence
+uses whenever `SESSION_DIR` is set — see `DATAFLOW.md` for the multi-instance sharing sequence
 and the cross-process locking it relies on.
 
 ### File locking — `src/utils/file-lock.ts`
@@ -2296,9 +2296,9 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 485 | dependency-graph.json |
-| totalLinesOfCode | 226382 | dependency-graph.json |
-| totalExports | 2143 | dependency-graph.json |
+| totalTypeScriptFiles | 488 | dependency-graph.json |
+| totalLinesOfCode | 226793 | dependency-graph.json |
+| totalExports | 2154 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | reachableFiles | 200 | dependency-graph.json |
 | orphanedFiles | 20 | dependency-graph.json |

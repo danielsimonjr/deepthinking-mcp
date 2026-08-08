@@ -34,7 +34,7 @@ Business logic extracted out of `index.ts`: `ThoughtFactory.ts` (thought creatio
 ### `session/`
 `SessionManager` and its lifecycle. `storage/` abstracts in-memory vs. file-based session
 storage (`SESSION_DIR`). `locks/` implements cross-process file locking for the multi-instance
-case. See `DATA_FLOW.md` for the live/dead distinction between this and the separate,
+case. See `DATAFLOW.md` for the live/dead distinction between this and the separate,
 non-functional `MCP_ENABLE_PERSISTENCE` config field.
 
 ### `validation/`
@@ -64,7 +64,7 @@ Caching strategies (LRU, LFU, FIFO). `cache/index.ts` is unused — consumers im
 concrete strategy files directly.
 
 ### `config/`
-Centralized environment-variable configuration. See `DATA_FLOW.md`'s "Data Persistence"
+Centralized environment-variable configuration. See `DATAFLOW.md`'s "Data Persistence"
 section for a specific example of a config field that is read here but consumed nowhere else.
 
 ### `interfaces/`

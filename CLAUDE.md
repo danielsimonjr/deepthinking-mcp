@@ -429,7 +429,7 @@ git diff --cached
 
 | Location | Contents |
 |----------|----------|
-| `docs/architecture/` | OVERVIEW.md, ARCHITECTURE.md, COMPONENTS.md, DATA_FLOW.md, DEPENDENCY_GRAPH.md |
+| `docs/architecture/` | OVERVIEW.md, ARCHITECTURE.md, COMPONENTS.md, DATAFLOW.md, DEPENDENCY_GRAPH.md |
 | `docs/modes/` | Per-mode docs for all 34 modes (SYNTHESIS.md, BAYESIAN.md, etc.) |
 | `docs/planning/` | PHASE_14-16 plans; older phases archived in `archive/` |
 | `docs/reference/` | Types of Thinking and Reasonings.md (110 reasoning types taxonomy) |

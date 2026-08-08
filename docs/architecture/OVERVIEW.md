@@ -24,11 +24,11 @@ document does not repeat it.
 | Metric | Value | Scope | Source |
 |---|---|---|---|
 | Version | 9.3.3 | package | `package.json` |
-| TypeScript files, whole repo | 485 | repo-wide | repo_map |
+| TypeScript files, whole repo | 488 | repo-wide | repo_map |
 | TypeScript files, `src/` | 228 | src only | repo_map (`file-inventory.json`, area=src) |
-| Lines of code, whole repo | 226,382 | repo-wide | repo_map |
+| Lines of code, whole repo | 226,793 | repo-wide | repo_map |
 | Lines of code, `src/` | 112,917 | src only | repo_map |
-| Total exports, whole repo | 2,143 | repo-wide | repo_map |
+| Total exports, whole repo | 2,154 | repo-wide | repo_map |
 | Total exports, `src/` | 1,306 (575 re-exports) | src only | DEPENDENCY_GRAPH.md |
 | Entry roots | 1 (`src/index.ts`) | src | repo_map |
 | Runtime circular dependencies | 0 | src | repo_map, confirmed by direct edge inspection |
@@ -88,7 +88,7 @@ The server lists exactly 13 tools. Confirmed live from `src/index.ts`:
 Each mode-grouping tool (`deepthinking_core` through `deepthinking_academic`) carries 2-4
 related reasoning modes. `deepthinking_session` bundles session-lifecycle actions
 (create/list/delete/export/switch_mode/recommend_mode). `deepthinking_analyze` runs multi-mode
-analysis. See `DATA_FLOW.md` for the full tool-to-mode mapping and the request path.
+analysis. See `DATAFLOW.md` for the full tool-to-mode mapping and the request path.
 
 ## How code gets loaded
 
@@ -134,9 +134,9 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 485 | dependency-graph.json |
-| totalLinesOfCode | 226382 | dependency-graph.json |
-| totalExports | 2143 | dependency-graph.json |
+| totalTypeScriptFiles | 488 | dependency-graph.json |
+| totalLinesOfCode | 226793 | dependency-graph.json |
+| totalExports | 2154 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | entryRoots | 1 | dependency-graph.json |
 | reachableFiles | 200 | dependency-graph.json |

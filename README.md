@@ -196,9 +196,30 @@ record sizes (`src/tools/schemas/shared.ts`), and export paths are sandboxed to
 mode's validation and enrichment; a generic handler backs modes without a specialised one. Results
 land in `SessionManager`. Exports take a parallel path through `ExportService`.
 
-Architecture documents live in [`docs/architecture/`](docs/architecture/). Their numeric claims are
-machine-checked — see [`DRIFT_REPORT.md`](docs/architecture/DRIFT_REPORT.md) for what the checker
-verifies and where its limits are.
+## Documentation
+
+Architecture documents live in [`docs/architecture/`](docs/architecture/). Every authored document
+ends with a `## Verification` block, and a drift gate re-checks those claims against a fresh parse —
+see [`DRIFT_REPORT.md`](docs/architecture/DRIFT_REPORT.md) for what the checker verifies and where
+its limits are.
+
+| Document | Contents |
+|---|---|
+| [`OVERVIEW.md`](docs/architecture/OVERVIEW.md) | What this is, key metrics, layout, how code gets loaded |
+| [`ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) | Design decisions and the constraints behind them |
+| [`COMPONENTS.md`](docs/architecture/COMPONENTS.md) | Module-by-module reference with real signatures |
+| [`DATAFLOW.md`](docs/architecture/DATAFLOW.md) | How a request travels, end to end |
+| [`API.md`](docs/architecture/API.md) | The full public surface, per export |
+| [`FILE_INVENTORY.md`](docs/architecture/FILE_INVENTORY.md) | Every file, its area and disposition (generated) |
+| [`TEST_COVERAGE.md`](docs/architecture/TEST_COVERAGE.md) | What is tested, and the gaps that matter |
+| [`DEPENDENCY_GRAPH.md`](docs/architecture/DEPENDENCY_GRAPH.md) | Who imports whom (generated) |
+| [`unused-analysis.md`](docs/architecture/unused-analysis.md) | Files and exports with no importer (generated) |
+| [`duplicate-symbols.md`](docs/architecture/duplicate-symbols.md) | Names defined in more than one file (generated) |
+| [`DIRECTORY_STRUCTURE.md`](docs/architecture/DIRECTORY_STRUCTURE.md) | What each directory is for |
+| [`DRIFT_REPORT.md`](docs/architecture/DRIFT_REPORT.md) | Refresh record, findings, analyzer limits |
+
+Also: [`CHANGELOG.md`](CHANGELOG.md) for version history and [`CLAUDE.md`](CLAUDE.md) for the full
+environment-variable reference and working notes.
 
 ## Development
 

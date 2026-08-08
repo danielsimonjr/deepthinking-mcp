@@ -1,0 +1,2958 @@
+{
+  "summary": {
+    "totalFiles": 486,
+    "byArea": {
+      "docs": {
+        "files": 2,
+        "loc": 1828
+      },
+      "src": {
+        "files": 241,
+        "loc": 118885
+      },
+      "templates": {
+        "files": 5,
+        "loc": 772
+      },
+      "tests": {
+        "files": 222,
+        "loc": 100979
+      },
+      "tools": {
+        "files": 14,
+        "loc": 4599
+      },
+      "config": {
+        "files": 2,
+        "loc": 49
+      }
+    },
+    "byDisposition": {
+      "other": 2,
+      "reachable": 229,
+      "orphan": 12,
+      "template": 5,
+      "test": 222,
+      "tool": 14,
+      "config": 2
+    }
+  },
+  "files": [
+    {
+      "path": "docs/integrations/shannon-enhanced-starter.ts",
+      "area": "docs",
+      "loc": 700,
+      "disposition": "other"
+    },
+    {
+      "path": "docs/planning/archive/Improvement/framework-aligned-implementation.ts",
+      "area": "docs",
+      "loc": 1128,
+      "disposition": "other"
+    },
+    {
+      "path": "src/cache/index.ts",
+      "area": "src",
+      "loc": 24,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/cache/lru.ts",
+      "area": "src",
+      "loc": 277,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/cache/types.ts",
+      "area": "src",
+      "loc": 190,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/config/index.ts",
+      "area": "src",
+      "loc": 182,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/file-exporter.ts",
+      "area": "src",
+      "loc": 488,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/index.ts",
+      "area": "src",
+      "loc": 69,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/profiles.ts",
+      "area": "src",
+      "loc": 406,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/graph-render.ts",
+      "area": "src",
+      "loc": 419,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/index.ts",
+      "area": "src",
+      "loc": 21,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/abductive.ts",
+      "area": "src",
+      "loc": 844,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/analogical.ts",
+      "area": "src",
+      "loc": 1012,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/bayesian.ts",
+      "area": "src",
+      "loc": 872,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/causal.ts",
+      "area": "src",
+      "loc": 1053,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/computability.ts",
+      "area": "src",
+      "loc": 1142,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/counterfactual.ts",
+      "area": "src",
+      "loc": 996,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/engineering.ts",
+      "area": "src",
+      "loc": 2131,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/evidential.ts",
+      "area": "src",
+      "loc": 1180,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/first-principles.ts",
+      "area": "src",
+      "loc": 1452,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/formal-logic.ts",
+      "area": "src",
+      "loc": 1415,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/game-theory.ts",
+      "area": "src",
+      "loc": 1235,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/historical.ts",
+      "area": "src",
+      "loc": 534,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/hybrid.ts",
+      "area": "src",
+      "loc": 1653,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/index.ts",
+      "area": "src",
+      "loc": 44,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/mathematics.ts",
+      "area": "src",
+      "loc": 1331,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/metareasoning.ts",
+      "area": "src",
+      "loc": 1917,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/optimization.ts",
+      "area": "src",
+      "loc": 1392,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/physics.ts",
+      "area": "src",
+      "loc": 2009,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/proof-decomposition.ts",
+      "area": "src",
+      "loc": 1869,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/scientific-method.ts",
+      "area": "src",
+      "loc": 1469,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/sequential.ts",
+      "area": "src",
+      "loc": 882,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/shannon.ts",
+      "area": "src",
+      "loc": 703,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/systems-thinking.ts",
+      "area": "src",
+      "loc": 1027,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/modes/temporal.ts",
+      "area": "src",
+      "loc": 749,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/session-graph.ts",
+      "area": "src",
+      "loc": 121,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/types.ts",
+      "area": "src",
+      "loc": 63,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils.ts",
+      "area": "src",
+      "loc": 32,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/ascii.ts",
+      "area": "src",
+      "loc": 1184,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/dot.ts",
+      "area": "src",
+      "loc": 1010,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/graphml.ts",
+      "area": "src",
+      "loc": 670,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/html.ts",
+      "area": "src",
+      "loc": 669,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/index.ts",
+      "area": "src",
+      "loc": 22,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/json.ts",
+      "area": "src",
+      "loc": 822,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/latex-mermaid-integration.ts",
+      "area": "src",
+      "loc": 402,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/latex.ts",
+      "area": "src",
+      "loc": 1455,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/markdown.ts",
+      "area": "src",
+      "loc": 791,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/mermaid.ts",
+      "area": "src",
+      "loc": 1357,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/modelica.ts",
+      "area": "src",
+      "loc": 558,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/svg.ts",
+      "area": "src",
+      "loc": 1296,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/tikz.ts",
+      "area": "src",
+      "loc": 1013,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/uml.ts",
+      "area": "src",
+      "loc": 991,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/visual-exporter.ts",
+      "area": "src",
+      "loc": 230,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/index.ts",
+      "area": "src",
+      "loc": 1043,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/interfaces/ILogger.ts",
+      "area": "src",
+      "loc": 179,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/causal/graph/algorithms/centrality.ts",
+      "area": "src",
+      "loc": 610,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/causal/graph/algorithms/d-separation.ts",
+      "area": "src",
+      "loc": 668,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/causal/graph/algorithms/intervention.ts",
+      "area": "src",
+      "loc": 724,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/causal/graph/types.ts",
+      "area": "src",
+      "loc": 472,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/combinations/analyzer.ts",
+      "area": "src",
+      "loc": 941,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/combinations/combination-types.ts",
+      "area": "src",
+      "loc": 415,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/combinations/conflict-resolver.ts",
+      "area": "src",
+      "loc": 623,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/combinations/index.ts",
+      "area": "src",
+      "loc": 100,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/combinations/merger.ts",
+      "area": "src",
+      "loc": 728,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/combinations/presets.ts",
+      "area": "src",
+      "loc": 301,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/AbductiveHandler.ts",
+      "area": "src",
+      "loc": 352,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/AlgorithmicHandler.ts",
+      "area": "src",
+      "loc": 728,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/AnalogicalHandler.ts",
+      "area": "src",
+      "loc": 446,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/AnalysisHandler.ts",
+      "area": "src",
+      "loc": 603,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/ArgumentationHandler.ts",
+      "area": "src",
+      "loc": 691,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/BayesianHandler.ts",
+      "area": "src",
+      "loc": 587,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/CausalHandler.ts",
+      "area": "src",
+      "loc": 697,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/ComputabilityHandler.ts",
+      "area": "src",
+      "loc": 622,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/ConstraintHandler.ts",
+      "area": "src",
+      "loc": 680,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/CounterfactualHandler.ts",
+      "area": "src",
+      "loc": 559,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/CritiqueHandler.ts",
+      "area": "src",
+      "loc": 703,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/CryptanalyticHandler.ts",
+      "area": "src",
+      "loc": 614,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/CustomHandler.ts",
+      "area": "src",
+      "loc": 562,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/DeductiveHandler.ts",
+      "area": "src",
+      "loc": 384,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/EngineeringHandler.ts",
+      "area": "src",
+      "loc": 594,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/EvidentialHandler.ts",
+      "area": "src",
+      "loc": 270,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/FirstPrinciplesHandler.ts",
+      "area": "src",
+      "loc": 212,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/FormalLogicHandler.ts",
+      "area": "src",
+      "loc": 233,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/GameTheoryHandler.ts",
+      "area": "src",
+      "loc": 924,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/GenericModeHandler.ts",
+      "area": "src",
+      "loc": 564,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/HistoricalHandler.ts",
+      "area": "src",
+      "loc": 543,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/HybridHandler.ts",
+      "area": "src",
+      "loc": 757,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/InductiveHandler.ts",
+      "area": "src",
+      "loc": 348,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/MathematicsHandler.ts",
+      "area": "src",
+      "loc": 536,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/MetaReasoningHandler.ts",
+      "area": "src",
+      "loc": 549,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/ModalHandler.ts",
+      "area": "src",
+      "loc": 665,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/ModeHandler.ts",
+      "area": "src",
+      "loc": 235,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/OptimizationHandler.ts",
+      "area": "src",
+      "loc": 618,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/PhysicsHandler.ts",
+      "area": "src",
+      "loc": 577,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/RecursiveHandler.ts",
+      "area": "src",
+      "loc": 499,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/ScientificMethodHandler.ts",
+      "area": "src",
+      "loc": 274,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/SequentialHandler.ts",
+      "area": "src",
+      "loc": 246,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/ShannonHandler.ts",
+      "area": "src",
+      "loc": 421,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/StochasticHandler.ts",
+      "area": "src",
+      "loc": 863,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/SynthesisHandler.ts",
+      "area": "src",
+      "loc": 629,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/SystemsThinkingHandler.ts",
+      "area": "src",
+      "loc": 767,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/TemporalHandler.ts",
+      "area": "src",
+      "loc": 262,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/index.ts",
+      "area": "src",
+      "loc": 219,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/registry.ts",
+      "area": "src",
+      "loc": 379,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/stochastic/analysis/statistics.ts",
+      "area": "src",
+      "loc": 581,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/stochastic/models/distribution.ts",
+      "area": "src",
+      "loc": 668,
+      "disposition": "orphan"
+    },
+    {
+      "path": "src/modes/stochastic/models/moments.ts",
+      "area": "src",
+      "loc": 171,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/stochastic/sampling/rng.ts",
+      "area": "src",
+      "loc": 324,
+      "disposition": "orphan"
+    },
+    {
+      "path": "src/modes/stochastic/types.ts",
+      "area": "src",
+      "loc": 354,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/advisory.ts",
+      "area": "src",
+      "loc": 365,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/assumption-tracker.ts",
+      "area": "src",
+      "loc": 548,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/branch-analyzer.ts",
+      "area": "src",
+      "loc": 521,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/branch-types.ts",
+      "area": "src",
+      "loc": 400,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/circular-detector.ts",
+      "area": "src",
+      "loc": 493,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/decomposer.ts",
+      "area": "src",
+      "loc": 789,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/dependency-graph.ts",
+      "area": "src",
+      "loc": 533,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/extended-advisory.ts",
+      "area": "src",
+      "loc": 438,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/gap-analyzer.ts",
+      "area": "src",
+      "loc": 887,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/hierarchical-proof.ts",
+      "area": "src",
+      "loc": 659,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/inconsistency-detector.ts",
+      "area": "src",
+      "loc": 684,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/index.ts",
+      "area": "src",
+      "loc": 117,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/patterns/warnings.ts",
+      "area": "src",
+      "loc": 406,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/strategy-recommender.ts",
+      "area": "src",
+      "loc": 970,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/verifier.ts",
+      "area": "src",
+      "loc": 684,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/services/ExportService.ts",
+      "area": "src",
+      "loc": 1619,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/services/RecommendationService.ts",
+      "area": "src",
+      "loc": 123,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/services/ThoughtFactory.ts",
+      "area": "src",
+      "loc": 233,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/session/SessionMetricsCalculator.ts",
+      "area": "src",
+      "loc": 281,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/session/manager.ts",
+      "area": "src",
+      "loc": 1155,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/session/storage/file-store.ts",
+      "area": "src",
+      "loc": 620,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/session/storage/interface.ts",
+      "area": "src",
+      "loc": 154,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/taxonomy/advisory.ts",
+      "area": "src",
+      "loc": 327,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/taxonomy/classifier.ts",
+      "area": "src",
+      "loc": 379,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/taxonomy/flow-advisory.ts",
+      "area": "src",
+      "loc": 92,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/taxonomy/multi-modal-analyzer.ts",
+      "area": "src",
+      "loc": 721,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/taxonomy/navigator.ts",
+      "area": "src",
+      "loc": 710,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/taxonomy/reasoning-types.ts",
+      "area": "src",
+      "loc": 1457,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/taxonomy/suggestion-engine.ts",
+      "area": "src",
+      "loc": 1181,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/definitions.ts",
+      "area": "src",
+      "loc": 176,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/json-schemas.ts",
+      "area": "src",
+      "loc": 2568,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/analyze.ts",
+      "area": "src",
+      "loc": 295,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/base.ts",
+      "area": "src",
+      "loc": 75,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/index.ts",
+      "area": "src",
+      "loc": 27,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/modes/academic.ts",
+      "area": "src",
+      "loc": 261,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/modes/analytical.ts",
+      "area": "src",
+      "loc": 56,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/modes/causal.ts",
+      "area": "src",
+      "loc": 90,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/modes/core.ts",
+      "area": "src",
+      "loc": 74,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/modes/engineering.ts",
+      "area": "src",
+      "loc": 161,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/modes/index.ts",
+      "area": "src",
+      "loc": 20,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/modes/mathematics.ts",
+      "area": "src",
+      "loc": 77,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/modes/probabilistic.ts",
+      "area": "src",
+      "loc": 161,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/modes/scientific.ts",
+      "area": "src",
+      "loc": 173,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/modes/strategic.ts",
+      "area": "src",
+      "loc": 174,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/modes/temporal.ts",
+      "area": "src",
+      "loc": 257,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schemas/shared.ts",
+      "area": "src",
+      "loc": 281,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/thinking.ts",
+      "area": "src",
+      "loc": 1560,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/core.ts",
+      "area": "src",
+      "loc": 741,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/handlers.ts",
+      "area": "src",
+      "loc": 276,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/index.ts",
+      "area": "src",
+      "loc": 272,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/algorithmic.ts",
+      "area": "src",
+      "loc": 795,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/analogical.ts",
+      "area": "src",
+      "loc": 96,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/analysis.ts",
+      "area": "src",
+      "loc": 367,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/argumentation.ts",
+      "area": "src",
+      "loc": 287,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/bayesian.ts",
+      "area": "src",
+      "loc": 77,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/causal.ts",
+      "area": "src",
+      "loc": 92,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/computability.ts",
+      "area": "src",
+      "loc": 382,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/constraint.ts",
+      "area": "src",
+      "loc": 173,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/counterfactual.ts",
+      "area": "src",
+      "loc": 90,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/critique.ts",
+      "area": "src",
+      "loc": 339,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/cryptanalytic.ts",
+      "area": "src",
+      "loc": 438,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/custom.ts",
+      "area": "src",
+      "loc": 85,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/engineering.ts",
+      "area": "src",
+      "loc": 396,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/evidential.ts",
+      "area": "src",
+      "loc": 89,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/firstprinciples.ts",
+      "area": "src",
+      "loc": 74,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/formallogic.ts",
+      "area": "src",
+      "loc": 241,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/gametheory.ts",
+      "area": "src",
+      "loc": 479,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/historical.ts",
+      "area": "src",
+      "loc": 272,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/hybrid.ts",
+      "area": "src",
+      "loc": 80,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/mathematics.ts",
+      "area": "src",
+      "loc": 341,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/metareasoning.ts",
+      "area": "src",
+      "loc": 120,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/modal.ts",
+      "area": "src",
+      "loc": 167,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/optimization.ts",
+      "area": "src",
+      "loc": 216,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/physics.ts",
+      "area": "src",
+      "loc": 73,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/recommendations.ts",
+      "area": "src",
+      "loc": 2137,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/recursive.ts",
+      "area": "src",
+      "loc": 132,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/scientificmethod.ts",
+      "area": "src",
+      "loc": 208,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/sequential.ts",
+      "area": "src",
+      "loc": 33,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/shannon.ts",
+      "area": "src",
+      "loc": 42,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/stochastic.ts",
+      "area": "src",
+      "loc": 161,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/synthesis.ts",
+      "area": "src",
+      "loc": 285,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/systemsthinking.ts",
+      "area": "src",
+      "loc": 156,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/modes/temporal.ts",
+      "area": "src",
+      "loc": 112,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/types/session.ts",
+      "area": "src",
+      "loc": 543,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/utils/errors.ts",
+      "area": "src",
+      "loc": 265,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/utils/file-lock.ts",
+      "area": "src",
+      "loc": 630,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/utils/logger-types.ts",
+      "area": "src",
+      "loc": 37,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/utils/logger.ts",
+      "area": "src",
+      "loc": 180,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/utils/sanitization.ts",
+      "area": "src",
+      "loc": 210,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/utils/type-guards.ts",
+      "area": "src",
+      "loc": 149,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/advisory.ts",
+      "area": "src",
+      "loc": 107,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/cache.ts",
+      "area": "src",
+      "loc": 202,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/constants.ts",
+      "area": "src",
+      "loc": 101,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/index.ts",
+      "area": "src",
+      "loc": 56,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validator.ts",
+      "area": "src",
+      "loc": 232,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/base.ts",
+      "area": "src",
+      "loc": 35,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/index.ts",
+      "area": "src",
+      "loc": 57,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/abductive.ts",
+      "area": "src",
+      "loc": 115,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/algorithmic.ts",
+      "area": "src",
+      "loc": 136,
+      "disposition": "orphan"
+    },
+    {
+      "path": "src/validation/validators/modes/analogical.ts",
+      "area": "src",
+      "loc": 161,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/analysis.ts",
+      "area": "src",
+      "loc": 296,
+      "disposition": "orphan"
+    },
+    {
+      "path": "src/validation/validators/modes/argumentation.ts",
+      "area": "src",
+      "loc": 455,
+      "disposition": "orphan"
+    },
+    {
+      "path": "src/validation/validators/modes/bayesian.ts",
+      "area": "src",
+      "loc": 157,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/causal.ts",
+      "area": "src",
+      "loc": 223,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/computability.ts",
+      "area": "src",
+      "loc": 616,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/constraint.ts",
+      "area": "src",
+      "loc": 99,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/counterfactual.ts",
+      "area": "src",
+      "loc": 205,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/critique.ts",
+      "area": "src",
+      "loc": 252,
+      "disposition": "orphan"
+    },
+    {
+      "path": "src/validation/validators/modes/cryptanalytic.ts",
+      "area": "src",
+      "loc": 419,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/deductive.ts",
+      "area": "src",
+      "loc": 131,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/engineering.ts",
+      "area": "src",
+      "loc": 382,
+      "disposition": "orphan"
+    },
+    {
+      "path": "src/validation/validators/modes/evidential.ts",
+      "area": "src",
+      "loc": 193,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/firstprinciples.ts",
+      "area": "src",
+      "loc": 262,
+      "disposition": "orphan"
+    },
+    {
+      "path": "src/validation/validators/modes/formallogic.ts",
+      "area": "src",
+      "loc": 404,
+      "disposition": "orphan"
+    },
+    {
+      "path": "src/validation/validators/modes/gametheory.ts",
+      "area": "src",
+      "loc": 246,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/historical.ts",
+      "area": "src",
+      "loc": 517,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/hybrid.ts",
+      "area": "src",
+      "loc": 32,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/inductive.ts",
+      "area": "src",
+      "loc": 120,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/mathematics.ts",
+      "area": "src",
+      "loc": 94,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/meta.ts",
+      "area": "src",
+      "loc": 69,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/metareasoning.ts",
+      "area": "src",
+      "loc": 417,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/modal.ts",
+      "area": "src",
+      "loc": 86,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/optimization.ts",
+      "area": "src",
+      "loc": 415,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/physics.ts",
+      "area": "src",
+      "loc": 84,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/recursive.ts",
+      "area": "src",
+      "loc": 128,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/scientificmethod.ts",
+      "area": "src",
+      "loc": 383,
+      "disposition": "orphan"
+    },
+    {
+      "path": "src/validation/validators/modes/sequential.ts",
+      "area": "src",
+      "loc": 60,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/shannon.ts",
+      "area": "src",
+      "loc": 66,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/stochastic.ts",
+      "area": "src",
+      "loc": 121,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/modes/synthesis.ts",
+      "area": "src",
+      "loc": 409,
+      "disposition": "orphan"
+    },
+    {
+      "path": "src/validation/validators/modes/systemsthinking.ts",
+      "area": "src",
+      "loc": 229,
+      "disposition": "orphan"
+    },
+    {
+      "path": "src/validation/validators/modes/temporal.ts",
+      "area": "src",
+      "loc": 203,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/registry.ts",
+      "area": "src",
+      "loc": 314,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/validation/validators/validation-utils.ts",
+      "area": "src",
+      "loc": 239,
+      "disposition": "reachable"
+    },
+    {
+      "path": "templates/mode-scaffolding/example-mode.handler.ts",
+      "area": "templates",
+      "loc": 264,
+      "disposition": "template"
+    },
+    {
+      "path": "templates/mode-scaffolding/example-mode.json-schema.ts",
+      "area": "templates",
+      "loc": 159,
+      "disposition": "template"
+    },
+    {
+      "path": "templates/mode-scaffolding/example-mode.schema.ts",
+      "area": "templates",
+      "loc": 98,
+      "disposition": "template"
+    },
+    {
+      "path": "templates/mode-scaffolding/example-mode.type.ts",
+      "area": "templates",
+      "loc": 107,
+      "disposition": "template"
+    },
+    {
+      "path": "templates/mode-scaffolding/example-mode.validator.ts",
+      "area": "templates",
+      "loc": 144,
+      "disposition": "template"
+    },
+    {
+      "path": "tests/edge-cases/boundaries.test.ts",
+      "area": "tests",
+      "loc": 320,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/edge-cases/error-responses.test.ts",
+      "area": "tests",
+      "loc": 257,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/edge-cases/input-validation.test.ts",
+      "area": "tests",
+      "loc": 243,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/edge-cases/regression.test.ts",
+      "area": "tests",
+      "loc": 368,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/edge-cases/session-edges.test.ts",
+      "area": "tests",
+      "loc": 308,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/edge-cases/type-validation.test.ts",
+      "area": "tests",
+      "loc": 211,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/error-handling.test.ts",
+      "area": "tests",
+      "loc": 545,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/export/batch-export.test.ts",
+      "area": "tests",
+      "loc": 122,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/export/visual/builders-integration.test.ts",
+      "area": "tests",
+      "loc": 702,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/export/visual/mode-exporters-snapshot.test.ts",
+      "area": "tests",
+      "loc": 359,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/exports/ascii.test.ts",
+      "area": "tests",
+      "loc": 237,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/exports/dot.test.ts",
+      "area": "tests",
+      "loc": 251,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/exports/html.test.ts",
+      "area": "tests",
+      "loc": 243,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/exports/json.test.ts",
+      "area": "tests",
+      "loc": 220,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/exports/jupyter.test.ts",
+      "area": "tests",
+      "loc": 208,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/exports/latex.test.ts",
+      "area": "tests",
+      "loc": 246,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/exports/markdown.test.ts",
+      "area": "tests",
+      "loc": 238,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/exports/mermaid.test.ts",
+      "area": "tests",
+      "loc": 273,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/exports/mode-specific.test.ts",
+      "area": "tests",
+      "loc": 384,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/handlers/bayesian.handler.test.ts",
+      "area": "tests",
+      "loc": 316,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/handlers/causal.handler.test.ts",
+      "area": "tests",
+      "loc": 333,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/handlers/counterfactual.handler.test.ts",
+      "area": "tests",
+      "loc": 287,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/handlers/critique.handler.test.ts",
+      "area": "tests",
+      "loc": 476,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/handlers/gametheory.handler.test.ts",
+      "area": "tests",
+      "loc": 256,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/handlers/synthesis.handler.test.ts",
+      "area": "tests",
+      "loc": 264,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/handlers/systemsthinking.handler.test.ts",
+      "area": "tests",
+      "loc": 297,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/index-handlers.test.ts",
+      "area": "tests",
+      "loc": 1088,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/index-importable.test.ts",
+      "area": "tests",
+      "loc": 71,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/index-server.test.ts",
+      "area": "tests",
+      "loc": 334,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/mcp-compliance.test.ts",
+      "area": "tests",
+      "loc": 295,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/mcp-protocol.test.ts",
+      "area": "tests",
+      "loc": 755,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/mode-handler-delegation.test.ts",
+      "area": "tests",
+      "loc": 1155,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/modes/causal-graph.test.ts",
+      "area": "tests",
+      "loc": 422,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/multi-session.test.ts",
+      "area": "tests",
+      "loc": 572,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/proof/decomposition.test.ts",
+      "area": "tests",
+      "loc": 409,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/scenarios/complex-branching.test.ts",
+      "area": "tests",
+      "loc": 488,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/scenarios/export-roundtrip.test.ts",
+      "area": "tests",
+      "loc": 456,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/scenarios/multi-mode.test.ts",
+      "area": "tests",
+      "loc": 375,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/scenarios/real-world-workflows.test.ts",
+      "area": "tests",
+      "loc": 409,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/session-workflow.test.ts",
+      "area": "tests",
+      "loc": 371,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/academic-analysis.test.ts",
+      "area": "tests",
+      "loc": 802,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/academic-argumentation.test.ts",
+      "area": "tests",
+      "loc": 735,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/academic-critique.test.ts",
+      "area": "tests",
+      "loc": 664,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/academic-synthesis.test.ts",
+      "area": "tests",
+      "loc": 650,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/algorithmic.test.ts",
+      "area": "tests",
+      "loc": 753,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/analytical-analogical.test.ts",
+      "area": "tests",
+      "loc": 596,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/analytical-cryptanalytic.test.ts",
+      "area": "tests",
+      "loc": 513,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/analytical-firstprinciples.test.ts",
+      "area": "tests",
+      "loc": 518,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/analytical-metareasoning.test.ts",
+      "area": "tests",
+      "loc": 532,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/analyze-confidence-contract.test.ts",
+      "area": "tests",
+      "loc": 90,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/analyze.test.ts",
+      "area": "tests",
+      "loc": 546,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/causal.test.ts",
+      "area": "tests",
+      "loc": 767,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/common-parameters.test.ts",
+      "area": "tests",
+      "loc": 1055,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/computability.test.ts",
+      "area": "tests",
+      "loc": 559,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/core-abductive.test.ts",
+      "area": "tests",
+      "loc": 498,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/core-deductive.test.ts",
+      "area": "tests",
+      "loc": 491,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/core-inductive.test.ts",
+      "area": "tests",
+      "loc": 585,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/counterfactual.test.ts",
+      "area": "tests",
+      "loc": 482,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/engineering.test.ts",
+      "area": "tests",
+      "loc": 604,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/mathematics-analysis.test.ts",
+      "area": "tests",
+      "loc": 464,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/mathematics-core.test.ts",
+      "area": "tests",
+      "loc": 625,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/physics.test.ts",
+      "area": "tests",
+      "loc": 595,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/probabilistic-bayesian.test.ts",
+      "area": "tests",
+      "loc": 594,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/probabilistic-evidential.test.ts",
+      "area": "tests",
+      "loc": 573,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/scientific-formallogic.test.ts",
+      "area": "tests",
+      "loc": 523,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/scientific-method.test.ts",
+      "area": "tests",
+      "loc": 619,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/scientific-systemsthinking.test.ts",
+      "area": "tests",
+      "loc": 973,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/session-actions.test.ts",
+      "area": "tests",
+      "loc": 511,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/session-export-all.test.ts",
+      "area": "tests",
+      "loc": 180,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/session-lifecycle.test.ts",
+      "area": "tests",
+      "loc": 340,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/session-multiinstance.test.ts",
+      "area": "tests",
+      "loc": 207,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/standard-hybrid.test.ts",
+      "area": "tests",
+      "loc": 629,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/standard-runtime-only.test.ts",
+      "area": "tests",
+      "loc": 525,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/standard-sequential.test.ts",
+      "area": "tests",
+      "loc": 535,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/standard-shannon.test.ts",
+      "area": "tests",
+      "loc": 619,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/strategic-gametheory.test.ts",
+      "area": "tests",
+      "loc": 690,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/strategic-optimization.test.ts",
+      "area": "tests",
+      "loc": 553,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/temporal-events.test.ts",
+      "area": "tests",
+      "loc": 430,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/temporal-relations.test.ts",
+      "area": "tests",
+      "loc": 745,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/tools/temporal-timeline.test.ts",
+      "area": "tests",
+      "loc": 659,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/validators/mode-validators.test.ts",
+      "area": "tests",
+      "loc": 436,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/performance/helpers/work-probe.ts",
+      "area": "tests",
+      "loc": 122,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/performance/latency.test.ts",
+      "area": "tests",
+      "loc": 446,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/performance/memory.test.ts",
+      "area": "tests",
+      "loc": 548,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/performance/stress.test.ts",
+      "area": "tests",
+      "loc": 638,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/performance/throughput.test.ts",
+      "area": "tests",
+      "loc": 499,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/abductive.test.ts",
+      "area": "tests",
+      "loc": 378,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/analogical.test.ts",
+      "area": "tests",
+      "loc": 472,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/bayesian.test.ts",
+      "area": "tests",
+      "loc": 380,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/benchmarks/metrics-performance.test.ts",
+      "area": "tests",
+      "loc": 126,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/benchmarks/validation-performance.test.ts",
+      "area": "tests",
+      "loc": 287,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/cache/lru.test.ts",
+      "area": "tests",
+      "loc": 537,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/causal.test.ts",
+      "area": "tests",
+      "loc": 353,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/config-index.test.ts",
+      "area": "tests",
+      "loc": 49,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/counterfactual.test.ts",
+      "area": "tests",
+      "loc": 390,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/errors.test.ts",
+      "area": "tests",
+      "loc": 137,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/evidential.test.ts",
+      "area": "tests",
+      "loc": 646,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/duplicate-implementations.test.ts",
+      "area": "tests",
+      "loc": 137,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/file-exporter.test.ts",
+      "area": "tests",
+      "loc": 501,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/latex-export.test.ts",
+      "area": "tests",
+      "loc": 380,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/latex.test.ts",
+      "area": "tests",
+      "loc": 599,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/mode-exporter-format-matrix.test.ts",
+      "area": "tests",
+      "loc": 196,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/profiles.test.ts",
+      "area": "tests",
+      "loc": 534,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/proof-decomposition-visual.test.ts",
+      "area": "tests",
+      "loc": 450,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/visual/modes/snapshot-baseline.test.ts",
+      "area": "tests",
+      "loc": 1041,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/visual/utils/document-builders.test.ts",
+      "area": "tests",
+      "loc": 1127,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/visual/utils/graph-builders.test.ts",
+      "area": "tests",
+      "loc": 680,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/visual/utils/visual-builders.test.ts",
+      "area": "tests",
+      "loc": 955,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/file-lock.test.ts",
+      "area": "tests",
+      "loc": 154,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/file-store-storage-error.test.ts",
+      "area": "tests",
+      "loc": 83,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/file-store.test.ts",
+      "area": "tests",
+      "loc": 542,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/gametheory.test.ts",
+      "area": "tests",
+      "loc": 681,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/logger.test.ts",
+      "area": "tests",
+      "loc": 144,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/causal/graph/centrality.test.ts",
+      "area": "tests",
+      "loc": 443,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/causal/graph/d-separation.test.ts",
+      "area": "tests",
+      "loc": 545,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/causal/graph/intervention.test.ts",
+      "area": "tests",
+      "loc": 550,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/combinations/analyzer-execution.test.ts",
+      "area": "tests",
+      "loc": 323,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/combinations/conflict-resolver.test.ts",
+      "area": "tests",
+      "loc": 774,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/combinations/merger.test.ts",
+      "area": "tests",
+      "loc": 482,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/combinations/presets.test.ts",
+      "area": "tests",
+      "loc": 483,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handler-registration-coverage.test.ts",
+      "area": "tests",
+      "loc": 123,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/AbductiveHandler.test.ts",
+      "area": "tests",
+      "loc": 567,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/AlgorithmicHandler.test.ts",
+      "area": "tests",
+      "loc": 954,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/AnalogicalHandler.test.ts",
+      "area": "tests",
+      "loc": 584,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/AnalysisHandler.test.ts",
+      "area": "tests",
+      "loc": 990,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/ArgumentationHandler.test.ts",
+      "area": "tests",
+      "loc": 855,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/BayesianHandler.test.ts",
+      "area": "tests",
+      "loc": 479,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/CausalHandler.test.ts",
+      "area": "tests",
+      "loc": 400,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/ComputabilityHandler.test.ts",
+      "area": "tests",
+      "loc": 1034,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/ConstraintHandler.test.ts",
+      "area": "tests",
+      "loc": 498,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/CounterfactualHandler.test.ts",
+      "area": "tests",
+      "loc": 369,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/CritiqueHandler.test.ts",
+      "area": "tests",
+      "loc": 491,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/CryptanalyticHandler.test.ts",
+      "area": "tests",
+      "loc": 891,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/CustomHandler.test.ts",
+      "area": "tests",
+      "loc": 753,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/DeductiveHandler.test.ts",
+      "area": "tests",
+      "loc": 626,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/EngineeringHandler.test.ts",
+      "area": "tests",
+      "loc": 821,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/EvidentialHandler.test.ts",
+      "area": "tests",
+      "loc": 553,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/FirstPrinciplesHandler.test.ts",
+      "area": "tests",
+      "loc": 558,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/FormalLogicHandler.test.ts",
+      "area": "tests",
+      "loc": 635,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/GameTheoryHandler.test.ts",
+      "area": "tests",
+      "loc": 494,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/GenericModeHandler.test.ts",
+      "area": "tests",
+      "loc": 365,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/HistoricalHandler.test.ts",
+      "area": "tests",
+      "loc": 861,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/HybridHandler.test.ts",
+      "area": "tests",
+      "loc": 801,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/InductiveHandler.test.ts",
+      "area": "tests",
+      "loc": 597,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/MathematicsHandler.test.ts",
+      "area": "tests",
+      "loc": 574,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/MetaReasoningHandler.test.ts",
+      "area": "tests",
+      "loc": 729,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/ModalHandler.test.ts",
+      "area": "tests",
+      "loc": 519,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/ModeHandler.test.ts",
+      "area": "tests",
+      "loc": 148,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/OptimizationHandler.test.ts",
+      "area": "tests",
+      "loc": 519,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/PhysicsHandler.test.ts",
+      "area": "tests",
+      "loc": 872,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/RecursiveHandler.test.ts",
+      "area": "tests",
+      "loc": 520,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/ScientificMethodHandler.test.ts",
+      "area": "tests",
+      "loc": 629,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/SequentialHandler.test.ts",
+      "area": "tests",
+      "loc": 571,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/ShannonHandler.test.ts",
+      "area": "tests",
+      "loc": 743,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/StochasticHandler.test.ts",
+      "area": "tests",
+      "loc": 456,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/SynthesisHandler.test.ts",
+      "area": "tests",
+      "loc": 434,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/SystemsThinkingHandler.test.ts",
+      "area": "tests",
+      "loc": 465,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/TemporalHandler.test.ts",
+      "area": "tests",
+      "loc": 661,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/registry.test.ts",
+      "area": "tests",
+      "loc": 298,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/stochastic-engine-wiring.test.ts",
+      "area": "tests",
+      "loc": 205,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/stochastic/distribution.test.ts",
+      "area": "tests",
+      "loc": 398,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/stochastic/large-sample.test.ts",
+      "area": "tests",
+      "loc": 52,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/stochastic/moments.test.ts",
+      "area": "tests",
+      "loc": 152,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/stochastic/rng.test.ts",
+      "area": "tests",
+      "loc": 366,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/stochastic/statistics.test.ts",
+      "area": "tests",
+      "loc": 405,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/proof/advisory.test.ts",
+      "area": "tests",
+      "loc": 381,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/proof/branch-analyzer.test.ts",
+      "area": "tests",
+      "loc": 432,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/proof/circular-detector.test.ts",
+      "area": "tests",
+      "loc": 294,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/proof/dependency-graph.test.ts",
+      "area": "tests",
+      "loc": 477,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/proof/hierarchical-proof.test.ts",
+      "area": "tests",
+      "loc": 596,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/proof/inconsistency-detector.test.ts",
+      "area": "tests",
+      "loc": 199,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/proof/strategy-recommender.test.ts",
+      "area": "tests",
+      "loc": 362,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/proof/types.test.ts",
+      "area": "tests",
+      "loc": 521,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/proof/verifier.test.ts",
+      "area": "tests",
+      "loc": 487,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/proof/warning-patterns.test.ts",
+      "area": "tests",
+      "loc": 290,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/recommendations.test.ts",
+      "area": "tests",
+      "loc": 400,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/sanitization.test.ts",
+      "area": "tests",
+      "loc": 159,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/services/ExportService.test.ts",
+      "area": "tests",
+      "loc": 398,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/services/ThoughtFactory.test.ts",
+      "area": "tests",
+      "loc": 254,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/session-manager-remediation.test.ts",
+      "area": "tests",
+      "loc": 362,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/session-manager.test.ts",
+      "area": "tests",
+      "loc": 286,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/session/advisory-validation-wiring.test.ts",
+      "area": "tests",
+      "loc": 158,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/session/proof-analysis-wiring.test.ts",
+      "area": "tests",
+      "loc": 209,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/session/proof-extended-wiring.test.ts",
+      "area": "tests",
+      "loc": 295,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/session/reasoning-flow-wiring.test.ts",
+      "area": "tests",
+      "loc": 154,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/taxonomy/taxonomy-advisory.test.ts",
+      "area": "tests",
+      "loc": 275,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/taxonomy/taxonomy-system.test.ts",
+      "area": "tests",
+      "loc": 310,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/taxonomy/taxonomy-wiring.test.ts",
+      "area": "tests",
+      "loc": 108,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/temporal.test.ts",
+      "area": "tests",
+      "loc": 673,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/tools/mode-reachability.test.ts",
+      "area": "tests",
+      "loc": 591,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/tools/schemas/bounds.test.ts",
+      "area": "tests",
+      "loc": 504,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/tools/schemas/schema-contract.test.ts",
+      "area": "tests",
+      "loc": 412,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/tools/schemas/schema-validation.test.ts",
+      "area": "tests",
+      "loc": 233,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/tools/schemas/tool-definitions.test.ts",
+      "area": "tests",
+      "loc": 325,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/types.test.ts",
+      "area": "tests",
+      "loc": 443,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/types/thought-guard-coverage.test.ts",
+      "area": "tests",
+      "loc": 165,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/advisory.test.ts",
+      "area": "tests",
+      "loc": 196,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/cache-key.test.ts",
+      "area": "tests",
+      "loc": 106,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/registry-mode-coverage.test.ts",
+      "area": "tests",
+      "loc": 166,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/unknown-mode.test.ts",
+      "area": "tests",
+      "loc": 71,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validator-file-coverage.test.ts",
+      "area": "tests",
+      "loc": 104,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/bayesian.test.ts",
+      "area": "tests",
+      "loc": 305,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/causal.test.ts",
+      "area": "tests",
+      "loc": 419,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/computability.test.ts",
+      "area": "tests",
+      "loc": 713,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/constraint.test.ts",
+      "area": "tests",
+      "loc": 235,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/cryptanalytic.test.ts",
+      "area": "tests",
+      "loc": 663,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/deductive.test.ts",
+      "area": "tests",
+      "loc": 311,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/evidential.test.ts",
+      "area": "tests",
+      "loc": 405,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/gametheory.test.ts",
+      "area": "tests",
+      "loc": 408,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/inductive.test.ts",
+      "area": "tests",
+      "loc": 358,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/metareasoning.test.ts",
+      "area": "tests",
+      "loc": 668,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/modal.test.ts",
+      "area": "tests",
+      "loc": 405,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/optimization.test.ts",
+      "area": "tests",
+      "loc": 554,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/recursive.test.ts",
+      "area": "tests",
+      "loc": 328,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/stochastic.test.ts",
+      "area": "tests",
+      "loc": 459,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/validators/modes/validator-contract.test.ts",
+      "area": "tests",
+      "loc": 248,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/visual.test.ts",
+      "area": "tests",
+      "loc": 285,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/utils/assertion-helpers.ts",
+      "area": "tests",
+      "loc": 330,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/utils/index.ts",
+      "area": "tests",
+      "loc": 18,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/utils/mock-data.ts",
+      "area": "tests",
+      "loc": 390,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/utils/session-factory.ts",
+      "area": "tests",
+      "loc": 112,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/utils/thought-factory.ts",
+      "area": "tests",
+      "loc": 513,
+      "disposition": "test"
+    },
+    {
+      "path": "tools/chunking-for-files/chunking-for-files.ts",
+      "area": "tools",
+      "loc": 1255,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/compress-for-context/compress-for-context.ts",
+      "area": "tools",
+      "loc": 1461,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/create-dependency-graph/create-dependency-graph.ts",
+      "area": "tools",
+      "loc": 168,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/create-dependency-graph/src/analysis.ts",
+      "area": "tools",
+      "loc": 332,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/create-dependency-graph/src/config.ts",
+      "area": "tools",
+      "loc": 82,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/create-dependency-graph/src/duplicates.ts",
+      "area": "tools",
+      "loc": 104,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/create-dependency-graph/src/inventory.ts",
+      "area": "tools",
+      "loc": 139,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/create-dependency-graph/src/paths.ts",
+      "area": "tools",
+      "loc": 30,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/create-dependency-graph/src/reporters/census-reports.ts",
+      "area": "tools",
+      "loc": 138,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/create-dependency-graph/src/reporters/json-reports.ts",
+      "area": "tools",
+      "loc": 159,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/create-dependency-graph/src/reporters/markdown-report.ts",
+      "area": "tools",
+      "loc": 303,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/create-dependency-graph/src/reporters/unused-report.ts",
+      "area": "tools",
+      "loc": 87,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/create-dependency-graph/src/scanner.ts",
+      "area": "tools",
+      "loc": 240,
+      "disposition": "tool"
+    },
+    {
+      "path": "tools/create-dependency-graph/src/types.ts",
+      "area": "tools",
+      "loc": 101,
+      "disposition": "tool"
+    },
+    {
+      "path": "tsup.config.ts",
+      "area": "config",
+      "loc": 15,
+      "disposition": "config"
+    },
+    {
+      "path": "vitest.config.ts",
+      "area": "config",
+      "loc": 34,
+      "disposition": "config"
+    }
+  ]
+}

@@ -390,7 +390,7 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 485 | dependency-graph.json |
+| totalTypeScriptFiles | 488 | dependency-graph.json |
 | testOnlyFiles | 8 | dependency-graph.json |
 | orphanedFiles | 20 | dependency-graph.json |
 

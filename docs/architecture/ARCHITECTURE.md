@@ -25,7 +25,7 @@
 A tool call validates against a Zod schema (`src/validation/`), is turned into a typed thought
 by `ThoughtFactory`, is handled by the mode's specialized handler (or a generic fallback), and
 is stored by `SessionManager`. Export follows a parallel path from `ExportService` into
-format-specific exporters. See `DATA_FLOW.md` for the full sequence.
+format-specific exporters. See `DATAFLOW.md` for the full sequence.
 
 ## Core Layers
 
@@ -135,7 +135,7 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 485 | dependency-graph.json |
+| totalTypeScriptFiles | 488 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
 | typeOnlyCircularDeps | 61 | dependency-graph.json |

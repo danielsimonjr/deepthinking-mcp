@@ -5,7 +5,7 @@
      docs' Verification blocks. -->
 # Architecture Docs — 2026-08-05 Refresh Record
 
-This document records why `OVERVIEW.md`, `ARCHITECTURE.md`, `COMPONENTS.md`, `DATA_FLOW.md`,
+This document records why `OVERVIEW.md`, `ARCHITECTURE.md`, `COMPONENTS.md`, `DATAFLOW.md`,
 `DIRECTORY_STRUCTURE.md`, and `OVERVIEW.compact.md` were rewritten, what was wrong in the prior
 versions, and two analyzer gaps found while verifying this rewrite. It replaces no other file
 in this directory — `DEPENDENCY_GRAPH.md` and `unused-analysis.md` are separately-generated and
@@ -21,7 +21,7 @@ repo's own regenerated metrics table in `CLAUDE.md` (2026-08-03). Per-document t
 | OVERVIEW.md | 19 | 3 | 15 (+1 borderline) | Regenerate |
 | ARCHITECTURE.md | 16 | 3 | 12 (+1 never-true) | Regenerate |
 | COMPONENTS.md | 14 | 1 | 12 (+1 flagged) | Regenerate |
-| DATA_FLOW.md | 5 | 0 | 3 severe, 2 uncheckable | Regenerate |
+| DATAFLOW.md | 5 | 0 | 3 severe, 2 uncheckable | Regenerate |
 | DIRECTORY_STRUCTURE.md | 9 rows | 0 clean | 9, several self-contradictory | Regenerate |
 | OVERVIEW.compact.md | 8 | 0 | 8, and disagreed with OVERVIEW.md too | Regenerate |
 
@@ -32,13 +32,13 @@ that they are the fresher source of truth for the numbers the other docs used to
 
 ## The 5 worst examples
 
-1. **DATA_FLOW.md described tool names that no longer exist.** Its request-routing diagram
+1. **DATAFLOW.md described tool names that no longer exist.** Its request-routing diagram
    listed `add_thought`, `create_session`, `export_session`, `switch_mode`, `get_summary`, and
    `get_recommendations` as if they were top-level MCP tools. They are not tools — `add_thought`
    is one `action` value inside the legacy single `deepthinking` tool's input schema. The
    current surface is 13 `deepthinking_*` tools; `deepthinking_session` bundles what this
    section described as six separate tools into one tool's actions.
-2. **DATA_FLOW.md documented a dead feature as if it were live.** Its "Data Persistence"
+2. **DATAFLOW.md documented a dead feature as if it were live.** Its "Data Persistence"
    section described atomic writes, crash recovery, and a `.deepthinking-sessions/sessions/*.json`
    file format for `MCP_ENABLE_PERSISTENCE`/`MCP_PERSISTENCE_DIR`. Both env vars are read into
    config and consumed nowhere else in `src/` — confirmed by grep, and independently by

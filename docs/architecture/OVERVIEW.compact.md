@@ -9,9 +9,9 @@ export. ESM, Node >=18, stdio transport. Entry point: `src/index.ts`. Publishes 
 | Metric | Value |
 |---|---|
 | Version | 9.3.3 |
-| TS files, whole repo / `src/` only | 485 / 228 |
-| LOC, whole repo / `src/` only | 226,382 / 112,917 |
-| Exports, whole repo / `src/` only | 2,143 / 1,306 (575 re-exports) |
+| TS files, whole repo / `src/` only | 488 / 228 |
+| LOC, whole repo / `src/` only | 226,793 / 112,917 |
+| Exports, whole repo / `src/` only | 2,154 / 1,306 (575 re-exports) |
 | Runtime circular deps | 0 |
 | Type-only circular deps | 61 |
 | Files with no static importer | 24 (17 loaded dynamically or by design, 7 unused) |
@@ -62,7 +62,7 @@ tool's actions), `_analyze` (multi-mode analysis).
 - `src/search/` is an empty stray directory, safe to `rmdir`.
 
 Full detail and sourcing for every claim above: `OVERVIEW.md`, `ARCHITECTURE.md`,
-`COMPONENTS.md`, `DATA_FLOW.md`, `DIRECTORY_STRUCTURE.md`.
+`COMPONENTS.md`, `DATAFLOW.md`, `DIRECTORY_STRUCTURE.md`.
 
 ## Verification
 Generated 2026-08-05 by `repo_map.py map`.
@@ -70,6 +70,6 @@ Check: `python repo_map.py check <repo> --docs docs/architecture`
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 485 | dependency-graph.json |
+| totalTypeScriptFiles | 488 | dependency-graph.json |
 | typeOnlyCircularDeps | 61 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |
