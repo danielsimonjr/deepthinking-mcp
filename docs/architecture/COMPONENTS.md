@@ -2296,8 +2296,8 @@ Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_m
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 488 | dependency-graph.json |
-| totalLinesOfCode | 226793 | dependency-graph.json |
+| totalTypeScriptFiles | 491 | dependency-graph.json |
+| totalLinesOfCode | 226965 | dependency-graph.json |
 | totalExports | 2154 | dependency-graph.json |
 | totalModules | 5 | dependency-graph.json |
 | reachableFiles | 200 | dependency-graph.json |

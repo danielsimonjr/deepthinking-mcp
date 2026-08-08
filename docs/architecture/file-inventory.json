@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 486,
+    "totalFiles": 489,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 241,
-        "loc": 118885
+        "loc": 118934
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 222,
-        "loc": 100979
+        "files": 225,
+        "loc": 101105
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 229,
       "orphan": 12,
       "template": 5,
-      "test": 222,
+      "test": 225,
       "tool": 14,
       "config": 2
     }
@@ -59,13 +59,13 @@
     {
       "path": "src/cache/lru.ts",
       "area": "src",
-      "loc": 277,
+      "loc": 286,
       "disposition": "reachable"
     },
     {
       "path": "src/cache/types.ts",
       "area": "src",
-      "loc": 190,
+      "loc": 198,
       "disposition": "reachable"
     },
     {
@@ -809,7 +809,7 @@
     {
       "path": "src/session/manager.ts",
       "area": "src",
-      "loc": 1155,
+      "loc": 1187,
       "disposition": "reachable"
     },
     {
@@ -2073,6 +2073,12 @@
       "disposition": "test"
     },
     {
+      "path": "tests/unit/cache/lru-contract.test.ts",
+      "area": "tests",
+      "loc": 44,
+      "disposition": "test"
+    },
+    {
       "path": "tests/unit/cache/lru.test.ts",
       "area": "tests",
       "loc": 537,
@@ -2616,6 +2622,18 @@
       "path": "tests/unit/session/advisory-validation-wiring.test.ts",
       "area": "tests",
       "loc": 158,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/session/create-session-mode-sync.test.ts",
+      "area": "tests",
+      "loc": 66,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/session/default-config-leak.test.ts",
+      "area": "tests",
+      "loc": 16,
       "disposition": "test"
     },
     {

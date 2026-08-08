@@ -103,7 +103,15 @@ export interface CacheStats {
   misses: number;
 
   /**
-   * Hit rate (percentage)
+   * Hit rate as a RATIO in [0, 1] — `hits / (hits + misses)`, not a percentage.
+   *
+   * This was documented as a percentage while the implementation always stored
+   * a ratio, so a consumer trusting the doc rendered a 0.85 hit rate as
+   * "0.85%" — wrong by two orders of magnitude and entirely plausible-looking.
+   * Callers depend on the ratio, so the documentation was the thing that was
+   * wrong. Multiply by 100 at the display edge if you want a percentage.
+   *
+   * `0` before any lookup, never `NaN` (0/0).
    */
   hitRate: number;
 

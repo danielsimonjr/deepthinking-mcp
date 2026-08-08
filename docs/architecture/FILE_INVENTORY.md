@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **486 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **489 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -18,7 +18,7 @@ Every tracked TypeScript file in the repository — **486 files** — not just t
 | other | 2 |
 | reachable | 229 |
 | template | 5 |
-| test | 222 |
+| test | 225 |
 | tool | 14 |
 
 ## Per-area counts
@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **486 files** — not just t
 |---|---|---|
 | config | 2 | 49 |
 | docs | 2 | 1,828 |
-| src | 241 | 118,885 |
+| src | 241 | 118,934 |
 | templates | 5 | 772 |
-| tests | 222 | 100,979 |
+| tests | 225 | 101,105 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -39,8 +39,8 @@ Every tracked TypeScript file in the repository — **486 files** — not just t
 | `docs/integrations/shannon-enhanced-starter.ts` | docs | 700 | other |
 | `docs/planning/archive/Improvement/framework-aligned-implementation.ts` | docs | 1128 | other |
 | `src/cache/index.ts` | src | 24 | reachable |
-| `src/cache/lru.ts` | src | 277 | reachable |
-| `src/cache/types.ts` | src | 190 | reachable |
+| `src/cache/lru.ts` | src | 286 | reachable |
+| `src/cache/types.ts` | src | 198 | reachable |
 | `src/config/index.ts` | src | 182 | reachable |
 | `src/export/file-exporter.ts` | src | 488 | reachable |
 | `src/export/index.ts` | src | 69 | reachable |
@@ -164,7 +164,7 @@ Every tracked TypeScript file in the repository — **486 files** — not just t
 | `src/services/RecommendationService.ts` | src | 123 | reachable |
 | `src/services/ThoughtFactory.ts` | src | 233 | reachable |
 | `src/session/SessionMetricsCalculator.ts` | src | 281 | reachable |
-| `src/session/manager.ts` | src | 1155 | reachable |
+| `src/session/manager.ts` | src | 1187 | reachable |
 | `src/session/storage/file-store.ts` | src | 620 | reachable |
 | `src/session/storage/interface.ts` | src | 154 | reachable |
 | `src/taxonomy/advisory.ts` | src | 327 | reachable |
@@ -375,6 +375,7 @@ Every tracked TypeScript file in the repository — **486 files** — not just t
 | `tests/unit/bayesian.test.ts` | tests | 380 | test |
 | `tests/unit/benchmarks/metrics-performance.test.ts` | tests | 126 | test |
 | `tests/unit/benchmarks/validation-performance.test.ts` | tests | 287 | test |
+| `tests/unit/cache/lru-contract.test.ts` | tests | 44 | test |
 | `tests/unit/cache/lru.test.ts` | tests | 537 | test |
 | `tests/unit/causal.test.ts` | tests | 353 | test |
 | `tests/unit/config-index.test.ts` | tests | 49 | test |
@@ -466,6 +467,8 @@ Every tracked TypeScript file in the repository — **486 files** — not just t
 | `tests/unit/session-manager-remediation.test.ts` | tests | 362 | test |
 | `tests/unit/session-manager.test.ts` | tests | 286 | test |
 | `tests/unit/session/advisory-validation-wiring.test.ts` | tests | 158 | test |
+| `tests/unit/session/create-session-mode-sync.test.ts` | tests | 66 | test |
+| `tests/unit/session/default-config-leak.test.ts` | tests | 16 | test |
 | `tests/unit/session/proof-analysis-wiring.test.ts` | tests | 209 | test |
 | `tests/unit/session/proof-extended-wiring.test.ts` | tests | 295 | test |
 | `tests/unit/session/reasoning-flow-wiring.test.ts` | tests | 154 | test |

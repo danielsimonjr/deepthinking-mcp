@@ -283,7 +283,19 @@ export class SessionManager {
       title,
       mode: options.mode || ThinkingMode.HYBRID,
       domain,
-      config: this.mergeConfig(options.config),
+      // A session carries its mode twice, and `switchMode` has always updated
+      // both. `createSession` used to set only `session.mode`, leaving
+      // `config.modeConfig.mode` at DEFAULT_CONFIG's `hybrid` -- so a session
+      // created as `bayesian` described itself as bayesian at the top level and
+      // hybrid in its own config until an unrelated switchMode repaired it.
+      // Two fields disagreeing about one fact is worse than one wrong field:
+      // both look authoritative, and which one a consumer reads decides what it
+      // does. Set the field, never replace the object -- the caller's other
+      // modeConfig settings must survive.
+      config: this.withSessionMode(
+        this.mergeConfig(options.config),
+        options.mode || ThinkingMode.HYBRID,
+      ),
       thoughts: [],
       createdAt: now,
       updatedAt: now,
@@ -779,6 +791,26 @@ export class SessionManager {
       ...this.config,
       ...userConfig,
     } as SessionConfig;
+  }
+
+  /**
+   * Return `config` with `modeConfig.mode` set to `mode`, preserving every
+   * other `modeConfig` setting the caller supplied.
+   *
+   * Deliberately a copy rather than a mutation: `mergeConfig` spreads
+   * `DEFAULT_CONFIG`, which is a module-level constant, and a shallow spread
+   * leaves `modeConfig` pointing at the SAME nested object. Assigning through
+   * it would edit `DEFAULT_CONFIG.modeConfig` itself and silently change the
+   * default for every session created afterwards in the process.
+   */
+  private withSessionMode(
+    config: SessionConfig,
+    mode: ThinkingMode,
+  ): SessionConfig {
+    return {
+      ...config,
+      modeConfig: { ...config.modeConfig, mode },
+    };
   }
 
   // ============================================

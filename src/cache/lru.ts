@@ -26,6 +26,15 @@ export class LRUCache<T> implements Cache<T> {
        * - Prevents unbounded memory growth in long-running processes
        * - Can be overridden via config parameter for high-traffic scenarios
        */
+      // `||`, so 0 falls back to 100. Kept deliberately, and re-verified
+      // 2026-08-07 rather than "fixed": a 0-capacity cache is unreachable
+      // through this API. The only construction site
+      // (`SessionManager`, manager.ts) passes `getConfig().maxActiveSessions`,
+      // and `validateConfig` THROWS on `maxActiveSessions < 1`
+      // (config/index.ts). `LRUCache` is not exported from `src/index.ts`
+      // either, so no external caller can reach it. Changing this to `??`
+      // would alter behaviour only on a path nothing can take, while breaking
+      // the test that pins the decision. See tests/unit/cache/lru.test.ts.
       maxSize: config.maxSize || 100,
       strategy: "lru",
       ttl: config.ttl || 0,

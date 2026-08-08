@@ -9,8 +9,8 @@ export. ESM, Node >=18, stdio transport. Entry point: `src/index.ts`. Publishes 
 | Metric | Value |
 |---|---|
 | Version | 9.3.3 |
-| TS files, whole repo / `src/` only | 488 / 228 |
-| LOC, whole repo / `src/` only | 226,793 / 112,917 |
+| TS files, whole repo / `src/` only | 491 / 228 |
+| LOC, whole repo / `src/` only | 226,965 / 112,917 |
 | Exports, whole repo / `src/` only | 2,154 / 1,306 (575 re-exports) |
 | Runtime circular deps | 0 |
 | Type-only circular deps | 61 |
@@ -70,6 +70,6 @@ Check: `python repo_map.py check <repo> --docs docs/architecture`
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 488 | dependency-graph.json |
+| totalTypeScriptFiles | 491 | dependency-graph.json |
 | typeOnlyCircularDeps | 61 | dependency-graph.json |
 | runtimeCircularDeps | 0 | dependency-graph.json |

@@ -1594,6 +1594,40 @@ Of 15 files flagged as "unused", **10 are actually dynamically loaded** via `Val
 
 ## [Unreleased]
 
+### Fixed
+
+- **`switchMode` corrupted `DEFAULT_CONFIG` for every session created afterwards.** This is the
+  serious one, and it was found while fixing a smaller symptom. A session carries its mode twice —
+  `session.mode` and `session.config.modeConfig.mode`. `createSession` set only the first, so a
+  session created as `bayesian` described itself as bayesian at the top level and `hybrid` in its
+  own config. But `mergeConfig` spreads the module-level `DEFAULT_CONFIG` **shallowly**, so every
+  session's `config.modeConfig` pointed at the *same* nested object — and `switchMode` assigns
+  through it. Calling `switchMode(sessionA, 'causal')` therefore rewrote
+  `DEFAULT_CONFIG.modeConfig.mode`, and the next session created in that process defaulted to
+  `causal` instead of `hybrid`. Process-global state corruption from an ordinary API call.
+
+  `createSession` now derives the config with a fresh `modeConfig` object carrying the requested
+  mode, preserving every other setting the caller supplied. **Mutation-verified**: reverting the
+  fix makes the leak test fail with `expected 'causal' to be 'hybrid'`.
+
+- **`CacheStats.hitRate` was documented as a percentage but has always been a ratio.** A consumer
+  trusting the doc rendered a 0.85 hit rate as "0.85%" — wrong by two orders of magnitude and
+  entirely plausible-looking. Callers depend on the ratio, so the documentation was the thing that
+  was wrong; the contract is now stated precisely (`[0, 1]`, `0` and never `NaN` before any
+  lookup) and pinned by tests so the two cannot drift apart again.
+
+### Changed
+
+- **`LRUCache`'s `maxSize: 0` behaviour re-verified and deliberately left alone.** It falls back to
+  100 because `config.maxSize || 100` cannot tell 0 from absent, which looks like the same
+  falsy-check bug as the `if (firstKey)` eviction defect fixed earlier. It is not reachable: the
+  only construction site passes `getConfig().maxActiveSessions`, `validateConfig` **throws** on
+  `maxActiveSessions < 1`, and `LRUCache` is not exported from the package entry. An existing test
+  already pinned this decision with its reasoning; changing it would have broken a correct test to
+  alter a path nothing can take. The reasoning is now recorded at the call site so the premise is
+  re-checkable rather than re-litigated.
+
+
 ### Added
 
 - **`FILE_INVENTORY.md` and `duplicate-symbols.md`** — the two canonical architecture documents
