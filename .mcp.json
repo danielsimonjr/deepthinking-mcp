@@ -3,9 +3,9 @@
     "deepthinking-mcp": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "deepthinking-mcp@9.5.1"],
+      "args": ["-y", "deepthinking-mcp@9.5.2"],
       "env": {
-        "_RETRY": "2026-08-07-v9.5.1-honest-confidence"
+        "_RETRY": "2026-08-09-v9.5.2-session-config-leak"
       }
     }
   }
