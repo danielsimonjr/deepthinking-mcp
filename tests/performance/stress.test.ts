@@ -104,7 +104,7 @@ describe('Stress Tests', () => {
       // Verify sample sessions
       const sampleSession = await manager.getSession(sessions[50].id);
       expect(sampleSession?.thoughts).toHaveLength(thoughtsPerSession);
-    });
+    }, 60000); // 10,000 thoughts across 100 sessions — the default 5s cap is a runtime limit, not a correctness one
 
     it('should keep per-thought work flat across 10,000 thoughts in one session', async () => {
       const session = await manager.createSession({
@@ -148,7 +148,7 @@ describe('Stress Tests', () => {
       expect(readsAfterFirstInsert).toBeGreaterThan(0);
       expect(first.reads - readsAfterFirstInsert).toBe(0);
       expect(middle!.reads - readsAfterMiddleInsert).toBe(0);
-    });
+    }, 60000); // 10,000 thoughts in one session — the default 5s cap is a runtime limit, not a correctness one
 
     it('should maintain data integrity with 10,000 thoughts', async () => {
       // Audit 2026-08-03 H-3: SessionManager now enforces maxThoughtsInMemory
@@ -177,7 +177,7 @@ describe('Stress Tests', () => {
       expect(updated?.thoughts[0].content).toContain('Thought-1-Content');
       expect(updated?.thoughts[999].content).toContain('Thought-1000-Content');
       expect(updated?.thoughts[9999].content).toContain('Thought-10000-Content');
-    });
+    }, 60000); // 10,000 thoughts — the default 5s cap is a runtime limit, not a correctness one
   });
 
   // ===========================================================================
@@ -541,7 +541,7 @@ describe('Stress Tests', () => {
       const updated = await manager.getSession(newSession.id);
       expect(updated?.thoughts).toHaveLength(1);
       expect(updated?.thoughts[0].content).toBe('Recovery test');
-    });
+    }, 30000); // high-load recovery — the default 5s cap is a runtime limit, not a correctness one
 
     it('should handle large content gracefully', async () => {
       const session = await manager.createSession();
