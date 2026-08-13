@@ -54392,6 +54392,15 @@ var LRUCache = class {
        * - Prevents unbounded memory growth in long-running processes
        * - Can be overridden via config parameter for high-traffic scenarios
        */
+      // `||`, so 0 falls back to 100. Kept deliberately, and re-verified
+      // 2026-08-07 rather than "fixed": a 0-capacity cache is unreachable
+      // through this API. The only construction site
+      // (`SessionManager`, manager.ts) passes `getConfig().maxActiveSessions`,
+      // and `validateConfig` THROWS on `maxActiveSessions < 1`
+      // (config/index.ts). `LRUCache` is not exported from `src/index.ts`
+      // either, so no external caller can reach it. Changing this to `??`
+      // would alter behaviour only on a path nothing can take, while breaking
+      // the test that pins the decision. See tests/unit/cache/lru.test.ts.
       maxSize: config.maxSize || 100,
       strategy: "lru",
       ttl: config.ttl || 0,
@@ -54931,7 +54940,19 @@ var SessionManager = class {
       title,
       mode: options.mode || "hybrid" /* HYBRID */,
       domain,
-      config: this.mergeConfig(options.config),
+      // A session carries its mode twice, and `switchMode` has always updated
+      // both. `createSession` used to set only `session.mode`, leaving
+      // `config.modeConfig.mode` at DEFAULT_CONFIG's `hybrid` -- so a session
+      // created as `bayesian` described itself as bayesian at the top level and
+      // hybrid in its own config until an unrelated switchMode repaired it.
+      // Two fields disagreeing about one fact is worse than one wrong field:
+      // both look authoritative, and which one a consumer reads decides what it
+      // does. Set the field, never replace the object -- the caller's other
+      // modeConfig settings must survive.
+      config: this.withSessionMode(
+        this.mergeConfig(options.config),
+        options.mode || "hybrid" /* HYBRID */
+      ),
       thoughts: [],
       createdAt: now,
       updatedAt: now,
@@ -55314,6 +55335,22 @@ ${flowReport}
       ...DEFAULT_CONFIG4,
       ...this.config,
       ...userConfig
+    };
+  }
+  /**
+   * Return `config` with `modeConfig.mode` set to `mode`, preserving every
+   * other `modeConfig` setting the caller supplied.
+   *
+   * Deliberately a copy rather than a mutation: `mergeConfig` spreads
+   * `DEFAULT_CONFIG`, which is a module-level constant, and a shallow spread
+   * leaves `modeConfig` pointing at the SAME nested object. Assigning through
+   * it would edit `DEFAULT_CONFIG.modeConfig` itself and silently change the
+   * default for every session created afterwards in the process.
+   */
+  withSessionMode(config, mode) {
+    return {
+      ...config,
+      modeConfig: { ...config.modeConfig, mode }
     };
   }
   // ============================================
