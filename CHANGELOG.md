@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [9.5.3] - 2026-08-25
+
+### Fixed
+
+- **The tracked `dist/` artifact is rebuilt to match committed source.** This package ships a
+  committed build (zod v4 cannot be flattened by esbuild, so there is no bundle step), which
+  means a source change not followed by a rebuild reaches nobody. Artifact and source now agree.
+- **CI runs on Bun**, with the npm cache directive the migration invalidated removed and Bun
+  installed in every job that uses it.
+
+### Dependencies
+
+- CI: `actions/setup-python` 6 -> 7, `github/codeql-action` 4.37.3 -> 4.37.7.
+- Dev: `typescript-eslint` / `@typescript-eslint/parser` 8.65.0 -> 8.67.0, `eslint`
+  10.8.0 -> 10.8.1, `globals` 17.8.0 -> 17.11.0, `tsx` 4.23.1 -> 4.23.12,
+  `@types/node` 26.1.2 -> 26.2.0.
+
 ## [9.5.2] - 2026-08-09
 
 ### Fixed
