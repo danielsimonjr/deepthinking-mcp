@@ -120,3 +120,6 @@ memory.db.backup.*
 # the token itself. Ignored so neither the reference nor an accidental literal
 # can be committed.
 .npmrc
+
+# Agent-local tracker-discipline config (infrastructure, not project content)
+.tracker-watch.json
