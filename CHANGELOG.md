@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security
+
+- **SHA-pinned the three third-party GitHub Actions.** `codecov/codecov-action@v7`,
+  `schneegans/dynamic-badges-action@v1.9.0` and `softprops/action-gh-release@v3` were pinned to
+  mutable tags. A tag can be repointed at any commit by its owner, so a bare tag grants that owner
+  the ability to change what runs in this repository's CI without any change here. Each now pins
+  the resolved commit with the version kept as a trailing comment.
+  No behaviour change: the SHAs are the ones those tags pointed at when pinned.
+
 ## [9.5.3] - 2026-08-25
 
 ### Fixed
