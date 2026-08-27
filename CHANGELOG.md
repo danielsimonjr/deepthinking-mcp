@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **`master` had been red since 2026-08-25 on the repo's own version-consistency gate.**
+  `skills/think/SKILL.md` and `CLAUDE.md` still claimed v9.5.2 while `plugin.json` and
+  `package.json` were at 9.5.3. The 9.5.3 release bumped the manifests without updating the two
+  prose mentions, and the gate that exists to catch exactly that was left failing. A permanently
+  red check is the bug, not the background. `test/test_version_consistency.py` now passes.
+
 ### Security
 
 - **SHA-pinned the three third-party GitHub Actions.** `codecov/codecov-action@v7`,
