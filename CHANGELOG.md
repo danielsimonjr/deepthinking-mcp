@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Gitignored `.tracker-watch.json`.** The tracker-discipline Stop hook seeds that file at any
+  root it runs from, declaring which paths the agent's work lands in. It is agent infrastructure
+  rather than project content, so it stays out of the published tree without showing up as
+  untracked noise on every `git status`.
+
 ### Fixed
 
 - **`master` had been red since 2026-08-25 on the repo's own version-consistency gate.**

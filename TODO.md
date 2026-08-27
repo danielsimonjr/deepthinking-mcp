@@ -16,6 +16,9 @@ Repo-level task tracker. Cross-repo roll-up lives in `~/Github/TODO.md`; per-cha
   `skills/think/SKILL.md` and `CLAUDE.md` claiming v9.5.2. Verified locally
   (`test/test_version_consistency.py` exits 0) before pushing; CI green after.
 
+- [x] **Gitignore `.tracker-watch.json`** (`89e9c5b`, 2026-08-27) — agent-local
+  infrastructure, kept out of the published tree.
+
 ## Open
 
 - [ ] **A release bump must update the prose mentions, not only the manifests.** That is exactly
