@@ -5,6 +5,12 @@ on:
     branches: [master, main, develop]
   pull_request:
     branches: [master, main, develop]
+  # A Dependabot PR auto-merged by dependabot-auto-merge.yml is pushed with GITHUB_TOKEN, and
+  # GitHub's recursion guard suppresses workflow triggers for those pushes -- so master can carry
+  # a dependency commit with no run at all (cc86933a did). The PR gate still held; master's own
+  # history is what goes dark. A nightly run re-exercises master regardless of who pushed it.
+  schedule:
+    - cron: '0 7 * * *'
   workflow_dispatch:
 
 permissions:

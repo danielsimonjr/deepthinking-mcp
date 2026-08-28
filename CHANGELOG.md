@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Auto-merged Dependabot commits landed on `master` with no CI run at all.** `cc86933a` sits on
+  `master` with zero workflow runs and a `pending` combined status. Cause: `dependabot-auto-merge.yml`
+  merges with `GITHUB_TOKEN`, and GitHub's recursion guard suppresses workflow triggers for pushes
+  made with that token, so `on: push` never fires. The merge gate itself held — branch protection
+  requires `Build Package` and `Test on ubuntu-latest (Node 20.x/22.x)`, and those passed on the
+  pull request — but `master`'s own history goes dark for every auto-merged dependency bump, taking
+  the coverage record with it. `test.yml` and `coverage.yml` now also run on a nightly `schedule`
+  (07:00 UTC), so `master` is exercised regardless of who pushed it. Both were dispatched manually
+  against `cc86933a` to backfill the missing runs. Chosen over granting the auto-merge workflow a
+  PAT, which would restore the trigger but widens that token's blast radius to close a telemetry
+  hole rather than a gate hole.
+
 ### Changed
 
 - **Gitignored `.tracker-watch.json`.** The tracker-discipline Stop hook seeds that file at any
