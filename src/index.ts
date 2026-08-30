@@ -1,33 +1,11 @@
 #!/usr/bin/env node
 
-/**
- * DeepThinking MCP Server
- *
- * 34 advanced reasoning modes with ModeHandler pattern, meta-reasoning,
- * taxonomy classifier, enterprise security, and visual export capabilities.
- *
- * Tools (13 total):
- * - deepthinking_core: inductive, deductive, abductive modes
- * - deepthinking_standard: sequential, shannon, hybrid modes
- * - deepthinking_mathematics: mathematics, physics, computability modes
- * - deepthinking_temporal: temporal, historical reasoning
- * - deepthinking_probabilistic: bayesian, evidential modes
- * - deepthinking_causal: causal, counterfactual modes
- * - deepthinking_strategic: gametheory, optimization modes
- * - deepthinking_analytical: analogical, firstprinciples, metareasoning, cryptanalytic modes
- * - deepthinking_scientific: scientificmethod, systemsthinking, formallogic modes
- * - deepthinking_engineering: engineering, algorithmic modes
- * - deepthinking_academic: synthesis, argumentation, critique, analysis modes
- * - deepthinking_session: summarize, export, export_all, get_session, switch_mode, recommend_mode
- * - deepthinking_analyze: multi-mode analysis with presets and merge strategies (Phase 12 Sprint 3)
- */
-
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+  SUPPORTED_PROTOCOL_VERSIONS,
+  type ListToolsResult,
+  Server,
+} from "@modelcontextprotocol/server";
+import { serveStdio } from "@modelcontextprotocol/server/stdio";
 import { readFileSync, realpathSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
@@ -60,9 +38,42 @@ import {
   type ProblemCharacteristics,
 } from "./types/index.js";
 
+/** MCP 2.0 (2026-07-28) protocol revision this server implements. */
+export const MCP_PROTOCOL_VERSION = "2026-07-28" as const;
+
 /**
- * The MCP server, with every tool handler registered on it by the
- * `setRequestHandler` calls below.
+ * Build a configured MCP server with all tool handlers registered.
+ *
+ * Used by `serveStdio` (production) and by integration tests (in-memory /
+ * `createMcpHandler` fetch shim). Each call returns a fresh instance; business
+ * logic services (`thoughtFactory`, `getSessionManager`, etc.) are shared.
+ */
+export function buildServer(): Server {
+  const server = new Server(
+    {
+      name: packageJson.name,
+      version: packageJson.version,
+    },
+    {
+      capabilities: {
+        tools: {},
+      },
+      supportedProtocolVersions: [
+        MCP_PROTOCOL_VERSION,
+        ...SUPPORTED_PROTOCOL_VERSIONS,
+      ],
+      cacheHints: {
+        "tools/list": { ttlMs: 60_000, cacheScope: "private" },
+      },
+    },
+  );
+
+  registerHandlers(server);
+  return server;
+}
+
+/**
+ * The MCP server, with every tool handler registered on it.
  *
  * Exported so a test can drive the REAL dispatch path over an in-memory
  * transport instead of re-implementing it. Before this, `main()` ran at module
@@ -71,17 +82,7 @@ import {
  * against `SessionManager` directly, and the real ones drifted and died while
  * the suite stayed green. See `tests/integration/index-server.test.ts`.
  */
-export const server = new Server(
-  {
-    name: packageJson.name,
-    version: packageJson.version,
-  },
-  {
-    capabilities: {
-      tools: {},
-    },
-  },
-);
+export const server = buildServer();
 
 /**
  * Service Initialization (Phase 15A)
@@ -132,83 +133,85 @@ async function getSessionManager(): Promise<SessionManager> {
 // hidden from tools/list (it advertised itself as deprecated to every
 // client) but its handler below is kept so existing callers that already
 // hardcode the tool name continue to work.
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [...toolList], // 13 focused tools
-  };
-});
-
-// Register tool call handler
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
-
-  try {
-    // Handle new focused tools
-    if (isValidTool(name)) {
-      const schema = toolSchemas[name as keyof typeof toolSchemas];
-      const input = schema.parse(args);
-
-      // Session action tool
-      if (name === "deepthinking_session") {
-        return await handleSessionAction(input as SessionInput);
-      }
-
-      // Multi-mode analyze tool (Phase 12 Sprint 3)
-      if (name === "deepthinking_analyze") {
-        return await handleAnalyze(input as AnalyzeInputType);
-      }
-
-      // All other tools are for adding thoughts
-      return await handleAddThought(input as ThoughtInput, name);
-    }
-
-    // Handle legacy tool (backward compatibility)
-    if (name === "deepthinking") {
-      const { ThinkingToolSchema } = await import("./tools/thinking.js");
-      const input = ThinkingToolSchema.parse(args);
-
-      // Add deprecation warning
-      const deprecationWarning =
-        '⚠️ DEPRECATED: The "deepthinking" tool is deprecated. ' +
-        "Use the focused tools instead: deepthinking_core, deepthinking_mathematics, " +
-        "deepthinking_temporal, deepthinking_probabilistic, deepthinking_causal, " +
-        "deepthinking_strategic, deepthinking_analytical, deepthinking_scientific, " +
-        "deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.\n\n";
-
-      switch (input.action) {
-        case "add_thought": {
-          const result = await handleAddThought(
-            input,
-            modeToToolMap[input.mode || "hybrid"] || "deepthinking_core",
-          );
-          return prependWarning(result, deprecationWarning);
-        }
-        case "summarize":
-        case "export":
-        case "switch_mode":
-        case "get_session":
-        case "recommend_mode": {
-          const result = await handleSessionAction(input);
-          return prependWarning(result, deprecationWarning);
-        }
-        default:
-          throw new Error(`Unknown action: ${input.action}`);
-      }
-    }
-
-    throw new Error(`Unknown tool: ${name}`);
-  } catch (error) {
+function registerHandlers(server: Server): void {
+  server.setRequestHandler("tools/list", async () => {
     return {
-      content: [
-        {
-          type: "text",
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-        },
-      ],
-      isError: true,
+      tools: [...toolList] as unknown as ListToolsResult["tools"],
     };
-  }
-});
+  });
+
+  // Register tool call handler
+  server.setRequestHandler("tools/call", async (request) => {
+    const { name, arguments: args } = request.params;
+
+    try {
+      // Handle new focused tools
+      if (isValidTool(name)) {
+        const schema = toolSchemas[name as keyof typeof toolSchemas];
+        const input = schema.parse(args);
+
+        // Session action tool
+        if (name === "deepthinking_session") {
+          return await handleSessionAction(input as SessionInput);
+        }
+
+        // Multi-mode analyze tool (Phase 12 Sprint 3)
+        if (name === "deepthinking_analyze") {
+          return await handleAnalyze(input as AnalyzeInputType);
+        }
+
+        // All other tools are for adding thoughts
+        return await handleAddThought(input as ThoughtInput, name);
+      }
+
+      // Handle legacy tool (backward compatibility)
+      if (name === "deepthinking") {
+        const { ThinkingToolSchema } = await import("./tools/thinking.js");
+        const input = ThinkingToolSchema.parse(args);
+
+        // Add deprecation warning
+        const deprecationWarning =
+          '⚠️ DEPRECATED: The "deepthinking" tool is deprecated. ' +
+          "Use the focused tools instead: deepthinking_core, deepthinking_mathematics, " +
+          "deepthinking_temporal, deepthinking_probabilistic, deepthinking_causal, " +
+          "deepthinking_strategic, deepthinking_analytical, deepthinking_scientific, " +
+          "deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.\n\n";
+
+        switch (input.action) {
+          case "add_thought": {
+            const result = await handleAddThought(
+              input,
+              modeToToolMap[input.mode || "hybrid"] || "deepthinking_core",
+            );
+            return prependWarning(result, deprecationWarning);
+          }
+          case "summarize":
+          case "export":
+          case "switch_mode":
+          case "get_session":
+          case "recommend_mode": {
+            const result = await handleSessionAction(input);
+            return prependWarning(result, deprecationWarning);
+          }
+          default:
+            throw new Error(`Unknown action: ${input.action}`);
+        }
+      }
+
+      throw new Error(`Unknown tool: ${name}`);
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+          },
+        ],
+        isError: true,
+      };
+    }
+  });
+} // registerHandlers
 
 /**
  * Prepend a warning message to a tool result
@@ -978,12 +981,14 @@ async function handleAnalyze(input: AnalyzeInputType): Promise<MCPResponse> {
 }
 
 /**
- * Main server startup
+ * Main server startup — serves MCP 2026-07-28 (stateless) and legacy 2025-era
+ * clients on the same stdio connection via `serveStdio`.
  */
 export async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error("DeepThinking MCP server running on stdio");
+  serveStdio(() => buildServer(), { legacy: "serve" });
+  console.error(
+    `DeepThinking MCP server running on stdio (protocol ${MCP_PROTOCOL_VERSION} + legacy)`,
+  );
 }
 
 /**

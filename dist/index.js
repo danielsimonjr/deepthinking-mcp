@@ -7,9 +7,8 @@ import { z } from 'zod';
 import * as fs3 from 'fs';
 import { readFileSync, realpathSync, promises } from 'fs';
 import * as os2 from 'os';
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import { Server, SUPPORTED_PROTOCOL_VERSIONS } from '@modelcontextprotocol/server';
+import { serveStdio } from '@modelcontextprotocol/server/stdio';
 
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
@@ -63115,17 +63114,27 @@ var __dirname2 = dirname(__filename2);
 var packageJson = JSON.parse(
   readFileSync(join(__dirname2, "../package.json"), "utf-8")
 );
-var server = new Server(
-  {
-    name: packageJson.name,
-    version: packageJson.version
-  },
-  {
-    capabilities: {
-      tools: {}
+var MCP_PROTOCOL_VERSION = "2026-07-28";
+function buildServer() {
+  const server2 = new Server(
+    {
+      name: packageJson.name,
+      version: packageJson.version
+    },
+    {
+      capabilities: {
+        tools: {}
+      },
+      supportedProtocolVersions: [MCP_PROTOCOL_VERSION, ...SUPPORTED_PROTOCOL_VERSIONS],
+      cacheHints: {
+        "tools/list": { ttlMs: 6e4, cacheScope: "private" }
+      }
     }
-  }
-);
+  );
+  registerHandlers(server2);
+  return server2;
+}
+var server = buildServer();
 var thoughtFactory = new ThoughtFactory();
 var exportService = new ExportService();
 var _sessionManager = null;
@@ -63150,63 +63159,64 @@ async function getSessionManager() {
   }
   return _sessionManagerPromise;
 }
-server.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [...toolList]
-    // 13 focused tools
-  };
-});
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
-  const { name, arguments: args } = request.params;
-  try {
-    if (isValidTool(name)) {
-      const schema = toolSchemas[name];
-      const input = schema.parse(args);
-      if (name === "deepthinking_session") {
-        return await handleSessionAction(input);
-      }
-      if (name === "deepthinking_analyze") {
-        return await handleAnalyze(input);
-      }
-      return await handleAddThought(input, name);
-    }
-    if (name === "deepthinking") {
-      const { ThinkingToolSchema: ThinkingToolSchema2 } = await Promise.resolve().then(() => (init_thinking(), thinking_exports));
-      const input = ThinkingToolSchema2.parse(args);
-      const deprecationWarning = '\u26A0\uFE0F DEPRECATED: The "deepthinking" tool is deprecated. Use the focused tools instead: deepthinking_core, deepthinking_mathematics, deepthinking_temporal, deepthinking_probabilistic, deepthinking_causal, deepthinking_strategic, deepthinking_analytical, deepthinking_scientific, deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.\n\n';
-      switch (input.action) {
-        case "add_thought": {
-          const result = await handleAddThought(
-            input,
-            modeToToolMap[input.mode || "hybrid"] || "deepthinking_core"
-          );
-          return prependWarning(result, deprecationWarning);
-        }
-        case "summarize":
-        case "export":
-        case "switch_mode":
-        case "get_session":
-        case "recommend_mode": {
-          const result = await handleSessionAction(input);
-          return prependWarning(result, deprecationWarning);
-        }
-        default:
-          throw new Error(`Unknown action: ${input.action}`);
-      }
-    }
-    throw new Error(`Unknown tool: ${name}`);
-  } catch (error) {
+function registerHandlers(server2) {
+  server2.setRequestHandler("tools/list", async () => {
     return {
-      content: [
-        {
-          type: "text",
-          text: `Error: ${error instanceof Error ? error.message : String(error)}`
-        }
-      ],
-      isError: true
+      tools: [...toolList]
     };
-  }
-});
+  });
+  server2.setRequestHandler("tools/call", async (request) => {
+    const { name, arguments: args } = request.params;
+    try {
+      if (isValidTool(name)) {
+        const schema = toolSchemas[name];
+        const input = schema.parse(args);
+        if (name === "deepthinking_session") {
+          return await handleSessionAction(input);
+        }
+        if (name === "deepthinking_analyze") {
+          return await handleAnalyze(input);
+        }
+        return await handleAddThought(input, name);
+      }
+      if (name === "deepthinking") {
+        const { ThinkingToolSchema: ThinkingToolSchema2 } = await Promise.resolve().then(() => (init_thinking(), thinking_exports));
+        const input = ThinkingToolSchema2.parse(args);
+        const deprecationWarning = '\u26A0\uFE0F DEPRECATED: The "deepthinking" tool is deprecated. Use the focused tools instead: deepthinking_core, deepthinking_mathematics, deepthinking_temporal, deepthinking_probabilistic, deepthinking_causal, deepthinking_strategic, deepthinking_analytical, deepthinking_scientific, deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.\n\n';
+        switch (input.action) {
+          case "add_thought": {
+            const result = await handleAddThought(
+              input,
+              modeToToolMap[input.mode || "hybrid"] || "deepthinking_core"
+            );
+            return prependWarning(result, deprecationWarning);
+          }
+          case "summarize":
+          case "export":
+          case "switch_mode":
+          case "get_session":
+          case "recommend_mode": {
+            const result = await handleSessionAction(input);
+            return prependWarning(result, deprecationWarning);
+          }
+          default:
+            throw new Error(`Unknown action: ${input.action}`);
+        }
+      }
+      throw new Error(`Unknown tool: ${name}`);
+    } catch (error) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Error: ${error instanceof Error ? error.message : String(error)}`
+          }
+        ],
+        isError: true
+      };
+    }
+  });
+}
 function prependWarning(result, warning) {
   if (result.content && result.content[0] && result.content[0].type === "text") {
     result.content[0].text = warning + result.content[0].text;
@@ -63762,9 +63772,10 @@ ${response.analysis.primaryInsights.map((i) => `- [${i.sourceMode}] ${i.content}
   };
 }
 async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error("DeepThinking MCP server running on stdio");
+  serveStdio(() => buildServer(), { legacy: "serve" });
+  console.error(
+    `DeepThinking MCP server running on stdio (protocol ${MCP_PROTOCOL_VERSION} + legacy)`
+  );
 }
 function isProcessEntryPoint() {
   const entry = process.argv[1];
@@ -63782,6 +63793,6 @@ if (isProcessEntryPoint()) {
   });
 }
 
-export { main, server };
+export { MCP_PROTOCOL_VERSION, buildServer, main, server };
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map
