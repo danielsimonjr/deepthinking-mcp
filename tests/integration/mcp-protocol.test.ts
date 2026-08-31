@@ -4,11 +4,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js';
+import { CallToolRequestSchema, ListToolsRequestSchema } from "@modelcontextprotocol/core";
+import { Server } from "@modelcontextprotocol/server";
 import { SessionManager } from '../../src/session/manager.js';
 import { ThinkingToolSchema, thinkingTool } from '../../src/tools/thinking.js';
 import { ThinkingMode } from '../../src/types/index.js';

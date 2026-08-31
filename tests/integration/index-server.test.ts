@@ -23,8 +23,7 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
+import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 
 // The import that was impossible before the entry-point guard.
 import { server } from '../../src/index.js';

@@ -15,18 +15,18 @@
  * The transport is mocked rather than timed. `main()` was called but never
  * awaited, so its startup log lands on a later tick — a test that merely
  * checked "nothing logged yet" would pass vacuously even with the bug present.
- * Asserting the transport constructor was never called is deterministic.
+ * Asserting the serveStdio entry was never called is deterministic.
  */
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
-const transportConstructed = vi.fn();
+const serveStdioCalled = vi.fn();
 
-vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
-  StdioServerTransport: class {
-    constructor() {
-      transportConstructed();
-    }
+vi.mock("@modelcontextprotocol/server/stdio", () => ({
+  serveStdio: (..._args: unknown[]) => {
+    serveStdioCalled();
+    return { close: vi.fn() };
   },
+  StdioServerTransport: class {},
 }));
 
 /**
@@ -40,31 +40,54 @@ vi.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
  */
 const IMPORT_GRAPH_TIMEOUT_MS = 60_000;
 
-describe('src/index.ts entry-point guard', () => {
+describe("src/index.ts entry-point guard", () => {
   beforeEach(() => {
-    transportConstructed.mockClear();
+    serveStdioCalled.mockClear();
   });
 
-  it('does not construct a stdio transport when merely imported', async () => {
-    vi.resetModules();
-    transportConstructed.mockClear();
+  it(
+    "does not start serveStdio when merely imported",
+    async () => {
+      vi.resetModules();
+      serveStdioCalled.mockClear();
 
-    await import('../../src/index.js');
+      await import("../../src/index.js");
 
-    // Give any un-awaited module-scope promise a chance to run, so this
-    // cannot pass just because the side effect had not happened yet.
-    await new Promise((resolve) => setImmediate(resolve));
+      // Give any un-awaited module-scope promise a chance to run, so this
+      // cannot pass just because the side effect had not happened yet.
+      await new Promise((resolve) => setImmediate(resolve));
 
-    expect(transportConstructed).not.toHaveBeenCalled();
-  }, IMPORT_GRAPH_TIMEOUT_MS);
+      expect(serveStdioCalled).not.toHaveBeenCalled();
+    },
+    IMPORT_GRAPH_TIMEOUT_MS,
+  );
 
-  it('exports main, so the entry point is explicit and reachable from a test', async () => {
-    const mod = await import('../../src/index.js');
-    expect(typeof (mod as { main?: unknown }).main).toBe('function');
-  }, IMPORT_GRAPH_TIMEOUT_MS);
+  it(
+    "exports main, so the entry point is explicit and reachable from a test",
+    async () => {
+      const mod = await import("../../src/index.js");
+      expect(typeof (mod as { main?: unknown }).main).toBe("function");
+    },
+    IMPORT_GRAPH_TIMEOUT_MS,
+  );
 
-  it('exports the server instance so handlers can be exercised, not re-implemented', async () => {
-    const mod = await import('../../src/index.js');
-    expect((mod as { server?: unknown }).server).toBeDefined();
-  }, IMPORT_GRAPH_TIMEOUT_MS);
+  it(
+    "exports the server instance so handlers can be exercised, not re-implemented",
+    async () => {
+      const mod = await import("../../src/index.js");
+      expect((mod as { server?: unknown }).server).toBeDefined();
+    },
+    IMPORT_GRAPH_TIMEOUT_MS,
+  );
+
+  it(
+    "exports buildServer factory for MCP 2.0 in-process testing",
+    async () => {
+      const mod = await import("../../src/index.js");
+      expect(typeof (mod as { buildServer?: unknown }).buildServer).toBe(
+        "function",
+      );
+    },
+    IMPORT_GRAPH_TIMEOUT_MS,
+  );
 });
