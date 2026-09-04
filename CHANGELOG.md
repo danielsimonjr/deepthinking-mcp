@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **CI now proves the shipped artifact loads under Node.** `test.yml`'s `Build Package` job gains a
+  `Node runtime smoke` step that imports `dist/index.js` with `node --input-type=module` after the
+  build, failing the job if it throws. This repo builds and tests with Bun but SHIPS to Node
+  consumers, and nothing previously exercised that second half -- a Bun-only toolchain can build an
+  artifact Node cannot load, and every gate would stay green. The step is known failure-capable, not
+  trivially green: a deliberately bogus entry path exits 1 with a distinct message, while the real
+  entry exits 0. Verified against the MCP 2.0 dependency set (`@modelcontextprotocol/{server,client,
+  core}@^2.0.0`) from a clean `bun install --frozen-lockfile`.
+
 ### Fixed
 
 - **Auto-merged Dependabot commits landed on `master` with no CI run at all.** `cc86933a` sits on

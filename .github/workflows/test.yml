@@ -136,6 +136,15 @@ jobs:
       - name: Build package
         run: bun run build
 
+      - name: Node runtime smoke (the shipped artifact must load under Node)
+        run: |
+          node --input-type=module -e '
+            const entry = "./dist/index.js";
+            const t = setTimeout(() => { console.log("PASS: self-started under Node (still running at 5s)"); process.exit(0); }, 5000);
+            import(entry).then(() => { clearTimeout(t); console.log("PASS: loaded cleanly under Node"); process.exit(0); })
+              .catch((e) => { clearTimeout(t); console.error("FAIL: " + entry + " does not load under Node -- " + e.message); process.exit(1); });
+          '
+
       - name: Check package size
         run: |
           SIZE=$(du -sh dist | cut -f1)
