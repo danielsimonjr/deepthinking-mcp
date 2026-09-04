@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [10.0.0] - 2026-09-04
+
+### Changed
+
+- **BREAKING: the MCP runtime dependency moved from `@modelcontextprotocol/sdk@^1.30.0` to
+  `@modelcontextprotocol/{server,client,core}@^2.0.0`** (#301). One package became three and the
+  major moved, so anything importing the old SDK alongside this server must move with it. This is
+  a DEPENDENCY major and that is the whole of it.
+- **This release does NOT change the wire protocol.** The negotiated MCP revision is `2025-11-25`
+  before and after, and clients will see no handshake difference. Said explicitly because the
+  migration was originally framed as "the MCP 2.0 (2026-07-28) protocol migration", and shipping
+  that framing would have promised a 2026-era handshake that does not exist: `2026-07-28` is not a
+  revision any published SDK implements. The v2 PACKAGE major and the protocol ERA are separate
+  facts; conflating them is what produced the false claim.
+
+### Fixed
+
+- **Stopped advertising a protocol revision the SDK cannot speak.** `MCP_PROTOCOL_VERSION` was a
+  hand-written `"2026-07-28"` prepended to `supportedProtocolVersions`. The server clamped every
+  handshake to `2025-11-25` -- correctly, per spec, for an unsupported requested version -- so the
+  code claimed one revision while the wire spoke another. The constant is now DERIVED from the
+  SDK's own `LATEST_PROTOCOL_VERSION` rather than restated beside it, removing the second source
+  of truth that allowed the drift.
+- **Three tests passed *because* of the defect and now assert real behaviour.** One compared the
+  constant against a literal copy of itself; one pinned the client to `2026-07-28`, which is valid
+  only for 2026-era servers and so forced a modern era that the shipped server never enters; one
+  asserted `server/discover`, a method that does not exist at wire era `2025-11-25`.
+- **The compliance suite never exercised the shipped transport.** It ran entirely over
+  `createMcpHandler` (streamable HTTP) while the product ships `bin: dist/index.js` on **stdio**.
+  A new test spawns the real stdio binary and asserts the negotiated revision equals the
+  advertised one -- the gap that let a false protocol claim survive 6369 passing tests.
+
+
 ### Fixed
 
 - **The server advertised a protocol revision it cannot speak, and the compliance suite

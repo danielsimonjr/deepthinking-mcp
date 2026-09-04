@@ -1,6 +1,6 @@
 {
   "name": "deepthinking-mcp",
-  "version": "9.5.3",
+  "version": "10.0.0",
   "description": "Structured reasoning for Claude Code, in one plugin: an MCP server (34 modes, 13 tools, meta-reasoning, taxonomy classification) plus the /think and /think-render slash commands, 14 reasoning skills covering 46 modes, and the visual-exporter subagent. Absorbed deepthinking-plugin on 2026-08-03.",
   "author": {
     "name": "Daniel Simon Jr.",
