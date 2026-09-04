@@ -30,7 +30,16 @@ Repo-level task tracker. Cross-repo roll-up lives in `~/Github/TODO.md`; per-cha
   (`npm install --package-lock-only --ignore-scripts` on a copied `package.json`) until Bun is
   installed on the machine. Last audited 2026-08-27: **clean**.
 
-## State (2026-08-27)
+## State (2026-09-04)
 
-Version **9.5.3**, in sync with npm and with the tag; 0 commits since `v9.5.3`; 0 open PRs;
-0 open Dependabot alerts (alerting verified enabled, not merely empty).
+Version **10.0.0**, in sync with npm and with the tag (`v10.0.0`); 0 open PRs; 0 open Dependabot
+alerts. Released as a **dependency major** — the runtime moved from `@modelcontextprotocol/sdk@1.x`
+to `@modelcontextprotocol/{server,client,core}@2.x`. It is **not** a protocol change: the negotiated
+MCP wire revision is `2025-11-25` before and after, verified by a live stdio round trip against the
+published artifact.
+
+Known stale: `sbom.json` still describes 9.1.3 and lists `@modelcontextprotocol/sdk 1.29.0`, a
+dependency this package no longer has. It was generated once (2026-05-02) by
+`@cyclonedx/cyclonedx-npm`, which reads an npm tree; this repo is now bun-only, so the generator
+was orphaned by that migration and nothing regenerates it. Needs a bun-capable generator, a
+synthesised lockfile, or removal — tracked, not silently patched.
