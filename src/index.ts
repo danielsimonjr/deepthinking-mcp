@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import {
+  LATEST_PROTOCOL_VERSION,
   SUPPORTED_PROTOCOL_VERSIONS,
   type ListToolsResult,
   Server,
@@ -38,8 +39,21 @@ import {
   type ProblemCharacteristics,
 } from "./types/index.js";
 
-/** MCP 2.0 (2026-07-28) protocol revision this server implements. */
-export const MCP_PROTOCOL_VERSION = "2026-07-28" as const;
+/**
+ * The protocol revision this server actually implements.
+ *
+ * DERIVED from the SDK, never hardcoded. It was hardcoded to "2026-07-28" until
+ * 2026-09-04, which no published SDK implements -- `@modelcontextprotocol/server`
+ * is at 2.0.0 and its LATEST_PROTOCOL_VERSION is "2025-11-25". The string exists in
+ * the SDK only inside client error messages describing a FUTURE protocol era
+ * ("pinning is for 2026-07-28 and later"), so it read like a real revision.
+ *
+ * The effect was a server that ADVERTISED a version it could not speak: `initialize`
+ * correctly clamped to 2025-11-25 for every request -- including deliberately invalid
+ * input -- while this constant claimed otherwise. Deriving it removes the second
+ * source of truth that made the drift possible.
+ */
+export const MCP_PROTOCOL_VERSION = LATEST_PROTOCOL_VERSION;
 
 /**
  * Build a configured MCP server with all tool handlers registered.
@@ -58,10 +72,9 @@ export function buildServer(): Server {
       capabilities: {
         tools: {},
       },
-      supportedProtocolVersions: [
-        MCP_PROTOCOL_VERSION,
-        ...SUPPORTED_PROTOCOL_VERSIONS,
-      ],
+      // The SDK's own list is the truth. Prepending a bespoke constant here is what
+      // let an unimplementable revision reach the advertised set.
+      supportedProtocolVersions: [...SUPPORTED_PROTOCOL_VERSIONS],
       cacheHints: {
         "tools/list": { ttlMs: 60_000, cacheScope: "private" },
       },
@@ -981,7 +994,7 @@ async function handleAnalyze(input: AnalyzeInputType): Promise<MCPResponse> {
 }
 
 /**
- * Main server startup — serves MCP 2026-07-28 (stateless) and legacy 2025-era
+ * Main server startup — serves the SDK's latest protocol revision and legacy 2025-era
  * clients on the same stdio connection via `serveStdio`.
  */
 export async function main() {

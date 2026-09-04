@@ -7,7 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **The server advertised a protocol revision it cannot speak, and the compliance suite
+  certified it.** `MCP_PROTOCOL_VERSION` was hardcoded to `"2026-07-28"`, which **no published
+  SDK implements** -- `@modelcontextprotocol/server` is at 2.0.0 and its
+  `LATEST_PROTOCOL_VERSION` is `"2025-11-25"`. The string appears in the SDK only inside client
+  error messages describing a *future* protocol era ("pinning is for 2026-07-28 and later"),
+  which is why it read like a real revision. `initialize` therefore clamped to 2025-11-25 for
+  every request -- including deliberately invalid input -- while the constant, the startup
+  banner and the docs all claimed 2026-07-28.
+  The constant is now DERIVED from the SDK's `LATEST_PROTOCOL_VERSION` rather than restated,
+  removing the second source of truth that allowed the drift, and `supportedProtocolVersions`
+  no longer prepends a bespoke value into the advertised set.
+
+- **Three tests were passing *because* of the defect, not despite it.**
+  - `expect(MCP_PROTOCOL_VERSION).toBe("2026-07-28")` asserted the constant against a copy of
+    itself. A test that shares its subject's constant certifies whatever that constant says.
+    It now asserts membership in the SDK's `SUPPORTED_PROTOCOL_VERSIONS`.
+  - The client was constructed with `versionNegotiation: { mode: { pin: MCP_PROTOCOL_VERSION } }`.
+    Pinning is only valid for 2026-07-28-and-later servers; the fictional date satisfied that
+    check syntactically and put the client in **modern** era over an in-process HTTP shim. With
+    a real revision the SDK rejects the pin by name, so the mode is now `"legacy"` -- which is
+    what this server actually is. `getProtocolEra()` is asserted as `legacy` accordingly.
+    **The v2 dependency major and the protocol era are separate facts**; using the MCP 2.0
+    packages does not make this a 2026-era server.
+  - `server/discover` was asserted to list 2026-07-28 in `supportedVersions`. The method does
+    not exist at wire era 2025-11-25 -- the shipped stdio binary answers "Method not found" for
+    it. The test now asserts that real behaviour.
+
 ### Added
+
+- **A compliance test that exercises the SHIPPED stdio binary.** The rest of the suite runs over
+  `createMcpHandler` (streamable HTTP), but the product ships `bin: dist/index.js` on stdio, and
+  the two paths disagree. The new test spawns the built binary, performs a real `initialize`, and
+  asserts the negotiated revision equals the advertised one -- the property a client actually
+  reads at runtime.
+
 
 - **CI now proves the shipped artifact loads under Node.** `test.yml`'s `Build Package` job gains a
   `Node runtime smoke` step that imports `dist/index.js` with `node --input-type=module` after the

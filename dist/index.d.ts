@@ -1,8 +1,21 @@
 #!/usr/bin/env node
 import { Server } from '@modelcontextprotocol/server';
 
-/** MCP 2.0 (2026-07-28) protocol revision this server implements. */
-declare const MCP_PROTOCOL_VERSION: "2026-07-28";
+/**
+ * The protocol revision this server actually implements.
+ *
+ * DERIVED from the SDK, never hardcoded. It was hardcoded to "2026-07-28" until
+ * 2026-09-04, which no published SDK implements -- `@modelcontextprotocol/server`
+ * is at 2.0.0 and its LATEST_PROTOCOL_VERSION is "2025-11-25". The string exists in
+ * the SDK only inside client error messages describing a FUTURE protocol era
+ * ("pinning is for 2026-07-28 and later"), so it read like a real revision.
+ *
+ * The effect was a server that ADVERTISED a version it could not speak: `initialize`
+ * correctly clamped to 2025-11-25 for every request -- including deliberately invalid
+ * input -- while this constant claimed otherwise. Deriving it removes the second
+ * source of truth that made the drift possible.
+ */
+declare const MCP_PROTOCOL_VERSION = "2025-11-25";
 /**
  * Build a configured MCP server with all tool handlers registered.
  *
@@ -23,7 +36,7 @@ declare function buildServer(): Server;
  */
 declare const server: Server;
 /**
- * Main server startup — serves MCP 2026-07-28 (stateless) and legacy 2025-era
+ * Main server startup — serves the SDK's latest protocol revision and legacy 2025-era
  * clients on the same stdio connection via `serveStdio`.
  */
 declare function main(): Promise<void>;

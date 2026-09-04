@@ -7,7 +7,7 @@ import { z } from 'zod';
 import * as fs3 from 'fs';
 import { readFileSync, realpathSync, promises } from 'fs';
 import * as os2 from 'os';
-import { Server, SUPPORTED_PROTOCOL_VERSIONS } from '@modelcontextprotocol/server';
+import { Server, SUPPORTED_PROTOCOL_VERSIONS, LATEST_PROTOCOL_VERSION } from '@modelcontextprotocol/server';
 import { serveStdio } from '@modelcontextprotocol/server/stdio';
 
 var __defProp = Object.defineProperty;
@@ -63114,7 +63114,7 @@ var __dirname2 = dirname(__filename2);
 var packageJson = JSON.parse(
   readFileSync(join(__dirname2, "../package.json"), "utf-8")
 );
-var MCP_PROTOCOL_VERSION = "2026-07-28";
+var MCP_PROTOCOL_VERSION = LATEST_PROTOCOL_VERSION;
 function buildServer() {
   const server2 = new Server(
     {
@@ -63125,7 +63125,9 @@ function buildServer() {
       capabilities: {
         tools: {}
       },
-      supportedProtocolVersions: [MCP_PROTOCOL_VERSION, ...SUPPORTED_PROTOCOL_VERSIONS],
+      // The SDK's own list is the truth. Prepending a bespoke constant here is what
+      // let an unimplementable revision reach the advertised set.
+      supportedProtocolVersions: [...SUPPORTED_PROTOCOL_VERSIONS],
       cacheHints: {
         "tools/list": { ttlMs: 6e4, cacheScope: "private" }
       }
