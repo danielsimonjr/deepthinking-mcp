@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Bun pinned to 1.4.2** in `packageManager`, `engines.bun` and all four CI workflows
+  (test, coverage, codeql, release) together -- a version the manifest declares but CI
+  never installs is a pin that enforces nothing.
+
+- **TypeScript stays at `^6.0.3`: TypeScript 7 is BLOCKED here by `tsup`.** TS 7.0
+  shipped without the stable programmatic Compiler API (due in 7.1), so
+  `rollup-plugin-dts`, which tsup uses to emit declarations, crashes with
+  `TypeError: Cannot read properties of undefined (reading 'useCaseSensitiveFileNames')`.
+  Upstream: tsup issues #1405 and #1408. Revisit when TS 7.1 lands.
+
 ## [10.0.0] - 2026-09-04
 
 ### Changed
