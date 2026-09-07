@@ -3,6 +3,29 @@
 Repo-level task tracker. Cross-repo roll-up lives in `~/Github/TODO.md`; per-change history is in
 [`CHANGELOG.md`](CHANGELOG.md).
 
+## Blocked: vitest 5 major (2026-09-07)
+
+- [ ] **vitest 4 -> 5 cannot land here yet: `@vitest/coverage-v8` 5 breaks the coverage step.**
+      PRs #309 (vitest) and #308 (coverage-v8) are red, and it is a REAL breaking change, not
+      the usual `bun.lock` plumbing. Run 34108055630, job **Generate Coverage Report**, step
+      *Run tests with coverage*:
+
+      ```
+      TypeError: Expected string coverage payload, received object,
+      {"result":[{"scriptId":"208","url":"file:///.../document-builders.test.ts", ...
+      ```
+
+      **All 220 test files PASS.** Only the coverage reporter fails, so the library itself is
+      compatible with vitest 5 — what breaks is the v8 coverage payload changing from a string
+      to an object. The message comes from vitest 5's own code, not ours (nothing in this repo
+      or in the vitest-4 `node_modules` contains that string).
+
+      **Useful contrast: math-mcp took vitest 5 cleanly** (#106 merged the same morning), because
+      it does not run this coverage job. So the blocker is the coverage integration, not vitest.
+
+      Both PRs must land TOGETHER when it is fixed — splitting them leaves vitest and
+      coverage-v8 on mismatched majors, which is its own failure.
+
 ## Done
 
 - [x] **SHA-pin the three third-party GitHub Actions** (`c879b038`, 2026-08-27).
