@@ -5,7 +5,18 @@ Repo-level task tracker. Cross-repo roll-up lives in `~/Github/TODO.md`; per-cha
 
 ## Blocked: vitest 5 major (2026-09-07)
 
-- [ ] **vitest 4 -> 5 cannot land here yet: `@vitest/coverage-v8` 5 breaks the coverage step.**
+- [x] **vitest 4 -> 5 — RESOLVED 2026-09-07 by landing both halves together (#309).**
+      The original diagnosis below was WRONG in a way worth keeping: it read as "coverage-v8 5
+      breaks the coverage step", when nothing was broken. vitest 5 changed the core/provider
+      contract — `onAfterSuiteRun({ coverage })` now expects a FILENAME the provider has
+      written (`dist/chunks/index.B89dZ0-N.js:15000`), while coverage-v8 v4 passes the raw V8
+      object inline. #309 (vitest 5 + coverage-v8 4) and #308 (the mirror) were two halves of
+      one bump, each red for the other's absence. Verified locally before pushing:
+      `bun run test:coverage` completes at 68.56% lines vs a threshold of 55. #308 closed as
+      superseded. **The tell was there and I under-read it: math-mcp took vitest 5 cleanly the
+      same morning — not because it is different, but because it runs no coverage job and so
+      never paired the two majors.**
+- [ ] ~~ORIGINAL (superseded):~~ **vitest 4 -> 5 cannot land here yet: `@vitest/coverage-v8` 5 breaks the coverage step.**
       PRs #309 (vitest) and #308 (coverage-v8) are red, and it is a REAL breaking change, not
       the usual `bun.lock` plumbing. Run 34108055630, job **Generate Coverage Report**, step
       *Run tests with coverage*:
