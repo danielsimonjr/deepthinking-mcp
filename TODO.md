@@ -3,9 +3,12 @@
 Repo-level task tracker. Cross-repo roll-up lives in `~/Github/TODO.md`; per-change history is in
 [`CHANGELOG.md`](CHANGELOG.md).
 
-## Blocked: vitest 5 major (2026-09-07)
+## Resolved: vitest 5 major (filed + closed 2026-09-07)
 
-- [x] **vitest 4 -> 5 — RESOLVED 2026-09-07 by landing both halves together (#309).**
+- [x] **vitest 4 -> 5 cannot land here yet: `@vitest/coverage-v8` 5 breaks the coverage step.**
+      **RESOLVED 2026-09-07 by landing both halves together (#309)** — and the heading above
+      is kept verbatim on purpose: a closed item must still be findable by the words it was
+      filed under.
       The original diagnosis below was WRONG in a way worth keeping: it read as "coverage-v8 5
       breaks the coverage step", when nothing was broken. vitest 5 changed the core/provider
       contract — `onAfterSuiteRun({ coverage })` now expects a FILENAME the provider has
@@ -16,26 +19,6 @@ Repo-level task tracker. Cross-repo roll-up lives in `~/Github/TODO.md`; per-cha
       superseded. **The tell was there and I under-read it: math-mcp took vitest 5 cleanly the
       same morning — not because it is different, but because it runs no coverage job and so
       never paired the two majors.**
-- [ ] ~~ORIGINAL (superseded):~~ **vitest 4 -> 5 cannot land here yet: `@vitest/coverage-v8` 5 breaks the coverage step.**
-      PRs #309 (vitest) and #308 (coverage-v8) are red, and it is a REAL breaking change, not
-      the usual `bun.lock` plumbing. Run 34108055630, job **Generate Coverage Report**, step
-      *Run tests with coverage*:
-
-      ```
-      TypeError: Expected string coverage payload, received object,
-      {"result":[{"scriptId":"208","url":"file:///.../document-builders.test.ts", ...
-      ```
-
-      **All 220 test files PASS.** Only the coverage reporter fails, so the library itself is
-      compatible with vitest 5 — what breaks is the v8 coverage payload changing from a string
-      to an object. The message comes from vitest 5's own code, not ours (nothing in this repo
-      or in the vitest-4 `node_modules` contains that string).
-
-      **Useful contrast: math-mcp took vitest 5 cleanly** (#106 merged the same morning), because
-      it does not run this coverage job. So the blocker is the coverage integration, not vitest.
-
-      Both PRs must land TOGETHER when it is fixed — splitting them leaves vitest and
-      coverage-v8 on mismatched majors, which is its own failure.
 
 ## Done
 
