@@ -1,6 +1,5 @@
 #!/usr/bin/env node
-import { Server } from '@modelcontextprotocol/server';
-
+import { Server } from "@modelcontextprotocol/server";
 /**
  * The protocol revision this server actually implements.
  *
@@ -15,7 +14,7 @@ import { Server } from '@modelcontextprotocol/server';
  * input -- while this constant claimed otherwise. Deriving it removes the second
  * source of truth that made the drift possible.
  */
-declare const MCP_PROTOCOL_VERSION = "2025-11-25";
+export declare const MCP_PROTOCOL_VERSION = "2025-11-25";
 /**
  * Build a configured MCP server with all tool handlers registered.
  *
@@ -23,7 +22,7 @@ declare const MCP_PROTOCOL_VERSION = "2025-11-25";
  * `createMcpHandler` fetch shim). Each call returns a fresh instance; business
  * logic services (`thoughtFactory`, `getSessionManager`, etc.) are shared.
  */
-declare function buildServer(): Server;
+export declare function buildServer(): Server;
 /**
  * The MCP server, with every tool handler registered on it.
  *
@@ -34,11 +33,10 @@ declare function buildServer(): Server;
  * against `SessionManager` directly, and the real ones drifted and died while
  * the suite stayed green. See `tests/integration/index-server.test.ts`.
  */
-declare const server: Server;
+export declare const server: Server;
 /**
  * Main server startup — serves the SDK's latest protocol revision and legacy 2025-era
  * clients on the same stdio connection via `serveStdio`.
  */
-declare function main(): Promise<void>;
-
-export { MCP_PROTOCOL_VERSION, buildServer, main, server };
+export declare function main(): Promise<void>;
+//# sourceMappingURL=index.d.ts.map

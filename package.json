@@ -17,7 +17,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && tsc --emitDeclarationOnly",
     "dev": "tsup --watch",
     "test": "vitest",
     "test:run": "cross-env VITEST_REPORT_MODE=summary vitest --run --coverage",
@@ -25,7 +25,7 @@
     "test:all": "cross-env VITEST_REPORT_MODE=all vitest --run --coverage",
     "test:publish": "cross-env SKIP_BENCHMARKS=1 VITEST_REPORT_MODE=summary vitest --run --coverage",
     "test:coverage": "vitest --coverage",
-    "lint": "eslint src/ --max-warnings 356",
+    "lint": "oxlint src --max-warnings 356",
     "format": "prettier --write src/",
     "format:check": "prettier --check src/",
     "typecheck": "tsc --noEmit",
@@ -40,21 +40,16 @@
     "@modelcontextprotocol/core": "^2.0.0"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^26.4.1",
-    "@typescript-eslint/eslint-plugin": "^8.69.0",
-    "@typescript-eslint/parser": "^8.69.0",
     "@vitest/coverage-v8": "^5.0.0",
     "cross-env": "^10.1.0",
-    "eslint": "^10.9.1",
-    "globals": "^17.12.0",
     "js-yaml": "^5.4.1",
+    "oxlint": "^1.82.0",
     "prettier": "^3.9.6",
     "tsup": "^8.5.1",
     "tsx": "^4.23.13",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.69.0",
+    "typescript": "^7.0.2",
     "vitest": "^5.0.0"
   },
   "overrides": {

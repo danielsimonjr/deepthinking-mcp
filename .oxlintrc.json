@@ -1,0 +1,15 @@
+{
+  "plugins": ["typescript", "oxc"],
+  "env": { "node": true, "es2022": true },
+  "categories": { "correctness": "error" },
+  "ignorePatterns": ["dist/", "node_modules/", "**/*.js", "**/*.mjs", "**/*.cjs"],
+  "rules": {
+    "typescript/no-explicit-any": "warn",
+    "typescript/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "typescript/no-require-imports": "warn",
+    "no-useless-escape": "warn",
+    "no-case-declarations": "warn",
+    "no-shadow-restricted-names": "warn",
+    "prefer-const": "warn"
+  }
+}

@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **TypeScript raised to `^7.0.2`.** Both blockers removed at once.
+
+  **Build:** declarations now come from `tsc --emitDeclarationOnly` instead of tsup.
+  tsup generates them through `rollup-plugin-dts`, which needs TypeScript's
+  programmatic Compiler API -- TS 7.0 does not ship it (expected in 7.1). tsup's
+  BUNDLING is esbuild and unaffected, so only the declaration step moved. This
+  package is ESM-only with a single entry, so no `.d.cts` mirroring is needed.
+
+  **Lint:** ESLint replaced by `oxlint`, which parses TypeScript itself and never
+  loads that API. All seven enforced rules ported with identical severities, and
+  **both linters independently report `0 errors, 356 warnings` on the same code** --
+  the existing `--max-warnings 356` ratchet is preserved and still bites, verified by
+  adding two `any`s and watching it fail.
+
+  **tsconfig modernised:** TS 7 REMOVED `baseUrl` (TS5102) and rejects non-relative
+  `paths` targets (TS5090). `baseUrl` was `"."`, so the ten targets are now written
+  relative to the config file -- the same mapping, spelled the new way.
+
+  Also removed a second source of truth: this repo carried BOTH `eslint.config.js`
+  and `.eslintrc.json`. Both are gone with the six ESLint packages.
+
+  Verified: typecheck, lint, test and build pass, and a real MCP client over stdio
+  against the built `dist/index.js` negotiates 2025-11-25 and lists all 13 tools.
+
+### Changed
+
 - **Bun pinned to 1.4.2** in `packageManager`, `engines.bun` and all four CI workflows
   (test, coverage, codeql, release) together -- a version the manifest declares but CI
   never installs is a pin that enforces nothing.

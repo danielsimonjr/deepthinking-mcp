@@ -7,18 +7,20 @@
     "types": ["node"],
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": ".",
+    // TypeScript 7 REMOVED baseUrl (TS5102) and no longer accepts non-relative
+    // paths targets (TS5090). baseUrl was "." here, so the targets below are now
+    // written relative to this file -- the same mapping, spelled the new way.
     "ignoreDeprecations": "6.0",
     "paths": {
-      "@/*": ["src/*"],
-      "@types/*": ["src/types/*"],
-      "@utils/*": ["src/utils/*"],
-      "@validation/*": ["src/validation/*"],
-      "@modes/*": ["src/modes/*"],
-      "@session/*": ["src/session/*"],
-      "@cache/*": ["src/cache/*"],
-      "@export/*": ["src/export/*"],
-      "@taxonomy/*": ["src/taxonomy/*"]
+      "@/*": ["./src/*"],
+      "@types/*": ["./src/types/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@validation/*": ["./src/validation/*"],
+      "@modes/*": ["./src/modes/*"],
+      "@session/*": ["./src/session/*"],
+      "@cache/*": ["./src/cache/*"],
+      "@export/*": ["./src/export/*"],
+      "@taxonomy/*": ["./src/taxonomy/*"]
     },
     "declaration": true,
     "declarationMap": true,
@@ -34,6 +36,6 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src/**/*"],
+  "include": ["./src/**/*"],
   "exclude": ["node_modules", "dist", "tests"]
 }
