@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 DeepThinking MCP is a TypeScript-based Model Context Protocol server featuring **34 reasoning modes** (30 with dedicated thought types + 4 advanced runtime) with taxonomy-based classification (69 implemented reasoning types across 12 categories), enterprise security, proof decomposition, ModeHandler architecture, and visual export capabilities including native SVG.
 
-**Version**: 10.0.0 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
+**Version**: 10.0.1 | **Node**: >=18.0.0 | **Entry Point**: `dist/index.js` | **Module**: ESM-only
 
 ## Project Metrics
 
@@ -296,10 +296,19 @@ guarantees the declared dependencies are installed, then spawns `dist/index.js` 
 > `npx` still works fine from a shell, which is why this survived so long: every manual test passed.
 > Only a real `spawn()` without a shell reproduces it.
 
-Version is pinned in three places that must move together — `package.json`,
-`.claude-plugin/plugin.json`, and the marketplace manifest in the `skills` repo. A split leaves the
-release invisible to the plugin system; on 2026-09-16 the marketplace manifest was found still
-advertising `9.5.3` against a repo at `10.0.0`.
+**Version is pinned in FIVE places that must move together.** Four in this repo —
+`package.json`, `.claude-plugin/plugin.json`, the `**Version**:` line at the top of this file, and
+the `## Available Modes (vX.Y.Z)` heading in `skills/think/SKILL.md` — plus the marketplace manifest
+in the `skills` repo.
+
+The four in-repo ones are enforced by the **artifact/schema/version consistency** job, which fails
+the build on any mismatch. It earned its keep on 2026-09-16: a 10.0.1 bump moved `package.json` and
+`.claude-plugin/plugin.json`, and CI caught the two doc strings left behind. Do not bump by hand
+without running that job.
+
+The marketplace manifest is in a **different repo, so nothing gates it** — and that is exactly how
+it drifted: it was found still advertising `9.5.3` against a repo at `10.0.0`, the same split that
+once made memory-mcp's `12.9.0` release invisible to the plugin system. Bump it in the same change.
 
 > ### Do not try to replace this with a committed `bundle/index.mjs`
 >
