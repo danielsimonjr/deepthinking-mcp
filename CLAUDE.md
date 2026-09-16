@@ -270,9 +270,36 @@ bounded by `MAX_LENGTHS`.
 
 This repo is a `local-marketplace` plugin: `.claude-plugin/plugin.json` + `.mcp.json`.
 
-**`.mcp.json` runs the published npm package via `npx -y deepthinking-mcp@<version>`, not a
-committed bundle — and that is deliberate.** Bump the pinned version in `.mcp.json` on every
-release, the same way the sibling servers bump their `_RETRY` key.
+**`.mcp.json` launches `node ${CLAUDE_PLUGIN_ROOT}/cli/mcp-server-wrapper.mjs`.** The wrapper
+guarantees the declared dependencies are installed, then spawns `dist/index.js` as its own process.
+
+> ### ⚠ It used to launch via `npx`, and that NEVER WORKED as a plugin (corrected 2026-09-16)
+>
+> The previous text here said running `npx -y deepthinking-mcp@<version>` was *deliberate*. It was
+> also **broken every single session**, and the note kept anyone who read it from looking.
+>
+> An MCP client spawns its server with `child_process.spawn` and **no shell**. On Windows `npx` is a
+> `.cmd` shim, not an executable. Measured:
+>
+> | spawn | result |
+> |---|---|
+> | `spawn("npx")` | **`ENOENT`** ← the actual failure |
+> | `spawn("npx.cmd")` | `EINVAL` (Node refuses `.cmd` without a shell, CVE-2024-27980) |
+> | `spawn("npx", {shell:true})` | starts — but **cmd.exe consumes piped stdin**, which *is* the MCP transport |
+> | `spawn("node")` | works |
+>
+> The server never started, so there was no handshake to time out — the client reported
+> `CONNECT_TIMEOUT` after 30 s, which reads like a slow server rather than an absent one. Across the
+> whole marketplace the correlation was perfect: **both** npx-launched servers failed, **all 60**
+> node-launched ones bound fine.
+>
+> `npx` still works fine from a shell, which is why this survived so long: every manual test passed.
+> Only a real `spawn()` without a shell reproduces it.
+
+Version is pinned in three places that must move together — `package.json`,
+`.claude-plugin/plugin.json`, and the marketplace manifest in the `skills` repo. A split leaves the
+release invisible to the plugin system; on 2026-09-16 the marketplace manifest was found still
+advertising `9.5.3` against a repo at `10.0.0`.
 
 > ### Do not try to replace this with a committed `bundle/index.mjs`
 >
@@ -292,6 +319,11 @@ release, the same way the sibling servers bump their `_RETRY` key.
 >
 > If you do revisit this: **verify with a real `initialize` + `tools/list` handshake**, never with
 > "the process didn't crash". Both failure modes above exit 0.
+>
+> **Re-confirmed 2026-09-16.** Someone fixing the `npx` spawn bug tried bundling first *without
+> reading this section*, and hit failure mode 1 within minutes: `TypeError: ZodLazy is not a
+> constructor`. The warning is accurate and the cost of ignoring it is real. The launch problem was
+> never solvable by bundling — it was solved by `node` + a wrapper, above.
 
 ## MCP Configuration
 

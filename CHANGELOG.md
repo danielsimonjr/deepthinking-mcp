@@ -5,6 +5,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [10.0.1] - 2026-09-16
+
+### Fixed
+
+- **The Claude Code plugin never connected. Root cause: `npx` cannot be spawned by an MCP
+  client on Windows.** An MCP client launches its server with `child_process.spawn` and **no
+  shell**; `npx` is a `.cmd` shim, not an executable. Measured: `spawn("npx")` -> `ENOENT`,
+  `spawn("npx.cmd")` -> `EINVAL` (Node refuses `.cmd` without a shell, CVE-2024-27980),
+  `spawn("node")` -> works. The server never started, so there was no handshake to time out and
+  the client reported `CONNECT_TIMEOUT` after 30s - which reads like a slow server rather than an
+  absent one. Across the marketplace the correlation was exact: both npx-launched servers failed,
+  all 60 node-launched ones bound fine.
+
+  This survived for weeks because **`npx` works perfectly from a shell** - every manual test
+  passed. Only a real `spawn()` without a shell reproduces it.
+
+- `.mcp.json` now launches `node ${CLAUDE_PLUGIN_ROOT}/cli/mcp-server-wrapper.mjs`.
+
+### Added
+
+- `cli/mcp-server-wrapper.mjs` - verifies the declared dependencies are installed (running
+  `npm install --omit=dev` once if not), then **spawns** `dist/index.js` as its own process.
+
+  **Spawn rather than import is load-bearing.** `src/index.ts` gates `main()` behind
+  `isProcessEntryPoint()`, which compares `process.argv[1]` to its own `import.meta.url`.
+  Importing it from a wrapper makes the WRAPPER the entry point, the guard returns false,
+  `main()` never runs, and the process exits 0 with no output - the silent failure CLAUDE.md
+  warns about. Spawning keeps `argv[1]` correct and leaves that guard untouched.
+
+  Dependency sentinels are **derived from `package.json`**, never hardcoded. The first attempt
+  hardcoded `@modelcontextprotocol/sdk` - the pre-2.0 name, which survives only as a stale
+  directory in a long-lived `node_modules`. The check therefore passed locally and failed on
+  every clean clone, reinstalling on each launch and then reporting the deps still missing.
+
+  Measured time to a real `initialize` + `tools/list` returning 13 tools: **0.7-1.3s warm**,
+  **16.4-21.8s cold** (full dependency install). Cold start fits the 30s client budget, but the
+  margin is 8-14s and depends on install speed - it applies only to the first launch.
+
+### Notes
+
+- **Bundling remains impossible and was re-tested.** Flattening zod v4 into one module dies at
+  startup (`TypeError: ZodLazy is not a constructor`), reproducing the failure CLAUDE.md already
+  documented across six esbuild/tsup configurations. `dist/index.js` alone is also not viable:
+  tsup leaves the runtime deps external, so it throws `ERR_MODULE_NOT_FOUND` with no
+  `node_modules` - verified in an isolated directory.
+- The CLAUDE.md claim that launching via `npx` was *deliberate* has been corrected. It was not a
+  design choice that happened to break; it never worked in this context, and the note discouraged
+  anyone from looking.
+
 ## [Unreleased]
 
 ### Changed

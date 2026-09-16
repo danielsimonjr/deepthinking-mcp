@@ -2,10 +2,10 @@
   "mcpServers": {
     "deepthinking-mcp": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "deepthinking-mcp@10.0.0"],
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/cli/mcp-server-wrapper.mjs"],
       "env": {
-        "_RETRY": "2026-08-09-v9.5.2-session-config-leak"
+        "_RETRY": "2026-09-16-npx-spawn-enoent"
       }
     }
   }
