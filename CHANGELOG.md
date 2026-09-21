@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Every Dependabot PR failed CI at the install step, and the cause was a contract mismatch
+  rather than any dependency.** `bun install --frozen-lockfile` rejected each one with
+  `error: lockfile had changes, but lockfile is frozen`: Dependabot edits `package.json` and does
+  not write `bun.lock`, so the two disagreed and every job died before building or testing.
+  Measured 2026-09-21 across six open PRs (#317, #319, #320, #321, #322, #323), each failing 8
+  checks with an IDENTICAL profile — six unrelated bumps cannot fail identically by coincidence,
+  which is what located the defect in the contract instead of in the bumps.
+- Added `.github/workflows/dependabot-bun-lock.yml`: on a Dependabot PR it runs `bun install`
+  without `--frozen-lockfile`, commits `bun.lock` if it changed, pushes as `github-actions[bot]`
+  (a human push would cost the PR its automerge), and then dispatches `test.yml` onto the
+  regenerated commit — necessary because a `GITHUB_TOKEN` push does not retrigger CI, which would
+  otherwise leave the PR judged against a superseded SHA. The main CI job keeps
+  `--frozen-lockfile`; this does not weaken the gate.
+- **Switching `package-ecosystem` to `bun` was considered and rejected**, because it would break
+  Dependabot rather than fix it: its bun parser supports only `bun.lock` lockfileVersion 1 while
+  this repo writes version 2, so on that ecosystem no updates would be proposed at all.
+
 ## [10.0.1] - 2026-09-16
 
 ### Fixed

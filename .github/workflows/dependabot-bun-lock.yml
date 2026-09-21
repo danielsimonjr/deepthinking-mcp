@@ -1,0 +1,104 @@
+name: Dependabot bun.lock
+
+# WHY THIS EXISTS. Every Dependabot PR in this repo fails CI at the install step
+# with `error: lockfile had changes, but lockfile is frozen`. Dependabot edits
+# `package.json` and does NOT write `bun.lock`, while CI runs
+# `bun install --frozen-lockfile` — so the two disagree and every job dies before
+# it builds or tests anything. Measured 2026-09-21: SIX open Dependabot PRs
+# (#317, #319, #320, #321, #322, #323) each failing 8 checks with an identical
+# profile. Six unrelated bumps cannot fail identically by coincidence; the defect
+# is in the contract, not in any bump.
+#
+# WHY NOT JUST SWITCH `package-ecosystem` TO `bun`. Because that breaks
+# Dependabot outright. Its bun parser supports only bun.lock lockfileVersion 1
+# and this repo writes version 2, so on the bun ecosystem Dependabot cannot
+# propose updates at all. Staying on npm means it cannot write bun.lock. This
+# workflow is the follow-up that closes that gap, and it is the same design
+# already proven in a sibling repo rather than a new invention.
+#
+# HOW IT WORKS. Dependabot PRs only (same-repo, dependabot[bot]): run
+# `bun install` WITHOUT --frozen-lockfile, commit bun.lock if it changed, push.
+# The push uses GITHUB_TOKEN rather than a human identity, because a human push
+# would cost the PR its automerge; github-actions[bot] does not.
+#
+# Trigger is `pull_request`, NOT `pull_request_target` — this never checks out
+# untrusted code with write credentials. Dependabot PRs originate in this repo,
+# which the `if:` below also enforces.
+#
+# THE LOOP GUARD, and why the last step is needed: a GITHUB_TOKEN push does not
+# fire `pull_request`, so it cannot retrigger this workflow (good), but it also
+# leaves the original CI run pinned to the PRE-lockfile SHA (bad) — the PR would
+# still read red against a commit that no longer exists at the tip. So after a
+# lockfile commit we dispatch the CI workflow onto the new ref. That check
+# attaches to the regenerated SHA and is how the PR actually goes green. The
+# main CI job keeps --frozen-lockfile; this does not weaken the gate.
+
+on:
+  pull_request:
+    branches: [master, main, develop]
+
+# One regeneration at a time per Dependabot branch. A force-push from Dependabot
+# should cancel the in-flight run rather than race two pushes.
+concurrency:
+  group: dependabot-bun-lock-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  regenerate-lockfile:
+    name: Regenerate bun.lock
+    if: >-
+      (github.actor == 'dependabot[bot]'
+        || github.event.pull_request.user.login == 'dependabot[bot]')
+      && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    # Sized to the WORK — one `bun install` and a push, not a test tier. No
+    # measured envelope exists for this workflow in this repo yet, and a
+    # percentile taken from a workflow that has never run would be fiction.
+    timeout-minutes: 10
+    # Write is required to push bun.lock; actions:write is required to dispatch
+    # CI onto that commit, because GITHUB_TOKEN pushes do not retrigger it.
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Regenerate bun.lock
+        run: bun install
+
+      - name: Commit and push bun.lock if it changed
+        id: commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bun.lock
+          if [ -f bun.lockb ]; then
+            git add bun.lockb
+          fi
+          if git diff --cached --quiet; then
+            echo "bun.lock unchanged — nothing to push"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "deps: regenerate bun.lock"
+          git push origin "HEAD:${{ github.head_ref }}"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      # Dispatch the CI workflow onto the regenerated commit. This repo's gate is
+      # `test.yml` ("Test Suite"), NOT `ci.yml` — the filename differs per repo
+      # and a wrong name here fails silently, leaving the PR red with no clue why.
+      - name: Dispatch CI on the regenerated commit
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run test.yml --ref "${{ github.head_ref }}"
