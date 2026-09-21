@@ -17,7 +17,7 @@
         "cross-env": "^10.1.0",
         "js-yaml": "^5.4.1",
         "oxlint": "^1.83.0",
-        "prettier": "^3.9.6",
+        "prettier": "^3.9.8",
         "tsup": "^8.5.1",
         "tsx": "^4.23.13",
         "typescript": "^7.0.2",
@@ -425,7 +425,7 @@
 
     "postcss-load-config": ["postcss-load-config@6.0.1", "", { "dependencies": { "lilconfig": "^3.1.1" }, "peerDependencies": { "jiti": ">=1.21.0", "postcss": ">=8.0.9", "tsx": "^4.8.1", "yaml": "^2.4.2" }, "optionalPeers": ["jiti", "postcss", "tsx", "yaml"] }, ""],
 
-    "prettier": ["prettier@3.9.6", "", { "bin": "bin/prettier.cjs" }, "sha512-OpN0zzVdiaiAhxpuuj5efpIS4sY9j7bY6uR5mnj5yPzGkdkjNKSJeUThPb60Jw29QuAZgA4o+/iB49kFiaBX6g=="],
+    "prettier": ["prettier@3.9.8", "", { "bin": { "prettier": "bin/prettier.cjs" } }, "sha512-WRFq3Wn3WId7LLROfMLdH7xaFr2jR62wU8nLO6rQUOLOxNZUviyJQs1M0iIhLexSFy+L+w0ch66wtoO2jRjG0A=="],
 
     "readdirp": ["readdirp@4.1.2", "", {}, ""],
 
