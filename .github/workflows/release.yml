@@ -104,42 +104,40 @@ jobs:
             echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Generate changelog
-        id: changelog
+      # Pack ONE artifact. The previous step passed `files: dist/**/*`, and GitHub FLATTENS
+      # uploaded asset names: once dist/ became nested, files sharing a basename
+      # (base.d.ts, critique.d.ts.map, argumentation.d.ts.map ...) raced each other into the
+      # same asset name. v10.0.1 failed with "Asset X already exists (race condition)" after
+      # leaving 303 assets behind, where v10.0.0 - when dist/ was still flat - produced 6.
+      # The tarball cannot collide with itself, and by package.json `files` it contains exactly
+      # dist/, README.md and LICENSE: the same intent v10.0.0 shipped, in one file.
+      - name: Pack the release tarball
+        id: pack
         run: |
-          CHANGELOG=$(git log $(git describe --tags --abbrev=0 HEAD^)..HEAD --pretty=format:"- %s (%h)" --no-merges || echo "Initial release")
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          set -euo pipefail
+          FILE=$(npm pack --silent)
+          echo "file=$FILE" >> "$GITHUB_OUTPUT"
+          echo "Packed $FILE ($(stat -c%s "$FILE") bytes)"
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3
-        with:
-          tag_name: ${{ steps.get_version.outputs.tag }}
-          name: Release ${{ steps.get_version.outputs.version }}
-          body: |
-            ## Changes
-
-            ${{ steps.changelog.outputs.changelog }}
-
-            ## Installation
-
-            ```bash
-            bun install
-            ```
-
-            ## Full Changelog
-
-            See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md) for details.
-          draft: false
-          prerelease: false
-          files: |
-            dist/**/*
-            package.json
-            README.md
-            LICENSE
+      # ATTACH ONLY. Releases for this repo are written BY HAND and created locally, so this
+      # workflow must never author or rewrite one. The old step passed name: and body:, which
+      # overwrote hand-written notes with a git-log dump on v10.0.1. `gh release upload` touches
+      # assets and nothing else; if the release does not exist yet we STOP rather than create a
+      # release with machine-generated notes.
+      - name: Attach the tarball to the existing release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.get_version.outputs.tag }}"
+          if ! gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "::error::Release $TAG does not exist. This workflow ATTACHES assets; it does not create releases."
+            echo "Create the release first (it is authored by hand), then re-run."
+            exit 1
+          fi
+          gh release upload "$TAG" "${{ steps.pack.outputs.file }}" --repo "$GITHUB_REPOSITORY" --clobber
+          COUNT=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets|length')
+          echo "Attached ${{ steps.pack.outputs.file }}; release now has $COUNT asset(s)."
 
   notify:
     name: Notify Release

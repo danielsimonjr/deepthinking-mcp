@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- **The release workflow no longer collides with itself.** `Create GitHub Release` passed
+  `files: dist/**/*`, and GitHub **flattens** uploaded asset names. While `dist/` was flat that was
+  harmless: v10.0.0 produced 6 assets. Once `dist/` became nested, files sharing a basename
+  (`base.d.ts`, `critique.d.ts.map`, `argumentation.d.ts.map`, ...) raced each other into the same
+  asset name, and v10.0.1 failed with `Asset X already exists (race condition)` **after** leaving
+  303 assets on the release.
+
+  It now packs **one** artifact with `npm pack`. By `package.json` `files` the tarball contains
+  exactly `dist/`, `README.md` and `LICENSE` — the same intent v10.0.0 shipped, in a single file
+  that cannot collide with itself.
+
+- **The workflow no longer rewrites release notes.** It passed `name:` and `body:`, so on v10.0.1 it
+  overwrote hand-written notes with a git-log dump. Releases for this repo are authored by hand and
+  created locally, so the workflow now **attaches assets only**, via `gh release upload --clobber`.
+  If the release does not exist it **fails loudly** rather than creating one with machine-generated
+  notes — that refusal is the point, not an oversight.
+
+- **Removed the now-dead `Generate changelog` step.** With `body:` gone nothing consumed its output;
+  a step that computes an unused value is how the next reader is misled about what the workflow does.
+
+Unchanged on purpose: no `npm publish` in CI, and the third-party action SHA pins elsewhere in the
+workflow set.
+
 ## [Unreleased]
 
 ### Fixed
