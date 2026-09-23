@@ -143,14 +143,25 @@ jobs:
     name: Notify Release
     runs-on: ubuntu-latest
     needs: [release]
+    # always() so the summary is written even when the release job fails - but the
+    # SUMMARY must then say so. It used to print "GitHub Release: OK" unconditionally,
+    # which is a fabricated success signal: the one run where you read this summary is
+    # the run that went wrong.
     if: always()
 
     steps:
       - name: Post summary
         run: |
-          echo "## Release Completed" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- GitHub Release: ✅" >> $GITHUB_STEP_SUMMARY
+          RESULT="${{ needs.release.result }}"
+          if [ "$RESULT" = "success" ]; then
+            echo "## Release Completed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- Assets attached: OK" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## Release FAILED ($RESULT)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- Assets attached: NO - see the \"Attach Assets to Release\" job" >> $GITHUB_STEP_SUMMARY
+          fi
           echo "- npm Publish: run \`npm publish\` locally (see CLAUDE.md)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Version: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY

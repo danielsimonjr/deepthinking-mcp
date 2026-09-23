@@ -26,6 +26,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   If the release does not exist it **fails loudly** rather than creating one with machine-generated
   notes — that refusal is the point, not an oversight.
 
+- **The run summary no longer reports a success that did not happen.** The `notify` job runs
+  `if: always()` and printed `GitHub Release: OK` unconditionally. On the negative-control run -
+  a tag pushed with no release - the release job failed and the summary still reported success.
+  The one run where somebody reads that summary is the run that went wrong, so it now branches on
+  `needs.release.result` and names the failing job. The job that attaches assets is also renamed
+  from `Create GitHub Release` to `Attach Assets to Release`, because it no longer creates one.
+
 - **Removed the now-dead `Generate changelog` step.** With `body:` gone nothing consumed its output;
   a step that computes an unused value is how the next reader is misled about what the workflow does.
 
