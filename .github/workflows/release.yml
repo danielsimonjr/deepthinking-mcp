@@ -162,6 +162,6 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "- Assets attached: NO - see the \"Attach Assets to Release\" job" >> $GITHUB_STEP_SUMMARY
           fi
-          echo "- npm Publish: run \`npm publish\` locally (see CLAUDE.md)" >> $GITHUB_STEP_SUMMARY
+          echo "- npm Publish: done by the Publish workflow (publish.yml) on the same tag" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Version: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
