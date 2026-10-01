@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- **Publish to npm on a release tag.** The new workflow `.github/workflows/publish.yml` runs when a `v*` tag is pushed. It refuses a tag that is not exactly the `package.json` version (`scripts/publish-version-guard.mjs`). It skips the publish when that version is already on npm, so a re-run is harmless. It then installs, typechecks, builds, tests, and runs `npm publish --provenance --access public`. The job needs the repository secret `NPM`. If the secret is empty, the first step fails with a clear message and nothing publishes. `release.yml` does not publish to npm. It only attaches a tarball to the GitHub release. Its summary line now says that the Publish workflow does the npm publish.
+
 ### Fixed
 
 - **Removed the dead root `npm` Dependabot entry.** No dependency-update ecosystem works on a
