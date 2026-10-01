@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Removed the dead root `npm` Dependabot entry.** No dependency-update ecosystem works on a
+  Bun-managed root right now: `bun` fails with "Unsupported bun.lock 'lockfileVersion' 2" and `npm`
+  aborts during file fetching with "npm_and_yarn ecosystem cannot update bun.lock". Each error
+  recommends the other. Measured fleet-wide 2026-10-01: 19 dead updater jobs. The entry was failing
+  weekly and proposing nothing, so it was removed and the reason recorded in `dependabot.yml`.
+  Security alerts are unaffected; automated remediation is what stops. `github-actions` updates
+  continue.
+
 - **The release workflow no longer collides with itself.** `Create GitHub Release` passed
   `files: dist/**/*`, and GitHub **flattens** uploaded asset names. While `dist/` was flat that was
   harmless: v10.0.0 produced 6 assets. Once `dist/` became nested, files sharing a basename
