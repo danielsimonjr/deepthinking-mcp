@@ -3,6 +3,26 @@
 Repo-level task tracker. Cross-repo roll-up lives in `~/Github/TODO.md`; per-change history is in
 [`CHANGELOG.md`](CHANGELOG.md).
 
+## Dependabot ignore rules to restore when remediation returns
+
+The root Dependabot entry was removed on 2026-10-01 because no updater ecosystem works on a
+Bun-managed root (see `.github/dependabot.yml`). The ignore rules below went with it. They are
+NOT obsolete - they are inert only while nothing proposes updates, and each one must be restored
+with the entry.
+
+- [ ] 🟡 **The `typescript` semver-major ignore must come back with the entry.** It was:
+
+      ```yaml
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      ```
+
+      WHY, and it still holds: TypeScript 7 is un-adoptable until the lint toolchain supports it.
+      `@typescript-eslint/eslint-plugin@8.63.0` (latest at the time) declares
+      `peer typescript: >=4.8.4 <6.1.0`, so `npm ci` fails with ERESOLVE. Drop the ignore only
+      once `@typescript-eslint` ships TS 7 support — check with
+      `npm view @typescript-eslint/eslint-plugin peerDependencies.typescript`.
+
 ## Resolved: vitest 5 major (filed + closed 2026-09-07)
 
 - [x] **vitest 4 -> 5 cannot land here yet: `@vitest/coverage-v8` 5 breaks the coverage step.**
