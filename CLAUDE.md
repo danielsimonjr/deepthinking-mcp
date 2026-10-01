@@ -404,9 +404,13 @@ For parallel reasoning or handling multiple concurrent sessions:
 3. npm run test:publish       # Test BEFORE building
 4. npm run build              # Build AFTER typecheck and tests pass
 5. git add -A && git commit   # Commit source + dist
-6. npm publish                # Publish to npm
-7. git push origin master     # Push to GitHub
+6. git push origin master     # Push to GitHub
+7. git tag vX.Y.Z && git push origin vX.Y.Z   # publish.yml publishes to npm
 ```
+
+Do not run `npm publish` locally. `.github/workflows/publish.yml` is the only npm publisher. It runs
+on a `v*` tag, stops when the tag does not match the `package.json` version, and skips a version
+that is already on npm.
 
 ### Entry-point guard (`src/index.ts`)
 

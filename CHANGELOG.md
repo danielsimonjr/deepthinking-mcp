@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **CLAUDE.md no longer says to run `npm publish` locally.** Its build-and-publish steps now end with a `v*` tag push, and they say that `publish.yml` is the only npm publisher. A local publish next to the CI one would publish the same version twice or race it.
+
 - **Removed the dead root `npm` Dependabot entry.** No dependency-update ecosystem works on a
   Bun-managed root right now: `bun` fails with "Unsupported bun.lock 'lockfileVersion' 2" and `npm`
   aborts during file fetching with "npm_and_yarn ecosystem cannot update bun.lock". Each error
