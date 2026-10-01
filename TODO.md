@@ -3,6 +3,10 @@
 Repo-level task tracker. Cross-repo roll-up lives in `~/Github/TODO.md`; per-change history is in
 [`CHANGELOG.md`](CHANGELOG.md).
 
+## Flaky on Windows
+
+- [x] 🔴 **`FileSessionStore` concurrent reads return `undefined` on Windows.** `tests/unit/file-store.test.ts > concurrent operations > should handle concurrent reads` failed on windows-latest (Node 22.x) in run 36910387395 attempt 1 and passed on the rerun. The log shows ENOENT opening lock files in `<session>.json.locks\` just before the failure, so concurrent readers race in `src/utils/file-lock.ts` and a read can report an existing session as missing. Find the cause, reproduce it locally on Windows, fix it with a RED test first.
+
 ## Dependabot ignore rules to restore when remediation returns
 
 The root Dependabot entry was removed on 2026-10-01 because no updater ecosystem works on a
