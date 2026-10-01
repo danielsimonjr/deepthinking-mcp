@@ -391,9 +391,20 @@ async function acquireSharedLock(
     // Create our shared lock
     const lockInfo = createLockInfo("shared");
     try {
-      await fs.writeFile(sharedLockPath, JSON.stringify(lockInfo), {
-        flag: "wx",
-      });
+      try {
+        await fs.writeFile(sharedLockPath, JSON.stringify(lockInfo), {
+          flag: "wx",
+        });
+      } catch (error: unknown) {
+        if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+          // A reader releasing the last shared lock removes the directory
+          // when it is empty. That can happen between our mkdir and our
+          // write. The directory is only a container, so recreate it and
+          // retry at once; this is not a lock conflict and needs no wait.
+          continue;
+        }
+        throw error;
+      }
 
       // Double-check no exclusive lock was acquired while we were creating ours
       const recheck = await readLockInfo(exclusiveLockPath);

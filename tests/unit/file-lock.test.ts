@@ -16,12 +16,12 @@
  * 'should handle concurrent saves').
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { promises as fs } from "fs";
 import { randomUUID } from "crypto";
 import * as path from "path";
 import * as os from "os";
-import { acquireLock, withLock, isLocked } from "../../src/utils/file-lock.js";
+import { acquireLock, withLock, withSharedLock, isLocked } from "../../src/utils/file-lock.js";
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -149,5 +149,52 @@ describe("file-lock", () => {
       const statusAfter = await isLocked(targetFile);
       expect(statusAfter.locked).toBe(false);
     });
+  });
+  describe("shared-lock directory cleanup race", () => {
+    it("acquires a shared lock when the lock directory is removed right after mkdir", async () => {
+      // Root cause: acquireSharedLock did mkdir(recursive) then writeFile in two
+      // steps. A releasing reader that saw the directory empty could rmdir it
+      // between those steps, so writeFile threw ENOENT and the read failed.
+      // Here the interleaving is forced: right after mkdir returns, another
+      // "reader" removes the empty directory (twice in a row).
+      const realMkdir = fs.mkdir.bind(fs);
+      let injected = 0;
+      const spy = vi
+        .spyOn(fs, "mkdir")
+        .mockImplementation(async (p: any, o: any) => {
+          const res = await realMkdir(p, o);
+          if (String(p).endsWith(".locks") && injected < 2) {
+            injected++;
+            await fs.rmdir(p);
+          }
+          return res;
+        });
+      try {
+        const value = await withSharedLock(targetFile, async () => 42, {
+          timeout: 5000,
+          retryInterval: 5,
+        });
+        expect(value).toBe(42);
+        expect(injected).toBe(2);
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
+    it("never fails concurrent staggered readers", async () => {
+      const readers = 40;
+      for (let r = 0; r < 25; r++) {
+        const results = await Promise.allSettled(
+          Array.from({ length: readers }, async (_, i) => {
+            await sleep(i % 3);
+            return withSharedLock(targetFile, async () => i, {
+              timeout: 5000,
+              retryInterval: 5,
+            });
+          }),
+        );
+        expect(results.filter((x) => x.status === "rejected")).toHaveLength(0);
+      }
+    }, 60000);
   });
 });
