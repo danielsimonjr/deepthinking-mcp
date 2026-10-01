@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A concurrent read of an existing session no longer reports it as missing.** `acquireSharedLock` in `src/utils/file-lock.ts` created the `<file>.locks` directory and then wrote the lock file in a second step. A reader that released the last shared lock could remove the empty directory between those two steps. The write then failed with `ENOENT`, and `FileSessionStore.loadSession` turned that error into `null`. The write now recreates the directory and retries at once on `ENOENT`. A regression test forces the interleaving.
 - **CLAUDE.md no longer says to run `npm publish` locally.** Its build-and-publish steps now end with a `v*` tag push, and they say that `publish.yml` is the only npm publisher. A local publish next to the CI one would publish the same version twice or race it.
 
 - **Removed the dead root `npm` Dependabot entry.** No dependency-update ecosystem works on a
