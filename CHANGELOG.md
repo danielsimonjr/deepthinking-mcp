@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The Dependabot bun.lock workflow no longer leaves a PR BLOCKED.** GitHub holds the
+  `pull_request` runs that the workflow's lockfile push triggers at `action_required`, and a
+  `workflow_dispatch` run never reaches the PR's required checks. The workflow now approves the
+  held runs on the commit that it pushed, in place of the dispatch step. `head_ref` now reaches
+  the shell through `env:`, and only a Dependabot push cancels an in-flight run.
+
 - **A concurrent read of an existing session no longer reports it as missing.** `acquireSharedLock` in `src/utils/file-lock.ts` created the `<file>.locks` directory and then wrote the lock file in a second step. A reader that released the last shared lock could remove the empty directory between those two steps. The write then failed with `ENOENT`, and `FileSessionStore.loadSession` turned that error into `null`. The write now recreates the directory and retries at once on `ENOENT`. A regression test forces the interleaving.
 - **CLAUDE.md no longer says to run `npm publish` locally.** Its build-and-publish steps now end with a `v*` tag push, and they say that `publish.yml` is the only npm publisher. A local publish next to the CI one would publish the same version twice or race it.
 
