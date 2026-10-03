@@ -385,8 +385,25 @@ async function acquireSharedLock(
       }
     }
 
-    // Create shared lock directory if needed
-    await fs.mkdir(sharedLockDir, { recursive: true });
+    // Create shared lock directory if needed. A recursive mkdir is not
+    // atomic: it finds the directory present, then checks it, and a reader
+    // releasing the last shared lock can remove it in between. Node then
+    // rejects the mkdir itself with ENOENT (and, on Windows, EPERM while the
+    // removal is still pending). Both are the same race as the writeFile
+    // ENOENT below, so retry; any other error is real and propagates.
+    try {
+      await fs.mkdir(sharedLockDir, { recursive: true });
+    } catch (error: unknown) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code === "ENOENT") {
+        continue;
+      }
+      if (code === "EPERM" && process.platform === "win32") {
+        await sleep(options.retryInterval);
+        continue;
+      }
+      throw error;
+    }
 
     // Create our shared lock
     const lockInfo = createLockInfo("shared");

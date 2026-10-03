@@ -181,6 +181,64 @@ describe("file-lock", () => {
       }
     });
 
+    // A recursive mkdir is not atomic: it finds the directory present, then
+    // checks it, and a releasing reader can remove it in between. Node then
+    // rejects the mkdir itself. Measured on Node 24: a recursive mkdir racing
+    // an rmdir threw ENOENT 1860 times (and EPERM 14 times on Windows) in 8 s.
+    // The mkdir sat outside the retry, so that error failed the read.
+    const raceErrors =
+      process.platform === "win32" ? ["ENOENT", "EPERM"] : ["ENOENT"];
+    for (const code of raceErrors) {
+      it(`acquires a shared lock when mkdir itself fails with ${code} from a concurrent rmdir`, async () => {
+        const realMkdir = fs.mkdir.bind(fs);
+        let injected = 0;
+        const spy = vi
+          .spyOn(fs, "mkdir")
+          .mockImplementation(async (p: any, o: any) => {
+            if (String(p).endsWith(".locks") && injected < 2) {
+              injected++;
+              throw Object.assign(new Error(`${code}: simulated race`), {
+                code,
+              });
+            }
+            return realMkdir(p, o);
+          });
+        try {
+          const value = await withSharedLock(targetFile, async () => 42, {
+            timeout: 5000,
+            retryInterval: 5,
+          });
+          expect(value).toBe(42);
+          expect(injected).toBe(2);
+        } finally {
+          spy.mockRestore();
+        }
+      });
+    }
+
+    it("still fails at once on a mkdir error that is not a race", async () => {
+      const spy = vi.spyOn(fs, "mkdir").mockImplementation(async (p: any) => {
+        if (String(p).endsWith(".locks")) {
+          throw Object.assign(new Error("EACCES: simulated"), {
+            code: "EACCES",
+          });
+        }
+        return undefined;
+      });
+      const started = Date.now();
+      try {
+        await expect(
+          withSharedLock(targetFile, async () => 42, {
+            timeout: 5000,
+            retryInterval: 5,
+          }),
+        ).rejects.toMatchObject({ code: "EACCES" });
+        expect(Date.now() - started).toBeLessThan(1000);
+      } finally {
+        spy.mockRestore();
+      }
+    });
+
     it("never fails concurrent staggered readers", async () => {
       const readers = 40;
       for (let r = 0; r < 25; r++) {
@@ -193,7 +251,13 @@ describe("file-lock", () => {
             });
           }),
         );
-        expect(results.filter((x) => x.status === "rejected")).toHaveLength(0);
+        // The reasons, not just the count: a failure names the error code.
+        const reasons = results.flatMap((x) =>
+          x.status === "rejected"
+            ? [String((x.reason as NodeJS.ErrnoException)?.code ?? x.reason)]
+            : [],
+        );
+        expect(reasons).toEqual([]);
       }
     }, 60000);
   });
