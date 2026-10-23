@@ -1,17 +1,17 @@
 {
   "metadata": {
     "name": "deepthinking-mcp",
-    "version": "9.5.1",
-    "lastUpdated": "2026-08-08",
+    "version": "10.0.1",
+    "lastUpdated": "2026-10-23",
     "totalFiles": 241,
     "totalModules": 14,
-    "totalExports": 1184
+    "totalExports": 1186
   },
   "entryPoints": [
     {
       "file": "src/index.ts",
       "type": "main",
-      "description": "DeepThinking MCP Server"
+      "description": "The protocol revision this server actually implements."
     }
   ],
   "modules": {
@@ -4647,25 +4647,21 @@
     },
     "entry": {
       "src/index.ts": {
-        "description": "DeepThinking MCP Server",
+        "description": "The protocol revision this server actually implements.",
         "externalDependencies": [
           {
-            "package": "@modelcontextprotocol/sdk/server/index.js",
+            "package": "@modelcontextprotocol/server",
             "imports": [
+              "LATEST_PROTOCOL_VERSION",
+              "SUPPORTED_PROTOCOL_VERSIONS",
+              "ListToolsResult",
               "Server"
             ]
           },
           {
-            "package": "@modelcontextprotocol/sdk/server/stdio.js",
+            "package": "@modelcontextprotocol/server/stdio",
             "imports": [
-              "StdioServerTransport"
-            ]
-          },
-          {
-            "package": "@modelcontextprotocol/sdk/types.js",
-            "imports": [
-              "CallToolRequestSchema",
-              "ListToolsRequestSchema"
+              "serveStdio"
             ]
           }
         ],
@@ -4750,14 +4746,18 @@
           }
         ],
         "exports": [
+          "MCP_PROTOCOL_VERSION",
           "server",
           "format",
+          "buildServer",
           "main"
         ],
         "functions": [
+          "buildServer",
           "main"
         ],
         "constants": [
+          "MCP_PROTOCOL_VERSION",
           "server",
           "format"
         ]
@@ -16174,14 +16174,14 @@
   "statistics": {
     "totalTypeScriptFiles": 241,
     "totalModules": 14,
-    "totalLinesOfCode": 118934,
-    "totalExports": 1184,
+    "totalLinesOfCode": 118980,
+    "totalExports": 1186,
     "totalClasses": 143,
     "totalInterfaces": 562,
-    "totalFunctions": 433,
+    "totalFunctions": 434,
     "totalTypeGuards": 87,
     "totalEnums": 3,
-    "totalConstants": 133,
+    "totalConstants": 134,
     "totalReExports": 487,
     "totalTypeOnlyImports": 333,
     "runtimeCircularDeps": 0,

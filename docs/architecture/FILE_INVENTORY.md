@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **489 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **490 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -18,18 +18,18 @@ Every tracked TypeScript file in the repository — **489 files** — not just t
 | other | 2 |
 | reachable | 229 |
 | template | 5 |
-| test | 225 |
+| test | 226 |
 | tool | 14 |
 
 ## Per-area counts
 
 | Area | Files | Lines |
 |---|---|---|
-| config | 2 | 49 |
+| config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 241 | 118,934 |
+| src | 241 | 118,980 |
 | templates | 5 | 772 |
-| tests | 225 | 101,105 |
+| tests | 226 | 101,370 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -89,7 +89,7 @@ Every tracked TypeScript file in the repository — **489 files** — not just t
 | `src/export/visual/utils/tikz.ts` | src | 1013 | reachable |
 | `src/export/visual/utils/uml.ts` | src | 991 | reachable |
 | `src/export/visual/visual-exporter.ts` | src | 230 | reachable |
-| `src/index.ts` | src | 1043 | reachable |
+| `src/index.ts` | src | 1061 | reachable |
 | `src/interfaces/ILogger.ts` | src | 179 | reachable |
 | `src/modes/causal/graph/algorithms/centrality.ts` | src | 610 | reachable |
 | `src/modes/causal/graph/algorithms/d-separation.ts` | src | 668 | reachable |
@@ -230,7 +230,7 @@ Every tracked TypeScript file in the repository — **489 files** — not just t
 | `src/types/modes/temporal.ts` | src | 112 | reachable |
 | `src/types/session.ts` | src | 543 | reachable |
 | `src/utils/errors.ts` | src | 265 | reachable |
-| `src/utils/file-lock.ts` | src | 630 | reachable |
+| `src/utils/file-lock.ts` | src | 658 | reachable |
 | `src/utils/logger-types.ts` | src | 37 | reachable |
 | `src/utils/logger.ts` | src | 180 | reachable |
 | `src/utils/sanitization.ts` | src | 210 | reachable |
@@ -311,10 +311,11 @@ Every tracked TypeScript file in the repository — **489 files** — not just t
 | `tests/integration/handlers/synthesis.handler.test.ts` | tests | 264 | test |
 | `tests/integration/handlers/systemsthinking.handler.test.ts` | tests | 297 | test |
 | `tests/integration/index-handlers.test.ts` | tests | 1088 | test |
-| `tests/integration/index-importable.test.ts` | tests | 71 | test |
-| `tests/integration/index-server.test.ts` | tests | 334 | test |
+| `tests/integration/index-importable.test.ts` | tests | 94 | test |
+| `tests/integration/index-server.test.ts` | tests | 333 | test |
+| `tests/integration/mcp-2-compliance.test.ts` | tests | 136 | test |
 | `tests/integration/mcp-compliance.test.ts` | tests | 295 | test |
-| `tests/integration/mcp-protocol.test.ts` | tests | 755 | test |
+| `tests/integration/mcp-protocol.test.ts` | tests | 752 | test |
 | `tests/integration/mode-handler-delegation.test.ts` | tests | 1155 | test |
 | `tests/integration/modes/causal-graph.test.ts` | tests | 422 | test |
 | `tests/integration/multi-session.test.ts` | tests | 572 | test |
@@ -333,7 +334,7 @@ Every tracked TypeScript file in the repository — **489 files** — not just t
 | `tests/integration/tools/analytical-cryptanalytic.test.ts` | tests | 513 | test |
 | `tests/integration/tools/analytical-firstprinciples.test.ts` | tests | 518 | test |
 | `tests/integration/tools/analytical-metareasoning.test.ts` | tests | 532 | test |
-| `tests/integration/tools/analyze-confidence-contract.test.ts` | tests | 90 | test |
+| `tests/integration/tools/analyze-confidence-contract.test.ts` | tests | 89 | test |
 | `tests/integration/tools/analyze.test.ts` | tests | 546 | test |
 | `tests/integration/tools/causal.test.ts` | tests | 767 | test |
 | `tests/integration/tools/common-parameters.test.ts` | tests | 1055 | test |
@@ -393,7 +394,7 @@ Every tracked TypeScript file in the repository — **489 files** — not just t
 | `tests/unit/export/visual/utils/document-builders.test.ts` | tests | 1127 | test |
 | `tests/unit/export/visual/utils/graph-builders.test.ts` | tests | 680 | test |
 | `tests/unit/export/visual/utils/visual-builders.test.ts` | tests | 955 | test |
-| `tests/unit/file-lock.test.ts` | tests | 154 | test |
+| `tests/unit/file-lock.test.ts` | tests | 265 | test |
 | `tests/unit/file-store-storage-error.test.ts` | tests | 83 | test |
 | `tests/unit/file-store.test.ts` | tests | 542 | test |
 | `tests/unit/gametheory.test.ts` | tests | 681 | test |
@@ -523,5 +524,5 @@ Every tracked TypeScript file in the repository — **489 files** — not just t
 | `tools/create-dependency-graph/src/reporters/unused-report.ts` | tools | 87 | tool |
 | `tools/create-dependency-graph/src/scanner.ts` | tools | 240 | tool |
 | `tools/create-dependency-graph/src/types.ts` | tools | 101 | tool |
-| `tsup.config.ts` | config | 15 | config |
+| `tsup.config.ts` | config | 18 | config |
 | `vitest.config.ts` | config | 34 | config |

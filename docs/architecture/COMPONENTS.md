@@ -27,13 +27,16 @@ listings. For request-flow sequencing, see `DATAFLOW.md`. For the full 13-tool M
 
 `src/services/` sits between the MCP handlers in `src/index.ts` and the mode/export subsystems.
 `ThoughtFactory` and `ExportService` are classes; `RecommendationService` is a module of pure
-functions. None contains mode-specific logic itself — all delegate.
+functions. `ThoughtFactory` and `RecommendationService` delegate to other subsystems.
+`ExportService` delegates the visual formats to `VisualExporter`. It builds the `json`, `markdown`,
+`latex` and `jupyter` documents itself, including their mode-specific sections.
 
-`RecommendationService` exists for a structural reason worth knowing: `src/index.ts` calls `main()`
-at module scope, so a test cannot import it. Response-building logic that lives there is only
-reachable by re-implementation in tests, which is how several subsystems went dead. Moving
-`recommend_mode`'s response construction here made it testable. Extending that treatment to the
-remaining handlers is tracked work.
+`RecommendationService` exists for a structural reason: response-building logic that lives in
+`src/index.ts` is reachable only through the MCP dispatch path. `src/index.ts` is importable by a
+test, because `main()` runs only when the module is the process entry point and the module exports
+a ready `server`. A unit test of one response builder in that file still needs the whole server
+around it. A module of pure functions needs no server, so a test can call the `recommend_mode`
+response builder on its own.
 
 ### ThoughtFactory (`src/services/ThoughtFactory.ts`)
 
@@ -58,11 +61,10 @@ export class ThoughtFactory {
 }
 ```
 
-`createThought` always routes through `ModeHandlerRegistry.createThought()` — the constructor
-auto-registers all 34 mode handlers via `registerAllHandlers()` unless
-`autoRegisterHandlers: false` is passed. The legacy per-mode switch statement this factory used to
-contain was removed; every mode now has a dedicated handler, so `createThought` throws only if
-registry initialization itself failed (a condition the code treats as "should never happen").
+`createThought` always calls `ModeHandlerRegistry.createThought()`. The constructor registers all 35
+mode handlers through `registerAllHandlers()` unless `autoRegisterHandlers: false` is passed. A mode
+string with no registered handler gets `GenericModeHandler` from the registry. The `throw` at the end
+of `createThought` cannot run, because the private `shouldUseRegistry()` always returns `true`.
 
 ### RecommendationService (`src/services/RecommendationService.ts`)
 
@@ -81,16 +83,17 @@ export function buildModeRecommendation(input: RecommendModeInput): string
 ```
 
 Two input paths: `problemType` alone gives a quick recommendation; `problemCharacteristics` gives
-the comprehensive one. The taxonomy section is **appended** — set `includeReasoningTypes: false`
-and the response is byte-identical to what it was before the taxonomy was wired, which is asserted
-by test. A throwing advisory engine degrades to a one-line note; the recommendation still returns.
+the comprehensive one. The taxonomy section is **appended**. With `includeReasoningTypes: false` the
+function returns the mode recommendation with no taxonomy section. A test asserts that the default
+response starts with the opt-out response. A throwing advisory engine degrades to a one-line note;
+the recommendation still returns.
 
 ---
 
 ### ExportService (`src/services/ExportService.ts`)
 
-**Purpose**: Orchestrates multi-format session export — routes to document exporters (JSON,
-Markdown, LaTeX, HTML, Jupyter) or to `VisualExporter` for diagram formats.
+**Purpose**: Orchestrates multi-format session export — builds the `json`, `markdown`, `latex` and
+`jupyter` documents in this file, and routes the other eleven formats to `VisualExporter`.
 
 ```typescript
 export class ExportService {
@@ -107,25 +110,28 @@ export class ExportService {
 ```
 
 `exportSession` is the entire public surface. Internally it branches on `format`: the eleven
-visual formats (`mermaid` through `visual-markdown`) delegate to a private `exportVisual()` which
-constructs a `VisualExporter` and picks the mode-specific visual exporter from
-`src/export/visual/modes/`; `json`, `markdown`, `latex`, and `jupyter` are handled by private
-`exportTo*` methods inside this file (`html` is a visual format here, not a private method — it is
-generated via `HTMLDocBuilder` in `src/export/visual/utils/html.ts`). `visual-json` and
+visual formats (`mermaid`, `dot`, `ascii`, `svg`, `graphml`, `tikz`, `modelica`, `html`, `uml`,
+`visual-json` and `visual-markdown`) delegate to a private `exportVisual()`. `exportVisual()` throws
+when the session has no thoughts. For a session with one thought, it calls the mode-specific method
+of the `VisualExporter` that the constructor created (the exporters are in
+`src/export/visual/modes/`). For a session with more than one thought, it renders the whole session
+as one graph. `json`, `markdown`, `latex`, and `jupyter` are handled by private `exportTo*` methods
+inside this file. `html` is a visual format here, not a private method. The session-graph renderer
+builds it in `toHTML()` (`src/export/visual/graph-render.ts`) with the helper functions of
+`src/export/visual/utils/html.ts`; no code under `src/` constructs `HTMLDocBuilder`. `visual-json` and
 `visual-markdown` are aliases that map onto the `json`/`markdown` members of `VisualFormat`, kept
 distinct from the plain `json`/`markdown` document formats so callers can request either the flat
-document or the graph-structured visual rendering of the same format name. The class carries the
-codebase's one confirmed type suppression: a `@ts-expect-error` at `ExportService.ts:1043` marking
-a method kept for future use.
+document or the graph-structured visual rendering of the same format name.
 
 ---
 
 ## Session
 
 `src/session/` owns session lifecycle, meta-monitoring (strategy tracking across a session), and
-the persistence abstraction. Storage has two implementations reachable through one interface;
-cross-process file locking lives in `src/utils/file-lock.ts`, not in a `src/session/locks/`
-subdirectory.
+the persistence abstraction. `SessionManager` keeps sessions in an in-memory LRU cache, and it can
+also write them through one optional `SessionStorage` backend. `FileSessionStore` is the only
+backend. Cross-process file locking lives in `src/utils/file-lock.ts`; `src/session/` has no
+`locks/` subdirectory.
 
 ### SessionManager (`src/session/manager.ts`)
 
@@ -175,9 +181,9 @@ Behaviour notes:
 
 - **Eviction.** The in-memory store is an `LRUCache<ThinkingSession>` sized from
   `getConfig().maxActiveSessions` (`MCP_MAX_SESSIONS`, default 100). Its `onEvict` callback
-  auto-saves the evicted session to `storage` when `enableAutoSave` is set; with no storage
-  configured, the session's thoughts are discarded and a warning is logged rather than dropped
-  silently.
+  saves the evicted session to `storage` when a storage backend exists and the session's
+  `enableAutoSave` is true. In every other case it discards the thoughts and logs a warning. In both
+  cases it clears the meta-monitoring state of the session.
 - **Expiry.** `getSession()` checks expiry twice — once against the in-memory copy
   (`isSessionExpired` inside `getLiveSession`), and again after a storage reload, because a
   persisted session's `updatedAt` does not change on reload; without the second check an expired
@@ -188,10 +194,15 @@ Behaviour notes:
 - **`switchMode`** changes `session.mode` and `session.config.modeConfig.mode` together and
   re-persists if auto-save is enabled; it does not validate that the new mode is compatible with
   thoughts already recorded.
-- **`evaluateStrategy` / `calculateQualityMetrics`** are heuristic scorers over
-  `currentStrategies` / `sessionHistory` maps keyed by `sessionId` — weighted combinations of
-  progress-indicator counts, issue counts, and mode diversity, not derived from the mode handlers
-  themselves. Both return neutral (`0.5`-centered) results when no history exists for the session.
+- **`evaluateStrategy`** scores the tracked strategy of a session from its progress indicators,
+  thoughts spent, elapsed time and issue count. It returns a baseline (0.5 for every score except
+  `progressRate`, which is 0) when no strategy is tracked. **`calculateQualityMetrics`** scores the
+  session history from its length, average uncertainty, mode diversity and the strategy's issue and
+  progress counts. It returns 0.5 for every metric when the session has no history. Neither method
+  uses the mode handlers. No code under `src/` outside `manager.ts` calls the public meta-monitoring
+  methods (`evaluateStrategy`, `suggestAlternatives`, `calculateQualityMetrics`,
+  `updateStrategyProgress`, `recordStrategyIssue`, `getMetaSessionContext`). Only the private
+  `recordMetaThought` runs, from `addThought`.
 - **`getSessionCacheStats()`** exposes `LRUCache.getStats()` directly, specifically so tests can
   assert on cache hit/miss counts instead of wall-clock timing.
 
@@ -207,10 +218,11 @@ export class SessionMetricsCalculator {
 }
 ```
 
-`updateMetrics` dispatches internally to a private `updateModeSpecificMetrics()` (tracks
-mode-dependent signals such as branch counts and revision counts) and a private
-`updateCacheStats()`. Both private helpers are implementation detail; `updateMetrics` is the
-only entry point callers need.
+`updateMetrics` updates the basic counters itself: thought count, thoughts by type, revision
+count, time spent, average uncertainty and dependency depth. It then calls a private
+`updateModeSpecificMetrics()`, which records custom metrics for temporal, game-theory and
+evidential thoughts, and a private `updateCacheStats()`, which copies the statistics of the global
+validation cache. `updateMetrics` is the only entry point callers need.
 
 ### Storage — `src/session/storage/`
 
@@ -275,9 +287,9 @@ sidecars), used by `FileSessionStore` so multiple `deepthinking-mcp` instances c
 export interface LockOptions { /* timeout, staleThreshold, type: "exclusive" | "shared", ... */ }
 
 export async function acquireLock(filePath: string, options?: LockOptions): Promise<() => Promise<void>>
-export async function withLock<T>(filePath: string, fn: () => Promise<T>, options?: LockOptions): Promise<T>
-export async function withSharedLock<T>(filePath: string, fn: () => Promise<T>, options?: LockOptions): Promise<T>
-export async function isLocked(filePath: string): Promise<boolean>
+export async function withLock<T>(filePath: string, fn: () => Promise<T>, options?: Omit<LockOptions, "type">): Promise<T>
+export async function withSharedLock<T>(filePath: string, fn: () => Promise<T>, options?: Omit<LockOptions, "type">): Promise<T>
+export async function isLocked(filePath: string, staleThreshold?: number): Promise<{ locked: boolean; type?: "exclusive" | "shared"; holders?: number }>
 export async function forceUnlock(filePath: string): Promise<void>
 ```
 
@@ -286,17 +298,23 @@ the returned release function from `acquireLock`. `withSharedLock` allows concur
 Stale locks (older than a configurable threshold) are detected and cleared automatically rather
 than blocking forever on a crashed holder.
 
+A shared lock is one file in a per-path directory, and the reader that releases the last shared
+lock removes that directory. `acquireSharedLock` retries when a second reader meets that removal
+between its `mkdir` and its `writeFile`: `ENOENT` from either call, and on Windows `EPERM` from
+`mkdir`. Any other `mkdir` error propagates. From `writeFile`, `EEXIST` returns a release function
+for the lock file that already exists, and any other error propagates.
+
 ---
 
 ## Mode Handlers
 
-`src/modes/handlers/` implements the Strategy pattern that replaced a monolithic switch statement
-in the original `ThoughtFactory`. The directory holds 37 files: one interface file
+`src/modes/handlers/` implements the Strategy pattern: one handler class for each mode. The
+directory holds 37 files: one interface file
 (`ModeHandler.ts`), 35 handlers each bound to exactly one `ThinkingMode` value via
 `registerAllHandlers()` in `src/modes/index.ts`, and `GenericModeHandler.ts`, a 36th handler class
-that is never registered — it is constructed on demand by the registry as the fallback for any
-mode with no registered handler, and today that path is unreachable in practice because all 35
-non-generic modes are registered at startup. `ThinkingMode.CUSTOM` (handled by `CustomHandler`) is
+that is never registered — the registry constructs it on demand as the fallback for any mode
+string with no registered handler. That path is unreachable for a `ThinkingMode` member, because
+all 35 non-generic modes are registered at startup. `ThinkingMode.CUSTOM` (handled by `CustomHandler`) is
 one of the 35 registered modes, not a separate case.
 
 ### ModeHandler (`src/modes/handlers/ModeHandler.ts`)
@@ -320,10 +338,10 @@ export interface ModeHandler {
 
 export interface ValidationResult {
   valid: boolean;
-  errors: ValidationError[];
+  errors: HandlerValidationError[];
   warnings: ValidationWarning[];
 }
-export interface ValidationError { field: string; message: string; code: string }
+export interface HandlerValidationError { field: string; message: string; code: string }
 export interface ValidationWarning { field: string; message: string; suggestion?: string }
 
 export interface ModeEnhancements {
@@ -348,14 +366,17 @@ export interface ModeStatus {
 
 // Factory helpers
 export function validationSuccess(warnings?: ValidationWarning[]): ValidationResult
-export function validationFailure(errors: ValidationError[], warnings?: ValidationWarning[]): ValidationResult
-export function createValidationError(field: string, message: string, code: string): ValidationError
+export function validationFailure(errors: HandlerValidationError[], warnings?: ValidationWarning[]): ValidationResult
+export function createValidationError(field: string, message: string, code: string): HandlerValidationError
 export function createValidationWarning(field: string, message: string, suggestion?: string): ValidationWarning
 ```
 
-`getEnhancements` and `supportsThoughtType` are optional on the interface but every shipped handler
-implements both; only `GenericModeHandler` and a small number of simple handlers omit
-`supportsThoughtType` where a mode has no thought-type variants worth checking.
+`getEnhancements` and `supportsThoughtType` are optional on the interface. All 36 handler classes
+implement `getEnhancements`. All handlers except `AbductiveHandler`, `AnalogicalHandler` and
+`GenericModeHandler` implement `supportsThoughtType`.
+
+`HandlerValidationError` is plain data inside a `ValidationResult`. It is never thrown. The
+throwable `ValidationError` class is a different type, in `src/utils/errors.ts`.
 
 ### ModeHandlerRegistry (`src/modes/registry.ts`)
 
@@ -404,8 +425,9 @@ handler-specific logic runs.
 ### All handlers
 
 Every row below is a `class X implements ModeHandler` in `src/modes/handlers/`, registered in
-`registerAllHandlers()` unless noted. The description column is each handler's own `description`
-field, not a paraphrase.
+`registerAllHandlers()` unless noted. The description column repeats each handler's own `description`
+field, with two exceptions: the `GenericModeHandler` row is a summary (the handler computes its
+`description` from the mode in its constructor), and the Bayesian row adds a closing clause.
 
 | Handler | File | Mode | What it adds |
 |---|---|---|---|
@@ -418,7 +440,7 @@ field, not a paraphrase.
 | DeductiveHandler | `DeductiveHandler.ts` | `deductive` | Reasoning from general principles to specific conclusions with validity checking |
 | AbductiveHandler | `AbductiveHandler.ts` | `abductive` | Inference to best explanation with hypothesis evaluation and evidence coverage |
 | CausalHandler | `CausalHandler.ts` | `causal` | Causal graph analysis with intervention reasoning and cycle detection |
-| BayesianHandler | `BayesianHandler.ts` | `bayesian` | Probabilistic reasoning with Bayes theorem and evidence updates — computes the posterior itself |
+| BayesianHandler | `BayesianHandler.ts` | `bayesian` | Probabilistic reasoning with Bayes theorem and evidence updates (the handler also computes the posterior itself) |
 | CounterfactualHandler | `CounterfactualHandler.ts` | `counterfactual` | What-if analysis with world state tracking and divergence point identification |
 | TemporalHandler | `TemporalHandler.ts` | `temporal` | Timeline analysis with Allen's interval algebra and event sequencing |
 | HistoricalHandler | `HistoricalHandler.ts` | `historical` | Historical analysis with source evaluation, pattern recognition, and causal chain analysis |
@@ -426,7 +448,7 @@ field, not a paraphrase.
 | EvidentialHandler | `EvidentialHandler.ts` | `evidential` | Dempster-Shafer belief functions with uncertainty quantification |
 | AnalogicalHandler | `AnalogicalHandler.ts` | `analogical` | Cross-domain reasoning through structural mapping and analogy transfer |
 | FirstPrinciplesHandler | `FirstPrinciplesHandler.ts` | `firstprinciples` | Bottom-up reasoning from fundamental truths with derivation chains |
-| SystemsThinkingHandler | `SystemsThinkingHandler.ts` | `systemsthinking` | Systems analysis with archetype detection, feedback loops, and leverage point identification |
+| SystemsThinkingHandler | `SystemsThinkingHandler.ts` | `systemsthinking` | Systems analysis: feedback loops and leverage points; archetype detection runs only in `getEnhancements()` |
 | ScientificMethodHandler | `ScientificMethodHandler.ts` | `scientificmethod` | Hypothesis testing with experimental design and falsifiability analysis |
 | FormalLogicHandler | `FormalLogicHandler.ts` | `formallogic` | Propositional and predicate logic with inference validation |
 | SynthesisHandler | `SynthesisHandler.ts` | `synthesis` | Multi-source synthesis with theme extraction, contradiction detection, and gap analysis |
@@ -437,22 +459,23 @@ field, not a paraphrase.
 | ComputabilityHandler | `ComputabilityHandler.ts` | `computability` | Turing machine analysis, decidability proofs, and reductions |
 | CryptanalyticHandler | `CryptanalyticHandler.ts` | `cryptanalytic` | Bayesian cryptanalysis with Turing's deciban evidence system |
 | AlgorithmicHandler | `AlgorithmicHandler.ts` | `algorithmic` | Algorithm design, complexity analysis, and correctness proofs (CLRS coverage) |
-| MetaReasoningHandler | `MetaReasoningHandler.ts` | `metareasoning` | Reasoning about reasoning itself — strategy monitoring and optimization |
+| MetaReasoningHandler | `MetaReasoningHandler.ts` | `metareasoning` | Reasoning about reasoning itself - strategy monitoring and optimization |
 | RecursiveHandler | `RecursiveHandler.ts` | `recursive` | Problem decomposition, base case identification, and recursive solution construction |
 | ModalHandler | `ModalHandler.ts` | `modal` | Reasoning about necessity, possibility, and possible worlds semantics |
 | StochasticHandler | `StochasticHandler.ts` | `stochastic` | Markov chains, random processes, probabilistic state transitions, and Monte Carlo methods |
 | ConstraintHandler | `ConstraintHandler.ts` | `constraint` | Constraint satisfaction, domain reduction, propagation, and feasibility analysis |
 | OptimizationHandler | `OptimizationHandler.ts` | `optimization` | Constraint optimization, objective functions, and solution search |
 | CustomHandler | `CustomHandler.ts` | `custom` | User-defined reasoning patterns with flexible structure and custom validation |
-| GenericModeHandler | `GenericModeHandler.ts` | any (fallback) | Replicates the pre-Strategy-pattern switch statement; constructed on demand, never registered |
+| GenericModeHandler | `GenericModeHandler.ts` | any (fallback) | Fallback with a `switch` over eight modes and a hybrid default; constructed on demand, never registered |
 
 Both `ConstraintHandler` and `OptimizationHandler` are registered, dedicated handlers, not
 generic-handler-plus-validator coverage.
 
 ### The eight handlers with real specialized logic
 
-Every handler above implements `createThought` and `validate`; most `getEnhancements` too. The
-eight below carry algorithms beyond input shaping — the actual computation the mode is named for.
+Every handler above implements `createThought`, `validate` and `getEnhancements`. Eight handlers
+are described below in more detail. Other handlers, such as `CausalHandler`, `ConstraintHandler`
+and `StochasticHandler`, also contain algorithms.
 
 #### BayesianHandler — auto posterior calculation
 
@@ -513,7 +536,8 @@ circuits to an empty result). `findDominantStrategies` classifies each strategy 
 `strictly_dominant` (dominates every alternative) or `weakly_dominant` (dominates some) by pairwise
 payoff comparison via `checkDominance`. `checkParetoOptimality` verifies no other outcome in the
 matrix Pareto-dominates a found equilibrium (weakly better for every player, strictly better for at
-least one) — if one does, the equilibrium is efficient but not Pareto optimal.
+least one). If one does, the equilibrium is not Pareto optimal and the function returns `false`.
+The function returns `true` when there is no matrix or no equilibrium.
 
 #### SystemsThinkingHandler — archetype detection
 
@@ -536,8 +560,10 @@ Discipline* — Fixes that Fail, Shifting the Burden, Limits to Growth, Success 
 Tragedy of the Commons, Escalation, Growth and Underinvestment, Eroding Goals — each carrying a
 `loopSignature` (expected counts of reinforcing/balancing feedback loops, and whether a delay is
 present). `detectArchetypes` counts the thought's own `feedbackLoops` by type, fuzzy-matches
-against every archetype's signature (exact count match: +0.4 confidence; off-by-one: +0.2; delay
-match: +0.2), keeps matches scoring ≥0.4, and returns the top three by confidence.
+against every archetype's signature (for each of the reinforcing and balancing loop counts: exact
+match +0.4 confidence, off by one +0.2; matching the delay flag +0.2), keeps matches scoring ≥0.4, and returns the top three by confidence. Only
+`getEnhancements()` calls `detectArchetypes`, and no code under `src/` calls `getEnhancements()`,
+so no tool response carries `detectedArchetypes`.
 
 #### HistoricalHandler — source reliability scoring
 
@@ -586,10 +612,10 @@ Not one algorithm but three formal-formulation shapes lifted from *Introduction 
 termination argument with a decreasing quantity and lower bound), a `DPFormulation` (optimal
 substructure characterization, recursive definition, computation order, reconstruction method,
 complexity), and a `GreedyProof` (greedy-choice property plus optimal-substructure proof, with an
-optional exchange argument or matroid justification). The `normalize*` methods fill structurally
-required sub-fields with safe defaults when a caller supplies a partial object; `validateDPFormulation`
-and `validateCorrectnessProof` then check the fully-normalized structure and return field-level
-issues.
+optional exchange argument or matroid justification). `createThought()` calls the `normalize*`
+methods, which fill structurally required sub-fields with safe defaults when a caller supplies a
+partial object. `validate()` calls `validateDPFormulation` and `validateCorrectnessProof` on the
+raw caller input, not on the normalized structure. They return field-level warnings.
 
 #### MetaReasoningHandler — strategy recommendation
 
@@ -613,9 +639,9 @@ export class MetaReasoningHandler implements ModeHandler {
 `effectiveness`/`efficiency`: `CONTINUE` when both exceed threshold (0.7 / 0.5); `SWITCH` to the
 best-scoring `AlternativeStrategy` when it beats current effectiveness by more than 0.2; `REFINE`
 when effectiveness is below 0.5 with no clearly better alternative; `CONTINUE` (low confidence) as
-the fallback when nothing else applies. This mirrors — but does not call — the strategy-evaluation
-logic in `SessionManager.evaluateStrategy`; the two are independent implementations of a similar
-heuristic, one scoped to a single thought's self-report, the other to the whole session's history.
+the fallback when nothing else applies. `createThought` calls `generateRecommendation` only when the caller
+supplies no `recommendation`. It does not call `SessionManager`: its decision table is independent
+of `SessionManager.evaluateStrategy` and `SessionManager.suggestAlternatives`.
 
 #### GenericModeHandler — the fallback (`GenericModeHandler.ts`)
 
@@ -640,9 +666,9 @@ export class GenericModeHandler implements ModeHandler {
 }
 ```
 
-`createModeSpecificThought` is a large `switch (mode)` that replicates, mode by mode, the same
-field-shaping logic each specialized handler's `createThought` does — this is the pre-Strategy-
-pattern implementation kept alive as the registry's fallback path. It is designed to be
+`createModeSpecificThought` is a `switch (mode)` with cases for eight modes (sequential, shannon,
+mathematics, physics, inductive, deductive, abductive and causal). Every other mode, including
+hybrid, gets a hybrid-shaped thought from `createHybridThought()`. It is designed to be
 subclassed (`protected` members, constructor takes the mode as a parameter) but the registry never
 instantiates a subclass — only the base `GenericModeHandler(mode)` — so the extension point is
 unused in practice.
@@ -677,12 +703,12 @@ rule fails open (returns `true`, i.e. does not block the value) instead of throw
 
 ## Validation
 
-`src/validation/` holds 37 classes across 39 files: the top-level engine (`validator.ts`,
-`cache.ts`), the lazy-loading registry and static barrel that both feed it validators
-(`validators/registry.ts`, `validators/index.ts`), a shared interface (`validators/base.ts`), shared
-constants (`constants.ts`), 35 per-mode validator classes under `validators/modes/`, and two Zod
-schema files (`schemas.ts`, `schema-utils.ts`) plus a top-level barrel (`index.ts`) that nothing in
-`src/` imports.
+`src/validation/` holds 37 exported classes across 44 files: the top-level engine (`validator.ts`,
+`cache.ts`), the advisory wrapper (`advisory.ts`), the lazy-loading registry and static barrel that
+both feed it validators (`validators/registry.ts`, `validators/index.ts`), a shared interface
+(`validators/base.ts`), shared helper functions (`validators/validation-utils.ts`), shared
+constants (`constants.ts`), 35 per-mode validator classes under `validators/modes/`, and a
+top-level barrel (`index.ts`) that nothing in `src/` imports.
 
 > ### This engine runs advisorily on every thought
 >
@@ -692,45 +718,52 @@ schema files (`schemas.ts`, `schema-utils.ts`) plus a top-level barrel (`index.t
 > throws degrades to `{available: false, reason}` without failing the request. Issues are capped
 > at 20 (ordered errors → warnings → info) with `totalIssues` and `issuesTruncated` alongside;
 > suggestions are deduplicated and capped at 10. Gated per session by
-> `SessionConfig.enableValidation`. Cost is 0.035–0.085 ms per call.
+> `SessionConfig.enableValidation`.
 >
-> Zod still validates at the tool boundary; that is the layer that can reject. This engine grades
+> Zod validates at the tool boundary; that is the layer that can reject. This engine grades
 > what Zod accepted.
 
 ### ThoughtValidator (`src/validation/validator.ts`)
 
 **Purpose**: The validation entry point *of this subsystem* — looks up the mode-specific validator,
-runs it, and turns its issues into a scored `ValidationResult`. Not called by the server today.
+runs it, and turns its issues into a scored `ValidationResult`. `SessionManager.addThought()` reaches it
+through `validateAdvisory()` (`src/validation/advisory.ts`).
 
 ```typescript
 export class ThoughtValidator {
-  async validate(thought: Thought, context?: ValidationContext): Promise<ValidationResult>
+  async validate(thought: Thought, context: ValidationContext = {}): Promise<ValidationResult>
 
-  private async performValidation(thought: Thought, context?: ValidationContext): Promise<ValidationResult>
+  private cacheKeySource(thought: Thought, context: ValidationContext): unknown
+  private async performValidation(thought: Thought, context: ValidationContext = {}): Promise<ValidationResult>
   private calculateConfidence(thought: Thought, issues: ValidationIssue[]): number
-  private calculateStrengthMetrics(thought: Thought, issues: ValidationIssue[]): {
+  private calculateStrengthMetrics(_thought: Thought, issues: ValidationIssue[]): {
     logicalSoundness: number; empiricalSupport: number;
     mathematicalRigor: number; physicalConsistency: number;
   }
   private generateSuggestions(issues: ValidationIssue[]): string[]
 }
 
+// Defined in constants.ts; validator.ts re-exports the type.
 export interface ValidationContext {
   existingThoughts?: Map<string, Thought>;
   strictMode?: boolean;
 }
 ```
 
-`validate()` checks `validationCache` first when `MCP_ENABLE_VALIDATION_CACHE` is on, then calls
-`performValidation()`, which fetches the mode's validator via `getValidatorForMode(thought.mode)`
-(async, lazy-loaded — see registry below) and folds its `ValidationIssue[]` into a result:
+`validate()` uses `validationCache` when `MCP_ENABLE_VALIDATION_CACHE` is on and the context has no
+`existingThoughts`. A call with `existingThoughts` skips the cache. The cache key comes from
+`cacheKeySource()`: a stable copy of the thought without `id`, `sessionId`, `timestamp` and
+`validation`, plus `strictMode`. On a miss, `validate()` calls `performValidation()`, which fetches
+the mode's validator via `getValidatorForMode(thought.mode)` (async, lazy-loaded — see registry
+below) and folds its `ValidationIssue[]` into a result:
 `confidence` starts at 1.0 and loses 0.3 per error / 0.1 per warning / 0.05 per info, then is
 further scaled by the thought's own `uncertainty` field when present.
 
 ### ValidationCache (`src/validation/cache.ts`)
 
-**Purpose**: LRU cache of `ValidationResult`s keyed by a SHA-256 hash of the thought's serialized
-content, so re-validating unchanged content is free.
+**Purpose**: LRU cache of `ValidationResult`s keyed by a SHA-256 hash of the content value that
+the caller passes (`ThoughtValidator` passes the stable copy from `cacheKeySource()`), so
+re-validating unchanged content is free.
 
 ```typescript
 export interface ValidationCacheEntry {
@@ -774,9 +807,8 @@ export { ModeValidator as BaseValidator };
 Every per-mode validator (below) implements this interface directly using free functions from
 `validation-utils.ts` (`validateCommon`, `validateDependencies`, `validateUncertainty`,
 `validateNumberRange`, `validateProbability`, `validateConfidence`, `validateRequired`,
-`validateNonEmptyArray`) for composition instead of subclassing — an earlier abstract
-`BaseValidator` class was removed in favor of this composition pattern; the name survives only as a
-deprecated type alias for `ModeValidator`.
+`validateNonEmptyArray`) for composition instead of subclassing. There is no abstract base class:
+`BaseValidator` is only a deprecated type alias for `ModeValidator`.
 
 ### Two loading paths — the one thing to know about this directory
 
@@ -784,7 +816,7 @@ Mode validators reach `ThoughtValidator` through two different mechanisms, and b
 
 **Lazy path — `validators/registry.ts`.** A private `ValidatorRegistry` class (only its singleton
 instance is exported) holds `VALIDATOR_REGISTRY`, a `Record<string, { module, className }>` table
-naming 30 of the 35 mode-validator files by dynamic-import path:
+naming 34 of the 35 mode-validator files (all but `meta`) by dynamic-import path:
 
 ```typescript
 export const validatorRegistry: ValidatorRegistry;  // singleton (class itself is not exported)
@@ -799,38 +831,24 @@ export async function preloadValidators(modes: string[]): Promise<void>
 `getValidatorForMode()` — the function `ThoughtValidator.performValidation()` actually calls — first
 checks the registry's in-memory cache, then `VALIDATOR_REGISTRY[mode]`, then `await
 import(config.module)` and instantiates `mod[config.className]`, caching the instance for
-subsequent calls. Ten of the thirty entries (`algorithmic`, `analysis`, `argumentation`, `critique`,
+subsequent calls. Ten of the 34 entries (`algorithmic`, `analysis`, `argumentation`, `critique`,
 `engineering`, `firstprinciples`, `formallogic`, `scientificmethod`, `synthesis`, `systemsthinking`)
 are reached exclusively through this `import()` call — no static `import` statement anywhere in
 `src/` references those ten files, which is why a purely static reachability scan cannot see them as
 used even though they are.
 
-**Static path — `validators/index.ts`.** A hand-written barrel that statically imports and
-re-exports 24 validator classes plus the constants and utility functions above. Its 24 named
-exports overlap with 20 of the registry's 30 dynamic-import entries (the sequential/shannon/
-mathematics/physics/hybrid/inductive/deductive/abductive/causal/bayesian/counterfactual/
-analogical/temporal/historical/gametheory/evidential/computability/cryptanalytic/metareasoning
-group), but also names five classes the registry table never mentions:
+**Static path — `validators/index.ts`.** A hand-written barrel that re-exports 25 validator
+classes, the eight utility functions, the `ModeValidator` type and the registry API. It has no
+`import` statements and exports no constants. 24 of the 25 are also registry entries. The 25th, `MetaValidator`, is not. The ten modes that only the registry
+names (listed above) have no static export.
 
-```typescript
-export { MetaValidator } from "./modes/meta.js";
-export { ModalValidator } from "./modes/modal.js";
-export { ConstraintValidator } from "./modes/constraint.js";
-export { OptimizationValidator } from "./modes/optimization.js";
-export { StochasticValidator } from "./modes/stochastic.js";
-export { RecursiveValidator } from "./modes/recursive.js";
-```
-
-**This is a real gap, not a style choice.** `VALIDATOR_REGISTRY` in `registry.ts` has no entry for
-`constraint`, `modal`, `recursive`, or `stochastic` — all four are real `ThinkingMode` enum values
-with live handlers, but a thought created in any of those four modes can never reach its validator
-class through `getValidatorForMode()`; `performValidation()` falls through to the "unknown thinking
-mode" warning branch instead, exactly as if no validator existed for the mode at all.
-(`OptimizationValidator` is not affected — `optimization` *is* in `VALIDATOR_REGISTRY`, just under a
-module path the static-export list also happens to duplicate.) `MetaValidator` is a further step
-removed: `ThinkingMode` has no `META` value at all, only `METAREASONING` (backed separately by
-`MetaReasoningValidator`, which *is* registered) — so `meta.ts` cannot be reached by any live
-thought regardless of the registry table, static export, or import path used.
+**`MetaValidator` can never be reached by a thought.** `ThinkingMode` has no `META` member. Its
+real mode is `METAREASONING`, which `MetaReasoningValidator` serves and the registry lists. A
+comment at the end of `VALIDATOR_REGISTRY` records the same fact. `ThinkingMode.CUSTOM` is also
+absent from the registry, because a user-defined mode has no fixed shape that a mode validator
+could check. For a thought in the `custom` mode, `performValidation()` adds a warning-severity
+issue ("No validator registered for thinking mode"). Every other mode resolves to its validator
+through `getValidatorForMode()`.
 
 ### Per-mode validators (`src/validation/validators/modes/`)
 
@@ -846,26 +864,35 @@ export class BayesianValidator implements ModeValidator<BayesianThought> {
 }
 ```
 
-The 35 files, one per mode, are not enumerated individually here — the loading-path table above
-already lists every mode name, and each validator's file is `validators/modes/<mode>.ts` with class
-name `<Mode>Validator` (e.g. `historical.ts` → `HistoricalValidator`). `constants.ts` supplies the
-shared `IssueSeverity`, `IssueCategory`, `ValidationThresholds`, and `ValidationMessages` enums/
-factories every validator draws its issue codes and messages from, plus the `ValidationContext`
-interface (relocated here from `validator.ts` in a past refactor specifically to break a
-`validator.ts` → `validators/index.ts` → `base.ts` → `validator.ts` circular import).
+The 35 files are not listed here. Each file is `validators/modes/<mode>.ts` with class name
+`<Mode>Validator` (e.g. `historical.ts` → `HistoricalValidator`). `VALIDATOR_REGISTRY` in
+`registry.ts` lists 34 of the mode names.
 
-### Unused: `schemas.ts`, `schema-utils.ts`, `validation/index.ts`
+`constants.ts` defines `IssueSeverity`, `IssueCategory`, `ValidationThresholds`,
+`ValidationMessages`, three range helpers (`isInRange`, `isValidProbability`,
+`isValidConfidence`) and the `ValidationContext` interface. `validation-utils.ts` uses the
+thresholds and messages. 12 of the 35 mode validators import `IssueSeverity` and `IssueCategory`
+from it. 22 of the other 23 write the severity as a string literal, and `HybridValidator` uses only
+the helpers. `ValidationIssue` has no issue-code field.
 
-`schemas.ts` defines Zod schemas for the MCP tool inputs (`SessionIdSchema`, `ThinkingModeSchema`,
-`CreateSessionSchema`, `AddThoughtSchema`, and others). `schema-utils.ts` defines lower-level
-reusable Zod primitives (`probabilitySchema` and similar) that `schemas.ts` could compose from.
-`validation/index.ts` is a barrel that re-exports both plus the constants and `ThoughtValidator`.
-None of the three has an importer anywhere in `src/` outside of each other — `index.ts` imports
-`schemas.ts`, and nothing imports `index.ts`. The live input-validation path for MCP tool calls is
-different: `src/index.ts` parses raw tool arguments with `ThinkingToolSchema` (Zod, defined in
-`src/tools/thinking.ts`), and the per-tool JSON Schemas advertised to MCP clients come from
-`src/tools/json-schemas.ts` plus the per-mode Zod schemas under `src/tools/schemas/modes/`. These
-three `src/validation/` files are a superseded, disconnected alternative that predates that path.
+`validator.ts` re-exports `ValidationContext` as a type, so `base.ts` imports it from
+`constants.ts` and the shared base layer has no import back to `validator.ts`. All 35 mode
+validators import the type from `validator.ts` with `import type`. 25 of them are also re-exported
+by `validators/index.ts`, and those 25 close the type-only validator cycles that `ARCHITECTURE.md`
+lists. The other ten close no static cycle.
+
+### Input validation for tool calls is not in `src/validation/`
+
+`src/validation/` validates thoughts, not tool-call arguments. The input validation of an MCP tool
+call lives in `src/tools/`. The `tools/call` handler in `src/index.ts` looks the tool name up in
+`toolSchemas` (`src/tools/definitions.ts`), one Zod schema per focused tool, and calls
+`schema.parse(args)`. The per-mode Zod schemas are under `src/tools/schemas/`. The legacy
+`deepthinking` tool parses with `ThinkingToolSchema` (`src/tools/thinking.ts`). The JSON Schemas
+that `tools/list` advertises come from `src/tools/json-schemas.ts`.
+
+`validation/index.ts` is a barrel that re-exports the constants, `ThoughtValidator`, and the
+advisory wrapper (`validateAdvisory`, `MAX_ADVISORY_ISSUES`, `MAX_ADVISORY_SUGGESTIONS` and the
+`AdvisoryValidatorLike` type). Nothing in `src/` imports it. Consumers import the concrete modules.
 
 ---
 
@@ -874,71 +901,110 @@ three `src/validation/` files are a superseded, disconnected alternative that pr
 `src/export/` splits into two families: flat document exporters (`ExportService`'s private
 `exportTo*` methods, covered under Services above, plus `FileExporter` for writing them to disk)
 and `src/export/visual/` for diagram formats. Visual export has three layers: 23 mode-specific
-exporter functions (`visual/modes/`), 14 fluent builder classes plus 4 supporting classes that those
-functions call into (`visual/utils/`), and `VisualExporter`, a thin per-mode dispatch facade. 18
-classes total across the directory.
+exporter functions (`visual/modes/`), 16 classes in `visual/utils/` (14 fluent builder classes plus
+`LaTeXExporter` and `LatexMermaidIntegrator`), and `VisualExporter`, a thin per-mode dispatch
+facade. `visual/` holds 17 classes. With `FileExporter`, `src/export/` holds 18 classes.
+
+The mode exporters build `mermaid`, `dot` and `ascii` output with three builder classes. They
+build the other eight formats with helper functions from `visual/utils/*.ts`.
 
 ### FileExporter (`src/export/file-exporter.ts`)
 
-**Purpose**: Writes `ExportService` output to disk — single session, batch of sessions, or a named
-export profile — inside a sandboxed output directory.
+**Purpose**: Writes the output of an export callback to disk. One session can go to one format, to
+a list of formats, to all 8 file formats, or to the formats of a named export profile. The class
+does not check the output path. Callers resolve it first with `resolveSandboxedOutputDir`.
 
 ```typescript
-export function resolveSandboxedOutputDir(requestedDir: string | undefined, root: string): string
+export function resolveSandboxedOutputDir(requestedDir: string | undefined, sandboxRoot: string | undefined): string
 
-export interface FileExportConfig { /* outputDir, overwrite, filenameTemplate, ... */ }
-export interface FileExportResult { /* filePath, bytesWritten, format, ... */ }
-export interface BatchExportResult { /* results: FileExportResult[], succeeded, failed, ... */ }
-export interface ExportProgress { /* current, total, sessionId, ... */ }
+export interface FileExportConfig {
+  outputDir: string;
+  createSessionSubdir?: boolean;      // default true
+  createDateSubdir?: boolean;         // default false
+  filenamePattern?: string;           // default "{session}_{mode}_{format}"
+  overwrite?: boolean;                // default false
+  createDir?: boolean;                // default true
+  dateFormat?: "iso" | "short" | "timestamp";   // default "iso"
+}
+export interface FileExportResult { format: ExportFormatType; filePath: string; success: boolean; error?: string; size?: number }
+export interface BatchExportResult {
+  outputDir: string; results: FileExportResult[];
+  successCount: number; failureCount: number; totalSize: number; exportedAt: Date;
+}
+export interface ExportProgress {
+  currentFormat: ExportFormatType; currentIndex: number; totalExports: number; percentage: number;
+  phase: "started" | "exporting" | "writing" | "completed" | "failed";
+}
 export type ExportProgressCallback = (progress: ExportProgress) => void;
 
 export class FileExporter {
-  constructor(exportService: ExportService, config?: Partial<FileExportConfig>)
+  constructor(
+    config: Partial<FileExportConfig>,
+    exportFunction: (session: ThinkingSession, format: ExportFormatType) => string,
+  )
 
-  async exportToFile(session: ThinkingSession, format: string, filename?: string): Promise<FileExportResult>
-  async exportToFiles(sessions: ThinkingSession[], format: string, onProgress?: ExportProgressCallback): Promise<BatchExportResult>
-  async exportWithProfile(session: ThinkingSession, profileId: ExportProfileId): Promise<FileExportResult>
-  async exportAll(session: ThinkingSession, formats: string[]): Promise<BatchExportResult>
+  async exportToFile(session: ThinkingSession, format: ExportFormatType): Promise<FileExportResult>
+  async exportToFiles(session: ThinkingSession, formats: ExportFormatType[], onProgress?: ExportProgressCallback): Promise<BatchExportResult>
+  async exportWithProfile(session: ThinkingSession, profileId: ExportProfileId, onProgress?: ExportProgressCallback): Promise<BatchExportResult>
+  async exportAll(session: ThinkingSession, onProgress?: ExportProgressCallback): Promise<BatchExportResult>
 
   getConfig(): FileExportConfig
   updateConfig(updates: Partial<FileExportConfig>): void
 }
 
-export function createFileExporter(exportService: ExportService, config?: Partial<FileExportConfig>): FileExporter
+export function createFileExporter(
+  config: Partial<FileExportConfig>,
+  exportFunction: (session: ThinkingSession, format: ExportFormatType) => string,
+): FileExporter
 ```
 
-`resolveSandboxedOutputDir` is the security-relevant piece: it resolves a caller-requested output
-directory against a root and rejects (throws) any path that escapes the root, guarding
-`MCP_EXPORT_PATH` against path traversal. Private helpers handle filename generation
+`ExportFormatType` has 8 values: `markdown`, `latex`, `json`, `html`, `jupyter`, `mermaid`, `dot`,
+`ascii`. `exportAll()` exports exactly these 8. `exportWithProfile()` with an unknown profile ID
+returns a batch with `failureCount: 1` and no results.
+
+`resolveSandboxedOutputDir` is the security-relevant piece, and it is a separate function: it
+resolves a caller-requested output directory against a sandbox root (`MCP_EXPORT_PATH`, or
+`~/.claude/deepthinking-exports` when the root is unset or empty) and throws for any path that
+escapes the root. `src/index.ts` calls it, passes the result as `outputDir` to
+`createFileExporter`, and passes `(s, f) => exportService.exportSession(s, f)` as the export
+callback. `FileExporter` writes to `config.outputDir` (default `./exports`) with no containment
+check. Private helpers handle the output directory (`resolveOutputDir`), filename generation
 (`generateFilename`, `sanitizeFilename`, `formatDate`) and directory creation (`ensureDir`).
 
 ### Export profiles (`src/export/profiles.ts`)
 
 Not a class — a static catalog. `EXPORT_PROFILES: Record<ExportProfileId, ExportProfile>` bundles a
-named set of formats and options (e.g. an "academic paper" profile bundling LaTeX + a diagram
-format) that `FileExporter.exportWithProfile()` and `ExportService` consumers can request by ID
-instead of listing formats individually.
+named set of formats and options under five IDs: `academic` (latex, markdown, json),
+`presentation` (mermaid, markdown), `documentation` (markdown, mermaid, ascii), `archive` (json,
+markdown, latex, jupyter) and `minimal` (json, markdown). `src/index.ts` looks a profile up by ID
+with `getExportProfile()` and passes `profile.formats` to `FileExporter.exportToFiles()`.
+`FileExporter.exportWithProfile()` does the same lookup inside the class. `ExportService` does not
+use profiles.
 
 ```typescript
 export const EXPORT_PROFILES: Record<ExportProfileId, ExportProfile>
 
-export function getExportProfile(id: ExportProfileId): ExportProfile
+export function getExportProfile(id: ExportProfileId): ExportProfile | undefined
 export function getAllExportProfiles(): ExportProfile[]
 export function getExportProfilesByTag(tag: string): ExportProfile[]
 export function getExportProfilesByFormat(format: ExportFormatType): ExportProfile[]
 export function isValidExportProfileId(id: string): id is ExportProfileId
 export function listExportProfileIds(): ExportProfileId[]
-export function getExportProfileMetadata(id: ExportProfileId): ExportProfileMetadata
-export function combineExportProfiles(ids: ExportProfileId[]): ExportProfile
+export function getExportProfileMetadata(id: ExportProfileId): ExportProfileMetadata | undefined
+export function combineExportProfiles(
+  profileIds: ExportProfileId[], name: string, mergeOptions?: "union" | "intersection",   // default "union"
+): ExportProfile
 export function recommendExportProfile(keywords: string[]): ExportProfileId
 ```
 
 ### VisualExporter (`src/export/visual/visual-exporter.ts`)
 
-**Purpose**: A per-mode dispatch facade — 22 methods, each a one-line delegation to the matching
-function in `visual/modes/`. `ExportService.exportVisual()` picks which method to call by inspecting
-`thought.mode` and a mode-specific field (e.g. `"causalGraph" in lastThought`), so `VisualExporter`
-itself carries no branching logic.
+**Purpose**: A per-mode dispatch facade — 23 methods, each a one-line delegation to the matching
+function in `visual/modes/`. `ExportService.exportVisual()` calls these methods only for a session
+with exactly one thought. It picks the method by inspecting `thought.mode` and a mode-specific
+field (e.g. `"causalGraph" in lastThought`), so `VisualExporter` itself carries no branching logic.
+A session with more than one thought always uses the session-level visualization
+(`exportSessionWithThoughtDetails`), in every mode.
 
 ```typescript
 export class VisualExporter {
@@ -978,8 +1044,13 @@ Markdown frontmatter/TOC flags).
 
 23 exporter functions, one per file, plus `index.ts` re-exporting all of them (24 files total). Each
 function takes a mode's `Thought` subtype plus `VisualExportOptions` and returns a string in the
-requested `VisualFormat`, internally branching on `options.format` and calling into the matching
-builder class from `visual/utils/`.
+requested `VisualFormat`, branching on `options.format`. It builds `mermaid`, `dot` and `ascii`
+output with `MermaidGraphBuilder`, `DOTGraphBuilder` and `ASCIIDocBuilder` (and with
+`MermaidGanttBuilder` in `temporal.ts` and `historical.ts`, and `MermaidStateDiagramBuilder` in
+`computability.ts`). It builds the other eight formats with helper functions from
+`visual/utils/*.ts` (for example `generateGraphML`, `generateTikZ`, `generateSVGHeader` and
+`generateHTMLHeader`). 21 of the 23 exporter files throw `Unsupported format: <format>` in their
+`default:` case.
 
 | Function | File | Mode |
 |---|---|---|
@@ -1008,15 +1079,20 @@ builder class from `visual/utils/`.
 | `exportProofDecomposition` | `proof-decomposition.ts` | (proof system, not a mode — see Proof) |
 
 Modes with no dedicated visual exporter (deductive, inductive, analysis, argumentation, critique,
-synthesis, algorithmic, cryptanalytic, modal, constraint, recursive, stochastic, custom) fall back
-to `ExportService`'s session-level thought-sequence visualization rather than a mode-specific
-diagram.
+synthesis, algorithmic, cryptanalytic, modal, constraint, recursive, stochastic, custom) have no
+mode-specific diagram. A one-thought session in one of these modes uses
+`ExportService.exportGenericThoughtSequence`. A session with more than one thought uses the
+session-level visualization in every mode.
 
 ### The 14 fluent builder classes (`src/export/visual/utils/`)
 
 All 14 share one shape: `set*`/`add*` methods return `this` for chaining, and a terminal `render()`
-returns the finished string. This is the public-facing authoring API for anything that wants to
-build a diagram directly, outside the mode-exporter dispatch path.
+returns the finished string. These classes are the internal authoring API of the export layer. The
+package entry point (`src/index.ts`) does not export them. The mode exporters use
+`DOTGraphBuilder`, `MermaidGraphBuilder` and `ASCIIDocBuilder`, plus the Gantt and state-diagram
+builders in three exporters. The other nine builder classes (`GraphMLBuilder`, `SVGBuilder`,
+`SVGGroupBuilder`, `TikZBuilder`, `UMLBuilder`, `HTMLDocBuilder`, `MarkdownBuilder`,
+`ModelicaBuilder`, `JSONExportBuilder`) have no caller in `src/`; only tests use them.
 
 #### DOTGraphBuilder (`dot.ts`) — GraphViz DOT
 
@@ -1037,7 +1113,7 @@ export class DOTGraphBuilder {
   clear(): this
   resetOptions(): this
   render(): string
-  static from(nodes: DotNode[], edges: DotEdge[], options?: DotOptions): string
+  static from(nodes?: DotNode[], edges?: DotEdge[], options?: DotOptions): DOTGraphBuilder
 }
 ```
 
@@ -1049,7 +1125,7 @@ export class MermaidGraphBuilder {
   addNodes(nodes: MermaidNode[]): this
   addEdge(edge: MermaidEdge): this
   addEdges(edges: MermaidEdge[]): this
-  addSubgraph(id: string, title: string, nodeIds: string[]): this
+  addSubgraph(id: string, label: string, nodeIds: string[], direction?: MermaidDirection): this
   addSubgraphDef(subgraph: MermaidSubgraph): this
   addSubgraphs(subgraphs: MermaidSubgraph[]): this
   setOptions(options: MermaidOptions): this
@@ -1059,9 +1135,18 @@ export class MermaidGraphBuilder {
   clear(): this
   resetOptions(): this
   render(): string
-  renderAsStateDiagram(states: unknown, transitions: unknown): string
-  renderAsClassDiagram(classes: unknown, relationships: unknown): string
-  static from(nodes: MermaidNode[], edges: MermaidEdge[], options?: MermaidOptions): string
+  renderAsStateDiagram(
+    states: Array<{ id: string; label: string; type?: "start" | "end" | "normal" | "choice" }>,
+    transitions: Array<{ from: string; to: string; label?: string }>,
+  ): string
+  renderAsClassDiagram(
+    classes: Array<{ name: string; attributes?: string[]; methods?: string[] }>,
+    relationships: Array<{
+      from: string; to: string; label?: string;
+      type: "inheritance" | "composition" | "aggregation" | "association" | "dependency";
+    }>,
+  ): string
+  static from(nodes?: MermaidNode[], edges?: MermaidEdge[], options?: MermaidOptions): MermaidGraphBuilder
 }
 
 export class MermaidGanttBuilder {
@@ -1098,14 +1183,14 @@ export class MermaidStateDiagramBuilder {
 
 ```typescript
 export class GraphMLBuilder {
-  addNode(id: string, label?: string, attrs?: Record<string, unknown>): this
+  addNode(id: string, label: string, attributes?: { type?: string; metadata?: Record<string, unknown> }): this
   addNodeDef(node: GraphMLNode): this
   addNodes(nodes: GraphMLNode[]): this
-  addEdge(source: string, target: string, attrs?: Record<string, unknown>): this
+  addEdge(source: string, target: string, attributes?: { label?: string; metadata?: Record<string, unknown> }): this
   addEdgeDef(edge: GraphMLEdge): this
   addEdges(edges: GraphMLEdge[]): this
-  defineNodeAttribute(attr: GraphMLAttribute): this
-  defineEdgeAttribute(attr: GraphMLAttribute): this
+  defineNodeAttribute(name: string, type: "string" | "double" | "int" | "boolean", defaultValue?: string): this
+  defineEdgeAttribute(name: string, type: "string" | "double" | "int" | "boolean", defaultValue?: string): this
   setOptions(options: GraphMLOptions): this
   setGraphId(id: string): this
   setGraphName(name: string): this
@@ -1115,7 +1200,7 @@ export class GraphMLBuilder {
   clear(): this
   resetOptions(): this
   render(): string
-  static from(nodes: GraphMLNode[], edges: GraphMLEdge[], options?: GraphMLOptions): string
+  static from(nodes?: GraphMLNode[], edges?: GraphMLEdge[], options?: GraphMLOptions): GraphMLBuilder
 }
 ```
 
@@ -1130,15 +1215,24 @@ export class ASCIIDocBuilder {
   addHeader(title: string, style?: ASCIIHeaderStyle): this
   addSection(title: string, icon?: string): this
   addBoxedTitle(title: string, style?: AsciiBoxStyle): this
-  addBulletList(items: string[]): this
-  addNumberedList(items: string[]): this
-  addBox(content: string, options?: unknown): this
+  addBulletList(items: string[], bullet?: keyof typeof BULLETS, indent?: number): this   // bullet defaults to "bullet"
+  addNumberedList(items: string[], indent?: number, startNumber?: number): this           // startNumber defaults to 1
+  addBox(content: string | string[], boxOptions?: { style?: AsciiBoxStyle; title?: string; width?: number; padding?: number }): this
   addTree(root: AsciiTreeNode): this
   addTreeList(items: AsciiTreeNode[]): this
-  addTable(columns: AsciiTableColumn[], rows: unknown[][]): this
+  addTable(
+    headers: string[], rows: string[][],
+    tableOptions?: { style?: AsciiBoxStyle; columnWidths?: number[]; alignments?: Array<"left" | "center" | "right"> },
+  ): this
   addFlowDiagram(steps: string[], direction?: "horizontal" | "vertical"): this
-  addProgressBar(percent: number, width?: number): this
-  addMetricsPanel(metrics: Record<string, unknown>): this
+  addProgressBar(                                    // the second argument is the maximum, not the width
+    value: number, max?: number, width?: number,     // max defaults to 100, width to 20
+    barOptions?: { filled?: string; empty?: string; showPercent?: boolean },
+  ): this
+  addMetricsPanel(
+    metrics: Array<{ label: string; value: string | number }>,
+    panelOptions?: { style?: AsciiBoxStyle; title?: string },
+  ): this
   addGraph(nodes: AsciiNode[], edges: AsciiEdge[]): this
   addText(text: string): this
   addEmptyLine(count?: number): this
@@ -1210,18 +1304,21 @@ export class TikZBuilder {
   setNodeDistance(distance: string): this
   setLevelDistance(distance: string): this
   addStyle(name: string, style: string): this
-  addNode(id: string, label: string, options?: TikZNodeOptions): this
+  addNode(id: string, label: string, nodeOptions?: TikZNodeOptions): this
   addNodes(nodes: Array<{ id: string; label: string; options?: TikZNodeOptions }>): this
-  addEdge(source: string, target: string, options?: TikZEdgeOptions): this
+  addEdge(source: string, target: string, edgeOptions?: TikZEdgeOptions): this
   addEdges(edges: Array<{ source: string; target: string; options?: TikZEdgeOptions }>): this
-  beginScope(options?: TikZScopeOptions): this
+  beginScope(scopeOptions?: TikZScopeOptions): this
   endScope(): this
   addRaw(content: string): this
   addComment(comment: string): this
   addCoordinate(name: string, x: number, y: number): this
-  addBackground(...args: unknown[]): this
-  addMetrics(...args: unknown[]): this
-  addLegend(...args: unknown[]): this
+  addBackground(x1: number, y1: number, x2: number, y2: number, fill?: string): this   // fill defaults to "gray!10"
+  addMetrics(x: number, y: number, metrics: Array<{ label: string; value: string | number }>): this
+  addLegend(
+    x: number, y: number,
+    items: Array<{ label: string; color: { fill: string; stroke: string }; shape?: string }>,
+  ): this
   clear(): this
   resetOptions(): this
   render(): string
@@ -1230,13 +1327,13 @@ export class TikZBuilder {
 }
 ```
 
-#### UMLBuilder (`uml.ts`) — UML (via Mermaid/PlantUML-style syntax)
+#### UMLBuilder (`uml.ts`) — UML (PlantUML syntax)
 
 ```typescript
 export class UMLBuilder {
   setOptions(options: UMLBuilderOptions): this
   setTitle(title: string): this
-  setTheme(theme: UMLBuilderOptions["theme"]): this        // "default" | "sketchy" | "blueprint" | "plain"
+  setTheme(theme: UMLBuilderOptions["theme"]): this        // "default" | "sketchy" | "blueprint" | "plain" | "cerulean" | "reddress"
   setDirection(direction: "left to right" | "top to bottom"): this
   setScale(scale: number): this
   addSkinparam(param: string, value: string): this
@@ -1268,12 +1365,12 @@ export class HTMLDocBuilder {
   addParagraph(text: string, className?: string): this
   addRaw(html: string): this
   addList(items: string[], ordered?: boolean): this
-  addTable(headers: string[], rows: string[][]): this
+  addTable(headers: string[], rows: (string | number)[][], caption?: string): this
   addDiv(content: string, className?: string): this
   addSection(title: string, content: string, icon?: string): this
   addMetricCard(label: string, value: string | number, color?: string): this
   addProgressBar(percent: number, color?: string): this
-  addBadge(text: string, color?: string): this
+  addBadge(text: string, type?: "primary" | "success" | "warning" | "danger" | "info" | "secondary"): this   // type defaults to "primary"
   beginMetricsGrid(): this
   endMetricsGrid(): this
   addCard(header: string, content: string): this
@@ -1288,7 +1385,7 @@ export class HTMLDocBuilder {
 export class MarkdownBuilder {
   setOptions(options: MarkdownBuilderOptions): this
   setTitle(title: string): this
-  enableFrontmatter(metadata: Record<string, unknown>): this
+  enableFrontmatter(metadata?: Record<string, string | number | boolean | string[]>): this
   enableTableOfContents(): this
   addHeading(level: HeadingLevel, text: string): this      // HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6
   addParagraph(text: string): this
@@ -1296,7 +1393,7 @@ export class MarkdownBuilder {
   addNumberedList(items: string[]): this
   addTaskList(items: Array<{ text: string; completed: boolean }>): this
   addCodeBlock(code: string, language?: string): this
-  addTable(headers: string[], rows: string[][], alignment?: TableAlignment[]): this
+  addTable(headers: string[], rows: string[][], alignments?: TableAlignment[]): this
   addBlockquote(text: string): this
   addHorizontalRule(): this
   addLink(text: string, url: string, title?: string): this
@@ -1305,7 +1402,7 @@ export class MarkdownBuilder {
   addCollapsible(summary: string, detailContent: string): this
   addKeyValueSection(items: Record<string, string | number | boolean>): this
   addRaw(markdown: string): this
-  addSection(title: string, content: string, level?: HeadingLevel): this
+  addSection(title: string, sectionContent: string, level?: HeadingLevel): this   // level defaults to 2
   addBadge(label: string, value: string, color?: string): this
   addProgressBar(value: number, max?: number, width?: number): this
   reset(): this
@@ -1345,9 +1442,9 @@ export class JSONExportBuilder {
   addSections(sections: JSONSectionDef[]): this
   setPath(path: string, value: unknown): this
   addGraph(nodes: JsonVisualNode[], edges: JsonVisualEdge[]): this
-  addLayout(layout: { type: string; [key: string]: unknown }): this
+  addLayout(layout: { type: "hierarchical" | "force" | "circular" | "tree" | "linear"; direction?: "TB" | "BT" | "LR" | "RL" }): this
   addMetrics(metrics: Record<string, unknown>): this
-  addLegend(entries: unknown[]): this
+  addLegend(legend: Array<{ label: string; color: string; shape?: string }>): this
   removeSection(key: string): this
   reset(): this
   getData(): Record<string, unknown>
@@ -1360,7 +1457,8 @@ export class JSONExportBuilder {
 
 ### LaTeX support classes (`visual/utils/latex.ts`, `latex-mermaid-integration.ts`)
 
-Two more classes round out the 18, kept separate from `ExportService`'s own `exportToLatex` (a
+Two more classes bring `visual/utils/` to 16 classes. With `VisualExporter` and `FileExporter`,
+`src/export/` holds 18 classes. They are separate from `ExportService`'s own `exportToLatex` (a
 private, simpler LaTeX path) because they produce a fuller document with embedded diagrams.
 
 ```typescript
@@ -1368,63 +1466,94 @@ export class LaTeXExporter {
   constructor(options?: LaTeXExportOptions)
   preamble(): string
   export(session: ThinkingSession): string
-  // ~25 private formatX(thought) methods, one per mode family, plus escapeLatex, formatDate, formatDuration
+  // 30 private helper methods: 9 per-mode formatters, a generic formatter for every other
+  // mode, and layout, style and escaping helpers
+}
+
+export interface MermaidLatexOptions {
+  engine: "mermaid-tikz" | "external-svg" | "inline-code";
+  width?: string; caption?: boolean; label?: boolean;
+  floatPlacement?: "h" | "t" | "b" | "p" | "H";
+  colorScheme?: "default" | "monochrome" | "pastel";
 }
 
 export class LatexMermaidIntegrator {
-  generateMermaidPreamble(options?: MermaidLatexOptions): string
-  embedMermaidDiagram(mermaidCode: string, caption?: string): string
-  generateThoughtDiagram(thought: Thought, options?: unknown): string
-  generateSessionDiagrams(session: ThinkingSession): string
+  constructor()
+
+  generateMermaidPreamble(engine: "mermaid-tikz" | "external-svg" | "inline-code"): string
+  embedMermaidDiagram(mermaidCode: string, caption: string, label: string, options: MermaidLatexOptions): string
+  generateThoughtDiagram(thought: Thought, options: MermaidLatexOptions): string
+  generateSessionDiagrams(session: ThinkingSession, options: MermaidLatexOptions): string
   generateMermaidAppendix(session: ThinkingSession): string
-  generateIntegratedDocument(session: ThinkingSession, options?: unknown): string
+  generateIntegratedDocument(session: ThinkingSession, options: MermaidLatexOptions & { includeAppendix?: boolean }): string
 
   private convertMermaidToTikZ(mermaidCode: string): string
 }
 ```
 
-`LaTeXExporter.export()` is the full-document entry point; its private `formatXThought` methods
-switch on mode the same way `ExportService`'s private markdown/HTML formatters do — a duplicated
-shape, not shared code. `LaTeXExporter` previously carried its own `escapeLatex()`; it now imports
-the canonical one from `src/utils/sanitization.ts`, as `TikZBuilder` and `ExportService` do. The
-private copies were not equivalent — they chained `.replace()` calls and re-escaped their own
-inserted braces, so a literal backslash rendered as `\{}`. `LatexMermaidIntegrator` converts
-Mermaid diagram source to TikZ (`convertMermaidToTikZ`) so a LaTeX document can embed a native
-vector diagram instead of a rasterized Mermaid render.
+`LaTeXExporter.export()` is the full-document entry point; its private per-mode formatters
+(`formatMathematicsThought`, `formatPhysicsThought` and seven more, plus `formatGenericThought` for
+every other mode) follow the same shape as `ExportService`'s private markdown/HTML formatters — a
+duplicated shape, not shared code. `LaTeXExporter` imports the canonical `escapeLatex()` from
+`src/utils/sanitization.ts`, as `TikZBuilder` and `ExportService` do; its private `escapeLatex`
+method only calls that function.
+
+`convertMermaidToTikZ` is a placeholder. It writes the Mermaid source as LaTeX comment lines and
+emits a fixed one-node TikZ picture, so the embedded diagram is not a vector drawing of the graph.
+Nothing in `src/` calls `LatexMermaidIntegrator`, and `LaTeXExporter` is only re-exported by
+`src/export/index.ts`, which nothing in `src/` imports. Tests are the only callers of both.
 
 ---
 
 ### Session graph renderer (`src/export/visual/session-graph.ts`)
 
-**Purpose**: Renders a whole multi-thought session in any visual format, using the same builders
-the single-thought path uses.
+**Purpose**: Renders a multi-thought session in the 8 formats that `graph-render.ts` owns (`svg`,
+`graphml`, `tikz`, `modelica`, `html`, `uml`, `json`, `markdown`). It maps the session to a
+`GraphRenderModel` and calls `renderGraphModel` in `graph-render.ts`, which calls the helper
+functions in `visual/utils/*.ts`, not the builder classes. `modes/historical.ts` uses the same
+`renderGraphModel`.
 
 ```typescript
-export interface SessionGraphNode { /* one per thought */ }
-export interface SessionGraphEdge { /* thought-to-thought links */ }
-export interface SessionGraphModel { nodes: SessionGraphNode[]; edges: SessionGraphEdge[] }
+export interface SessionGraphNode {
+  id: string; label: string;
+  type: "session" | "thought";       // "session" is the summary node
+  detail?: string; mode?: string; thoughtNumber?: number;
+}
+export interface SessionGraphEdge {
+  source: string; target: string;
+  type: "sequence" | "revision" | "dependency"; label?: string;
+}
+export interface SessionGraphModel {
+  title: string; mode: string;
+  thoughtCount: number; branchCount: number; revisionCount: number;
+  nodes: SessionGraphNode[]; edges: SessionGraphEdge[];
+}
 
 export function renderSessionGraph(model: SessionGraphModel, format: VisualFormat): string
 ```
 
-This closes a real defect. `exportSessionWithThoughtDetails` previously implemented only
-`mermaid`, `dot` and `ascii`; the other eight visual formats fell through to a plain-text
-`"Session: …"` dump, so `html` returned text rather than HTML and `visual-json` returned
-non-JSON. The single-thought path had always rendered every format and **threw** on an unknown
-one — it never degraded — so the session path was the outlier. Normalising the session to a
-node/edge model and handing it to the existing builders fixed all eight at once, and the
-plain-text fallback was removed from both paths.
+`ExportService` renders `mermaid`, `dot` and `ascii` for a session itself. `renderSessionGraph`
+throws `Unsupported visual format for session-level export` for those three and for any other
+format outside the list above.
 
 ---
 
 ## Proof
 
-`src/proof/` (13 files, 10 classes) implements proof decomposition, gap analysis, assumption
+`src/proof/` (15 files, 10 classes) implements proof decomposition, gap analysis, assumption
 tracking, inconsistency detection, circular-reasoning detection, and strategy recommendation for
-the Mathematics mode. Its `index.ts` barrel is unused — no file under `src/` imports it, and every
-consumer (the test suite is currently the only one; see Verification) imports the concrete modules
-directly. All ten classes operate on the shared `ProofDecomposition` / `AtomicStatement` /
-`DependencyGraph` / `ProofStep` types defined in `decomposer.ts` and `dependency-graph.ts`.
+the Mathematics and Formal Logic modes. Its `index.ts` barrel is unused: no file under `src/`
+imports it. `SessionManager.addThought()` reaches the proof classes through `advisory.ts` and
+`extended-advisory.ts`, which between them reach every other module of the directory. Tests import
+the concrete modules directly. The classes share the types `ProofDecomposition`,
+`AtomicStatement` and `DependencyGraph` from `src/types/modes/mathematics.ts`. `decomposer.ts`
+defines `ProofStep`.
+
+`advisory.ts` exports `analyzeProofAdvisory(thought, deps?)`. It finds proof content in a
+mathematics or formal-logic thought, runs the decomposer, gap analyzer, circular-reasoning
+detector and inconsistency detector, and returns an `AdvisoryProofAnalysis`, or `undefined` when
+the thought carries no proof content. `extended-advisory.ts` adds the assumption tracker, verifier,
+branch analyzer, hierarchical proof manager, strategy recommender and fallacy patterns.
 
 ### ProofDecomposer (`decomposer.ts`)
 
@@ -1432,26 +1561,32 @@ directly. All ten classes operate on the shared `ProofDecomposition` / `AtomicSt
 dependency graph, and a completeness score.
 
 ```typescript
-export interface ProofStep { /* statement, justification, references, ... */ }
+export interface ProofStep { content: string; justification?: string; latex?: string }
 
 export class ProofDecomposer {
   decompose(proof: string | ProofStep[], theorem?: string): ProofDecomposition
   extractStatements(steps: ProofStep[]): AtomicStatement[]
-  classifyStatement(statement: string, index: number, allStatements: string[]): AtomicStatement["type"]
-  inferDependencies(atoms: AtomicStatement[]): DependencyGraph
+  classifyStatement(step: ProofStep, stepNumber: number): AtomicStatement | null
+  inferDependencies(                 // returns nothing: it sets `derivedFrom` on the atoms
+    atoms: AtomicStatement[], steps: ProofStep[], statementIds: Map<string, string>,
+  ): void
   computeCompleteness(atoms: AtomicStatement[], gaps: ProofGap[]): number
-  computeMetrics(decomposition: ProofDecomposition): { atomCount: number; gapCount: number; completeness: number; rigorLevel: string; [k: string]: unknown }
+  computeMetrics(decomposition: ProofDecomposition): {
+    atomCount: number; rootCount: number; leafCount: number; avgDependencies: number;
+    maxDependencyDepth: number; completeness: number; gapCount: number; implicitAssumptionCount: number;
+  }
 }
 ```
 
 `decompose()` is the orchestrator: parse (`parseProofText` if given a raw string) → classify each
-statement (premise / inference / conclusion / assumption / lemma, via regex `StatementPattern`s
-initialized in the constructor) → build the dependency graph (`buildDependencyGraph`, pattern-based
-reference detection, not NLP) → trace assumption chains back to axioms
+step (`extractStatements` calls `classifyStatement`; the type is an axiom, definition, hypothesis,
+lemma, derived statement or conclusion, chosen with regex `StatementPattern`s initialized in the
+constructor) → infer dependencies (`inferDependencies`: pattern-based reference detection, not
+NLP) → build the dependency graph (`buildDependencyGraph`) → trace assumption chains back to axioms
 (`traceAssumptionChains`) → detect gaps (`detectBasicGaps`, `findImplicitAssumptions`) → score
-rigor (`assessRigorLevel`). Statement classification and dependency inference are both
-regex-pattern-driven, not a formal parser — `hasSignificantOverlap` uses word-overlap heuristics to
-decide whether two statements likely reference each other.
+completeness and rigor (`computeCompleteness`, `assessRigorLevel`). Statement classification and
+dependency inference are both regex-pattern-driven, not a formal parser — `hasSignificantOverlap`
+uses word-overlap heuristics to decide whether two statements likely reference each other.
 
 ### GapAnalyzer (`gap-analyzer.ts`)
 
@@ -1459,30 +1594,46 @@ decide whether two statements likely reference each other.
 missing intermediate steps, scope errors, undefined terms.
 
 ```typescript
-export interface GapAnalyzerConfig { /* leapDistanceThreshold, complexityThreshold, ... */ }
+export interface GapAnalyzerConfig {
+  strictness: "lenient" | "standard" | "strict";   // default "standard"
+  checkDomainAssumptions: boolean;                 // default true
+  verifyInferenceRules: boolean;                   // default true
+  maxLeapDistance: number;                         // default 2
+}
+
+// Not exported: { isValid: boolean; reason?: string; suggestedFix?: string; missingSteps?: string[] }
+interface TransitionValidation { /* see above */ }
 
 export class GapAnalyzer {
   constructor(config?: Partial<GapAnalyzerConfig>)
 
   analyzeGaps(decomposition: ProofDecomposition): GapAnalysis
-  isValidTransition(from: AtomicStatement, to: AtomicStatement): boolean
+  isValidTransition(from: AtomicStatement, to: AtomicStatement): TransitionValidation
   findUnjustifiedLeaps(atoms: AtomicStatement[], graph: DependencyGraph): ProofGap[]
-  findMissingSteps(atoms: AtomicStatement[]): ProofGap[]
+  findMissingSteps(atoms: AtomicStatement[], graph: DependencyGraph): ProofGap[]
   findScopeErrors(atoms: AtomicStatement[]): ProofGap[]
   findUndefinedTerms(atoms: AtomicStatement[]): ProofGap[]
-  findImplicitAssumptions(atoms: AtomicStatement[]): ProofGap[]
+  findImplicitAssumptions(atoms: AtomicStatement[], gaps: ProofGap[]): ImplicitAssumption[]
   findUnjustifiedSteps(atoms: AtomicStatement[]): string[]
-  generateSuggestions(gaps: ProofGap[]): string[]
-  computeCompleteness(decomposition: ProofDecomposition, gaps: ProofGap[]): number
+  generateSuggestions(
+    gaps: ProofGap[], implicitAssumptions: ImplicitAssumption[], unjustifiedSteps: string[],
+  ): string[]
+  computeCompleteness(
+    atoms: AtomicStatement[], gaps: ProofGap[], implicitAssumptions: ImplicitAssumption[],
+  ): number
 }
 ```
 
-`isValidTransition` checks a known inference rule (`verifyInferenceRule`) or an implied semantic
-connection (`checkImpliedConnection`) between two adjacent statements; `findUnjustifiedLeaps` flags
-transitions whose `computeLeapDistance` (an estimated-complexity delta, via
-`estimateStatementComplexity`) exceeds a threshold with no valid transition found.
-`findUndefinedTerms` cross-checks against a hardcoded list of standard math vocabulary
-(`isStandardMathTerm`) — anything outside it and not defined earlier in the proof is flagged.
+`isValidTransition` takes any two statements. It is always valid when `to` is an axiom,
+definition or hypothesis. When `to.derivedFrom` includes `from.id`, it checks the inference rule
+(`verifyInferenceRule`) if `to.usedInferenceRule` is set and `verifyInferenceRules` is on.
+Otherwise it looks for an implied semantic connection (`checkImpliedConnection`). Only
+`findMissingSteps` calls it. `findUnjustifiedLeaps` does not call it. It flags a derived statement,
+lemma or conclusion that has no `derivedFrom` entry. Unless `strictness` is `lenient`, it also
+flags a statement whose `computeLeapDistance` is larger than `maxLeapDistance`.
+`findUndefinedTerms` looks for the phrase "by (the) definition of X". It flags X when no definition
+statement defines X and X is not in the hardcoded list of standard math vocabulary
+(`isStandardMathTerm`). The set of defined terms comes from all definition statements in the proof.
 
 ### AssumptionTracker (`assumption-tracker.ts`)
 
@@ -1490,23 +1641,32 @@ transitions whose `computeLeapDistance` (an estimated-complexity delta, via
 minimal assumption set a proof actually needs.
 
 ```typescript
+// Not exported: { assumptionId: string; isDischarged: boolean; dischargedAt?: string; dischargeReason?: string }
+interface DischargeStatus { /* see above */ }
+
 export class AssumptionTracker {
-  traceToAssumptions(statementId: string, graph: DependencyGraph): string[]
+  traceToAssumptions(conclusionId: string, graph: DependencyGraph): AssumptionChain
   analyzeAssumptions(decomposition: ProofDecomposition): AssumptionAnalysis
-  findMinimalAssumptions(decomposition: ProofDecomposition): string[]
+  findMinimalAssumptions(
+    conclusionDependencies: Map<string, string[]>, graph: DependencyGraph,
+  ): Map<string, string[]>
   findUnusedAssumptions(decomposition: ProofDecomposition): string[]
-  checkAssumptionDischarge(decomposition: ProofDecomposition): { discharged: string[]; undischarged: string[] }
+  checkAssumptionDischarge(decomposition: ProofDecomposition): DischargeStatus[]
   getAssumptionImpact(assumptionId: string, graph: DependencyGraph): string[]
   getSuggestions(analysis: AssumptionAnalysis): string[]
-  validateStructure(decomposition: ProofDecomposition): { valid: boolean; issues: string[] }
+  validateStructure(decomposition: ProofDecomposition): { isValid: boolean; issues: string[] }
 }
 ```
 
-`findMinimalAssumptions` walks backward from the conclusion (`computeMinimalSet`, reachability via
-`isReachable`) rather than just listing every declared assumption — an assumption the conclusion
-never actually depends on is excluded, and separately reported by `findUnusedAssumptions`.
-`getAssumptionImpact` is the inverse query: given one assumption, which statements would become
-unsupported if it were removed (`dependsOn` reachability in the other direction).
+`traceToAssumptions` collects the assumptions that one conclusion depends on, with a depth-first
+walk back to axiom, definition and hypothesis statements. `findMinimalAssumptions` takes those
+assumptions for each conclusion. `computeMinimalSet` removes one assumption at a time and keeps the
+removal when `isReachable` shows that the conclusion still follows from the smaller set
+(`isReachable` propagates forward from the assumptions). The result is a greedy, approximate
+minimal set. `findUnusedAssumptions` is a different check: it lists axioms, definitions and
+hypotheses that no statement and no edge uses. `getAssumptionImpact` runs a breadth-first search
+over `derivedFrom` and returns every statement that depends on the assumption, directly or through
+other statements. It does not test whether a dependent has other support.
 
 ### InconsistencyDetector (`inconsistency-detector.ts`)
 
@@ -1514,7 +1674,12 @@ unsupported if it were removed (`dependsOn` reachability in the other direction)
 axiom conflicts, and quantifier-scope errors across a proof's statements.
 
 ```typescript
-export interface InconsistencyDetectorConfig { /* strictness thresholds */ }
+export interface InconsistencyDetectorConfig {
+  strictTyping: boolean;             // default true
+  checkDomains: boolean;             // default true
+  checkQuantifiers: boolean;         // default true
+  maxPairwiseComparisons: number;    // default 1000
+}
 
 export class InconsistencyDetector {
   constructor(config?: Partial<InconsistencyDetectorConfig>)
@@ -1525,16 +1690,23 @@ export class InconsistencyDetector {
   detectDomainViolations(atoms: AtomicStatement[]): Omit<Inconsistency, "id">[]
   detectUndefinedOperations(atoms: AtomicStatement[]): Omit<Inconsistency, "id">[]
   detectAxiomConflicts(atoms: AtomicStatement[]): Omit<Inconsistency, "id">[]
-  detectQuantifierErrors(atoms: AtomicStatement[]): Omit<Inconsistency, "id">[]
-  getSummary(inconsistencies: Inconsistency[]): { total: number; bySeverity: Record<string, number>; [k: string]: unknown }
+  detectQuantifierErrors(atoms: AtomicStatement[], graph: DependencyGraph): Omit<Inconsistency, "id">[]
+  getSummary(inconsistencies: Inconsistency[]): {
+    isConsistent: boolean; criticalCount: number; errorCount: number; warningCount: number; summary: string;
+  }
 }
 ```
 
-`analyze()` runs all six `detect*` passes and assigns each finding an ID. Contradiction detection
-(`detectContradictions`) is syntactic (`isSyntacticNegation` — pattern-matches negation forms like
-"not X" against "X"), not semantic — it will not catch a contradiction expressed in different
-words. A fixed table of `ContradictionPattern`s built in the constructor
-(`initializePatterns`) backs several of the six passes.
+`analyze()` runs the six `detect*` passes and assigns each finding an ID of the form `inc-N`. The
+type, domain and quantifier passes run only when `strictTyping`, `checkDomains` and
+`checkQuantifiers` are true (the default). Contradiction detection (`detectContradictions`) is
+syntactic (`isSyntacticNegation` — pattern-matches negation forms like "not X" against "X"), not
+semantic — it will not catch a contradiction expressed in different words. Only
+`detectContradictions` uses the fixed table of nine `ContradictionPattern` entries built in the
+constructor (`initializePatterns`). It compares statements in pairs, and `maxPairwiseComparisons`
+limits the pairs: the loop covers the first `sqrt(maxPairwiseComparisons)` statements, which is 32
+with the default. A proof with more statements is not fully checked for direct contradictions.
+`getSummary().isConsistent` is true when there is no critical and no error finding.
 
 ### CircularReasoningDetector (`circular-detector.ts`)
 
@@ -1542,34 +1714,54 @@ words. A fixed table of `ContradictionPattern`s built in the constructor
 begging-the-question patterns, and tautologies masquerading as proof steps.
 
 ```typescript
-export interface CircularReasoningResult { /* hasCircularReasoning, cycles, selfReferential, ... */ }
+export interface CircularReasoningResult {
+  hasCircularReasoning: boolean;     // ignores tautologies
+  cycles: CircularPath[];
+  selfReferentialStatements: string[];
+  beggingTheQuestion: string[];
+  tautologies: string[];
+  summary: string;
+}
 
 export class CircularReasoningDetector {
   detectCircularReasoning(decomposition: ProofDecomposition): CircularReasoningResult
   isSelfReferential(statement: AtomicStatement): boolean
   findReasoningCycles(graph: DependencyGraph): CircularPath[]
-  findBeggingTheQuestion(atoms: AtomicStatement[], conclusion: AtomicStatement): string[]
+  findBeggingTheQuestion(atoms: AtomicStatement[], graph: DependencyGraph): string[]
   findTautologies(atoms: AtomicStatement[]): string[]
-  analyzeCycle(cycle: string[], graph: DependencyGraph): CircularPath
-  conclusionDependsOnItself(decomposition: ProofDecomposition): boolean
+  analyzeCycle(cycle: CircularPath, graph: DependencyGraph): {
+    involvedStatements: AtomicStatement[]; breakPoints: string[]; suggestedFix: string;
+  }
+  conclusionDependsOnItself(conclusionId: string, graph: DependencyGraph): boolean
 }
 ```
 
-`findReasoningCycles` runs a DFS over the dependency graph (`findCyclesDFS`) and reconstructs each
-cycle's statement path (`extractCyclePath`) — this is the one genuinely graph-theoretic check in
-the class; `findBeggingTheQuestion` and `findTautologies` are pattern/equivalence heuristics
-(`statementsEquivalent`, `isLogicalTautology`) layered on top, not derived from the cycle search.
+`findReasoningCycles` returns nothing when `graph.hasCycles` is false. Otherwise it reads the
+strongly connected components that `DependencyGraphBuilder` computed with Tarjan's algorithm and
+makes one `CircularPath` for each component with more than one statement. A graph that
+`ProofDecomposer` built always has these components when it has a cycle. The detector runs its own
+depth-first search (`findCyclesDFS`, `extractCyclePath`) only for a graph without components. A
+self-referential statement is a component of one node, so `isSelfReferential` finds it, not
+`findReasoningCycles`. `findBeggingTheQuestion` and `findTautologies` are pattern/equivalence
+heuristics (`statementsEquivalent`, `isLogicalTautology`), not derived from the cycle search.
 
 ### DependencyGraphBuilder (`dependency-graph.ts`)
 
-**Purpose**: The mutable graph builder every other proof class consumes — add statements and
-dependency edges, then query structure (roots, leaves, depth, cycles, topological order, paths).
+**Purpose**: The mutable graph builder behind `DependencyGraph` — add statements and dependency
+edges, then query structure (roots, leaves, depth, cycles, topological order, paths).
 
 ```typescript
 export class DependencyGraphBuilder {
   addStatement(statement: AtomicStatement): void
-  createStatement(id: string, content: string, type: AtomicStatement["type"]): AtomicStatement
-  addDependency(fromId: string, toId: string, type?: string): void
+  createStatement(      // makes the statement with a random UUID as its id, adds it, and returns it
+    statement: string, type: AtomicStatement["type"],
+    options?: Partial<Omit<AtomicStatement, "id" | "statement" | "type">>,
+  ): AtomicStatement
+  addDependency(        // throws an Error when either statement is not in the graph
+    from: string, to: string,
+    type?: "logical" | "definitional" | "computational" | "implicit",   // default "logical"
+    options?: { strength?: number; inferenceRule?: InferenceRule },
+  ): void
 
   findRoots(): string[]
   findLeaves(): string[]
@@ -1584,6 +1776,8 @@ export class DependencyGraphBuilder {
   findAllPaths(from: string, to: string, maxPaths?: number): string[][]   // default maxPaths: 100
 
   build(): DependencyGraph
+  get nodeCount(): number
+  get edgeCount(): number
   hasNode(nodeId: string): boolean
   getNode(nodeId: string): AtomicStatement | undefined
   getAllNodes(): AtomicStatement[]
@@ -1592,10 +1786,12 @@ export class DependencyGraphBuilder {
 }
 ```
 
-This is the only proof class with no `analyze`/`detect`-style entry point — it is pure graph
-infrastructure that `ProofDecomposer.inferDependencies()` and every detector/tracker above builds
-on. `getTopologicalOrder()` returning `null` is the graph's own signal for "contains a cycle,"
-independent of `CircularReasoningDetector`'s higher-level analysis.
+`ProofDecomposer.buildDependencyGraph` (private) is the only code that creates a
+`DependencyGraphBuilder`. The other proof classes read the finished `DependencyGraph` value, not
+the builder. `detectCycles()` uses Tarjan's algorithm, and `build()` stores its result as
+`stronglyConnectedComponents` when the graph has a cycle. `getTopologicalOrder()` returning `null`
+is the graph's own signal for "contains a cycle," independent of `CircularReasoningDetector`'s
+higher-level analysis.
 
 ### HierarchicalProofManager (`hierarchical-proof.ts`)
 
@@ -1603,57 +1799,79 @@ independent of `CircularReasoningDetector`'s higher-level analysis.
 list, and can render that tree to Mermaid.
 
 ```typescript
-export interface HierarchicalProofOptions { /* maxDepth, autoExtractLemmas, ... */ }
-export interface ProofElementInput { /* statement, type, parentId?, steps, ... */ }
+export interface HierarchicalProofOptions {
+  autoExtractLemmas?: boolean;       // default true
+  maxDepth?: number;                 // default 10
+  extractMetadata?: boolean;         // default true
+}
+export interface ProofElementInput {
+  type: HierarchicalProofType; statement: string; name?: string;
+  proof: ProofStep[]; dependencies?: string[];
+}
 
 export class HierarchicalProofManager {
   constructor(options?: HierarchicalProofOptions)
 
-  createProof(input: ProofElementInput): HierarchicalProof
+  createProof(statement: string, steps: ProofStep[], name?: string): HierarchicalProof   // always a theorem
   createElement(input: ProofElementInput): HierarchicalProof
   buildTree(root: HierarchicalProof): ProofTree
 
-  addLemma(tree: ProofTree, lemma: HierarchicalProof, parentId?: string): ProofTree
-  addCorollary(tree: ProofTree, corollary: HierarchicalProof, parentId: string): ProofTree
+  addLemma(proof: HierarchicalProof, lemma: ProofElementInput): HierarchicalProof
+  addCorollary(proof: HierarchicalProof, corollary: ProofElementInput): HierarchicalProof
   findById(tree: ProofTree, id: string): HierarchicalProof | undefined
-  findByType(tree: ProofTree, type: HierarchicalProof["type"]): HierarchicalProof[]
+  findByType(tree: ProofTree, type: HierarchicalProofType): HierarchicalProof[]
   findIncomplete(tree: ProofTree): HierarchicalProof[]
   generateSummary(tree: ProofTree): string
   toMermaid(tree: ProofTree): string
 }
 ```
 
-`buildTree()` auto-extracts sub-proofs and lemmas from a flat `ProofStep[]` (private
-`extractSubProofs`, `findLemmas`) rather than requiring the caller to pre-structure them, then
-computes cross-element dependency order (`computeDependencyOrder`) and per-node completeness
-(`checkCompleteness` / `checkStepCompleteness`). `toMermaid()` is this class's own diagram
+`createProof()` and `createElement()` extract lemmas from the step list (private
+`extractSubProofs`, `findLemmas`) when `autoExtractLemmas` is true, and they set `isComplete` on each
+element (`checkCompleteness` / `checkStepCompleteness`). `createProof()` makes a theorem;
+`createElement()` makes a lemma, corollary, claim or proposition. `addLemma()` and `addCorollary()`
+create an element from the input and return a new proof with that element added to `subProofs`;
+they do not change the original proof. `buildTree()` walks the existing sub-proofs down to
+`maxDepth`, then computes the dependency order (`computeDependencyOrder`) and the statistics
+(`calculateStatistics`). `toMermaid()` is this class's own diagram
 renderer — a proof-tree-specific Mermaid emitter, separate from `MermaidGraphBuilder` in
 `src/export/visual/utils/mermaid.ts`.
 
 ### BranchAnalyzer (`branch-analyzer.ts`)
 
-**Purpose**: Partitions a proof's steps into independent branches that could be verified or explored
-in parallel, and orders them for sequential execution when they cannot.
+**Purpose**: Partitions a proof's steps into branches that could be verified or explored in
+parallel, and orders the branches into execution levels.
 
 ```typescript
-export interface BranchAnalyzerOptions { /* minBranchSize, mergeThreshold, ... */ }
+export interface BranchAnalyzerOptions {
+  minBranchSize?: number;            // default 1
+  estimateComplexity?: boolean;      // default true
+  extractMetadata?: boolean;         // default true
+}
 
 export class BranchAnalyzer {
   constructor(options?: BranchAnalyzerOptions)
 
   analyze(steps: ProofStep[]): BranchAnalysisResult
   buildDependencyGraph(steps: ProofStep[]): Map<number, DependencyNode>
-  partitionIntoBranches(steps: ProofStep[], graph: Map<number, DependencyNode>): ProofBranch[]
+  partitionIntoBranches(graph: Map<number, DependencyNode>, steps: ProofStep[]): ProofBranch[]
   markIndependentBranches(branches: ProofBranch[]): void
-  getExecutionOrder(branches: ProofBranch[]): ProofBranch[][]   // outer array = sequential stages, inner = parallelizable within a stage
+  getExecutionOrder(branches: ProofBranch[]): ProofBranch[][]   // outer array = levels, inner = branches in one level
   estimateComplexity(branch: ProofBranch): number
-  getStatistics(result: BranchAnalysisResult): { branchCount: number; independentCount: number; maxDepth: number; [k: string]: unknown }
+  getStatistics(result: BranchAnalysisResult): {
+    totalBranches: number; independentBranches: number; maxParallelism: number;
+    totalSteps: number; avgBranchSize: number; avgComplexity: number;
+  }
 }
 ```
 
-`getExecutionOrder()` returns a *stage list*, not a flat order: branches within one inner array have
-no dependency on each other and could run concurrently, while stages themselves are still
-sequential — this is a scheduling structure, not a linear step order.
+`getExecutionOrder()` returns a list of levels, not a flat order: branches within one inner array
+have no dependency on each other and could run concurrently, and the levels are ordered. The
+branches are mutually independent by construction. `partitionIntoBranches` builds each branch as a
+connected component of the step dependency graph, and the component search follows both
+`dependencies` and `dependents`, so no dependency edge leaves a branch. `resolveBranchDependencies`
+therefore records no cross-branch edge, `markIndependentBranches` marks every branch independent,
+and `getExecutionOrder` returns one level that holds all branches.
 
 ### ProofVerifier (`verifier.ts`)
 
@@ -1661,7 +1879,12 @@ sequential — this is a scheduling structure, not a linear step order.
 flags structural problems (circular references, undefined terms) across the whole step sequence.
 
 ```typescript
-export interface ProofVerifierConfig { /* knownRules, strictMode, ... */ }
+export interface ProofVerifierConfig {
+  checkCircular?: boolean;           // default true
+  checkUndefinedTerms?: boolean;     // default true
+  strict?: boolean;                  // default false
+  customRules?: string[];            // default []
+}
 
 export class ProofVerifier {
   constructor(config?: ProofVerifierConfig)
@@ -1677,63 +1900,77 @@ export class ProofVerifier {
 `verify()` parses every step (`parseStep` → extracts justification, references, and
 introduced/used terms), then runs two whole-sequence checks that a single-step `verifyStep()` call
 cannot: `checkCircularReferences` (a step that, transitively, justifies itself) and
-`checkUndefinedTerms` (a term used before any step introduces it). `addCustomRule()` extends the
+`checkUndefinedTerms` (a term used before any step introduces it); each runs only when its config
+flag is true. The constructor builds a fixed set of 31 known rule names, and `customRules` adds to
+it. `addCustomRule()` extends the
 known-rule set at runtime — `isValidJustification()` checks against whatever rules are currently
 registered, including custom ones added earlier in the same instance's lifetime.
 
 ### StrategyRecommender (`strategy-recommender.ts`)
 
 **Purpose**: Given a theorem statement, recommends proof strategies (induction, contradiction,
-direct, contrapositive, ...) ranked by fit, each with a generated template.
+direct, contrapositive, ...) ranked by fit, each with the static template for its strategy.
 
 ```typescript
-export interface StrategyRecommenderConfig { /* weights per strategy, domain bonuses, ... */ }
+export interface StrategyRecommenderConfig {
+  maxRecommendations?: number;       // default 3
+  minConfidence?: number;            // default 0.3
+  includeTemplates?: boolean;        // default true; stored, never read
+}
 
 export class StrategyRecommender {
   constructor(config?: StrategyRecommenderConfig)
 
   recommend(theorem: string): StrategyRecommendation[]
   extractFeatures(theorem: string): TheoremFeatures
-  matchStrategies(features: TheoremFeatures): Array<{ strategy: ProofStrategyType; score: number; [k: string]: unknown }>
+  matchStrategies(features: TheoremFeatures): Array<{ strategy: ProofStrategyType; score: number; matchedFeatures: string[] }>
   getStrategies(): ProofStrategyType[]
   getTemplate(strategy: ProofStrategyType): ProofTemplate | undefined
 }
 ```
 
 `recommend()` extracts features from the theorem text (`extractFeatures` — domain type via
-`detectDomainType`, plus `detectAdditionalFeatures` for things like "involves an infinite set" or
-"asserts non-existence"), scores every strategy against a fixed weight table
-(`initializeStrategyWeights`, `matchStrategies`) with domain and feature bonuses layered on
-(`applyDomainBonus`, `applyAdditionalFeatureBonus`), and returns them ranked with generated
-reasoning text (`generateReasoning`) and a filled-in `ProofTemplate` (`initializeTemplates` builds a
+`detectDomainType`, plus `detectAdditionalFeatures`, which returns tags such as `parity`,
+`uniqueness`, `constructive` and `impossibility`), scores all 12 strategies against a fixed weight
+table (`initializeStrategyWeights`, `matchStrategies`) with domain and feature bonuses layered on
+(`applyDomainBonus`, `applyAdditionalFeatureBonus`), keeps the scores of at least `minConfidence`,
+and returns the top `maxRecommendations`, sorted by score. Each result carries reasoning text
+(`generateReasoning`) and the static `ProofTemplate` of its strategy (`initializeTemplates` builds a
 per-strategy template map at construction; `getDefaultTemplate` is the fallback for a strategy with
-no custom template).
+no custom template). Nothing fills a template with content from the theorem. The weights and bonuses
+are fixed tables in the code; the config cannot change them.
 
 ### Warning patterns (`patterns/warnings.ts`)
 
-Not a class — a static catalog of 13 named `WarningPattern` constants (division by hidden zero,
+Not a class — a static catalog of 12 named `WarningPattern` constants (division by hidden zero,
 assuming the conclusion, affirming the consequent, denying the antecedent, hasty generalization,
 ambiguous middle, illegal cancellation, infinity arithmetic, necessary/sufficient confusion,
-existential instantiation error, √ sign error, limit exchange error) collected into
-`ALL_WARNING_PATTERNS`, plus three lookup/check functions:
+existential instantiation error, √ sign error, limit exchange error). `ALL_WARNING_PATTERNS` holds
+11 of them. `AMBIGUOUS_MIDDLE` stays exported but is not scanned, because its regex fails in both
+directions. The file also has four functions:
 
 ```typescript
 export function getPatternsByCategory(category: WarningCategory): WarningPattern[]
-export function getPatternsBySeverity(severity: string): WarningPattern[]
-export function checkStatement(statement: string): WarningPattern[]
-export function checkProof(steps: ProofStep[]): Map<number, WarningPattern[]>
+export function getPatternsBySeverity(severity: "info" | "warning" | "error" | "critical"): WarningPattern[]
+export function checkStatement(statement: string): { pattern: WarningPattern; match: RegExpMatchArray }[]
+export function checkProof(statements: string[]): Map<number, { pattern: WarningPattern; match: RegExpMatchArray }[]>
 ```
 
-`checkStatement`/`checkProof` are the entry points other proof classes could call to flag a known
+`checkStatement` is called by `findFallacies` in `extended-advisory.ts`, which flags a known
 logical-fallacy pattern by name rather than re-deriving it structurally — a complementary,
 name-the-fallacy layer alongside `InconsistencyDetector`'s structural contradiction detection.
+`checkProof`, `getPatternsByCategory` and `getPatternsBySeverity` are exported from
+`src/proof/index.ts`. No other code in `src/` calls them.
 
 ---
 
 ## Taxonomy
 
 `src/taxonomy/` classifies and recommends reasoning approaches independent of the 34 `ThinkingMode`
-values — a broader 69-entry taxonomy backs `recommend_mode` and related tooling.
+values — a broader 69-entry taxonomy backs `recommend_mode` and related tooling. The live request
+path reaches it through two wrappers. `advisory.ts` appends reasoning-type advice to the
+`recommend_mode` response, and `flow-advisory.ts` appends a reasoning-flow report to the
+`summarize` text.
 
 ### Reasoning taxonomy data (`reasoning-types.ts`)
 
@@ -1760,36 +1997,52 @@ export function getReasoningType(id: string): ReasoningType | undefined
 export function getReasoningTypesByCategory(category: ReasoningCategory): ReasoningType[]
 export function searchReasoningTypes(query: string): ReasoningType[]
 export function getRelatedTypes(id: string): ReasoningType[]
-export function getTaxonomyStats(): { total: number; byCategory: Record<ReasoningCategory, number>; [k: string]: unknown }
+export function getTaxonomyStats(): {
+  total: number;
+  byCategory: Map<ReasoningCategory, number>;
+  byDifficulty: Map<string, number>;
+  byFrequency: Map<string, number>;
+}
 ```
 
-The file's own header comment still says "110 reasoning types" (Phase 4D naming, from before a
-later trim); `REASONING_TAXONOMY` holds exactly 69 entries today — the module-level `id:` field
-count is the ground truth, not the comment.
+The header comment of `reasoning-types.ts` says "110 reasoning types". `REASONING_TAXONOMY` holds 69
+entries: 20 deductive, 15 inductive, 10 abductive, 8 analogical, and 2 in each of the other eight
+categories. Count the `id:` fields to check the number.
 
 ### TaxonomyClassifier (`classifier.ts`)
 
-**Purpose**: Classifies a `Thought` against the 69-entry taxonomy via keyword + context scoring.
+**Purpose**: Classifies a `Thought`, or free text, against the 69-entry taxonomy via keyword + context scoring.
 
 ```typescript
-export interface ThoughtClassification { /* typeId, confidence, alternativeTypes, ... */ }
+export interface ThoughtClassification {
+  primaryCategory: ReasoningCategory; primaryType: ReasoningType; secondaryTypes: ReasoningType[];
+  confidence: number; matchedKeywords: string[];
+}
 
 export class TaxonomyClassifier {
   classifyThought(thought: Thought): ThoughtClassification
+  classifyText(text: string): ThoughtClassification
   getType(typeId: string): ReasoningType | undefined
   getTypesByCategory(category: ReasoningCategory): ReasoningType[]
   getCategories(): ReasoningCategory[]
-  getStatistics(): { totalTypes: number; byCategory: Record<string, number>; [k: string]: unknown }
+  getStatistics(): {
+    totalTypes: number;
+    categories: Map<ReasoningCategory, number>;
+    difficulties: Map<string, number>;
+    frequencies: Map<string, number>;
+  }
 }
 ```
 
 The constructor builds a keyword index (`buildKeywordIndex`) over every taxonomy entry's
-`keywords`/`aliases` once, up front. `classifyThought` tokenizes the thought's content
-(`tokenize`), scores each candidate type by keyword overlap (`calculateKeywordScore`) plus a
-context bonus for surrounding sentence structure (`calculateContextScore`), and returns the
-best-scoring type with alternatives. **`classifier.ts` itself is unused** — nothing in `src/`
-imports `TaxonomyClassifier`; the only occurrence of its name in `src/index.ts` is a JSDoc comment,
-not an import.
+`keywords` and `aliases` once, up front. The index also holds the tokens of each type's `name` that
+are longer than 3 characters. `classifyThought` passes the thought's content to `classifyText`,
+which tokenizes the text (`tokenize`), scores each candidate type by keyword overlap
+(`calculateKeywordScore`) plus a context bonus for surrounding sentence structure
+(`calculateContextScore`), and returns the best-scoring type with at most 3 secondary types.
+`confidence` is `min(1, score / 10)`. When no token matches, `classifyText` returns the type
+`practical_common_sense` with confidence 0.3 and no secondary types. `taxonomy/advisory.ts` constructs one `TaxonomyClassifier`
+and calls `classifyText()` on the `problemType` and domain text of a `recommend_mode` request.
 
 ### TaxonomyNavigator (`navigator.ts`)
 
@@ -1797,44 +2050,94 @@ not an import.
 type comparison, and a text report generator.
 
 ```typescript
-export interface TaxonomyQuery { /* category?, difficulty?, keyword?, ... */ }
-export interface QueryResult { /* type: ReasoningType, relevance: number, ... */ }
-export interface NavigationPath { /* steps: NavigationStep[], ... */ }
-export interface TaxonomyExploration { /* type, relatedTypes, learningPath, ... */ }
+export interface TaxonomyQuery {
+  categories?: ReasoningCategory[];
+  difficulties?: Array<"beginner" | "intermediate" | "advanced" | "expert">;
+  frequencies?: Array<"rare" | "uncommon" | "common" | "very_common">;
+  keywords?: string[]; applications?: string[];
+  hasPrerequisites?: boolean; hasFormalDefinition?: boolean; searchText?: string;
+}
+export interface QueryResult { type: ReasoningType; relevanceScore: number; matchReasons: string[] }
+export interface NavigationPath { steps: NavigationStep[]; totalDistance: number }
+export interface TaxonomyExploration {
+  startType: ReasoningType;
+  neighborhood: {
+    prerequisites: ReasoningType[]; related: ReasoningType[];
+    sameCategory: ReasoningType[]; similarApplications: ReasoningType[];
+  };
+  learningPath: ReasoningType[];               // suggested order to learn the prerequisites
+  dependencies: Map<string, string[]>;         // type ID -> prerequisite IDs
+}
 
 export class TaxonomyNavigator {
   query(filters: TaxonomyQuery): QueryResult[]
   findByKeyword(keyword: string): ReasoningType[]
   findByApplication(application: string): ReasoningType[]
   explore(typeId: string): TaxonomyExploration | null
-  findPath(fromId: string, toId: string): NavigationPath | null
-  recommend(characteristics: unknown): ReasoningType[]
-  compare(typeIdA: string, typeIdB: string): { shared: string[]; differences: string[]; [k: string]: unknown }
-  getOverview(): { totalTypes: number; categories: ReasoningCategory[]; [k: string]: unknown }
+  findPath(fromId: string, toId: string, maxDepth?: number): NavigationPath | null   // maxDepth defaults to 6
+  recommend(
+    problemDescription: string,
+    context?: { difficulty?: "beginner" | "intermediate" | "advanced" | "expert"; domain?: string; constraints?: string[] },
+  ): QueryResult[]                                                                 // at most 10 results
+  compare(id1: string, id2: string): {
+    type1: ReasoningType; type2: ReasoningType;
+    commonalities: string[]; differences: string[]; relatedPath: NavigationPath | null;
+  } | null                                                                         // null for an unknown ID
+  getOverview(): {
+    total: number;
+    categories: Array<{ name: ReasoningCategory; count: number; types: string[] }>;
+    difficulties: Map<string, number>; popularTypes: ReasoningType[];
+  }
   generateQueryReport(results: QueryResult[]): string
 }
 ```
 
-`explore()` builds a `computeLearningPath` for the requested type — the prerequisite chain leading
-up to it, walked via a private `buildDependencyGraph` over `ReasoningType.prerequisites`. Only the
-test suite imports `TaxonomyNavigator`; no production path from `src/index.ts` reaches it.
+`explore()` sets `learningPath` with `computeLearningPath`, a depth-first walk over
+`ReasoningType.prerequisites` that returns the prerequisite chain leading up to the requested type.
+It sets `dependencies` with the private `buildDependencyGraph`, which walks `prerequisites` and
+`relatedTypes` to depth 2.
+`SuggestionEngine` constructs a `TaxonomyNavigator` and calls its `recommend()` and `query()`
+methods, so `recommend_mode` reaches it through `suggestForProblem()`.
 
 ### SuggestionEngine (`suggestion-engine.ts`)
 
-**Purpose**: The largest taxonomy file — recommends a reasoning type for a described problem, and
-retrospectively analyzes a completed session for quality and bottlenecks.
+**Purpose**: The largest taxonomy file that holds logic (`reasoning-types.ts` is larger, and is
+data) — recommends a reasoning type for a described problem, and retrospectively analyzes a
+completed session for quality and bottlenecks.
 
 ```typescript
-export type CognitiveLoad = "low" | "medium" | "high" | "very_high";
+export type CognitiveLoad = "minimal" | "low" | "moderate" | "high" | "very_high";
 export type DualProcessType = "system1" | "system2" | "hybrid";
 export interface QualityMetrics { /* rigor, completeness, clarity, ... */ }
-export interface ProblemCharacteristics { /* complexity, domain, uncertaintyLevel, ... */ }
-export interface ReasoningSuggestion { /* typeId, confidence, rationale, warnings, ... */ }
-export interface SessionAnalysis { /* bottlenecks, improvements, qualityTrend, ... */ }
+export interface ProblemCharacteristics {
+  domain: string;
+  complexity: "simple" | "moderate" | "complex" | "very_complex";
+  uncertainty: "low" | "medium" | "high";
+  timeConstraints: "none" | "loose" | "moderate" | "tight" | "critical";
+  stakeholders: number;
+  novelty: "routine" | "familiar" | "novel" | "unprecedented";
+  dataAvailability: "abundant" | "adequate" | "limited" | "scarce";
+  reversibility: "reversible" | "partially_reversible" | "irreversible";
+  ethicalImplications: "none" | "minor" | "moderate" | "significant" | "critical";
+}
+export interface ReasoningSuggestion {
+  reasoningType: ReasoningType; metadata: EnhancedMetadata; relevanceScore: number;
+  rationale: string[]; warnings: string[]; alternatives: string[];
+  estimatedEffort: string; successProbability: number;
+}
+export interface SessionAnalysis {
+  session: ThinkingSession; totalThoughts: number; uniqueModes: number;
+  cognitiveLoadProfile: Map<CognitiveLoad, number>;
+  dualProcessDistribution: Map<DualProcessType, number>;
+  averageQualityMetrics: QualityMetrics;
+  modeEffectiveness: Map<string, number>;      // always an empty Map
+  suggestions: ReasoningSuggestion[];          // always empty
+  bottlenecks: string[]; improvements: string[];
+}
 
 export class SuggestionEngine {
   getMetadata(typeId: string): EnhancedMetadata | null
-  suggestForProblem(characteristics: ProblemCharacteristics): ReasoningSuggestion[]
+  suggestForProblem(characteristics: Partial<ProblemCharacteristics>): ReasoningSuggestion[]   // missing fields get defaults
   analyzeSession(session: ThinkingSession): SessionAnalysis
 }
 ```
@@ -1842,9 +2145,15 @@ export class SuggestionEngine {
 `suggestForProblem` maps problem complexity to a difficulty tier (`mapComplexityToDifficulty`),
 then builds per-suggestion rationale (`buildRationale`), warnings (`buildWarnings`), an effort
 estimate (`estimateEffort`), and a success-probability estimate (`estimateSuccessProbability`) — all
-heuristic scoring functions, not learned from historical outcomes. `analyzeSession` maps each
-thought's `ThinkingMode` back to a taxonomy type (`mapModeToType`) to reuse the same metadata, then
-derives `identifyBottlenecks` and `suggestImprovements` from the mapped sequence.
+heuristic scoring functions, not learned from historical outcomes. It sorts the result by
+`successProbability` and keeps at most 10 items. `analyzeSession` maps each thought's
+`ThinkingMode` to a taxonomy type with `mapModeToType` (29 mode names; a mode with no mapping, such
+as `historical`, `synthesis`, `argumentation`, `critique`, `analysis` or `custom`, is skipped),
+averages the quality metrics, and counts the cognitive load. `identifyBottlenecks` has one rule
+(more than half of the thoughts have `very_high` load). `suggestImprovements` has three rules, on
+the average rigor, creativity and efficiency. `taxonomy/advisory.ts`
+constructs one `SuggestionEngine` and calls `suggestForProblem()`. No code under `src/` calls
+`analyzeSession()`.
 
 ### MultiModalAnalyzer (`multi-modal-analyzer.ts`)
 
@@ -1852,39 +2161,61 @@ derives `identifyBottlenecks` and `suggestImprovements` from the mapped sequence
 modes, detected mode combinations, and pattern-based recommendations for future multi-mode flows.
 
 ```typescript
-export interface ModeTransition { /* from, to, effectiveness, ... */ }
-export interface ModeCombination { /* modes: string[], synergy: number, ... */ }
-export interface ReasoningFlow { /* transitions, combinations, complexity, coherence, adaptability */ }
-export interface MultiModalPattern { /* name, modes, description, ... */ }
-export interface ModeSynergy { /* mode1, mode2, score, rationale */ }
-export interface MultiModalRecommendation { /* pattern, relevance, rationale, adaptations */ }
+export interface ModeTransition {
+  from: ThinkingMode; to: ThinkingMode; thoughtNumber: number; reason?: string; effectiveness: number;
+}
+export interface ModeCombination {
+  modes: ThinkingMode[]; frequency: number; effectiveness: number;
+  typicalSequence: ThinkingMode[]; synergy: number; examples: string[];     // examples are thought IDs
+}
+export interface ReasoningFlow {
+  session: ThinkingSession; transitions: ModeTransition[]; combinations: ModeCombination[];
+  dominantMode: ThinkingMode; modeDistribution: Map<ThinkingMode, number>;
+  categoryDistribution: Map<ReasoningCategory, number>;
+  flowComplexity: number; coherence: number; adaptability: number;          // each 0-1
+}
+export interface MultiModalPattern {
+  id: string; name: string; description: string; modeSequence: string[]; useCases: string[];
+  effectiveness: number; examples: string[]; prerequisites: string[]; alternatives: string[];
+}
+export interface ModeSynergy {
+  mode1: string; mode2: string; synergyScore: number; complementarity: string[];
+  conflicts: string[]; optimalTransition: string; examples: string[];
+}
+export interface MultiModalRecommendation {
+  pattern: MultiModalPattern; relevanceScore: number; rationale: string[];
+  adaptations: string[]; estimatedBenefit: number;
+}
 
 export class MultiModalAnalyzer {
   analyzeFlow(session: ThinkingSession): ReasoningFlow
-  recommendPatterns(characteristics: unknown): MultiModalRecommendation[]
+  recommendPatterns(problemDescription: string, currentModes: ThinkingMode[]): MultiModalRecommendation[]
   findSynergy(mode1: string, mode2: string): ModeSynergy | null
   generateFlowReport(flow: ReasoningFlow): string
 }
 ```
 
-`analyzeFlow` scores each mode-to-mode transition (`estimateTransitionEffectiveness`), detects
-mode-combination clusters (`detectCombinations`, scored by `calculateCombinationSynergy`), and
-rolls those up into flow-level `calculateFlowComplexity`, `calculateCoherence`, and
-`calculateAdaptability` scores. Not one of the 4 taxonomy classes here is reachable from
-`src/index.ts` at runtime except through the taxonomy module as a whole — see Verification for the
-dependency-graph's reachability numbers.
+`analyzeFlow` scores each mode-to-mode transition (`estimateTransitionEffectiveness`), counts mode
+combinations (`detectCombinations` slides a window of 3 consecutive thoughts over the session,
+keys each window by its mode sequence and sorts by frequency; `calculateCombinationSynergy` scores
+a window as the mean `synergyScore` of its known consecutive mode pairs, or 0.5 when it knows
+none), and rolls those up into flow-level `calculateFlowComplexity`, `calculateCoherence`, and
+`calculateAdaptability` scores. `calculateAdaptability` divides the number of unique modes by the
+constant 14, although `ThinkingMode` has 35 members, so the value can exceed 1. `taxonomy/flow-advisory.ts` calls `analyzeFlow()` and
+`generateFlowReport()` for the `summarize` action. No code under `src/` calls `recommendPatterns()`
+or `findSynergy()`.
 
 ---
 
 ## Cache
 
-`src/cache/` is now LRU-only. `types.ts`'s `CacheStrategy` type still lists `"lru" | "lfu" |
-"fifo"` and `CacheEntry.accessCount`'s doc comment still says "(for LFU)", but the LFU and FIFO
-implementations, and the factory that used to select between them, were removed — a comment in
-`cache/index.ts` records this explicitly ("Simplified to LRU only (removed unused LFU/FIFO/
-factory)"). `LRUCache` is what `SessionManager.activeSessions` and `ValidationCache`'s internal
-`Map` conceptually parallel (the latter reimplements its own LRU logic rather than using this
-class — see Validation, above).
+`src/cache/` implements one cache strategy: LRU (`lru.ts`). The `CacheStrategy` type in `types.ts`
+also names `"lfu"` and `"fifo"`, and the doc comment of `CacheEntry.accessCount` says "(for LFU)",
+but no class implements either strategy and no factory selects between strategies. The module
+barrel `cache/index.ts` exports `LRUCache` and the types. Nothing under `src/` imports the barrel:
+`SessionManager` imports `lru.ts` and `types.ts` directly and holds its `activeSessions` in an
+`LRUCache`. `ValidationCache` keeps its own internal `Map` with its own LRU logic and does not use
+this class (see Validation, above).
 
 ```typescript
 export type CacheStrategy = "lru" | "lfu" | "fifo";   // only "lru" has an implementing class
@@ -1942,19 +2273,22 @@ export class LRUCache<T> implements Cache<T> {
 ```
 
 `set()` evicts the least-recently-used entry (private `evictLRU`) once `config.maxSize` is reached.
-`cleanExpired()` is a separate maintenance sweep for TTL-expired entries — `get()`/`has()` still
-check expiry lazily on access, so `cleanExpired()` is only needed to reclaim memory from entries
-nobody has touched since they expired. `SessionManager` constructs one with an `onEvict` callback
-that auto-saves the evicted session to storage (see Session, above) — the cache itself has no
-storage awareness; eviction behavior beyond LRU ordering is entirely the caller's callback.
+`cleanExpired()` is a separate maintenance sweep for TTL-expired entries — `get()`/`has()` check
+expiry lazily on access, so the sweep only reclaims memory from entries that nothing reads after
+they expire. No code in `src/` calls `cleanExpired()`. `SessionManager` constructs one with an
+`onEvict` callback (see Session, above). The callback saves the evicted session when storage exists
+and `session.config.enableAutoSave` is true. Otherwise it logs a warning that the thoughts are
+discarded. `LRUCache` calls the callback without awaiting it. The cache itself has no storage
+awareness; eviction behavior beyond LRU ordering is entirely the caller's callback.
 
 ---
 
 ## Utils
 
-`src/utils/` holds 18 classes (17 error classes in `errors.ts` plus `Logger` in `logger.ts`) and
-four function-only modules: `sanitization.ts`, `type-guards.ts`, `logger-types.ts`, and
-`file-lock.ts` (documented under Session, above, since its only consumer is `FileSessionStore`).
+`src/utils/` holds 18 classes (in `errors.ts` the base class `DeepThinkingError`, 15 subclasses and
+`ErrorFactory`, plus `Logger` in `logger.ts`) and four modules without classes: `sanitization.ts`,
+`type-guards.ts`, `logger-types.ts`, and `file-lock.ts` (documented under Session, above, since its
+only consumer is `FileSessionStore`).
 
 ### Errors (`errors.ts`)
 
@@ -2025,11 +2359,10 @@ export class ErrorFactory {
 }
 ```
 
-`InputValidationError`'s constructor stringifies any object `value` to the literal `"[object]"`
-before storing it in `context` — a deliberate choice so a validation error's context never leaks a
-full (possibly sensitive) input object into logs, only its field name and a generic marker.
-`ErrorFactory` covers five of the seventeen error types with static convenience constructors; the
-other twelve are constructed directly.
+`InputValidationError`'s constructor replaces a `value` whose `typeof` is `"object"` (arrays and
+`null` too) with the string `"[object]"` in its `context`, and stores any other value unchanged.
+The context also holds `fieldName` and `reason`. `ErrorFactory` builds 5 of the 15 subclasses with
+static convenience constructors; code creates the other 10 with `new`.
 
 ### Logger (`logger.ts`, `logger-types.ts`)
 
@@ -2059,25 +2392,31 @@ export const logger: Logger;                                    // module-level 
 export function createLogger(config?: Partial<LoggerConfig>): Logger
 ```
 
-Every entry is buffered in `this.logs` regardless of `enableConsole` — `getLogs()` reads that
-buffer (optionally filtered to a minimum level), which is how tests assert on logged output without
-capturing stdout. `logger-types.ts` exists purely to hold `LogLevel`/`LogEntry`/`LoggerConfig`
-separately from the `Logger` class itself, breaking a circular import that existed when those types
-lived in `logger.ts` directly; `logger.ts` re-exports all three for backward compatibility.
+`Logger` buffers every entry at or above `minLevel` in `this.logs`, whether or not
+`enableConsole` is true. The buffer has no size limit, and `clearLogs()` empties it. `getLogs()`
+reads that buffer (optionally filtered to a minimum level), which is how tests assert on logged
+output without capturing stdout. `logger-types.ts` holds `LogLevel`, `LogEntry` and `LoggerConfig`
+so that other modules can import them without importing `Logger`; `logger.ts` re-exports all
+three.
 
 ### Sanitization (`sanitization.ts`)
 
-Function-only — input-hardening helpers used across `SessionManager`, `ExportService`, and the
-validation layer.
+Input-hardening helpers used by `SessionManager`, `FileSessionStore`, `ExportService`, the LaTeX
+and TikZ exporters, the legacy tool schema (`src/tools/thinking.ts`) and the tool schemas in
+`src/tools/schemas/`. Nothing under `src/validation/` uses them.
 
 ```typescript
-export const MAX_LENGTHS: { TITLE: number; DOMAIN: number; AUTHOR: number; [k: string]: number };
+export const MAX_LENGTHS: {   // nine keys
+  THOUGHT_CONTENT: 100000; TITLE: 500; DOMAIN: 200; AUTHOR: 300; SESSION_ID: 100;
+  DESCRIPTION: 10000; STRING_FIELD: 1000; ARRAY_ITEMS: 1000; NESTED_ARRAY_ITEMS: 500;
+};
 
-export function sanitizeString(value: string, maxLength: number, fieldName: string): string
-export function sanitizeOptionalString(value: string | undefined, maxLength: number, fieldName: string): string | undefined
+// Every parameter after the first has a default: maxLength = MAX_LENGTHS.STRING_FIELD, fieldName = "input".
+export function sanitizeString(input: string, maxLength?: number, fieldName?: string): string
+export function sanitizeOptionalString(input: string | undefined, maxLength?: number, fieldName?: string): string | undefined
 export function validateSessionId(sessionId: string): string             // throws on non-UUID-v4 / path-traversal-shaped input
-export function sanitizeNumber(value: number, min: number, max: number, fieldName: string): number
-export function sanitizeStringArray(values: string[], maxLength: number, fieldName: string): string[]
+export function sanitizeNumber(input: number, min?: number, max?: number, fieldName?: string): number   // min = -Infinity, max = Infinity
+export function sanitizeStringArray(input: string[], maxLength?: number, maxItems?: number, fieldName?: string): string[]   // maxItems = 1000
 export function sanitizeThoughtContent(content: string): string
 export function sanitizeTitle(title: string | undefined): string
 export function sanitizeDomain(domain: string | undefined): string | undefined
@@ -2086,11 +2425,13 @@ export function escapeHtml(text: string): string
 export function escapeLatex(text: string): string
 ```
 
-`validateSessionId` is the path-traversal guard `SessionManager` and `FileSessionStore` both call
-before touching disk with a caller-supplied session ID. This `escapeLatex` is the one `ExportService`
-imports and uses; `LaTeXExporter` in `src/export/visual/utils/latex.ts` has its own private,
-independently-implemented `escapeLatex()` method — two implementations of the same operation that
-happen to share a name (see Export, above).
+These functions throw a plain `Error`, not an `InputValidationError`, on invalid input (an empty
+string, a string over the limit, a null byte). `sanitizeTitle` returns `"Untitled Session"` for an
+empty title. `validateSessionId` is the path-traversal guard `SessionManager` and
+`FileSessionStore` both call before touching disk with a caller-supplied session ID. This `escapeLatex` is the single
+implementation. `ExportService`, `TikZBuilder` and `LaTeXExporter` all use it. The private
+`escapeLatex()` method of `LaTeXExporter` in `src/export/visual/utils/latex.ts` only delegates to
+it (see Export, above).
 
 ### Type guards (`type-guards.ts`)
 
@@ -2117,7 +2458,8 @@ this is a separate, smaller vocabulary from the 69-entry taxonomy in `src/taxono
 
 `src/types/` splits into `core.ts` (the enum, the union, the fundamental-triad types, and every
 type guard) and `types/modes/` (32 files, one per mode with a dedicated `Thought` subtype, plus one
-shared support file). `index.ts` is the barrel every other module imports from; `handlers.ts` and
+shared support file). `index.ts` is a barrel that 68 files under `src/` import; 50 files import
+`core.ts` directly, among them every file in `src/modes/handlers/`. `handlers.ts` and
 `session.ts` hold MCP-response and session-lifecycle types respectively, outside the `Thought`
 hierarchy.
 
@@ -2142,13 +2484,12 @@ export enum ThinkingMode {
   ANALYSIS = "analysis",
   CUSTOM = "custom",
 }
-// 35 values: 34 real reasoning modes + CUSTOM. The enum's own doc comment says "33 total" —
-// stale; count the members, not the comment.
+// 35 values: 34 reasoning modes + CUSTOM.
 
 export const FULLY_IMPLEMENTED_MODES: ReadonlyArray<ThinkingMode>;  // all 34 real modes (excludes CUSTOM)
 export function isFullyImplemented(mode: ThinkingMode): boolean;
 
-/** @deprecated always empty — every mode reached full implementation */
+/** @deprecated Always empty. All modes are fully implemented. */
 export const EXPERIMENTAL_MODES: ReadonlyArray<ThinkingMode>;       // []
 
 export enum ShannonStage {
@@ -2166,6 +2507,8 @@ export interface BaseThought {
   isRevision?: boolean; revisesThought?: string; revisionReason?: string;
   branchFrom?: string; branchId?: string; uncertainty?: number;
   dependencies?: string[]; assumptions?: string[]; tags?: string[]; importance?: number;
+  validation?: AdvisoryValidation;        // advisory, set by SessionManager.addThought()
+  proofAnalysis?: AdvisoryProofAnalysis;  // advisory, set when the thought carries proof content
 }
 
 // The fundamental triad is defined directly in core.ts, not in types/modes/ —
@@ -2212,23 +2555,32 @@ export function isAbductiveThought(thought: Thought): thought is AbductiveThough
 `core.ts` **imports** every mode-specific `Thought` interface as a `type`-only import from its own
 file under `types/modes/`, folds all of them into the `Thought` union, and **defines its own
 `isXThought` guard for every member** — including the 32 modes whose type it only imported. Each of
-those 32 `types/modes/<mode>.ts` files **also** defines its own `is<Mode>Thought` guard, with an
-identical implementation (`thought.mode === ThinkingMode.<MODE>`). This is a real, verified
-duplication, not a naming coincidence: 32 guard functions exist in two places each, and nothing
-enforces the two copies stay behaviorally identical if one is edited without the other — a genuine
-drift risk if a mode's discriminant check ever needs to change. `types/modes/recommendations.ts` is
-the one file in that directory that is not a per-mode thought-type file: it holds
-`ProblemCharacteristics` and related types for mode recommendation, re-exported directly through
-`types/index.ts` rather than through `core.ts`'s `Thought` union.
+those 32 `types/modes/<mode>.ts` files **also** defines its own `is<Mode>Thought` guard. The
+`core.ts` copy takes a `Thought` and checks `thought.mode === ThinkingMode.<MODE>`. The
+mode-file copy takes a `BaseThought` and checks the same enum member or, in many files, the
+string literal of the mode. `isEngineeringThought` in `types/modes/engineering.ts` is stricter
+than its `core.ts` copy: it takes `unknown` and also requires the `analysisType` and
+`designChallenge` fields. This is a real, verified duplication, not a naming coincidence: 32
+guard functions exist in two places each, and nothing enforces that the two copies stay
+behaviorally equal if one is edited without the other — a genuine drift risk if a mode's
+discriminant check ever needs to change. `types/modes/recommendations.ts` is
+the one file in that directory that is not a per-mode thought-type file. It holds the interfaces
+`ProblemCharacteristics`, `ModeRecommendation` and `CombinationRecommendation`, and the
+`ModeRecommender` class (about 2,100 lines of recommendation logic). `types/index.ts` re-exports it
+directly rather than through `core.ts`'s `Thought` union.
 
-63 names in total are exported by two or more files under `src/`. Beyond the 32 duplicated
-`isXThought` guard pairs: 29 pairs are type-only names that collide by English word only (e.g.
-`Constraint` in `src/modes/stochastic/types.ts` vs. a same-named type in
-`types/modes/optimization.ts` — unrelated concepts, already disambiguated by the hand-curated
-`types/index.ts` barrel, not a defect); the remaining 2 pairs are the genuine footguns already
-covered above — duplicated `escapeLatex` logic (Export/Utils) and two unrelated `ValidationError`
-definitions (an interface in `types/session.ts` vs. a class in `src/utils/errors.ts`, distinguished
-only by which one a given file happens to import).
+`repo-tools map` lists 64 names (`duplicateCount`) that two or more files under `src/` export, and
+its classified lists hold 65: 32 runtime names, which are the `isXThought` guard pairs above, and
+33 type names. The 65th name is `HybridThought`: `modes/handlers/HybridHandler.ts` declares an
+interface of that name that extends the one in `types/modes/hybrid.ts`, and the tool leaves it out
+of the 64. Four of the type declarations have an identical body in both files, when comments and whitespace are removed: `CustomThought`
+(`modes/handlers/CustomHandler.ts` and `types/modes/custom.ts`), and `MathematicalModel`,
+`PhysicalInterpretation` and `TensorProperties` (`types/modes/hybrid.ts` and the mathematics or
+physics type file). The remaining type names are different declarations. Some name the same concept
+twice with different fields (for example `ModeStatus`, `RecommendModeInput` and
+`ProblemCharacteristics`). Some name unrelated concepts that share a word (for example `Constraint`
+in `src/modes/stochastic/types.ts` and in `types/modes/optimization.ts`). The hand-curated
+`types/index.ts` barrel disambiguates the names that it re-exports.
 
 ### Session and validation-result types (`session.ts`)
 
@@ -2243,22 +2595,30 @@ export interface ThinkingSession {
 }
 export interface SessionConfig {
   modeConfig: ModeConfig; enableAutoSave: boolean; enableValidation: boolean;
-  maxThoughtsInMemory?: number; sessionTimeoutMs?: number; /* ... */
+  enableVisualization: boolean; enableProofAnalysis?: boolean;
+  maxThoughtsInMemory: number; compressionThreshold: number; /* ... integrations, exportFormats, ... */
 }
 export interface ModeConfig { mode: ThinkingMode; /* ... */ }
-export interface SessionMetrics { /* per-mode accumulated stats, updated by SessionMetricsCalculator */ }
+export interface SessionMetrics {
+  totalThoughts: number; thoughtsByType: Record<string, number>; averageUncertainty: number;
+  revisionCount: number; timeSpent: number; dependencyDepth: number; customMetrics: Map<string, unknown>;
+  cacheStats?: { hits: number; misses: number; hitRate: number; size: number; maxSize: number };
+  _uncertaintySum?: number; _uncertaintyCount?: number;     // internal running totals for an O(1) average
+}
 export interface SessionMetadata { id: string; title: string; createdAt: Date; updatedAt: Date; thoughtCount: number; mode: ThinkingMode; isComplete: boolean }
-export type ExportFormat = /* the document/visual format union, distinct from ExportService's inline literal union */;
-export interface Attachment { /* id, type, content or reference, ... */ }
+export type ExportFormat = "markdown" | "latex" | "json" | "html" | "jupyter" | "mermaid";
+export interface Attachment { id: string; filename: string; mimeType: string; size: number; url?: string; data?: Buffer }
 
 export interface ValidationResult {          // returned by ThoughtValidator, NOT the src/validation/validators/base.ts ModeValidator result shape
   isValid: boolean; confidence: number; issues: ValidationIssue[];
-  strengthMetrics: { logicalSoundness: number; empiricalSupport: number; mathematicalRigor: number; physicalConsistency: number };
-  suggestions: string[];
+  strengthMetrics: { logicalSoundness: number; empiricalSupport: number; mathematicalRigor: number; physicalConsistency?: number };
+  tensorValidation?: { rankCorrect: boolean; symmetriesVerified: boolean; invariantsChecked: boolean; dimensionsConsistent: boolean };
+  suggestions?: string[];
 }
 export interface ValidationIssue {
   severity: "error" | "warning" | "info"; thoughtNumber: number;
-  description: string; suggestion: string; category: string;
+  description: string; suggestion: string;
+  category: "logical" | "mathematical" | "physical" | "structural" | "completeness" | "interpretation";
 }
 ```
 
@@ -2266,7 +2626,9 @@ There are two distinct `ValidationResult` shapes in this codebase: this session-
 `ThoughtValidator.validate()` returns — confidence-scored, with strength metrics) and the
 per-handler one in `src/modes/handlers/ModeHandler.ts` (`{ valid, errors, warnings }` — what
 `ModeHandler.validate()` and `ModeHandlerRegistry.validate()` return). They serve different layers
-of the same word and are not interchangeable.
+of the same word and are not interchangeable. The name `ValidationResult` from the barrel
+`types/index.ts` is the handler shape, because the barrel's explicit `ModeHandler` re-export wins
+over `export * from "./session.js"`. Import the session shape from `types/session.js`.
 
 ### Handler I/O types (`handlers.ts`) and the barrel (`index.ts`)
 
@@ -2280,30 +2642,37 @@ export interface AddThoughtInput { /* mode: string (not ThinkingMode) for Zod-sc
 // + one refined input interface per MCP handler function
 ```
 
-`types/index.ts` is the barrel nearly everything else imports from: it re-exports all of `core.ts`
-and `session.ts` wholesale (`export *`), the `ModeHandler` interface family by name (to avoid a
-duplicate-export collision with `core.ts`), `types/modes/recommendations.ts` wholesale, and a
-curated list of engineering-specific sub-interfaces (`Requirement`, `TradeStudy`, `FailureMode`,
-and others) that exist in `types/modes/engineering.ts` but aren't part of `core.ts`'s `Thought`
-union surface.
+`types/index.ts` is a barrel. 68 files under `src/` import it, and 50 files, among them every file
+in `src/modes/handlers/`, import `core.ts` directly. It re-exports `core.ts` and `session.ts`
+wholesale (`export *`), then the `ModeHandler` interface family by name (this explicit export is
+what makes `ValidationResult` the handler shape; `ModeStatus` from `handlers.ts` is exported as
+`HandlerModeStatus` because the `ModeHandler` family already exports a `ModeStatus`),
+`types/modes/recommendations.ts` wholesale, and named lists of sub-interfaces and guards from 13
+mode files (engineering, computability, gametheory, cryptanalytic, synthesis, argumentation,
+critique, analysis, recursive, modal, stochastic, constraint, custom) that are not part of
+`core.ts`'s `Thought` union surface. It also re-exports the handler I/O types of `handlers.ts`
+(`MCPTextContent`, `MCPResponse`, `AddThoughtInput`, `isAddThoughtInput` and others).
 
 ---
 
 ## Verification
 
-Generated 2026-08-05 by `repo_map.py map`.
-Regenerate: `python repo_map.py map <repo> --out <dir>` · Check: `python repo_map.py check <repo> --docs docs/architecture`
+Generated 2026-10-23 by `repo-tools map`.
+Regenerate the generated reports: `npm run docs:deps` · Check: `repo-tools check . --docs=docs/architecture`
+
+The claims below come from `repo-tools map .`, which reads the whole repository. The generated reports in this
+directory come from `tools/create-dependency-graph`, which counts files and exports with its own rules. Their
+counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 491 | dependency-graph.json |
-| totalLinesOfCode | 226965 | dependency-graph.json |
-| totalExports | 2154 | dependency-graph.json |
-| totalModules | 5 | dependency-graph.json |
-| reachableFiles | 216 | dependency-graph.json |
-| orphanedFiles | 22 | dependency-graph.json |
-| noImporterFileCount | 22 | dependency-graph.json |
+| totalTypeScriptFiles | 493 | repo-tools map (whole repository) |
+| totalLinesOfCode | 227447 | repo-tools map (whole repository) |
+| totalExports | 2158 | repo-tools map (whole repository) |
+| totalModules | 5 | repo-tools map (whole repository) |
+| reachableFiles | 223 | repo-tools map (whole repository) |
+| orphanedFiles | 22 | repo-tools map (whole repository) |
+| noImporterFileCount | 22 | repo-tools map (whole repository) |
 
-Class counts, handler counts and validator counts in this document are verified directly
-against `src/` by listing and reading the files named at each claim. They are not graph metrics,
-so they do not appear in the table above.
+Class counts, handler counts and validator counts in this document come from listing the files
+in `src/`. They are not graph metrics, so they do not appear in the table above.

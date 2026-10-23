@@ -5,7 +5,7 @@
 
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 9.5.1 | **Last Updated**: 2026-08-08
+**Version**: 10.0.1 | **Last Updated**: 2026-10-23
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -1019,14 +1019,13 @@ The codebase is organized into the following modules:
 
 ## Entry Dependencies
 
-### `src/index.ts` - DeepThinking MCP Server
+### `src/index.ts` - The protocol revision this server actually implements.
 
 **External Dependencies:**
 | Package | Import |
 |---------|--------|
-| `@modelcontextprotocol/sdk/server/index.js` | `Server` |
-| `@modelcontextprotocol/sdk/server/stdio.js` | `StdioServerTransport` |
-| `@modelcontextprotocol/sdk/types.js` | `CallToolRequestSchema, ListToolsRequestSchema` |
+| `@modelcontextprotocol/server` | `LATEST_PROTOCOL_VERSION, SUPPORTED_PROTOCOL_VERSIONS, ListToolsResult, Server` |
+| `@modelcontextprotocol/server/stdio` | `serveStdio` |
 
 **Node.js Built-in Dependencies:**
 | Module | Import |
@@ -1048,8 +1047,8 @@ The codebase is organized into the following modules:
 | `./tools/thinking.js` | `ThinkingToolInput` | Import |
 
 **Exports:**
-- Functions: `main`
-- Constants: `server`, `format`
+- Functions: `buildServer`, `main`
+- Constants: `MCP_PROTOCOL_VERSION`, `server`, `format`
 
 ---
 
@@ -4455,12 +4454,12 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 241 |
 | Total Modules | 14 |
-| Total Lines of Code | 118934 |
-| Total Exports | 1184 |
+| Total Lines of Code | 118980 |
+| Total Exports | 1186 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
 | Total Interfaces | 562 |
-| Total Functions | 433 |
+| Total Functions | 434 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
 | Type-only Imports | 333 |
@@ -4469,5 +4468,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2026-08-08
-*Version*: 9.5.1
+*Last Updated*: 2026-10-23
+*Version*: 10.0.1
