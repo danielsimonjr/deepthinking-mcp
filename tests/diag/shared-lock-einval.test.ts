@@ -82,4 +82,48 @@ describe("diag: shared-lock failures", () => {
       })}\n`,
     );
   }, 600000);
+
+  it("records what the kernel answers to an exclusive create racing an rmdir", async () => {
+    const budgetMs = Number(process.env.MICRO_MS ?? 90000);
+    const base = path.join(os.tmpdir(), `diag-micro-${randomUUID()}`);
+    await fs.mkdir(base, { recursive: true });
+    const dir = path.join(base, "d.locks");
+    const counts = new Map<string, number>();
+    const bump = (key: string) => counts.set(key, (counts.get(key) ?? 0) + 1);
+    const stopAt = Date.now() + budgetMs;
+    let n = 0;
+    const maker = (async () => {
+      while (Date.now() < stopAt) {
+        await fs.mkdir(dir, { recursive: true }).catch(() => {});
+      }
+    })();
+    const remover = (async () => {
+      while (Date.now() < stopAt) {
+        await fs.rmdir(dir).catch(() => {});
+      }
+    })();
+    const creators = Array.from({ length: 8 }, async (_, k) => {
+      while (Date.now() < stopAt) {
+        const file = path.join(dir, `${k}-${n++}.lock`);
+        try {
+          await fs.writeFile(file, "x", { flag: "wx" });
+          bump("ok");
+          await fs.unlink(file).catch(() => {});
+        } catch (error) {
+          const e = error as NodeJS.ErrnoException;
+          bump(`${e.code}|${e.syscall}`);
+        }
+      }
+    });
+    await Promise.all([maker, remover, ...creators]);
+    await fs.rm(base, { recursive: true, force: true }).catch(() => {});
+    process.stdout.write(
+      `MICRO_SUMMARY ${JSON.stringify({
+        node: process.version,
+        platform: process.platform,
+        release: os.release(),
+        counts: Object.fromEntries(counts),
+      })}\n`,
+    );
+  }, 300000);
 });
