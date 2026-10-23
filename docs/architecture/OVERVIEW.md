@@ -26,8 +26,8 @@ document does not repeat it.
 |---|---|---|---|
 | Source files, whole repo | 494 | repo-wide | `repo-tools map` (491 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
 | TypeScript files, `src/` | 241 | src only | `repo-tools map`, files under `src/` |
-| Lines of code, whole repo | 227,770 | repo-wide | `repo-tools map` |
-| Lines of code, `src/` | 118,782 | src only | `repo-tools map`, files under `src/` |
+| Lines of code, whole repo | 227,796 | repo-wide | `repo-tools map` |
+| Lines of code, `src/` | 118,787 | src only | `repo-tools map`, files under `src/` |
 | Total exports, whole repo | 2,158 | repo-wide | `repo-tools map` |
 | Total exports, `src/` | 1,186 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
 | Entry roots | 1 (`src/index.ts`) | repo-wide | `repo-tools map` |
@@ -51,7 +51,7 @@ come from two tools and count different file sets: `repo-tools map` reads all 49
 
 ```
 deepthinking-mcp/
-├── src/                # 241 files, 118,782 LOC — the package
+├── src/                # 241 files, 118,787 LOC — the package
 │   ├── index.ts        # entry point, all 13 tool handlers
 │   ├── types/           # ThinkingMode enum, Thought union, per-mode types
 │   ├── modes/            # mode handlers, registry, combinations, stochastic
@@ -65,7 +65,7 @@ deepthinking-mcp/
 │   ├── config/            # environment-variable configuration
 │   ├── interfaces/       # DI interfaces
 │   └── utils/             # errors, logger, sanitization
-├── tests/               # 227 files, 101,424 LOC
+├── tests/               # 227 files, 101,445 LOC
 ├── tools/                # 15 files, 4,718 LOC — standalone CLI utilities
 ├── cli/                  # mcp-server-wrapper.mjs — launcher script for the Claude Code plugin
 ├── templates/mode-scaffolding/  # 5 copy-paste templates for authoring a new mode
@@ -144,7 +144,7 @@ counts differ for that reason.
 | Claim | Value | Source |
 |---|---|---|
 | totalTypeScriptFiles | 494 | repo-tools map (whole repository) |
-| totalLinesOfCode | 227770 | repo-tools map (whole repository) |
+| totalLinesOfCode | 227796 | repo-tools map (whole repository) |
 | totalExports | 2158 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
