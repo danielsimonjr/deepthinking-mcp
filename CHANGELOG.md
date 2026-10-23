@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Fixed
+
+- **A shared-lock read that meets the removal of its lock directory is retried on macOS.**
+  `acquireSharedLock` creates its lock file inside the shared-lock directory, and a reader that
+  releases the last shared lock removes the empty directory. When the directory vanished between the
+  `mkdir` and the create, the create failed with `ENOENT`, and that was already retried. On macOS the
+  same race also ends with `EINVAL` from the `open` call, and that error went to the caller, so one
+  read failed. It showed once in CI as `expected [ 'EINVAL' ] to deeply equal []` in the test "never
+  fails concurrent staggered readers". The create is now retried on `EINVAL` on macOS only, after one
+  retry interval and inside the existing timeout. A refusal that does not clear ends as the timeout
+  error, with the last `EINVAL` as its `cause`. On other systems `EINVAL` still reaches the caller.
+  Measured on macOS runners: a stress run of the shared-lock code before the change (about 7.4
+  million acquisitions in 8 jobs) recorded 4 failures, all `EINVAL` from `open` at that create, all on
+  Node 22; the same run after the change (about 7.6 million acquisitions) recorded none. A bare race
+  of a create against `rmdir`, with no lock code, returned `EINVAL` from `open` on Node 20 and on
+  Node 22.
+
 ## [10.0.2] - 2026-10-23
 
 ### Added

@@ -8,7 +8,7 @@
       },
       "src": {
         "files": 241,
-        "loc": 119015
+        "loc": 119028
       },
       "templates": {
         "files": 5,
@@ -16,7 +16,7 @@
       },
       "tests": {
         "files": 227,
-        "loc": 101562
+        "loc": 101672
       },
       "tools": {
         "files": 14,
@@ -1205,7 +1205,7 @@
     {
       "path": "src/utils/file-lock.ts",
       "area": "src",
-      "loc": 658,
+      "loc": 671,
       "disposition": "reachable"
     },
     {
@@ -2195,7 +2195,7 @@
     {
       "path": "tests/unit/file-lock.test.ts",
       "area": "tests",
-      "loc": 265,
+      "loc": 375,
       "disposition": "test"
     },
     {

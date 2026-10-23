@@ -239,6 +239,116 @@ describe("file-lock", () => {
       }
     });
 
+    // On macOS the kernel can answer an exclusive create inside a directory
+    // that a releasing reader is removing with EINVAL, where other systems
+    // answer ENOENT. It is the same race as the ENOENT case above, so it is
+    // retried on macOS and nowhere else: on any other system EINVAL from the
+    // create is a real error and must reach the caller.
+    describe("lock-file create refused with EINVAL by a concurrent rmdir", () => {
+      const realPlatform = Object.getOwnPropertyDescriptor(
+        process,
+        "platform",
+      )!;
+      const setPlatform = (value: string) =>
+        Object.defineProperty(process, "platform", { ...realPlatform, value });
+
+      afterEach(() => {
+        Object.defineProperty(process, "platform", realPlatform);
+      });
+
+      // Refuses the first `times` creates of a shared-lock file with `code`.
+      // Each refusal first removes the empty lock directory, as the reader
+      // that releases the last shared lock does, so a retry must recreate it.
+      const refuseLockCreate = (code: string, times: number) => {
+        const realWriteFile = fs.writeFile.bind(fs) as (
+          ...args: unknown[]
+        ) => Promise<void>;
+        const state = { refused: 0 };
+        const spy = vi
+          .spyOn(fs, "writeFile")
+          .mockImplementation(async (p: any, ...rest: any[]) => {
+            if (String(p).includes(".locks") && state.refused < times) {
+              state.refused++;
+              await fs.rmdir(path.dirname(String(p))).catch(() => {});
+              throw Object.assign(new Error(`${code}: simulated race`), {
+                code,
+              });
+            }
+            return realWriteFile(p, ...rest);
+          });
+        return { state, spy };
+      };
+
+      it("retries on macOS until the create succeeds", async () => {
+        setPlatform("darwin");
+        const { state, spy } = refuseLockCreate("EINVAL", 2);
+        try {
+          const value = await withSharedLock(targetFile, async () => 42, {
+            timeout: 5000,
+            retryInterval: 5,
+          });
+          expect(value).toBe(42);
+          expect(state.refused).toBe(2);
+        } finally {
+          spy.mockRestore();
+        }
+      });
+
+      it("fails at once on any other system", async () => {
+        setPlatform("linux");
+        const { state, spy } = refuseLockCreate("EINVAL", 1);
+        try {
+          await expect(
+            withSharedLock(targetFile, async () => 42, {
+              timeout: 5000,
+              retryInterval: 5,
+            }),
+          ).rejects.toMatchObject({ code: "EINVAL" });
+          expect(state.refused).toBe(1);
+        } finally {
+          spy.mockRestore();
+        }
+      });
+
+      it("still fails at once on macOS for an error that is not a race", async () => {
+        setPlatform("darwin");
+        const { state, spy } = refuseLockCreate("EACCES", 1);
+        try {
+          await expect(
+            withSharedLock(targetFile, async () => 42, {
+              timeout: 5000,
+              retryInterval: 5,
+            }),
+          ).rejects.toMatchObject({ code: "EACCES" });
+          expect(state.refused).toBe(1);
+        } finally {
+          spy.mockRestore();
+        }
+      });
+
+      it("ends as the timeout error, with the refusal as its cause, when it never clears", async () => {
+        setPlatform("darwin");
+        const { state, spy } = refuseLockCreate(
+          "EINVAL",
+          Number.POSITIVE_INFINITY,
+        );
+        try {
+          const failure = await withSharedLock(targetFile, async () => 42, {
+            timeout: 100,
+            retryInterval: 5,
+          }).then(
+            () => undefined,
+            (error: unknown) => error as Error,
+          );
+          expect(failure?.message).toMatch(/Timeout acquiring shared lock/);
+          expect(failure?.cause).toMatchObject({ code: "EINVAL" });
+          expect(state.refused).toBeGreaterThan(1);
+        } finally {
+          spy.mockRestore();
+        }
+      });
+    });
+
     it("never fails concurrent staggered readers", async () => {
       const readers = 40;
       for (let r = 0; r < 25; r++) {

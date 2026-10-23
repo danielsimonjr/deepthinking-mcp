@@ -348,10 +348,12 @@ giving up.
 
 A shared lock lives in a directory of per-reader lock files. A reader that releases the last
 shared lock removes that directory. A second reader can then meet the removal between its
-`mkdir` and its `writeFile`. `acquireSharedLock` treats that race as a retry: an `ENOENT` from
-either call, and on Windows an `EPERM` from `mkdir`, restarts the attempt. Any other `mkdir`
-error propagates. From `writeFile`, `EEXIST` returns a release function for the lock file that
-already exists, and any other error propagates.
+`mkdir` and its `writeFile`. `acquireSharedLock` treats that race as a retry. An `ENOENT` from
+either call restarts the attempt. So does an `EPERM` from `mkdir` on Windows, and an `EINVAL`
+from `writeFile` on macOS. The `EINVAL` retry first waits one `retryInterval`. A refusal that does not
+clear ends as the timeout error, with the last `EINVAL` as its `cause`. Any other `mkdir` error
+propagates. From `writeFile`, `EEXIST` returns a release function for the lock file that already
+exists, and any other error propagates.
 
 ### Thought accumulation and the enforced cap
 

@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **491 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 241 | 119,015 |
+| src | 241 | 119,028 |
 | templates | 5 | 772 |
-| tests | 227 | 101,562 |
+| tests | 227 | 101,672 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -230,7 +230,7 @@ Every tracked TypeScript file in the repository — **491 files** — not just t
 | `src/types/modes/temporal.ts` | src | 112 | reachable |
 | `src/types/session.ts` | src | 543 | reachable |
 | `src/utils/errors.ts` | src | 265 | reachable |
-| `src/utils/file-lock.ts` | src | 658 | reachable |
+| `src/utils/file-lock.ts` | src | 671 | reachable |
 | `src/utils/logger-types.ts` | src | 37 | reachable |
 | `src/utils/logger.ts` | src | 180 | reachable |
 | `src/utils/sanitization.ts` | src | 210 | reachable |
@@ -395,7 +395,7 @@ Every tracked TypeScript file in the repository — **491 files** — not just t
 | `tests/unit/export/visual/utils/document-builders.test.ts` | tests | 1127 | test |
 | `tests/unit/export/visual/utils/graph-builders.test.ts` | tests | 680 | test |
 | `tests/unit/export/visual/utils/visual-builders.test.ts` | tests | 955 | test |
-| `tests/unit/file-lock.test.ts` | tests | 265 | test |
+| `tests/unit/file-lock.test.ts` | tests | 375 | test |
 | `tests/unit/file-store-storage-error.test.ts` | tests | 83 | test |
 | `tests/unit/file-store.test.ts` | tests | 542 | test |
 | `tests/unit/gametheory.test.ts` | tests | 681 | test |

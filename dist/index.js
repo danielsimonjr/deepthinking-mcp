@@ -65436,6 +65436,7 @@ async function acquireSharedLock(filePath, options) {
   const sharedLockDir = getSharedLockDir(filePath);
   const sharedLockPath = path4.join(sharedLockDir, `${nextAttemptId()}.lock`);
   const startTime = Date.now();
+  let lastRaceError;
   while (Date.now() - startTime < options.timeout) {
     const exclusiveLock = await readLockInfo(exclusiveLockPath);
     if (exclusiveLock) {
@@ -65468,7 +65469,13 @@ async function acquireSharedLock(filePath, options) {
           flag: "wx"
         });
       } catch (error) {
-        if (error.code === "ENOENT") {
+        const code = error.code;
+        if (code === "ENOENT") {
+          continue;
+        }
+        if (code === "EINVAL" && process.platform === "darwin") {
+          lastRaceError = error;
+          await sleep(options.retryInterval);
           continue;
         }
         throw error;
@@ -65505,7 +65512,8 @@ async function acquireSharedLock(filePath, options) {
     }
   }
   throw new Error(
-    `Timeout acquiring shared lock on ${filePath} after ${options.timeout}ms`
+    `Timeout acquiring shared lock on ${filePath} after ${options.timeout}ms`,
+    lastRaceError === void 0 ? void 0 : { cause: lastRaceError }
   );
 }
 function sleep(ms) {

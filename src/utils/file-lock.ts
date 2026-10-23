@@ -365,6 +365,7 @@ async function acquireSharedLock(
   // sneak in while they're still reading.
   const sharedLockPath = path.join(sharedLockDir, `${nextAttemptId()}.lock`);
   const startTime = Date.now();
+  let lastRaceError: unknown;
 
   while (Date.now() - startTime < options.timeout) {
     // Check for existing exclusive lock
@@ -413,11 +414,22 @@ async function acquireSharedLock(
           flag: "wx",
         });
       } catch (error: unknown) {
-        if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        const code = (error as NodeJS.ErrnoException).code;
+        if (code === "ENOENT") {
           // A reader releasing the last shared lock removes the directory
           // when it is empty. That can happen between our mkdir and our
           // write. The directory is only a container, so recreate it and
           // retry at once; this is not a lock conflict and needs no wait.
+          continue;
+        }
+        if (code === "EINVAL" && process.platform === "darwin") {
+          // The same race on macOS: an exclusive create inside a directory
+          // that is being removed can fail with EINVAL instead of ENOENT.
+          // Elsewhere EINVAL does not come from this race and reaches the
+          // caller. The last such error is kept as the cause of the timeout
+          // error below, in case the refusal does not clear.
+          lastRaceError = error;
+          await sleep(options.retryInterval);
           continue;
         }
         throw error;
@@ -471,6 +483,7 @@ async function acquireSharedLock(
 
   throw new Error(
     `Timeout acquiring shared lock on ${filePath} after ${options.timeout}ms`,
+    lastRaceError === undefined ? undefined : { cause: lastRaceError },
   );
 }
 
