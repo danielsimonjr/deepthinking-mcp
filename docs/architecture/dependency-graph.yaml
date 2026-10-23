@@ -1,6 +1,6 @@
 metadata:
   name: deepthinking-mcp
-  version: 10.0.1
+  version: 10.0.2
   lastUpdated: '2026-10-23'
   totalFiles: 241
   totalModules: 14
@@ -11250,7 +11250,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 241
   totalModules: 14
-  totalLinesOfCode: 119015
+  totalLinesOfCode: 119023
   totalExports: 1186
   totalClasses: 143
   totalInterfaces: 562
