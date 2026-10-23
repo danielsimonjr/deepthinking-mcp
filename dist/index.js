@@ -18210,6 +18210,6360 @@ var init_config = __esm({
   }
 });
 
+// src/validation/constants.ts
+function isInRange(value, min, max) {
+  return value >= min && value <= max;
+}
+var IssueSeverity, IssueCategory, ValidationThresholds, ValidationMessages;
+var init_constants = __esm({
+  "src/validation/constants.ts"() {
+    init_esm_shims();
+    IssueSeverity = {
+      ERROR: "error",
+      WARNING: "warning",
+      INFO: "info"
+    };
+    IssueCategory = {
+      STRUCTURAL: "structural",
+      LOGICAL: "logical",
+      MATHEMATICAL: "mathematical",
+      PHYSICAL: "physical",
+      COMPLETENESS: "completeness",
+      INTERPRETATION: "interpretation"
+    };
+    ValidationThresholds = {
+      MIN_PROBABILITY: 0,
+      MAX_PROBABILITY: 1,
+      MIN_CONFIDENCE: 0,
+      MAX_CONFIDENCE: 1,
+      MIN_PROGRESS: 0,
+      MAX_PROGRESS: 100,
+      MIN_WEIGHT: 0,
+      MAX_WEIGHT: 1
+    };
+    ValidationMessages = {
+      REQUIRED_FIELD: (field) => `${field} is required`,
+      INVALID_RANGE: (field, min, max) => `${field} must be between ${min} and ${max}`,
+      INVALID_TYPE: (field, expected) => `${field} must be of type ${expected}`,
+      EMPTY_ARRAY: (field) => `${field} must not be empty`,
+      MISSING_DEPENDENCY: (field, dependency) => `${field} requires ${dependency} to be defined`
+    };
+  }
+});
+
+// src/validation/validators/validation-utils.ts
+function validateCommon(thought) {
+  const issues = [];
+  if (thought.thoughtNumber <= 0) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: "Thought number must be positive",
+      suggestion: "Use sequential numbering starting from 1",
+      category: "structural"
+    });
+  }
+  if (thought.totalThoughts <= 0) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: "Total thoughts must be positive",
+      suggestion: "Specify expected total number of thoughts",
+      category: "structural"
+    });
+  }
+  if (thought.thoughtNumber > thought.totalThoughts) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Thought number ${thought.thoughtNumber} exceeds total ${thought.totalThoughts}`,
+      suggestion: "Ensure thought number is within the declared total",
+      category: "logical"
+    });
+  }
+  if ("content" in thought && typeof thought.content === "string" && thought.content.trim() === "") {
+    issues.push({
+      severity: "info",
+      thoughtNumber: thought.thoughtNumber,
+      description: "Thought content is empty",
+      suggestion: "Provide meaningful content for the thought",
+      category: "structural"
+    });
+  }
+  return issues;
+}
+function validateDependencies(thought, dependencies, context) {
+  const issues = [];
+  if (context.existingThoughts) {
+    for (const depId of dependencies) {
+      if (!context.existingThoughts.has(depId)) {
+        issues.push({
+          severity: "error",
+          thoughtNumber: thought.thoughtNumber,
+          description: `Dependency on non-existent thought: ${depId}`,
+          suggestion: "Verify all dependency IDs exist",
+          category: "logical"
+        });
+      }
+    }
+  }
+  return issues;
+}
+function validateUncertainty(thought, uncertainty) {
+  const issues = [];
+  if (uncertainty < 0 || uncertainty > 1) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: "Uncertainty must be between 0 and 1",
+      suggestion: "Provide uncertainty as a decimal (e.g., 0.2 for 20%)",
+      category: "structural"
+    });
+  }
+  return issues;
+}
+function validateNumberRange(thought, value, fieldName, min = 0, max = 1, severity = IssueSeverity.ERROR, category = IssueCategory.STRUCTURAL) {
+  const issues = [];
+  if (value !== void 0 && !isInRange(value, min, max)) {
+    issues.push({
+      severity,
+      thoughtNumber: thought.thoughtNumber,
+      description: ValidationMessages.INVALID_RANGE(fieldName, min, max),
+      suggestion: `Provide ${fieldName} as a value between ${min} and ${max}`,
+      category
+    });
+  }
+  return issues;
+}
+function validateProbability(thought, value, fieldName = "Probability") {
+  return validateNumberRange(
+    thought,
+    value,
+    fieldName,
+    ValidationThresholds.MIN_PROBABILITY,
+    ValidationThresholds.MAX_PROBABILITY,
+    IssueSeverity.ERROR,
+    IssueCategory.MATHEMATICAL
+  );
+}
+function validateConfidence(thought, value, fieldName = "Confidence") {
+  return validateNumberRange(
+    thought,
+    value,
+    fieldName,
+    ValidationThresholds.MIN_CONFIDENCE,
+    ValidationThresholds.MAX_CONFIDENCE,
+    IssueSeverity.ERROR,
+    IssueCategory.STRUCTURAL
+  );
+}
+function validateRequired(thought, value, fieldName, category = IssueCategory.STRUCTURAL) {
+  const issues = [];
+  if (value === void 0 || value === null) {
+    issues.push({
+      severity: IssueSeverity.ERROR,
+      thoughtNumber: thought.thoughtNumber,
+      description: ValidationMessages.REQUIRED_FIELD(fieldName),
+      suggestion: `Provide a value for ${fieldName}`,
+      category
+    });
+  }
+  return issues;
+}
+function validateNonEmptyArray(thought, arr, fieldName, category = IssueCategory.STRUCTURAL, severity = IssueSeverity.WARNING) {
+  const issues = [];
+  if (!arr || arr.length === 0) {
+    issues.push({
+      severity,
+      thoughtNumber: thought.thoughtNumber,
+      description: ValidationMessages.EMPTY_ARRAY(fieldName),
+      suggestion: `Add at least one item to ${fieldName}`,
+      category
+    });
+  }
+  return issues;
+}
+var init_validation_utils = __esm({
+  "src/validation/validators/validation-utils.ts"() {
+    init_esm_shims();
+    init_constants();
+  }
+});
+
+// src/validation/validators/modes/sequential.ts
+var sequential_exports = {};
+__export(sequential_exports, {
+  SequentialValidator: () => SequentialValidator
+});
+var SequentialValidator;
+var init_sequential = __esm({
+  "src/validation/validators/modes/sequential.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    SequentialValidator = class {
+      getMode() {
+        return "sequential";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (thought.isRevision && !thought.revisesThought) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Revision thought should specify which thought it revises",
+            suggestion: "Provide revisesThought ID",
+            category: "logical"
+          });
+        }
+        if (thought.isRevision && _context.existingThoughts) {
+          const revisedThought = _context.existingThoughts.get(
+            thought.revisesThought || ""
+          );
+          if (!revisedThought) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Cannot revise non-existent thought: ${thought.revisesThought}`,
+              suggestion: "Verify the thought ID being revised exists",
+              category: "logical"
+            });
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/shannon.ts
+var shannon_exports = {};
+__export(shannon_exports, {
+  ShannonValidator: () => ShannonValidator
+});
+var ShannonValidator;
+var init_shannon = __esm({
+  "src/validation/validators/modes/shannon.ts"() {
+    init_esm_shims();
+    init_constants();
+    init_validation_utils();
+    ShannonValidator = class {
+      getMode() {
+        return "shannon";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        issues.push(...validateUncertainty(thought, thought.uncertainty));
+        issues.push(
+          ...validateDependencies(thought, thought.dependencies, _context)
+        );
+        if (thought.stage === "model" && thought.assumptions.length === 0) {
+          issues.push({
+            severity: IssueSeverity.INFO,
+            thoughtNumber: thought.thoughtNumber,
+            description: "Model stage typically includes explicit assumptions",
+            suggestion: "Consider listing key assumptions for the model",
+            category: IssueCategory.STRUCTURAL
+          });
+        }
+        if (thought.uncertainty < 0.1 && thought.assumptions.length > 3) {
+          issues.push({
+            severity: IssueSeverity.INFO,
+            thoughtNumber: thought.thoughtNumber,
+            description: "High number of assumptions with low uncertainty",
+            suggestion: "Review if uncertainty should be higher given assumptions",
+            category: IssueCategory.LOGICAL
+          });
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/mathematics.ts
+var mathematics_exports = {};
+__export(mathematics_exports, {
+  MathematicsValidator: () => MathematicsValidator
+});
+var MathematicsValidator;
+var init_mathematics = __esm({
+  "src/validation/validators/modes/mathematics.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    MathematicsValidator = class {
+      getMode() {
+        return "mathematics";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (thought.proofStrategy) {
+          if (thought.proofStrategy.completeness < 0 || thought.proofStrategy.completeness > 1) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Proof completeness must be between 0 and 1",
+              suggestion: "Provide completeness as decimal (e.g., 0.8 for 80% complete)",
+              category: "mathematical"
+            });
+          }
+          if (thought.proofStrategy.type === "induction" && !thought.proofStrategy.baseCase) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Induction proof should include base case",
+              suggestion: "Specify the base case for induction",
+              category: "mathematical"
+            });
+          }
+        }
+        if (thought.mathematicalModel) {
+          if (!thought.mathematicalModel.latex && !thought.mathematicalModel.symbolic) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Mathematical model should have LaTeX or symbolic representation",
+              suggestion: "Provide at least one representation format",
+              category: "mathematical"
+            });
+          }
+        }
+        if (thought.logicalForm) {
+          if (thought.logicalForm.premises.length === 0) {
+            issues.push({
+              severity: "info",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Logical form has no premises",
+              suggestion: "Consider adding premises for the logical argument",
+              category: "logical"
+            });
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/physics.ts
+var physics_exports = {};
+__export(physics_exports, {
+  PhysicsValidator: () => PhysicsValidator
+});
+var PhysicsValidator;
+var init_physics = __esm({
+  "src/validation/validators/modes/physics.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    PhysicsValidator = class {
+      getMode() {
+        return "physics";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (thought.tensorProperties) {
+          const [contravariant, covariant] = thought.tensorProperties.rank;
+          if (contravariant < 0 || covariant < 0) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Tensor rank components must be non-negative",
+              suggestion: "Provide valid tensor rank [contravariant, covariant]",
+              category: "physical"
+            });
+          }
+          const totalRank = contravariant + covariant;
+          if (thought.tensorProperties.symmetries.includes("antisymmetric") && totalRank < 2) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Antisymmetric tensors must have rank \u2265 2",
+              suggestion: "Verify tensor rank and symmetry properties",
+              category: "physical"
+            });
+          }
+        }
+        if (thought.physicalInterpretation) {
+          if (!thought.physicalInterpretation.units) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Physical quantity should have units specified",
+              suggestion: 'Specify physical units (e.g., "m/s\xB2")',
+              category: "physical"
+            });
+          }
+          if (thought.physicalInterpretation.conservationLaws.length === 0) {
+            issues.push({
+              severity: "info",
+              thoughtNumber: thought.thoughtNumber,
+              description: "No conservation laws specified",
+              suggestion: "Consider noting relevant conservation laws",
+              category: "physical"
+            });
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/hybrid.ts
+var hybrid_exports = {};
+__export(hybrid_exports, {
+  HybridValidator: () => HybridValidator
+});
+var HybridValidator;
+var init_hybrid = __esm({
+  "src/validation/validators/modes/hybrid.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    HybridValidator = class {
+      getMode() {
+        return "hybrid";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/inductive.ts
+var inductive_exports = {};
+__export(inductive_exports, {
+  InductiveValidator: () => InductiveValidator
+});
+var InductiveValidator;
+var init_inductive = __esm({
+  "src/validation/validators/modes/inductive.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    InductiveValidator = class {
+      getMode() {
+        return "inductive";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (!thought.observations || thought.observations.length === 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Inductive reasoning requires at least one observation",
+            suggestion: "Provide specific cases or observations to generalize from",
+            category: "structural"
+          });
+        }
+        if (!thought.generalization || thought.generalization.trim().length === 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Inductive reasoning requires a generalization",
+            suggestion: "Provide the general principle formed from observations",
+            category: "structural"
+          });
+        }
+        if (thought.confidence < 0 || thought.confidence > 1) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Invalid confidence value: ${thought.confidence}`,
+            suggestion: "Confidence must be between 0 and 1",
+            category: "structural"
+          });
+        }
+        if (thought.sampleSize !== void 0 && thought.sampleSize < 1) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Invalid sample size: ${thought.sampleSize}`,
+            suggestion: "Sample size must be at least 1",
+            category: "structural"
+          });
+        }
+        if (thought.sampleSize !== void 0 && thought.sampleSize < 3) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Small sample size may lead to weak generalizations",
+            suggestion: "Consider gathering more observations to strengthen inference",
+            category: "logical"
+          });
+        }
+        if (thought.confidence > 0.8 && thought.sampleSize !== void 0 && thought.sampleSize < 10) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "High confidence with small sample size",
+            suggestion: "Consider lowering confidence or increasing sample size",
+            category: "logical"
+          });
+        }
+        if (thought.counterexamples && thought.counterexamples.length > 0) {
+          issues.push({
+            severity: "info",
+            thoughtNumber: thought.thoughtNumber,
+            description: `${thought.counterexamples.length} counterexample(s) noted`,
+            suggestion: "Counterexamples may indicate need to refine generalization",
+            category: "structural"
+          });
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/deductive.ts
+var deductive_exports = {};
+__export(deductive_exports, {
+  DeductiveValidator: () => DeductiveValidator
+});
+var DeductiveValidator;
+var init_deductive = __esm({
+  "src/validation/validators/modes/deductive.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    DeductiveValidator = class {
+      getMode() {
+        return "deductive";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (!thought.premises || thought.premises.length === 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Deductive reasoning requires at least one premise",
+            suggestion: "Provide general principles or axioms to reason from",
+            category: "structural"
+          });
+        }
+        if (!thought.conclusion || thought.conclusion.trim().length === 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Deductive reasoning requires a conclusion",
+            suggestion: "Provide the specific conclusion derived from premises",
+            category: "structural"
+          });
+        }
+        if (thought.validityCheck === void 0 || thought.validityCheck === null) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Validity check is required",
+            suggestion: "Indicate whether the deduction is logically valid",
+            category: "structural"
+          });
+        }
+        if (thought.validityCheck === false) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Deduction marked as invalid",
+            suggestion: "Review logical structure - invalid deductions should be corrected",
+            category: "logical"
+          });
+        }
+        if (thought.validityCheck === true && thought.soundnessCheck === false) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Deduction is valid but unsound (false premises)",
+            suggestion: "Valid deduction with false premises does not guarantee true conclusion",
+            category: "logical"
+          });
+        }
+        if (thought.logicForm) {
+          const knownForms = [
+            "modus ponens",
+            "modus tollens",
+            "hypothetical syllogism",
+            "disjunctive syllogism",
+            "constructive dilemma",
+            "destructive dilemma"
+          ];
+          const isKnownForm = knownForms.some(
+            (form) => thought.logicForm.toLowerCase().includes(form)
+          );
+          if (isKnownForm) {
+            issues.push({
+              severity: "info",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Using recognized logic form: ${thought.logicForm}`,
+              suggestion: "Standard logical forms help verify validity",
+              category: "structural"
+            });
+          }
+        }
+        if (thought.premises && thought.premises.length > 5) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Large number of premises may indicate complexity",
+            suggestion: "Consider breaking into multiple simpler deductions",
+            category: "structural"
+          });
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/abductive.ts
+var abductive_exports = {};
+__export(abductive_exports, {
+  AbductiveValidator: () => AbductiveValidator
+});
+var AbductiveValidator;
+var init_abductive = __esm({
+  "src/validation/validators/modes/abductive.ts"() {
+    init_esm_shims();
+    init_constants();
+    init_validation_utils();
+    AbductiveValidator = class {
+      getMode() {
+        return "abductive";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        issues.push(
+          ...validateNonEmptyArray(
+            thought,
+            thought.observations,
+            "observations",
+            IssueCategory.STRUCTURAL,
+            IssueSeverity.ERROR
+          )
+        );
+        if (thought.observations) {
+          for (const obs of thought.observations) {
+            issues.push(
+              ...validateConfidence(
+                thought,
+                obs.confidence,
+                `Observation "${obs.description}" confidence`
+              )
+            );
+          }
+        }
+        if (thought.hypotheses) {
+          const hypothesisIds = /* @__PURE__ */ new Set();
+          for (const hyp of thought.hypotheses) {
+            if (hypothesisIds.has(hyp.id)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Duplicate hypothesis ID: ${hyp.id}`,
+                suggestion: "Each hypothesis must have a unique ID",
+                category: IssueCategory.LOGICAL
+              });
+            }
+            hypothesisIds.add(hyp.id);
+          }
+        }
+        if (thought.evaluationCriteria) {
+          const { parsimony, explanatoryPower, plausibility } = thought.evaluationCriteria;
+          issues.push(
+            ...validateProbability(thought, parsimony, "Parsimony score")
+          );
+          issues.push(
+            ...validateProbability(thought, explanatoryPower, "Explanatory power")
+          );
+          issues.push(
+            ...validateProbability(thought, plausibility, "Plausibility")
+          );
+        }
+        if (thought.bestExplanation && thought.hypotheses) {
+          const hypothesisIds = thought.hypotheses.map((h) => h.id);
+          if (!hypothesisIds.includes(thought.bestExplanation.id)) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: "Best explanation must be from the hypotheses list",
+              suggestion: "Ensure bestExplanation references an existing hypothesis",
+              category: IssueCategory.LOGICAL
+            });
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/causal.ts
+var causal_exports = {};
+__export(causal_exports, {
+  CausalValidator: () => CausalValidator
+});
+var CausalValidator;
+var init_causal = __esm({
+  "src/validation/validators/modes/causal.ts"() {
+    init_esm_shims();
+    init_constants();
+    init_validation_utils();
+    CausalValidator = class {
+      getMode() {
+        return "causal";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (thought.causalGraph) {
+          const { nodes, edges } = thought.causalGraph;
+          const nodeIds = new Set(nodes.map((n) => n.id));
+          for (const edge of edges) {
+            if (!nodeIds.has(edge.from)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Edge references non-existent source node: ${edge.from}`,
+                suggestion: "Ensure all edge endpoints reference existing nodes",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            if (!nodeIds.has(edge.to)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Edge references non-existent target node: ${edge.to}`,
+                suggestion: "Ensure all edge endpoints reference existing nodes",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            issues.push(
+              ...validateNumberRange(
+                thought,
+                edge.strength,
+                `Edge strength (${edge.from} -> ${edge.to})`,
+                -1,
+                1,
+                IssueSeverity.ERROR,
+                IssueCategory.STRUCTURAL
+              )
+            );
+            issues.push(
+              ...validateConfidence(
+                thought,
+                edge.confidence,
+                `Edge confidence (${edge.from} -> ${edge.to})`
+              )
+            );
+          }
+          const hasCycle = this.detectCycle(edges, nodeIds);
+          if (hasCycle) {
+            const hasFeedbackMechanism = thought.mechanisms?.some(
+              (m) => m.type === "feedback"
+            );
+            if (!hasFeedbackMechanism) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Causal graph contains cycles (feedback loops)",
+                suggestion: "Verify that cyclical relationships are intentional",
+                category: "structural"
+              });
+            }
+          }
+          const connectedNodes = /* @__PURE__ */ new Set();
+          for (const edge of edges) {
+            connectedNodes.add(edge.from);
+            connectedNodes.add(edge.to);
+          }
+          for (const node of nodes) {
+            if (!connectedNodes.has(node.id) && nodes.length > 1) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Node "${node.name}" is isolated (no connections)`,
+                suggestion: "Consider adding causal relationships or removing isolated nodes",
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.interventions) {
+          const nodeIds = new Set(
+            thought.causalGraph?.nodes.map((n) => n.id) || []
+          );
+          for (const intervention of thought.interventions) {
+            if (!nodeIds.has(intervention.nodeId)) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Intervention references non-existent node: ${intervention.nodeId}`,
+                suggestion: "Ensure intervention references existing nodes",
+                category: "structural"
+              });
+            }
+            for (const effect of intervention.expectedEffects) {
+              if (!nodeIds.has(effect.nodeId)) {
+                issues.push({
+                  severity: "error",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Intervention effect references non-existent node: ${effect.nodeId}`,
+                  suggestion: "Ensure expected effects reference existing nodes",
+                  category: "structural"
+                });
+              }
+              issues.push(
+                ...validateConfidence(
+                  thought,
+                  effect.confidence,
+                  "Intervention effect confidence"
+                )
+              );
+            }
+          }
+        }
+        return issues;
+      }
+      /**
+       * Detect cycles in directed graph using DFS
+       */
+      detectCycle(edges, nodeIds) {
+        const graph = /* @__PURE__ */ new Map();
+        for (const nodeId of nodeIds) {
+          graph.set(nodeId, []);
+        }
+        for (const edge of edges) {
+          const neighbors = graph.get(edge.from) || [];
+          neighbors.push(edge.to);
+          graph.set(edge.from, neighbors);
+        }
+        const visited = /* @__PURE__ */ new Set();
+        const recStack = /* @__PURE__ */ new Set();
+        const dfs = (node) => {
+          visited.add(node);
+          recStack.add(node);
+          const neighbors = graph.get(node) || [];
+          for (const neighbor of neighbors) {
+            if (!visited.has(neighbor)) {
+              if (dfs(neighbor)) {
+                return true;
+              }
+            } else if (recStack.has(neighbor)) {
+              return true;
+            }
+          }
+          recStack.delete(node);
+          return false;
+        };
+        for (const node of nodeIds) {
+          if (!visited.has(node)) {
+            if (dfs(node)) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/bayesian.ts
+var bayesian_exports = {};
+__export(bayesian_exports, {
+  BayesianValidator: () => BayesianValidator
+});
+var BayesianValidator;
+var init_bayesian = __esm({
+  "src/validation/validators/modes/bayesian.ts"() {
+    init_esm_shims();
+    init_constants();
+    init_validation_utils();
+    BayesianValidator = class {
+      getMode() {
+        return "bayesian";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (thought.prior !== void 0) {
+          issues.push(
+            ...validateProbability(
+              thought,
+              thought.prior.probability,
+              "Prior probability"
+            )
+          );
+        }
+        if (thought.likelihood !== void 0) {
+          if (thought.likelihood.probability < 0 || thought.likelihood.probability > 1) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Likelihood probability must be between 0 and 1",
+              suggestion: "Provide likelihood as decimal",
+              category: "structural"
+            });
+          }
+        }
+        if (thought.posterior !== void 0) {
+          issues.push(
+            ...validateProbability(
+              thought,
+              thought.posterior.probability,
+              "Posterior probability"
+            )
+          );
+          if (!thought.posterior.calculation || thought.posterior.calculation.trim() === "") {
+            issues.push({
+              severity: IssueSeverity.WARNING,
+              thoughtNumber: thought.thoughtNumber,
+              description: "Posterior calculation should be shown",
+              suggestion: "Provide calculation showing how posterior was derived",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+        }
+        if (thought.evidence) {
+          for (const evidence of thought.evidence) {
+            if (evidence.likelihoodGivenHypothesis < 0 || evidence.likelihoodGivenHypothesis > 1) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Evidence "${evidence.description}" has invalid P(E|H): ${evidence.likelihoodGivenHypothesis}`,
+                suggestion: "Likelihood must be between 0 and 1",
+                category: "structural"
+              });
+            }
+            if (evidence.likelihoodGivenNotHypothesis < 0 || evidence.likelihoodGivenNotHypothesis > 1) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Evidence "${evidence.description}" has invalid P(E|\xACH): ${evidence.likelihoodGivenNotHypothesis}`,
+                suggestion: "Likelihood must be between 0 and 1",
+                category: "structural"
+              });
+            }
+          }
+        }
+        issues.push(
+          ...validateNumberRange(
+            thought,
+            thought.bayesFactor,
+            "Bayes factor",
+            0,
+            Infinity,
+            IssueSeverity.ERROR,
+            IssueCategory.MATHEMATICAL
+          )
+        );
+        if (thought.bayesFactor !== void 0 && thought.bayesFactor > 1) {
+          issues.push({
+            severity: "info",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Bayes factor ${thought.bayesFactor.toFixed(2)} > 1, evidence supports hypothesis`,
+            suggestion: "Evidence favors the hypothesis over the alternative",
+            category: "interpretation"
+          });
+        }
+        if (thought.bayesFactor !== void 0 && thought.bayesFactor < 1 && thought.bayesFactor >= 0) {
+          issues.push({
+            severity: "info",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Bayes factor ${thought.bayesFactor.toFixed(2)} < 1, evidence contradicts hypothesis`,
+            suggestion: "Evidence favors the alternative over the hypothesis",
+            category: "interpretation"
+          });
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/counterfactual.ts
+var counterfactual_exports = {};
+__export(counterfactual_exports, {
+  CounterfactualValidator: () => CounterfactualValidator
+});
+var CounterfactualValidator;
+var init_counterfactual = __esm({
+  "src/validation/validators/modes/counterfactual.ts"() {
+    init_esm_shims();
+    init_constants();
+    init_validation_utils();
+    CounterfactualValidator = class {
+      getMode() {
+        return "counterfactual";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (!thought.actual) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Counterfactual reasoning requires an actual scenario",
+            suggestion: "Provide the actual scenario that occurred",
+            category: "structural"
+          });
+        }
+        if (!thought.counterfactuals || thought.counterfactuals.length === 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Must have at least one counterfactual scenario",
+            suggestion: "Provide at least one alternative scenario",
+            category: "structural"
+          });
+        }
+        if (!thought.interventionPoint || !thought.interventionPoint.description) {
+          issues.push({
+            severity: IssueSeverity.ERROR,
+            thoughtNumber: thought.thoughtNumber,
+            description: "Intervention point must be specified",
+            suggestion: "Specify where and how intervention could change the outcome",
+            category: IssueCategory.STRUCTURAL
+          });
+        } else if (!thought.interventionPoint.description || thought.interventionPoint.description.trim() === "") {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Intervention point must be specified",
+            suggestion: "Provide a description of the intervention point",
+            category: "structural"
+          });
+        }
+        if (thought.interventionPoint) {
+          if (thought.interventionPoint.feasibility !== void 0 && (thought.interventionPoint.feasibility < 0 || thought.interventionPoint.feasibility > 1)) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Intervention point feasibility must be between 0 and 1",
+              suggestion: "Provide feasibility as decimal",
+              category: "structural"
+            });
+          }
+          if (thought.interventionPoint.expectedImpact !== void 0 && (thought.interventionPoint.expectedImpact < 0 || thought.interventionPoint.expectedImpact > 1)) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Intervention point expectedImpact must be between 0 and 1",
+              suggestion: "Provide expectedImpact as decimal",
+              category: "structural"
+            });
+          }
+        }
+        if (thought.actual && thought.actual.likelihood !== void 0 && (thought.actual.likelihood < 0 || thought.actual.likelihood > 1)) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Actual scenario likelihood must be between 0 and 1",
+            suggestion: "Provide likelihood as decimal",
+            category: "structural"
+          });
+        }
+        if (thought.actual && thought.actual.likelihood !== void 0 && (thought.actual.likelihood < 0 || thought.actual.likelihood > 1)) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Actual scenario has invalid likelihood",
+            suggestion: "Provide likelihood as decimal between 0 and 1",
+            category: "structural"
+          });
+        }
+        if (thought.counterfactuals) {
+          for (const scenario of thought.counterfactuals) {
+            issues.push(
+              ...validateProbability(
+                thought,
+                scenario.likelihood,
+                `Counterfactual scenario "${scenario.name}" likelihood`
+              )
+            );
+            if (scenario.outcomes) {
+              for (const outcome of scenario.outcomes) {
+                issues.push(
+                  ...validateProbability(
+                    thought,
+                    outcome.magnitude,
+                    `Counterfactual scenario "${scenario.name}" outcome magnitude`
+                  )
+                );
+              }
+            }
+          }
+        }
+        if (thought.comparison && thought.comparison.differences) {
+          for (const diff of thought.comparison.differences) {
+            if (!diff.actual || !diff.counterfactual) {
+              issues.push({
+                severity: IssueSeverity.WARNING,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Difference "${diff.aspect}" should reference both actual and counterfactual values`,
+                suggestion: "Provide both actual and counterfactual values for complete comparison",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+          }
+        }
+        if (thought.comparison && thought.comparison.differences) {
+          for (const diff of thought.comparison.differences) {
+            if (!diff.actual || diff.actual.trim() === "" || !diff.counterfactual || diff.counterfactual.trim() === "") {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Comparison differences should reference both actual and counterfactual scenarios",
+                suggestion: "Provide both actual and counterfactual values for meaningful comparison",
+                category: "completeness"
+              });
+            }
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/analogical.ts
+var analogical_exports = {};
+__export(analogical_exports, {
+  AnalogicalValidator: () => AnalogicalValidator
+});
+var AnalogicalValidator;
+var init_analogical = __esm({
+  "src/validation/validators/modes/analogical.ts"() {
+    init_esm_shims();
+    init_constants();
+    init_validation_utils();
+    AnalogicalValidator = class {
+      getMode() {
+        return "analogical";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (!thought.sourceDomain) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Analogical reasoning requires a source domain",
+            suggestion: "Provide the source domain for the analogy",
+            category: "structural"
+          });
+        }
+        if (!thought.targetDomain) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Analogical reasoning requires a target domain",
+            suggestion: "Provide the target domain for the analogy",
+            category: "structural"
+          });
+        }
+        issues.push(
+          ...validateProbability(
+            thought,
+            thought.analogyStrength,
+            "Analogy strength"
+          )
+        );
+        if (thought.mapping && thought.mapping.length === 0) {
+          issues.push({
+            severity: IssueSeverity.INFO,
+            thoughtNumber: thought.thoughtNumber,
+            description: "No mappings specified between domains",
+            suggestion: "Provide at least one mapping between source and target",
+            category: IssueCategory.STRUCTURAL
+          });
+        }
+        if (thought.mapping && thought.sourceDomain && thought.targetDomain) {
+          const sourceEntityIds = new Set(
+            thought.sourceDomain.entities.map((e) => e.id)
+          );
+          const targetEntityIds = new Set(
+            thought.targetDomain.entities.map((e) => e.id)
+          );
+          for (const map of thought.mapping) {
+            if (!sourceEntityIds.has(map.sourceEntityId)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Mapping references non-existent source entity: ${map.sourceEntityId}`,
+                suggestion: "Ensure mappings reference existing source entities",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            if (!targetEntityIds.has(map.targetEntityId)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Mapping references non-existent target entity: ${map.targetEntityId}`,
+                suggestion: "Ensure mappings reference existing target entities",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            issues.push(
+              ...validateConfidence(
+                thought,
+                map.confidence,
+                `Mapping confidence (${map.sourceEntityId} -> ${map.targetEntityId})`
+              )
+            );
+          }
+        }
+        if (!thought.limitations || thought.limitations.length === 0) {
+          issues.push({
+            severity: IssueSeverity.WARNING,
+            thoughtNumber: thought.thoughtNumber,
+            description: "Good analogies acknowledge their limitations",
+            suggestion: "Consider identifying potential limitations or weaknesses of the analogy",
+            category: "completeness"
+          });
+        }
+        if (thought.insights) {
+          for (const insight of thought.insights) {
+            issues.push(
+              ...validateProbability(thought, insight.novelty, "Insight novelty")
+            );
+          }
+        }
+        if (thought.inferences) {
+          for (const inference of thought.inferences) {
+            issues.push(
+              ...validateConfidence(
+                thought,
+                inference.confidence,
+                "Inference confidence"
+              )
+            );
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/temporal.ts
+var temporal_exports = {};
+__export(temporal_exports, {
+  TemporalValidator: () => TemporalValidator
+});
+var TemporalValidator;
+var init_temporal = __esm({
+  "src/validation/validators/modes/temporal.ts"() {
+    init_esm_shims();
+    init_constants();
+    init_validation_utils();
+    TemporalValidator = class {
+      getMode() {
+        return "temporal";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (thought.timeline) {
+          if (!thought.timeline.timeUnit) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: "Timeline must specify timeUnit",
+              suggestion: "Add timeUnit property (milliseconds, seconds, minutes, hours, days, months, years)",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+          if (thought.timeline.startTime !== void 0 && thought.timeline.endTime !== void 0 && thought.timeline.startTime >= thought.timeline.endTime) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: "Timeline startTime must be before endTime",
+              suggestion: "Ensure chronological order: startTime < endTime",
+              category: IssueCategory.LOGICAL
+            });
+          }
+        }
+        if (thought.events) {
+          for (const event of thought.events) {
+            if (event.type === "interval" && !event.duration) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Interval event ${event.id} must have duration`,
+                suggestion: "Add duration property for interval events",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            issues.push(
+              ...validateNumberRange(
+                thought,
+                event.timestamp,
+                `Event ${event.id} timestamp`,
+                0,
+                Infinity,
+                IssueSeverity.ERROR,
+                IssueCategory.STRUCTURAL
+              )
+            );
+          }
+        }
+        if (thought.intervals) {
+          for (const interval of thought.intervals) {
+            if (interval.start >= interval.end) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Interval ${interval.id} start must be before end`,
+                suggestion: "Ensure start < end for all intervals",
+                category: IssueCategory.LOGICAL
+              });
+            }
+          }
+        }
+        if (thought.constraints) {
+          const eventIds = new Set(thought.events?.map((e) => e.id) || []);
+          const intervalIds = new Set(thought.intervals?.map((i) => i.id) || []);
+          for (const constraint of thought.constraints) {
+            if (!eventIds.has(constraint.subject) && !intervalIds.has(constraint.subject)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Constraint subject ${constraint.subject} not found in events or intervals`,
+                suggestion: "Ensure constraint references exist",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            if (!eventIds.has(constraint.object) && !intervalIds.has(constraint.object)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Constraint object ${constraint.object} not found in events or intervals`,
+                suggestion: "Ensure constraint references exist",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            issues.push(
+              ...validateConfidence(
+                thought,
+                constraint.confidence,
+                `Constraint ${constraint.id} confidence`
+              )
+            );
+          }
+        }
+        if (thought.relations) {
+          const eventIds = new Set(thought.events?.map((e) => e.id) || []);
+          for (const relation of thought.relations) {
+            if (!eventIds.has(relation.from)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Temporal relation ${relation.id} 'from' event ${relation.from} not found`,
+                suggestion: "Ensure relation references existing events",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            if (!eventIds.has(relation.to)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Temporal relation ${relation.id} 'to' event ${relation.to} not found`,
+                suggestion: "Ensure relation references existing events",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            if (relation.strength < 0 || relation.strength > 1) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Temporal relation ${relation.id} strength must be 0-1`,
+                suggestion: "Provide strength as decimal",
+                category: "structural"
+              });
+            }
+            if (relation.delay !== void 0 && relation.delay < 0) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Temporal relation ${relation.id} delay cannot be negative`,
+                suggestion: "Use non-negative delay values",
+                category: "structural"
+              });
+            }
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/historical.ts
+var historical_exports = {};
+__export(historical_exports, {
+  HistoricalValidator: () => HistoricalValidator
+});
+var HistoricalValidator;
+var init_historical = __esm({
+  "src/validation/validators/modes/historical.ts"() {
+    init_esm_shims();
+    init_constants();
+    init_validation_utils();
+    HistoricalValidator = class {
+      getMode() {
+        return "historical";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        const eventIds = new Set(thought.events?.map((e) => e.id) || []);
+        const sourceIds = new Set(thought.sources?.map((s) => s.id) || []);
+        const periodIds = new Set(thought.periods?.map((p) => p.id) || []);
+        const actorIds = new Set(thought.actors?.map((a) => a.id) || []);
+        if (thought.events) {
+          issues.push(
+            ...this.validateEvents(thought, eventIds, sourceIds, actorIds)
+          );
+        }
+        if (thought.sources) {
+          issues.push(...this.validateSources(thought, sourceIds));
+        }
+        if (thought.periods) {
+          issues.push(...this.validatePeriods(thought, eventIds, actorIds));
+        }
+        if (thought.causalChains) {
+          issues.push(...this.validateCausalChains(thought, eventIds, sourceIds));
+        }
+        if (thought.actors) {
+          issues.push(...this.validateActors(thought, periodIds, actorIds));
+        }
+        if (thought.aggregateReliability !== void 0) {
+          issues.push(
+            ...validateConfidence(
+              thought,
+              thought.aggregateReliability,
+              "Aggregate reliability"
+            )
+          );
+        }
+        return issues;
+      }
+      /**
+       * Validate historical events
+       */
+      validateEvents(thought, eventIds, sourceIds, actorIds) {
+        const issues = [];
+        for (const event of thought.events) {
+          if (!event.name) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: `Event ${event.id} must have a name`,
+              suggestion: "Add a descriptive name for the event",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+          if (!event.date) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: `Event ${event.id} must have a date`,
+              suggestion: "Add date as string or DateRange object",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+          if (typeof event.date === "object" && event.date.start && event.date.end) {
+            if (event.date.start > event.date.end) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Event ${event.id} date range is invalid (start > end)`,
+                suggestion: "Ensure date range start is before end",
+                category: IssueCategory.LOGICAL
+              });
+            }
+          }
+          if (event.causes) {
+            for (const causeId of event.causes) {
+              if (!eventIds.has(causeId)) {
+                issues.push({
+                  severity: IssueSeverity.WARNING,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Event ${event.id} references unknown cause event ${causeId}`,
+                  suggestion: "Add the referenced cause event or remove the reference",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+            }
+          }
+          if (event.effects) {
+            for (const effectId of event.effects) {
+              if (!eventIds.has(effectId)) {
+                issues.push({
+                  severity: IssueSeverity.WARNING,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Event ${event.id} references unknown effect event ${effectId}`,
+                  suggestion: "Add the referenced effect event or remove the reference",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+            }
+          }
+          if (event.sources) {
+            for (const srcId of event.sources) {
+              if (!sourceIds.has(srcId)) {
+                issues.push({
+                  severity: IssueSeverity.WARNING,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Event ${event.id} references unknown source ${srcId}`,
+                  suggestion: "Add the referenced source or remove the reference",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+            }
+          }
+          if (event.actors) {
+            for (const actorId of event.actors) {
+              if (!actorIds.has(actorId)) {
+                issues.push({
+                  severity: IssueSeverity.WARNING,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Event ${event.id} references unknown actor ${actorId}`,
+                  suggestion: "Add the referenced actor or remove the reference",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+            }
+          }
+        }
+        return issues;
+      }
+      /**
+       * Validate historical sources
+       */
+      validateSources(thought, sourceIds) {
+        const issues = [];
+        for (const source of thought.sources) {
+          if (!source.title) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: `Source ${source.id} must have a title`,
+              suggestion: "Add a title for the source",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+          issues.push(
+            ...validateConfidence(
+              thought,
+              source.reliability,
+              `Source ${source.id} reliability`
+            )
+          );
+          if (source.bias?.severity !== void 0) {
+            issues.push(
+              ...validateConfidence(
+                thought,
+                source.bias.severity,
+                `Source ${source.id} bias severity`
+              )
+            );
+          }
+          if (source.corroboratedBy) {
+            for (const srcId of source.corroboratedBy) {
+              if (!sourceIds.has(srcId)) {
+                issues.push({
+                  severity: IssueSeverity.WARNING,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Source ${source.id} corroboratedBy references unknown source ${srcId}`,
+                  suggestion: "Add the referenced source or remove the reference",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+            }
+          }
+          if (source.contradictedBy) {
+            for (const srcId of source.contradictedBy) {
+              if (!sourceIds.has(srcId)) {
+                issues.push({
+                  severity: IssueSeverity.WARNING,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Source ${source.id} contradictedBy references unknown source ${srcId}`,
+                  suggestion: "Add the referenced source or remove the reference",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+            }
+          }
+        }
+        return issues;
+      }
+      /**
+       * Validate historical periods
+       */
+      validatePeriods(thought, eventIds, actorIds) {
+        const issues = [];
+        for (const period of thought.periods) {
+          if (!period.name) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: `Period ${period.id} must have a name`,
+              suggestion: "Add a descriptive name for the period",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+          if (period.startDate && period.endDate && period.startDate > period.endDate) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: `Period ${period.id} startDate must be before endDate`,
+              suggestion: "Ensure chronological order: startDate < endDate",
+              category: IssueCategory.LOGICAL
+            });
+          }
+          if (period.keyEvents) {
+            for (const eventId of period.keyEvents) {
+              if (!eventIds.has(eventId)) {
+                issues.push({
+                  severity: IssueSeverity.WARNING,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Period ${period.id} references unknown event ${eventId}`,
+                  suggestion: "Add the referenced event or remove the reference",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+            }
+          }
+          if (period.keyActors) {
+            for (const actorId of period.keyActors) {
+              if (!actorIds.has(actorId)) {
+                issues.push({
+                  severity: IssueSeverity.WARNING,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Period ${period.id} references unknown actor ${actorId}`,
+                  suggestion: "Add the referenced actor or remove the reference",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+            }
+          }
+          if (!period.characteristics || period.characteristics.length === 0) {
+            issues.push({
+              severity: IssueSeverity.WARNING,
+              thoughtNumber: thought.thoughtNumber,
+              description: `Period ${period.id} should have at least one characteristic`,
+              suggestion: "Add characteristics that define this historical period",
+              category: IssueCategory.LOGICAL
+            });
+          }
+        }
+        return issues;
+      }
+      /**
+       * Validate causal chains
+       */
+      validateCausalChains(thought, eventIds, sourceIds) {
+        const issues = [];
+        for (const chain of thought.causalChains) {
+          if (!chain.name) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: `CausalChain ${chain.id} must have a name`,
+              suggestion: "Add a descriptive name for the causal chain",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+          if (!chain.links || chain.links.length === 0) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: `CausalChain ${chain.id} must have at least one link`,
+              suggestion: "Add causal links to the chain",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+          issues.push(
+            ...validateConfidence(
+              thought,
+              chain.confidence,
+              `CausalChain ${chain.id} confidence`
+            )
+          );
+          if (chain.links) {
+            for (let i = 0; i < chain.links.length; i++) {
+              const link = chain.links[i];
+              if (!eventIds.has(link.cause)) {
+                issues.push({
+                  severity: IssueSeverity.ERROR,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `CausalChain ${chain.id} link ${i} references unknown cause event ${link.cause}`,
+                  suggestion: "Add the referenced cause event",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+              if (!eventIds.has(link.effect)) {
+                issues.push({
+                  severity: IssueSeverity.ERROR,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `CausalChain ${chain.id} link ${i} references unknown effect event ${link.effect}`,
+                  suggestion: "Add the referenced effect event",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+              issues.push(
+                ...validateConfidence(
+                  thought,
+                  link.confidence,
+                  `CausalChain ${chain.id} link ${i} confidence`
+                )
+              );
+              if (link.evidence) {
+                for (const srcId of link.evidence) {
+                  if (!sourceIds.has(srcId)) {
+                    issues.push({
+                      severity: IssueSeverity.WARNING,
+                      thoughtNumber: thought.thoughtNumber,
+                      description: `CausalChain ${chain.id} link ${i} references unknown source ${srcId}`,
+                      suggestion: "Add the referenced source or remove the reference",
+                      category: IssueCategory.STRUCTURAL
+                    });
+                  }
+                }
+              }
+            }
+            for (let i = 0; i < chain.links.length - 1; i++) {
+              if (chain.links[i].effect !== chain.links[i + 1].cause) {
+                issues.push({
+                  severity: IssueSeverity.WARNING,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `CausalChain ${chain.id} has discontinuity between links ${i} and ${i + 1}`,
+                  suggestion: "Ensure each link effect is the cause of the next link for chain continuity",
+                  category: IssueCategory.LOGICAL
+                });
+              }
+            }
+          }
+        }
+        return issues;
+      }
+      /**
+       * Validate historical actors
+       */
+      validateActors(thought, periodIds, actorIds) {
+        const issues = [];
+        for (const actor of thought.actors) {
+          if (!actor.name) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: `Actor ${actor.id} must have a name`,
+              suggestion: "Add a name for the actor",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+          if (actor.period && !periodIds.has(actor.period)) {
+            issues.push({
+              severity: IssueSeverity.WARNING,
+              thoughtNumber: thought.thoughtNumber,
+              description: `Actor ${actor.id} references unknown period ${actor.period}`,
+              suggestion: "Add the referenced period or remove the reference",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+          if (actor.relationships) {
+            for (const rel of actor.relationships) {
+              if (!actorIds.has(rel.actorId)) {
+                issues.push({
+                  severity: IssueSeverity.WARNING,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Actor ${actor.id} has relationship with unknown actor ${rel.actorId}`,
+                  suggestion: "Add the referenced actor or remove the relationship",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+            }
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/gametheory.ts
+var gametheory_exports = {};
+__export(gametheory_exports, {
+  GameTheoryValidator: () => GameTheoryValidator
+});
+var GameTheoryValidator;
+var init_gametheory = __esm({
+  "src/validation/validators/modes/gametheory.ts"() {
+    init_esm_shims();
+    init_constants();
+    init_validation_utils();
+    GameTheoryValidator = class {
+      getMode() {
+        return "gametheory";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (thought.game && thought.game.numPlayers < 2) {
+          issues.push({
+            severity: IssueSeverity.ERROR,
+            thoughtNumber: thought.thoughtNumber,
+            description: "Game must have at least 2 players",
+            suggestion: "Game theory requires at least 2 players",
+            category: IssueCategory.STRUCTURAL
+          });
+        }
+        if (thought.game && thought.players) {
+          if (thought.players.length !== thought.game.numPlayers) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: `Player count (${thought.players.length}) does not match game definition (${thought.game.numPlayers})`,
+              suggestion: "Ensure number of players matches game definition",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+          for (const player of thought.players) {
+            issues.push(
+              ...validateNonEmptyArray(
+                thought,
+                player.availableStrategies,
+                `Player "${player.name}" available strategies`,
+                IssueCategory.STRUCTURAL,
+                IssueSeverity.ERROR
+              )
+            );
+          }
+        }
+        if (thought.strategies) {
+          const playerIds = new Set(thought.players?.map((p) => p.id) || []);
+          for (const strategy of thought.strategies) {
+            if (!playerIds.has(strategy.playerId)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Strategy "${strategy.name}" references non-existent player: ${strategy.playerId}`,
+                suggestion: "Ensure strategies reference existing players",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            if (!strategy.isPure && strategy.probability === void 0) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Mixed strategy "${strategy.name}" is missing probability`,
+                suggestion: "Provide probability for mixed strategies",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            if (strategy.probability !== void 0 && (strategy.probability < 0 || strategy.probability > 1)) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Strategy "${strategy.name}" probability must be 0-1`,
+                suggestion: "Provide probability as decimal",
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.payoffMatrix) {
+          if (thought.players && thought.payoffMatrix.players.length !== thought.players.length) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Payoff matrix player count does not match actual player count`,
+              suggestion: "Ensure payoff matrix includes all players",
+              category: "structural"
+            });
+          }
+          for (const entry of thought.payoffMatrix.payoffs) {
+            if (entry.strategyProfile.length !== thought.payoffMatrix.players.length) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Strategy profile length does not match player count`,
+                suggestion: "Each payoff entry must specify strategies for all players",
+                category: "structural"
+              });
+            }
+            if (entry.payoffs.length !== thought.payoffMatrix.players.length) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Payoff entry payoffs length does not match player count`,
+                suggestion: "Each payoff entry must specify payoffs for all players",
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.nashEquilibria) {
+          for (const equilibrium of thought.nashEquilibria) {
+            if (thought.players && equilibrium.strategyProfile.length !== thought.players.length) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Nash equilibrium "${equilibrium.id}" has strategy profile length mismatch`,
+                suggestion: "Strategy profile must include strategies for all players",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            if (equilibrium.stability < 0 || equilibrium.stability > 1) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Nash equilibrium "${equilibrium.id}" stability must be 0-1`,
+                suggestion: "Provide stability as decimal",
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.gameTree) {
+          const nodeIds = new Set(thought.gameTree.nodes.map((n) => n.id));
+          if (!nodeIds.has(thought.gameTree.rootNode)) {
+            issues.push({
+              severity: IssueSeverity.ERROR,
+              thoughtNumber: thought.thoughtNumber,
+              description: "Game tree root node does not exist in nodes",
+              suggestion: "Ensure rootNode references an existing node",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+          for (const node of thought.gameTree.nodes) {
+            if (node.type === "terminal" && !node.payoffs) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Terminal node ${node.id} is missing payoffs`,
+                suggestion: "Provide payoffs for terminal nodes",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            if (node.type === "chance" && node.probability === void 0) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Chance node ${node.id} must have probability`,
+                suggestion: "Provide probability for chance nodes",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            issues.push(
+              ...validateProbability(
+                thought,
+                node.probability,
+                `Node ${node.id} probability`
+              )
+            );
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/evidential.ts
+var evidential_exports = {};
+__export(evidential_exports, {
+  EvidentialValidator: () => EvidentialValidator
+});
+var EvidentialValidator;
+var init_evidential = __esm({
+  "src/validation/validators/modes/evidential.ts"() {
+    init_esm_shims();
+    init_constants();
+    init_validation_utils();
+    EvidentialValidator = class {
+      getMode() {
+        return "evidential";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        const hypothesisIds = new Set(thought.hypotheses?.map((h) => h.id) || []);
+        if (thought.hypotheses) {
+          for (const hypothesis of thought.hypotheses) {
+            if (hypothesis.subsets) {
+              for (const subset of hypothesis.subsets) {
+                if (!hypothesisIds.has(subset)) {
+                  issues.push({
+                    severity: IssueSeverity.ERROR,
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Hypothesis "${hypothesis.name}" references unknown subset: ${subset}`,
+                    suggestion: "Ensure subsets reference existing hypotheses",
+                    category: IssueCategory.STRUCTURAL
+                  });
+                }
+              }
+            }
+          }
+        }
+        if (thought.evidence) {
+          for (const evidence of thought.evidence) {
+            if (evidence.reliability !== void 0 && (evidence.reliability < 0 || evidence.reliability > 1)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Evidence "${evidence.description}" reliability must be 0-1`,
+                suggestion: "Provide reliability as decimal",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            if (evidence.supports) {
+              for (const hypothesisId of evidence.supports) {
+                if (!hypothesisIds.has(hypothesisId)) {
+                  issues.push({
+                    severity: IssueSeverity.ERROR,
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Evidence "${evidence.description}" supports unknown hypothesis: ${hypothesisId}`,
+                    suggestion: "Ensure evidence references existing hypotheses",
+                    category: IssueCategory.STRUCTURAL
+                  });
+                }
+              }
+            }
+          }
+        }
+        if (thought.beliefFunctions) {
+          for (const beliefFunction of thought.beliefFunctions) {
+            let totalMass = 0;
+            for (const assignment of beliefFunction.massAssignments) {
+              if (assignment.mass < 0 || assignment.mass > 1) {
+                issues.push({
+                  severity: IssueSeverity.ERROR,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Belief function "${beliefFunction.id}" has mass value that must be 0-1`,
+                  suggestion: "Provide mass as decimal",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+              if (!assignment.hypothesisSet || assignment.hypothesisSet.length === 0) {
+                issues.push({
+                  severity: IssueSeverity.ERROR,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Mass assignment in belief function "${beliefFunction.id}" must reference at least one hypothesis`,
+                  suggestion: "Provide at least one hypothesis in the set",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+              totalMass += assignment.mass;
+            }
+            const tolerance = 1e-3;
+            if (Math.abs(totalMass - 1) > tolerance) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Belief function "${beliefFunction.id}" mass assignments must sum to 1.0 (current: ${totalMass.toFixed(3)})`,
+                suggestion: "Ensure all mass assignments sum to exactly 1.0",
+                category: IssueCategory.MATHEMATICAL
+              });
+            }
+          }
+        }
+        if (thought.plausibility && thought.plausibility.assignments) {
+          for (const assignment of thought.plausibility.assignments) {
+            if (assignment.belief > assignment.plausibility) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Belief ${assignment.belief} cannot exceed plausibility ${assignment.plausibility}`,
+                suggestion: "Ensure Bel(A) <= Pl(A) for all hypotheses",
+                category: IssueCategory.LOGICAL
+              });
+            }
+            if (assignment.uncertaintyInterval) {
+              const [lower, upper] = assignment.uncertaintyInterval;
+              if (Math.abs(lower - assignment.belief) > 1e-3 || Math.abs(upper - assignment.plausibility) > 1e-3) {
+                issues.push({
+                  severity: IssueSeverity.ERROR,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Uncertainty interval [${lower}, ${upper}] must match [belief, plausibility]`,
+                  suggestion: "Ensure uncertainty interval is [Bel(A), Pl(A)]",
+                  category: IssueCategory.STRUCTURAL
+                });
+              }
+            }
+          }
+        }
+        if (thought.decisions) {
+          for (const decision of thought.decisions) {
+            if (decision.selectedHypothesis) {
+              for (const hypothesisId of decision.selectedHypothesis) {
+                if (!hypothesisIds.has(hypothesisId)) {
+                  issues.push({
+                    severity: IssueSeverity.ERROR,
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Decision "${decision.name}" selects unknown hypothesis: ${hypothesisId}`,
+                    suggestion: "Ensure decision references existing hypotheses",
+                    category: IssueCategory.STRUCTURAL
+                  });
+                }
+              }
+            }
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/modal.ts
+var modal_exports = {};
+__export(modal_exports, {
+  ModalValidator: () => ModalValidator
+});
+var ModalValidator;
+var init_modal = __esm({
+  "src/validation/validators/modes/modal.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    ModalValidator = class {
+      getMode() {
+        return "modal";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        const modalOperators = [
+          "necessarily",
+          "necessary",
+          "must",
+          "possibly",
+          "possible",
+          "might",
+          "could",
+          "impossible",
+          "cannot",
+          "contingent",
+          "may or may not"
+        ];
+        const hasModalOperator = modalOperators.some(
+          (operator) => thought.content.toLowerCase().includes(operator)
+        );
+        if (!hasModalOperator) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Modal logic should use modal operators (necessary, possible, impossible)",
+            suggestion: "Express claims using modalities: \u25A1 (necessity), \u25C7 (possibility)",
+            category: "structural"
+          });
+        }
+        const worldKeywords = [
+          "world",
+          "scenario",
+          "case",
+          "situation",
+          "circumstance"
+        ];
+        const hasWorldReference = worldKeywords.some(
+          (keyword) => thought.content.toLowerCase().includes(keyword)
+        );
+        if (!hasWorldReference && thought.thoughtNumber > 1) {
+          issues.push({
+            severity: "info",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Modal reasoning often considers different possible worlds or scenarios",
+            suggestion: "Consider making explicit references to alternative scenarios or states",
+            category: "structural"
+          });
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/constraint.ts
+var constraint_exports = {};
+__export(constraint_exports, {
+  ConstraintValidator: () => ConstraintValidator
+});
+var ConstraintValidator;
+var init_constraint = __esm({
+  "src/validation/validators/modes/constraint.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    ConstraintValidator = class {
+      getMode() {
+        return "constraint";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if ("constraints" in thought && Array.isArray(thought.constraints)) {
+          if (thought.constraints.length === 0) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Constraint-based reasoning should define constraints",
+              suggestion: "Add constraints array with problem constraints",
+              category: "structural"
+            });
+          }
+          for (const constraint of thought.constraints) {
+            if (!constraint.description && !constraint.type) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Each constraint should have a description or type",
+                suggestion: "Provide clear constraint specifications",
+                category: "structural"
+              });
+            }
+          }
+        }
+        const constraintKeywords = [
+          "constraint",
+          "satisfy",
+          "violate",
+          "requirement",
+          "condition",
+          "limit"
+        ];
+        const hasConstraintContent = constraintKeywords.some(
+          (keyword) => thought.content.toLowerCase().includes(keyword)
+        );
+        if (!hasConstraintContent) {
+          issues.push({
+            severity: "info",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Constraint-based reasoning typically discusses constraints explicitly",
+            suggestion: "Consider making explicit references to constraints being satisfied or violated",
+            category: "structural"
+          });
+        }
+        if ("solution" in thought && thought.thoughtNumber > 1) {
+          const hasSatisfaction = thought.content.toLowerCase().includes("satisf") || thought.content.toLowerCase().includes("meets") || thought.content.toLowerCase().includes("valid");
+          if (!hasSatisfaction) {
+            issues.push({
+              severity: "info",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Solution should be validated against constraints",
+              suggestion: "Verify that the solution satisfies all constraints",
+              category: "logical"
+            });
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/optimization.ts
+var optimization_exports = {};
+__export(optimization_exports, {
+  OptimizationValidator: () => OptimizationValidator
+});
+var OptimizationValidator;
+var init_optimization = __esm({
+  "src/validation/validators/modes/optimization.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    OptimizationValidator = class {
+      getMode() {
+        return "optimization";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (thought.problem) {
+          if (!thought.problem.name || thought.problem.name.trim() === "") {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Optimization problem must have a name",
+              suggestion: "Provide a descriptive problem name",
+              category: "structural"
+            });
+          }
+        }
+        if (thought.variables && thought.variables.length > 0) {
+          const variableIds = /* @__PURE__ */ new Set();
+          for (const variable of thought.variables) {
+            if (variableIds.has(variable.id)) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Duplicate variable ID: ${variable.id}`,
+                suggestion: "Ensure all variable IDs are unique",
+                category: "structural"
+              });
+            }
+            variableIds.add(variable.id);
+            if (!variable.name || variable.name.trim() === "") {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Variable ${variable.id} must have a name`,
+                suggestion: "Provide descriptive variable names",
+                category: "structural"
+              });
+            }
+            if (variable.domain) {
+              if (variable.domain.type === "continuous" || variable.domain.type === "integer") {
+                if ("lowerBound" in variable.domain && "upperBound" in variable.domain) {
+                  if (variable.domain.lowerBound >= variable.domain.upperBound) {
+                    issues.push({
+                      severity: "error",
+                      thoughtNumber: thought.thoughtNumber,
+                      description: `Variable ${variable.id} lower bound must be less than upper bound`,
+                      suggestion: "Ensure domain bounds are correctly specified",
+                      category: "logical"
+                    });
+                  }
+                }
+              }
+              if (variable.domain.type === "discrete" && "values" in variable.domain) {
+                if (!variable.domain.values || variable.domain.values.length === 0) {
+                  issues.push({
+                    severity: "error",
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Discrete variable ${variable.id} must have at least one value`,
+                    suggestion: "Provide domain values for discrete variables",
+                    category: "structural"
+                  });
+                }
+              }
+              if (variable.domain.type === "categorical" && "categories" in variable.domain) {
+                if (!variable.domain.categories || variable.domain.categories.length === 0) {
+                  issues.push({
+                    severity: "error",
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Categorical variable ${variable.id} must have at least one category`,
+                    suggestion: "Provide categories for categorical variables",
+                    category: "structural"
+                  });
+                }
+              }
+            }
+          }
+        } else {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Optimization problem should define decision variables",
+            suggestion: "Add variables to be optimized",
+            category: "structural"
+          });
+        }
+        if (thought.optimizationConstraints && thought.optimizationConstraints.length > 0) {
+          const variableIds = new Set(thought.variables?.map((v) => v.id) || []);
+          for (const constraint of thought.optimizationConstraints) {
+            if (!constraint.formula || constraint.formula.trim() === "") {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Constraint ${constraint.id} must have a formula`,
+                suggestion: "Provide mathematical expression for constraint",
+                category: "structural"
+              });
+            }
+            if (constraint.type === "soft" && constraint.penalty === void 0) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Soft constraint ${constraint.id} should have a penalty`,
+                suggestion: "Specify penalty weight for soft constraint violation",
+                category: "structural"
+              });
+            }
+            if (constraint.penalty !== void 0 && constraint.penalty < 0) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Constraint ${constraint.id} penalty cannot be negative`,
+                suggestion: "Use non-negative penalty values",
+                category: "structural"
+              });
+            }
+            if (constraint.variables) {
+              for (const varId of constraint.variables) {
+                if (!variableIds.has(varId)) {
+                  issues.push({
+                    severity: "error",
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Constraint ${constraint.id} references non-existent variable ${varId}`,
+                    suggestion: "Ensure constraints reference defined variables",
+                    category: "logical"
+                  });
+                }
+              }
+            }
+            if (constraint.priority !== void 0 && constraint.priority < 0) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Constraint ${constraint.id} priority cannot be negative`,
+                suggestion: "Use non-negative priority values",
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.objectives && thought.objectives.length > 0) {
+          const variableIds = new Set(thought.variables?.map((v) => v.id) || []);
+          let totalWeight = 0;
+          for (const objective of thought.objectives) {
+            if (!objective.formula || objective.formula.trim() === "") {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Objective ${objective.id} must have a formula`,
+                suggestion: "Provide mathematical expression for objective function",
+                category: "structural"
+              });
+            }
+            if (objective.variables) {
+              for (const varId of objective.variables) {
+                if (!variableIds.has(varId)) {
+                  issues.push({
+                    severity: "error",
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Objective ${objective.id} references non-existent variable ${varId}`,
+                    suggestion: "Ensure objectives reference defined variables",
+                    category: "logical"
+                  });
+                }
+              }
+            }
+            if (objective.weight !== void 0) {
+              if (objective.weight < 0 || objective.weight > 1) {
+                issues.push({
+                  severity: "error",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Objective ${objective.id} weight must be 0-1`,
+                  suggestion: "Use decimal weight values between 0 and 1",
+                  category: "structural"
+                });
+              }
+              totalWeight += objective.weight;
+            }
+          }
+          if (thought.objectives.length > 1 && totalWeight > 0 && Math.abs(totalWeight - 1) > 0.01) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Objective weights sum to ${totalWeight.toFixed(2)}, not 1.0`,
+              suggestion: "For multi-objective optimization, weights should sum to 1",
+              category: "logical"
+            });
+          }
+        } else {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Optimization problem must have at least one objective",
+            suggestion: "Define what is being optimized (objective function)",
+            category: "structural"
+          });
+        }
+        if (thought.solution) {
+          const variableIds = new Set(thought.variables?.map((v) => v.id) || []);
+          const constraintIds = new Set(
+            thought.optimizationConstraints?.map((c) => c.id) || []
+          );
+          const objectiveIds = new Set(thought.objectives?.map((o) => o.id) || []);
+          if (thought.solution.quality < 0 || thought.solution.quality > 1) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Solution quality must be 0-1",
+              suggestion: "Use decimal quality values between 0 and 1",
+              category: "structural"
+            });
+          }
+          const assignedVars = Object.keys(thought.solution.variableValues);
+          for (const varId of variableIds) {
+            if (!assignedVars.includes(varId)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Solution does not assign value to variable ${varId}`,
+                suggestion: "Ensure solution assigns values to all decision variables",
+                category: "structural"
+              });
+            }
+          }
+          for (const objId of Object.keys(thought.solution.objectiveValues)) {
+            if (!objectiveIds.has(objId)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Solution includes non-existent objective ${objId}`,
+                suggestion: "Ensure solution references defined objectives",
+                category: "logical"
+              });
+            }
+          }
+          if (thought.solution.constraintSatisfaction) {
+            for (const cs of thought.solution.constraintSatisfaction) {
+              if (!constraintIds.has(cs.constraintId)) {
+                issues.push({
+                  severity: "warning",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Solution references non-existent constraint ${cs.constraintId}`,
+                  suggestion: "Ensure solution references defined constraints",
+                  category: "logical"
+                });
+              }
+              if (cs.violation !== void 0 && cs.violation < 0) {
+                issues.push({
+                  severity: "error",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Constraint ${cs.constraintId} violation cannot be negative`,
+                  suggestion: "Use non-negative violation amounts",
+                  category: "structural"
+                });
+              }
+            }
+          }
+          if (thought.solution.computationTime !== void 0 && thought.solution.computationTime < 0) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Computation time cannot be negative",
+              suggestion: "Use non-negative time values in milliseconds",
+              category: "structural"
+            });
+          }
+        }
+        if (thought.analysis) {
+          if (thought.analysis.robustness < 0 || thought.analysis.robustness > 1) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Solution robustness must be 0-1",
+              suggestion: "Use decimal robustness values between 0 and 1",
+              category: "structural"
+            });
+          }
+          if (thought.analysis.parameters) {
+            for (const param2 of thought.analysis.parameters) {
+              if (param2.allowableIncrease !== void 0 && param2.allowableIncrease < 0) {
+                issues.push({
+                  severity: "warning",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Parameter ${param2.parameterId} allowable increase should be non-negative`,
+                  suggestion: "Use non-negative increase values",
+                  category: "structural"
+                });
+              }
+              if (param2.allowableDecrease !== void 0 && param2.allowableDecrease < 0) {
+                issues.push({
+                  severity: "warning",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Parameter ${param2.parameterId} allowable decrease should be non-negative`,
+                  suggestion: "Use non-negative decrease values",
+                  category: "structural"
+                });
+              }
+            }
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/stochastic.ts
+var stochastic_exports = {};
+__export(stochastic_exports, {
+  StochasticValidator: () => StochasticValidator
+});
+var StochasticValidator;
+var init_stochastic = __esm({
+  "src/validation/validators/modes/stochastic.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    StochasticValidator = class {
+      getMode() {
+        return "stochastic";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if ("distribution" in thought) {
+          const dist = thought.distribution;
+          if (typeof dist === "object") {
+            if (!dist.type) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Probability distribution should specify type",
+                suggestion: "Specify distribution type (e.g., normal, uniform, exponential)",
+                category: "structural"
+              });
+            }
+            if (dist.parameters && typeof dist.parameters === "object") {
+              if (dist.type === "normal" && (!dist.parameters.mean || !dist.parameters.stddev)) {
+                issues.push({
+                  severity: "error",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: "Normal distribution requires mean and stddev parameters",
+                  suggestion: "Add mean and stddev to distribution parameters",
+                  category: "structural"
+                });
+              }
+            }
+          }
+        }
+        if ("uncertainty" in thought && typeof thought.uncertainty === "number") {
+          issues.push(...validateUncertainty(thought, thought.uncertainty));
+          if (thought.uncertainty === 0) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Stochastic reasoning usually involves non-zero uncertainty",
+              suggestion: "Consider quantifying the uncertainty in your stochastic process",
+              category: "logical"
+            });
+          }
+        } else if (thought.thoughtNumber > 1) {
+          issues.push({
+            severity: "info",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Consider adding uncertainty quantification",
+            suggestion: "Stochastic reasoning benefits from explicit uncertainty measures",
+            category: "structural"
+          });
+        }
+        const stochasticKeywords = [
+          "random",
+          "stochastic",
+          "probability",
+          "distribution",
+          "variance",
+          "expected",
+          "sample",
+          "monte carlo"
+        ];
+        const hasStochasticContent = stochasticKeywords.some(
+          (keyword) => thought.content.toLowerCase().includes(keyword)
+        );
+        if (!hasStochasticContent) {
+          issues.push({
+            severity: "info",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Stochastic reasoning should discuss random processes or distributions",
+            suggestion: "Make explicit references to probability distributions or random variables",
+            category: "structural"
+          });
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/recursive.ts
+var recursive_exports = {};
+__export(recursive_exports, {
+  RecursiveValidator: () => RecursiveValidator
+});
+var RecursiveValidator;
+var init_recursive = __esm({
+  "src/validation/validators/modes/recursive.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    RecursiveValidator = class {
+      getMode() {
+        return "recursive";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (thought.thoughtNumber <= 2) {
+          const hasBaseCase = thought.content.toLowerCase().includes("base case") || thought.content.toLowerCase().includes("base condition") || thought.content.toLowerCase().includes("termination");
+          if (!hasBaseCase) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Recursive reasoning should define base cases early",
+              suggestion: "Define base/termination cases before recursive steps",
+              category: "structural"
+            });
+          }
+        }
+        const recursiveKeywords = [
+          "recursive",
+          "recursion",
+          "self-similar",
+          "subproblem",
+          "divide",
+          "conquer",
+          "smaller instance"
+        ];
+        const hasRecursiveContent = recursiveKeywords.some(
+          (keyword) => thought.content.toLowerCase().includes(keyword)
+        );
+        if (!hasRecursiveContent) {
+          issues.push({
+            severity: "info",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Recursive reasoning should make recursive structure explicit",
+            suggestion: "Describe how the problem breaks down into smaller instances",
+            category: "structural"
+          });
+        }
+        if ("dependencies" in thought && Array.isArray(thought.dependencies)) {
+          if (thought.thoughtNumber > 2 && thought.dependencies.length === 0) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Recursive steps should depend on previous subproblems or base cases",
+              suggestion: "Add dependencies to show how subproblems combine",
+              category: "structural"
+            });
+          }
+        }
+        if (thought.thoughtNumber > 2) {
+          const hasCombination = thought.content.toLowerCase().includes("combine") || thought.content.toLowerCase().includes("merge") || thought.content.toLowerCase().includes("build up");
+          if (!hasCombination && thought.nextThoughtNeeded) {
+            issues.push({
+              severity: "info",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Consider explaining how subproblem solutions combine",
+              suggestion: "Describe how to build the final solution from recursive calls",
+              category: "logical"
+            });
+          }
+        }
+        if (thought.thoughtNumber > thought.totalThoughts * 0.8) {
+          const hasTermination = thought.content.toLowerCase().includes("terminat") || thought.content.toLowerCase().includes("base") || thought.content.toLowerCase().includes("stop");
+          if (!hasTermination && thought.nextThoughtNeeded) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Deep recursion detected - ensure termination conditions are met",
+              suggestion: "Verify that base cases are being reached",
+              category: "logical"
+            });
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/metareasoning.ts
+var metareasoning_exports = {};
+__export(metareasoning_exports, {
+  MetaReasoningValidator: () => MetaReasoningValidator
+});
+var MetaReasoningValidator;
+var init_metareasoning = __esm({
+  "src/validation/validators/modes/metareasoning.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    MetaReasoningValidator = class {
+      getMode() {
+        return "metareasoning";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        this.validateCurrentStrategy(thought, issues);
+        this.validateStrategyEvaluation(thought, issues);
+        this.validateAlternativeStrategies(thought, issues);
+        this.validateRecommendation(thought, issues);
+        this.validateResourceAllocation(thought, issues);
+        this.validateQualityMetrics(thought, issues);
+        this.validateSessionContext(thought, issues);
+        return issues;
+      }
+      validateCurrentStrategy(thought, issues) {
+        const { currentStrategy } = thought;
+        if (!currentStrategy) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Current strategy is required for meta-reasoning",
+            suggestion: "Provide details about the current reasoning strategy being used",
+            category: "structural"
+          });
+          return;
+        }
+        if (!currentStrategy.approach || currentStrategy.approach.trim().length === 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Current strategy must describe the approach being used",
+            suggestion: "Describe what reasoning strategy is currently employed",
+            category: "structural"
+          });
+        }
+        if (currentStrategy.thoughtsSpent < 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Thoughts spent cannot be negative",
+            suggestion: "Provide valid count of thoughts used for current strategy",
+            category: "structural"
+          });
+        }
+      }
+      validateStrategyEvaluation(thought, issues) {
+        const { strategyEvaluation } = thought;
+        if (!strategyEvaluation) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Strategy evaluation is required for meta-reasoning",
+            suggestion: "Provide assessment of current strategy effectiveness",
+            category: "structural"
+          });
+          return;
+        }
+        const metrics = [
+          { name: "effectiveness", value: strategyEvaluation.effectiveness },
+          { name: "efficiency", value: strategyEvaluation.efficiency },
+          { name: "confidence", value: strategyEvaluation.confidence },
+          { name: "qualityScore", value: strategyEvaluation.qualityScore }
+        ];
+        for (const metric of metrics) {
+          if (metric.value < 0 || metric.value > 1) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Invalid ${metric.name}: ${metric.value}`,
+              suggestion: `${metric.name} must be between 0 and 1`,
+              category: "structural"
+            });
+          }
+        }
+        if (strategyEvaluation.progressRate < 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Progress rate cannot be negative",
+            suggestion: "Provide valid progress rate (insights per thought)",
+            category: "structural"
+          });
+        }
+        if (strategyEvaluation.issues && strategyEvaluation.issues.length > 0 && strategyEvaluation.effectiveness > 0.8) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "High effectiveness rating despite identified issues",
+            suggestion: "Consider whether effectiveness rating accounts for all identified problems",
+            category: "logical"
+          });
+        }
+      }
+      validateAlternativeStrategies(thought, issues) {
+        const { alternativeStrategies } = thought;
+        if (!alternativeStrategies || alternativeStrategies.length === 0) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "No alternative strategies identified",
+            suggestion: "Consider identifying alternative approaches even if current strategy is working",
+            category: "structural"
+          });
+          return;
+        }
+        for (const alt of alternativeStrategies) {
+          if (alt.switchingCost < 0 || alt.switchingCost > 1) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Invalid switching cost: ${alt.switchingCost}`,
+              suggestion: "Switching cost must be between 0 and 1",
+              category: "structural"
+            });
+          }
+          if (alt.recommendationScore < 0 || alt.recommendationScore > 1) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Invalid recommendation score: ${alt.recommendationScore}`,
+              suggestion: "Recommendation score must be between 0 and 1",
+              category: "structural"
+            });
+          }
+        }
+      }
+      validateRecommendation(thought, issues) {
+        const { recommendation } = thought;
+        if (!recommendation) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Strategy recommendation is required",
+            suggestion: "Provide actionable recommendation (CONTINUE, SWITCH, REFINE, or COMBINE)",
+            category: "structural"
+          });
+          return;
+        }
+        const validActions = ["CONTINUE", "SWITCH", "REFINE", "COMBINE"];
+        if (!validActions.includes(recommendation.action)) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Invalid recommendation action: ${recommendation.action}`,
+            suggestion: "Action must be one of: CONTINUE, SWITCH, REFINE, COMBINE",
+            category: "structural"
+          });
+        }
+        if (recommendation.action === "SWITCH" && !recommendation.targetMode) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "SWITCH action requires targetMode",
+            suggestion: "Specify which mode to switch to",
+            category: "structural"
+          });
+        }
+        if (recommendation.confidence < 0 || recommendation.confidence > 1) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Invalid recommendation confidence: ${recommendation.confidence}`,
+            suggestion: "Confidence must be between 0 and 1",
+            category: "structural"
+          });
+        }
+        if (!recommendation.justification || recommendation.justification.trim().length === 0) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Recommendation lacks justification",
+            suggestion: "Provide reasoning for the recommended action",
+            category: "structural"
+          });
+        }
+      }
+      validateResourceAllocation(thought, issues) {
+        const { resourceAllocation } = thought;
+        if (!resourceAllocation) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Resource allocation assessment missing",
+            suggestion: "Consider adding resource allocation guidance",
+            category: "structural"
+          });
+          return;
+        }
+        if (resourceAllocation.timeSpent < 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Time spent cannot be negative",
+            suggestion: "Provide valid time spent in milliseconds",
+            category: "structural"
+          });
+        }
+        if (resourceAllocation.thoughtsRemaining < 0) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Thoughts remaining estimate is negative",
+            suggestion: "Provide reasonable estimate of thoughts remaining",
+            category: "logical"
+          });
+        }
+      }
+      validateQualityMetrics(thought, issues) {
+        const { qualityMetrics } = thought;
+        if (!qualityMetrics) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Quality metrics missing",
+            suggestion: "Consider assessing reasoning quality metrics",
+            category: "structural"
+          });
+          return;
+        }
+        const metrics = [
+          { name: "logicalConsistency", value: qualityMetrics.logicalConsistency },
+          { name: "evidenceQuality", value: qualityMetrics.evidenceQuality },
+          { name: "completeness", value: qualityMetrics.completeness },
+          { name: "originality", value: qualityMetrics.originality },
+          { name: "clarity", value: qualityMetrics.clarity },
+          { name: "overallQuality", value: qualityMetrics.overallQuality }
+        ];
+        for (const metric of metrics) {
+          if (metric.value < 0 || metric.value > 1) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Invalid quality metric ${metric.name}: ${metric.value}`,
+              suggestion: `${metric.name} must be between 0 and 1`,
+              category: "structural"
+            });
+          }
+        }
+        const componentAvg = (qualityMetrics.logicalConsistency + qualityMetrics.evidenceQuality + qualityMetrics.completeness + qualityMetrics.originality + qualityMetrics.clarity) / 5;
+        if (Math.abs(qualityMetrics.overallQuality - componentAvg) > 0.3) {
+          issues.push({
+            severity: "info",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Overall quality differs significantly from component average",
+            suggestion: "Ensure overall quality reflects all component metrics appropriately",
+            category: "logical"
+          });
+        }
+      }
+      validateSessionContext(thought, issues) {
+        const { sessionContext } = thought;
+        if (!sessionContext) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Session context is required",
+            suggestion: "Provide session context for meta-reasoning",
+            category: "structural"
+          });
+          return;
+        }
+        if (sessionContext.totalThoughts < 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Total thoughts cannot be negative",
+            suggestion: "Provide valid count of total thoughts in session",
+            category: "structural"
+          });
+        }
+        if (sessionContext.modeSwitches < 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Mode switches cannot be negative",
+            suggestion: "Provide valid count of mode switches",
+            category: "structural"
+          });
+        }
+        if (sessionContext.historicalEffectiveness !== void 0 && (sessionContext.historicalEffectiveness < 0 || sessionContext.historicalEffectiveness > 1)) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Historical effectiveness must be between 0 and 1",
+            suggestion: "Provide valid historical effectiveness score",
+            category: "structural"
+          });
+        }
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/computability.ts
+var computability_exports = {};
+__export(computability_exports, {
+  ComputabilityValidator: () => ComputabilityValidator
+});
+var ComputabilityValidator;
+var init_computability2 = __esm({
+  "src/validation/validators/modes/computability.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    ComputabilityValidator = class {
+      getMode() {
+        return "computability";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        const validTypes = [
+          "machine_definition",
+          "computation_trace",
+          "decidability_proof",
+          "reduction_construction",
+          "complexity_analysis",
+          "oracle_reasoning",
+          "diagonalization"
+        ];
+        if (!validTypes.includes(thought.thoughtType)) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Invalid computability thought type: ${thought.thoughtType}`,
+            suggestion: `Use one of: ${validTypes.join(", ")}`,
+            category: "structural"
+          });
+        }
+        if (thought.machines) {
+          for (const machine of thought.machines) {
+            issues.push(...this.validateTuringMachine(thought, machine));
+          }
+        }
+        if (thought.currentMachine) {
+          issues.push(
+            ...this.validateTuringMachine(thought, thought.currentMachine)
+          );
+        }
+        if (thought.reductions) {
+          for (const reduction of thought.reductions) {
+            issues.push(...this.validateReduction(thought, reduction));
+          }
+        }
+        if (thought.decidabilityProof) {
+          issues.push(
+            ...this.validateDecidabilityProof(thought, thought.decidabilityProof)
+          );
+        }
+        if (thought.diagonalization) {
+          issues.push(
+            ...this.validateDiagonalization(thought, thought.diagonalization)
+          );
+        }
+        if (thought.computationTrace) {
+          issues.push(...this.validateComputationTrace(thought));
+        }
+        if (thought.complexityAnalysis) {
+          issues.push(...this.validateComplexityAnalysis(thought));
+        }
+        return issues;
+      }
+      validateTuringMachine(thought, machine) {
+        const issues = [];
+        if (machine.states.length === 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Turing machine ${machine.name} has no states`,
+            suggestion: "Define at least one state for the machine",
+            category: "structural"
+          });
+        }
+        if (!machine.states.includes(machine.initialState)) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Initial state "${machine.initialState}" not in state set for machine ${machine.name}`,
+            suggestion: "Initial state must be one of the defined states",
+            category: "structural"
+          });
+        }
+        for (const acceptState of machine.acceptStates) {
+          if (!machine.states.includes(acceptState)) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Accept state "${acceptState}" not in state set for machine ${machine.name}`,
+              suggestion: "All accept states must be defined states",
+              category: "structural"
+            });
+          }
+        }
+        for (const rejectState of machine.rejectStates) {
+          if (!machine.states.includes(rejectState)) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Reject state "${rejectState}" not in state set for machine ${machine.name}`,
+              suggestion: "All reject states must be defined states",
+              category: "structural"
+            });
+          }
+        }
+        const overlap = machine.acceptStates.filter(
+          (s) => machine.rejectStates.includes(s)
+        );
+        if (overlap.length > 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `States [${overlap.join(", ")}] are both accept and reject states`,
+            suggestion: "A state cannot be both accepting and rejecting",
+            category: "logical"
+          });
+        }
+        if (!machine.tapeAlphabet.includes(machine.blankSymbol)) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Blank symbol "${machine.blankSymbol}" not in tape alphabet`,
+            suggestion: "Blank symbol must be part of the tape alphabet",
+            category: "structural"
+          });
+        }
+        for (const symbol of machine.inputAlphabet) {
+          if (!machine.tapeAlphabet.includes(symbol)) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Input symbol "${symbol}" not in tape alphabet`,
+              suggestion: "Input alphabet must be a subset of tape alphabet",
+              category: "structural"
+            });
+          }
+        }
+        for (const transition of machine.transitions) {
+          if (!machine.states.includes(transition.fromState)) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Transition from unknown state "${transition.fromState}"`,
+              suggestion: "All transition states must be defined states",
+              category: "structural"
+            });
+          }
+          if (!machine.states.includes(transition.toState)) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Transition to unknown state "${transition.toState}"`,
+              suggestion: "All transition states must be defined states",
+              category: "structural"
+            });
+          }
+          if (!machine.tapeAlphabet.includes(transition.readSymbol)) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Transition reads unknown symbol "${transition.readSymbol}"`,
+              suggestion: "Read symbols must be in tape alphabet",
+              category: "structural"
+            });
+          }
+          if (!machine.tapeAlphabet.includes(transition.writeSymbol)) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Transition writes unknown symbol "${transition.writeSymbol}"`,
+              suggestion: "Write symbols must be in tape alphabet",
+              category: "structural"
+            });
+          }
+        }
+        if (machine.type === "deterministic") {
+          const transitionKeys = /* @__PURE__ */ new Set();
+          for (const transition of machine.transitions) {
+            const key = `${transition.fromState}:${transition.readSymbol}`;
+            if (transitionKeys.has(key)) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Non-deterministic transition from (${transition.fromState}, ${transition.readSymbol})`,
+                suggestion: "Deterministic machines must have unique transitions per (state, symbol) pair",
+                category: "logical"
+              });
+            }
+            transitionKeys.add(key);
+          }
+        }
+        if (machine.transitions.length === 0) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Turing machine ${machine.name} has no transitions`,
+            suggestion: "Define transitions for the machine to perform computation",
+            category: "structural"
+          });
+        }
+        return issues;
+      }
+      validateReduction(thought, reduction) {
+        const issues = [];
+        if (!reduction.reductionFunction.inputTransformation) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Reduction ${reduction.id} lacks input transformation specification`,
+            suggestion: "Describe how inputs are transformed in the reduction",
+            category: "structural"
+          });
+        }
+        if (!reduction.correctnessProof.forwardDirection) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Reduction ${reduction.id} lacks forward direction proof (x \u2208 A \u27F9 f(x) \u2208 B)`,
+            suggestion: "Prove that positive instances map to positive instances",
+            category: "structural"
+          });
+        }
+        if (!reduction.correctnessProof.backwardDirection) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Reduction ${reduction.id} lacks backward direction proof (f(x) \u2208 B \u27F9 x \u2208 A)`,
+            suggestion: "Prove that the reduction preserves answers in both directions",
+            category: "structural"
+          });
+        }
+        const validTypes = ["many_one", "turing", "polynomial_time", "log_space"];
+        if (!validTypes.includes(reduction.type)) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Invalid reduction type: ${reduction.type}`,
+            suggestion: `Use one of: ${validTypes.join(", ")}`,
+            category: "structural"
+          });
+        }
+        return issues;
+      }
+      validateDecidabilityProof(thought, proof) {
+        const issues = [];
+        const validMethods = [
+          "direct_machine",
+          "reduction",
+          "diagonalization",
+          "rice_theorem",
+          "oracle"
+        ];
+        if (!validMethods.includes(proof.method)) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Invalid proof method: ${proof.method}`,
+            suggestion: `Use one of: ${validMethods.join(", ")}`,
+            category: "structural"
+          });
+        }
+        if (proof.conclusion === "decidable" && proof.method === "direct_machine") {
+          if (!proof.decidingMachine) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Direct decidability proof requires a deciding machine",
+              suggestion: "Provide a Turing machine that decides the problem",
+              category: "structural"
+            });
+          }
+        }
+        if (proof.conclusion === "undecidable" && proof.method === "reduction") {
+          if (!proof.reduction) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Reduction-based undecidability proof requires a reduction",
+              suggestion: "Provide the reduction from a known undecidable problem",
+              category: "structural"
+            });
+          }
+          if (!proof.knownUndecidableProblem) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Reduction proof should specify the known undecidable problem",
+              suggestion: "Identify the undecidable problem being reduced from (e.g., halting problem)",
+              category: "structural"
+            });
+          }
+        }
+        if (proof.method === "diagonalization" && !proof.diagonalization) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Diagonalization proof requires diagonalization argument",
+            suggestion: "Provide the diagonal construction and contradiction",
+            category: "structural"
+          });
+        }
+        if (proof.method === "rice_theorem" && proof.riceApplication) {
+          if (!proof.riceApplication.isNontrivial) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Rice's theorem only applies to non-trivial properties",
+              suggestion: "Verify the property is non-trivial (some TMs have it, some don't)",
+              category: "logical"
+            });
+          }
+          if (!proof.riceApplication.isSemantic) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Rice's theorem only applies to semantic (language) properties",
+              suggestion: "Verify the property is about the language, not the machine structure",
+              category: "logical"
+            });
+          }
+        }
+        if (!proof.proofSteps || proof.proofSteps.length === 0) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Decidability proof has no steps",
+            suggestion: "Break down the proof into logical steps",
+            category: "structural"
+          });
+        }
+        return issues;
+      }
+      validateDiagonalization(thought, diag) {
+        const issues = [];
+        if (!diag.enumeration.description) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Diagonalization argument lacks enumeration description",
+            suggestion: "Describe what is being enumerated (e.g., all Turing machines)",
+            category: "structural"
+          });
+        }
+        if (!diag.diagonalConstruction.rule) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Diagonalization argument lacks diagonal construction rule",
+            suggestion: "Specify how the diagonal element differs at each position",
+            category: "structural"
+          });
+        }
+        if (!diag.contradiction.assumption) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Diagonalization argument lacks initial assumption",
+            suggestion: "State the assumption being contradicted",
+            category: "structural"
+          });
+        }
+        if (!diag.contradiction.impossibility) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Diagonalization argument lacks impossibility statement",
+            suggestion: "Explain why the contradiction proves impossibility",
+            category: "structural"
+          });
+        }
+        const validPatterns = ["cantor", "turing", "godel", "rice", "custom"];
+        if (!validPatterns.includes(diag.pattern)) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Unknown diagonalization pattern: ${diag.pattern}`,
+            suggestion: `Consider classifying as one of: ${validPatterns.join(", ")}`,
+            category: "structural"
+          });
+        }
+        return issues;
+      }
+      validateComputationTrace(thought) {
+        const issues = [];
+        const trace = thought.computationTrace;
+        for (let i = 0; i < trace.steps.length; i++) {
+          if (trace.steps[i].stepNumber !== i) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Computation step numbering inconsistent at index ${i}`,
+              suggestion: "Steps should be numbered sequentially starting from 0",
+              category: "structural"
+            });
+            break;
+          }
+        }
+        if (trace.totalSteps !== trace.steps.length) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Total steps count does not match actual steps",
+            suggestion: "Update totalSteps to reflect actual computation length",
+            category: "logical"
+          });
+        }
+        const validResults = ["accept", "reject", "loop", "running"];
+        if (!validResults.includes(trace.result)) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Invalid computation result: ${trace.result}`,
+            suggestion: `Use one of: ${validResults.join(", ")}`,
+            category: "structural"
+          });
+        }
+        if ((trace.result === "accept" || trace.result === "reject") && !trace.isTerminating) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Computation that accepts/rejects should be marked as terminating",
+            suggestion: "Set isTerminating to true for halting computations",
+            category: "logical"
+          });
+        }
+        return issues;
+      }
+      validateComplexityAnalysis(thought) {
+        const issues = [];
+        const analysis = thought.complexityAnalysis;
+        if (!analysis.complexityClass) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Complexity analysis lacks complexity class",
+            suggestion: "Specify the complexity class (P, NP, PSPACE, etc.)",
+            category: "structural"
+          });
+        }
+        if (!analysis.classJustification) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Complexity classification lacks justification",
+            suggestion: "Explain why the problem belongs to this complexity class",
+            category: "structural"
+          });
+        }
+        if (analysis.hardnessResults) {
+          if (analysis.hardnessResults.completeFor && !analysis.hardnessResults.hardFor) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Problem marked complete but not hard",
+              suggestion: "A problem that is complete for a class must also be hard for that class",
+              category: "logical"
+            });
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/cryptanalytic.ts
+var cryptanalytic_exports = {};
+__export(cryptanalytic_exports, {
+  CryptanalyticValidator: () => CryptanalyticValidator
+});
+function validateEvidenceChain(thought, chain) {
+  const issues = [];
+  if (!chain.hypothesis || chain.hypothesis.trim() === "") {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: "Evidence chain lacks hypothesis",
+      suggestion: "Specify the hypothesis being tested",
+      category: "structural"
+    });
+  }
+  const calculatedTotal = chain.observations.reduce(
+    (sum, obs) => sum + obs.decibans,
+    0
+  );
+  if (Math.abs(calculatedTotal - chain.totalDecibans) > 0.01) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Evidence chain total decibans (${chain.totalDecibans}) doesn't match sum of observations (${calculatedTotal.toFixed(2)})`,
+      suggestion: "Recalculate totalDecibans from observation contributions",
+      category: "mathematical"
+    });
+  }
+  const expectedOddsRatio = Math.pow(10, chain.totalDecibans / 10);
+  if (Math.abs(expectedOddsRatio - chain.oddsRatio) > 0.01) {
+    issues.push({
+      severity: "warning",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Odds ratio (${chain.oddsRatio}) doesn't match expected (${expectedOddsRatio.toFixed(2)}) from decibans`,
+      suggestion: "oddsRatio should equal 10^(totalDecibans/10)",
+      category: "mathematical"
+    });
+  }
+  const expectedConclusion = chain.totalDecibans >= chain.confirmationThreshold ? "confirmed" : chain.totalDecibans <= chain.refutationThreshold ? "refuted" : "inconclusive";
+  if (chain.conclusion !== expectedConclusion) {
+    issues.push({
+      severity: "warning",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Conclusion "${chain.conclusion}" doesn't match expected "${expectedConclusion}" based on thresholds`,
+      suggestion: `With ${chain.totalDecibans} decibans, conclusion should be "${expectedConclusion}"`,
+      category: "logical"
+    });
+  }
+  for (const obs of chain.observations) {
+    issues.push(...validateDecibanEvidence(thought, obs));
+  }
+  return issues;
+}
+function validateDecibanEvidence(thought, evidence) {
+  const issues = [];
+  const expectedDecibans = 10 * Math.log10(evidence.likelihoodRatio);
+  if (Math.abs(expectedDecibans - evidence.decibans) > 0.1) {
+    issues.push({
+      severity: "warning",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Decibans (${evidence.decibans}) inconsistent with likelihood ratio (${evidence.likelihoodRatio})`,
+      suggestion: `Expected decibans: ${expectedDecibans.toFixed(2)} (10 \xD7 log\u2081\u2080(${evidence.likelihoodRatio}))`,
+      category: "mathematical"
+    });
+  }
+  if (evidence.likelihoodRatio <= 0) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Likelihood ratio must be positive, got ${evidence.likelihoodRatio}`,
+      suggestion: "Likelihood ratio = P(E|H) / P(E|\xACH) must be > 0",
+      category: "mathematical"
+    });
+  }
+  if (evidence.confidence < 0 || evidence.confidence > 1) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Evidence confidence (${evidence.confidence}) must be between 0 and 1`,
+      suggestion: "Confidence should be a probability between 0 and 1",
+      category: "structural"
+    });
+  }
+  const validSources = [
+    "frequency",
+    "pattern",
+    "crib",
+    "statistical",
+    "structural"
+  ];
+  if (!validSources.includes(evidence.source)) {
+    issues.push({
+      severity: "warning",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Unknown evidence source: ${evidence.source}`,
+      suggestion: `Use one of: ${validSources.join(", ")}`,
+      category: "structural"
+    });
+  }
+  return issues;
+}
+function validateKeySpaceAnalysis(thought) {
+  const issues = [];
+  const analysis = thought.keySpaceAnalysis;
+  const total = Number(analysis.totalKeys);
+  const eliminated = Number(analysis.eliminatedKeys);
+  const remaining = Number(analysis.remainingKeys);
+  if (Math.abs(total - eliminated - remaining) > 1) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: "Key space arithmetic inconsistent: remaining \u2260 total - eliminated",
+      suggestion: `${total} - ${eliminated} = ${total - eliminated}, but remaining shows ${remaining}`,
+      category: "mathematical"
+    });
+  }
+  const expectedFactor = total / remaining;
+  if (remaining > 0 && Math.abs(expectedFactor - analysis.reductionFactor) / expectedFactor > 0.01) {
+    issues.push({
+      severity: "warning",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Reduction factor (${analysis.reductionFactor}) inconsistent with key counts`,
+      suggestion: `Expected: ${expectedFactor.toExponential(2)}`,
+      category: "mathematical"
+    });
+  }
+  if (analysis.eliminationMethods.length === 0) {
+    issues.push({
+      severity: "info",
+      thoughtNumber: thought.thoughtNumber,
+      description: "No elimination methods documented",
+      suggestion: "Document the methods used to eliminate keys",
+      category: "structural"
+    });
+  }
+  return issues;
+}
+function validateFrequencyAnalysis(thought) {
+  const issues = [];
+  const analysis = thought.frequencyAnalysis;
+  if (analysis.indexOfCoincidence < 0 || analysis.indexOfCoincidence > 1) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Index of coincidence (${analysis.indexOfCoincidence}) must be between 0 and 1`,
+      suggestion: "IC = \u03A3(f_i \xD7 (f_i - 1)) / (N \xD7 (N - 1))",
+      category: "mathematical"
+    });
+  }
+  if (analysis.chiSquared < 0) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Chi-squared statistic (${analysis.chiSquared}) cannot be negative`,
+      suggestion: "Chi-squared = \u03A3((O - E)\xB2 / E) is always \u2265 0",
+      category: "mathematical"
+    });
+  }
+  if (analysis.degreesOfFreedom <= 0) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Degrees of freedom (${analysis.degreesOfFreedom}) must be positive`,
+      suggestion: "DoF = (number of categories - 1)",
+      category: "mathematical"
+    });
+  }
+  return issues;
+}
+function validateHypotheses(thought) {
+  const issues = [];
+  const hypotheses = thought.hypotheses;
+  const ids = hypotheses.map((h) => h.id);
+  const duplicates = ids.filter((id, idx) => ids.indexOf(id) !== idx);
+  if (duplicates.length > 0) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Duplicate hypothesis IDs: ${[...new Set(duplicates)].join(", ")}`,
+      suggestion: "Each hypothesis should have a unique ID",
+      category: "structural"
+    });
+  }
+  for (const h of hypotheses) {
+    if (h.priorProbability < 0 || h.priorProbability > 1) {
+      issues.push({
+        severity: "error",
+        thoughtNumber: thought.thoughtNumber,
+        description: `Hypothesis ${h.id} prior probability (${h.priorProbability}) must be between 0 and 1`,
+        suggestion: "Prior probability should be a value between 0 and 1",
+        category: "mathematical"
+      });
+    }
+    if (h.posteriorProbability < 0 || h.posteriorProbability > 1) {
+      issues.push({
+        severity: "error",
+        thoughtNumber: thought.thoughtNumber,
+        description: `Hypothesis ${h.id} posterior probability (${h.posteriorProbability}) must be between 0 and 1`,
+        suggestion: "Posterior probability should be a value between 0 and 1",
+        category: "mathematical"
+      });
+    }
+    const validStatuses = ["active", "confirmed", "refuted", "superseded"];
+    if (!validStatuses.includes(h.status)) {
+      issues.push({
+        severity: "error",
+        thoughtNumber: thought.thoughtNumber,
+        description: `Invalid hypothesis status: ${h.status}`,
+        suggestion: `Use one of: ${validStatuses.join(", ")}`,
+        category: "structural"
+      });
+    }
+  }
+  return issues;
+}
+function validateCribAnalysis(thought) {
+  const issues = [];
+  const cribAnalyses = thought.cribAnalysis;
+  for (const crib of cribAnalyses) {
+    if (crib.crib.length !== crib.ciphertext.length) {
+      issues.push({
+        severity: "warning",
+        thoughtNumber: thought.thoughtNumber,
+        description: `Crib length (${crib.crib.length}) doesn't match ciphertext segment (${crib.ciphertext.length})`,
+        suggestion: "Crib and corresponding ciphertext should have the same length",
+        category: "structural"
+      });
+    }
+    if (crib.position < 0) {
+      issues.push({
+        severity: "error",
+        thoughtNumber: thought.thoughtNumber,
+        description: `Crib position (${crib.position}) cannot be negative`,
+        suggestion: "Position should be a non-negative integer",
+        category: "structural"
+      });
+    }
+    if (!crib.isViable && crib.contradictions.length === 0) {
+      issues.push({
+        severity: "info",
+        thoughtNumber: thought.thoughtNumber,
+        description: "Crib marked as non-viable but no contradictions documented",
+        suggestion: "Document why this crib position was rejected",
+        category: "structural"
+      });
+    }
+  }
+  return issues;
+}
+var CryptanalyticValidator;
+var init_cryptanalytic2 = __esm({
+  "src/validation/validators/modes/cryptanalytic.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    CryptanalyticValidator = class {
+      getMode() {
+        return "cryptanalytic";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        const validTypes = [
+          "hypothesis_formation",
+          "evidence_accumulation",
+          "frequency_analysis",
+          "key_elimination",
+          "banburismus",
+          "crib_analysis",
+          "isomorphism_detection"
+        ];
+        if (!validTypes.includes(thought.thoughtType)) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Invalid cryptanalytic thought type: ${thought.thoughtType}`,
+            suggestion: `Use one of: ${validTypes.join(", ")}`,
+            category: "structural"
+          });
+        }
+        if (thought.evidenceChains) {
+          for (const chain of thought.evidenceChains) {
+            issues.push(...validateEvidenceChain(thought, chain));
+          }
+        }
+        if (thought.keySpaceAnalysis) {
+          issues.push(...validateKeySpaceAnalysis(thought));
+        }
+        if (thought.frequencyAnalysis) {
+          issues.push(...validateFrequencyAnalysis(thought));
+        }
+        if (thought.hypotheses) {
+          issues.push(...validateHypotheses(thought));
+        }
+        if (thought.cribAnalysis) {
+          issues.push(...validateCribAnalysis(thought));
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/engineering.ts
+var engineering_exports = {};
+__export(engineering_exports, {
+  EngineeringValidator: () => EngineeringValidator
+});
+function validateRequirements(thought) {
+  const issues = [];
+  const reqs = thought.requirements;
+  const ids = reqs.requirements.map((r) => r.id);
+  const duplicates = ids.filter((id, idx) => ids.indexOf(id) !== idx);
+  if (duplicates.length > 0) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Duplicate requirement IDs: ${[...new Set(duplicates)].join(", ")}`,
+      suggestion: "Ensure each requirement has a unique ID",
+      category: "structural"
+    });
+  }
+  for (const req of reqs.requirements) {
+    if (req.tracesTo) {
+      for (const parentId of req.tracesTo) {
+        if (!ids.includes(parentId)) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Requirement ${req.id} traces to unknown requirement: ${parentId}`,
+            suggestion: "Verify traceability links point to valid requirement IDs",
+            category: "structural"
+          });
+        }
+      }
+    }
+  }
+  if (reqs.coverage.total !== reqs.requirements.length) {
+    issues.push({
+      severity: "warning",
+      thoughtNumber: thought.thoughtNumber,
+      description: "Coverage total does not match requirements count",
+      suggestion: "Update coverage metrics to reflect actual requirements",
+      category: "logical"
+    });
+  }
+  const reqsWithVerification = reqs.requirements.filter(
+    (r) => r.verificationMethod
+  );
+  if (reqsWithVerification.length === 0 && reqs.requirements.length > 0) {
+    issues.push({
+      severity: "info",
+      thoughtNumber: thought.thoughtNumber,
+      description: "No requirements have verification methods defined",
+      suggestion: "Consider adding verification methods for requirements",
+      category: "structural"
+    });
+  }
+  return issues;
+}
+function validateTradeStudy(thought) {
+  const issues = [];
+  const study = thought.tradeStudy;
+  const weightSum = study.criteria.reduce((sum, c) => sum + c.weight, 0);
+  if (Math.abs(weightSum - 1) > 0.01) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Trade study criteria weights sum to ${weightSum.toFixed(2)}, should sum to 1.0`,
+      suggestion: "Adjust criteria weights to sum to 1.0",
+      category: "mathematical"
+    });
+  }
+  const altIds = study.alternatives.map((a) => a.id);
+  const critIds = study.criteria.map((c) => c.id);
+  for (const altId of altIds) {
+    for (const critId of critIds) {
+      const score = study.scores.find(
+        (s) => s.alternativeId === altId && s.criteriaId === critId
+      );
+      if (!score) {
+        issues.push({
+          severity: "warning",
+          thoughtNumber: thought.thoughtNumber,
+          description: `Missing score for alternative ${altId} on criterion ${critId}`,
+          suggestion: "Provide scores for all alternative-criterion combinations",
+          category: "structural"
+        });
+      }
+    }
+  }
+  if (!altIds.includes(study.recommendation)) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Trade study recommendation "${study.recommendation}" is not a valid alternative`,
+      suggestion: "Recommendation must be one of the evaluated alternatives",
+      category: "structural"
+    });
+  }
+  if (study.alternatives.length < 2) {
+    issues.push({
+      severity: "warning",
+      thoughtNumber: thought.thoughtNumber,
+      description: "Trade study has fewer than 2 alternatives",
+      suggestion: "Consider evaluating multiple alternatives for a meaningful trade study",
+      category: "structural"
+    });
+  }
+  return issues;
+}
+function validateFMEA(thought) {
+  const issues = [];
+  const fmea = thought.fmea;
+  for (const fm of fmea.failureModes) {
+    const expectedRPN = fm.severity * fm.occurrence * fm.detection;
+    if (fm.rpn !== expectedRPN) {
+      issues.push({
+        severity: "error",
+        thoughtNumber: thought.thoughtNumber,
+        description: `Failure mode ${fm.id} has incorrect RPN: ${fm.rpn} (expected ${expectedRPN})`,
+        suggestion: "RPN should equal Severity \xD7 Occurrence \xD7 Detection",
+        category: "mathematical"
+      });
+    }
+    if (fm.severity < 1 || fm.severity > 10) {
+      issues.push({
+        severity: "error",
+        thoughtNumber: thought.thoughtNumber,
+        description: `Failure mode ${fm.id} has invalid severity: ${fm.severity}`,
+        suggestion: "Severity must be between 1 and 10",
+        category: "structural"
+      });
+    }
+    if (fm.occurrence < 1 || fm.occurrence > 10) {
+      issues.push({
+        severity: "error",
+        thoughtNumber: thought.thoughtNumber,
+        description: `Failure mode ${fm.id} has invalid occurrence: ${fm.occurrence}`,
+        suggestion: "Occurrence must be between 1 and 10",
+        category: "structural"
+      });
+    }
+    if (fm.detection < 1 || fm.detection > 10) {
+      issues.push({
+        severity: "error",
+        thoughtNumber: thought.thoughtNumber,
+        description: `Failure mode ${fm.id} has invalid detection: ${fm.detection}`,
+        suggestion: "Detection must be between 1 and 10",
+        category: "structural"
+      });
+    }
+  }
+  if (fmea.summary.totalModes !== fmea.failureModes.length) {
+    issues.push({
+      severity: "warning",
+      thoughtNumber: thought.thoughtNumber,
+      description: "FMEA summary totalModes does not match actual count",
+      suggestion: "Update summary statistics",
+      category: "logical"
+    });
+  }
+  const criticalCount = fmea.failureModes.filter(
+    (fm) => fm.rpn >= fmea.rpnThreshold
+  ).length;
+  if (fmea.summary.criticalModes !== criticalCount) {
+    issues.push({
+      severity: "warning",
+      thoughtNumber: thought.thoughtNumber,
+      description: "FMEA summary criticalModes does not match calculated count",
+      suggestion: "Update critical modes count based on RPN threshold",
+      category: "logical"
+    });
+  }
+  const highRiskNoMitigation = fmea.failureModes.filter(
+    (fm) => fm.rpn >= fmea.rpnThreshold && !fm.mitigation
+  );
+  if (highRiskNoMitigation.length > 0) {
+    issues.push({
+      severity: "warning",
+      thoughtNumber: thought.thoughtNumber,
+      description: `${highRiskNoMitigation.length} failure mode(s) above RPN threshold without mitigation`,
+      suggestion: "Define mitigation actions for high-risk failure modes",
+      category: "structural"
+    });
+  }
+  return issues;
+}
+function validateDesignDecisions(thought) {
+  const issues = [];
+  const log = thought.designDecisions;
+  const ids = log.decisions.map((d) => d.id);
+  const duplicates = ids.filter((id, idx) => ids.indexOf(id) !== idx);
+  if (duplicates.length > 0) {
+    issues.push({
+      severity: "error",
+      thoughtNumber: thought.thoughtNumber,
+      description: `Duplicate decision IDs: ${[...new Set(duplicates)].join(", ")}`,
+      suggestion: "Ensure each decision has a unique ID",
+      category: "structural"
+    });
+  }
+  for (const decision of log.decisions) {
+    if (decision.supersededBy && !ids.includes(decision.supersededBy)) {
+      issues.push({
+        severity: "warning",
+        thoughtNumber: thought.thoughtNumber,
+        description: `Decision ${decision.id} superseded by unknown decision: ${decision.supersededBy}`,
+        suggestion: "Verify supersededBy references a valid decision ID",
+        category: "structural"
+      });
+    }
+    if (decision.status === "accepted" && decision.alternatives.length === 0) {
+      issues.push({
+        severity: "info",
+        thoughtNumber: thought.thoughtNumber,
+        description: `Decision ${decision.id} has no documented alternatives`,
+        suggestion: "Document alternatives considered for important decisions",
+        category: "structural"
+      });
+    }
+    if (!decision.rationale || decision.rationale.trim() === "") {
+      issues.push({
+        severity: "warning",
+        thoughtNumber: thought.thoughtNumber,
+        description: `Decision ${decision.id} lacks rationale`,
+        suggestion: "Provide rationale for design decisions",
+        category: "structural"
+      });
+    }
+  }
+  return issues;
+}
+var EngineeringValidator;
+var init_engineering = __esm({
+  "src/validation/validators/modes/engineering.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    EngineeringValidator = class {
+      getMode() {
+        return "engineering";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (!thought.designChallenge || thought.designChallenge.trim() === "") {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: "Engineering thought must specify a design challenge",
+            suggestion: "Provide a clear description of the engineering problem",
+            category: "structural"
+          });
+        }
+        const validTypes = [
+          "requirements",
+          "trade-study",
+          "fmea",
+          "design-decision",
+          "comprehensive"
+        ];
+        if (!validTypes.includes(thought.analysisType)) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Invalid analysis type: ${thought.analysisType}`,
+            suggestion: `Use one of: ${validTypes.join(", ")}`,
+            category: "structural"
+          });
+        }
+        if (thought.requirements) {
+          issues.push(...validateRequirements(thought));
+        }
+        if (thought.tradeStudy) {
+          issues.push(...validateTradeStudy(thought));
+        }
+        if (thought.fmea) {
+          issues.push(...validateFMEA(thought));
+        }
+        if (thought.designDecisions) {
+          issues.push(...validateDesignDecisions(thought));
+        }
+        if (thought.analysisType === "comprehensive") {
+          const hasAny = thought.requirements || thought.tradeStudy || thought.fmea || thought.designDecisions;
+          if (!hasAny) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Comprehensive analysis should include at least one analysis section",
+              suggestion: "Add requirements, trade study, FMEA, or design decisions",
+              category: "structural"
+            });
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/firstprinciples.ts
+var firstprinciples_exports = {};
+__export(firstprinciples_exports, {
+  FirstPrinciplesValidator: () => FirstPrinciplesValidator
+});
+var FirstPrinciplesValidator;
+var init_firstprinciples = __esm({
+  "src/validation/validators/modes/firstprinciples.ts"() {
+    init_esm_shims();
+    init_constants();
+    init_validation_utils();
+    FirstPrinciplesValidator = class {
+      getMode() {
+        return "firstprinciples";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        issues.push(
+          ...validateRequired(
+            thought,
+            thought.question?.trim(),
+            "Question",
+            IssueCategory.STRUCTURAL
+          )
+        );
+        issues.push(
+          ...validateNonEmptyArray(
+            thought,
+            thought.principles,
+            "Foundational principles",
+            IssueCategory.STRUCTURAL,
+            IssueSeverity.ERROR
+          )
+        );
+        if (thought.principles && thought.principles.length > 0) {
+          const principleIds = /* @__PURE__ */ new Set();
+          for (const principle of thought.principles) {
+            if (principleIds.has(principle.id)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Duplicate principle ID: ${principle.id}`,
+                suggestion: "Ensure all principle IDs are unique",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            principleIds.add(principle.id);
+            issues.push(
+              ...validateRequired(
+                thought,
+                principle.statement?.trim(),
+                `Principle ${principle.id} statement`,
+                IssueCategory.STRUCTURAL
+              )
+            );
+            issues.push(
+              ...validateRequired(
+                thought,
+                principle.justification?.trim(),
+                `Principle ${principle.id} justification`,
+                IssueCategory.STRUCTURAL
+              )
+            );
+            issues.push(
+              ...validateConfidence(
+                thought,
+                principle.confidence,
+                `Principle ${principle.id} confidence`
+              )
+            );
+            if (principle.dependsOn) {
+              for (const depId of principle.dependsOn) {
+                if (!principleIds.has(depId) && !thought.principles.some((p) => p.id === depId)) {
+                  issues.push({
+                    severity: IssueSeverity.ERROR,
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Principle ${principle.id} depends on non-existent principle ${depId}`,
+                    suggestion: "Ensure dependency references exist",
+                    category: IssueCategory.LOGICAL
+                  });
+                }
+              }
+            }
+          }
+        }
+        issues.push(
+          ...validateNonEmptyArray(
+            thought,
+            thought.derivationSteps,
+            "Derivation steps",
+            IssueCategory.STRUCTURAL,
+            IssueSeverity.ERROR
+          )
+        );
+        if (thought.derivationSteps && thought.derivationSteps.length > 0) {
+          const principleIds = new Set(thought.principles?.map((p) => p.id) || []);
+          const stepNumbers = /* @__PURE__ */ new Set();
+          for (const step of thought.derivationSteps) {
+            if (stepNumbers.has(step.stepNumber)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Duplicate step number: ${step.stepNumber}`,
+                suggestion: "Ensure all step numbers are unique",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            stepNumbers.add(step.stepNumber);
+            issues.push(
+              ...validateNumberRange(
+                thought,
+                step.stepNumber,
+                `Step number`,
+                1,
+                Infinity,
+                IssueSeverity.ERROR,
+                IssueCategory.STRUCTURAL
+              )
+            );
+            if (!principleIds.has(step.principle)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Step ${step.stepNumber} references non-existent principle ${step.principle}`,
+                suggestion: "Ensure step references existing principles",
+                category: IssueCategory.LOGICAL
+              });
+            }
+            issues.push(
+              ...validateRequired(
+                thought,
+                step.inference?.trim(),
+                `Step ${step.stepNumber} inference`,
+                IssueCategory.STRUCTURAL
+              )
+            );
+            issues.push(
+              ...validateConfidence(
+                thought,
+                step.confidence,
+                `Step ${step.stepNumber} confidence`
+              )
+            );
+          }
+        }
+        issues.push(
+          ...validateRequired(
+            thought,
+            thought.conclusion,
+            "Conclusion",
+            IssueCategory.STRUCTURAL
+          )
+        );
+        if (thought.conclusion) {
+          issues.push(
+            ...validateRequired(
+              thought,
+              thought.conclusion.statement?.trim(),
+              "Conclusion statement",
+              IssueCategory.STRUCTURAL
+            )
+          );
+          issues.push(
+            ...validateNonEmptyArray(
+              thought,
+              thought.conclusion.derivationChain,
+              "Derivation chain",
+              IssueCategory.STRUCTURAL,
+              IssueSeverity.ERROR
+            )
+          );
+          if (thought.conclusion.derivationChain && thought.conclusion.derivationChain.length > 0) {
+            const stepNumbers = new Set(
+              thought.derivationSteps?.map((s) => s.stepNumber) || []
+            );
+            for (const stepNum of thought.conclusion.derivationChain) {
+              if (!stepNumbers.has(stepNum)) {
+                issues.push({
+                  severity: IssueSeverity.ERROR,
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Conclusion references non-existent step ${stepNum}`,
+                  suggestion: "Ensure derivation chain references existing steps",
+                  category: IssueCategory.LOGICAL
+                });
+              }
+            }
+          }
+          issues.push(
+            ...validateProbability(
+              thought,
+              thought.conclusion.certainty,
+              "Conclusion certainty"
+            )
+          );
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/systemsthinking.ts
+var systemsthinking_exports = {};
+__export(systemsthinking_exports, {
+  SystemsThinkingValidator: () => SystemsThinkingValidator
+});
+var SystemsThinkingValidator;
+var init_systemsthinking = __esm({
+  "src/validation/validators/modes/systemsthinking.ts"() {
+    init_esm_shims();
+    init_constants();
+    init_validation_utils();
+    SystemsThinkingValidator = class {
+      getMode() {
+        return "systemsthinking";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (thought.system) {
+          issues.push(
+            ...validateRequired(
+              thought,
+              thought.system.name?.trim(),
+              "System name",
+              IssueCategory.STRUCTURAL
+            )
+          );
+          if (!thought.system.boundary || thought.system.boundary.trim() === "") {
+            issues.push({
+              severity: IssueSeverity.WARNING,
+              thoughtNumber: thought.thoughtNumber,
+              description: "System boundary should be explicitly defined",
+              suggestion: "Clarify what is included and excluded from the system",
+              category: IssueCategory.STRUCTURAL
+            });
+          }
+        }
+        if (thought.components && thought.components.length > 0) {
+          const componentIds = /* @__PURE__ */ new Set();
+          for (const component of thought.components) {
+            if (componentIds.has(component.id)) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Duplicate component ID: ${component.id}`,
+                suggestion: "Ensure all component IDs are unique",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            componentIds.add(component.id);
+            issues.push(
+              ...validateRequired(
+                thought,
+                component.name?.trim(),
+                `Component ${component.id} name`,
+                IssueCategory.STRUCTURAL
+              )
+            );
+            if (component.influencedBy) {
+              for (const influencerId of component.influencedBy) {
+                if (!componentIds.has(influencerId) && !thought.components.some((c) => c.id === influencerId)) {
+                  issues.push({
+                    severity: IssueSeverity.ERROR,
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Component ${component.id} references non-existent influencer ${influencerId}`,
+                    suggestion: "Ensure all influences reference existing components",
+                    category: IssueCategory.LOGICAL
+                  });
+                }
+              }
+            }
+          }
+        }
+        if (thought.feedbackLoops && thought.feedbackLoops.length > 0) {
+          const componentIds = new Set(thought.components?.map((c) => c.id) || []);
+          for (const loop of thought.feedbackLoops) {
+            if (!loop.components || loop.components.length < 2) {
+              issues.push({
+                severity: IssueSeverity.ERROR,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Feedback loop ${loop.id} must have at least 2 components`,
+                suggestion: "Add more components to form a complete feedback loop",
+                category: IssueCategory.STRUCTURAL
+              });
+            }
+            if (loop.components) {
+              for (const compId of loop.components) {
+                if (!componentIds.has(compId)) {
+                  issues.push({
+                    severity: IssueSeverity.ERROR,
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Loop ${loop.id} references non-existent component ${compId}`,
+                    suggestion: "Ensure loop references existing components",
+                    category: IssueCategory.LOGICAL
+                  });
+                }
+              }
+            }
+            issues.push(
+              ...validateProbability(
+                thought,
+                loop.strength,
+                `Loop ${loop.id} strength`
+              )
+            );
+            issues.push(
+              ...validateNumberRange(
+                thought,
+                loop.delay,
+                `Loop ${loop.id} delay`,
+                0,
+                Infinity,
+                IssueSeverity.ERROR,
+                IssueCategory.STRUCTURAL
+              )
+            );
+          }
+        }
+        if (thought.leveragePoints && thought.leveragePoints.length > 0) {
+          const allIds = /* @__PURE__ */ new Set([
+            ...thought.components?.map((c) => c.id) || [],
+            ...thought.feedbackLoops?.map((l) => l.id) || []
+          ]);
+          for (const leveragePoint of thought.leveragePoints) {
+            if (!allIds.has(leveragePoint.location)) {
+              issues.push({
+                severity: IssueSeverity.WARNING,
+                thoughtNumber: thought.thoughtNumber,
+                description: `Leverage point ${leveragePoint.id} location ${leveragePoint.location} not found`,
+                suggestion: "Ensure leverage point references existing components or loops",
+                category: IssueCategory.LOGICAL
+              });
+            }
+            issues.push(
+              ...validateProbability(
+                thought,
+                leveragePoint.effectiveness,
+                `Leverage point ${leveragePoint.id} effectiveness`
+              )
+            );
+            issues.push(
+              ...validateProbability(
+                thought,
+                leveragePoint.difficulty,
+                `Leverage point ${leveragePoint.id} difficulty`
+              )
+            );
+          }
+        }
+        if (thought.behaviors && thought.behaviors.length > 0) {
+          const allIds = /* @__PURE__ */ new Set([
+            ...thought.components?.map((c) => c.id) || [],
+            ...thought.feedbackLoops?.map((l) => l.id) || []
+          ]);
+          for (const behavior of thought.behaviors) {
+            if (behavior.causes) {
+              for (const causeId of behavior.causes) {
+                if (!allIds.has(causeId)) {
+                  issues.push({
+                    severity: IssueSeverity.WARNING,
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Behavior ${behavior.id} references non-existent cause ${causeId}`,
+                    suggestion: "Ensure behavior causes reference existing components or loops",
+                    category: IssueCategory.LOGICAL
+                  });
+                }
+              }
+            }
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/scientificmethod.ts
+var scientificmethod_exports = {};
+__export(scientificmethod_exports, {
+  ScientificMethodValidator: () => ScientificMethodValidator
+});
+var ScientificMethodValidator;
+var init_scientificmethod = __esm({
+  "src/validation/validators/modes/scientificmethod.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    ScientificMethodValidator = class {
+      getMode() {
+        return "scientificmethod";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (thought.researchQuestion) {
+          if (!thought.researchQuestion.question || thought.researchQuestion.question.trim() === "") {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Research question must be specified",
+              suggestion: "Provide a clear research question",
+              category: "structural"
+            });
+          }
+          if (thought.researchQuestion.variables) {
+            if (!thought.researchQuestion.variables.independent || thought.researchQuestion.variables.independent.length === 0) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Research question should specify independent variables",
+                suggestion: "Identify the independent variables being manipulated",
+                category: "structural"
+              });
+            }
+            if (!thought.researchQuestion.variables.dependent || thought.researchQuestion.variables.dependent.length === 0) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Research question should specify dependent variables",
+                suggestion: "Identify the dependent variables being measured",
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.scientificHypotheses && thought.scientificHypotheses.length > 0) {
+          let hasNull = false;
+          let hasAlternative = false;
+          for (const hypothesis of thought.scientificHypotheses) {
+            if (hypothesis.type === "null") hasNull = true;
+            if (hypothesis.type === "alternative") hasAlternative = true;
+            if (!hypothesis.statement || hypothesis.statement.trim() === "") {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Hypothesis ${hypothesis.id} must have a statement`,
+                suggestion: "Provide a clear hypothesis statement",
+                category: "structural"
+              });
+            }
+            if (!hypothesis.testable) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Hypothesis ${hypothesis.id} is marked as not testable`,
+                suggestion: "Consider reformulating to make hypothesis testable",
+                category: "logical"
+              });
+            }
+            if (!hypothesis.falsifiable) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Hypothesis ${hypothesis.id} is not falsifiable`,
+                suggestion: "Scientific hypotheses should be falsifiable",
+                category: "logical"
+              });
+            }
+          }
+          if (!hasNull && !hasAlternative) {
+            issues.push({
+              severity: "info",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Consider specifying both null and alternative hypotheses",
+              suggestion: "Standard scientific practice includes null hypothesis",
+              category: "structural"
+            });
+          }
+        }
+        if (thought.experiment) {
+          if (thought.experiment.sampleSize <= 0) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Sample size must be positive",
+              suggestion: "Specify a valid sample size",
+              category: "structural"
+            });
+          }
+          if (thought.experiment.sampleSize < 30) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Sample size is small (< 30)",
+              suggestion: "Consider if sample size is adequate for statistical power",
+              category: "logical"
+            });
+          }
+          if (!thought.experiment.independentVariables || thought.experiment.independentVariables.length === 0) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Experiment should specify independent variables",
+              suggestion: "Define the variables being manipulated",
+              category: "structural"
+            });
+          }
+          if (!thought.experiment.dependentVariables || thought.experiment.dependentVariables.length === 0) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Experiment should specify dependent variables",
+              suggestion: "Define the outcome variables being measured",
+              category: "structural"
+            });
+          }
+        }
+        if (thought.data) {
+          if (thought.data.dataQuality) {
+            if (thought.data.dataQuality.completeness < 0 || thought.data.dataQuality.completeness > 1) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Data completeness must be 0-1",
+                suggestion: "Use decimal values between 0 and 1",
+                category: "structural"
+              });
+            }
+            if (thought.data.dataQuality.reliability < 0 || thought.data.dataQuality.reliability > 1) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Data reliability must be 0-1",
+                suggestion: "Use decimal values between 0 and 1",
+                category: "structural"
+              });
+            }
+            if (thought.data.dataQuality.validity < 0 || thought.data.dataQuality.validity > 1) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Data validity must be 0-1",
+                suggestion: "Use decimal values between 0 and 1",
+                category: "structural"
+              });
+            }
+            if (thought.data.dataQuality.completeness < 0.7) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Data completeness is low (< 70%)",
+                suggestion: "Consider implications of missing data",
+                category: "logical"
+              });
+            }
+          }
+        }
+        if (thought.analysis) {
+          if (thought.analysis.tests && thought.analysis.tests.length > 0) {
+            const hypothesisIds = new Set(
+              thought.scientificHypotheses?.map((h) => h.id) || []
+            );
+            for (const test of thought.analysis.tests) {
+              if (test.pValue < 0 || test.pValue > 1) {
+                issues.push({
+                  severity: "error",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Test ${test.id} p-value must be 0-1`,
+                  suggestion: "Ensure p-value is a valid probability",
+                  category: "structural"
+                });
+              }
+              if (test.alpha < 0 || test.alpha > 1) {
+                issues.push({
+                  severity: "error",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Test ${test.id} alpha must be 0-1`,
+                  suggestion: "Use standard alpha levels (e.g., 0.05, 0.01)",
+                  category: "structural"
+                });
+              }
+              if (!hypothesisIds.has(test.hypothesisTested)) {
+                issues.push({
+                  severity: "warning",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Test ${test.id} references non-existent hypothesis ${test.hypothesisTested}`,
+                  suggestion: "Ensure test references defined hypotheses",
+                  category: "logical"
+                });
+              }
+              if (test.pValue <= test.alpha && test.result !== "reject_null") {
+                issues.push({
+                  severity: "warning",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Test ${test.id} p-value (${test.pValue}) \u2264 alpha (${test.alpha}) but null not rejected`,
+                  suggestion: "Check result interpretation",
+                  category: "logical"
+                });
+              }
+            }
+          }
+          if (thought.analysis.effectSize) {
+            if (typeof thought.analysis.effectSize.value !== "number") {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Effect size value must be numeric",
+                suggestion: "Provide valid effect size calculation",
+                category: "structural"
+              });
+            }
+          }
+          if (thought.analysis.powerAnalysis) {
+            if (thought.analysis.powerAnalysis.power < 0 || thought.analysis.powerAnalysis.power > 1) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Statistical power must be 0-1",
+                suggestion: "Use decimal power values between 0 and 1",
+                category: "structural"
+              });
+            }
+            if (thought.analysis.powerAnalysis.power < 0.8) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Statistical power is low (< 0.8)",
+                suggestion: "Consider increasing sample size for adequate power",
+                category: "logical"
+              });
+            }
+          }
+        }
+        if (thought.conclusion) {
+          if (!thought.conclusion.statement || thought.conclusion.statement.trim() === "") {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Conclusion must have a statement",
+              suggestion: "Provide a clear conclusion statement",
+              category: "structural"
+            });
+          }
+          if (thought.conclusion.confidence < 0 || thought.conclusion.confidence > 1) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Conclusion confidence must be 0-1",
+              suggestion: "Use decimal confidence values between 0 and 1",
+              category: "structural"
+            });
+          }
+          const hypothesisIds = new Set(
+            thought.scientificHypotheses?.map((h) => h.id) || []
+          );
+          if (thought.conclusion.supportedHypotheses) {
+            for (const hypId of thought.conclusion.supportedHypotheses) {
+              if (!hypothesisIds.has(hypId)) {
+                issues.push({
+                  severity: "warning",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Conclusion references non-existent hypothesis ${hypId}`,
+                  suggestion: "Ensure conclusion references defined hypotheses",
+                  category: "logical"
+                });
+              }
+            }
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/formallogic.ts
+var formallogic_exports = {};
+__export(formallogic_exports, {
+  FormalLogicValidator: () => FormalLogicValidator
+});
+var FormalLogicValidator;
+var init_formallogic = __esm({
+  "src/validation/validators/modes/formallogic.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    FormalLogicValidator = class {
+      getMode() {
+        return "formallogic";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        if (thought.propositions && thought.propositions.length > 0) {
+          const propositionIds = /* @__PURE__ */ new Set();
+          const symbols = /* @__PURE__ */ new Set();
+          for (const proposition of thought.propositions) {
+            if (propositionIds.has(proposition.id)) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Duplicate proposition ID: ${proposition.id}`,
+                suggestion: "Ensure all proposition IDs are unique",
+                category: "structural"
+              });
+            }
+            propositionIds.add(proposition.id);
+            if (symbols.has(proposition.symbol)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Duplicate proposition symbol: ${proposition.symbol}`,
+                suggestion: "Use unique symbols for different propositions",
+                category: "structural"
+              });
+            }
+            symbols.add(proposition.symbol);
+            if (!proposition.statement || proposition.statement.trim() === "") {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Proposition ${proposition.id} must have a statement`,
+                suggestion: "Provide a clear statement for each proposition",
+                category: "structural"
+              });
+            }
+            if (proposition.type === "compound" && !proposition.formula) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Compound proposition ${proposition.id} should have a formula`,
+                suggestion: "Specify how atomic propositions combine",
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.logicalInferences && thought.logicalInferences.length > 0) {
+          const propositionIds = new Set(
+            thought.propositions?.map((p) => p.id) || []
+          );
+          for (const inference of thought.logicalInferences) {
+            if (inference.premises && inference.premises.length > 0) {
+              for (const premiseId of inference.premises) {
+                if (!propositionIds.has(premiseId)) {
+                  issues.push({
+                    severity: "error",
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Inference ${inference.id} references non-existent premise ${premiseId}`,
+                    suggestion: "Ensure inferences reference defined propositions",
+                    category: "logical"
+                  });
+                }
+              }
+            } else {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Inference ${inference.id} has no premises`,
+                suggestion: "Inferences should have at least one premise",
+                category: "structural"
+              });
+            }
+            if (!propositionIds.has(inference.conclusion)) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Inference ${inference.id} references non-existent conclusion ${inference.conclusion}`,
+                suggestion: "Ensure conclusion references a defined proposition",
+                category: "logical"
+              });
+            }
+            if (!inference.valid) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Inference ${inference.id} is marked as invalid`,
+                suggestion: "Review inference rule application",
+                category: "logical"
+              });
+            }
+          }
+        }
+        if (thought.proof) {
+          if (!thought.proof.theorem || thought.proof.theorem.trim() === "") {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Proof must state the theorem being proved",
+              suggestion: "Provide clear theorem statement",
+              category: "structural"
+            });
+          }
+          if (!thought.proof.steps || thought.proof.steps.length === 0) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Proof must have at least one step",
+              suggestion: "Add proof steps showing the derivation",
+              category: "structural"
+            });
+          }
+          if (thought.proof.steps) {
+            const stepNumbers = /* @__PURE__ */ new Set();
+            for (const step of thought.proof.steps) {
+              if (stepNumbers.has(step.stepNumber)) {
+                issues.push({
+                  severity: "error",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Duplicate proof step number: ${step.stepNumber}`,
+                  suggestion: "Ensure all step numbers are unique and sequential",
+                  category: "structural"
+                });
+              }
+              stepNumbers.add(step.stepNumber);
+              if (!step.statement || step.statement.trim() === "") {
+                issues.push({
+                  severity: "error",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Proof step ${step.stepNumber} must have a statement`,
+                  suggestion: "Provide statement for each proof step",
+                  category: "structural"
+                });
+              }
+              if (!step.justification || step.justification.trim() === "") {
+                issues.push({
+                  severity: "warning",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Proof step ${step.stepNumber} should have justification`,
+                  suggestion: "Explain the reasoning for each step",
+                  category: "structural"
+                });
+              }
+              if (step.referencesSteps) {
+                for (const refStep of step.referencesSteps) {
+                  if (!stepNumbers.has(refStep) && refStep < step.stepNumber) {
+                    issues.push({
+                      severity: "error",
+                      thoughtNumber: thought.thoughtNumber,
+                      description: `Step ${step.stepNumber} references non-existent step ${refStep}`,
+                      suggestion: "Ensure referenced steps exist and come before current step",
+                      category: "logical"
+                    });
+                  }
+                }
+              }
+              if (step.dischargesAssumption !== void 0) {
+                if (!stepNumbers.has(step.dischargesAssumption)) {
+                  issues.push({
+                    severity: "error",
+                    thoughtNumber: thought.thoughtNumber,
+                    description: `Step ${step.stepNumber} discharges non-existent assumption ${step.dischargesAssumption}`,
+                    suggestion: "Ensure discharged assumption exists",
+                    category: "logical"
+                  });
+                }
+              }
+            }
+          }
+          if (!thought.proof.valid) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Proof is marked as invalid",
+              suggestion: "Review proof steps and logical derivation",
+              category: "logical"
+            });
+          }
+          if (thought.proof.completeness < 0 || thought.proof.completeness > 1) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Proof completeness must be 0-1",
+              suggestion: "Use decimal completeness values between 0 and 1",
+              category: "structural"
+            });
+          }
+          if (thought.proof.completeness < 1) {
+            issues.push({
+              severity: "info",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Proof is incomplete (${(thought.proof.completeness * 100).toFixed(0)}%)`,
+              suggestion: "Consider adding missing steps to complete the proof",
+              category: "logical"
+            });
+          }
+        }
+        if (thought.truthTable) {
+          if (!thought.truthTable.propositions || thought.truthTable.propositions.length === 0) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Truth table must have at least one proposition",
+              suggestion: "Specify propositions for truth table",
+              category: "structural"
+            });
+          }
+          const propositionIds = new Set(
+            thought.propositions?.map((p) => p.id) || []
+          );
+          if (thought.truthTable.propositions) {
+            for (const propId of thought.truthTable.propositions) {
+              if (!propositionIds.has(propId)) {
+                issues.push({
+                  severity: "error",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Truth table references non-existent proposition ${propId}`,
+                  suggestion: "Ensure truth table references defined propositions",
+                  category: "logical"
+                });
+              }
+            }
+          }
+          const expectedRows = Math.pow(
+            2,
+            thought.truthTable.propositions?.length || 0
+          );
+          if (thought.truthTable.rows && thought.truthTable.rows.length !== expectedRows) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Truth table has ${thought.truthTable.rows.length} rows, expected ${expectedRows}`,
+              suggestion: "Truth table should have 2^n rows for n propositions",
+              category: "logical"
+            });
+          }
+          if (thought.truthTable.rows) {
+            const allTrue = thought.truthTable.rows.every(
+              (row) => row.result === true
+            );
+            const allFalse = thought.truthTable.rows.every(
+              (row) => row.result === false
+            );
+            if (allTrue && !thought.truthTable.isTautology) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: "All rows evaluate to true but not marked as tautology",
+                suggestion: "Mark as tautology if all evaluations are true",
+                category: "logical"
+              });
+            }
+            if (allFalse && !thought.truthTable.isContradiction) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: "All rows evaluate to false but not marked as contradiction",
+                suggestion: "Mark as contradiction if all evaluations are false",
+                category: "logical"
+              });
+            }
+            if (!allTrue && !allFalse && !thought.truthTable.isContingent) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: "Formula has mixed truth values but not marked as contingent",
+                suggestion: "Mark as contingent if not tautology or contradiction",
+                category: "logical"
+              });
+            }
+          }
+        }
+        if (thought.satisfiability) {
+          if (!thought.satisfiability.formula || thought.satisfiability.formula.trim() === "") {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Satisfiability check must specify formula",
+              suggestion: "Provide formula being checked for satisfiability",
+              category: "structural"
+            });
+          }
+          if (thought.satisfiability.satisfiable && !thought.satisfiability.model) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Satisfiable formula should provide satisfying assignment",
+              suggestion: "Include model (truth assignment) that satisfies the formula",
+              category: "structural"
+            });
+          }
+          if (!thought.satisfiability.satisfiable && thought.satisfiability.model) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Unsatisfiable formula should not have a model",
+              suggestion: "Remove model from unsatisfiable result",
+              category: "logical"
+            });
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/algorithmic.ts
+var algorithmic_exports = {};
+__export(algorithmic_exports, {
+  AlgorithmicValidator: () => AlgorithmicValidator
+});
+var AlgorithmicValidator;
+var init_algorithmic = __esm({
+  "src/validation/validators/modes/algorithmic.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    AlgorithmicValidator = class {
+      getMode() {
+        return "algorithmic";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        const validThoughtTypes = [
+          "algorithm_definition",
+          "complexity_analysis",
+          "recurrence_solving",
+          "correctness_proof",
+          "invariant_identification",
+          "divide_and_conquer",
+          "dynamic_programming",
+          "greedy_choice",
+          "backtracking",
+          "branch_and_bound",
+          "randomized_analysis",
+          "amortized_analysis",
+          "data_structure_design",
+          "data_structure_analysis",
+          "augmentation",
+          "graph_traversal",
+          "shortest_path",
+          "minimum_spanning_tree",
+          "network_flow",
+          "matching",
+          "string_matching",
+          "computational_geometry",
+          "number_theoretic",
+          "approximation",
+          "online_algorithm",
+          "parallel_algorithm"
+        ];
+        if (thought.thoughtType && !validThoughtTypes.includes(thought.thoughtType)) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Unknown algorithmic thought type: ${thought.thoughtType}`,
+            suggestion: `Use one of: ${validThoughtTypes.slice(0, 5).join(", ")}...`,
+            category: "structural"
+          });
+        }
+        if (thought.timeComplexity) {
+          if (!thought.timeComplexity.worstCase) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Complexity analysis should include worst-case analysis",
+              suggestion: "Add worstCase field to timeComplexity",
+              category: "logical"
+            });
+          }
+        }
+        const validPatterns = [
+          "brute_force",
+          "divide_and_conquer",
+          "dynamic_programming",
+          "greedy",
+          "backtracking",
+          "branch_and_bound",
+          "randomized",
+          "approximation",
+          "online",
+          "parallel",
+          "incremental",
+          "prune_and_search"
+        ];
+        if (thought.designPattern && !validPatterns.includes(thought.designPattern)) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Unknown design pattern: ${thought.designPattern}`,
+            suggestion: `Use one of: ${validPatterns.join(", ")}`,
+            category: "structural"
+          });
+        }
+        if (thought.correctnessProof) {
+          if (!thought.correctnessProof.method) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Correctness proof should specify a method",
+              suggestion: 'Add method (e.g., "induction", "loop_invariant")',
+              category: "logical"
+            });
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/synthesis.ts
+var synthesis_exports = {};
+__export(synthesis_exports, {
+  SynthesisValidator: () => SynthesisValidator
+});
+var SynthesisValidator;
+var init_synthesis2 = __esm({
+  "src/validation/validators/modes/synthesis.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    SynthesisValidator = class {
+      getMode() {
+        return "synthesis";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        const validThoughtTypes = [
+          "source_identification",
+          "source_evaluation",
+          "theme_extraction",
+          "pattern_integration",
+          "gap_identification",
+          "synthesis_construction",
+          "framework_development"
+        ];
+        if (thought.thoughtType && !validThoughtTypes.includes(thought.thoughtType)) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Unknown synthesis thought type: ${thought.thoughtType}`,
+            suggestion: `Use one of: ${validThoughtTypes.join(", ")}`,
+            category: "structural"
+          });
+        }
+        if (thought.sources && thought.sources.length > 0) {
+          const validSourceTypes = [
+            "journal_article",
+            "conference_paper",
+            "book",
+            "book_chapter",
+            "thesis",
+            "preprint",
+            "technical_report",
+            "review_article",
+            "meta_analysis",
+            "grey_literature",
+            "dataset",
+            "other"
+          ];
+          for (const source of thought.sources) {
+            if (source.type && !validSourceTypes.includes(source.type)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid source type: ${source.type}`,
+                suggestion: `Use one of: ${validSourceTypes.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (source.quality) {
+              if (source.quality.methodologicalRigor !== void 0) {
+                issues.push(
+                  ...validateProbability(
+                    thought,
+                    source.quality.methodologicalRigor,
+                    `source "${source.id}" methodological rigor`
+                  )
+                );
+              }
+              if (source.quality.relevance !== void 0) {
+                issues.push(
+                  ...validateProbability(
+                    thought,
+                    source.quality.relevance,
+                    `source "${source.id}" relevance`
+                  )
+                );
+              }
+              if (source.quality.recency !== void 0) {
+                issues.push(
+                  ...validateProbability(
+                    thought,
+                    source.quality.recency,
+                    `source "${source.id}" recency`
+                  )
+                );
+              }
+              if (source.quality.authorCredibility !== void 0) {
+                issues.push(
+                  ...validateProbability(
+                    thought,
+                    source.quality.authorCredibility,
+                    `source "${source.id}" author credibility`
+                  )
+                );
+              }
+              if (source.quality.overallQuality !== void 0) {
+                issues.push(
+                  ...validateProbability(
+                    thought,
+                    source.quality.overallQuality,
+                    `source "${source.id}" overall quality`
+                  )
+                );
+              }
+            }
+          }
+        }
+        if (thought.concepts && thought.concepts.length > 0) {
+          for (const concept of thought.concepts) {
+            if (concept.importance !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  concept.importance,
+                  `concept "${concept.term}" importance`
+                )
+              );
+            }
+            if (concept.frequency !== void 0 && concept.frequency < 0) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Concept "${concept.term}" has negative frequency: ${concept.frequency}`,
+                suggestion: "Frequency should be a non-negative number",
+                category: "logical"
+              });
+            }
+          }
+        }
+        if (thought.themes && thought.themes.length > 0) {
+          const validConsensusLevels = ["strong", "moderate", "weak", "contested"];
+          for (const theme of thought.themes) {
+            if (theme.strength !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  theme.strength,
+                  `theme "${theme.name}" strength`
+                )
+              );
+            }
+            if (theme.consensus && !validConsensusLevels.includes(theme.consensus)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual consensus level: ${theme.consensus}`,
+                suggestion: `Consider using: ${validConsensusLevels.join(", ")}`,
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.findings && thought.findings.length > 0) {
+          const validEvidenceStrengths = [
+            "strong",
+            "moderate",
+            "weak",
+            "conflicting"
+          ];
+          const validReplicationStatuses = [
+            "replicated",
+            "partial",
+            "not_replicated",
+            "unknown"
+          ];
+          for (const finding of thought.findings) {
+            if (finding.evidenceStrength && !validEvidenceStrengths.includes(finding.evidenceStrength)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid evidence strength: ${finding.evidenceStrength}`,
+                suggestion: `Use one of: ${validEvidenceStrengths.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (finding.replicationStatus && !validReplicationStatuses.includes(finding.replicationStatus)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual replication status: ${finding.replicationStatus}`,
+                suggestion: `Consider using: ${validReplicationStatuses.join(", ")}`,
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.patterns && thought.patterns.length > 0) {
+          const validPatternTypes = [
+            "trend",
+            "correlation",
+            "causal",
+            "methodological",
+            "theoretical"
+          ];
+          for (const pattern of thought.patterns) {
+            if (pattern.type && !validPatternTypes.includes(pattern.type)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid pattern type: ${pattern.type}`,
+                suggestion: `Use one of: ${validPatternTypes.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (pattern.confidence !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  pattern.confidence,
+                  `pattern "${pattern.name}" confidence`
+                )
+              );
+            }
+          }
+        }
+        if (thought.relations && thought.relations.length > 0) {
+          const validRelationTypes = [
+            "causes",
+            "correlates",
+            "contradicts",
+            "supports",
+            "extends",
+            "refines",
+            "subsumes"
+          ];
+          for (const relation of thought.relations) {
+            if (relation.type && !validRelationTypes.includes(relation.type)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid relation type: ${relation.type}`,
+                suggestion: `Use one of: ${validRelationTypes.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (relation.strength !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  relation.strength,
+                  `relation "${relation.id}" strength`
+                )
+              );
+            }
+          }
+        }
+        if (thought.gaps && thought.gaps.length > 0) {
+          const validGapTypes = [
+            "empirical",
+            "theoretical",
+            "methodological",
+            "population",
+            "contextual"
+          ];
+          const validImportanceLevels = [
+            "critical",
+            "significant",
+            "moderate",
+            "minor"
+          ];
+          for (const gap of thought.gaps) {
+            if (gap.type && !validGapTypes.includes(gap.type)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid gap type: ${gap.type}`,
+                suggestion: `Use one of: ${validGapTypes.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (gap.importance && !validImportanceLevels.includes(gap.importance)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual gap importance: ${gap.importance}`,
+                suggestion: `Consider using: ${validImportanceLevels.join(", ")}`,
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.framework) {
+          if (thought.framework.relationships && thought.framework.relationships.length > 0) {
+            const validRelTypes = [
+              "causes",
+              "correlates",
+              "contradicts",
+              "supports",
+              "extends",
+              "refines",
+              "subsumes"
+            ];
+            for (const rel of thought.framework.relationships) {
+              if (rel.type && !validRelTypes.includes(rel.type)) {
+                issues.push({
+                  severity: "warning",
+                  thoughtNumber: thought.thoughtNumber,
+                  description: `Invalid framework relationship type: ${rel.type}`,
+                  suggestion: `Use one of: ${validRelTypes.join(", ")}`,
+                  category: "structural"
+                });
+              }
+              if (rel.strength !== void 0) {
+                issues.push(
+                  ...validateProbability(
+                    thought,
+                    rel.strength,
+                    "framework relation strength"
+                  )
+                );
+              }
+            }
+          }
+        }
+        if (thought.conclusions && thought.conclusions.length > 0) {
+          for (const conclusion of thought.conclusions) {
+            if (conclusion.confidence !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  conclusion.confidence,
+                  "conclusion confidence"
+                )
+              );
+            }
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/argumentation.ts
+var argumentation_exports = {};
+__export(argumentation_exports, {
+  ArgumentationValidator: () => ArgumentationValidator
+});
+var ArgumentationValidator;
+var init_argumentation2 = __esm({
+  "src/validation/validators/modes/argumentation.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    ArgumentationValidator = class {
+      getMode() {
+        return "argumentation";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        const validThoughtTypes = [
+          "claim_formulation",
+          "grounds_identification",
+          "warrant_construction",
+          "backing_provision",
+          "rebuttal_anticipation",
+          "qualifier_specification",
+          "argument_assembly",
+          "dialectic_analysis"
+        ];
+        if (thought.thoughtType && !validThoughtTypes.includes(thought.thoughtType)) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Unknown argumentation thought type: ${thought.thoughtType}`,
+            suggestion: `Use one of: ${validThoughtTypes.join(", ")}`,
+            category: "structural"
+          });
+        }
+        if (thought.claims && thought.claims.length > 0) {
+          const validClaimTypes = [
+            "fact",
+            "value",
+            "policy",
+            "definition",
+            "cause"
+          ];
+          const validScopes = ["universal", "general", "particular"];
+          const validStrengths = ["strong", "moderate", "tentative"];
+          for (const claim of thought.claims) {
+            if (claim.type && !validClaimTypes.includes(claim.type)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid claim type: ${claim.type}`,
+                suggestion: `Use one of: ${validClaimTypes.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (claim.scope && !validScopes.includes(claim.scope)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual claim scope: ${claim.scope}`,
+                suggestion: `Consider using: ${validScopes.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (claim.strength && !validStrengths.includes(claim.strength)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual claim strength: ${claim.strength}`,
+                suggestion: `Consider using: ${validStrengths.join(", ")}`,
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.grounds && thought.grounds.length > 0) {
+          const validGroundTypes = [
+            "empirical",
+            "statistical",
+            "testimonial",
+            "analogical",
+            "logical",
+            "textual"
+          ];
+          const validSufficiencyLevels = ["sufficient", "partial", "insufficient"];
+          for (const ground of thought.grounds) {
+            if (ground.type && !validGroundTypes.includes(ground.type)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid ground type: ${ground.type}`,
+                suggestion: `Use one of: ${validGroundTypes.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (ground.reliability !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  ground.reliability,
+                  "ground reliability"
+                )
+              );
+            }
+            if (ground.relevance !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  ground.relevance,
+                  "ground relevance"
+                )
+              );
+            }
+            if (ground.sufficiency && !validSufficiencyLevels.includes(ground.sufficiency)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual sufficiency level: ${ground.sufficiency}`,
+                suggestion: `Consider using: ${validSufficiencyLevels.join(", ")}`,
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.warrants && thought.warrants.length > 0) {
+          const validWarrantTypes = [
+            "generalization",
+            "analogy",
+            "causal",
+            "authority",
+            "principle",
+            "definition"
+          ];
+          for (const warrant of thought.warrants) {
+            if (warrant.type && !validWarrantTypes.includes(warrant.type)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid warrant type: ${warrant.type}`,
+                suggestion: `Use one of: ${validWarrantTypes.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (warrant.strength !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  warrant.strength,
+                  "warrant strength"
+                )
+              );
+            }
+          }
+        }
+        if (thought.backings && thought.backings.length > 0) {
+          const validBackingTypes = [
+            "theoretical",
+            "empirical",
+            "authoritative",
+            "definitional",
+            "precedent"
+          ];
+          for (const backing of thought.backings) {
+            if (backing.type && !validBackingTypes.includes(backing.type)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid backing type: ${backing.type}`,
+                suggestion: `Use one of: ${validBackingTypes.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (backing.credibility !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  backing.credibility,
+                  "backing credibility"
+                )
+              );
+            }
+          }
+        }
+        if (thought.qualifiers && thought.qualifiers.length > 0) {
+          for (const qualifier of thought.qualifiers) {
+            if (qualifier.certainty !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  qualifier.certainty,
+                  "qualifier certainty"
+                )
+              );
+            }
+          }
+        }
+        if (thought.rebuttals && thought.rebuttals.length > 0) {
+          const validRebuttalTypes = [
+            "factual",
+            "logical",
+            "ethical",
+            "practical",
+            "definitional"
+          ];
+          const validRebuttalStrengths = ["strong", "moderate", "weak"];
+          const validTargets = ["claim", "grounds", "warrant", "backing"];
+          for (const rebuttal of thought.rebuttals) {
+            if (rebuttal.type && !validRebuttalTypes.includes(rebuttal.type)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid rebuttal type: ${rebuttal.type}`,
+                suggestion: `Use one of: ${validRebuttalTypes.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (rebuttal.strength && !validRebuttalStrengths.includes(rebuttal.strength)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual rebuttal strength: ${rebuttal.strength}`,
+                suggestion: `Consider using: ${validRebuttalStrengths.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (rebuttal.targetElement && !validTargets.includes(rebuttal.targetElement)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid rebuttal target: ${rebuttal.targetElement}`,
+                suggestion: `Use one of: ${validTargets.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (rebuttal.response?.effectiveness !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  rebuttal.response.effectiveness,
+                  "rebuttal response effectiveness"
+                )
+              );
+            }
+          }
+        }
+        if (thought.dialectic) {
+          const validResolutions = [
+            "thesis_prevails",
+            "antithesis_prevails",
+            "synthesis_achieved",
+            "unresolved"
+          ];
+          if (thought.dialectic.resolution && !validResolutions.includes(thought.dialectic.resolution)) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Invalid dialectic resolution: ${thought.dialectic.resolution}`,
+              suggestion: `Use one of: ${validResolutions.join(", ")}`,
+              category: "structural"
+            });
+          }
+        }
+        if (thought.rhetoricalStrategies && thought.rhetoricalStrategies.length > 0) {
+          const validAppeals = ["ethos", "pathos", "logos"];
+          const validAppropriateness = [
+            "appropriate",
+            "questionable",
+            "inappropriate"
+          ];
+          for (const strategy of thought.rhetoricalStrategies) {
+            if (strategy.appeal && !validAppeals.includes(strategy.appeal)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid rhetorical appeal: ${strategy.appeal}`,
+                suggestion: `Use one of: ${validAppeals.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (strategy.appropriateness && !validAppropriateness.includes(strategy.appropriateness)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual appropriateness value: ${strategy.appropriateness}`,
+                suggestion: `Consider using: ${validAppropriateness.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (strategy.effectiveness !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  strategy.effectiveness,
+                  "rhetorical strategy effectiveness"
+                )
+              );
+            }
+          }
+        }
+        if (thought.fallacies && thought.fallacies.length > 0) {
+          const validCategories = ["formal", "informal"];
+          const validSeverities = ["critical", "significant", "minor"];
+          for (const fallacy of thought.fallacies) {
+            if (fallacy.category && !validCategories.includes(fallacy.category)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid fallacy category: ${fallacy.category}`,
+                suggestion: `Use one of: ${validCategories.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (fallacy.severity && !validSeverities.includes(fallacy.severity)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual fallacy severity: ${fallacy.severity}`,
+                suggestion: `Consider using: ${validSeverities.join(", ")}`,
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.argumentStrength !== void 0) {
+          issues.push(
+            ...validateProbability(
+              thought,
+              thought.argumentStrength,
+              "argument strength"
+            )
+          );
+        }
+        if (thought.arguments && thought.arguments.length > 0) {
+          for (const arg of thought.arguments) {
+            if (arg.overallStrength !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  arg.overallStrength,
+                  `argument "${arg.id}" overall strength`
+                )
+              );
+            }
+          }
+        }
+        if (thought.currentArgument) {
+          if (thought.currentArgument.overallStrength !== void 0) {
+            issues.push(
+              ...validateProbability(
+                thought,
+                thought.currentArgument.overallStrength,
+                "current argument strength"
+              )
+            );
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/critique.ts
+var critique_exports = {};
+__export(critique_exports, {
+  CritiqueValidator: () => CritiqueValidator
+});
+var CritiqueValidator;
+var init_critique = __esm({
+  "src/validation/validators/modes/critique.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    CritiqueValidator = class {
+      getMode() {
+        return "critique";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        const validThoughtTypes = [
+          "work_characterization",
+          "methodology_evaluation",
+          "argument_analysis",
+          "evidence_assessment",
+          "contribution_evaluation",
+          "limitation_identification",
+          "strength_recognition",
+          "improvement_suggestion"
+        ];
+        if (thought.thoughtType && !validThoughtTypes.includes(thought.thoughtType)) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Unknown critique thought type: ${thought.thoughtType}`,
+            suggestion: `Use one of: ${validThoughtTypes.join(", ")}`,
+            category: "structural"
+          });
+        }
+        if (thought.work) {
+          const validWorkTypes = [
+            "empirical_study",
+            "theoretical_paper",
+            "review_article",
+            "meta_analysis",
+            "case_study",
+            "methodology_paper",
+            "position_paper",
+            "commentary",
+            "replication_study",
+            "mixed_methods",
+            "book",
+            "thesis"
+          ];
+          if (thought.work.type && !validWorkTypes.includes(thought.work.type)) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Invalid work type: ${thought.work.type}`,
+              suggestion: `Use one of: ${validWorkTypes.join(", ")}`,
+              category: "structural"
+            });
+          }
+        }
+        if (thought.methodologyEvaluation) {
+          const evaluation = thought.methodologyEvaluation;
+          if (evaluation.overallRating !== void 0) {
+            issues.push(
+              ...validateProbability(
+                thought,
+                evaluation.overallRating,
+                "methodology overall rating"
+              )
+            );
+          }
+          if (evaluation.design?.rating !== void 0) {
+            issues.push(
+              ...validateProbability(
+                thought,
+                evaluation.design.rating,
+                "design assessment rating"
+              )
+            );
+          }
+          if (evaluation.sample?.rating !== void 0) {
+            issues.push(
+              ...validateProbability(
+                thought,
+                evaluation.sample.rating,
+                "sample assessment rating"
+              )
+            );
+          }
+          if (evaluation.analysis?.rating !== void 0) {
+            issues.push(
+              ...validateProbability(
+                thought,
+                evaluation.analysis.rating,
+                "analysis assessment rating"
+              )
+            );
+          }
+        }
+        if (thought.critiquePoints && thought.critiquePoints.length > 0) {
+          const validPointTypes = ["strength", "weakness", "concern", "suggestion"];
+          const validCategories = [
+            "methodology",
+            "argument",
+            "evidence",
+            "contribution",
+            "writing",
+            "ethics"
+          ];
+          const validSeverities = ["critical", "major", "minor", "neutral"];
+          for (const point of thought.critiquePoints) {
+            if (point.type && !validPointTypes.includes(point.type)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid critique point type: ${point.type}`,
+                suggestion: `Use one of: ${validPointTypes.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (point.category && !validCategories.includes(point.category)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual critique category: ${point.category}`,
+                suggestion: `Consider using: ${validCategories.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (point.severity && !validSeverities.includes(point.severity)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual severity level: ${point.severity}`,
+                suggestion: `Consider using: ${validSeverities.join(", ")}`,
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.verdict) {
+          const validRecommendations = [
+            "accept",
+            "minor_revision",
+            "major_revision",
+            "reject"
+          ];
+          if (thought.verdict.recommendation && !validRecommendations.includes(thought.verdict.recommendation)) {
+            issues.push({
+              severity: "warning",
+              thoughtNumber: thought.thoughtNumber,
+              description: `Invalid verdict recommendation: ${thought.verdict.recommendation}`,
+              suggestion: `Use one of: ${validRecommendations.join(", ")}`,
+              category: "structural"
+            });
+          }
+          if (thought.verdict.confidence !== void 0) {
+            issues.push(
+              ...validateProbability(
+                thought,
+                thought.verdict.confidence,
+                "verdict confidence"
+              )
+            );
+          }
+        }
+        if (thought.balanceRatio !== void 0) {
+          issues.push(
+            ...validateProbability(thought, thought.balanceRatio, "balance ratio")
+          );
+        }
+        if (thought.strengthsIdentified !== void 0 && thought.strengthsIdentified < 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Strengths identified is negative: ${thought.strengthsIdentified}`,
+            suggestion: "Use a non-negative integer",
+            category: "logical"
+          });
+        }
+        if (thought.weaknessesIdentified !== void 0 && thought.weaknessesIdentified < 0) {
+          issues.push({
+            severity: "error",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Weaknesses identified is negative: ${thought.weaknessesIdentified}`,
+            suggestion: "Use a non-negative integer",
+            category: "logical"
+          });
+        }
+        return issues;
+      }
+    };
+  }
+});
+
+// src/validation/validators/modes/analysis.ts
+var analysis_exports = {};
+__export(analysis_exports, {
+  AnalysisValidator: () => AnalysisValidator
+});
+var AnalysisValidator;
+var init_analysis2 = __esm({
+  "src/validation/validators/modes/analysis.ts"() {
+    init_esm_shims();
+    init_validation_utils();
+    AnalysisValidator = class {
+      getMode() {
+        return "analysis";
+      }
+      validate(thought, _context) {
+        const issues = [];
+        issues.push(...validateCommon(thought));
+        const validThoughtTypes = [
+          "data_familiarization",
+          "initial_coding",
+          "focused_coding",
+          "theme_development",
+          "theme_refinement",
+          "theoretical_integration",
+          "memo_writing",
+          "saturation_assessment"
+        ];
+        if (thought.thoughtType && !validThoughtTypes.includes(thought.thoughtType)) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Unknown analysis thought type: ${thought.thoughtType}`,
+            suggestion: `Use one of: ${validThoughtTypes.join(", ")}`,
+            category: "structural"
+          });
+        }
+        const validMethods = [
+          "thematic_analysis",
+          "grounded_theory",
+          "discourse_analysis",
+          "content_analysis",
+          "phenomenological",
+          "narrative_analysis",
+          "framework_analysis",
+          "template_analysis",
+          "mixed_qualitative"
+        ];
+        if (thought.methodology && !validMethods.includes(thought.methodology)) {
+          issues.push({
+            severity: "warning",
+            thoughtNumber: thought.thoughtNumber,
+            description: `Unknown analysis methodology: ${thought.methodology}`,
+            suggestion: `Use one of: ${validMethods.join(", ")}`,
+            category: "structural"
+          });
+        }
+        if (thought.currentCodes && thought.currentCodes.length > 0) {
+          for (const code of thought.currentCodes) {
+            const validCodeTypes = [
+              "descriptive",
+              "in_vivo",
+              "process",
+              "initial",
+              "focused",
+              "axial",
+              "theoretical",
+              "emotion",
+              "value",
+              "versus",
+              "evaluation"
+            ];
+            if (code.type && !validCodeTypes.includes(code.type)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual code type: ${code.type}`,
+                suggestion: `Consider using: ${validCodeTypes.slice(0, 5).join(", ")}...`,
+                category: "structural"
+              });
+            }
+            if (code.frequency !== void 0 && code.frequency < 0) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Code "${code.label}" has negative frequency: ${code.frequency}`,
+                suggestion: "Frequency should be a non-negative integer",
+                category: "logical"
+              });
+            }
+          }
+        }
+        if (thought.gtCategories && thought.gtCategories.length > 0) {
+          const validSaturationLevels = ["saturated", "developing", "sparse"];
+          for (const category of thought.gtCategories) {
+            if (category.saturation && !validSaturationLevels.includes(category.saturation)) {
+              issues.push({
+                severity: "warning",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid saturation level for category "${category.name}": ${category.saturation}`,
+                suggestion: `Use one of: ${validSaturationLevels.join(", ")}`,
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.themes && thought.themes.length > 0) {
+          const validLevels = ["initial", "candidate", "refined", "final"];
+          for (const theme of thought.themes) {
+            if (theme.level && !validLevels.includes(theme.level)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual theme level: ${theme.level}`,
+                suggestion: `Consider using: ${validLevels.join(", ")}`,
+                category: "structural"
+              });
+            }
+            if (theme.prevalence !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  theme.prevalence,
+                  `theme "${theme.name}" prevalence`
+                )
+              );
+            }
+            if (theme.richness !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  theme.richness,
+                  `theme "${theme.name}" richness`
+                )
+              );
+            }
+          }
+        }
+        if (thought.memos && thought.memos.length > 0) {
+          const validMemoTypes = [
+            "code_memo",
+            "theoretical_memo",
+            "operational_memo",
+            "analytical_memo",
+            "reflective_memo"
+          ];
+          for (const memo of thought.memos) {
+            if (memo.type && !validMemoTypes.includes(memo.type)) {
+              issues.push({
+                severity: "info",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Unusual memo type: ${memo.type}`,
+                suggestion: `Consider using: ${validMemoTypes.join(", ")}`,
+                category: "structural"
+              });
+            }
+          }
+        }
+        if (thought.codingProgress) {
+          if (thought.codingProgress.segmentsCoded > thought.codingProgress.totalSegments) {
+            issues.push({
+              severity: "error",
+              thoughtNumber: thought.thoughtNumber,
+              description: "Coded segments exceeds total segments",
+              suggestion: "Check coding progress values",
+              category: "logical"
+            });
+          }
+          if (thought.codingProgress.percentComplete !== void 0) {
+            if (thought.codingProgress.percentComplete < 0 || thought.codingProgress.percentComplete > 100) {
+              issues.push({
+                severity: "error",
+                thoughtNumber: thought.thoughtNumber,
+                description: `Invalid percent complete: ${thought.codingProgress.percentComplete}`,
+                suggestion: "Percent complete should be between 0 and 100",
+                category: "logical"
+              });
+            }
+          }
+        }
+        if (thought.dataSources && thought.dataSources.length > 0) {
+          for (const source of thought.dataSources) {
+            if (source.quality !== void 0) {
+              issues.push(
+                ...validateProbability(
+                  thought,
+                  source.quality,
+                  `data source "${source.id}" quality`
+                )
+              );
+            }
+          }
+        }
+        if (thought.rigorAssessment) {
+          const rigor = thought.rigorAssessment;
+          if (rigor.credibility?.rating !== void 0) {
+            issues.push(
+              ...validateProbability(
+                thought,
+                rigor.credibility.rating,
+                "credibility rating"
+              )
+            );
+          }
+          if (rigor.transferability?.rating !== void 0) {
+            issues.push(
+              ...validateProbability(
+                thought,
+                rigor.transferability.rating,
+                "transferability rating"
+              )
+            );
+          }
+          if (rigor.dependability?.rating !== void 0) {
+            issues.push(
+              ...validateProbability(
+                thought,
+                rigor.dependability.rating,
+                "dependability rating"
+              )
+            );
+          }
+          if (rigor.confirmability?.rating !== void 0) {
+            issues.push(
+              ...validateProbability(
+                thought,
+                rigor.confirmability.rating,
+                "confirmability rating"
+              )
+            );
+          }
+        }
+        return issues;
+      }
+    };
+  }
+});
+
 // src/export/profiles.ts
 var profiles_exports = {};
 __export(profiles_exports, {
@@ -48002,103 +54356,127 @@ init_esm_shims();
 init_esm_shims();
 var VALIDATOR_REGISTRY = {
   sequential: {
-    module: "./modes/sequential.js",
+    load: () => Promise.resolve().then(() => (init_sequential(), sequential_exports)),
     className: "SequentialValidator"
   },
-  shannon: { module: "./modes/shannon.js", className: "ShannonValidator" },
+  shannon: {
+    load: () => Promise.resolve().then(() => (init_shannon(), shannon_exports)),
+    className: "ShannonValidator"
+  },
   mathematics: {
-    module: "./modes/mathematics.js",
+    load: () => Promise.resolve().then(() => (init_mathematics(), mathematics_exports)),
     className: "MathematicsValidator"
   },
-  physics: { module: "./modes/physics.js", className: "PhysicsValidator" },
-  hybrid: { module: "./modes/hybrid.js", className: "HybridValidator" },
+  physics: {
+    load: () => Promise.resolve().then(() => (init_physics(), physics_exports)),
+    className: "PhysicsValidator"
+  },
+  hybrid: {
+    load: () => Promise.resolve().then(() => (init_hybrid(), hybrid_exports)),
+    className: "HybridValidator"
+  },
   engineering: {
-    module: "./modes/engineering.js",
+    load: () => Promise.resolve().then(() => (init_engineering(), engineering_exports)),
     className: "EngineeringValidator"
   },
   // Phase 10 v7.1.0
   computability: {
-    module: "./modes/computability.js",
+    load: () => Promise.resolve().then(() => (init_computability2(), computability_exports)),
     className: "ComputabilityValidator"
   },
   // Phase 11 v7.2.0
   cryptanalytic: {
-    module: "./modes/cryptanalytic.js",
+    load: () => Promise.resolve().then(() => (init_cryptanalytic2(), cryptanalytic_exports)),
     className: "CryptanalyticValidator"
   },
   // Phase 11 v7.2.0
   inductive: {
-    module: "./modes/inductive.js",
+    load: () => Promise.resolve().then(() => (init_inductive(), inductive_exports)),
     className: "InductiveValidator"
   },
   deductive: {
-    module: "./modes/deductive.js",
+    load: () => Promise.resolve().then(() => (init_deductive(), deductive_exports)),
     className: "DeductiveValidator"
   },
   abductive: {
-    module: "./modes/abductive.js",
+    load: () => Promise.resolve().then(() => (init_abductive(), abductive_exports)),
     className: "AbductiveValidator"
   },
-  causal: { module: "./modes/causal.js", className: "CausalValidator" },
-  bayesian: { module: "./modes/bayesian.js", className: "BayesianValidator" },
+  causal: {
+    load: () => Promise.resolve().then(() => (init_causal(), causal_exports)),
+    className: "CausalValidator"
+  },
+  bayesian: {
+    load: () => Promise.resolve().then(() => (init_bayesian(), bayesian_exports)),
+    className: "BayesianValidator"
+  },
   counterfactual: {
-    module: "./modes/counterfactual.js",
+    load: () => Promise.resolve().then(() => (init_counterfactual(), counterfactual_exports)),
     className: "CounterfactualValidator"
   },
   analogical: {
-    module: "./modes/analogical.js",
+    load: () => Promise.resolve().then(() => (init_analogical(), analogical_exports)),
     className: "AnalogicalValidator"
   },
-  temporal: { module: "./modes/temporal.js", className: "TemporalValidator" },
+  temporal: {
+    load: () => Promise.resolve().then(() => (init_temporal(), temporal_exports)),
+    className: "TemporalValidator"
+  },
   gametheory: {
-    module: "./modes/gametheory.js",
+    load: () => Promise.resolve().then(() => (init_gametheory(), gametheory_exports)),
     className: "GameTheoryValidator"
   },
   evidential: {
-    module: "./modes/evidential.js",
+    load: () => Promise.resolve().then(() => (init_evidential(), evidential_exports)),
     className: "EvidentialValidator"
   },
   firstprinciples: {
-    module: "./modes/firstprinciples.js",
+    load: () => Promise.resolve().then(() => (init_firstprinciples(), firstprinciples_exports)),
     className: "FirstPrinciplesValidator"
   },
   systemsthinking: {
-    module: "./modes/systemsthinking.js",
+    load: () => Promise.resolve().then(() => (init_systemsthinking(), systemsthinking_exports)),
     className: "SystemsThinkingValidator"
   },
   scientificmethod: {
-    module: "./modes/scientificmethod.js",
+    load: () => Promise.resolve().then(() => (init_scientificmethod(), scientificmethod_exports)),
     className: "ScientificMethodValidator"
   },
   optimization: {
-    module: "./modes/optimization.js",
+    load: () => Promise.resolve().then(() => (init_optimization(), optimization_exports)),
     className: "OptimizationValidator"
   },
   formallogic: {
-    module: "./modes/formallogic.js",
+    load: () => Promise.resolve().then(() => (init_formallogic(), formallogic_exports)),
     className: "FormalLogicValidator"
   },
   metareasoning: {
-    module: "./modes/metareasoning.js",
+    load: () => Promise.resolve().then(() => (init_metareasoning(), metareasoning_exports)),
     className: "MetaReasoningValidator"
   },
   // Phase 14: Academic and algorithmic validators (cherry-picked from PR #166)
   algorithmic: {
-    module: "./modes/algorithmic.js",
+    load: () => Promise.resolve().then(() => (init_algorithmic(), algorithmic_exports)),
     className: "AlgorithmicValidator"
   },
   synthesis: {
-    module: "./modes/synthesis.js",
+    load: () => Promise.resolve().then(() => (init_synthesis2(), synthesis_exports)),
     className: "SynthesisValidator"
   },
   argumentation: {
-    module: "./modes/argumentation.js",
+    load: () => Promise.resolve().then(() => (init_argumentation2(), argumentation_exports)),
     className: "ArgumentationValidator"
   },
-  critique: { module: "./modes/critique.js", className: "CritiqueValidator" },
-  analysis: { module: "./modes/analysis.js", className: "AnalysisValidator" },
+  critique: {
+    load: () => Promise.resolve().then(() => (init_critique(), critique_exports)),
+    className: "CritiqueValidator"
+  },
+  analysis: {
+    load: () => Promise.resolve().then(() => (init_analysis2(), analysis_exports)),
+    className: "AnalysisValidator"
+  },
   historical: {
-    module: "./modes/historical.js",
+    load: () => Promise.resolve().then(() => (init_historical(), historical_exports)),
     className: "HistoricalValidator"
   },
   // v9.1.0
@@ -48106,16 +54484,19 @@ var VALIDATOR_REGISTRY = {
   // but were never mapped here, so every thought in one of these modes got
   // "No validator registered for thinking mode: X" instead. v9.4.1
   constraint: {
-    module: "./modes/constraint.js",
+    load: () => Promise.resolve().then(() => (init_constraint(), constraint_exports)),
     className: "ConstraintValidator"
   },
-  modal: { module: "./modes/modal.js", className: "ModalValidator" },
+  modal: {
+    load: () => Promise.resolve().then(() => (init_modal(), modal_exports)),
+    className: "ModalValidator"
+  },
   recursive: {
-    module: "./modes/recursive.js",
+    load: () => Promise.resolve().then(() => (init_recursive(), recursive_exports)),
     className: "RecursiveValidator"
   },
   stochastic: {
-    module: "./modes/stochastic.js",
+    load: () => Promise.resolve().then(() => (init_stochastic(), stochastic_exports)),
     className: "StochasticValidator"
   }
   // Not registered: `meta` (src/validation/validators/modes/meta.ts). Its
@@ -48166,7 +54547,7 @@ var ValidatorRegistry = class {
       if (!config) {
         return void 0;
       }
-      const mod = await import(config.module);
+      const mod = await config.load();
       const ValidatorClass = mod[config.className];
       if (!ValidatorClass) {
         return void 0;
@@ -59067,12 +65448,31 @@ async function acquireSharedLock(filePath, options) {
         continue;
       }
     }
-    await promises.mkdir(sharedLockDir, { recursive: true });
+    try {
+      await promises.mkdir(sharedLockDir, { recursive: true });
+    } catch (error) {
+      const code = error.code;
+      if (code === "ENOENT") {
+        continue;
+      }
+      if (code === "EPERM" && process.platform === "win32") {
+        await sleep(options.retryInterval);
+        continue;
+      }
+      throw error;
+    }
     const lockInfo = createLockInfo("shared");
     try {
-      await promises.writeFile(sharedLockPath, JSON.stringify(lockInfo), {
-        flag: "wx"
-      });
+      try {
+        await promises.writeFile(sharedLockPath, JSON.stringify(lockInfo), {
+          flag: "wx"
+        });
+      } catch (error) {
+        if (error.code === "ENOENT") {
+          continue;
+        }
+        throw error;
+      }
       const recheck = await readLockInfo(exclusiveLockPath);
       if (recheck && !isLockStale(recheck, options.staleThreshold)) {
         await promises.unlink(sharedLockPath).catch(
