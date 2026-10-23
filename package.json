@@ -35,14 +35,14 @@
   },
   "dependencies": {
     "zod": "^4.6.5",
-    "@modelcontextprotocol/server": "^2.0.0",
-    "@modelcontextprotocol/client": "^2.0.0",
-    "@modelcontextprotocol/core": "^2.0.0"
+    "@modelcontextprotocol/server": "^2.3.1",
+    "@modelcontextprotocol/client": "^2.3.1",
+    "@modelcontextprotocol/core": "^2.3.1"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^26.6.1",
-    "@vitest/coverage-v8": "^5.0.1",
+    "@vitest/coverage-v8": "^5.0.5",
     "cross-env": "^10.1.0",
     "js-yaml": "^5.4.2",
     "oxlint": "^1.83.0",
@@ -50,7 +50,7 @@
     "tsup": "^8.5.1",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2",
-    "vitest": "^5.0.1"
+    "vitest": "^5.0.5"
   },
   "overrides": {
     "esbuild": "^0.28.1"
