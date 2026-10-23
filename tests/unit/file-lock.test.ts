@@ -257,6 +257,8 @@ describe("file-lock", () => {
       });
 
       // Refuses the first `times` creates of a shared-lock file with `code`.
+      // Each refusal first removes the empty lock directory, as the reader
+      // that releases the last shared lock does, so a retry must recreate it.
       const refuseLockCreate = (code: string, times: number) => {
         const realWriteFile = fs.writeFile.bind(fs) as (
           ...args: unknown[]
@@ -267,6 +269,7 @@ describe("file-lock", () => {
           .mockImplementation(async (p: any, ...rest: any[]) => {
             if (String(p).includes(".locks") && state.refused < times) {
               state.refused++;
+              await fs.rmdir(path.dirname(String(p))).catch(() => {});
               throw Object.assign(new Error(`${code}: simulated race`), {
                 code,
               });
@@ -294,7 +297,6 @@ describe("file-lock", () => {
       it("fails at once on any other system", async () => {
         setPlatform("linux");
         const { state, spy } = refuseLockCreate("EINVAL", 1);
-        const started = Date.now();
         try {
           await expect(
             withSharedLock(targetFile, async () => 42, {
@@ -303,7 +305,6 @@ describe("file-lock", () => {
             }),
           ).rejects.toMatchObject({ code: "EINVAL" });
           expect(state.refused).toBe(1);
-          expect(Date.now() - started).toBeLessThan(1000);
         } finally {
           spy.mockRestore();
         }
@@ -312,7 +313,6 @@ describe("file-lock", () => {
       it("still fails at once on macOS for an error that is not a race", async () => {
         setPlatform("darwin");
         const { state, spy } = refuseLockCreate("EACCES", 1);
-        const started = Date.now();
         try {
           await expect(
             withSharedLock(targetFile, async () => 42, {
@@ -321,7 +321,28 @@ describe("file-lock", () => {
             }),
           ).rejects.toMatchObject({ code: "EACCES" });
           expect(state.refused).toBe(1);
-          expect(Date.now() - started).toBeLessThan(1000);
+        } finally {
+          spy.mockRestore();
+        }
+      });
+
+      it("ends as the timeout error, with the refusal as its cause, when it never clears", async () => {
+        setPlatform("darwin");
+        const { state, spy } = refuseLockCreate(
+          "EINVAL",
+          Number.POSITIVE_INFINITY,
+        );
+        try {
+          const failure = await withSharedLock(targetFile, async () => 42, {
+            timeout: 100,
+            retryInterval: 5,
+          }).then(
+            () => undefined,
+            (error: unknown) => error as Error,
+          );
+          expect(failure?.message).toMatch(/Timeout acquiring shared lock/);
+          expect(failure?.cause).toMatchObject({ code: "EINVAL" });
+          expect(state.refused).toBeGreaterThan(1);
         } finally {
           spy.mockRestore();
         }

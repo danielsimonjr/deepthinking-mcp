@@ -299,10 +299,12 @@ Stale locks (older than a configurable threshold) are detected and cleared autom
 than blocking forever on a crashed holder.
 
 A shared lock is one file in a per-path directory, and the reader that releases the last shared
-lock removes that directory. `acquireSharedLock` retries when a second reader meets that removal
-between its `mkdir` and its `writeFile`: `ENOENT` from either call, and on Windows `EPERM` from
-`mkdir`. Any other `mkdir` error propagates. From `writeFile`, `EEXIST` returns a release function
-for the lock file that already exists, and any other error propagates.
+lock removes that directory. A second reader can meet that removal between its `mkdir` and its
+`writeFile`. `acquireSharedLock` retries these refusals: `ENOENT` from either call, `EPERM` from
+`mkdir` on Windows, and `EINVAL` from `writeFile` on macOS. A retry for `EINVAL` first waits one
+`retryInterval`. A refusal that does not clear ends as the timeout error, with the last `EINVAL`
+as its `cause`. Any other `mkdir` error propagates. From `writeFile`, `EEXIST` returns a release
+function for the lock file that already exists, and any other error propagates.
 
 ---
 

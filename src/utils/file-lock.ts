@@ -365,6 +365,7 @@ async function acquireSharedLock(
   // sneak in while they're still reading.
   const sharedLockPath = path.join(sharedLockDir, `${nextAttemptId()}.lock`);
   const startTime = Date.now();
+  let lastRaceError: unknown;
 
   while (Date.now() - startTime < options.timeout) {
     // Check for existing exclusive lock
@@ -422,9 +423,12 @@ async function acquireSharedLock(
           continue;
         }
         if (code === "EINVAL" && process.platform === "darwin") {
-          // The same race on macOS: the kernel can refuse an exclusive
-          // create inside a directory that is being removed with EINVAL
-          // instead of ENOENT. On any other system EINVAL is a real error.
+          // The same race on macOS: an exclusive create inside a directory
+          // that is being removed can fail with EINVAL instead of ENOENT.
+          // Elsewhere EINVAL does not come from this race and reaches the
+          // caller. The last such error is kept as the cause of the timeout
+          // error below, in case the refusal does not clear.
+          lastRaceError = error;
           await sleep(options.retryInterval);
           continue;
         }
@@ -479,6 +483,7 @@ async function acquireSharedLock(
 
   throw new Error(
     `Timeout acquiring shared lock on ${filePath} after ${options.timeout}ms`,
+    lastRaceError === undefined ? undefined : { cause: lastRaceError },
   );
 }
 
