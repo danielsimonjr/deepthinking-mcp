@@ -10,128 +10,162 @@ import type { ModeValidator } from "./base.js";
 
 /**
  * Validator configuration entry
+ *
+ * `load` holds a dynamic `import()` with a LITERAL specifier. A bundler can
+ * resolve a literal specifier at build time, so the single-file bundle
+ * (`dist/index.js`) carries every validator and still initialises each one
+ * only on first use. A specifier held in a variable cannot be resolved at
+ * build time: the bundle then looks for `./modes/<mode>.js` next to
+ * `dist/index.js`, finds nothing, and every mode loses its validator.
  */
 interface ValidatorConfig {
-  module: string;
+  load: () => Promise<Record<string, unknown>>;
   className: string;
 }
 
 /**
  * Consolidated validator registry (Sprint 10: merged dual mappings)
- * Format: mode -> { module path, class name }
+ * Format: mode -> { load function, class name }
  */
 const VALIDATOR_REGISTRY: Record<string, ValidatorConfig> = {
   sequential: {
-    module: "./modes/sequential.js",
+    load: () => import("./modes/sequential.js"),
     className: "SequentialValidator",
   },
-  shannon: { module: "./modes/shannon.js", className: "ShannonValidator" },
+  shannon: {
+    load: () => import("./modes/shannon.js"),
+    className: "ShannonValidator",
+  },
   mathematics: {
-    module: "./modes/mathematics.js",
+    load: () => import("./modes/mathematics.js"),
     className: "MathematicsValidator",
   },
-  physics: { module: "./modes/physics.js", className: "PhysicsValidator" },
-  hybrid: { module: "./modes/hybrid.js", className: "HybridValidator" },
+  physics: {
+    load: () => import("./modes/physics.js"),
+    className: "PhysicsValidator",
+  },
+  hybrid: {
+    load: () => import("./modes/hybrid.js"),
+    className: "HybridValidator",
+  },
   engineering: {
-    module: "./modes/engineering.js",
+    load: () => import("./modes/engineering.js"),
     className: "EngineeringValidator",
   }, // Phase 10 v7.1.0
   computability: {
-    module: "./modes/computability.js",
+    load: () => import("./modes/computability.js"),
     className: "ComputabilityValidator",
   }, // Phase 11 v7.2.0
   cryptanalytic: {
-    module: "./modes/cryptanalytic.js",
+    load: () => import("./modes/cryptanalytic.js"),
     className: "CryptanalyticValidator",
   }, // Phase 11 v7.2.0
   inductive: {
-    module: "./modes/inductive.js",
+    load: () => import("./modes/inductive.js"),
     className: "InductiveValidator",
   },
   deductive: {
-    module: "./modes/deductive.js",
+    load: () => import("./modes/deductive.js"),
     className: "DeductiveValidator",
   },
   abductive: {
-    module: "./modes/abductive.js",
+    load: () => import("./modes/abductive.js"),
     className: "AbductiveValidator",
   },
-  causal: { module: "./modes/causal.js", className: "CausalValidator" },
-  bayesian: { module: "./modes/bayesian.js", className: "BayesianValidator" },
+  causal: {
+    load: () => import("./modes/causal.js"),
+    className: "CausalValidator",
+  },
+  bayesian: {
+    load: () => import("./modes/bayesian.js"),
+    className: "BayesianValidator",
+  },
   counterfactual: {
-    module: "./modes/counterfactual.js",
+    load: () => import("./modes/counterfactual.js"),
     className: "CounterfactualValidator",
   },
   analogical: {
-    module: "./modes/analogical.js",
+    load: () => import("./modes/analogical.js"),
     className: "AnalogicalValidator",
   },
-  temporal: { module: "./modes/temporal.js", className: "TemporalValidator" },
+  temporal: {
+    load: () => import("./modes/temporal.js"),
+    className: "TemporalValidator",
+  },
   gametheory: {
-    module: "./modes/gametheory.js",
+    load: () => import("./modes/gametheory.js"),
     className: "GameTheoryValidator",
   },
   evidential: {
-    module: "./modes/evidential.js",
+    load: () => import("./modes/evidential.js"),
     className: "EvidentialValidator",
   },
   firstprinciples: {
-    module: "./modes/firstprinciples.js",
+    load: () => import("./modes/firstprinciples.js"),
     className: "FirstPrinciplesValidator",
   },
   systemsthinking: {
-    module: "./modes/systemsthinking.js",
+    load: () => import("./modes/systemsthinking.js"),
     className: "SystemsThinkingValidator",
   },
   scientificmethod: {
-    module: "./modes/scientificmethod.js",
+    load: () => import("./modes/scientificmethod.js"),
     className: "ScientificMethodValidator",
   },
   optimization: {
-    module: "./modes/optimization.js",
+    load: () => import("./modes/optimization.js"),
     className: "OptimizationValidator",
   },
   formallogic: {
-    module: "./modes/formallogic.js",
+    load: () => import("./modes/formallogic.js"),
     className: "FormalLogicValidator",
   },
   metareasoning: {
-    module: "./modes/metareasoning.js",
+    load: () => import("./modes/metareasoning.js"),
     className: "MetaReasoningValidator",
   },
   // Phase 14: Academic and algorithmic validators (cherry-picked from PR #166)
   algorithmic: {
-    module: "./modes/algorithmic.js",
+    load: () => import("./modes/algorithmic.js"),
     className: "AlgorithmicValidator",
   },
   synthesis: {
-    module: "./modes/synthesis.js",
+    load: () => import("./modes/synthesis.js"),
     className: "SynthesisValidator",
   },
   argumentation: {
-    module: "./modes/argumentation.js",
+    load: () => import("./modes/argumentation.js"),
     className: "ArgumentationValidator",
   },
-  critique: { module: "./modes/critique.js", className: "CritiqueValidator" },
-  analysis: { module: "./modes/analysis.js", className: "AnalysisValidator" },
+  critique: {
+    load: () => import("./modes/critique.js"),
+    className: "CritiqueValidator",
+  },
+  analysis: {
+    load: () => import("./modes/analysis.js"),
+    className: "AnalysisValidator",
+  },
   historical: {
-    module: "./modes/historical.js",
+    load: () => import("./modes/historical.js"),
     className: "HistoricalValidator",
   }, // v9.1.0
   // Advanced runtime modes. Their validators existed from Phase 10 Sprint 3
   // but were never mapped here, so every thought in one of these modes got
   // "No validator registered for thinking mode: X" instead. v9.4.1
   constraint: {
-    module: "./modes/constraint.js",
+    load: () => import("./modes/constraint.js"),
     className: "ConstraintValidator",
   },
-  modal: { module: "./modes/modal.js", className: "ModalValidator" },
+  modal: {
+    load: () => import("./modes/modal.js"),
+    className: "ModalValidator",
+  },
   recursive: {
-    module: "./modes/recursive.js",
+    load: () => import("./modes/recursive.js"),
     className: "RecursiveValidator",
   },
   stochastic: {
-    module: "./modes/stochastic.js",
+    load: () => import("./modes/stochastic.js"),
     className: "StochasticValidator",
   },
   // Not registered: `meta` (src/validation/validators/modes/meta.ts). Its
@@ -204,14 +238,15 @@ class ValidatorRegistry {
         return undefined;
       }
 
-      const mod = await import(config.module);
-      const ValidatorClass = mod[config.className];
+      const mod = await config.load();
+      const ValidatorClass = mod[config.className] as
+        (new () => ModeValidator) | undefined;
 
       if (!ValidatorClass) {
         return undefined;
       }
 
-      const validator = new ValidatorClass() as ModeValidator;
+      const validator = new ValidatorClass();
       this.validators.set(mode, validator);
       this.loadPromises.delete(mode);
 

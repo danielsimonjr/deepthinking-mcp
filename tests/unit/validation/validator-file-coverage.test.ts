@@ -8,9 +8,10 @@
  *  - a validator file nobody references (`modes/meta.ts` is exactly this: a
  *    ~200-line validator whose `getMode()` returns "meta", a mode that does
  *    not exist). Four more files sat in that state for months.
- *  - a registry entry whose `className` or `module` is wrong. `loadValidator`
- *    swallows every failure and returns `undefined`, so a typo produces the
- *    same "No validator registered" advisory as a missing entry.
+ *  - a registry entry whose `className` or `load` specifier is wrong.
+ *    `loadValidator` swallows every failure and returns `undefined`, so a
+ *    typo produces the same "No validator registered" advisory as a missing
+ *    entry.
  *
  * These tests read the directory and resolve every entry, so both fail here
  * rather than reaching a client as an advisory message.
@@ -86,8 +87,8 @@ describe('every registered validator resolves and self-identifies', () => {
     '%s loads a validator whose getMode() matches its registry key',
     async (mode) => {
       // `loadValidator` catches everything and returns undefined, so a wrong
-      // module path or class name is indistinguishable from a missing entry
-      // at runtime. Resolving all of them is the only way to see it.
+      // class name is indistinguishable from a missing entry at runtime.
+      // Resolving all of them is the only way to see it.
       const validator = await getValidatorForMode(mode);
 
       expect(validator, `no validator resolved for ${mode}`).toBeDefined();

@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The published bundle loads its mode validators.** `src/validation/validators/registry.ts` loaded
+  each validator with `await import(config.module)`, where `module` was a relative path held in a
+  variable. The build (`tsup`, one output file) cannot resolve such a path. `dist/index.js` looked
+  for `./modes/<mode>.js` next to itself and found nothing, and `loadValidator` turned the failed
+  import into `undefined`. Every thought from the built server then carried "No validator
+  registered for thinking mode: <mode>", and no mode-specific validation ran. Each registry entry
+  now holds a `load` function that calls `import()` with a literal specifier. The build includes
+  every validator, and the registry still creates each one on first use. The new integration test
+  `tests/integration/dist-bundle-validators.test.ts` starts the built `dist/index.js` over stdio,
+  sends one thought for each of the 34 modes, and fails on any "No validator registered" issue.
+  The committed `dist/` is rebuilt, so it also carries the source changes that were merged without
+  a rebuild, such as the shared-lock retry on `ENOENT` and `EPERM`. Validation issues that the
+  bundle never reported now appear in its replies.
+
 - **The architecture documents pass the drift gate again, and the prose is corrected where it was
   audited.** `repo-tools check . --docs=docs/architecture` exited 1 because the Verification tables held
   old counts, and the hand-written prose had drifted further than the counts. The tables and the
