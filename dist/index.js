@@ -65468,7 +65468,12 @@ async function acquireSharedLock(filePath, options) {
           flag: "wx"
         });
       } catch (error) {
-        if (error.code === "ENOENT") {
+        const code = error.code;
+        if (code === "ENOENT") {
+          continue;
+        }
+        if (code === "EINVAL" && process.platform === "darwin") {
+          await sleep(options.retryInterval);
           continue;
         }
         throw error;
