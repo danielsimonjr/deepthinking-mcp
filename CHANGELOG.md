@@ -108,6 +108,19 @@ workflow set.
   Dependabot rather than fix it: its bun parser supports only `bun.lock` lockfileVersion 1 while
   this repo writes version 2, so on that ecosystem no updates would be proposed at all.
 
+### Security
+
+- **The dependency audit passes again, and CodeQL runs on pull requests.** `bun audit` reported 13
+  advisories (5 high) against the lockfile: `@modelcontextprotocol/server`,
+  `@modelcontextprotocol/client` and `@modelcontextprotocol/core` at 2.0.0, `@vitest/mocker` at
+  5.0.1, `vite` at 8.1.3 (through `vitest`) and `source-map-js` at 1.2.1 (through `postcss` and
+  `magicast`). The ranges of the three SDK packages now start at `^2.3.1` and the ranges of
+  `vitest` and `@vitest/coverage-v8` at `^5.0.5`. The lockfile resolves `vite` to 8.1.6 and
+  `source-map-js` to 1.2.2. The audit finds no advisory. The weekly job `Dependency Audit` had
+  failed on its two most recent runs. The workflow `.github/workflows/codeql.yml` named the
+  branches `main` and `develop`, which this repository does not use, so CodeQL never ran on a pull
+  request or a push. It now names `master`.
+
 ## [10.0.1] - 2026-09-16
 
 ### Fixed
