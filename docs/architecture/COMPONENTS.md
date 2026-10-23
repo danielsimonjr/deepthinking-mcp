@@ -815,8 +815,9 @@ Every per-mode validator (below) implements this interface directly using free f
 Mode validators reach `ThoughtValidator` through two different mechanisms, and both are live.
 
 **Lazy path — `validators/registry.ts`.** A private `ValidatorRegistry` class (only its singleton
-instance is exported) holds `VALIDATOR_REGISTRY`, a `Record<string, { module, className }>` table
-naming 34 of the 35 mode-validator files (all but `meta`) by dynamic-import path:
+instance is exported) holds `VALIDATOR_REGISTRY`, a `Record<string, { load, className }>` table
+naming 34 of the 35 mode-validator files (all but `meta`). Each `load` is an arrow function that
+calls `import()` with a literal specifier:
 
 ```typescript
 export const validatorRegistry: ValidatorRegistry;  // singleton (class itself is not exported)
@@ -830,12 +831,19 @@ export async function preloadValidators(modes: string[]): Promise<void>
 
 `getValidatorForMode()` — the function `ThoughtValidator.performValidation()` actually calls — first
 checks the registry's in-memory cache, then `VALIDATOR_REGISTRY[mode]`, then `await
-import(config.module)` and instantiates `mod[config.className]`, caching the instance for
+config.load()` and instantiates `mod[config.className]`, caching the instance for
 subsequent calls. Ten of the 34 entries (`algorithmic`, `analysis`, `argumentation`, `critique`,
 `engineering`, `firstprinciples`, `formallogic`, `scientificmethod`, `synthesis`, `systemsthinking`)
-are reached exclusively through this `import()` call — no static `import` statement anywhere in
-`src/` references those ten files, which is why a purely static reachability scan cannot see them as
-used even though they are.
+are reached only through the `load` functions — no static `import` statement anywhere in `src/`
+references those ten files.
+
+The specifier in each `load` function is a literal. A bundler resolves a literal specifier at build
+time, so the single-file build (`dist/index.js`) carries every validator. A specifier held in a
+variable cannot be resolved at build time. The bundle then looks for `./modes/<mode>.js` next to
+`dist/index.js`, finds nothing, and `loadValidator` turns the failed import into `undefined`. Every
+mode then reports "No validator registered". `tests/integration/dist-bundle-validators.test.ts`
+starts the built `dist/index.js` and sends one thought for each mode, because no test that imports
+`src/` can see this failure.
 
 **Static path — `validators/index.ts`.** A hand-written barrel that re-exports 25 validator
 classes, the eight utility functions, the `ModeValidator` type and the registry API. It has no
@@ -2666,13 +2674,13 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 493 | repo-tools map (whole repository) |
-| totalLinesOfCode | 227447 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 494 | repo-tools map (whole repository) |
+| totalLinesOfCode | 227673 | repo-tools map (whole repository) |
 | totalExports | 2158 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
-| reachableFiles | 223 | repo-tools map (whole repository) |
-| orphanedFiles | 22 | repo-tools map (whole repository) |
-| noImporterFileCount | 22 | repo-tools map (whole repository) |
+| reachableFiles | 233 | repo-tools map (whole repository) |
+| orphanedFiles | 12 | repo-tools map (whole repository) |
+| noImporterFileCount | 12 | repo-tools map (whole repository) |
 
 Class counts, handler counts and validator counts in this document come from listing the files
 in `src/`. They are not graph metrics, so they do not appear in the table above.

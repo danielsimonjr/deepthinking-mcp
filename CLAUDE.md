@@ -26,7 +26,7 @@ hand-editing the numbers below — they have drifted from source repeatedly.
 | Visual Exporters | 42 files (24 mode-specific, 15 utils, 3 root) |
 | Specialized Handlers | 37 (34 modes + GenericModeHandler + CustomHandler + utility) |
 | Builder Classes | 14 fluent APIs |
-| Circular Dependencies | 61 (all type-only, 0 runtime) |
+| Circular Dependencies | 95 (all type-only, 0 runtime) |
 
 ## Build & Development Commands
 

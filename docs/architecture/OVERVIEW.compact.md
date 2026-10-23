@@ -8,12 +8,12 @@ export. ESM, Node >=20, stdio transport. Entry point: `src/index.ts`. Publishes 
 
 | Metric | Value |
 |---|---|
-| Source files, whole repo / `src/` only | 493 / 241 |
-| LOC, whole repo / `src/` only | 227,447 / 118,739 |
+| Source files, whole repo / `src/` only | 494 / 241 |
+| LOC, whole repo / `src/` only | 227,673 / 118,774 |
 | Exports, whole repo / `src/` only | 2,158 / 1,186 (487 re-exports) |
 | Runtime circular deps | 0 |
-| Type-only circular deps | 61 |
-| Files with no static importer | 22 (10 validators loaded by name, 6 barrels, 5 templates, 1 launcher script) |
+| Type-only circular deps | 95 |
+| Files with no static importer | 12 (6 barrels, 5 templates, 1 launcher script) |
 | Duplicate symbol names | 64 (32 guard pairs, 4 identical type declarations) |
 | Reasoning modes | 34, plus `custom` |
 | MCP tools | 13 |
@@ -26,7 +26,7 @@ export. ESM, Node >=20, stdio transport. Entry point: `src/index.ts`. Publishes 
 src/            241 files — index.ts, types/, modes/, services/, session/,
                  validation/, export/, proof/, taxonomy/, cache/, config/,
                  interfaces/, utils/
-tests/          226 files, mirrors src/
+tests/          227 files, mirrors src/
 tools/          15 files — standalone CLI utilities
 cli/            mcp-server-wrapper.mjs — launcher script for the Claude Code plugin
 templates/mode-scaffolding/  5 copy-paste files, by-design unimported
@@ -40,11 +40,11 @@ docs/architecture/  this doc set + generated reports
 tools, 2-4 modes each), `_session` (7 actions: summarize, export, export_all, get_session,
 switch_mode, recommend_mode, delete_session), `_analyze` (multi-mode analysis).
 
-## Files with no static importer — 22
+## Files with no static importer — 12
 
-- **16 are live or by design.** 10 mode validators load by name through the registry's
-  `import()`; 5 `templates/mode-scaffolding/` files are copy-paste starting points and are never
-  meant to be imported; `cli/mcp-server-wrapper.mjs` is started by the plugin, not imported.
+- **6 are live or by design.** 5 `templates/mode-scaffolding/` files are copy-paste starting
+  points and are never meant to be imported; `cli/mcp-server-wrapper.mjs` is started by the
+  plugin, not imported.
 - **6 are unused barrels.** `index.ts` in `cache/`, `export/`, `proof/`, `validation/`,
   `tools/schemas/` and `tools/schemas/modes/`.
 
@@ -73,6 +73,6 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 493 | repo-tools map (whole repository) |
-| typeOnlyCircularDeps | 61 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 494 | repo-tools map (whole repository) |
+| typeOnlyCircularDeps | 95 | repo-tools map (whole repository) |
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |

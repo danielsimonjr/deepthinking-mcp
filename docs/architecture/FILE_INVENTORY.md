@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **490 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **491 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -18,7 +18,7 @@ Every tracked TypeScript file in the repository — **490 files** — not just t
 | other | 2 |
 | reachable | 229 |
 | template | 5 |
-| test | 226 |
+| test | 227 |
 | tool | 14 |
 
 ## Per-area counts
@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **490 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 241 | 118,980 |
+| src | 241 | 119,015 |
 | templates | 5 | 772 |
-| tests | 226 | 101,370 |
+| tests | 227 | 101,562 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -277,7 +277,7 @@ Every tracked TypeScript file in the repository — **490 files** — not just t
 | `src/validation/validators/modes/synthesis.ts` | src | 409 | orphan |
 | `src/validation/validators/modes/systemsthinking.ts` | src | 229 | orphan |
 | `src/validation/validators/modes/temporal.ts` | src | 203 | reachable |
-| `src/validation/validators/registry.ts` | src | 314 | reachable |
+| `src/validation/validators/registry.ts` | src | 349 | reachable |
 | `src/validation/validators/validation-utils.ts` | src | 239 | reachable |
 | `templates/mode-scaffolding/example-mode.handler.ts` | templates | 264 | template |
 | `templates/mode-scaffolding/example-mode.json-schema.ts` | templates | 159 | template |
@@ -290,6 +290,7 @@ Every tracked TypeScript file in the repository — **490 files** — not just t
 | `tests/edge-cases/regression.test.ts` | tests | 368 | test |
 | `tests/edge-cases/session-edges.test.ts` | tests | 308 | test |
 | `tests/edge-cases/type-validation.test.ts` | tests | 211 | test |
+| `tests/integration/dist-bundle-validators.test.ts` | tests | 191 | test |
 | `tests/integration/error-handling.test.ts` | tests | 545 | test |
 | `tests/integration/export/batch-export.test.ts` | tests | 122 | test |
 | `tests/integration/export/visual/builders-integration.test.ts` | tests | 702 | test |
@@ -488,7 +489,7 @@ Every tracked TypeScript file in the repository — **490 files** — not just t
 | `tests/unit/validation/cache-key.test.ts` | tests | 106 | test |
 | `tests/unit/validation/registry-mode-coverage.test.ts` | tests | 166 | test |
 | `tests/unit/validation/unknown-mode.test.ts` | tests | 71 | test |
-| `tests/unit/validation/validator-file-coverage.test.ts` | tests | 104 | test |
+| `tests/unit/validation/validator-file-coverage.test.ts` | tests | 105 | test |
 | `tests/unit/validation/validators/modes/bayesian.test.ts` | tests | 305 | test |
 | `tests/unit/validation/validators/modes/causal.test.ts` | tests | 419 | test |
 | `tests/unit/validation/validators/modes/computability.test.ts` | tests | 713 | test |

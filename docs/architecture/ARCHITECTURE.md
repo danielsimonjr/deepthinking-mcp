@@ -54,18 +54,22 @@ format-specific exporters. See `DATAFLOW.md` for the full sequence.
 
 ## Circular Dependencies — the honest story
 
-`src/` has **61 circular dependencies, all type-only, and 0 runtime cycles**. That is safe —
+`src/` has **95 circular dependencies, all type-only, and 0 runtime cycles**. That is safe —
 type-only edges erase at compile time — but the claim rests on how the edges were classified,
 so it is worth knowing the shape before relying on it.
 
-**The shape.** `repo-tools query cycles` lists 61 simple cycles. They fall into three groups:
+**The shape.** `repo-tools query cycles` lists 95 simple cycles. They fall into three groups:
 
 - **32 two-file cycles.** `src/types/core.ts` imports from a `src/types/modes/<mode>.ts` file,
   and that file imports back from `core.ts`. For example, `core.ts <-> types/modes/sequential.ts`
   and `core.ts <-> types/modes/engineering.ts` are two of the 32.
-- **25 validator cycles.** `src/validation/validator.ts` imports `validators/index.ts`, which
-  imports `validators/modes/<mode>.ts`, which imports `ValidationContext` back from
-  `validator.ts` with `import type`.
+- **59 validator cycles.** Each cycle starts at `src/validation/validator.ts`, which imports
+  `validators/index.ts`, and ends at a `validators/modes/<mode>.ts` file, which imports
+  `ValidationContext` back from `validator.ts` with `import type`. Two routes join the two ends.
+  In 25 cycles, `index.ts` re-exports the validator class straight from the mode file. The other
+  34 cycles, one for each registered mode, run through the registry. `index.ts` re-exports the
+  registry API from `validators/registry.ts`. `registry.ts` loads the mode file with a dynamic
+  `import()`.
 - **4 other cycles.** All four run through `src/types/session.ts`. One is the two-file cycle
   `core.ts <-> session.ts`, one adds `types/modes/mathematics.ts`, and two reach `src/proof/`.
   The tool classifies each of them as type-only. Their edges were not read by hand.
@@ -87,7 +91,7 @@ two-file cycles directly found:
 
 **Why "0 runtime cycles" still holds.** Every one of the 32 two-file cycles breaks at compile
 time regardless of the reverse edge's flag, because `core.ts`'s outbound half of the pair is
-always genuinely type-only. Every one of the 25 validator cycles breaks at the `import type` in
+always genuinely type-only. Every one of the 59 validator cycles breaks at the `import type` in
 the mode validator. The safety conclusion is correct. The per-edge `typeOnly` flag is not
 proof of that conclusion on its own — it is evidence of whether an author wrote the `type`
 keyword, which is a weaker claim than "this import is never used as a value." Do not cite a
@@ -160,12 +164,12 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 493 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 494 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |
-| typeOnlyCircularDeps | 61 | repo-tools map (whole repository) |
-| orphanedFiles | 22 | repo-tools map (whole repository) |
-| noImporterFileCount | 22 | repo-tools map (whole repository) |
+| typeOnlyCircularDeps | 95 | repo-tools map (whole repository) |
+| orphanedFiles | 12 | repo-tools map (whole repository) |
+| noImporterFileCount | 12 | repo-tools map (whole repository) |
 
 Duplicate-symbol counts come from the `duplicate-symbols.json` that `repo-tools map` writes
 (`duplicateCount: 64`, `totalSymbols: 1348`), not from the file of that name in this directory.

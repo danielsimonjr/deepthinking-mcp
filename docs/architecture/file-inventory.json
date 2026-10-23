@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 490,
+    "totalFiles": 491,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 241,
-        "loc": 118980
+        "loc": 119015
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 226,
-        "loc": 101370
+        "files": 227,
+        "loc": 101562
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 229,
       "orphan": 12,
       "template": 5,
-      "test": 226,
+      "test": 227,
       "tool": 14,
       "config": 2
     }
@@ -1487,7 +1487,7 @@
     {
       "path": "src/validation/validators/registry.ts",
       "area": "src",
-      "loc": 314,
+      "loc": 349,
       "disposition": "reachable"
     },
     {
@@ -1560,6 +1560,12 @@
       "path": "tests/edge-cases/type-validation.test.ts",
       "area": "tests",
       "loc": 211,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/dist-bundle-validators.test.ts",
+      "area": "tests",
+      "loc": 191,
       "disposition": "test"
     },
     {
@@ -2753,7 +2759,7 @@
     {
       "path": "tests/unit/validation/validator-file-coverage.test.ts",
       "area": "tests",
-      "loc": 104,
+      "loc": 105,
       "disposition": "test"
     },
     {

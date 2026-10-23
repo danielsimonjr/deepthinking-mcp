@@ -268,11 +268,11 @@ session by `SessionConfig.enableValidation`, which defaults to `true`. It is fee
 Mode resolution inside the engine has two paths, worth documenting because they resolve differently:
 
 - **The lazy path** (`src/validation/validators/registry.ts`) — `VALIDATOR_REGISTRY`, a table of
-  34 modes each mapped to a `{ module, className }` pair. `ValidatorRegistry.getAsync(mode)` checks
-  its cache, then calls `loadValidator()`, which runs `await import(config.module)` and
-  instantiates the validator class on first use, caching the instance afterward. This is the path
-  `ThoughtValidator.performValidation()` actually calls, through `getValidatorForMode`
-  (re-exported from the barrel).
+  34 modes each mapped to a `{ load, className }` pair. `ValidatorRegistry.getAsync(mode)` checks
+  its cache, then calls `loadValidator()`. `loadValidator()` runs `await config.load()`, a literal
+  `import()` of the mode file. It instantiates the validator class on first use and caches the
+  instance afterward. This is the path `ThoughtValidator.performValidation()` actually calls,
+  through `getValidatorForMode` (re-exported from the barrel).
 - **The static barrel** (`src/validation/validators/index.ts`) — re-exports 25 validator classes
   as direct named exports (`SequentialValidator`, `MathematicsValidator`, ..., `ModalValidator`,
   `ConstraintValidator`, `StochasticValidator`, `RecursiveValidator`, `MetaValidator`), for any
@@ -283,7 +283,7 @@ entry in `VALIDATOR_REGISTRY`. `ThinkingMode` has no `meta` member (the real mod
 `metareasoning`, which has its own entry), so no thought can reach `MetaValidator`. Ten modes in the
 registry (`engineering`, `firstprinciples`, `systemsthinking`, `scientificmethod`, `formallogic`,
 `algorithmic`, `synthesis`, `argumentation`, `critique`, `analysis`) have no corresponding static
-export in the barrel — they are reachable only through the lazy dynamic-import path.
+export in the barrel — they are reachable only through the registry's `load` functions.
 `ThinkingMode.CUSTOM` is in neither list, because a user-defined mode has no fixed shape for a mode
 validator; `performValidation()` adds a warning-severity issue for a mode without a validator.
 Every other `ThinkingMode` member has a registry entry. The two "supported mode" lists in this
@@ -916,11 +916,11 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 493 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 494 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
-| reachableFiles | 223 | repo-tools map (whole repository) |
+| reachableFiles | 233 | repo-tools map (whole repository) |
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |
-| typeOnlyCircularDeps | 61 | repo-tools map (whole repository) |
+| typeOnlyCircularDeps | 95 | repo-tools map (whole repository) |
 
 Every flow above was traced by reading the cited source. Tool names, action names, the
 mode-to-tool mapping, and which function calls which are confirmed by direct grep, with the file

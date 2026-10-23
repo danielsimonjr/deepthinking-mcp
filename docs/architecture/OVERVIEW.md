@@ -24,16 +24,16 @@ document does not repeat it.
 
 | Metric | Value | Scope | Source |
 |---|---|---|---|
-| Source files, whole repo | 493 | repo-wide | `repo-tools map` (490 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
+| Source files, whole repo | 494 | repo-wide | `repo-tools map` (491 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
 | TypeScript files, `src/` | 241 | src only | `repo-tools map`, files under `src/` |
-| Lines of code, whole repo | 227,447 | repo-wide | `repo-tools map` |
-| Lines of code, `src/` | 118,739 | src only | `repo-tools map`, files under `src/` |
+| Lines of code, whole repo | 227,673 | repo-wide | `repo-tools map` |
+| Lines of code, `src/` | 118,774 | src only | `repo-tools map`, files under `src/` |
 | Total exports, whole repo | 2,158 | repo-wide | `repo-tools map` |
 | Total exports, `src/` | 1,186 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
 | Entry roots | 1 (`src/index.ts`) | repo-wide | `repo-tools map` |
 | Runtime circular dependencies | 0 | repo-wide | `repo-tools map`, confirmed by direct edge inspection |
-| Type-only circular dependencies | 61 | repo-wide | `repo-tools map` |
-| Files with no static importer | 22 (10 mode validators loaded by name, 6 barrel files, 5 scaffolding templates, 1 launcher script) | repo-wide | `repo-tools map`, checked with `repo-tools query dependents` — see below |
+| Type-only circular dependencies | 95 | repo-wide | `repo-tools map` |
+| Files with no static importer | 12 (6 barrel files, 5 scaffolding templates, 1 launcher script) | repo-wide | `repo-tools map`, checked with `repo-tools query dependents` — see below |
 | Duplicate symbol names | 64 (32 guard pairs, 4 identical type declarations) | src | `repo-tools map` (its own `duplicate-symbols.json`) — see below |
 | Reasoning modes | 34, plus `custom` (35 `ThinkingMode` members) | src | `src/types/core.ts` `ThinkingMode` enum |
 | Reasoning types defined | 69 | src | `src/taxonomy/reasoning-types.ts` (surfaced by `recommend_mode`) |
@@ -44,14 +44,14 @@ document does not repeat it.
 | Fluent builder classes | 14 | src | `src/export/visual/utils/` |
 
 The whole-repo and `src`-only export counts (2,158 vs 1,186) are not a contradiction. They
-come from two tools and count different file sets: `repo-tools map` reads all 493 files, and
+come from two tools and count different file sets: `repo-tools map` reads all 494 files, and
 `tools/create-dependency-graph` reads the 241 files of `src/`.
 
 ## Project Structure
 
 ```
 deepthinking-mcp/
-├── src/                # 241 files, 118,739 LOC — the package
+├── src/                # 241 files, 118,774 LOC — the package
 │   ├── index.ts        # entry point, all 13 tool handlers
 │   ├── types/           # ThinkingMode enum, Thought union, per-mode types
 │   ├── modes/            # mode handlers, registry, combinations, stochastic
@@ -65,7 +65,7 @@ deepthinking-mcp/
 │   ├── config/            # environment-variable configuration
 │   ├── interfaces/       # DI interfaces
 │   └── utils/             # errors, logger, sanitization
-├── tests/               # 226 files, 101,144 LOC
+├── tests/               # 227 files, 101,335 LOC
 ├── tools/                # 15 files, 4,718 LOC — standalone CLI utilities
 ├── cli/                  # mcp-server-wrapper.mjs — launcher script for the Claude Code plugin
 ├── templates/mode-scaffolding/  # 5 copy-paste templates for authoring a new mode
@@ -96,8 +96,10 @@ analysis. See `DATAFLOW.md` for the full tool-to-mode mapping and the request pa
 Three mechanisms bring code in besides a plain `import` statement. Each is deliberate, and
 together they account for most of what looks unreferenced at a glance:
 
-- **Mode validators load by name.** `loadValidator` in `validators/registry.ts` loads all 34
-  registered mode validators with a dynamic `import()` from a module-path table. Ten of them
+- **Mode validators load on the first thought of their mode.** `loadValidator` in
+  `validators/registry.ts` loads all 34 registered mode validators through a table of `load`
+  functions. Each `load` function calls `import()` with a literal specifier, so the bundler
+  puts every validator into the single-file build (`dist/index.js`). Ten of them
   (`algorithmic`, `analysis`, `argumentation`, `critique`, `engineering`, `firstprinciples`,
   `formallogic`, `scientificmethod`, `synthesis`, `systemsthinking`) have no other importer. The
   other 24 are also exported by the static `validators/index.ts` barrel, which exports 25
@@ -118,7 +120,7 @@ barrel file. Consumers import the concrete modules directly.
 Two more files are reached only by tests: `modes/stochastic/models/distribution.ts` and
 `modes/stochastic/sampling/rng.ts`.
 
-`repo-tools map` lists 247 exports that have no importer. 88 of them have no reference at all — not
+`repo-tools map` lists 237 exports that have no importer. 78 of them have no reference at all — not
 even inside their own file. The other 159 are referenced only in the file that defines them. This
 split is a text match, so a name that also appears in a string or a comment counts as referenced.
 The reports that `tools/create-dependency-graph` generates count 491 unused exports under their
@@ -141,19 +143,19 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 493 | repo-tools map (whole repository) |
-| totalLinesOfCode | 227447 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 494 | repo-tools map (whole repository) |
+| totalLinesOfCode | 227673 | repo-tools map (whole repository) |
 | totalExports | 2158 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
-| reachableFiles | 223 | repo-tools map (whole repository) |
-| dormantFiles | 24 | repo-tools map (whole repository) |
-| orphanedFiles | 22 | repo-tools map (whole repository) |
+| reachableFiles | 233 | repo-tools map (whole repository) |
+| dormantFiles | 14 | repo-tools map (whole repository) |
+| orphanedFiles | 12 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |
-| typeOnlyCircularDeps | 61 | repo-tools map (whole repository) |
-| noImporterFileCount | 22 | repo-tools map (whole repository) |
-| unusedExportsCount | 247 | repo-tools map (whole repository) |
+| typeOnlyCircularDeps | 95 | repo-tools map (whole repository) |
+| noImporterFileCount | 12 | repo-tools map (whole repository) |
+| unusedExportsCount | 237 | repo-tools map (whole repository) |
 
 Note on `totalModules`: `repo-tools map` counts 5 top-level project areas (`docs`, `config`, `src`,
 `tools`, `tests`), not `src/` subdirectories. DEPENDENCY_GRAPH.md's "14 modules" counts `src/`

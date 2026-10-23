@@ -136,6 +136,9 @@ jobs:
       - name: Build package
         run: bun run build
 
+      - name: Bundle validator test (the built server must load every mode validator)
+        run: bunx vitest run tests/integration/dist-bundle-validators.test.ts
+
       - name: Node runtime smoke (the shipped artifact must load under Node)
         run: |
           node --input-type=module -e '
