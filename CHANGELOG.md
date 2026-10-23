@@ -31,7 +31,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `duplicate-symbols.json` counts 65; the handler interface is documented as
   `HandlerValidationError`; `escapeLatex` is documented as one implementation; the package is
   documented as one bundled `dist/index.js`; and the shared-lock retry on `ENOENT` and `EPERM` is
-  described. Source line numbers that rot with each edit are replaced by file and symbol anchors.
+  described. Line numbers that the audit could not keep stable are replaced by file and symbol anchors,
+  and each `path:line` reference that remains was read against the source.
   `TEST_COVERAGE.md` is rewritten from the tree: it holds no run-state test count, the per-directory
   counts are measured, `SKIP_BENCHMARKS=1` is documented as excluding `tests/unit/benchmarks/` and
   not `tests/performance/`, and the statements that `src/proof/` and `src/taxonomy/` are unreachable
