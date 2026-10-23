@@ -413,11 +413,19 @@ async function acquireSharedLock(
           flag: "wx",
         });
       } catch (error: unknown) {
-        if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        const code = (error as NodeJS.ErrnoException).code;
+        if (code === "ENOENT") {
           // A reader releasing the last shared lock removes the directory
           // when it is empty. That can happen between our mkdir and our
           // write. The directory is only a container, so recreate it and
           // retry at once; this is not a lock conflict and needs no wait.
+          continue;
+        }
+        if (code === "EINVAL" && process.platform === "darwin") {
+          // The same race on macOS: the kernel can refuse an exclusive
+          // create inside a directory that is being removed with EINVAL
+          // instead of ENOENT. On any other system EINVAL is a real error.
+          await sleep(options.retryInterval);
           continue;
         }
         throw error;
