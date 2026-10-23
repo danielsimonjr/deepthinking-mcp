@@ -102,7 +102,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Removed the now-dead `Generate changelog` step.** With `body:` gone nothing consumed its output;
   a step that computes an unused value is how the next reader is misled about what the workflow does.
 
-Unchanged on purpose: no `npm publish` in CI, and the third-party action SHA pins elsewhere in the
+Unchanged on purpose: no `npm publish` in `release.yml` (`publish.yml` is the only npm publisher), and the third-party action SHA pins elsewhere in the
 workflow set.
 
 - **Every Dependabot PR failed CI at the install step, and the cause was a contract mismatch
