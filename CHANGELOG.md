@@ -13,6 +13,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The architecture documents pass the drift gate again, and the prose is corrected where it was
+  audited.** `repo-tools check . --docs=docs/architecture` exited 1 because the Verification tables held
+  old counts, and the hand-written prose had drifted further than the counts. The tables and the
+  generated reports now come from one `repo-tools map` run of the same tree. The gate reads only the
+  Verification tables, so the prose was checked against the source by hand. The prose corrections: the SDK entry point (`buildServer()`,
+  `registerHandlers()`, the `tools/list` and `tools/call` handlers, `serveStdio`, and the entry-point
+  guard that makes `src/index.ts` importable) replaces the SDK v1 handler names; the validation engine
+  and the proof analysis are documented as the advisory steps that `SessionManager.addThought()` runs,
+  with the `validation` and `proofAnalysis` response fields, where the documents had called them
+  unreachable; the counts of handlers (35), tools (11 mode-grouping tools, a session tool and an
+  analyze tool), modes (34, plus `custom`), session actions (7), `customModes` values (34) and preset
+  modes are measured from the tree; the legacy tool is documented with the 6 actions its handler
+  dispatches; the deleted `validation/schemas.ts` and `schema-utils.ts` are no longer described; the
+  61 type-only cycles appear in their three groups; the duplicate-name text states the measured 64
+  names (32 guard pairs and 4 identical type declarations) and explains why the committed
+  `duplicate-symbols.json` counts 65; the handler interface is documented as
+  `HandlerValidationError`; `escapeLatex` is documented as one implementation; the package is
+  documented as one bundled `dist/index.js`; and the shared-lock retry on `ENOENT` and `EPERM` is
+  described. Line numbers that the audit could not keep stable are replaced by file and symbol anchors,
+  and each `path:line` reference that remains was read against the source.
+  `TEST_COVERAGE.md` is rewritten from the tree: it holds no run-state test count, the per-directory
+  counts are measured, `SKIP_BENCHMARKS=1` is documented as excluding `tests/unit/benchmarks/` and
+  not `tests/performance/`, and the statements that `src/proof/` and `src/taxonomy/` are unreachable
+  from the entry point and that `index-handlers.test.ts` tests the real handlers are corrected.
+  The signature blocks in `COMPONENTS.md` are rewritten from the source (the earlier blocks named
+  methods, parameters, return types and config fields that do not exist), and the field tables in
+  `API.md` are checked against the Zod schemas, including the fields that a handler accepts and
+  never reads. Prose outside the audited sections, the root `CLAUDE.md` and `DRIFT_REPORT.md` can
+  still differ from the source. No source file changed.
+
 - **The Dependabot bun.lock workflow no longer leaves a PR BLOCKED.** GitHub holds the
   `pull_request` runs that the workflow's lockfile push triggers at `action_required`, and a
   `workflow_dispatch` run never reaches the PR's required checks. The workflow now approves the

@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 489,
+    "totalFiles": 490,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 241,
-        "loc": 118934
+        "loc": 118980
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 225,
-        "loc": 101105
+        "files": 226,
+        "loc": 101370
       },
       "tools": {
         "files": 14,
@@ -24,7 +24,7 @@
       },
       "config": {
         "files": 2,
-        "loc": 49
+        "loc": 52
       }
     },
     "byDisposition": {
@@ -32,7 +32,7 @@
       "reachable": 229,
       "orphan": 12,
       "template": 5,
-      "test": 225,
+      "test": 226,
       "tool": 14,
       "config": 2
     }
@@ -359,7 +359,7 @@
     {
       "path": "src/index.ts",
       "area": "src",
-      "loc": 1043,
+      "loc": 1061,
       "disposition": "reachable"
     },
     {
@@ -1205,7 +1205,7 @@
     {
       "path": "src/utils/file-lock.ts",
       "area": "src",
-      "loc": 630,
+      "loc": 658,
       "disposition": "reachable"
     },
     {
@@ -1691,13 +1691,19 @@
     {
       "path": "tests/integration/index-importable.test.ts",
       "area": "tests",
-      "loc": 71,
+      "loc": 94,
       "disposition": "test"
     },
     {
       "path": "tests/integration/index-server.test.ts",
       "area": "tests",
-      "loc": 334,
+      "loc": 333,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/mcp-2-compliance.test.ts",
+      "area": "tests",
+      "loc": 136,
       "disposition": "test"
     },
     {
@@ -1709,7 +1715,7 @@
     {
       "path": "tests/integration/mcp-protocol.test.ts",
       "area": "tests",
-      "loc": 755,
+      "loc": 752,
       "disposition": "test"
     },
     {
@@ -1823,7 +1829,7 @@
     {
       "path": "tests/integration/tools/analyze-confidence-contract.test.ts",
       "area": "tests",
-      "loc": 90,
+      "loc": 89,
       "disposition": "test"
     },
     {
@@ -2183,7 +2189,7 @@
     {
       "path": "tests/unit/file-lock.test.ts",
       "area": "tests",
-      "loc": 154,
+      "loc": 265,
       "disposition": "test"
     },
     {
@@ -2963,7 +2969,7 @@
     {
       "path": "tsup.config.ts",
       "area": "config",
-      "loc": 15,
+      "loc": 18,
       "disposition": "config"
     },
     {

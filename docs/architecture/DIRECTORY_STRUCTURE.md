@@ -14,8 +14,10 @@ count into this file again.
 ## `src/` — the package
 
 ### `index.ts`
-The MCP server entry point. All 13 tool handlers. No mode-specific logic — that lives in
-`src/modes/` and `src/services/` by convention.
+The MCP server entry point. `buildServer()` registers the `tools/list` and `tools/call` handlers,
+and the `tools/call` handler dispatches all 13 tools. The module starts the stdio server only
+when it is the process entry point. No mode-specific logic — that lives in `src/modes/` and
+`src/services/` by convention.
 
 ### `types/`
 Type definitions for all reasoning modes. `core.ts` holds the `ThinkingMode` enum and the
@@ -33,15 +35,16 @@ Business logic extracted out of `index.ts`: `ThoughtFactory.ts` (thought creatio
 
 ### `session/`
 `SessionManager` and its lifecycle. `storage/` abstracts in-memory vs. file-based session
-storage (`SESSION_DIR`). `locks/` implements cross-process file locking for the multi-instance
-case. See `DATAFLOW.md` for the live/dead distinction between this and the separate,
-non-functional `MCP_ENABLE_PERSISTENCE` config field.
+storage (`SESSION_DIR`). The cross-process file locking for the multi-instance case is in
+`src/utils/file-lock.ts`. See `DATAFLOW.md` for the live/dead distinction between this and the
+separate, non-functional `MCP_ENABLE_PERSISTENCE` config field.
 
 ### `validation/`
-Zod schemas and validation logic. `validators/index.ts` is a static barrel covering most mode
-validators; `validators/registry.ts` is a separate lazy-loading table that dynamically imports
-the remaining mode validators by name at runtime. Both paths are live; only the loading
-mechanism differs. `schemas.ts` and `schema-utils.ts` are unused (see `COMPONENTS.md`).
+Thought validation: `ThoughtValidator`, the per-mode validators and the advisory wrapper.
+`validators/registry.ts` lists all 34 registered mode validators and imports each one by name at
+runtime. `validators/index.ts` is a static barrel that exports 25 validator classes: 24 of the
+registered ones and `MetaValidator`, which is not a registered mode. The Zod schemas for
+tool-call arguments are in `src/tools/`. `validation/index.ts` is unused.
 
 ### `export/`
 Document exporters at the top level. `visual/` holds diagram-format exporters:
@@ -56,12 +59,13 @@ recommender. `proof/index.ts` is unused, for the same reason as `export/index.ts
 
 ### `taxonomy/`
 Reasoning-type classification. `reasoning-types.ts` defines all 69 reasoning types.
-`classifier.ts` is unused — the only occurrence of its name in `src/index.ts` is a JSDoc
-comment, not an import.
+`advisory.ts` is the entry point that the live request path uses. It wraps the classifier and
+the suggestion engine.
 
 ### `cache/`
-Caching strategies (LRU, LFU, FIFO). `cache/index.ts` is unused — consumers import the
-concrete strategy files directly.
+The LRU cache (`lru.ts`) and its types (`types.ts`). The `CacheStrategy` type in `types.ts` also
+names `lfu` and `fifo`, but no file implements them. `cache/index.ts` is unused — consumers import
+`lru.ts` and `types.ts` directly.
 
 ### `config/`
 Centralized environment-variable configuration. See `DATAFLOW.md`'s "Data Persistence"
@@ -71,14 +75,20 @@ section for a specific example of a config field that is read here but consumed 
 Dependency-injection interfaces.
 
 ### `tools/`
-MCP tool definitions and schemas: `schemas/` (per-tool and per-mode JSON schemas) and
-`validators/` (tool-level input validators, distinct from the per-mode validators in
-`src/validation/`).
+MCP tool definitions and schemas. `definitions.ts` lists the tools and maps each tool name to its
+Zod schema (`toolSchemas`). `schemas/` holds the Zod schemas themselves: `shared.ts` holds the
+shared field schemas and enums, `base.ts` holds `BaseThoughtSchema` and `SessionActionSchema` (the
+schema of the session tool), `analyze.ts` holds the schema of the analyze tool, and the ten
+`modes/<group>.ts` files hold the 11 schemas of the mode-grouping tools (`modes/core.ts` holds two:
+the core tool and the standard tool).
+`json-schemas.ts` holds the JSON Schemas that `tools/list` advertises. `thinking.ts` holds the
+schema of the legacy `deepthinking` tool.
 
 ### `utils/`
 `errors.ts` (the `DeepThinkingError` hierarchy and its subclasses), `logger.ts`, and
-`sanitization.ts` (includes the canonical `escapeLatex` — see `ARCHITECTURE.md` for the
-duplicate in `export/visual/utils/tikz.ts`).
+`sanitization.ts` (includes the canonical `escapeLatex`, which `export/visual/utils/tikz.ts`,
+`export/visual/utils/latex.ts` and `services/ExportService.ts` use), and
+`file-lock.ts` (the cross-process file locks).
 
 ## `templates/mode-scaffolding/`
 
@@ -94,25 +104,20 @@ Mirrors the `src/` directory structure under `tests/{unit,integration,edge-cases
 
 ## `tools/`
 
-Standalone CLI utilities, compiled to executables separately from the main package: a
-markdown-file chunker/merger, a context-compression tool, and the dependency-graph generator
-(`create-dependency-graph`) that produces `DEPENDENCY_GRAPH.md`.
+Standalone CLI utilities, built separately from the main package: a markdown-file
+chunker/merger, a context-compression tool, a field extractor for the schema-parity check
+(`schema-parity`), and the dependency-graph generator (`create-dependency-graph`) that produces
+`DEPENDENCY_GRAPH.md`.
 
 `create-dependency-graph/` keeps orchestration in its entry file and the work in `src/`, layered
 so the module graph stays acyclic: `types.ts` and `paths.ts` are leaves, `config.ts` resolves the
 project root and output paths, `scanner.ts` is the only layer that reads source text, `analysis.ts`
-derives the graph, and `reporters/` render it without re-reading source. Each committed `.exe` here
-is built from those sources and **goes stale silently** — rebuild it whenever the tool changes.
+derives the graph, and `reporters/` render it without re-reading source. Run the generator from
+source with `npm run docs:deps`. The chunker and the context-compression tool are committed as
+`.exe` files that are built from their sources. A committed `.exe` **goes stale silently**, so
+rebuild it whenever its tool changes.
 
 ## `docs/architecture/`
 
 This document set, plus the machine-generated reports it points to
 (`DEPENDENCY_GRAPH.md`, `unused-analysis.md`, and their JSON/YAML equivalents).
-
-## An empty stray directory
-
-`src/search/` exists on disk as an empty directory (0 files) after commit `5857f90` deleted its
-contents ("refactor: delete the dead src/search/ subsystem"). Nothing references it. It was
-most likely never `rmdir`'d after the file deletions. It is safe to remove; it is not part of
-the current module structure and no generated report lists it, because it contains nothing to
-list.

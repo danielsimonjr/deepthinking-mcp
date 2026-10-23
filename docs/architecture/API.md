@@ -1,8 +1,7 @@
 # DeepThinking MCP — API Reference
 
 Complete reference for the DeepThinking MCP tool surface. For architecture and module layout see
-the sibling architecture docs; for environment variables see `CLAUDE.md`. This document describes
-the *current* tool surface only.
+the sibling architecture docs; for environment variables see `CLAUDE.md`.
 
 ---
 
@@ -27,7 +26,8 @@ the *current* tool surface only.
 17. [The legacy `deepthinking` tool](#the-legacy-deepthinking-tool)
 18. [Input limits](#input-limits)
 19. [npm package surface](#npm-package-surface)
-20. [Verification](#verification)
+20. [Source-verified facts](#source-verified-facts)
+21. [Verification](#verification)
 
 ---
 
@@ -35,8 +35,8 @@ the *current* tool surface only.
 
 DeepThinking MCP exposes its reasoning modes through the Model Context Protocol (MCP). A client
 connects over stdio, completes the MCP `initialize` handshake, then calls tools by name through
-`CallToolRequest`. `tools/list` returns 13 tools. A 14th tool, the legacy `deepthinking` tool, is
-still callable but hidden from `tools/list` (see
+`CallToolRequest`. `tools/list` returns 13 tools. A 14th tool, `deepthinking`, is
+callable but hidden from `tools/list` (see
 [The legacy `deepthinking` tool](#the-legacy-deepthinking-tool)).
 
 ### Request envelope
@@ -58,13 +58,25 @@ Every call is a JSON object matching one tool's input schema:
 
 The server validates `arguments` against a Zod schema before running any logic
 (`src/tools/definitions.ts` maps each tool name to its Zod schema in `toolSchemas`). The JSON
-Schema advertised by `tools/list` (`src/tools/json-schemas.ts`) and the Zod schema used for runtime
-validation (`src/tools/schemas/`) describe the same shape; the JSON Schema is hand-written for
-client-side display, the Zod schema is the actual gate.
+Schema advertised by `tools/list` (`src/tools/json-schemas.ts`) is hand-written for client-side
+display. The Zod schema (`src/tools/schemas/`) is the actual gate. Both schemas list the same
+top-level fields for each tool. They differ in these details:
 
-**All inputs are bounded.** Every free-text string, every array, and every record (object with
-dynamic keys) carries a maximum size. There is no unbounded field anywhere in the tool surface. See
-[Input limits](#input-limits) for the concrete numbers.
+- The advertised JSON Schema sets `additionalProperties` to `false`. The Zod schema strips an
+  unknown field and returns no error, so the server accepts a call with an unknown field and
+  ignores the field.
+- The advertised JSON Schema does not list `mode` in `required` for the 11 add-thought tools. The
+  Zod schema requires `mode`.
+- The advertised JSON Schema has four `maxItems` keys and no `maxLength`. The Zod schema bounds
+  every string, array and record.
+- A few nested details differ. The tool sections state them: `constraints[].type` of
+  `deepthinking_temporal` and `nodes[].type` of `deepthinking_causal`.
+
+**All inputs are bounded in the Zod schema.** Every free-text string, every array, and every record
+(object with dynamic keys) carries a maximum size. One exception: the values inside
+`events[].properties` of `deepthinking_temporal` accept any JSON value. The key length and the entry
+count are bounded there, but the size of a value is not. See [Input limits](#input-limits) for the
+concrete numbers.
 
 ### Response shape
 
@@ -78,10 +90,14 @@ A successful call returns:
 }
 ```
 
-`content` is an array of MCP content blocks; this server only ever returns one block, of type
-`text`, whose `text` is a JSON string (`JSON.stringify(response, null, 2)`). Callers must parse
-`content[0].text` to get the structured result. The exact shape of the parsed JSON differs per tool
-and is documented in each section below.
+`content` is an array of MCP content blocks; this server returns one block, of type `text`. The
+add-thought tools and `deepthinking_analyze` set `text` to a JSON string
+(`JSON.stringify(response, null, 2)`). Among the `deepthinking_session` actions, `get_session` and
+`export_all` return JSON, and `export` returns JSON in profile mode and in file mode. The actions
+`summarize`, `switch_mode`, `recommend_mode` and `delete_session`, and `export` with a single
+`exportFormat` in content mode, return plain text. Parse `content[0].text` as JSON only when the
+section for that tool or action documents a JSON response. The exact shape of the parsed JSON
+differs per tool and is documented in each section below.
 
 ### Error shape
 
@@ -97,7 +113,7 @@ On failure, the server returns:
 ```
 
 `isError: true` is set on every caught exception — Zod validation failures, unknown tool names, and
-runtime errors all take this path (`src/index.ts`, the `CallToolRequestSchema` handler's `catch`
+runtime errors all take this path (`src/index.ts`, the `tools/call` handler's `catch`
 block). There is no structured error code; the message is the only detail. A client should treat
 any response with `isError: true` as a failure regardless of what `content[0].text` says.
 
@@ -113,7 +129,7 @@ These fields are documented once here; each per-tool section below states only i
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `sessionId` | string | No | Session to add this thought to. Omit to create a new session automatically. Bounded by `IdSchema` (≤ 1,000 chars). |
+| `sessionId` | string | No | UUID of an existing session, as an earlier call returned it. Omit it to create a new session. The server returns an error for a value that is not a UUID and for a UUID that names no session. Bounded by `SessionIdSchema` (≤ 100 chars). |
 | `thought` | string | **Yes** | The current thought or reasoning step. Non-empty. Bounded by `ThoughtTextSchema` (≤ 100,000 chars). |
 | `thoughtNumber` | integer | **Yes** | Current thought number in sequence. Minimum 1. |
 | `totalThoughts` | integer | **Yes** | Estimated total number of thoughts needed. Minimum 1. |
@@ -129,13 +145,23 @@ These fields are documented once here; each per-tool section below states only i
 
 `thoughtNumber`, `totalThoughts`, and `nextThoughtNeeded` together let a client stream a multi-step
 reasoning chain: call the tool repeatedly with the same `sessionId`, incrementing `thoughtNumber`
-each time, until `nextThoughtNeeded` is `false`. `isRevision` + `revisesThought` let a later thought
-correct an earlier one in the same session without starting over. `branchFrom` + `branchId` let a
-client explore an alternative continuation from a specific prior thought while keeping the original
-line intact.
+each time, until `nextThoughtNeeded` is `false`.
 
-Every "add a thought" tool also accepts a `mode` field, whose enum values differ per tool (documented
-per section below), and adds tool-specific fields on top of the base set.
+The server stores `isRevision` and `revisesThought` on the thought in every mode. It stores
+`branchFrom`, `branchId` and `revisionReason` only in `sequential` mode. It stores `uncertainty`,
+`dependencies` and `assumptions` in some modes only. All modes accept these fields. A mode that does
+not store a field ignores it and returns no error. The server runs no branch logic and no revision
+logic: it does not create a branch and does not replace the revised thought. The stored values are
+labels that the exporters and the client read.
+
+Every "add a thought" tool also requires a `mode` field, whose enum values differ per tool
+(documented per section below), and adds tool-specific fields on top of the base set. The Zod
+schema rejects a call without `mode`, although the advertised JSON Schema does not list `mode` as
+required.
+
+The tables in this document list the fields that the server accepts. A mode handler can ignore an
+accepted field. The rows for `deepthinking_mathematics` and `deepthinking_engineering` mark the
+known cases.
 
 ### Response shape for add-thought tools
 
@@ -149,26 +175,49 @@ returns the same response shape, parsed from `content[0].text`:
   "thoughtNumber": 1,
   "mode": "deductive",
   "nextThoughtNeeded": false,
-  "sessionComplete": false,
-  "totalThoughts": 1,
+  "sessionComplete": true,   // true once the session holds a thought with nextThoughtNeeded false
+  "totalThoughts": 1,        // number of thoughts now stored in the session
   "modeStatus": {
     "mode": "deductive",
     "isFullyImplemented": true,
     "hasSpecializedHandler": true,
     "note": "" // present only when the mode lacks a specialized handler, or is experimental
   },
-  "decomposition": null,      // present only for modes that run proof decomposition
-  "consistencyReport": null,  // present only for modes that run consistency checking
-  "gapAnalysis": null         // present only for modes that run gap analysis
+  "validation": {},         // advisory validation; absent only when the session turns it off
+  "proofAnalysis": {},      // advisory proof analysis; present only for a thought with proof content
+  "decomposition": null,      // never present through the 13 tools (see below)
+  "consistencyReport": null,  // never present through the 13 tools (see below)
+  "gapAnalysis": null         // never present through the 13 tools (see below)
 }
 ```
 
 `sessionId` is either the ID you passed in, or a freshly created session ID when you omitted it.
+`totalThoughts` is the number of thoughts now stored in the session. It does not echo the
+`totalThoughts` estimate of the request. `sessionComplete` is `true` once the session has stored a
+thought with `nextThoughtNeeded` set to `false`.
+`validation` is feedback from the mode validator on the stored thought. It never rejects the call.
+When the validator ran, the object holds `available: true`, `isValid`, `confidence`, `issues` (at
+most 20, errors first, then warnings, then information), `totalIssues`, `issuesTruncated`,
+`strengthMetrics` and `suggestions` (at most 10, without duplicates). When no validator loads for
+the mode, `issues` holds one warning, `No validator registered for thinking mode: <mode>`, and
+`suggestions` lists the modes that have a validator. When the validator threw, the
+object is `{ "available": false, "reason": "…" }`. The field is absent when the session sets
+`enableValidation` to `false`. `proofAnalysis` is feedback on proof content. It is present only when the thought holds proof
+content: a `mathematics` thought whose `proofStrategy.steps` has at least two entries, or a
+`mathematics` or `formallogic` thought whose `thoughtType` is a proof-bearing type
+(`proof_construction` for `formallogic`) and whose `thought` text holds at least two statements. When the analysis ran, the object holds `available: true`, `source`,
+`decompositionSource`, `theorem` (when known), `completeness`, `rigorLevel`, `maxDependencyDepth`,
+`gapCompleteness`, `stepsAnalyzed`, `hasCircularReasoning`, `circularSummary`, bounded lists
+(`atoms`, `gaps`, `implicitAssumptions`, `suggestions`, `unjustifiedSteps`, `cycles`,
+`inconsistencies`), `totals` with the counts before truncation, `truncated` with a flag for each
+list that was capped, and `extended` (the extended analysis, when it ran). When an analyser threw,
+the object is `{ "available": false, "reason": "…" }`.
 `modeStatus.note` explains when a mode is experimental or falls back to the generic handler; it is
 absent when the mode is fully implemented with a specialized handler. `decomposition`,
-`consistencyReport`, and `gapAnalysis` are only populated for modes whose handler runs proof
-analysis (mathematics-family modes); other modes omit them or return `undefined`, which
-`JSON.stringify` drops from the output entirely.
+`consistencyReport`, and `gapAnalysis` come from input fields that no tool schema declares, and
+Zod strips undeclared keys. Through the 13 tools these three fields are therefore always absent:
+they are `undefined`, which `JSON.stringify` drops from the output. They hold a value only for a
+direct caller of the library.
 
 Per-tool sections below only describe deviations from this shape (there are none among the 11
 add-thought tools — the shape is identical across all of them; only the `mode` value and which
@@ -186,7 +235,7 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 
 | Field | Type | Required | Applies to | Description |
 |---|---|---|---|---|
-| `mode` | `"inductive" \| "deductive" \| "abductive"` | No | all | Core reasoning mode. |
+| `mode` | `"inductive" \| "deductive" \| "abductive"` | **Yes** | all | Core reasoning mode. |
 | `observations` | string[] | No | inductive, abductive | Specific cases observed. Array of `TextSchema` (≤ 10,000 chars each), ≤ 1,000 items. |
 | `pattern` | string | No | inductive | Identified pattern. `TextSchema`. |
 | `generalization` | string | No | inductive | General principle formed. `TextSchema`. |
@@ -201,7 +250,8 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 | `hypotheses` | object[] | No | abductive | Candidate explanations. Each item: `{ id: string, explanation: string, score?: number }`. `id` bounded by `IdSchema`, `explanation` by `TextSchema`. Array ≤ 500 items (`NESTED_ARRAY_ITEMS`). |
 | `bestExplanation` | object | No | abductive | Best explanation chosen. Same shape as one `hypotheses` item. |
 
-`inputSchema.additionalProperties` is `false` — a client cannot pass fields outside this list.
+The advertised `inputSchema` sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error.
 
 ### Returns
 
@@ -229,22 +279,23 @@ Request:
 }
 ```
 
-Response (`content[0].text`, parsed):
+Response (`content[0].text`, parsed; shortened):
 
 ```json
 {
   "sessionId": "a1b2c3d4-...",
-  "thoughtId": "t-0001",
+  "thoughtId": "b4f1c2e8-...",
   "thoughtNumber": 1,
   "mode": "deductive",
   "nextThoughtNeeded": false,
-  "sessionComplete": false,
+  "sessionComplete": true,
   "totalThoughts": 1,
   "modeStatus": {
     "mode": "deductive",
     "isFullyImplemented": true,
     "hasSpecializedHandler": true
-  }
+  },
+  "validation": { /* advisory validation */ }
 }
 ```
 
@@ -281,11 +332,12 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 
 | Field | Type | Required | Applies to | Description |
 |---|---|---|---|---|
-| `mode` | `"sequential" \| "shannon" \| "hybrid"` | No | all | Thinking mode to use. |
+| `mode` | `"sequential" \| "shannon" \| "hybrid"` | **Yes** | all | Thinking mode to use. |
 | `stage` | `"problem_definition" \| "constraints" \| "model" \| "proof" \| "implementation"` | No | shannon only | Shannon methodology stage. |
 | `activeModes` | string[] | No | hybrid only | Active sub-modes for hybrid mode. Array of `IdSchema`, ≤ 1,000 items. |
 
-`additionalProperties` is `false`.
+The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error.
 
 ### Returns
 
@@ -317,8 +369,8 @@ Response shape is the [standard add-thought response](#response-shape-for-add-th
 
 ## deepthinking_mathematics
 
-Math/physics/computability reasoning: proofs, Turing machines, decidability, tensors, LaTeX,
-conservation laws. Modes: `mathematics`, `physics`, `computability`.
+Mathematics, physics and computability reasoning. The mode-specific fields cover proofs, LaTeX
+models, tensors and conservation laws. Modes: `mathematics`, `physics`, `computability`.
 
 ### Input schema
 
@@ -326,26 +378,35 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `mode` | `"mathematics" \| "physics" \| "computability"` | No | Mathematical reasoning mode. |
+| `mode` | `"mathematics" \| "physics" \| "computability"` | **Yes** | Mathematical reasoning mode. |
 | `thoughtType` | string | No | Specific thought type for mathematics mode. Use `proof_decomposition`, `dependency_analysis`, `consistency_check`, `gap_identification`, or `assumption_trace` for proof analysis. `IdSchema` (≤ 1,000 chars). |
 | `mathematicalModel` | object | No | `{ latex: string, symbolic: string, ascii?: string }`. `latex` and `symbolic` required; each `TextSchema` (≤ 10,000 chars). |
 | `proofStrategy` | object | No | `{ type: ProofType, steps: string[] }`. `type` is one of `direct`, `contradiction`, `induction`, `construction`, `contrapositive`. `steps` is an array of `IdSchema` (≤ 1,000 items). Both fields required if the object is present. |
 | `tensorProperties` | object | No | `{ rank: [number, number], components: string, latex: string, symmetries: string[], invariants: string[], transformation: "covariant" \| "contravariant" \| "mixed" }`. `rank`, `components`, `latex`, `transformation` required. |
 | `physicalInterpretation` | object | No | `{ quantity: string, units: string, conservationLaws: string[] }`, all required. `quantity`/`units` are `IdSchema`; `conservationLaws` an `IdSchema[]` (≤ 1,000 items). |
-| `proofSteps` | object[] | No | Structured proof steps for decomposition analysis. Each: `{ stepNumber: integer ≥ 1, statement: string, justification?: string, latex?: string, referencesSteps?: integer[] }`. `statement`/`justification`/`latex` are `TextSchema`; `referencesSteps` ≤ 1,000 items. Array ≤ 500 items (`NESTED_ARRAY_ITEMS`). |
-| `theorem` | string | No | The theorem being proved, for proof decomposition. `TextSchema`. |
-| `hypotheses` | string[] | No | Starting hypotheses for the proof. Array of `IdSchema`, ≤ 1,000 items. |
-| `analysisDepth` | `"shallow" \| "standard" \| "deep"` | No | Depth of proof analysis. |
-| `includeConsistencyCheck` | boolean | No | Whether to run inconsistency detection. |
-| `traceAssumptions` | boolean | No | Whether to include assumption chain analysis. |
+| `proofSteps` | object[] | No | Structured proof steps. The server accepts the field and does not use it. Each: `{ stepNumber: integer ≥ 1, statement: string, justification?: string, latex?: string, referencesSteps?: number[] }`. `statement`/`justification`/`latex` are `TextSchema`; `referencesSteps` ≤ 1,000 items. Array ≤ 500 items (`NESTED_ARRAY_ITEMS`). |
+| `theorem` | string | No | The theorem being proved. The server accepts the field and does not use it. `TextSchema`. |
+| `hypotheses` | string[] | No | Starting hypotheses for the proof. The server accepts the field and does not use it. Array of `IdSchema`, ≤ 1,000 items. |
+| `analysisDepth` | `"shallow" \| "standard" \| "deep"` | No | Depth of proof analysis. The server accepts the field and does not use it. |
+| `includeConsistencyCheck` | boolean | No | Whether to run inconsistency detection. The server accepts the field and does not use it. |
+| `traceAssumptions` | boolean | No | Whether to include assumption chain analysis. The server accepts the field and does not use it. |
 
-`additionalProperties` is `false`.
+The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error.
+
+In `computability` mode the tool has no mode-specific input field. The server accepts the shared
+fields and `thoughtType`, and the computability handler reads other fields (for example `machines`
+and `decidabilityProof`) that no tool schema declares, so Zod strips them. The `physics` handler
+reads `fieldTheoryContext`, which no tool schema declares either.
 
 ### Returns
 
-The [standard add-thought response](#response-shape-for-add-thought-tools). When `proofSteps` is
-supplied and `thoughtType` requests proof analysis, `decomposition`, `consistencyReport`, and/or
-`gapAnalysis` populate in the response depending on which flags were set.
+The [standard add-thought response](#response-shape-for-add-thought-tools). The proof analysis
+comes from the thought itself, not from the six proof input fields above. When `mode` is
+`mathematics` and the thought carries proof content (a `proofStrategy` with at least two `steps`,
+or a proof-type `thoughtType` whose `thought` text holds at least two statements), the response
+includes `proofAnalysis`. The fields `decomposition`, `consistencyReport` and `gapAnalysis` stay
+absent.
 
 ### Example — proof decomposition
 
@@ -383,23 +444,23 @@ Request:
 }
 ```
 
-Response (`content[0].text`, parsed) follows the standard shape, with `decomposition`,
-`consistencyReport`, and `gapAnalysis` populated because `proofSteps` was supplied and both check
-flags were set:
+Response (`content[0].text`, parsed) follows the standard shape. `proofAnalysis` is present because
+`proofStrategy.steps` holds four statements. The server ignores `theorem`, `proofSteps`,
+`includeConsistencyCheck`, `traceAssumptions` and `analysisDepth`, so no `decomposition`,
+`consistencyReport` or `gapAnalysis` appears:
 
 ```jsonc
 {
   "sessionId": "a1b2c3d4-...",
-  "thoughtId": "t-0001",
+  "thoughtId": "b4f1c2e8-...",
   "thoughtNumber": 1,
   "mode": "mathematics",
   "nextThoughtNeeded": false,
-  "sessionComplete": false,
+  "sessionComplete": true,
   "totalThoughts": 1,
   "modeStatus": { "mode": "mathematics", "isFullyImplemented": true, "hasSpecializedHandler": true },
-  "decomposition": { /* structured proof-step graph */ },
-  "consistencyReport": { /* inconsistency findings, if any */ },
-  "gapAnalysis": { /* unjustified steps, if any */ }
+  "validation": { /* advisory validation */ },
+  "proofAnalysis": { /* atoms, gaps, cycles, inconsistencies, extended analysis */ }
 }
 ```
 
@@ -447,15 +508,15 @@ mode-specific groups of fields. All top-level object arrays below are bounded at
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `mode` | `"temporal" \| "historical"` | No | Temporal or historical reasoning mode. |
+| `mode` | `"temporal" \| "historical"` | **Yes** | Temporal or historical reasoning mode. |
 
 **Temporal-mode fields:**
 
 | Field | Type | Description |
 |---|---|---|
-| `timeline` | object | `{ id, name, timeUnit, events: string[], startTime?: number, endTime?: number }`. `timeUnit` is one of `milliseconds, seconds, minutes, hours, days, months, years`. `id`/`name`/`events` required. |
-| `events` | object[] | Temporal events. Each: `{ id, name, description, timestamp: number, type: "instant" \| "interval", duration?: number, properties?: record }`. `id`/`name`/`description`/`timestamp`/`type` required. `properties` is a bounded record (key `IdSchema`, ≤ 1,000 entries) of arbitrary values. |
-| `constraints` | object[] | Temporal constraints. Each: `{ id, type: "before" \| "after" \| "during" \| "simultaneous", subject: string, object: string, confidence: number 0–1 }`, all required. |
+| `timeline` | object | `{ id, name, timeUnit, events: string[], startTime?: number, endTime?: number }`. `timeUnit` is one of `milliseconds, seconds, minutes, hours, days, months, years`. `id`/`name`/`timeUnit`/`events` required. |
+| `events` | object[] | Temporal events. Each: `{ id, name, description, timestamp: number, type: "instant" \| "interval", duration?: number, properties?: record }`. `id`/`name`/`description`/`timestamp`/`type` required. `properties` is a bounded record (key `IdSchema`, ≤ 1,000 entries) whose values can be any JSON value, with no size limit. |
+| `constraints` | object[] | Temporal constraints. Each: `{ id, type: "before" \| "after" \| "during" \| "overlaps" \| "meets" \| "starts" \| "finishes" \| "equals", subject: string, object: string, confidence: number 0–1 }`, all required. The advertised JSON Schema lists `simultaneous` in place of the last five values, and the server rejects `simultaneous`. |
 | `intervals` | object[] | Temporal intervals. Each: `{ id, name, start: number, end: number, contains?: string[], overlaps?: string[] }`, `id`/`name`/`start`/`end` required. |
 | `relations` | object[] | Temporal relations, Allen's interval algebra. Each: `{ id, from, to, relationType, strength: number 0–1, delay?: number }`, all but `delay` required. `relationType` is one of `before, after, during, overlaps, meets, starts, finishes, equals, causes`. |
 
@@ -463,15 +524,16 @@ mode-specific groups of fields. All top-level object arrays below are bounded at
 
 | Field | Type | Description |
 |---|---|---|
-| `thoughtType` | string | Type of historical analysis: `event_analysis`, `source_evaluation`, `pattern_identification`, `causal_chain`, or `periodization`. |
+| `thoughtType` | enum | Type of historical analysis: `event_analysis`, `source_evaluation`, `pattern_identification`, `causal_chain`, or `periodization`. The server rejects any other value. |
 | `historicalEvents` | object[] | Each: `{ id, name, date: string \| { start, end, precision? }, location?, description?, actors?: string[], causes?: string[], effects?: string[], significance: "minor" \| "moderate" \| "major" \| "transformative", sources?: string[], tags?: string[] }`. `id`/`name`/`date`/`significance` required. `date.precision` is one of `exact, approximate, century, decade, year, month, day`. |
 | `historicalSources` | object[] | Each: `{ id, title, type: "primary" \| "secondary" \| "tertiary", subtype?, author?, date?, reliability: number 0–1, bias?: { type, direction?, severity? }, corroboratedBy?: string[], contradictedBy?: string[] }`. `id`/`title`/`type`/`reliability` required. `subtype` is one of `document, artifact, oral, visual, archaeological, statistical`. `bias.type` is one of `political, religious, cultural, economic, nationalistic, ideological, personal`. |
 | `periods` | object[] | Each: `{ id, name, startDate, endDate, characteristics: string[], keyEvents?, keyActors?, themes? }`. `id`/`name`/`startDate`/`endDate`/`characteristics` required. |
-| `causalChains` | object[] | Each: `{ id, name, links: { cause, effect, mechanism?, confidence: number, evidence?: string[] }[], confidence: number 0–1, alternativeExplanations?: string[] }`. `id`/`name`/`links`/`confidence` required; each link's `cause`/`effect`/`confidence` required, `links` array ≤ 500 items. |
+| `causalChains` | object[] | Each: `{ id, name, links: { cause, effect, mechanism?, confidence: number 0–1, evidence?: string[] }[], confidence: number 0–1, alternativeExplanations?: string[] }`. `id`/`name`/`links`/`confidence` required; each link's `cause`/`effect`/`confidence` required, `links` array ≤ 500 items. |
 | `actors` | object[] | Each: `{ id, name, type: "individual" \| "group" \| "institution" \| "nation" \| "movement" \| "class", period?, roles?, motivations?, relationships?: { actorId, type, description? }[], significance? }`. `id`/`name`/`type` required. `relationships[].type` is one of `ally, rival, subordinate, superior, colleague, influenced_by, mentor, successor`, `relationships` array ≤ 500 items. |
 | `historiographicalSchool` | string | Historiographical school of thought, e.g. Annales, Marxist, Postmodern. `IdSchema`. |
 
-`additionalProperties` is `false`.
+The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error.
 
 ### Returns
 
@@ -525,7 +587,8 @@ The [standard add-thought response](#response-shape-for-add-thought-tools).
 
 ## deepthinking_probabilistic
 
-Bayesian updates and Dempster-Shafer belief reasoning. Modes: `bayesian`, `evidential`.
+Bayesian updates, Dempster-Shafer belief reasoning, and stochastic processes. Modes: `bayesian`,
+`evidential`, `stochastic`.
 
 ### Input schema
 
@@ -533,7 +596,7 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 
 | Field | Type | Required | Applies to | Description |
 |---|---|---|---|---|
-| `mode` | `"bayesian" \| "evidential"` | No | all | Probabilistic reasoning mode. |
+| `mode` | `"bayesian" \| "evidential" \| "stochastic"` | **Yes** | all | Probabilistic reasoning mode. |
 | `priorProbability` | number 0–1 | No | bayesian | Prior probability before evidence. |
 | `likelihood` | number 0–1 | No | bayesian | Likelihood of evidence given hypothesis. |
 | `posteriorProbability` | number 0–1 | No | bayesian | Posterior probability after evidence. |
@@ -544,12 +607,25 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 | `beliefFunction` | record | No | evidential | Belief function values, same shape as `massFunction`. |
 | `plausibilityFunction` | record | No | evidential | Plausibility function values, same shape as `massFunction`. |
 
-The Zod validator also accepts an optional `beliefMasses` array (`{ hypothesisSet: string[], mass:
-number 0–1, justification: string }`, ≤ 500 items) for Dempster-Shafer belief-mass assignment. This
-field is present in the runtime schema but not in the advertised JSON Schema — it validates if sent
-but a client relying only on `tools/list` will not discover it.
+**Stochastic-mode fields** (`mode: "stochastic"`; all optional):
 
-`additionalProperties` is `false`.
+| Field | Type | Description |
+|---|---|---|
+| `thoughtType` | string | Step label, `IdSchema`. The server accepts any value and gives a warning, not an error, for an unknown one. The advertised values are `process_definition`, `transition_analysis`, `steady_state_analysis`, `random_variable_definition`, `monte_carlo_simulation`, `convergence_analysis` and `hitting_time_analysis`. |
+| `processType` | string | Kind of stochastic process. `IdSchema`. |
+| `stepCount` | integer | Number of steps taken. Minimum 0. |
+| `currentState` | string | Current state of the process. `IdSchema`. |
+| `stateHistory` | string[] | States visited. Array of `IdSchema`, ≤ 1,000 items. |
+| `markovChain` | object | `{ id?, name?, states?, transitions?, initialDistribution?, isIrreducible?, isErgodic?, period? }`. Each `states` item: `{ id?, name?, description?, probability?: number 0–1, isAbsorbing?, isTransient? }`. Each `transitions` item: `{ id?, fromState?, toState?, probability?: number 0–1, condition? }`. Both arrays ≤ 500 items. `initialDistribution` is a bounded record of numbers. `period` is an integer ≥ 1. |
+| `randomVariables` | object[] | Each: `{ id?, name?, distribution?, parameters?: record<string, number>, samples?: number[], expectedValue?, variance? }`. `samples` ≤ 1,000 items. Array ≤ 500 items. |
+| `simulations` | object[] | Monte Carlo runs. Each: `{ id?, iterations?: integer ≥ 0, mean?, variance?, confidenceInterval?: [number, number], samples?: number[] }`. `samples` ≤ 1,000 items. Array ≤ 500 items. |
+| `simulationResults` | object[] | Alias of `simulations` with the same shape. The handler reads both. |
+
+The field `thoughtType` also applies to `bayesian` and `evidential`. The field `beliefMasses` does
+not exist: the Dempster-Shafer input is `massFunction`.
+
+The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error.
 
 ### Returns
 
@@ -609,20 +685,20 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `mode` | `"causal" \| "counterfactual"` | No | Causal reasoning mode. |
-| `nodes` | object[] | No | Nodes in the causal graph. Each: `{ id, name, description? }`. `id`/`name` required. Array ≤ 500 items. |
+| `mode` | `"causal" \| "counterfactual"` | **Yes** | Causal reasoning mode. |
+| `nodes` | object[] | No | Nodes in the causal graph. Each: `{ id, name, description?, type? }`. `id`/`name` required. `type` is one of `cause`, `effect`, `mediator`, `confounder`; the server accepts `type`, and the advertised JSON Schema does not list it. Array ≤ 500 items. |
 | `edges` | object[] | No | Causal edges. Each: `{ from, to, strength?: number 0–1, type?: string }`. `from`/`to` required. Array ≤ 500 items. |
+| `causalGraph` | object | No | `{ nodes, edges }`, both required, with the same item shapes as the top-level `nodes` and `edges`. An alternative form of those two fields. |
 | `interventions` | object[] | No | Interventions applied to the causal graph. Each: `{ node, value?, effect? }`. `node` required. Array ≤ 500 items. |
 | `counterfactual` | object | No | `{ actual?, hypothetical?, consequence? }` — all fields optional strings, `TextSchema`. |
 | `observations` | string[] | No | Observed phenomena for abductive-style reasoning within causal mode. Array of `IdSchema`, ≤ 1,000 items. |
 | `explanations` | object[] | No | Candidate explanations. Each: `{ hypothesis, plausibility?: number 0–1 }`. `hypothesis` required, `TextSchema`. Array ≤ 500 items. |
 
-The Zod validator additionally accepts a legacy nested `causalGraph: { nodes, edges }` object (same
-item shapes as `nodes`/`edges` above) for backward compatibility, and an `"abductive"` value in
-`mode`'s enum. Neither is present in the advertised JSON Schema; prefer the top-level `nodes` /
-`edges` fields and `deepthinking_core`'s dedicated abductive mode instead.
+The `mode` values are `causal` and `counterfactual` only. For abductive reasoning, use
+`deepthinking_core`.
 
-`additionalProperties` is `false`.
+The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error.
 
 ### Returns
 
@@ -679,7 +755,8 @@ The [standard add-thought response](#response-shape-for-add-thought-tools).
 
 ## deepthinking_strategic
 
-Game theory, Nash equilibria, and optimization. Modes: `gametheory`, `optimization`.
+Game theory, Nash equilibria, optimization, and constraint satisfaction (CSP). Modes: `gametheory`,
+`optimization`, `constraint`.
 
 ### Input schema
 
@@ -687,16 +764,32 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 
 | Field | Type | Required | Applies to | Description |
 |---|---|---|---|---|
-| `mode` | `"gametheory" \| "optimization"` | No | all | Strategic reasoning mode. |
+| `mode` | `"gametheory" \| "optimization" \| "constraint"` | **Yes** | all | Strategic reasoning mode. |
 | `players` | object[] | No | gametheory | Players in the game. Each: `{ id, name, isRational: boolean, availableStrategies: string[], role?: string }`. `id`/`name`/`isRational`/`availableStrategies` required. Array ≤ 500 items. |
 | `strategies` | object[] | No | gametheory | Available strategies. Each: `{ id, playerId, name, description, isPure: boolean, probability?: number 0–1 }`. All but `probability` required. Array ≤ 500 items. |
 | `payoffMatrix` | object | No | gametheory | `{ players: string[], dimensions: number[], payoffs: { strategyProfile: string[], payoffs: number[] }[] }`, all required. `payoffs[].payoffs` ≤ 1,000 items; `payoffs` array ≤ 500 entries. |
 | `objectiveFunction` | string | No | optimization | Function to optimize. `TextSchema`. |
 | `constraints` | string[] | No | optimization | Optimization constraints. Array of `IdSchema`, ≤ 1,000 items. |
 | `optimizationMethod` | string | No | optimization | Method used for optimization. `IdSchema`. |
-| `solution` | object | No | optimization | `{ value: string, variables?: record<string, number> }`. `value` required, `TextSchema`. `variables` is a bounded record (key `IdSchema`, ≤ 1,000 entries). |
+| `solution` | object | No | optimization | `{ value?: string, variables?: record<string, number> }`. Both members are optional. `value` uses `TextSchema`. `variables` is a bounded record (key `IdSchema`, ≤ 1,000 entries). |
 
-`additionalProperties` is `false`.
+**Constraint-mode fields** (`mode: "constraint"`; all optional). The constraint objects of a CSP use
+`cspConstraints`, because `constraints` stays a string array for `optimization`.
+
+| Field | Type | Description |
+|---|---|---|
+| `thoughtType` | string | Step label, `IdSchema`. The server accepts any value and gives a warning, not an error, for an unknown one. The advertised values are `problem_formulation`, `variable_definition`, `constraint_definition`, `domain_reduction`, `arc_consistency`, `propagation`, `solution_search`, `backtracking` and `feasibility_check`. |
+| `variables` | object[] | CSP variables. Each: `{ id?, name?, domain?: (string \| number)[], currentValue?: string \| number, domainReduced?: boolean, assignedAt?: integer ≥ 0 }`. `domain` ≤ 1,000 items. Array ≤ 500 items. |
+| `cspConstraints` | object[] | CSP constraints. Each: `{ id?, name?, type?, variables?: string[], expression?, satisfied?: boolean, priority?, weight?: number }`. `type` and `priority` are strings. Array ≤ 500 items. |
+| `currentAssignments` | record | Variable to value (string or number). Bounded record, ≤ 1,000 entries. |
+| `assignmentHistory` | object[] | Each: `{ variableId?, value?: string \| number, step?: integer ≥ 0, backtracked?: boolean }`. Array ≤ 500 items. |
+| `arcs` | object[] | Arcs of the constraint graph. Each: `{ from?, to?, constraintId? }`. Array ≤ 500 items. |
+| `backtracks`, `searchStep`, `solutionCount` | integer | Search counters. Minimum 0. |
+| `isArcConsistent` | boolean | Whether the arc-consistency check passed. |
+| `solutionStatus` | string | Status of the search. `IdSchema`. |
+
+The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error.
 
 ### Returns
 
@@ -763,8 +856,8 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 
 | Field | Type | Required | Applies to | Description |
 |---|---|---|---|---|
-| `mode` | `"analogical" \| "firstprinciples" \| "metareasoning" \| "cryptanalytic"` | No | all | Analytical reasoning mode. |
-| `sourceAnalogy` | object | No | analogical | Source domain for analogy. `{ domain: string, elements?: string[], relations?: string[] }`. |
+| `mode` | `"analogical" \| "firstprinciples" \| "metareasoning" \| "cryptanalytic"` | **Yes** | all | Analytical reasoning mode. |
+| `sourceAnalogy` | object | No | analogical | Source domain for analogy. `{ domain?: string, elements?: string[], relations?: string[] }`. All three members are optional. `domain` is at most 1,000 characters. `elements` and `relations` hold at most 1,000 items. |
 | `targetAnalogy` | object | No | analogical | Target domain for analogy. Same shape as `sourceAnalogy`. |
 | `mappings` | object[] | No | analogical | Mappings between domains. Each: `{ source, target, confidence?: number 0–1 }`. `source`/`target` required. Array ≤ 500 items. |
 | `fundamentals` | string[] | No | firstprinciples | Fundamental truths or axioms. Array of `IdSchema`, ≤ 1,000 items. |
@@ -773,7 +866,8 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 `metareasoning` and `cryptanalytic` carry no dedicated structured fields beyond the shared thought
 fields — express their content through `thought`, `uncertainty`, `dependencies`, and `assumptions`.
 
-`additionalProperties` is `false`.
+The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error.
 
 ### Returns
 
@@ -821,8 +915,8 @@ The [standard add-thought response](#response-shape-for-add-thought-tools).
 
 ## deepthinking_scientific
 
-Hypothesis testing, systems thinking, and formal logic. Modes: `scientificmethod`,
-`systemsthinking`, `formallogic`.
+Hypothesis testing, systems thinking, formal logic, and modal logic (possible worlds). Modes:
+`scientificmethod`, `systemsthinking`, `formallogic`, `modal`.
 
 ### Input schema
 
@@ -830,18 +924,27 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 
 | Field | Type | Required | Applies to | Description |
 |---|---|---|---|---|
-| `mode` | `"scientificmethod" \| "systemsthinking" \| "formallogic"` | No | all | Scientific reasoning mode. |
+| `mode` | `"scientificmethod" \| "systemsthinking" \| "formallogic" \| "modal"` | **Yes** | all | Scientific reasoning mode. |
 | `hypothesis` | string | No | scientificmethod | Scientific hypothesis. `TextSchema`. |
 | `predictions` | string[] | No | scientificmethod | Testable predictions. Array of `IdSchema`, ≤ 1,000 items. |
 | `experiments` | object[] | No | scientificmethod | Experiments conducted. Each: `{ id, description, result? }`. `id`/`description` required. Array ≤ 500 items. |
 | `systemComponents` | object[] | No | systemsthinking | Components of the system. Each: `{ id, name, role? }`. `id`/`name` required. Array ≤ 500 items. |
 | `interactions` | object[] | No | systemsthinking | Interactions between components. Each: `{ from, to, type }`, all required. Array ≤ 500 items. |
-| `feedbackLoops` | object[] | No | systemsthinking | Feedback loops in the system. Each: `{ type: "positive" \| "negative" \| "neutral", components: string[] }`. Array ≤ 500 items. |
+| `feedbackLoops` | object[] | No | systemsthinking | Feedback loops in the system. Each: `{ type?: "positive" \| "negative" \| "neutral", components?: string[] }`. Both members are optional. Array ≤ 500 items. |
 | `premises` | string[] | No | formallogic | Logical premises. Array of `IdSchema`, ≤ 1,000 items. |
 | `conclusion` | string | No | formallogic | Logical conclusion. `TextSchema`. |
 | `inference` | string | No | formallogic | Type of logical inference used. `TextSchema`. |
+| `thoughtType` | string | No | all | Step label, `IdSchema`. The server accepts any value and gives a warning, not an error, for an unknown one. The advertised values for `modal` are `world_definition`, `proposition_analysis`, `accessibility_analysis`, `necessity_proof`, `possibility_proof`, `modal_inference` and `countermodel`. |
+| `worlds` | object[] | No | modal | Possible worlds. Each: `{ id?, name?, description?, propositions?: record<string, boolean>, isActual?: boolean, accessibility?: string[] }`. Array ≤ 500 items. |
+| `actualWorld` | string | No | modal | ID of the actual world. `IdSchema`. |
+| `propositions` | object[] | No | modal | Each: `{ id?, content?, operator?, truthValue?: boolean, worldsTrue?: string[], worldsFalse?: string[] }`. Array ≤ 500 items. |
+| `accessibilityRelations` | object[] | No | modal | Each: `{ id?, fromWorld?, toWorld?, type?, modalType? }`. Array ≤ 500 items. |
+| `inferences` | object[] | No | modal | Modal inferences. Each: `{ id?, premises?: string[], conclusion?, rule?, valid?: boolean, justification? }`. Array ≤ 500 items. |
+| `modalLogicType` | string | No | modal | Modal logic system, for example `S5`. `IdSchema`. |
+| `modalDomain` | string | No | modal | Domain of the modal reasoning. `IdSchema`. |
 
-`additionalProperties` is `false`.
+The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error.
 
 ### Returns
 
@@ -898,8 +1001,8 @@ The [standard add-thought response](#response-shape-for-add-thought-tools).
 
 ## deepthinking_engineering
 
-Requirements analysis, trade studies, FMEA, ADRs, and algorithm design (CLRS coverage). Modes:
-`engineering`, `algorithmic`.
+Requirements analysis, trade studies, FMEA, ADRs, algorithm design (CLRS coverage), and recursive
+decomposition. Modes: `engineering`, `algorithmic`, `recursive`.
 
 ### Input schema
 
@@ -907,16 +1010,25 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 
 | Field | Type | Required | Applies to | Description |
 |---|---|---|---|---|
-| `mode` | `"engineering" \| "algorithmic"` | No | all | Engineering reasoning mode. |
-| `requirementId` | string | No | engineering | Requirement ID being analyzed. `IdSchema`. |
-| `tradeStudy` | object | No | engineering | `{ options: string[], criteria: string[], weights?: record<string, number> }`. The Zod validator requires `options` and `criteria`; the advertised JSON Schema marks the whole object's properties optional, so omitting them passes `tools/list`'s schema but fails the actual call. `weights` is a bounded record (key `IdSchema`, ≤ 1,000 entries). |
-| `fmeaEntry` | object | No | engineering | `{ failureMode: string, severity: integer 1–10, occurrence: integer 1–10, detection: integer 1–10, rpn?: integer }`. `rpn` is the Risk Priority Number (Severity × Occurrence × Detection); the server does not compute it, the caller supplies it. Same discrepancy as `tradeStudy`: Zod requires `failureMode`/`severity`/`occurrence`/`detection`, the JSON Schema does not mark them required. |
+| `mode` | `"engineering" \| "algorithmic" \| "recursive"` | **Yes** | all | Engineering reasoning mode. |
+| `requirementId` | string | No | engineering | Requirement ID being analyzed. `IdSchema`. The server accepts the field and does not store it. |
+| `tradeStudy` | object | No | engineering | `{ options?: string[], criteria?: string[], weights?: record<string, number> }`. All members are optional. `options` and `criteria` are arrays of `IdSchema`, ≤ 1,000 items. `weights` is a bounded record (key `IdSchema`, ≤ 1,000 entries). The engineering handler stores `criteria` only. It does not store `options` or `weights`. |
+| `fmeaEntry` | object | No | engineering | `{ failureMode?: string, severity?: integer 1–10, occurrence?: integer 1–10, detection?: integer 1–10, rpn?: integer }`. All members are optional. `failureMode` uses `TextSchema`. `rpn` is the Risk Priority Number (Severity × Occurrence × Detection). The server accepts the field and does not store it, and it does not compute `rpn` from this field. |
 | `algorithmName` | string | No | algorithmic | Name of the algorithm being analyzed. `NameSchema` (≤ 500 chars). |
 | `designPattern` | string | No | algorithmic | One of `divide-and-conquer`, `dynamic-programming`, `greedy`, `backtracking`, `branch-and-bound`, `randomized`, `approximation`. |
-| `complexityAnalysis` | object | No | algorithmic | `{ timeComplexity: string, spaceComplexity?, bestCase?, averageCase?, worstCase? }`, e.g. `"O(n log n)"`. Zod requires `timeComplexity`; the JSON Schema marks it optional. |
-| `correctnessProof` | object | No | algorithmic | `{ invariant: string, termination: string, correctness: string }` — loop invariant, termination argument, correctness proof. Zod requires all three; the JSON Schema marks them optional. |
+| `complexityAnalysis` | object | No | algorithmic | `{ timeComplexity?: string, spaceComplexity?, bestCase?, averageCase?, worstCase? }`, e.g. `"O(n log n)"`. All members are optional and use `IdSchema`. |
+| `correctnessProof` | object | No | algorithmic | `{ invariant?: string, termination?: string, correctness?: string }` — loop invariant, termination argument, correctness proof. All members are optional and use `TextSchema`. |
+| `thoughtType` | string | No | all | Step label, `IdSchema`. The server accepts any value and gives a warning, not an error, for an unknown one. The advertised values for `recursive` are `problem_decomposition`, `base_case_identification`, `recursive_step`, `subproblem_solution`, `solution_combination` and `termination_analysis`. |
+| `subproblems` | object[] | No | recursive | Each: `{ id?, name?, description?, size?: string \| number, depth?: integer ≥ 0, parentId?, status?, result? }`. Array ≤ 500 items. |
+| `baseCases` | object[] | No | recursive | Each: `{ id?, condition?, result?, verified?: boolean }`. Array ≤ 500 items. |
+| `baseCaseReached` | boolean | No | recursive | Whether the recursion reached a base case. |
+| `currentDepth`, `maxDepth` | integer | No | recursive | Recursion depth now, and the depth limit. Minimum 0. |
+| `recurrence` | object | No | recursive | `{ formula?, baseCase?, closedForm?, complexity? }`. |
+| `strategy` | string | No | recursive | Decomposition strategy, `IdSchema`. The handler recognizes `divide_and_conquer`, `decrease_and_conquer`, `transform_and_conquer` and `dynamic_programming`. These values use underscores, and `designPattern` uses hyphens. |
+| `divisionFactor` | number | No | recursive | Factor by which each step divides the problem. |
 
-`additionalProperties` is `false`.
+The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error.
 
 ### Returns
 
@@ -983,7 +1095,7 @@ Academic research reasoning: synthesis (literature review), argumentation (Toulm
 
 ### Input schema
 
-Carries all [shared thought fields](#shared-thought-fields) plus a `mode` field, an optional
+Carries all [shared thought fields](#shared-thought-fields) plus a required `mode` field, an optional
 `thoughtType` (`IdSchema`), and per-submode fields below. All structured object arrays are bounded
 at 500 items (`NESTED_ARRAY_ITEMS`); plain string arrays at 1,000 items. `title`/`name`/`label` use
 `NameSchema` (≤ 500 chars); free text uses `TextSchema` (≤ 10,000 chars); short strings use
@@ -996,7 +1108,6 @@ at 500 items (`NESTED_ARRAY_ITEMS`); plain string arrays at 1,000 items. `title`
 | `sources` | object[] | Literature sources being synthesized. Each: `{ id, title, type?, authors?: string[], year?: integer, venue?, doi?, relevance?: number 0–1 }`. `id`/`title` required. |
 | `themes` | object[] | Identified themes across sources. Each: `{ id, name, description?, sourceIds?: string[], strength?: number 0–1, consensus?: "strong" \| "moderate" \| "weak" \| "contested" }`. `id`/`name` required. |
 | `gaps` | object[] | Identified gaps in the literature (structured). Each: `{ id, description, type?, importance? }`. `id`/`description` required. `type` is one of `empirical, theoretical, methodological, population, contextual`; `importance` is one of `critical, significant, moderate, minor`. |
-| `researchGaps` | string[] | Advertised in the JSON Schema (`tools/list`) as a plain string array of literature gaps, but the Zod validator that actually gates the call has no `researchGaps` field. Zod's default parse mode strips unrecognized keys silently — sending this field has **no effect** on the created thought. Use the structured `gaps` field instead. |
 
 **`mode: "argumentation"` fields** (Toulmin model):
 
@@ -1022,11 +1133,9 @@ at 500 items (`NESTED_ARRAY_ITEMS`); plain string arrays at 1,000 items. `title`
 | Field | Type | Description |
 |---|---|---|
 | `methodology` | string | Qualitative analysis methodology: one of `thematic_analysis, grounded_theory, discourse_analysis, content_analysis, phenomenological, narrative_analysis, framework_analysis, template_analysis, mixed_qualitative`. |
-| `analysisMethod` | string | Advertised in the JSON Schema as a simplified 6-value enum (`thematic, grounded-theory, discourse, content, narrative, phenomenological`), but — like `researchGaps` above — the Zod validator has no `analysisMethod` field. Sending it has **no effect**; use `methodology` instead. |
 | `dataSources` | object[] | Each: `{ id, type, description?, participantId? }`. `id`/`type` required. |
 | `codes` | object[] | Coding scheme. Each: `{ id, label, definition?, type?, frequency?: integer, examples?: string[] }`. `id`/`label` required. `type` is one of `descriptive, in_vivo, process, initial, focused, axial, theoretical, emotion, value`. |
 | `memos` | object[] | Analytical memos. Each: `{ id, content, type?, relatedCodes?: string[] }`. `id`/`content` required. `type` is one of `analytical, theoretical, methodological, reflexive, code, operational`. |
-| `categories` | string[] | Categories derived from codes. |
 | `saturationReached` | boolean | Whether theoretical saturation has been reached. |
 
 **Shared across all four submodes:**
@@ -1035,7 +1144,8 @@ at 500 items (`NESTED_ARRAY_ITEMS`); plain string arrays at 1,000 items. `title`
 |---|---|---|
 | `keyInsight` | string | Key insight from the analysis. `TextSchema`. |
 
-`additionalProperties` is `false`.
+The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error.
 
 ### Returns
 
@@ -1103,21 +1213,22 @@ ID.
 | `exportFormat` | string | No | Export format for `export` action. One of the [export formats](#export-formats). |
 | `exportProfile` | string | No | Pre-configured export bundle for `export`/`export_all`: `academic`, `presentation`, `documentation`, `archive`, `minimal`. See [Export formats](#export-formats). |
 | `includeContent` | boolean | No | For `export_all`: include full export content in the response instead of just a summary. |
-| `outputDir` | string | No | Output directory for file export (`export`/`export_all`). When provided, exports write to files instead of returning content inline; a session subdirectory is created automatically. Server-side sandboxed against `MCP_EXPORT_PATH` — a path that escapes the sandbox is rejected. |
-| `overwrite` | boolean | No | Overwrite existing files when exporting to `outputDir`. Default `false`. |
+| `outputDir` | string | No | Output directory for file export (`export`/`export_all`). When provided, exports write to files instead of returning content inline, in a session subdirectory that the server creates. A relative path resolves under the export sandbox. The sandbox is `MCP_EXPORT_PATH`, or `~/.claude/deepthinking-exports/` when that variable is unset. The server rejects a path outside the sandbox. When `MCP_EXPORT_PATH` is set, `export` and `export_all` write files even when `outputDir` is omitted. |
+| `overwrite` | boolean | No | Overwrite existing files in file mode. Default: the value of `MCP_EXPORT_OVERWRITE`, which is `false` unless that variable is `true`. |
 | `newMode` | string | No | New thinking mode, for `switch_mode`. |
 | `problemType` | string | No | Quick problem type for `recommend_mode`'s fast path. |
 | `problemCharacteristics` | object | No | Detailed problem characteristics for `recommend_mode`'s comprehensive path. All 10 sub-fields required if the object is present: `domain: string`, `complexity`/`uncertainty: "low" \| "medium" \| "high"`, and seven booleans — `timeDependent`, `multiAgent`, `requiresProof`, `requiresQuantification`, `hasIncompleteInfo`, `requiresExplanation`, `hasAlternatives`. |
 | `includeCombinations` | boolean | No | For `recommend_mode`: also include recommended mode *combinations*, not just single modes. |
+| `includeReasoningTypes` | boolean | No | For `recommend_mode`: append advisory reasoning-type advice from the 69-type taxonomy. Default `true`. |
 
-`additionalProperties` is `false`.
+The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error.
 
 ### Actions
 
 #### `summarize`
 
-Requires `sessionId`. Returns a plain-text summary as `content[0].text` (not JSON — this is the one
-session action whose response is human-readable prose, not a JSON-encoded object).
+Requires `sessionId`. Returns a text summary as `content[0].text` (not JSON).
 
 #### `export`
 
@@ -1145,19 +1256,21 @@ With `exportProfile` set (content mode), `content[0].text` is JSON:
 }
 ```
 
-With `outputDir` set (file mode), `content[0].text` is JSON describing what was written to disk
-instead of content:
+In file mode (`outputDir` set, or `MCP_EXPORT_PATH` set), `content[0].text` is JSON describing what
+was written to disk instead of content:
 
 ```jsonc
 {
   "mode": "file",
   "format": "markdown",          // single-format export
-  "path": "/exports/<sessionId>/session.md",
+  "path": ".../<outputDir>/<sessionId>/<sessionId>_<mode>_markdown.md",
   "success": true,
-  "size": 4213,
-  "error": null
+  "size": 4213
 }
 ```
+
+The key `error` appears only when a write fails. A failed write sets `success` to `false`, adds
+`error`, and leaves out `size`. A failed write is not a tool error: the response has no `isError`.
 
 (a profile export in file mode nests the same per-format result objects under `files: []`,
 alongside `outputDir`, `successCount`, `failureCount`, `totalSize`).
@@ -1174,14 +1287,14 @@ if given. Returns a summary by default:
   "successCount": 8,
   "failureCount": 0,
   "results": [
-    { "format": "markdown", "success": true, "size": 2048, "error": null },
-    { "format": "latex", "success": true, "size": 3102, "error": null }
+    { "format": "markdown", "success": true, "size": 2048 },
+    { "format": "latex", "success": true, "size": 3102 }
     // ... one entry per format
   ]
 }
 ```
 
-Set `includeContent: true` to also get every export's full content inline, added as an `exports`
+A `results` entry holds `error` only when that format failed. Set `includeContent: true` to also get every export's full content inline, added as an `exports`
 object keyed by format name. Set `outputDir` to write files instead — the response then reports
 `outputDir`, `successCount`, `failureCount`, `totalSize`, `exportedAt`, and a `files[]` array of
 per-format write results, the same shape used by `export`'s file mode.
@@ -1209,10 +1322,13 @@ Requires `sessionId` and `newMode`. Returns a plain-text confirmation as `conten
 #### `recommend_mode`
 
 Requires either `problemType` (fast path) or `problemCharacteristics` (comprehensive path); neither
-requires `sessionId`. Returns Markdown-formatted text (not JSON) as `content[0].text`: the fast path
-returns a one-line recommendation, the comprehensive path returns a `# Mode Recommendations` section
-per candidate mode (score, reasoning, strengths, limitations, examples), plus a `## Recommended Mode
-Combinations` section when `includeCombinations: true`.
+requires `sessionId`. When both are present, `problemCharacteristics` takes priority. When neither
+is present, the call fails. Returns Markdown-formatted text (not JSON) as `content[0].text`. The
+fast path returns a short block with one recommended mode. The comprehensive path returns a
+`# Mode Recommendations` heading and a `## Individual Modes` section with a `### <mode> (Score: n)`
+block for each candidate mode (reasoning, strengths, limitations, examples), plus a `## Recommended
+Mode Combinations` section when `includeCombinations: true`. Both paths end with a
+`## Reasoning Types (advisory)` section, unless `includeReasoningTypes` is `false`.
 
 #### `delete_session`
 
@@ -1260,8 +1376,9 @@ confirmation as `content[0].text`, e.g. `"Session a1b2c3d4-... deleted successfu
 
 ## deepthinking_analyze
 
-Multi-mode reasoning analysis: runs 2–10 reasoning modes on the same thought in parallel, merges
-their insights with a chosen strategy, and returns a synthesized conclusion. Unlike the other
+Multi-mode reasoning analysis: runs several reasoning modes on the same thought, one after the
+other (in batches of up to 5), merges their insights with a chosen strategy, and returns a
+synthesized conclusion. A `customModes` list holds 2 to 10 modes. A preset holds 4 or 5 modes. Unlike the other
 add-thought tools, it does not accept `thoughtNumber` / `totalThoughts` / `nextThoughtNeeded` — one
 call runs a complete analysis.
 
@@ -1271,31 +1388,32 @@ call runs a complete analysis.
 |---|---|---|---|
 | `thought` | string | **Yes** | The thought, problem, or question to analyze. Non-empty, `ThoughtTextSchema` (≤ 100,000 chars). |
 | `preset` | string | No | Pre-defined mode combination. One of `comprehensive_analysis`, `hypothesis_testing`, `decision_making`, `root_cause`, `future_planning`. See [Presets](#presets) below. |
-| `customModes` | string[] | No | Custom mode selection, overrides `preset` when present. 2–10 items, each one of the 29 mode names listed in the [mode enum](#custommodes-enum-values) below. |
+| `customModes` | string[] | No | Custom mode selection, overrides `preset` when present. 2–10 items, each one of the 34 mode names listed in the [mode enum](#custommodes-enum-values) below. |
 | `mergeStrategy` | string | No | `union` (combine all, dedupe), `intersection` (only insights agreed by all modes), `weighted` (weight by confidence/importance), `hierarchical` (primary mode + supporting evidence), or `dialectical` (thesis–antithesis–synthesis). Default `union`. |
-| `sessionId` | string | No | Existing session to associate the analysis with. `IdSchema`-bounded (≤ 1,000 chars) in the Zod validator (the JSON Schema does not state a bound). |
+| `sessionId` | string | No | At most 100 characters in the Zod validator (the JSON Schema does not state a bound). The server uses it only as a label for the internal mode runs. It does not add the analysis to that session, and it does not look the session up. The response always holds a new `sessionId`. |
 | `context` | string | No | Additional context or background for the analysis. `TextSchema` (≤ 10,000 chars). |
-| `timeoutPerMode` | integer | No | Maximum milliseconds per mode. 1,000–120,000, default 30,000. |
+| `timeoutPerMode` | integer | No | Milliseconds per mode. 1,000–120,000, default 30,000. The server accepts and validates the value but does not enforce it: the analyzer runs each mode synchronously and never reads the value. |
 
-`additionalProperties` is `false`. Neither `preset` nor `customModes` is required — if both are
-omitted, the analyzer's own default mode set applies (not documented in the schema; supply one of
-the two explicitly for predictable behavior).
+The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
+outside this list and returns no error. Neither `preset` nor `customModes` is required — if both are
+omitted, the analyzer runs the mode set of the `comprehensive_analysis` preset.
 
 #### `customModes` enum values
 
 `sequential`, `shannon`, `mathematics`, `physics`, `hybrid`, `inductive`, `deductive`, `abductive`,
 `causal`, `bayesian`, `counterfactual`, `temporal`, `gametheory`, `evidential`, `analogical`,
-`firstprinciples`, `systemsthinking`, `scientificmethod`, `formallogic`, `optimization`,
-`engineering`, `computability`, `cryptanalytic`, `algorithmic`, `synthesis`, `argumentation`,
-`critique`, `analysis`, `metareasoning`.
+`firstprinciples`, `systemsthinking`, `scientificmethod`, `formallogic`, `historical`, `stochastic`,
+`constraint`, `modal`, `recursive`, `optimization`, `engineering`, `computability`, `cryptanalytic`,
+`algorithmic`, `synthesis`, `argumentation`, `critique`, `analysis`, `metareasoning`. This is every
+reasoning mode except `custom`.
 
 ### Presets
 
-Preset mode lists and default merge strategies live in `PRESETS` (the analyzer's preset table), not
+Preset mode lists and merge strategies live in `PRESETS` (the analyzer's preset table), not
 in the tool schema itself — a client cannot introspect them via `tools/list`; they are reproduced
 here from source.
 
-| Preset | Modes run (in order) | Default `mergeStrategy` | Purpose |
+| Preset | Modes run (in order) | Strategy stored in `PRESETS` (not used by the tool) | Purpose |
 |---|---|---|---|
 | `comprehensive_analysis` | deductive, inductive, abductive, systemsthinking, firstprinciples | `weighted` | Thorough multi-perspective analysis. |
 | `hypothesis_testing` | scientificmethod, bayesian, evidential, deductive | `hierarchical` (primary: scientificmethod) | Evidence-based hypothesis evaluation; updating beliefs from new data. |
@@ -1303,7 +1421,11 @@ here from source.
 | `root_cause` | causal, systemsthinking, firstprinciples, abductive | `hierarchical` (primary: causal) | Diagnosing problems; understanding causal chains. |
 | `future_planning` | temporal, counterfactual, bayesian, optimization | `dialectical` (thesis: temporal, antithesis: counterfactual) | Scenario analysis and forecasting. |
 
-A `mergeStrategy` passed explicitly in the request overrides the preset's default.
+The tool does not use the strategy that a preset stores. The Zod schema gives `mergeStrategy` the
+default `union`, so the analyzer always receives a value, and that value wins over the preset. A
+call that omits `mergeStrategy` therefore merges with `union` for every preset. Pass `mergeStrategy`
+to choose another strategy. The other merge settings of a preset (the primary mode, the thesis and
+antithesis modes, the mode weights) still reach the merger.
 
 ### Returns
 
@@ -1311,24 +1433,24 @@ A `mergeStrategy` passed explicitly in the request overrides the preset's defaul
 {
   "success": true,
   "sessionId": "a1b2c3d4-...",          // a new session created to hold the analysis
-  "analysisId": "analysis-...",
+  "analysisId": "<uuid>",
   "modesUsed": 5,
   "contributingModes": ["deductive", "inductive", "abductive", "systemsthinking", "firstprinciples"],
   "synthesizedConclusion": "...",
-  "confidenceScore": 0.78,
+  "confidenceBasis": "unavailable",      // "derived" or "unavailable"
+  "confidenceNote": "...",               // says why no confidence was computed
   "primaryInsights": [
-    { "id": "i1", "content": "...", "sourceMode": "deductive", "confidence": 0.8, "category": "...", "priority": 1 }
+    { "id": "i1", "content": "...", "sourceMode": "deductive", "confidenceBasis": "unavailable", "confidenceNote": "...", "category": "..." }
   ],
   "conflictsDetected": 1,
   "conflictsResolved": 1,
   "mergeStrategy": "union",
   "executionTime": 842,
-  "errors": [],                          // present only if a mode errored; { mode, message, recoverable }[]
   "statistics": {
     "totalInsightsBefore": 12,
     "totalInsightsAfter": 9,
     "duplicatesRemoved": 3,
-    "averageConfidence": 0.74,
+    "averageConfidence": 0,
     "mergeTime": 15
   },
   "exportable": true,
@@ -1336,10 +1458,14 @@ A `mergeStrategy` passed explicitly in the request overrides the preset's defaul
 }
 ```
 
+The key `errors` (`{ mode, message, recoverable }[]`) appears only when a mode failed. The key
+`priority` of an insight is not set. When `confidenceBasis` is `derived`, the response also holds
+`confidenceScore`, and each insight holds `confidence`. While every insight has the basis
+`unavailable`, `statistics.averageConfidence` is `0`.
+
 `deepthinking_analyze` always creates a new session (mode `hybrid`) to hold a single summarizing
-thought, even when `sessionId` was supplied to associate the run with an existing session — the
-returned `sessionId` is this new session, exportable via `deepthinking_session`'s `export` action as
-`exportHint` states.
+thought, even when `sessionId` is supplied — the returned `sessionId` is this new session,
+exportable via `deepthinking_session`'s `export` action as `exportHint` states.
 
 ### Example
 
@@ -1370,8 +1496,9 @@ once.
 
 By default a single-format export returns content inline as `content[0].text` (a plain string in
 that format, not further JSON-wrapped). Set `outputDir` on the request to write the export to a
-file instead — the response then reports `{ mode: "file", format, path, success, size, error }`
-rather than the raw content.
+file instead — the response then reports `{ mode: "file", format, path, success, size }`
+rather than the raw content, and adds `error` when the write fails. When `MCP_EXPORT_PATH` is set,
+the server writes a file even if the request has no `outputDir`.
 
 ### Export profiles (`exportProfile`)
 
@@ -1380,23 +1507,16 @@ A profile bundles several formats into one call, verified against `src/export/pr
 | Profile | Formats | Notes |
 |---|---|---|
 | `academic` | `latex`, `markdown`, `json` | Optimized for papers and publications. |
-| `presentation` | `mermaid`, `svg`, `markdown` | `svg` is unconditionally filtered out before export runs (see below) — the formats actually produced are `mermaid` and `markdown`. |
+| `presentation` | `mermaid`, `markdown` | Optimized for slides and diagrams. |
 | `documentation` | `markdown`, `mermaid`, `ascii` | |
-| `archive` | `json`, `markdown`, `latex`, `jupyter` | Despite the name, this is **not** all 8 base formats — `html`, `mermaid`, `dot`, and `ascii` are absent. |
+| `archive` | `json`, `markdown`, `latex`, `jupyter` | Does not include all 8 base formats: `html`, `mermaid`, `dot`, and `ascii` are absent. |
 | `minimal` | `json`, `markdown` | |
 
-The tool's own `tools/list` description text (`"academic: LaTeX+Mermaid+JSON, presentation:
-Mermaid+HTML+ASCII, documentation: Markdown+HTML+JSON, archive: all formats, minimal:
-Markdown+JSON"`) does not match the formats each profile actually exports in
-`src/export/profiles.ts`; trust the table above, sourced from the profile definitions, over the
-advertised description.
+The `exportProfile` description in `tools/list` is generated from `EXPORT_PROFILES`, so it lists the
+same formats as this table.
 
-**`svg` is never actually produced by a profile export.** Every code path that expands a profile to
-its format list (`handleExport` and `handleExportAll` in content mode, and both in file mode)
-explicitly filters out or skips `"svg"` before exporting, regardless of whether the chosen profile
-lists it. `svg` also does not appear in `ExportFormatEnum`, so it cannot be requested via a plain
-`exportFormat` either — there is no way to get an SVG out of `deepthinking_session`'s export
-actions.
+No profile includes `svg`, and `ExportFormatEnum` does not list `svg`. The export actions of
+`deepthinking_session` cannot produce SVG.
 
 Profile export in content mode returns:
 
@@ -1419,12 +1539,13 @@ returns `{ mode: "file", profile, outputDir, successCount, failureCount, totalSi
 
 ## The legacy `deepthinking` tool
 
-`deepthinking` is a single monolithic tool that predates the 13 focused tools. It is **hidden from
+`deepthinking` is a single tool for all modes. The server keeps it for old clients. It is **hidden from
 `tools/list`** — a client that only discovers tools by listing will never see it — but its
 `CallToolRequest` handler is still registered, so a client that already hardcodes the tool name
 continues to work.
 
-Every call through the legacy tool prepends a deprecation warning to the response text:
+A successful call through the legacy tool prepends a deprecation warning to the response text. A
+failed call returns the error text without the warning:
 
 ```
 ⚠️ DEPRECATED: The "deepthinking" tool is deprecated. Use the focused tools instead:
@@ -1433,26 +1554,34 @@ deepthinking_causal, deepthinking_strategic, deepthinking_analytical, deepthinki
 deepthinking_session. See docs/migration/v4.0-tool-splitting.md for details.
 ```
 
-(the warning's own list of tool names is itself stale — it predates `deepthinking_engineering`,
-`deepthinking_academic`, and `deepthinking_analyze`; migrate to whichever of the 13 focused tools
-matches your mode per `modeToToolMap` below, not just the tools the warning happens to name.)
+(the warning's own list of tool names is incomplete — it omits `deepthinking_standard`,
+`deepthinking_engineering`, `deepthinking_academic`, and `deepthinking_analyze`; migrate to
+whichever of the mode-grouping tools matches your mode per `modeToToolMap` below, not just the
+tools the warning happens to name.)
 
 ### Input shape
 
-The legacy tool takes an `action` field (`add_thought`, `summarize`, `export`, `switch_mode`,
-`get_session`, `recommend_mode`) plus a `mode` field (any of the 29 reasoning modes) and the union
-of every mode-specific field across all 13 focused tools, validated by `ThinkingToolSchema` in
-`src/tools/thinking.ts`. That schema is bounded to the same string/array/record limits described in
-[Input limits](#input-limits) — arrays were the last gap closed here, so the legacy tool cannot be
-used to bypass the caps that apply to the focused tools.
+The legacy tool takes an `action` field and a `mode` field (one of 20 reasoning modes, default
+`hybrid`), plus the mode-specific fields of those modes. `ThinkingToolSchema` in
+`src/tools/thinking.ts` validates them. The schema accepts eight actions, and the handler
+dispatches six of them: `add_thought`, `summarize`, `export`, `switch_mode`, `get_session` and
+`recommend_mode`. `export_all` and `delete_session` pass the schema and then return the error
+`Unknown action`. Every legacy action needs `thought`, `thoughtNumber`, `totalThoughts` and
+`nextThoughtNeeded`, because the schema requires them. The schema is bounded, but with wider limits
+than the focused tools: strings up to 10,000 characters and object arrays up to 1,000 items
+(see [Input limits](#input-limits)). Three numeric arrays have no length limit:
+`payoffMatrix.payoffs[].payoffs`, `gameTree.nodes[].payoffs` and
+`logicalProof.steps[].referencesSteps`.
 
 ### Migrating off the legacy tool
 
-For `action: "add_thought"`, the server dispatches internally via `modeToToolMap[mode]` to resolve
-which of the 13 focused tools owns that mode — the same mapping documented in each tool's mode list
-above (`deepthinking_core` owns inductive/deductive/abductive, `deepthinking_mathematics` owns
-mathematics/physics/computability, and so on). Call that focused tool directly instead: same field
-names, same validation, no deprecation warning, and it appears in `tools/list`.
+For `action: "add_thought"`, the server looks up `modeToToolMap[mode]` to name the mode-grouping tool
+that owns that mode — the same mapping documented in each tool's mode list above
+(`deepthinking_core` owns inductive/deductive/abductive, `deepthinking_mathematics` owns
+mathematics/physics/computability, and so on). `handleAddThought` receives that name as the
+unused parameter `_toolName`, so the name does not change how the thought is handled. Call the
+focused tool directly instead: same field names, no deprecation warning, and it appears in
+`tools/list`. The focused tools require `mode`. The legacy tool defaults `mode` to `hybrid`.
 
 For `action: "summarize" | "export" | "switch_mode" | "get_session" | "recommend_mode"`, call
 `deepthinking_session` with the matching `action` value directly.
@@ -1461,8 +1590,10 @@ For `action: "summarize" | "export" | "switch_mode" | "get_session" | "recommend
 
 ## Input limits
 
-Every free-text string, array, and record across all 13 tools is bounded. The concrete numbers
-(`MAX_LENGTHS` in `src/utils/sanitization.ts`, referenced from `src/tools/schemas/shared.ts`):
+Every free-text string and array across all 13 tools is bounded, and every record is capped by entry
+count. The values of `events[].properties` in `deepthinking_temporal` are not size-bounded. The
+concrete numbers (`MAX_LENGTHS` in `src/utils/sanitization.ts`, referenced from
+`src/tools/schemas/shared.ts`):
 
 | Constant | Value | Used for |
 |---|---|---|
@@ -1493,19 +1624,21 @@ which field and limit were violated.
 The published package is `deepthinking-mcp`. Its `package.json` declares `"main": "./dist/index.js"`
 and no `exports` map — Node resolves any `import`/`require` of the package to that single file.
 
-`dist/index.js` is the compiled form of `src/index.ts`: it starts the MCP server over stdio (calls
-`server.connect(transport)` and registers the `CallToolRequestSchema` handler) as its top-level
-side effect. **It is not designed to be imported as a library.** `src/index.ts` exports no public
-functions, classes, or types intended for a consumer to import and call — it is a runnable entry
-point, not an API module. `npm install deepthinking-mcp` gets you a package whose only meaningful
-use is running it as a server process (directly with `node`, or via `npx deepthinking-mcp`), not
-importing individual pieces of it into another Node program.
+`dist/index.js` is the compiled form of `src/index.ts`. It starts the MCP server over stdio
+(`main()` calls `serveStdio` with a factory that returns `buildServer()`) only when the module is
+the process entry point (`isProcessEntryPoint()`). Importing the module starts no server.
+`bin.deepthinking-mcp` points at the same file.
+
+The module exports `server` (one ready instance), `buildServer`, `main` and
+`MCP_PROTOCOL_VERSION`. They exist so that a test can drive the real dispatch path over an
+in-memory transport. **They are not a library API.** `npm install deepthinking-mcp` gets you a
+package whose only meaningful use is running it as a server process (directly with `node`, or via
+`npx deepthinking-mcp`), not importing individual pieces of it into another Node program.
 
 A consumer who wants programmatic access to a specific reasoning capability (a mode handler, an
-exporter, a builder class) would need to import from the package's internal module paths under
-`dist/` directly — unsupported by the `main`-only `package.json`, since there is no `exports` map
-declaring which subpaths are public, and those internal modules are not designed or documented as a
-stable import surface.
+exporter, a builder class) cannot get it from the package. The build bundles the source into the
+single file `dist/index.js` (`tsup`, with `splitting: false`), so the package holds no internal
+module paths to import, and `package.json` declares no `exports` map for subpaths.
 
 The one genuinely public surface is the **MCP tool protocol itself** — the 13 tools documented
 above, reachable by any MCP client that spawns the package's binary and speaks the protocol over
@@ -1516,29 +1649,32 @@ stdio. That is the API this document describes.
 ## Source-verified facts
 
 This document is **source-verified, not graph-derived**. Tool count, field names, required/optional
-status, enum values and numeric bounds all come from reading the schema files directly. Every field
-and bound cited above traces to a specific source file, named at the claim and listed under
-[Source of truth](#source-of-truth).
+status, enum values and numeric bounds all come from reading the schema files directly. Field names,
+required status, enum values and bounds come from `src/tools/schemas/` (Zod) and
+`src/tools/json-schemas.ts` (the schema that `tools/list` returns).
 
 | Fact | Value | Verified against |
 |---|---|---|
 | MCP tools listed via `tools/list` | 13 | `src/tools/json-schemas.ts` — `jsonSchemas` array |
-| Legacy tools callable but hidden | 1 (`deepthinking`) | `src/index.ts` — `CallToolRequestSchema` handler |
+| Legacy tools callable but hidden | 1 (`deepthinking`) | `src/index.ts` — `tools/call` handler |
 | `deepthinking_analyze` presets | 5 | `src/modes/combinations/presets.ts` — `PRESETS` |
-| `deepthinking_analyze` merge strategies | 5 | `src/tools/schemas/shared.ts` |
+| `deepthinking_analyze` merge strategies | 5 | `src/tools/schemas/analyze.ts` — `mergeStrategy` |
 | `deepthinking_session` actions | 7 | `src/tools/schemas/shared.ts` — `SessionActionEnum` |
 | Export formats accepted by the API | 8 | `src/tools/schemas/shared.ts` — `ExportFormatEnum` |
 | Export profiles | 5 | `src/export/profiles.ts` |
 
-These are **not** in the Verification block below, and that is deliberate: the drift gate checks
-graph metrics only. A claim it cannot check must not be dressed up as one it can. Re-verify these
-by reading the named file — no automated check will catch it for you when a schema changes.
+The drift gate checks graph metrics only, so these facts are not in the Verification block below.
+Re-verify them by reading the named file; no automated check catches a change of a schema.
 
 ## Verification
 
-Generated 2026-08-05 by `repo_map.py map`.
-Check: `python repo_map.py check <repo> --docs docs/architecture`
+Generated 2026-10-23 by `repo-tools map`.
+Regenerate the generated reports: `npm run docs:deps` · Check: `repo-tools check . --docs=docs/architecture`
+
+The claims below come from `repo-tools map .`, which reads the whole repository. The generated reports in this
+directory come from `tools/create-dependency-graph`, which counts files and exports with its own rules. Their
+counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 491 | dependency-graph.json |
+| totalTypeScriptFiles | 493 | repo-tools map (whole repository) |
