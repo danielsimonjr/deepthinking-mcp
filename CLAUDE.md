@@ -238,9 +238,9 @@ bounded by `MAX_LENGTHS`.
 > modes as `FULLY_IMPLEMENTED_MODES` (every `ThinkingMode` except `custom`), and
 > `tests/unit/tools/schemas/analyze-custom-modes.test.ts` pins both forms of it. A new mode must be
 > added to that enum as well as to a focused tool. `MultiModeAnalyzer.runMode()` runs the mode's
-> real handler through `ThoughtFactory`, so a mode in the enum with no handler would fail at run
-> time. `timeoutPerMode` is accepted and ignored: every mode runs synchronously and no time limit
-> applies.
+> real handler through `ThoughtFactory`, so a mode in the enum with no specialized handler would
+> run through the generic `hybrid` fallback and report no error. `timeoutPerMode` is accepted and
+> ignored: every mode runs synchronously and no time limit applies.
 
 ## Adding New Features
 

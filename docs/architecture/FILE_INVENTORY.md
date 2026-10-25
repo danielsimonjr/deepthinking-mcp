@@ -29,7 +29,7 @@ Every tracked TypeScript file in the repository — **492 files** — not just t
 | docs | 2 | 1,828 |
 | src | 241 | 119,017 |
 | templates | 5 | 772 |
-| tests | 228 | 101,734 |
+| tests | 228 | 101,735 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -479,7 +479,7 @@ Every tracked TypeScript file in the repository — **492 files** — not just t
 | `tests/unit/taxonomy/taxonomy-wiring.test.ts` | tests | 108 | test |
 | `tests/unit/temporal.test.ts` | tests | 673 | test |
 | `tests/unit/tools/mode-reachability.test.ts` | tests | 591 | test |
-| `tests/unit/tools/schemas/analyze-custom-modes.test.ts` | tests | 64 | test |
+| `tests/unit/tools/schemas/analyze-custom-modes.test.ts` | tests | 65 | test |
 | `tests/unit/tools/schemas/bounds.test.ts` | tests | 504 | test |
 | `tests/unit/tools/schemas/schema-contract.test.ts` | tests | 412 | test |
 | `tests/unit/tools/schemas/schema-validation.test.ts` | tests | 233 | test |

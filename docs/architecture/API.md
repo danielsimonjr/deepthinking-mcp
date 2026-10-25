@@ -1476,8 +1476,7 @@ exportable via `deepthinking_session`'s `export` action as `exportHint` states.
     "thought": "Our checkout conversion rate dropped 8% after last week's deploy. What's the root cause and what should we do?",
     "preset": "root_cause",
     "mergeStrategy": "weighted",
-    "context": "Deploy included a payment-provider SDK bump and a new address-autocomplete widget.",
-    "timeoutPerMode": 20000
+    "context": "Deploy included a payment-provider SDK bump and a new address-autocomplete widget."
   }
 }
 ```

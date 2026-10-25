@@ -16,7 +16,7 @@
       },
       "tests": {
         "files": 228,
-        "loc": 101734
+        "loc": 101735
       },
       "tools": {
         "files": 14,
@@ -2699,7 +2699,7 @@
     {
       "path": "tests/unit/tools/schemas/analyze-custom-modes.test.ts",
       "area": "tests",
-      "loc": 64,
+      "loc": 65,
       "disposition": "test"
     },
     {

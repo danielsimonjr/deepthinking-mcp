@@ -18,8 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `docs/architecture/API.md` and `docs/architecture/DATAFLOW.md` now say that it is ignored.
   `handleAnalyze` no longer passes it on, and `MultiModeAnalyzerConfig` and
   `MultiModeAnalysisRequest` lose the options that nothing read: `defaultTimeoutPerMode`,
-  `minConfidenceThreshold` and `timeoutPerMode`. These types are not part of the published package
-  surface.
+  `minConfidenceThreshold` and `timeoutPerMode`. The package entry point does not export these
+  types.
 
 ### Fixed
 

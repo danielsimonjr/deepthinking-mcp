@@ -26,7 +26,7 @@ document does not repeat it.
 |---|---|---|---|
 | Source files, whole repo | 495 | repo-wide | `repo-tools map` (492 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
 | TypeScript files, `src/` | 241 | src only | `repo-tools map`, files under `src/` |
-| Lines of code, whole repo | 227,846 | repo-wide | `repo-tools map` |
+| Lines of code, whole repo | 227,847 | repo-wide | `repo-tools map` |
 | Lines of code, `src/` | 118,776 | src only | `repo-tools map`, files under `src/` |
 | Total exports, whole repo | 2,158 | repo-wide | `repo-tools map` |
 | Total exports, `src/` | 1,186 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
@@ -65,7 +65,7 @@ deepthinking-mcp/
 │   ├── config/            # environment-variable configuration
 │   ├── interfaces/       # DI interfaces
 │   └── utils/             # errors, logger, sanitization
-├── tests/               # 228 files, 101,506 LOC
+├── tests/               # 228 files, 101,507 LOC
 ├── tools/                # 15 files, 4,718 LOC — standalone CLI utilities
 ├── cli/                  # mcp-server-wrapper.mjs — launcher script for the Claude Code plugin
 ├── templates/mode-scaffolding/  # 5 copy-paste templates for authoring a new mode
@@ -144,7 +144,7 @@ counts differ for that reason.
 | Claim | Value | Source |
 |---|---|---|
 | totalTypeScriptFiles | 495 | repo-tools map (whole repository) |
-| totalLinesOfCode | 227846 | repo-tools map (whole repository) |
+| totalLinesOfCode | 227847 | repo-tools map (whole repository) |
 | totalExports | 2158 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |

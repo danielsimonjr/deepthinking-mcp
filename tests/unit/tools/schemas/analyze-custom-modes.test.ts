@@ -4,16 +4,17 @@
  * The `customModes` enum of `deepthinking_analyze` is its own list, kept apart
  * from the focused tools' `mode` enums. The analyzer runs the real handler of
  * every mode it receives, so a mode missing from the enum is a mode a caller
- * cannot ask for, and a name in the enum with no handler is a mode that fails
- * at run time. This file pins the list in both directions, for both forms of
- * the schema (Zod and the advertised JSON Schema):
+ * cannot ask for, and a name in the enum with no specialized handler is a mode
+ * that silently runs through the generic `hybrid` fallback. This file pins the
+ * list in both directions, for both forms of the schema (Zod and the advertised
+ * JSON Schema):
  *
  * - every `ThinkingMode` except `custom` is accepted
  * - nothing else is accepted
- * - the analyzer can run every accepted mode
+ * - the analyzer has a specialized handler for every accepted mode
  *
- * `custom` stays out on purpose: its payload has no fixed shape that
- * `MAX_LENGTHS` could bound.
+ * `custom` stays out on purpose: it is the one `ThinkingMode` outside
+ * `FULLY_IMPLEMENTED_MODES`.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -52,7 +53,7 @@ describe('deepthinking_analyze customModes', () => {
     expect(EXPECTED).toHaveLength(34);
   });
 
-  it('is a subset of what the analyzer can run, and the rest is custom', () => {
+  it('has a specialized handler for every accepted mode, and only custom is extra', () => {
     const runnable = new MultiModeAnalyzer().getSupportedModes() as string[];
     const missing = EXPECTED.filter((mode) => !runnable.includes(mode));
     const extra = runnable.filter((mode) => !EXPECTED.includes(mode));
