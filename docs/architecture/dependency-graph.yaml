@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-25'
   totalFiles: 243
   totalModules: 14
-  totalExports: 1191
+  totalExports: 1192
 entryPoints:
   - file: src/index.ts
     type: main
@@ -4611,10 +4611,12 @@ modules:
       exports:
         - unrecognisedValueWarning
         - droppedValueWarning
+        - ignoredMembersWarning
         - inputWarningsField
       functions:
         - unrecognisedValueWarning
         - droppedValueWarning
+        - ignoredMembersWarning
         - inputWarningsField
     src/modes/handlers/MathematicsHandler.ts:
       description: MathematicsHandler - Phase 10 Sprint 3 (v8.4.0)
@@ -4858,6 +4860,10 @@ modules:
           imports:
             - ThinkingToolInput
           typeOnly: true
+        - file: ../../tools/schemas/modes/engineering.js
+          imports:
+            - EngineeringInput
+          typeOnly: true
         - file: ./ModeHandler.js
           imports:
             - ModeHandler
@@ -4868,6 +4874,11 @@ modules:
             - validationFailure
             - createValidationError
             - createValidationWarning
+        - file: ./input-warnings.js
+          imports:
+            - ignoredMembersWarning
+            - inputWarningsField
+            - unrecognisedValueWarning
       exports:
         - RecursiveHandler
       classes:
@@ -11312,16 +11323,16 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 243
   totalModules: 14
-  totalLinesOfCode: 120752
-  totalExports: 1191
+  totalLinesOfCode: 120910
+  totalExports: 1192
   totalClasses: 143
   totalInterfaces: 562
-  totalFunctions: 438
+  totalFunctions: 439
   totalTypeGuards: 87
   totalEnums: 3
   totalConstants: 135
   totalReExports: 487
-  totalTypeOnlyImports: 334
+  totalTypeOnlyImports: 335
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 58
   unusedFilesCount: 12

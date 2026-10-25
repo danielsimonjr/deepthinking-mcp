@@ -1041,13 +1041,13 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 | `correctnessProof` | object | No | algorithmic | `{ id?, algorithm?, method?, preconditions?: string[], postconditions?: string[], invariants?: object[], inductionBase?, inductionStep?, terminationArgument?: { decreasingQuantity?, lowerBound?, proof? }, proofSteps?: string[], keyInsights?: string[] }`. The tool does not list `invariants`. An absent `method` is `loop_invariant`. |
 | `loopInvariants` | object[] | No | algorithmic | Each: `{ id?, description?, initialization?, maintenance?, termination?, loopVariable?, loopBounds? }`. The tool does not list this field. Array ≤ 500 items. |
 | `dpFormulation`, `greedyProof`, `graphContext`, `dataStructure`, `amortizedAnalysis`, `comparison`, `executionTrace` | object | No | algorithmic | The tool does not list these fields, and the server accepts them. The members are in [Algorithmic mode](../modes/ALGORITHMIC.md). |
-| `thoughtType` | string | No | all | Step label, `IdSchema`. The server accepts any value and gives a warning, not an error, for an unknown one. The advertised values for `algorithmic` are the 26 thought types in [Algorithmic mode](../modes/ALGORITHMIC.md); an unknown value gives `algorithm_definition`. The advertised values for `recursive` are `problem_decomposition`, `base_case_identification`, `recursive_step`, `subproblem_solution`, `solution_combination` and `termination_analysis`. |
+| `thoughtType` | string | No | all | Step label, `IdSchema`. The server accepts any value and gives a warning, not an error, for an unknown one. The advertised values for `algorithmic` are the 26 thought types in [Algorithmic mode](../modes/ALGORITHMIC.md); an unknown value gives `algorithm_definition`. The advertised values for `recursive` are the 8 thought types in [Recursive mode](../modes/RECURSIVE.md); an unknown value gives `problem_decomposition`. |
 | `subproblems` | object[] | No | recursive | Each: `{ id?, name?, description?, size?: string \| number, depth?: integer ≥ 0, parentId?, status?, result? }`. Array ≤ 500 items. |
 | `baseCases` | object[] | No | recursive | Each: `{ id?, condition?, result?, verified?: boolean }`. Array ≤ 500 items. |
 | `baseCaseReached` | boolean | No | recursive | Whether the recursion reached a base case. |
-| `currentDepth`, `maxDepth` | integer | No | recursive | Recursion depth now, and the depth limit. Minimum 0. |
-| `recurrence` | object | No | recursive, algorithmic | `{ id?, formula?, baseCase?, closedForm?, complexity?, solutionMethod?, solution?, solutionProof?, recursionTree?: { levelWork?, levels?, totalWork? } }`. Both modes use this one object. Recursive mode reads `formula`, `baseCase`, `closedForm` and `complexity`, and it ignores the other members. |
-| `strategy` | string | No | recursive | Decomposition strategy, `IdSchema`. The handler recognizes `divide_and_conquer`, `decrease_and_conquer`, `transform_and_conquer` and `dynamic_programming`. |
+| `currentDepth`, `maxDepth` | integer | No | recursive | Recursion depth now, and the depth limit. Minimum 0. The thought stores `maxDepth` only when the request carries it. |
+| `recurrence` | object | No | recursive, algorithmic | `{ id?, formula?, baseCase?, closedForm?, complexity?, solutionMethod?, solution?, solutionProof?, recursionTree?: { levelWork?, levels?, totalWork? } }`. Both modes use this one object. Recursive mode reads `formula`, `baseCase`, `closedForm` and `complexity`, and it ignores the other members. The answer carries one sentence that names each ignored member that the request sent. |
+| `strategy` | string | No | recursive | Decomposition strategy, `IdSchema`. The handler recognizes `divide_and_conquer`, `decrease_and_conquer`, `transform_and_conquer` and `dynamic_programming`. An unknown value gives `divide_and_conquer` and one sentence. |
 | `divisionFactor` | number | No | recursive | Factor by which each step divides the problem. |
 
 The advertised JSON Schema of this tool has no `additionalProperties: false` at three levels: the
@@ -1712,4 +1712,4 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 509 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 510 | repo-tools map (whole repository) |

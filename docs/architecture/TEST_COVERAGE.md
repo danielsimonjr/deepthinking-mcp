@@ -22,13 +22,13 @@ Most test folders follow the folder names of `src/`: `tests/unit/<area>/` and
 | Directory | Test files | Purpose |
 |---|---|---|
 | `tests/unit/` | 144 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
-| `tests/integration/` | 79 | Cross-module paths: entry-point dispatch over a real transport, tool-shaped input through the handlers, export round-trips, multi-mode analysis, session lifecycles. |
+| `tests/integration/` | 80 | Cross-module paths: entry-point dispatch over a real transport, tool-shaped input through the handlers, export round-trips, multi-mode analysis, session lifecycles. |
 | `tests/edge-cases/` | 6 | Boundary conditions, malformed input, regressions pinned from past bugs. |
 | `tests/performance/` | 4 | Counted-work checks for cost, throughput, memory and stress. `helpers/work-probe.ts` holds the counters. |
 | `tests/utils/` | 0 (5 helper files) | Shared fixtures, factories, and assertion helpers. 21 test files import them, all under `tests/integration/tools/`. |
 | `tests/test-results/` | 0 | Reporter code and `TEST_RESULTS_v*.md` summaries. Not test code. |
 
-The suite holds 233 test files. `npx vitest list --filesOnly` lists them. This document maps
+The suite holds 234 test files. `npx vitest list --filesOnly` lists them. This document maps
 files. It holds no test count and no pass or fail state. Run the suite to get those.
 
 ### Running each tier
@@ -44,8 +44,8 @@ npx vitest run                          # everything
 `npm run test:publish` sets `SKIP_BENCHMARKS=1`. That variable switches on one extra entry in the
 `exclude` list of `vitest.config.ts`: `**/benchmarks/**`. The pattern matches the directory
 `tests/unit/benchmarks/`, which holds 2 test files. It does not match `tests/performance/`, so
-the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 231
-files instead of 233.
+the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 232
+files instead of 234.
 
 ### Where reports land
 
@@ -72,7 +72,7 @@ the root-level files that name the area in their subject.
 
 | Area | `src/` files | Unit test files | `src/` files imported directly by a test | Also exercised by |
 |---|---|---|---|---|
-| `index.ts` | 1 | 0 | 1 (7 test files) | `tests/integration/index-server.test.ts` and 6 more files that import the module. See Gaps. |
+| `index.ts` | 1 | 0 | 1 (8 test files) | `tests/integration/index-server.test.ts` and 7 more files that import the module. See Gaps. |
 | `types/` | 37 | 11 | 18 | Most handler and validator tests import types from here. No test imports 18 of the mode type files directly. |
 | `modes/` (handlers, combinations, causal graph, stochastic) | 55 | 54 | 53 | `tests/integration/handlers/`, `tests/integration/mode-handler-delegation.test.ts`. |
 | `services/` | 3 | 2 | 3 | 68 test files import `ThoughtFactory` or `ExportService` directly. `RecommendationService` has one importer, `tests/unit/taxonomy/taxonomy-wiring.test.ts`. |
@@ -478,7 +478,7 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 509 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 510 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 
