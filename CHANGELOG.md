@@ -7,7 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- **`deepthinking_analyze` says that `timeoutPerMode` has no effect.** The schema accepted the value
+  and described it as "Maximum time in milliseconds to spend on each mode". The analyzer runs every
+  mode's handler synchronously, so nothing can interrupt a mode and no limit was ever enforced. The
+  value is still accepted and validated, because the advertised schema sets `additionalProperties`
+  to `false` and a client that sends it must keep passing. Its description, `docs/architecture/API.md`
+  and `docs/architecture/DATAFLOW.md` now say that it is ignored. `handleAnalyze` no longer passes it
+  on, and `MultiModeAnalyzerConfig` and `MultiModeAnalysisRequest` lose the options that nothing
+  read: `defaultTimeoutPerMode`, `minConfidenceThreshold` and `timeoutPerMode`. These types are not
+  part of the published package surface.
+
 ### Fixed
+
+- **Source comments and `CLAUDE.md` name the right modes and exports.** The comment in
+  `ThoughtValidator.performValidation()` listed `recursive`, `modal`, `stochastic` and `constraint`
+  as modes with no validator, but the registry has an entry for each one; only `custom` has none. The
+  comment on `MultiModeAnalyzer.getSupportedModes()` and the note in `CLAUDE.md` said that the
+  `customModes` enum of `deepthinking_analyze` lists 29 modes, and `CLAUDE.md` said that the analyzer
+  generates canned insights from a `switch`; the enum lists 34 modes and the analyzer runs each
+  mode's real handler. The header of `src/types/core.ts` counted 34 identifiers in `ThinkingMode`,
+  which has 35. The header of `src/services/RecommendationService.ts` said that importing
+  `src/index.ts` starts a server, but the entry-point guard prevents that. The barrel headers of
+  `src/validation`, `src/cache` and `src/proof` said that `src/index.ts` has no exports or that
+  `dist/index.d.ts` is one line; it exports `MCP_PROTOCOL_VERSION`, `buildServer`, `server` and
+  `main`. The new test
+  `tests/unit/tools/schemas/analyze-custom-modes.test.ts` pins the `customModes` list to every
+  `ThinkingMode` except `custom`, in the Zod schema and in the advertised schema.
 
 - **A shared-lock read that meets the removal of its lock directory is retried on macOS.**
   `acquireSharedLock` creates its lock file inside the shared-lock directory, and a reader that

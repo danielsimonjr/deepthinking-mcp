@@ -5,7 +5,7 @@
 
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 10.0.2 | **Last Updated**: 2026-10-23
+**Version**: 10.0.2 | **Last Updated**: 2026-10-25
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -2928,7 +2928,7 @@ The codebase is organized into the following modules:
 
 ## Types Dependencies
 
-### `src/types/core.ts` - Core type definitions for the DeepThinking MCP server v9.1.0
+### `src/types/core.ts` - Core type definitions for the DeepThinking MCP server
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -4454,7 +4454,7 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 241 |
 | Total Modules | 14 |
-| Total Lines of Code | 119028 |
+| Total Lines of Code | 119017 |
 | Total Exports | 1186 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
@@ -4468,5 +4468,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2026-10-23
+*Last Updated*: 2026-10-25
 *Version*: 10.0.2

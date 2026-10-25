@@ -234,12 +234,13 @@ enforces it is `tests/unit/tools/mode-reachability.test.ts`. `custom` is deliber
 is the one `ThinkingMode` outside `FULLY_IMPLEMENTED_MODES`, and its arbitrary payload cannot be
 bounded by `MAX_LENGTHS`.
 
-> **`deepthinking_analyze` is a separate surface with its own, narrower mode list.** Its
-> `customModes` enum covers 29 modes and omits `historical` as well as the four above. Widening it
-> is not just a schema edit: `MultiModeAnalyzer.executeModes()` does not call `ThoughtFactory` at
-> all — it generates canned per-mode insights from a `switch` (see the "Simulate mode execution"
-> comment in `src/modes/combinations/analyzer.ts`), so a mode added to the enum without a `case`
-> would produce generic filler, not reasoning.
+> **`deepthinking_analyze` keeps its own mode list.** Its `customModes` enum names the same 34
+> modes as `FULLY_IMPLEMENTED_MODES` (every `ThinkingMode` except `custom`), and
+> `tests/unit/tools/schemas/analyze-custom-modes.test.ts` pins both forms of it. A new mode must be
+> added to that enum as well as to a focused tool. `MultiModeAnalyzer.runMode()` runs the mode's
+> real handler through `ThoughtFactory`, so a mode in the enum with no handler would fail at run
+> time. `timeoutPerMode` is accepted and ignored: every mode runs synchronously and no time limit
+> applies.
 
 ## Adding New Features
 

@@ -12,8 +12,9 @@
  * turn calls `./extended-advisory.js`. Between them they reach **every**
  * module in this directory, so no file here is dead any more; only the barrel
  * itself is unimported, and the published package exposes no library API for
- * it to serve (`dist/index.d.ts` is one shebang line). It is kept as the
- * conventional import surface, not as a claim that anything routes through it.
+ * it to serve (`dist/index.d.ts` declares only `MCP_PROTOCOL_VERSION`,
+ * `buildServer`, `server` and `main`). It is kept as the conventional import
+ * surface, not as a claim that anything routes through it.
  */
 
 // Advisory entry points - what the live request path actually uses

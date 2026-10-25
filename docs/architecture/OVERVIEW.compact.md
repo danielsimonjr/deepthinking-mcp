@@ -9,7 +9,7 @@ export. ESM, Node >=20, stdio transport. Entry point: `src/index.ts`. Publishes 
 | Metric | Value |
 |---|---|
 | Source files, whole repo / `src/` only | 494 / 241 |
-| LOC, whole repo / `src/` only | 227,796 / 118,787 |
+| LOC, whole repo / `src/` only | 227,783 / 118,776 |
 | Exports, whole repo / `src/` only | 2,158 / 1,186 (487 re-exports) |
 | Runtime circular deps | 0 |
 | Type-only circular deps | 95 |
@@ -26,7 +26,7 @@ export. ESM, Node >=20, stdio transport. Entry point: `src/index.ts`. Publishes 
 src/            241 files — index.ts, types/, modes/, services/, session/,
                  validation/, export/, proof/, taxonomy/, cache/, config/,
                  interfaces/, utils/
-tests/          227 files, mirrors src/
+tests/          228 files, mirrors src/
 tools/          15 files — standalone CLI utilities
 cli/            mcp-server-wrapper.mjs — launcher script for the Claude Code plugin
 templates/mode-scaffolding/  5 copy-paste files, by-design unimported

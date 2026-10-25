@@ -268,7 +268,6 @@ type SessionInput = Record<string, unknown> & {
 /** Input type for analyze handlers - validated by Zod schemas */
 type AnalyzeInputType = Record<string, unknown> & {
   thought: string;
-  timeoutPerMode?: number;
   customModes?: string[];
   preset?: string;
   mergeStrategy?: string;
@@ -887,9 +886,7 @@ async function handleDeleteSession(input: SessionInput): Promise<MCPResponse> {
 async function handleAnalyze(input: AnalyzeInputType): Promise<MCPResponse> {
   const { MultiModeAnalyzer } = await import("./modes/combinations/index.js");
 
-  const DEFAULT_TIMEOUT_PER_MODE = 30000;
   const analyzer = new MultiModeAnalyzer({
-    defaultTimeoutPerMode: input.timeoutPerMode || DEFAULT_TIMEOUT_PER_MODE,
     continueOnError: true,
     verbose: false,
   });
@@ -909,7 +906,6 @@ async function handleAnalyze(input: AnalyzeInputType): Promise<MCPResponse> {
     mergeStrategy: (input.mergeStrategy || "union") as MergeStrategy,
     sessionId: input.sessionId,
     context: input.context,
-    timeoutPerMode: input.timeoutPerMode,
   });
 
   // Phase 12 fix: Create an exportable session for the analysis results

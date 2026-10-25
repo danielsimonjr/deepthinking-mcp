@@ -2537,7 +2537,8 @@ handles conflicts between perspectives, and produces a synthesized conclusion.
         minimum: 1000,
         maximum: 120000,
         default: 30000,
-        description: "Maximum time in milliseconds per mode (default: 30000)",
+        description:
+          "Ignored. Accepted for compatibility only: each mode runs to completion and no time limit applies (range 1000-120000, default 30000)",
       },
     },
     required: ["thought"],

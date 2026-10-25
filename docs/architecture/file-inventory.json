@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 491,
+    "totalFiles": 492,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 241,
-        "loc": 119028
+        "loc": 119017
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 227,
-        "loc": 101672
+        "files": 228,
+        "loc": 101734
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 229,
       "orphan": 12,
       "template": 5,
-      "test": 227,
+      "test": 228,
       "tool": 14,
       "config": 2
     }
@@ -359,7 +359,7 @@
     {
       "path": "src/index.ts",
       "area": "src",
-      "loc": 1061,
+      "loc": 1057,
       "disposition": "reachable"
     },
     {
@@ -395,13 +395,13 @@
     {
       "path": "src/modes/combinations/analyzer.ts",
       "area": "src",
-      "loc": 941,
+      "loc": 931,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/combinations/combination-types.ts",
       "area": "src",
-      "loc": 415,
+      "loc": 412,
       "disposition": "reachable"
     },
     {
@@ -761,7 +761,7 @@
     {
       "path": "src/proof/index.ts",
       "area": "src",
-      "loc": 117,
+      "loc": 118,
       "disposition": "reachable"
     },
     {
@@ -791,7 +791,7 @@
     {
       "path": "src/services/RecommendationService.ts",
       "area": "src",
-      "loc": 123,
+      "loc": 122,
       "disposition": "reachable"
     },
     {
@@ -875,13 +875,13 @@
     {
       "path": "src/tools/json-schemas.ts",
       "area": "src",
-      "loc": 2568,
+      "loc": 2569,
       "disposition": "reachable"
     },
     {
       "path": "src/tools/schemas/analyze.ts",
       "area": "src",
-      "loc": 295,
+      "loc": 299,
       "disposition": "reachable"
     },
     {
@@ -1259,7 +1259,7 @@
     {
       "path": "src/validation/validator.ts",
       "area": "src",
-      "loc": 232,
+      "loc": 233,
       "disposition": "reachable"
     },
     {
@@ -1841,7 +1841,7 @@
     {
       "path": "tests/integration/tools/analyze.test.ts",
       "area": "tests",
-      "loc": 546,
+      "loc": 544,
       "disposition": "test"
     },
     {
@@ -2694,6 +2694,12 @@
       "path": "tests/unit/tools/mode-reachability.test.ts",
       "area": "tests",
       "loc": 591,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/tools/schemas/analyze-custom-modes.test.ts",
+      "area": "tests",
+      "loc": 64,
       "disposition": "test"
     },
     {

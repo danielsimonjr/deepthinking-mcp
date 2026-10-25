@@ -108,7 +108,11 @@ export const analyzeInputSchema = z.object({
       "Additional context or background information to consider during analysis",
     ),
 
-  /** Optional timeout per mode in milliseconds */
+  /**
+   * Accepted for compatibility, never read. The analyzer runs every mode's
+   * handler synchronously, so nothing can interrupt a mode and no time limit
+   * applies. The range stays so that an earlier caller's value still validates.
+   */
   timeoutPerMode: z
     .number()
     .int()
@@ -117,7 +121,7 @@ export const analyzeInputSchema = z.object({
     .optional()
     .default(30000)
     .describe(
-      "Maximum time in milliseconds to spend on each mode (default: 30000, max: 120000)",
+      "Ignored. Accepted for compatibility only: each mode runs to completion and no time limit applies (range 1000-120000, default 30000)",
     ),
 });
 
