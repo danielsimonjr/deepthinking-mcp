@@ -62,6 +62,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Three tests failed on a loaded machine and passed alone.** Each failure has a measured cause.
+  - `should identify storage health status` (`file-store.test.ts`) takes 0.2 s on an idle machine.
+    With 16 CPU-bound processes on a 12-core machine, it timed out at the default 5 s limit in 5 of 8
+    runs. It now has a 15 s limit, as its neighbours have. In 8 runs under the same load it passed
+    every time, in up to 7.5 s.
+  - `ends as the timeout error ... when it never clears` (`file-lock.test.ts`) needs more than one
+    refused attempt. If the first attempt takes longer than the 100 ms timeout, the loop ends after
+    one refusal. A first attempt delayed by 150 ms reproduced the failure
+    `expected 1 to be greater than 1`. The timeout is now 1000 ms.
+  - `should maintain O(1) lookup complexity` (`validation-performance.test.ts`) took one average of
+    ten lookups for each cache size. One disturbed batch gave a ratio of 76.6, against a limit of 50.
+    The test now takes the fastest of seven batches for each size. The limit stays at 50.
 - **Six base thought fields reached the stored thought in some modes only.** Every tool accepts
   `revisionReason`, `branchFrom`, `branchId`, `uncertainty`, `dependencies` and `assumptions`. Each
   mode handler builds its thought by hand, and most copied some of the six, so the rest were

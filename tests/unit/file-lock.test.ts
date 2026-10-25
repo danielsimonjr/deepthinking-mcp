@@ -333,8 +333,11 @@ describe("file-lock", () => {
           Number.POSITIVE_INFINITY,
         );
         try {
+          // The test needs more than one refusal. If the first attempt takes longer than
+          // the timeout, the loop ends after one refusal. Under machine load, file
+          // operations ran up to 15 times slower than idle, so 100 ms was not enough.
           const failure = await withSharedLock(targetFile, async () => 42, {
-            timeout: 100,
+            timeout: 1000,
             retryInterval: 5,
           }).then(
             () => undefined,
