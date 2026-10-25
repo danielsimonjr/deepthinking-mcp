@@ -396,7 +396,7 @@ describe('FileSessionStore', () => {
       expect(stats.storageHealth).toBe('warning');
 
       await healthStore.close();
-    });
+    }, 15000); // Idle: 0.2 s. With 16 CPU-bound processes on a 12-core machine: up to 7.5 s. The default 5 s limit leaves no margin.
   });
 
   describe('cleanup', () => {

@@ -26,7 +26,7 @@ document does not repeat it.
 |---|---|---|---|
 | Source files, whole repo | 501 | repo-wide | `repo-tools map` (498 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
 | TypeScript files, `src/` | 242 | src only | `repo-tools map`, files under `src/` |
-| Lines of code, whole repo | 229,231 | repo-wide | `repo-tools map` |
+| Lines of code, whole repo | 229,240 | repo-wide | `repo-tools map` |
 | Lines of code, `src/` | 118,990 | src only | `repo-tools map`, files under `src/` |
 | Total exports, whole repo | 2,160 | repo-wide | `repo-tools map` |
 | Total exports, `src/` | 1,188 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
@@ -144,7 +144,7 @@ counts differ for that reason.
 | Claim | Value | Source |
 |---|---|---|
 | totalTypeScriptFiles | 501 | repo-tools map (whole repository) |
-| totalLinesOfCode | 229231 | repo-tools map (whole repository) |
+| totalLinesOfCode | 229240 | repo-tools map (whole repository) |
 | totalExports | 2160 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
