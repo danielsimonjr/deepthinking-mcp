@@ -57,8 +57,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `masterTheorem.case`, the fields that stay accepted and ignored, the fields that the tool accepts
   and does not list, and the export of sparse blocks in the 8 formats of the session tool without
   the text `undefined`. `AlgorithmicHandler.test.ts` pins what the handler fills in for an absent
-  member: the first value of a vocabulary, an unweighted graph, the pseudocode of the thought, the
-  position of a trace step, and a recurrence with no solution. `advertised-omissions.ts` holds the pinned list of unlisted paths, with the reason
+  member: the first value of the list for the proof method and the computation direction, no value for
+  the other vocabulary members, an unweighted graph, the pseudocode of the thought, the position of a
+  trace step, and a recurrence with no solution. `advertised-omissions.ts` holds the pinned list of unlisted paths, with the reason
   "tool size cap", and the cap of 16,000 bytes for one tool. The conformance test fails when a listed
   path is not accepted, when an accepted path is neither listed nor pinned, when the pinned list
   names a path that is listed or not accepted, when the tool is over the cap, and when the tool
@@ -140,11 +141,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `formula`, `baseCase`, `closedForm` and `complexity`, and it does not read the other members.
   - **`thoughtType` lists the 26 algorithmic values.** An unknown value falls back to
     `algorithm_definition`, and one sentence says so.
-  - **A member with a fixed vocabulary takes its first value when it is absent and keeps an
-    unrecognised value as sent, with one sentence.** The members are `correctnessProof.method`,
+  - **A member with a fixed vocabulary keeps an unrecognised value as sent, with one sentence, and
+    is stored only when the client sent it.** The members are `correctnessProof.method`,
     `recurrence.solutionMethod`, `amortizedAnalysis.method`, `dpFormulation.computationOrder.direction`,
-    `graphContext.graphType`, `graphContext.representation` and `graphContext.weightProperty` (this one
-    has no default).
+    `graphContext.graphType`, `graphContext.representation` and `graphContext.weightProperty`. Two
+    take the first value of their list when absent: `correctnessProof.method` and
+    `dpFormulation.computationOrder.direction`. The suggestions of a thought print the amortized
+    method and the graph type only when the thought holds them.
   - **A sparse block is complete.** The handler gives a missing required member an empty string,
     an empty list, `false` or a generated identifier, so that no export prints `undefined` and no
     exporter reads a missing member. A time or space complexity that lacks a case keeps that case

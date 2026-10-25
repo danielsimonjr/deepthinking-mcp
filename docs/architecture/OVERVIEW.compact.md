@@ -9,7 +9,7 @@ export. ESM, Node >=20, stdio transport. Entry point: `src/index.ts`. Publishes 
 | Metric | Value |
 |---|---|
 | Source files, whole repo / `src/` only | 509 / 243 |
-| LOC, whole repo / `src/` only | 232,863 / 120,505 |
+| LOC, whole repo / `src/` only | 232,992 / 120,509 |
 | Exports, whole repo / `src/` only | 2,169 / 1,191 (487 re-exports) |
 | Runtime circular deps | 0 |
 | Type-only circular deps | 95 |

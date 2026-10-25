@@ -633,8 +633,9 @@ optional exchange argument or matroid justification). `Sent<K>` is the type that
 `deepthinking_engineering` gives to the request field `K`. Each normaliser reads a typed request,
 and none reads `any`. `createThought()` calls the `normalize*` methods. A caller can leave out a
 member that the thought type requires. The method then gives it an empty string, an empty list,
-`false` or a generated identifier. It writes no complexity case that the caller did not send. A member with a fixed vocabulary takes the first value of its list when absent, and an
-unrecognised value is kept as sent. A design pattern in the hyphen spelling is read as the
+`false` or a generated identifier. It writes no complexity case that the caller did not send. A member with a fixed vocabulary stays absent when the caller sends none. Two members,
+`correctnessProof.method` and `dpFormulation.computationOrder.direction`, take the first value of
+their list. An unrecognised value is kept as sent. A design pattern in the hyphen spelling is read as the
 underscore value. An unknown design pattern is not stored. Each replacement and each ignored value
 adds one sentence to the `inputWarnings` field of the thought. `validate()` calls
 `validateDPFormulation` and `validateCorrectnessProof` on the raw caller input, not on the
@@ -2708,7 +2709,7 @@ counts differ for that reason.
 | Claim | Value | Source |
 |---|---|---|
 | totalTypeScriptFiles | 509 | repo-tools map (whole repository) |
-| totalLinesOfCode | 232863 | repo-tools map (whole repository) |
+| totalLinesOfCode | 232992 | repo-tools map (whole repository) |
 | totalExports | 2169 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | reachableFiles | 235 | repo-tools map (whole repository) |

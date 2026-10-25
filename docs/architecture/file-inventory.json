@@ -8,7 +8,7 @@
       },
       "src": {
         "files": 243,
-        "loc": 120748
+        "loc": 120752
       },
       "templates": {
         "files": 5,
@@ -16,7 +16,7 @@
       },
       "tests": {
         "files": 240,
-        "loc": 105034
+        "loc": 105159
       },
       "tools": {
         "files": 14,
@@ -437,7 +437,7 @@
     {
       "path": "src/modes/handlers/AlgorithmicHandler.ts",
       "area": "src",
-      "loc": 1200,
+      "loc": 1203,
       "disposition": "reachable"
     },
     {
@@ -1007,7 +1007,7 @@
     {
       "path": "src/types/modes/algorithmic.ts",
       "area": "src",
-      "loc": 809,
+      "loc": 810,
       "disposition": "reachable"
     },
     {
@@ -1577,7 +1577,7 @@
     {
       "path": "tests/integration/algorithmic-contract.test.ts",
       "area": "tests",
-      "loc": 730,
+      "loc": 783,
       "disposition": "test"
     },
     {
@@ -2309,7 +2309,7 @@
     {
       "path": "tests/unit/modes/handlers/AlgorithmicHandler.test.ts",
       "area": "tests",
-      "loc": 1118,
+      "loc": 1190,
       "disposition": "test"
     },
     {

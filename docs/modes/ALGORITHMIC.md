@@ -299,6 +299,7 @@ no export prints `undefined`.
 | An `id` is absent | A generated identifier |
 | `inPlace` or `weighted` is absent | `false` |
 | `algorithm.pseudocode` absent | The top-level `pseudocode` |
+| A member that is a choice from a list is absent | The member stays absent (two exceptions: see below) |
 | An optional member is absent | The member stays absent |
 
 The flag objects `practical`, `clrsReference`, `masterTheorem`, `inputSensitive` and
@@ -306,19 +307,23 @@ The flag objects `practical`, `clrsReference`, `masterTheorem`, `inputSensitive`
 
 ### Members with a fixed vocabulary
 
-A member that is absent takes the first value of its list (`weightProperty` takes none). An
-unrecognised value is kept as sent, and the answer carries one sentence that lists the recognised
-values.
+A member is stored only when the client sent it, because an absent member is not a choice that
+the client made. Two members are the exception. They take the first value of their list when
+absent: `correctnessProof.method` and `dpFormulation.computationOrder.direction`. An unrecognised
+value is kept as sent, and the answer carries one sentence that lists the recognised values.
 
-| Member | Values |
-|--------|--------|
-| `correctnessProof.method` | `loop_invariant`, `induction`, `contradiction`, `direct`, `structural` |
-| `recurrence.solutionMethod` | `master_theorem`, `substitution`, `recursion_tree`, `generating_function` |
-| `amortizedAnalysis.method` | `aggregate`, `accounting`, `potential` |
-| `dpFormulation.computationOrder.direction` | `bottom_up`, `top_down`, `bidirectional` |
-| `graphContext.graphType` | `directed`, `undirected`, `mixed` |
-| `graphContext.representation` | `adjacency_list`, `adjacency_matrix`, `edge_list`, `implicit` |
-| `graphContext.weightProperty` | `non_negative`, `positive`, `arbitrary`, `unit` |
+| Member | Values | When absent |
+|--------|--------|-------------|
+| `correctnessProof.method` | `loop_invariant`, `induction`, `contradiction`, `direct`, `structural` | `loop_invariant` |
+| `recurrence.solutionMethod` | `master_theorem`, `substitution`, `recursion_tree`, `generating_function` | Stays absent |
+| `amortizedAnalysis.method` | `aggregate`, `accounting`, `potential` | Stays absent |
+| `dpFormulation.computationOrder.direction` | `bottom_up`, `top_down`, `bidirectional` | `bottom_up` |
+| `graphContext.graphType` | `directed`, `undirected`, `mixed` | Stays absent |
+| `graphContext.representation` | `adjacency_list`, `adjacency_matrix`, `edge_list`, `implicit` | Stays absent |
+| `graphContext.weightProperty` | `non_negative`, `positive`, `arbitrary`, `unit` | Stays absent |
+
+The suggestions of a thought print `Method:` for an amortized analysis, and the graph type in
+`Graph:`, only when the thought holds the member.
 
 `clrsCategory` and `clrsAlgorithm` are stored as sent, with no sentence.
 
