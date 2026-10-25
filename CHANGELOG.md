@@ -7,8 +7,64 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- **The advertised JSON Schema now states the length, count and numeric bounds of every string,
+  array and number that the Zod schema bounds.** Before this change the advertised schema of the 11
+  thought tools carried three `maxItems` keys and no `maxLength`, so a client could not learn the
+  limits and met them as errors. `src/tools/schema-bounds.ts` copies each bound from the Zod schema
+  onto the hand-written schema when the tool definitions load. A bound that the hand-written schema
+  already states is kept. Two limits stay in the Zod schema only: the entry count of a record and
+  the length of a record key. The 13 tool definitions that `tools/list` returns
+  grow by about 15 percent (63,577 to 73,160 bytes of compact JSON). The schema stays hand-written
+  for Claude Desktop, as in 4.4.0.
+- **Four tests hold the two schemas and the handlers together.**
+  `schema-bounds.test.ts` pins the copy rules of `withZodBounds`: a stated bound is kept, a missing
+  bound is copied at every depth, the safe-integer limits of `.int()` are not copied, and the input
+  schemas are not changed.
+  `advertised-schema-conformance.test.ts` derives a JSON Schema from each Zod schema with
+  `z.toJSONSchema` and compares it with the advertised schema at every depth: types, enum members,
+  `required`, properties and bounds. `bounded-inputs.test.ts` fails on any string, array or value of
+  unknown type without a bound, in the 13 tools and in the legacy `deepthinking` tool.
+  `field-reach.test.ts` changes one accepted field at a time and checks that the stored thought
+  changes in at least one mode of the tool. Its list `KNOWN_UNREACHED` names the 72 accepted fields
+  that no mode stores, per tool. The test fails when a field joins or leaves the list without a
+  change to the list.
+
+### Changed
+
+- **The advertised JSON Schema now agrees with the Zod schema on `mode`, the temporal constraint
+  types and the causal node type.** `mode` is in `required` for the 11 thought tools (the Zod schema
+  already required it). The temporal `constraints[].type` lists `before`, `after`, `during`,
+  `overlaps`, `meets`, `starts`, `finishes` and `equals`. It listed `simultaneous`, which the server
+  rejects, and it left out the last five values. `nodes[].type` and `causalGraph.nodes[].type` list
+  `cause`, `effect`, `mediator` and `confounder`. The items of `referencesSteps` are numbers, and
+  the temporal source `bias` object requires `type`, as the Zod schema does.
+- **A value in `events[].properties` is a string, a number, a boolean, `null` or a bounded array of
+  those.** The value was `z.unknown()` in `deepthinking_temporal` and `z.any()` in the legacy tool,
+  so its size was not bounded. A call that sends a nested object, an array of objects, a nested
+  array, a string of more than 10,000 characters or an array of more than 1,000 items as a value is
+  now rejected by the focused tool.
+- **The legacy `deepthinking` tool bounds three numeric arrays.** `payoffMatrix.payoffs[].payoffs`,
+  `gameTree.nodes[].payoffs` and `logicalProof.steps[].referencesSteps` hold at most 1,000 items.
+  They had no limit, so a caller could pass the input caps through the old tool name.
+
 ### Fixed
 
+- **Six base thought fields reached the stored thought in some modes only.** Every tool accepts
+  `revisionReason`, `branchFrom`, `branchId`, `uncertainty`, `dependencies` and `assumptions`. Each
+  mode handler builds its thought by hand, and most copied some of the six, so the rest were
+  accepted and dropped without an error. `ModeHandlerRegistry.createThought` now copies a field
+  from the input when the handler left it unset. A value that the handler computed is kept. The new
+  test `registry-base-fields.test.ts` checks every mode. A few advisory validators now see the
+  fields in more modes: an explicit empty `dependencies` list adds a warning in `meta` and
+  `recursive` mode, and a `stochastic` thought that carries `uncertainty` no longer gets the advice
+  to add it.
+- **The description of `uncertainty` was inverted.** The advertised schema called it a confidence
+  level, where 1 is the highest confidence. The server treats it as uncertainty: the advisory
+  validation confidence of a thought is multiplied by 1 minus the value. The description now says
+  so. A client that followed the old text and sent 1 for a confident thought lowered the advisory
+  confidence of that thought to 0 in every mode that kept the field, and now every mode keeps it.
 - **A shared-lock read that meets the removal of its lock directory is retried on macOS.**
   `acquireSharedLock` creates its lock file inside the shared-lock directory, and a reader that
   releases the last shared lock removes the empty directory. When the directory vanished between the

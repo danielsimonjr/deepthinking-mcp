@@ -151,7 +151,10 @@ handleAddThought(input, toolName)                                    [index.ts:2
   │         │    └─ handlers.get(mode) ?? new GenericModeHandler(mode) [fallback for any
   │         │                                                           mode with no registered
   │         │                                                           specialized handler]
-  │         └─ return handler.createThought(input, sessionId)
+  │         └─ return carryBaseFields(handler.createThought(input, sessionId), input)
+  │              (copies revisionReason, branchFrom, branchId, uncertainty,
+  │               dependencies and assumptions from the input when the
+  │               handler left them unset)
   │
   ├─ session = await sessionManager.addThought(sessionId, thought)    [session/manager.ts]
   │    │   (validates session exists, enforces maxThoughtsInMemory,
@@ -918,9 +921,9 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 494 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 500 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
-| reachableFiles | 233 | repo-tools map (whole repository) |
+| reachableFiles | 234 | repo-tools map (whole repository) |
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |
 | typeOnlyCircularDeps | 95 | repo-tools map (whole repository) |
 

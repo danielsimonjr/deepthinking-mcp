@@ -12,6 +12,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { ThoughtFactory } from '../../../src/services/ThoughtFactory.js';
 import { ModeHandlerRegistry } from '../../../src/modes/registry.js';
 import { ThinkingMode } from '../../../src/types/core.js';
+import { getSchemaForTool } from '../../../src/tools/definitions.js';
 import type { TemporalThought } from '../../../src/types/modes/temporal.js';
 import type { ThinkingToolInput } from '../../../src/tools/thinking.js';
 
@@ -258,6 +259,9 @@ describe('Temporal Mode Integration - Events, Intervals, Timestamps', () => {
    * T-TMP-008: Temporal with events[].properties
    */
   describe('T-TMP-008: Event Properties', () => {
+    // This test calls the factory, so Zod never runs: it shows that the handler
+    // stores what it receives. The tool schema admits flat values only, and the
+    // next two tests pin that.
     it('should correctly store arbitrary event properties', () => {
       const input = createTemporalThought({
         events: [
@@ -283,6 +287,55 @@ describe('Temporal Mode Integration - Events, Intervals, Timestamps', () => {
       expect(thought.events![0].properties.count).toBe(42);
       expect(thought.events![0].properties.tags).toEqual(['important', 'urgent']);
       expect(thought.events![0].properties.metadata).toEqual({ author: 'test', version: 1 });
+    });
+
+    const toolInput = (properties: Record<string, unknown>) => ({
+      mode: 'temporal',
+      thought: 'Event properties through the tool schema',
+      thoughtNumber: 1,
+      totalThoughts: 1,
+      nextThoughtNeeded: false,
+      events: [
+        {
+          id: 'e1',
+          name: 'Event',
+          description: 'An event',
+          timestamp: 1000,
+          type: 'instant',
+          properties,
+        },
+      ],
+    });
+
+    it('accepts a string, a number, a boolean, null and a list of those through the tool schema', () => {
+      const schema = getSchemaForTool('deepthinking_temporal');
+      const parsed = schema.parse(
+        toolInput({
+          priority: 'high',
+          count: 42,
+          flag: true,
+          nothing: null,
+          tags: ['important', 42, false, null],
+        })
+      ) as { events: Array<{ properties: Record<string, unknown> }> };
+
+      expect(parsed.events[0].properties).toEqual({
+        priority: 'high',
+        count: 42,
+        flag: true,
+        nothing: null,
+        tags: ['important', 42, false, null],
+      });
+    });
+
+    it('rejects a nested object, an array of objects and a nested array through the tool schema', () => {
+      const schema = getSchemaForTool('deepthinking_temporal');
+
+      expect(() =>
+        schema.parse(toolInput({ metadata: { author: 'test', version: 1 } }))
+      ).toThrow();
+      expect(() => schema.parse(toolInput({ rows: [{ a: 1 }] }))).toThrow();
+      expect(() => schema.parse(toolInput({ grid: [[1, 2]] }))).toThrow();
     });
   });
 

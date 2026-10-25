@@ -1,10 +1,10 @@
 metadata:
   name: deepthinking-mcp
   version: 10.0.2
-  lastUpdated: '2026-10-23'
-  totalFiles: 241
+  lastUpdated: '2026-10-25'
+  totalFiles: 242
   totalModules: 14
-  totalExports: 1186
+  totalExports: 1188
 entryPoints:
   - file: src/index.ts
     type: main
@@ -6688,6 +6688,9 @@ modules:
         - file: ./json-schemas.js
           imports:
             - jsonSchemas
+        - file: ./schema-bounds.js
+          imports:
+            - withZodBounds
         - file: ./schemas/base.js
           imports:
             - SessionActionSchema
@@ -6726,9 +6729,9 @@ modules:
           imports:
             - analyzeInputSchema
       exports:
+        - toolSchemas
         - tools
         - toolList
-        - toolSchemas
         - modeToToolMap
         - getToolForMode
         - isValidTool
@@ -6738,9 +6741,9 @@ modules:
         - isValidTool
         - getSchemaForTool
       constants:
+        - toolSchemas
         - tools
         - toolList
-        - toolSchemas
         - modeToToolMap
     src/tools/json-schemas.ts:
       description: Hand-Written JSON Schemas for MCP Tools (v4.4.0)
@@ -6781,6 +6784,18 @@ modules:
         - deepthinking_session_schema
         - deepthinking_analyze_schema
         - jsonSchemas
+    src/tools/schema-bounds.ts:
+      description: Advertised-schema bounds
+      externalDependencies:
+        - package: zod
+          imports:
+            - z
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - withZodBounds
+      functions:
+        - withZodBounds
     src/tools/schemas/analyze.ts:
       description: Multi-Mode Analyze Tool Schema - Phase 12 Sprint 3
       externalDependencies:
@@ -7273,6 +7288,7 @@ modules:
             - NameSchema
             - TextSchema
             - IdArraySchema
+            - PropertyValueSchema
             - boundedRecord
         - file: ../../../utils/sanitization.js
           imports:
@@ -7302,6 +7318,7 @@ modules:
         - ThoughtTextSchema
         - IdArraySchema
         - TextArraySchema
+        - PropertyValueSchema
         - LevelEnum
         - ImpactEnum
         - ExportFormatEnum
@@ -7331,6 +7348,7 @@ modules:
         - ThoughtTextSchema
         - IdArraySchema
         - TextArraySchema
+        - PropertyValueSchema
         - LevelEnum
         - ImpactEnum
         - ExportFormatEnum
@@ -7359,6 +7377,7 @@ modules:
         - file: ./schemas/shared.js
           imports:
             - boundedRecord
+            - PropertyValueSchema
       exports:
         - ThinkingToolSchema
         - thinkingTool
@@ -11138,6 +11157,7 @@ dependencyGraph:
       files:
         - src/tools/definitions.ts
         - src/tools/json-schemas.ts
+        - src/tools/schema-bounds.ts
         - src/tools/schemas/analyze.ts
         - src/tools/schemas/base.ts
         - src/tools/schemas/index.ts
@@ -11248,16 +11268,16 @@ dependencyGraph:
         - src/validation/validators/registry.ts
         - src/validation/validators/validation-utils.ts
 statistics:
-  totalTypeScriptFiles: 241
+  totalTypeScriptFiles: 242
   totalModules: 14
-  totalLinesOfCode: 119028
-  totalExports: 1186
+  totalLinesOfCode: 119242
+  totalExports: 1188
   totalClasses: 143
   totalInterfaces: 562
-  totalFunctions: 434
+  totalFunctions: 435
   totalTypeGuards: 87
   totalEnums: 3
-  totalConstants: 134
+  totalConstants: 135
   totalReExports: 487
   totalTypeOnlyImports: 333
   runtimeCircularDeps: 0

@@ -1,22 +1,22 @@
 {
   "summary": {
-    "totalFiles": 491,
+    "totalFiles": 497,
     "byArea": {
       "docs": {
         "files": 2,
         "loc": 1828
       },
       "src": {
-        "files": 241,
-        "loc": 119028
+        "files": 242,
+        "loc": 119242
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 227,
-        "loc": 101672
+        "files": 232,
+        "loc": 102847
       },
       "tools": {
         "files": 14,
@@ -29,10 +29,10 @@
     },
     "byDisposition": {
       "other": 2,
-      "reachable": 229,
+      "reachable": 230,
       "orphan": 12,
       "template": 5,
-      "test": 227,
+      "test": 232,
       "tool": 14,
       "config": 2
     }
@@ -659,7 +659,7 @@
     {
       "path": "src/modes/registry.ts",
       "area": "src",
-      "loc": 379,
+      "loc": 412,
       "disposition": "reachable"
     },
     {
@@ -869,13 +869,19 @@
     {
       "path": "src/tools/definitions.ts",
       "area": "src",
-      "loc": 176,
+      "loc": 190,
       "disposition": "reachable"
     },
     {
       "path": "src/tools/json-schemas.ts",
       "area": "src",
-      "loc": 2568,
+      "loc": 2594,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/tools/schema-bounds.ts",
+      "area": "src",
+      "loc": 118,
       "disposition": "reachable"
     },
     {
@@ -959,19 +965,19 @@
     {
       "path": "src/tools/schemas/modes/temporal.ts",
       "area": "src",
-      "loc": 257,
+      "loc": 258,
       "disposition": "reachable"
     },
     {
       "path": "src/tools/schemas/shared.ts",
       "area": "src",
-      "loc": 281,
+      "loc": 297,
       "disposition": "reachable"
     },
     {
       "path": "src/tools/thinking.ts",
       "area": "src",
-      "loc": 1560,
+      "loc": 1566,
       "disposition": "reachable"
     },
     {
@@ -2003,7 +2009,7 @@
     {
       "path": "tests/integration/tools/temporal-events.test.ts",
       "area": "tests",
-      "loc": 430,
+      "loc": 483,
       "disposition": "test"
     },
     {
@@ -2505,6 +2511,12 @@
       "disposition": "test"
     },
     {
+      "path": "tests/unit/modes/registry-base-fields.test.ts",
+      "area": "tests",
+      "loc": 114,
+      "disposition": "test"
+    },
+    {
       "path": "tests/unit/modes/stochastic/distribution.test.ts",
       "area": "tests",
       "loc": 398,
@@ -2697,9 +2709,33 @@
       "disposition": "test"
     },
     {
+      "path": "tests/unit/tools/schema-bounds.test.ts",
+      "area": "tests",
+      "loc": 152,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/tools/schemas/advertised-schema-conformance.test.ts",
+      "area": "tests",
+      "loc": 208,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/tools/schemas/bounded-inputs.test.ts",
+      "area": "tests",
+      "loc": 115,
+      "disposition": "test"
+    },
+    {
       "path": "tests/unit/tools/schemas/bounds.test.ts",
       "area": "tests",
       "loc": 504,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/tools/schemas/field-reach.test.ts",
+      "area": "tests",
+      "loc": 533,
       "disposition": "test"
     },
     {

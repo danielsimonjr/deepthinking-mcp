@@ -60,23 +60,31 @@ The server validates `arguments` against a Zod schema before running any logic
 (`src/tools/definitions.ts` maps each tool name to its Zod schema in `toolSchemas`). The JSON
 Schema advertised by `tools/list` (`src/tools/json-schemas.ts`) is hand-written for client-side
 display. The Zod schema (`src/tools/schemas/`) is the actual gate. Both schemas list the same
-top-level fields for each tool. They differ in these details:
+top-level fields for each tool. They agree on the type, the enum members, the `required` list and
+the length, count and numeric bounds of every nested string, array and number. They differ in two
+details:
 
 - The advertised JSON Schema sets `additionalProperties` to `false`. The Zod schema strips an
   unknown field and returns no error, so the server accepts a call with an unknown field and
   ignores the field.
-- The advertised JSON Schema does not list `mode` in `required` for the 11 add-thought tools. The
-  Zod schema requires `mode`.
-- The advertised JSON Schema has four `maxItems` keys and no `maxLength`. The Zod schema bounds
-  every string, array and record.
-- A few nested details differ. The tool sections state them: `constraints[].type` of
-  `deepthinking_temporal` and `nodes[].type` of `deepthinking_causal`.
+- The Zod schema limits two things in a record (an object with dynamic keys). The two limits are
+  the number of entries and the length of a key. Two records are `massFunction` and
+  `events[].properties`. The advertised schema states neither limit. A call with too many entries
+  passes the advertised schema and fails in the Zod schema.
+
+The hand-written schema states the names, types, enums and descriptions. The bounds (`maxLength`,
+`minLength`, `maxItems`, `minItems`, `minimum`, `maximum`) are not written twice. The server copies
+each bound from the Zod schema onto the advertised schema when it loads the tool definitions
+(`withZodBounds` in `src/tools/schema-bounds.ts`). A bound that the hand-written schema already
+states is kept. The test `advertised-schema-conformance.test.ts` derives a JSON Schema from each
+Zod schema and compares it with the advertised one at every depth.
 
 **All inputs are bounded in the Zod schema.** Every free-text string, every array, and every record
-(object with dynamic keys) carries a maximum size. One exception: the values inside
-`events[].properties` of `deepthinking_temporal` accept any JSON value. The key length and the entry
-count are bounded there, but the size of a value is not. See [Input limits](#input-limits) for the
-concrete numbers.
+(object with dynamic keys) carries a maximum size. A value in `events[].properties` of
+`deepthinking_temporal` is a bounded string, a number, a boolean, `null`, or a bounded array of
+those. A nested object is rejected there. The test `bounded-inputs.test.ts` fails on any string,
+array or value of unknown type without a bound, for all 13 tools and for the legacy tool. See
+[Input limits](#input-limits) for the concrete numbers.
 
 ### Response shape
 
@@ -139,7 +147,7 @@ These fields are documented once here; each per-tool section below states only i
 | `revisionReason` | string | No | Explanation for why revision is needed. Bounded by `TextSchema` (≤ 10,000 chars). |
 | `branchFrom` | string | No | ID of thought to branch from, for an alternative reasoning path. Bounded by `IdSchema`. |
 | `branchId` | string | No | Identifier for this reasoning branch. Bounded by `IdSchema`. |
-| `uncertainty` | number | No | Confidence level, 0–1 (1 = highest confidence). |
+| `uncertainty` | number | No | Uncertainty about this thought, 0–1 (0 = certain, 1 = fully uncertain). The advisory validation confidence of the thought is multiplied by 1 minus this value. |
 | `dependencies` | string[] | No | IDs of thoughts this one depends on. Array of `IdSchema`, ≤ 1,000 items. |
 | `assumptions` | string[] | No | Key assumptions made in this thought. Array of `IdSchema`, ≤ 1,000 items. |
 
@@ -147,21 +155,24 @@ These fields are documented once here; each per-tool section below states only i
 reasoning chain: call the tool repeatedly with the same `sessionId`, incrementing `thoughtNumber`
 each time, until `nextThoughtNeeded` is `false`.
 
-The server stores `isRevision` and `revisesThought` on the thought in every mode. It stores
-`branchFrom`, `branchId` and `revisionReason` only in `sequential` mode. It stores `uncertainty`,
-`dependencies` and `assumptions` in some modes only. All modes accept these fields. A mode that does
-not store a field ignores it and returns no error. The server runs no branch logic and no revision
-logic: it does not create a branch and does not replace the revised thought. The stored values are
-labels that the exporters and the client read.
+The server stores `isRevision`, `revisesThought`, `revisionReason`, `branchFrom`, `branchId`,
+`uncertainty`, `dependencies` and `assumptions` on the thought in every mode. A mode handler builds
+its thought by hand and can leave one of the last six unset. `ModeHandlerRegistry.createThought`
+then copies the value from the input. A value that the handler computed itself is kept. The server
+runs no branch logic and no revision logic: it does not create a branch and does not replace the
+revised thought. The stored values are labels that the exporters and the client read. The field
+`sessionId` selects the session that stores the thought and is not part of the thought.
 
 Every "add a thought" tool also requires a `mode` field, whose enum values differ per tool
-(documented per section below), and adds tool-specific fields on top of the base set. The Zod
-schema rejects a call without `mode`, although the advertised JSON Schema does not list `mode` as
-required.
+(documented per section below), and adds tool-specific fields on top of the base set. Both the Zod
+schema and the advertised JSON Schema require `mode`.
 
 The tables in this document list the fields that the server accepts. A mode handler can ignore an
-accepted field. The rows for `deepthinking_mathematics` and `deepthinking_engineering` mark the
-known cases.
+accepted field. The rows for `deepthinking_mathematics` and `deepthinking_engineering` mark two
+known groups. The test `field-reach.test.ts` finds every case. It changes one accepted field at a
+time and checks that the stored thought changes in at least one mode of the tool. The list
+`KNOWN_UNREACHED` in that test names each accepted field that no mode stores. The test fails when
+a field joins the list or leaves it without a change to the list.
 
 ### Response shape for add-thought tools
 
@@ -515,8 +526,8 @@ mode-specific groups of fields. All top-level object arrays below are bounded at
 | Field | Type | Description |
 |---|---|---|
 | `timeline` | object | `{ id, name, timeUnit, events: string[], startTime?: number, endTime?: number }`. `timeUnit` is one of `milliseconds, seconds, minutes, hours, days, months, years`. `id`/`name`/`timeUnit`/`events` required. |
-| `events` | object[] | Temporal events. Each: `{ id, name, description, timestamp: number, type: "instant" \| "interval", duration?: number, properties?: record }`. `id`/`name`/`description`/`timestamp`/`type` required. `properties` is a bounded record (key `IdSchema`, ≤ 1,000 entries) whose values can be any JSON value, with no size limit. |
-| `constraints` | object[] | Temporal constraints. Each: `{ id, type: "before" \| "after" \| "during" \| "overlaps" \| "meets" \| "starts" \| "finishes" \| "equals", subject: string, object: string, confidence: number 0–1 }`, all required. The advertised JSON Schema lists `simultaneous` in place of the last five values, and the server rejects `simultaneous`. |
+| `events` | object[] | Temporal events. Each: `{ id, name, description, timestamp: number, type: "instant" \| "interval", duration?: number, properties?: record }`. `id`/`name`/`description`/`timestamp`/`type` required. `properties` is a bounded record (key `IdSchema`, ≤ 1,000 entries). Each value is a string (`TextSchema`), a number, a boolean, `null`, or an array of at most 1,000 of those. |
+| `constraints` | object[] | Temporal constraints. Each: `{ id, type: "before" \| "after" \| "during" \| "overlaps" \| "meets" \| "starts" \| "finishes" \| "equals", subject: string, object: string, confidence: number 0–1 }`, all required. The advertised JSON Schema lists the same eight values. |
 | `intervals` | object[] | Temporal intervals. Each: `{ id, name, start: number, end: number, contains?: string[], overlaps?: string[] }`, `id`/`name`/`start`/`end` required. |
 | `relations` | object[] | Temporal relations, Allen's interval algebra. Each: `{ id, from, to, relationType, strength: number 0–1, delay?: number }`, all but `delay` required. `relationType` is one of `before, after, during, overlaps, meets, starts, finishes, equals, causes`. |
 
@@ -686,7 +697,7 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 | Field | Type | Required | Description |
 |---|---|---|---|
 | `mode` | `"causal" \| "counterfactual"` | **Yes** | Causal reasoning mode. |
-| `nodes` | object[] | No | Nodes in the causal graph. Each: `{ id, name, description?, type? }`. `id`/`name` required. `type` is one of `cause`, `effect`, `mediator`, `confounder`; the server accepts `type`, and the advertised JSON Schema does not list it. Array ≤ 500 items. |
+| `nodes` | object[] | No | Nodes in the causal graph. Each: `{ id, name, description?, type? }`. `id`/`name` required. `type` is one of `cause`, `effect`, `mediator`, `confounder`. Array ≤ 500 items. |
 | `edges` | object[] | No | Causal edges. Each: `{ from, to, strength?: number 0–1, type?: string }`. `from`/`to` required. Array ≤ 500 items. |
 | `causalGraph` | object | No | `{ nodes, edges }`, both required, with the same item shapes as the top-level `nodes` and `edges`. An alternative form of those two fields. |
 | `interventions` | object[] | No | Interventions applied to the causal graph. Each: `{ node, value?, effect? }`. `node` required. Array ≤ 500 items. |
@@ -1390,7 +1401,7 @@ call runs a complete analysis.
 | `preset` | string | No | Pre-defined mode combination. One of `comprehensive_analysis`, `hypothesis_testing`, `decision_making`, `root_cause`, `future_planning`. See [Presets](#presets) below. |
 | `customModes` | string[] | No | Custom mode selection, overrides `preset` when present. 2–10 items, each one of the 34 mode names listed in the [mode enum](#custommodes-enum-values) below. |
 | `mergeStrategy` | string | No | `union` (combine all, dedupe), `intersection` (only insights agreed by all modes), `weighted` (weight by confidence/importance), `hierarchical` (primary mode + supporting evidence), or `dialectical` (thesis–antithesis–synthesis). Default `union`. |
-| `sessionId` | string | No | At most 100 characters in the Zod validator (the JSON Schema does not state a bound). The server uses it only as a label for the internal mode runs. It does not add the analysis to that session, and it does not look the session up. The response always holds a new `sessionId`. |
+| `sessionId` | string | No | At most 100 characters (both schemas state the bound). The server uses it only as a label for the internal mode runs. It does not add the analysis to that session, and it does not look the session up. The response always holds a new `sessionId`. |
 | `context` | string | No | Additional context or background for the analysis. `TextSchema` (≤ 10,000 chars). |
 | `timeoutPerMode` | integer | No | Milliseconds per mode. 1,000–120,000, default 30,000. The server accepts and validates the value but does not enforce it: the analyzer runs each mode synchronously and never reads the value. |
 
@@ -1569,9 +1580,8 @@ dispatches six of them: `add_thought`, `summarize`, `export`, `switch_mode`, `ge
 `Unknown action`. Every legacy action needs `thought`, `thoughtNumber`, `totalThoughts` and
 `nextThoughtNeeded`, because the schema requires them. The schema is bounded, but with wider limits
 than the focused tools: strings up to 10,000 characters and object arrays up to 1,000 items
-(see [Input limits](#input-limits)). Three numeric arrays have no length limit:
-`payoffMatrix.payoffs[].payoffs`, `gameTree.nodes[].payoffs` and
-`logicalProof.steps[].referencesSteps`.
+(see [Input limits](#input-limits)). The three numeric arrays `payoffMatrix.payoffs[].payoffs`,
+`gameTree.nodes[].payoffs` and `logicalProof.steps[].referencesSteps` hold at most 1,000 items.
 
 ### Migrating off the legacy tool
 
@@ -1591,8 +1601,7 @@ For `action: "summarize" | "export" | "switch_mode" | "get_session" | "recommend
 ## Input limits
 
 Every free-text string and array across all 13 tools is bounded, and every record is capped by entry
-count. The values of `events[].properties` in `deepthinking_temporal` are not size-bounded. The
-concrete numbers (`MAX_LENGTHS` in `src/utils/sanitization.ts`, referenced from
+count. The concrete numbers (`MAX_LENGTHS` in `src/utils/sanitization.ts`, referenced from
 `src/tools/schemas/shared.ts`):
 
 | Constant | Value | Used for |
@@ -1677,4 +1686,4 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 494 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 500 | repo-tools map (whole repository) |

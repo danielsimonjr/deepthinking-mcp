@@ -10,6 +10,7 @@
  */
 
 import { jsonSchemas } from "./json-schemas.js";
+import { withZodBounds } from "./schema-bounds.js";
 import { SessionActionSchema } from "./schemas/base.js";
 import { CoreModeSchema, StandardSchema } from "./schemas/modes/core.js";
 import { MathSchema } from "./schemas/modes/mathematics.js";
@@ -22,34 +23,6 @@ import { ScientificSchema } from "./schemas/modes/scientific.js";
 import { EngineeringSchema } from "./schemas/modes/engineering.js";
 import { AcademicSchema } from "./schemas/modes/academic.js";
 import { analyzeInputSchema } from "./schemas/analyze.js";
-
-/**
- * 13 focused tools with hand-written JSON schemas (v8.4.0)
- * Zod schemas used only for runtime validation
- * Phase 5: Added deepthinking_core for fundamental reasoning
- * Phase 12 Sprint 3: Added deepthinking_analyze
- * Phase 14: Added deepthinking_engineering and deepthinking_academic
- */
-export const tools = {
-  deepthinking_core: jsonSchemas[0],
-  deepthinking_standard: jsonSchemas[1],
-  deepthinking_mathematics: jsonSchemas[2],
-  deepthinking_temporal: jsonSchemas[3],
-  deepthinking_probabilistic: jsonSchemas[4],
-  deepthinking_causal: jsonSchemas[5],
-  deepthinking_strategic: jsonSchemas[6],
-  deepthinking_analytical: jsonSchemas[7],
-  deepthinking_scientific: jsonSchemas[8],
-  deepthinking_engineering: jsonSchemas[9],
-  deepthinking_academic: jsonSchemas[10],
-  deepthinking_session: jsonSchemas[11],
-  deepthinking_analyze: jsonSchemas[12],
-};
-
-/**
- * All tools as array for MCP ListTools
- */
-export const toolList = jsonSchemas;
 
 /**
  * Tool name to schema mapping for validation
@@ -71,6 +44,47 @@ export const toolSchemas = {
   deepthinking_session: SessionActionSchema,
   deepthinking_analyze: analyzeInputSchema,
 } as const;
+
+/**
+ * The advertised definitions: the hand-written JSON Schemas, each carrying the
+ * length, count and numeric bounds of the Zod schema that enforces its tool
+ * (see `schema-bounds.ts`). Property names, `required` lists and enums stay
+ * hand-written; `advertised-schema-conformance.test.ts` checks them.
+ */
+const advertised = jsonSchemas.map((definition) =>
+  withZodBounds(
+    definition,
+    toolSchemas[definition.name as keyof typeof toolSchemas],
+  ),
+) as unknown as typeof jsonSchemas;
+
+/**
+ * 13 focused tools with hand-written JSON schemas (v8.4.0)
+ * Zod schemas used only for runtime validation
+ * Phase 5: Added deepthinking_core for fundamental reasoning
+ * Phase 12 Sprint 3: Added deepthinking_analyze
+ * Phase 14: Added deepthinking_engineering and deepthinking_academic
+ */
+export const tools = {
+  deepthinking_core: advertised[0],
+  deepthinking_standard: advertised[1],
+  deepthinking_mathematics: advertised[2],
+  deepthinking_temporal: advertised[3],
+  deepthinking_probabilistic: advertised[4],
+  deepthinking_causal: advertised[5],
+  deepthinking_strategic: advertised[6],
+  deepthinking_analytical: advertised[7],
+  deepthinking_scientific: advertised[8],
+  deepthinking_engineering: advertised[9],
+  deepthinking_academic: advertised[10],
+  deepthinking_session: advertised[11],
+  deepthinking_analyze: advertised[12],
+};
+
+/**
+ * All tools as array for MCP ListTools
+ */
+export const toolList = advertised;
 
 /**
  * Mode to tool name mapping for routing

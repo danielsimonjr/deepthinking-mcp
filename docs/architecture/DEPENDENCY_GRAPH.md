@@ -5,7 +5,7 @@
 
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 10.0.2 | **Last Updated**: 2026-10-23
+**Version**: 10.0.2 | **Last Updated**: 2026-10-25
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -49,7 +49,7 @@ The codebase is organized into the following modules:
 - **services**: 3 files
 - **session**: 4 files
 - **taxonomy**: 7 files
-- **tools**: 18 files
+- **tools**: 19 files
 - **types**: 37 files
 - **utils**: 6 files
 - **validation**: 44 files
@@ -2593,6 +2593,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `./json-schemas.js` | `jsonSchemas` | Import |
+| `./schema-bounds.js` | `withZodBounds` | Import |
 | `./schemas/base.js` | `SessionActionSchema` | Import |
 | `./schemas/modes/core.js` | `CoreModeSchema, StandardSchema` | Import |
 | `./schemas/modes/mathematics.js` | `MathSchema` | Import |
@@ -2608,7 +2609,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Functions: `getToolForMode`, `isValidTool`, `getSchemaForTool`
-- Constants: `tools`, `toolList`, `toolSchemas`, `modeToToolMap`
+- Constants: `toolSchemas`, `tools`, `toolList`, `modeToToolMap`
 
 ---
 
@@ -2621,6 +2622,18 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Constants: `deepthinking_core_schema`, `deepthinking_standard_schema`, `deepthinking_mathematics_schema`, `deepthinking_temporal_schema`, `deepthinking_probabilistic_schema`, `deepthinking_causal_schema`, `deepthinking_strategic_schema`, `deepthinking_analytical_schema`, `deepthinking_scientific_schema`, `deepthinking_engineering_schema`, `deepthinking_academic_schema`, `deepthinking_session_schema`, `deepthinking_analyze_schema`, `jsonSchemas`
+
+---
+
+### `src/tools/schema-bounds.ts` - Advertised-schema bounds
+
+**External Dependencies:**
+| Package | Import |
+|---------|--------|
+| `zod` | `z` |
+
+**Exports:**
+- Functions: `withZodBounds`
 
 ---
 
@@ -2882,7 +2895,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `ConfidenceSchema, TimeUnitEnum, TemporalConstraintEnum, TemporalRelationEnum, EventTypeEnum, IdSchema, NameSchema, TextSchema, IdArraySchema, boundedRecord` | Import |
+| `../shared.js` | `ConfidenceSchema, TimeUnitEnum, TemporalConstraintEnum, TemporalRelationEnum, EventTypeEnum, IdSchema, NameSchema, TextSchema, IdArraySchema, PropertyValueSchema, boundedRecord` | Import |
 | `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
@@ -2904,7 +2917,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Functions: `boundedArray`, `boundedRecord`
-- Constants: `ConfidenceSchema`, `PositiveIntSchema`, `IdSchema`, `SessionIdSchema`, `NameSchema`, `TextSchema`, `ThoughtTextSchema`, `IdArraySchema`, `TextArraySchema`, `LevelEnum`, `ImpactEnum`, `ExportFormatEnum`, `SessionActionEnum`, `ExportProfileEnum`, `ProofTypeEnum`, `TimeUnitEnum`, `TemporalConstraintEnum`, `TemporalRelationEnum`, `EventTypeEnum`, `TransformationEnum`, `ShannonStageEnum`, `EntitySchema`, `DescribedEntitySchema`
+- Constants: `ConfidenceSchema`, `PositiveIntSchema`, `IdSchema`, `SessionIdSchema`, `NameSchema`, `TextSchema`, `ThoughtTextSchema`, `IdArraySchema`, `TextArraySchema`, `PropertyValueSchema`, `LevelEnum`, `ImpactEnum`, `ExportFormatEnum`, `SessionActionEnum`, `ExportProfileEnum`, `ProofTypeEnum`, `TimeUnitEnum`, `TemporalConstraintEnum`, `TemporalRelationEnum`, `EventTypeEnum`, `TransformationEnum`, `ShannonStageEnum`, `EntitySchema`, `DescribedEntitySchema`
 
 ---
 
@@ -2919,7 +2932,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../utils/sanitization.js` | `MAX_LENGTHS` | Import |
-| `./schemas/shared.js` | `boundedRecord` | Import |
+| `./schemas/shared.js` | `boundedRecord, PropertyValueSchema` | Import |
 
 **Exports:**
 - Constants: `ThinkingToolSchema`, `thinkingTool`
@@ -4381,10 +4394,10 @@ graph TD
     subgraph Tools
         N37[definitions]
         N38[json-schemas]
-        N39[analyze]
-        N40[base]
-        N41[index]
-        N42[...13 more]
+        N39[schema-bounds]
+        N40[analyze]
+        N41[base]
+        N42[...14 more]
     end
 
     subgraph Types
@@ -4452,14 +4465,14 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 241 |
+| Total TypeScript Files | 242 |
 | Total Modules | 14 |
-| Total Lines of Code | 119028 |
-| Total Exports | 1186 |
+| Total Lines of Code | 119242 |
+| Total Exports | 1188 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
 | Total Interfaces | 562 |
-| Total Functions | 434 |
+| Total Functions | 435 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
 | Type-only Imports | 333 |
@@ -4468,5 +4481,5 @@ graph TD
 
 ---
 
-*Last Updated*: 2026-10-23
+*Last Updated*: 2026-10-25
 *Version*: 10.0.2

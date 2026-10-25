@@ -69,7 +69,8 @@ const baseThoughtProperties = {
   },
   uncertainty: {
     type: "number",
-    description: "Confidence level (0-1, where 1 is highest confidence)",
+    description:
+      "Uncertainty about this thought (0-1, where 0 is certain and 1 is fully uncertain)",
     minimum: 0,
     maximum: 1,
   },
@@ -90,6 +91,7 @@ const baseThoughtRequired = [
   "thoughtNumber",
   "totalThoughts",
   "nextThoughtNeeded",
+  "mode",
 ] as const;
 
 /**
@@ -363,7 +365,7 @@ export const deepthinking_mathematics_schema = {
             },
             referencesSteps: {
               type: "array",
-              items: { type: "integer" },
+              items: { type: "number" },
               description: "Step numbers this step references",
             },
           },
@@ -540,6 +542,7 @@ export const deepthinking_temporal_schema = {
                 direction: { type: "string" },
                 severity: { type: "number", minimum: 0, maximum: 1 },
               },
+              required: ["type"],
             },
             corroboratedBy: {
               type: "array",
@@ -740,8 +743,12 @@ export const deepthinking_temporal_schema = {
             },
             properties: {
               type: "object",
-              additionalProperties: true,
-              description: "Additional event properties",
+              additionalProperties: {
+                type: ["string", "number", "boolean", "null", "array"],
+                items: { type: ["string", "number", "boolean", "null"] },
+              },
+              description:
+                "Additional event properties: each value is text, a number, a boolean, null, or a list of those",
             },
           },
           required: ["id", "name", "description", "timestamp", "type"],
@@ -757,7 +764,16 @@ export const deepthinking_temporal_schema = {
             id: { type: "string" },
             type: {
               type: "string",
-              enum: ["before", "after", "during", "simultaneous"],
+              enum: [
+                "before",
+                "after",
+                "during",
+                "overlaps",
+                "meets",
+                "starts",
+                "finishes",
+                "equals",
+              ],
               description: "Constraint type",
             },
             subject: { type: "string", description: "Subject event ID" },
@@ -1098,6 +1114,11 @@ export const deepthinking_causal_schema = {
             id: { type: "string" },
             name: { type: "string" },
             description: { type: "string" },
+            type: {
+              type: "string",
+              enum: ["cause", "effect", "mediator", "confounder"],
+              description: "Role of the node in the causal graph",
+            },
           },
           required: ["id", "name"],
           additionalProperties: false,
@@ -1130,6 +1151,11 @@ export const deepthinking_causal_schema = {
                 id: { type: "string" },
                 name: { type: "string" },
                 description: { type: "string" },
+                type: {
+                  type: "string",
+                  enum: ["cause", "effect", "mediator", "confounder"],
+                  description: "Role of the node in the causal graph",
+                },
               },
               required: ["id", "name"],
               additionalProperties: false,

@@ -17,6 +17,7 @@ import {
   NameSchema,
   TextSchema,
   IdArraySchema,
+  PropertyValueSchema,
   boundedRecord,
 } from "../shared.js";
 import { MAX_LENGTHS } from "../../../utils/sanitization.js";
@@ -170,7 +171,7 @@ const TemporalEventSchema = z.object({
   timestamp: z.number(),
   type: EventTypeEnum,
   duration: z.number().optional(),
-  properties: boundedRecord(IdSchema, z.unknown()).optional(),
+  properties: boundedRecord(IdSchema, PropertyValueSchema).optional(),
 });
 
 const TemporalConstraintSchema = z.object({

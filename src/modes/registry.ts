@@ -34,6 +34,39 @@ export interface RegistryStats {
 }
 
 /**
+ * Base thought fields that every tool accepts and `BaseThought` declares.
+ *
+ * Each handler builds its thought by hand and most copy only some of these, so
+ * the rest were accepted at the tool boundary and dropped without an error.
+ */
+const CARRIED_BASE_FIELDS = [
+  "revisionReason",
+  "branchFrom",
+  "branchId",
+  "uncertainty",
+  "dependencies",
+  "assumptions",
+] as const;
+
+/**
+ * Copy the base fields the caller sent onto a thought whose handler left them
+ * unset. A value the handler computed itself is kept.
+ */
+function carryBaseFields(thought: Thought, input: ThinkingToolInput): Thought {
+  const carried: Partial<
+    Record<(typeof CARRIED_BASE_FIELDS)[number], unknown>
+  > = {};
+  for (const field of CARRIED_BASE_FIELDS) {
+    if (thought[field] === undefined && input[field] !== undefined) {
+      carried[field] = input[field];
+    }
+  }
+  return Object.keys(carried).length > 0
+    ? ({ ...thought, ...carried } as Thought)
+    : thought;
+}
+
+/**
  * ModeHandlerRegistry
  *
  * Singleton registry that manages mode handlers. Provides:
@@ -164,7 +197,7 @@ export class ModeHandlerRegistry {
   createThought(input: ThinkingToolInput, sessionId: string): Thought {
     const mode = (input.mode as ThinkingMode) || ThinkingMode.HYBRID;
     const handler = this.getHandler(mode);
-    return handler.createThought(input, sessionId);
+    return carryBaseFields(handler.createThought(input, sessionId), input);
   }
 
   /**

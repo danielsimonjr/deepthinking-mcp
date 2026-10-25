@@ -111,6 +111,22 @@ export function boundedRecord<
   });
 }
 
+/**
+ * A value in a caller-supplied property map (for example `events[].properties`):
+ * bounded text, a number, a boolean, null, or a bounded list of those.
+ *
+ * The values used to be `z.unknown()`, so a map was bounded by its entry count
+ * alone: each value could be any JSON, nested to any depth and of any size. One
+ * level of list covers the real use (a name, a count, a flag, a list of names).
+ */
+export const PropertyValueSchema = z.union([
+  TextSchema,
+  z.number(),
+  z.boolean(),
+  z.null(),
+  boundedArray(z.union([TextSchema, z.number(), z.boolean(), z.null()])),
+]);
+
 // ============================================================
 // COMMON ENUMS
 // ============================================================

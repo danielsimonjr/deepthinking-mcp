@@ -21,14 +21,14 @@ Most test folders follow the folder names of `src/`: `tests/unit/<area>/` and
 
 | Directory | Test files | Purpose |
 |---|---|---|
-| `tests/unit/` | 134 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
+| `tests/unit/` | 139 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
 | `tests/integration/` | 77 | Cross-module paths: entry-point dispatch over a real transport, tool-shaped input through the handlers, export round-trips, multi-mode analysis, session lifecycles. |
 | `tests/edge-cases/` | 6 | Boundary conditions, malformed input, regressions pinned from past bugs. |
 | `tests/performance/` | 4 | Counted-work checks for cost, throughput, memory and stress. `helpers/work-probe.ts` holds the counters. |
 | `tests/utils/` | 0 (5 helper files) | Shared fixtures, factories, and assertion helpers. 21 test files import them, all under `tests/integration/tools/`. |
 | `tests/test-results/` | 0 | Reporter code and `TEST_RESULTS_v*.md` summaries. Not test code. |
 
-The suite holds 221 test files. `npx vitest list --filesOnly` lists them. This document maps
+The suite holds 226 test files. `npx vitest list --filesOnly` lists them. This document maps
 files. It holds no test count and no pass or fail state. Run the suite to get those.
 
 ### Running each tier
@@ -44,8 +44,8 @@ npx vitest run                          # everything
 `npm run test:publish` sets `SKIP_BENCHMARKS=1`. That variable switches on one extra entry in the
 `exclude` list of `vitest.config.ts`: `**/benchmarks/**`. The pattern matches the directory
 `tests/unit/benchmarks/`, which holds 2 test files. It does not match `tests/performance/`, so
-the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 219
-files instead of 221.
+the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 224
+files instead of 226.
 
 ### Where reports land
 
@@ -74,7 +74,7 @@ the root-level files that name the area in their subject.
 |---|---|---|---|---|
 | `index.ts` | 1 | 0 | 1 (4 test files) | `tests/integration/index-server.test.ts` and 3 more files that import the module. See Gaps. |
 | `types/` | 37 | 11 | 17 | Most handler and validator tests import types from here. No test imports 19 of the mode type files directly. |
-| `modes/` (handlers, combinations, causal graph, stochastic) | 54 | 52 | 52 | `tests/integration/handlers/`, `tests/integration/mode-handler-delegation.test.ts`. |
+| `modes/` (handlers, combinations, causal graph, stochastic) | 54 | 53 | 52 | `tests/integration/handlers/`, `tests/integration/mode-handler-delegation.test.ts`. |
 | `services/` | 3 | 2 | 3 | 68 test files import `ThoughtFactory` or `ExportService` directly. `RecommendationService` has one importer, `tests/unit/taxonomy/taxonomy-wiring.test.ts`. |
 | `session/` | 4 | 10 | 2 | `tests/integration/session-workflow.test.ts`, `multi-session.test.ts`, `edge-cases/session-edges.test.ts`, and 4 `tests/integration/tools/session-*.test.ts` files. |
 | `validation/` | 44 | 20 | 20 | `tests/unit/validation/validators/modes/validator-contract.test.ts` covers all 35 mode validators. See Gaps. |
@@ -83,17 +83,17 @@ the root-level files that name the area in their subject.
 | `taxonomy/` | 7 | 3 | 6 | `tests/unit/session/reasoning-flow-wiring.test.ts`. |
 | `cache/` | 3 | 2 | 1 | `src/cache/lru.ts` is imported by 2 unit tests. `index.ts` and `types.ts` have no direct importer. |
 | `utils/` + `interfaces/` | 7 | 4 | 5 | `type-guards.ts` and `logger-types.ts` have no direct importer. |
-| `tools/` | 18 | 5 | 15 | 40 files under `tests/integration/tools/`. `json-schemas.ts` and 2 barrel files have no direct importer. |
+| `tools/` | 19 | 9 | 16 | 40 files under `tests/integration/tools/`. `json-schemas.ts` and 2 barrel files have no direct importer. |
 | `config/` | 1 | 1 | 1 | `config-index.test.ts` has 5 tests. They set no environment variable. |
 
 **Headline:** `modes/` has a test file for every handler. The validation area shows a low
 count of direct importers, but its contract test discovers the mode validators by glob. The
-`tools/` area has 15 of its 18 files imported, and `schema-contract.test.ts` walks `toolList`
+`tools/` area has 16 of its 19 files imported, and `schema-contract.test.ts` walks `toolList`
 and `toolSchemas`. See Gaps for the exact limits of that coverage.
 
 ## 3. Unit tests
 
-134 files under `tests/unit/`, organized by the `src/` area they cover.
+139 files under `tests/unit/`, organized by the `src/` area they cover.
 
 **`types/` (11 files).** `types.test.ts` covers the core type guards in `src/types/core.ts`.
 `types/thought-guard-coverage.test.ts` pins the type guards against `ThinkingMode` in both
@@ -103,7 +103,7 @@ directions. Eight files pair one reasoning mode's type guard with `ThoughtValida
 `temporal.test.ts`. `recommendations.test.ts` covers `ModeRecommender` in
 `src/types/modes/recommendations.ts`.
 
-**`modes/` (52 files).** The largest concentration in the suite:
+**`modes/` (53 files).** The largest concentration in the suite:
 - `tests/unit/modes/handlers/` (39 files) has one test per file in `src/modes/handlers/`
   (`AbductiveHandler.test.ts` through `TemporalHandler.test.ts`, and `ModeHandler.test.ts` for the
   interface file). It also holds `registry.test.ts` for the `ModeHandlerRegistry` singleton in
@@ -111,6 +111,11 @@ directions. Eight files pair one reasoning mode's type guard with `ThoughtValida
   `StochasticHandler` uses the Monte Carlo engine.
 - `tests/unit/modes/handler-registration-coverage.test.ts` checks that `registerAllHandlers`
   covers every `ThinkingMode`. The expected list comes from the enum, not from a copy.
+- `tests/unit/modes/registry-base-fields.test.ts` checks that `ModeHandlerRegistry.createThought`
+  carries the six base fields (`revisionReason`, `branchFrom`, `branchId`, `uncertainty`,
+  `dependencies`, `assumptions`) from the input to the thought, for every mode. It also checks
+  that a value the handler computed stays, and that the registry adds no key when the input
+  carries none of the six.
 - `tests/unit/modes/combinations/` (4 files): `analyzer-execution.test.ts`,
   `conflict-resolver.test.ts`, `merger.test.ts`, `presets.test.ts`. The first one checks that
   `deepthinking_analyze` runs real modes through `ThoughtFactory`.
@@ -157,11 +162,23 @@ navigator, the suggestion engine, and the multi-modal analyzer. `taxonomy-adviso
 the advisory wrapper `suggestReasoningTypesAdvisory`. `taxonomy-wiring.test.ts` checks that
 `recommend_mode` reaches the taxonomy through `RecommendationService`.
 
-**`tools/` (5 files).** `mode-reachability.test.ts` checks that every implemented mode is
-selectable through a tool. `schemas/bounds.test.ts`, `schemas/schema-contract.test.ts`,
-`schemas/schema-validation.test.ts`, and `schemas/tool-definitions.test.ts` cover input-size
-limits, the Zod schema contract, schema shape, and the 13 tool definitions in
-`src/tools/definitions.ts` and `src/tools/schemas/`.
+**`tools/` (9 files).** `mode-reachability.test.ts` checks that every implemented mode is
+selectable through a tool. `schema-bounds.test.ts` covers `withZodBounds` in
+`src/tools/schema-bounds.ts`. That function copies the length, count and numeric limits of a Zod
+schema into the hand-written JSON schema of the same tool. The test checks four rules. A limit
+that the JSON schema states stays. A missing limit is copied at every depth. The safe-integer
+limits of `.int()` are not copied. The function does not change its inputs.
+`schemas/bounds.test.ts`, `schemas/schema-contract.test.ts`, `schemas/schema-validation.test.ts`,
+and `schemas/tool-definitions.test.ts` cover input-size limits, the Zod schema contract, schema
+shape, and the 13 tool definitions in `src/tools/definitions.ts` and `src/tools/schemas/`.
+Three more files in `schemas/` guard the whole class of schema defects.
+`advertised-schema-conformance.test.ts` derives a JSON schema from each Zod schema. It compares
+the result with the advertised schema at every depth: property names, required names, types,
+enum members and bounds. `bounded-inputs.test.ts` covers the Zod schemas of the 13 tools and of
+the legacy `deepthinking` tool. It fails on a string, an array or a value of unknown type that
+has no bound. `field-reach.test.ts` changes one leaf of an input at a time. It checks that the
+leaf reaches the stored thought. A list names the leaves that no mode stores. The test compares
+that list with the measured one in both directions.
 
 **`session/` (10 files).** Four files sit at the `tests/unit/` root: `session-manager.test.ts` and
 `session-manager-remediation.test.ts` cover `src/session/manager.ts`; `file-store.test.ts` and
@@ -452,7 +469,7 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 494 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 500 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 

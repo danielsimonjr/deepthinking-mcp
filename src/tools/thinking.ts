@@ -8,7 +8,7 @@
 
 import { z } from "zod";
 import { MAX_LENGTHS } from "../utils/sanitization.js";
-import { boundedRecord } from "./schemas/shared.js";
+import { boundedRecord, PropertyValueSchema } from "./schemas/shared.js";
 
 /**
  * Zod schema for runtime validation (internal use)
@@ -525,7 +525,7 @@ export const ThinkingToolSchema = z.object({
         type: z.enum(["instant", "interval"]),
         properties: boundedRecord(
           z.string().max(MAX_LENGTHS.DESCRIPTION),
-          z.any(),
+          PropertyValueSchema,
         ),
       }),
     )
@@ -646,7 +646,7 @@ export const ThinkingToolSchema = z.object({
             strategyProfile: z
               .array(z.string().max(MAX_LENGTHS.DESCRIPTION))
               .max(MAX_LENGTHS.ARRAY_ITEMS),
-            payoffs: z.array(z.number()),
+            payoffs: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS),
           }),
         )
         .max(MAX_LENGTHS.ARRAY_ITEMS),
@@ -696,7 +696,10 @@ export const ThinkingToolSchema = z.object({
               .max(MAX_LENGTHS.ARRAY_ITEMS),
             action: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
             probability: z.number().min(0).max(1).optional(),
-            payoffs: z.array(z.number()).optional(),
+            payoffs: z
+              .array(z.number())
+              .max(MAX_LENGTHS.ARRAY_ITEMS)
+              .optional(),
           }),
         )
         .max(MAX_LENGTHS.ARRAY_ITEMS),
@@ -1306,7 +1309,10 @@ export const ThinkingToolSchema = z.object({
                 "excluded_middle",
               ])
               .optional(),
-            referencesSteps: z.array(z.number()).optional(),
+            referencesSteps: z
+              .array(z.number())
+              .max(MAX_LENGTHS.ARRAY_ITEMS)
+              .optional(),
             isAssumption: z.boolean().optional(),
             dischargesAssumption: z.number().optional(),
           }),
