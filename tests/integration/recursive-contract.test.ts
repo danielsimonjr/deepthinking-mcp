@@ -185,6 +185,39 @@ describe("fields the handler reads reach the stored thought", () => {
     );
     expect(thought.baseCaseReached).toBe(true);
   });
+
+  it("a base case that is not verified leaves baseCaseReached false", async () => {
+    const thought = await stored(
+      await add({
+        baseCases: [
+          { condition: "n = 1" },
+          { condition: "n = 0", verified: false },
+        ],
+      }),
+    );
+    expect(thought.baseCaseReached).toBe(false);
+  });
+
+  it("an empty subproblem, base case and recurrence are completed, not left to print 'undefined'", async () => {
+    const thought = await stored(
+      await add({ subproblems: [{}], baseCases: [{}], recurrence: {} }),
+    );
+    expect(thought.subproblems).toEqual([
+      {
+        id: expect.any(String),
+        name: "",
+        description: "",
+        size: "unknown",
+        depth: 0,
+        status: "pending",
+      },
+    ]);
+    expect(thought.baseCases).toEqual([
+      { id: expect.any(String), condition: "", result: "", verified: false },
+    ]);
+    expect(thought.recurrence).toEqual({ formula: "", baseCase: "" });
+    expect(thought.currentDepth).toBe(1);
+  });
 });
 
 describe("thoughtType: the eight recognised values are stored as sent", () => {
@@ -393,6 +426,22 @@ describe("the advertisement names every field the handler reads", () => {
     expect(description).toContain(
       "recursive mode uses 'problem_decomposition'",
     );
+  });
+
+  it("the strategy description names the four strategies and no other", async () => {
+    const description = (await engineeringTool()).inputSchema.properties
+      .strategy.description as string;
+    const named = [...description.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]);
+    expect(named).toEqual(STRATEGIES);
+  });
+
+  it("the recurrence description says which members recursive mode reads", async () => {
+    const description = (await engineeringTool()).inputSchema.properties
+      .recurrence.description as string;
+    expect(description).toContain(
+      "Recursive mode reads formula, baseCase, closedForm and complexity",
+    );
+    expect(description).toContain("algorithmic mode reads every member");
   });
 
   it("the maxDepth description says that an omitted limit means no limit", async () => {

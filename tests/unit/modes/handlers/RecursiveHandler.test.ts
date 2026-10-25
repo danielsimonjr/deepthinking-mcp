@@ -485,6 +485,56 @@ describe('RecursiveHandler', () => {
     });
   });
 
+  describe('what getEnhancements prints about the recurrence and the base cases', () => {
+    const base = {
+      thought: 'Working on the recurrence',
+      thoughtNumber: 2,
+      totalThoughts: 5,
+      nextThoughtNeeded: true,
+      mode: 'recursive',
+    };
+    const create = (extra: Record<string, unknown>) =>
+      handler.createThought({ ...base, ...extra } as any, 'session-1');
+
+    it.each([
+      'problem_decomposition',
+      'base_case_identification',
+      'subproblem_solution',
+      'solution_combination',
+      'termination_analysis',
+    ])('prints no recurrence line for %s', (thoughtType) => {
+      const thought = create({
+        thoughtType,
+        recurrence: { formula: 'T(n) = 2T(n/2) + O(n)', closedForm: 'O(n log n)' },
+      });
+
+      const suggestions = handler.getEnhancements(thought).suggestions!;
+
+      expect(suggestions.some((s) => s.startsWith('Recurrence:'))).toBe(false);
+      expect(suggestions.some((s) => s.startsWith('Closed form:'))).toBe(false);
+    });
+
+    it('prints the formula and no closed form when the recurrence has none', () => {
+      const thought = create({
+        thoughtType: 'recurrence_formulation',
+        recurrence: { formula: 'T(n) = T(n-1) + O(1)' },
+      });
+
+      const suggestions = handler.getEnhancements(thought).suggestions!;
+
+      expect(suggestions).toContain('Recurrence: T(n) = T(n-1) + O(1)');
+      expect(suggestions.some((s) => s.startsWith('Closed form:'))).toBe(false);
+    });
+
+    it('warns of missing base cases below the top level only', () => {
+      const top = handler.getEnhancements(create({ currentDepth: 0 }));
+      const below = handler.getEnhancements(create({ currentDepth: 1 }));
+
+      expect(top.warnings!.some((w) => w.includes('No base cases'))).toBe(false);
+      expect(below.warnings!.some((w) => w.includes('No base cases'))).toBe(true);
+    });
+  });
+
   describe('a depth limit that the client did not send', () => {
     const base = {
       thought: 'Descending',
