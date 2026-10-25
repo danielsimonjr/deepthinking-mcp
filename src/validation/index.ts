@@ -8,10 +8,10 @@
  * No file under `src/` imports this barrel, and no test does either. That is
  * not a defect — the live path imports `./advisory.js` and `./validator.js`
  * directly, and the published package exposes no library API for it to serve
- * (`tsup` builds the single entry `src/index.ts`, which exports only
- * `MCP_PROTOCOL_VERSION`, `buildServer`, `server` and `main`). The barrel is
- * kept as the conventional import surface for the directory, and because
- * deleting it would not make one line of code reachable.
+ * (`tsup` builds the single entry `src/index.ts`, whose few exports are the
+ * server and its entry point). The barrel is kept as the conventional import
+ * surface for the directory, and because deleting it would not make one line
+ * of code reachable.
  *
  * What it must NOT do is re-export dead code and make it look live. Two
  * modules were removed on 2026-08-07 for exactly that reason:

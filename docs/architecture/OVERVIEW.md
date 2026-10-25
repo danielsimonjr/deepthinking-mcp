@@ -24,9 +24,9 @@ document does not repeat it.
 
 | Metric | Value | Scope | Source |
 |---|---|---|---|
-| Source files, whole repo | 494 | repo-wide | `repo-tools map` (491 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
+| Source files, whole repo | 495 | repo-wide | `repo-tools map` (492 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
 | TypeScript files, `src/` | 241 | src only | `repo-tools map`, files under `src/` |
-| Lines of code, whole repo | 227,783 | repo-wide | `repo-tools map` |
+| Lines of code, whole repo | 227,846 | repo-wide | `repo-tools map` |
 | Lines of code, `src/` | 118,776 | src only | `repo-tools map`, files under `src/` |
 | Total exports, whole repo | 2,158 | repo-wide | `repo-tools map` |
 | Total exports, `src/` | 1,186 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
@@ -44,7 +44,7 @@ document does not repeat it.
 | Fluent builder classes | 14 | src | `src/export/visual/utils/` |
 
 The whole-repo and `src`-only export counts (2,158 vs 1,186) are not a contradiction. They
-come from two tools and count different file sets: `repo-tools map` reads all 494 files, and
+come from two tools and count different file sets: `repo-tools map` reads all 495 files, and
 `tools/create-dependency-graph` reads the 241 files of `src/`.
 
 ## Project Structure
@@ -143,8 +143,8 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 494 | repo-tools map (whole repository) |
-| totalLinesOfCode | 227783 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 495 | repo-tools map (whole repository) |
+| totalLinesOfCode | 227846 | repo-tools map (whole repository) |
 | totalExports | 2158 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |

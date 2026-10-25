@@ -12,12 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`deepthinking_analyze` says that `timeoutPerMode` has no effect.** The schema accepted the value
   and described it as "Maximum time in milliseconds to spend on each mode". The analyzer runs every
   mode's handler synchronously, so nothing can interrupt a mode and no limit was ever enforced. The
-  value is still accepted and validated, because the advertised schema sets `additionalProperties`
-  to `false` and a client that sends it must keep passing. Its description, `docs/architecture/API.md`
-  and `docs/architecture/DATAFLOW.md` now say that it is ignored. `handleAnalyze` no longer passes it
-  on, and `MultiModeAnalyzerConfig` and `MultiModeAnalysisRequest` lose the options that nothing
-  read: `defaultTimeoutPerMode`, `minConfidenceThreshold` and `timeoutPerMode`. These types are not
-  part of the published package surface.
+  value is still accepted and validated. The server would ignore an unknown field, but the advertised
+  schema sets `additionalProperties` to `false`, so a client that validates a request against that
+  schema before it sends it would reject its own request if the field were removed. Its description,
+  `docs/architecture/API.md` and `docs/architecture/DATAFLOW.md` now say that it is ignored.
+  `handleAnalyze` no longer passes it on, and `MultiModeAnalyzerConfig` and
+  `MultiModeAnalysisRequest` lose the options that nothing read: `defaultTimeoutPerMode`,
+  `minConfidenceThreshold` and `timeoutPerMode`. These types are not part of the published package
+  surface.
 
 ### Fixed
 
@@ -31,8 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   which has 35. The header of `src/services/RecommendationService.ts` said that importing
   `src/index.ts` starts a server, but the entry-point guard prevents that. The barrel headers of
   `src/validation`, `src/cache` and `src/proof` said that `src/index.ts` has no exports or that
-  `dist/index.d.ts` is one line; it exports `MCP_PROTOCOL_VERSION`, `buildServer`, `server` and
-  `main`. The new test
+  `dist/index.d.ts` is one line; `src/index.ts` exports the server and its entry point. The new test
   `tests/unit/tools/schemas/analyze-custom-modes.test.ts` pins the `customModes` list to every
   `ThinkingMode` except `custom`, in the Zod schema and in the advertised schema.
 

@@ -8,8 +8,8 @@
  * `./lru.js` and `./types.js` directly. Both files behind it are live, so
  * there is no dead code here; only the barrel is unimported. Kept as the
  * conventional import surface. The published package exposes no library API
- * for it to serve: `tsup` builds the single entry `src/index.ts`, which exports
- * only `MCP_PROTOCOL_VERSION`, `buildServer`, `server` and `main`.
+ * for it to serve: `tsup` builds the single entry `src/index.ts`, whose few
+ * exports are the server and its entry point (`dist/index.d.ts` lists them).
  */
 
 export { LRUCache } from "./lru.js";
