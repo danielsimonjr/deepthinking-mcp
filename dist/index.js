@@ -14158,8 +14158,12 @@ var init_AlgorithmicHandler = __esm({
               "Is the credit/potential always non-negative?"
             );
             if (thought.amortizedAnalysis) {
+              if (thought.amortizedAnalysis.method) {
+                enhancements.suggestions.push(
+                  `Method: ${thought.amortizedAnalysis.method}`
+                );
+              }
               enhancements.suggestions.push(
-                `Method: ${thought.amortizedAnalysis.method}`,
                 `Amortized cost: ${thought.amortizedAnalysis.result}`
               );
             }
@@ -14169,10 +14173,11 @@ var init_AlgorithmicHandler = __esm({
           case "minimum_spanning_tree":
           case "network_flow":
             if (thought.graphContext) {
-              enhancements.metrics.graphType = thought.graphContext.graphType;
-              enhancements.metrics.weighted = thought.graphContext.weighted ? 1 : 0;
+              const { graphType, weighted } = thought.graphContext;
+              if (graphType) enhancements.metrics.graphType = graphType;
+              enhancements.metrics.weighted = weighted ? 1 : 0;
               enhancements.suggestions.push(
-                `Graph: ${thought.graphContext.graphType}, ${thought.graphContext.weighted ? "weighted" : "unweighted"}`
+                `Graph: ${[graphType, weighted ? "weighted" : "unweighted"].filter(Boolean).join(", ")}`
               );
             }
             break;
@@ -14320,8 +14325,7 @@ var init_AlgorithmicHandler = __esm({
           solutionMethod: vocabulary(
             "recurrence.solutionMethod",
             rec.solutionMethod,
-            SOLUTION_METHODS,
-            SOLUTION_METHODS[0]
+            SOLUTION_METHODS
           ),
           solution: text(rec.solution),
           solutionProof: rec.solutionProof,
@@ -14453,24 +14457,23 @@ var init_AlgorithmicHandler = __esm({
         };
       }
       /**
-       * Normalize the graph the algorithm runs on. `weightProperty` is optional and
-       * has no default; `properties` is a bag of optional flags and is kept as sent.
+       * Normalize the graph the algorithm runs on. `graphType`, `representation` and
+       * `weightProperty` are choices from a list: each is stored only when the
+       * client sent it. `properties` is a bag of optional flags and is kept as sent.
        */
       normalizeGraphContext(g, vocabulary) {
         return {
           graphType: vocabulary(
             "graphContext.graphType",
             g.graphType,
-            GRAPH_TYPES,
-            GRAPH_TYPES[0]
+            GRAPH_TYPES
           ),
           weighted: g.weighted ?? false,
           properties: g.properties,
           representation: vocabulary(
             "graphContext.representation",
             g.representation,
-            GRAPH_REPRESENTATIONS,
-            GRAPH_REPRESENTATIONS[0]
+            GRAPH_REPRESENTATIONS
           ),
           source: g.source,
           sink: g.sink,
@@ -14522,8 +14525,7 @@ var init_AlgorithmicHandler = __esm({
           method: vocabulary(
             "amortizedAnalysis.method",
             a.method,
-            AMORTIZED_METHODS,
-            AMORTIZED_METHODS[0]
+            AMORTIZED_METHODS
           ),
           aggregate: a.aggregate ? {
             totalCost: text(a.aggregate.totalCost),

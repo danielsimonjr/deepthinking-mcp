@@ -200,8 +200,8 @@ export interface Recurrence {
   formula: string; // T(n) = 2T(n/2) + n
   baseCase: string; // T(1) = 1
 
-  // Solution method
-  solutionMethod:
+  // Solution method; stored only when the client sent it
+  solutionMethod?:
     | "master_theorem"
     | "substitution"
     | "recursion_tree"
@@ -373,7 +373,8 @@ export interface GreedyProof {
  * Graph algorithm context
  */
 export interface GraphAlgorithmContext {
-  graphType: "directed" | "undirected" | "mixed";
+  // Stored only when the client sent it
+  graphType?: "directed" | "undirected" | "mixed";
   weighted: boolean;
 
   // Properties assumed
@@ -386,8 +387,8 @@ export interface GraphAlgorithmContext {
     dense?: boolean; // |E| = O(|V|²)
   };
 
-  // Representation used
-  representation:
+  // Representation used; stored only when the client sent it
+  representation?:
     "adjacency_list" | "adjacency_matrix" | "edge_list" | "implicit";
 
   // Special vertices
@@ -445,8 +446,8 @@ export interface AmortizedAnalysis {
   dataStructure: string;
   operation: string;
 
-  // Method used
-  method: "aggregate" | "accounting" | "potential";
+  // Method used; stored only when the client sent it
+  method?: "aggregate" | "accounting" | "potential";
 
   // For aggregate method
   aggregate?: {

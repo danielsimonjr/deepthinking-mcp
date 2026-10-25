@@ -1059,19 +1059,91 @@ describe('AlgorithmicHandler', () => {
       expect(thought).not.toHaveProperty('inputWarnings');
     });
 
-    it('takes the first value of each vocabulary and an unweighted graph for an empty graphContext', () => {
+    it('stores no graph type and no representation for a graphContext that sends none, and an unweighted graph', () => {
       const thought = handler.createThought({ ...base, graphContext: {} } as any, 's');
-      expect(thought.graphContext).toMatchObject({
-        graphType: 'directed',
-        representation: 'adjacency_list',
-        weighted: false,
-      });
+      expect(thought.graphContext!.graphType).toBeUndefined();
+      expect(thought.graphContext!.representation).toBeUndefined();
+      expect(thought.graphContext!.weighted).toBe(false);
       expect(thought).not.toHaveProperty('inputWarnings');
     });
 
-    it('keeps a graph that the client marks as weighted', () => {
+    it('keeps a graph that the client marks as weighted, with no graph type and no representation', () => {
       const thought = handler.createThought({ ...base, graphContext: { weighted: true } } as any, 's');
       expect(thought.graphContext!.weighted).toBe(true);
+      expect(thought.graphContext!.graphType).toBeUndefined();
+      expect(thought.graphContext!.representation).toBeUndefined();
+    });
+
+    it('stores no method for an amortizedAnalysis that sends none', () => {
+      const thought = handler.createThought(
+        { ...base, amortizedAnalysis: { operation: 'push' } } as any,
+        's',
+      );
+      expect(thought.amortizedAnalysis!.method).toBeUndefined();
+      expect(thought.amortizedAnalysis!.operation).toBe('push');
+      expect(thought).not.toHaveProperty('inputWarnings');
+    });
+
+    it('stores no solution method for a recurrence that sends none', () => {
+      const thought = handler.createThought(
+        { ...base, recurrence: { formula: 'T(n) = T(n/2) + 1' } } as any,
+        's',
+      );
+      expect(thought.recurrence!.solutionMethod).toBeUndefined();
+      expect(thought.recurrence!.formula).toBe('T(n) = T(n/2) + 1');
+      expect(thought).not.toHaveProperty('inputWarnings');
+    });
+
+    it('stores a vocabulary member as sent, with no sentence, when the client sends a recognised value', () => {
+      const thought = handler.createThought(
+        {
+          ...base,
+          graphContext: { graphType: 'undirected', representation: 'edge_list' },
+          amortizedAnalysis: { method: 'potential' },
+          recurrence: { solutionMethod: 'substitution' },
+        } as any,
+        's',
+      );
+      expect(thought.graphContext).toMatchObject({ graphType: 'undirected', representation: 'edge_list' });
+      expect(thought.amortizedAnalysis!.method).toBe('potential');
+      expect(thought.recurrence!.solutionMethod).toBe('substitution');
+      expect(thought).not.toHaveProperty('inputWarnings');
+    });
+
+    it('still keeps an unrecognised vocabulary member as sent, with one sentence each', () => {
+      const thought = handler.createThought(
+        {
+          ...base,
+          graphContext: { graphType: 'bogus', representation: 'bogus' },
+          amortizedAnalysis: { method: 'bogus' },
+          recurrence: { solutionMethod: 'bogus' },
+        } as any,
+        's',
+      );
+      expect(thought.graphContext!.graphType).toBe('bogus');
+      expect(thought.amortizedAnalysis!.method).toBe('bogus');
+      expect(thought.recurrence!.solutionMethod).toBe('bogus');
+      expect(thought.inputWarnings).toHaveLength(4);
+    });
+
+    it('prints a method and a graph type in the suggestions only when the thought has them', () => {
+      const method = (extra: Record<string, unknown>) =>
+        handler.getEnhancements(
+          handler.createThought({ ...base, thoughtType: 'amortized_analysis', ...extra } as any, 's'),
+        ).suggestions!;
+      expect(method({ amortizedAnalysis: { method: 'accounting', result: 'O(1)' } })).toContain('Method: accounting');
+      expect(method({ amortizedAnalysis: { result: 'O(1)' } }).some((s) => s.startsWith('Method:'))).toBe(false);
+      expect(method({ amortizedAnalysis: { result: 'O(1)' } })).toContain('Amortized cost: O(1)');
+
+      const graph = (graphContext: Record<string, unknown>) =>
+        handler.getEnhancements(
+          handler.createThought({ ...base, thoughtType: 'shortest_path', graphContext } as any, 's'),
+        );
+      expect(graph({ graphType: 'directed', weighted: true }).suggestions).toContain('Graph: directed, weighted');
+      expect(graph({ graphType: 'directed', weighted: true }).metrics!.graphType).toBe('directed');
+      expect(graph({ weighted: true }).suggestions).toContain('Graph: weighted');
+      expect(graph({ weighted: true }).metrics).not.toHaveProperty('graphType');
+      expect(graph({}).suggestions).toContain('Graph: unweighted');
     });
 
     it('gives an algorithm with no pseudocode the pseudocode of the thought', () => {

@@ -497,6 +497,59 @@ describe("a vocabulary member the handler cannot place is kept and reported", ()
   });
 });
 
+describe("a member that is a choice from a list is stored only when the client sent it", () => {
+  // A sparse block must not claim a choice the client did not make. These four
+  // members have a list of values and no default; `correctnessProof.method` and
+  // `dpFormulation.computationOrder.direction` keep the first value of their
+  // list because master already stored it.
+  it("graphContext without graphType or representation stores neither", async () => {
+    const thought = await stored(
+      await add({ thoughtType: "graph_traversal", graphContext: { weighted: true } }),
+    );
+    expect(thought.graphContext).not.toHaveProperty("graphType");
+    expect(thought.graphContext).not.toHaveProperty("representation");
+    expect(thought.graphContext.weighted).toBe(true);
+  });
+
+  it("amortizedAnalysis without method stores none", async () => {
+    const thought = await stored(
+      await add({
+        thoughtType: "amortized_analysis",
+        amortizedAnalysis: { operation: "push" },
+      }),
+    );
+    expect(thought.amortizedAnalysis).not.toHaveProperty("method");
+    expect(thought.amortizedAnalysis.operation).toBe("push");
+  });
+
+  it("recurrence without solutionMethod stores none", async () => {
+    const thought = await stored(
+      await add({
+        thoughtType: "recurrence_solving",
+        recurrence: { formula: "T(n) = T(n/2) + 1" },
+      }),
+    );
+    expect(thought.recurrence).not.toHaveProperty("solutionMethod");
+    expect(thought.recurrence.formula).toBe("T(n) = T(n/2) + 1");
+  });
+
+  it("a value that the client sent is stored as sent and gives no sentence", async () => {
+    const answer = await add({
+      graphContext: { graphType: "mixed", representation: "implicit" },
+      amortizedAnalysis: { method: "accounting" },
+      recurrence: { solutionMethod: "recursion_tree" },
+    });
+    const thought = await stored(answer);
+    expect(thought.graphContext).toMatchObject({
+      graphType: "mixed",
+      representation: "implicit",
+    });
+    expect(thought.amortizedAnalysis.method).toBe("accounting");
+    expect(thought.recurrence.solutionMethod).toBe("recursion_tree");
+    expect(textsOf(answer).join("\n")).not.toMatch(/^Unknown /m);
+  });
+});
+
 describe("fields that nothing read are no longer advertised and are still accepted", () => {
   const REMOVED_TOP = ["algorithmName", "complexityAnalysis"];
   const REMOVED_PROOF = ["invariant", "termination", "correctness"];

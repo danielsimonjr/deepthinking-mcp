@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **506 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 243 | 120,748 |
+| src | 243 | 120,752 |
 | templates | 5 | 772 |
-| tests | 240 | 105,034 |
+| tests | 240 | 105,159 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -102,7 +102,7 @@ Every tracked TypeScript file in the repository — **506 files** — not just t
 | `src/modes/combinations/merger.ts` | src | 728 | reachable |
 | `src/modes/combinations/presets.ts` | src | 301 | reachable |
 | `src/modes/handlers/AbductiveHandler.ts` | src | 352 | reachable |
-| `src/modes/handlers/AlgorithmicHandler.ts` | src | 1200 | reachable |
+| `src/modes/handlers/AlgorithmicHandler.ts` | src | 1203 | reachable |
 | `src/modes/handlers/AnalogicalHandler.ts` | src | 446 | reachable |
 | `src/modes/handlers/AnalysisHandler.ts` | src | 603 | reachable |
 | `src/modes/handlers/ArgumentationHandler.ts` | src | 691 | reachable |
@@ -197,7 +197,7 @@ Every tracked TypeScript file in the repository — **506 files** — not just t
 | `src/types/core.ts` | src | 752 | reachable |
 | `src/types/handlers.ts` | src | 276 | reachable |
 | `src/types/index.ts` | src | 272 | reachable |
-| `src/types/modes/algorithmic.ts` | src | 809 | reachable |
+| `src/types/modes/algorithmic.ts` | src | 810 | reachable |
 | `src/types/modes/analogical.ts` | src | 96 | reachable |
 | `src/types/modes/analysis.ts` | src | 367 | reachable |
 | `src/types/modes/argumentation.ts` | src | 287 | reachable |
@@ -292,7 +292,7 @@ Every tracked TypeScript file in the repository — **506 files** — not just t
 | `tests/edge-cases/regression.test.ts` | tests | 368 | test |
 | `tests/edge-cases/session-edges.test.ts` | tests | 308 | test |
 | `tests/edge-cases/type-validation.test.ts` | tests | 211 | test |
-| `tests/integration/algorithmic-contract.test.ts` | tests | 730 | test |
+| `tests/integration/algorithmic-contract.test.ts` | tests | 783 | test |
 | `tests/integration/dist-bundle-validators.test.ts` | tests | 191 | test |
 | `tests/integration/engineering-contract.test.ts` | tests | 461 | test |
 | `tests/integration/error-handling.test.ts` | tests | 545 | test |
@@ -414,7 +414,7 @@ Every tracked TypeScript file in the repository — **506 files** — not just t
 | `tests/unit/modes/combinations/presets.test.ts` | tests | 483 | test |
 | `tests/unit/modes/handler-registration-coverage.test.ts` | tests | 123 | test |
 | `tests/unit/modes/handlers/AbductiveHandler.test.ts` | tests | 567 | test |
-| `tests/unit/modes/handlers/AlgorithmicHandler.test.ts` | tests | 1118 | test |
+| `tests/unit/modes/handlers/AlgorithmicHandler.test.ts` | tests | 1190 | test |
 | `tests/unit/modes/handlers/AnalogicalHandler.test.ts` | tests | 584 | test |
 | `tests/unit/modes/handlers/AnalysisHandler.test.ts` | tests | 990 | test |
 | `tests/unit/modes/handlers/ArgumentationHandler.test.ts` | tests | 855 | test |

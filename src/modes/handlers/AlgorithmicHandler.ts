@@ -98,9 +98,11 @@ const VALID_DESIGN_PATTERNS: DesignPattern[] = [
 const DEFAULT_THOUGHT_TYPE: AlgorithmicThoughtType = "algorithm_definition";
 
 /**
- * Values that the thought type names for the vocabulary members. A member that
- * is absent takes the first value (`weightProperty` takes none); an unrecognised
- * value is kept as sent and reported.
+ * Values that the thought type names for the vocabulary members. An absent
+ * `correctnessProof.method` and an absent `dpFormulation.computationOrder.direction`
+ * take the first value of their list. Every other member stays absent when the
+ * client sends none: an absent member is not a choice that the client made. An
+ * unrecognised value is kept as sent and reported.
  */
 const PROOF_METHODS = [
   "loop_invariant",
@@ -136,8 +138,9 @@ const COMPUTATION_DIRECTIONS = [
 ] as const;
 
 /**
- * Resolve a vocabulary member: return the value as sent, or the default when it
- * is absent, and record a sentence for a value that is not recognised.
+ * Resolve a vocabulary member: return the value as sent, or the fallback when it
+ * is absent (the member stays absent when there is no fallback), and record a
+ * sentence for a value that is not recognised.
  */
 type Vocabulary = (
   field: string,
@@ -596,8 +599,12 @@ export class AlgorithmicHandler implements ModeHandler {
           "Is the credit/potential always non-negative?",
         );
         if (thought.amortizedAnalysis) {
+          if (thought.amortizedAnalysis.method) {
+            enhancements.suggestions!.push(
+              `Method: ${thought.amortizedAnalysis.method}`,
+            );
+          }
           enhancements.suggestions!.push(
-            `Method: ${thought.amortizedAnalysis.method}`,
             `Amortized cost: ${thought.amortizedAnalysis.result}`,
           );
         }
@@ -608,12 +615,11 @@ export class AlgorithmicHandler implements ModeHandler {
       case "minimum_spanning_tree":
       case "network_flow":
         if (thought.graphContext) {
-          enhancements.metrics!.graphType = thought.graphContext.graphType;
-          enhancements.metrics!.weighted = thought.graphContext.weighted
-            ? 1
-            : 0;
+          const { graphType, weighted } = thought.graphContext;
+          if (graphType) enhancements.metrics!.graphType = graphType;
+          enhancements.metrics!.weighted = weighted ? 1 : 0;
           enhancements.suggestions!.push(
-            `Graph: ${thought.graphContext.graphType}, ${thought.graphContext.weighted ? "weighted" : "unweighted"}`,
+            `Graph: ${[graphType, weighted ? "weighted" : "unweighted"].filter(Boolean).join(", ")}`,
           );
         }
         break;
@@ -797,7 +803,6 @@ export class AlgorithmicHandler implements ModeHandler {
         "recurrence.solutionMethod",
         rec.solutionMethod,
         SOLUTION_METHODS,
-        SOLUTION_METHODS[0],
       ) as Recurrence["solutionMethod"],
       solution: text(rec.solution),
       solutionProof: rec.solutionProof,
@@ -950,8 +955,9 @@ export class AlgorithmicHandler implements ModeHandler {
   }
 
   /**
-   * Normalize the graph the algorithm runs on. `weightProperty` is optional and
-   * has no default; `properties` is a bag of optional flags and is kept as sent.
+   * Normalize the graph the algorithm runs on. `graphType`, `representation` and
+   * `weightProperty` are choices from a list: each is stored only when the
+   * client sent it. `properties` is a bag of optional flags and is kept as sent.
    */
   private normalizeGraphContext(
     g: Sent<"graphContext">,
@@ -962,7 +968,6 @@ export class AlgorithmicHandler implements ModeHandler {
         "graphContext.graphType",
         g.graphType,
         GRAPH_TYPES,
-        GRAPH_TYPES[0],
       ) as GraphAlgorithmContext["graphType"],
       weighted: g.weighted ?? false,
       properties: g.properties,
@@ -970,7 +975,6 @@ export class AlgorithmicHandler implements ModeHandler {
         "graphContext.representation",
         g.representation,
         GRAPH_REPRESENTATIONS,
-        GRAPH_REPRESENTATIONS[0],
       ) as GraphAlgorithmContext["representation"],
       source: g.source,
       sink: g.sink,
@@ -1032,7 +1036,6 @@ export class AlgorithmicHandler implements ModeHandler {
         "amortizedAnalysis.method",
         a.method,
         AMORTIZED_METHODS,
-        AMORTIZED_METHODS[0],
       ) as AmortizedAnalysis["method"],
       aggregate: a.aggregate
         ? {
