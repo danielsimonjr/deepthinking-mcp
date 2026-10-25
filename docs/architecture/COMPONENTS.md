@@ -875,7 +875,8 @@ through `getValidatorForMode()`.
 
 All 35 implement `ModeValidator<T>` the same way: a `getMode()` returning the mode's string key, and
 a `validate(thought, context)` that opens with `validateCommon(thought)` (checks shared structural
-fields and reports each `inputWarnings` sentence as a warning) and layers mode-specific checks on top via the same `validation-utils.ts` helpers. Example
+fields) and layers mode-specific checks on top via the same `validation-utils.ts` helpers.
+`validateCommon` also reports each `inputWarnings` sentence of the thought as a warning. Example
 (`BayesianValidator`, `validators/modes/bayesian.ts`):
 
 ```typescript

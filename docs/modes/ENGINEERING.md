@@ -91,7 +91,7 @@ interface TradeStudy {
   title: string;
   objective: string;
   alternatives: TradeAlternative[];
-  criteria: TradeCriterion[];    // With weights summing to 1
+  criteria: (TradeCriterion | string)[];    // Objects carry weights that sum to 1; a bare string has no weight
   scores: TradeScore[];          // Score each alternative on each criterion
   recommendation: string;        // Recommended alternative ID
   justification: string;
@@ -143,7 +143,7 @@ interface DesignDecision {
 
 ```typescript
 // Requirements analysis
-const requirements = await deepthinking_analytical({
+const requirements = await deepthinking_engineering({
   mode: 'engineering',
   thought: 'Define system requirements for the authentication module',
   thoughtNumber: 1,
@@ -173,18 +173,13 @@ const requirements = await deepthinking_analytical({
         status: 'approved',
         verificationMethod: 'test'
       }
-    ],
-    coverage: {
-      total: 10,
-      verified: 6,
-      tracedToSource: 9,
-      allocatedToDesign: 8
-    }
+    ]
+    // coverage is computed from the requirements when it is omitted
   }
 });
 
 // Trade study
-const tradeStudy = await deepthinking_analytical({
+const tradeStudy = await deepthinking_engineering({
   mode: 'engineering',
   thought: 'Compare authentication providers',
   thoughtNumber: 2,
@@ -220,7 +215,7 @@ const tradeStudy = await deepthinking_analytical({
 });
 
 // FMEA
-const fmea = await deepthinking_analytical({
+const fmea = await deepthinking_engineering({
   mode: 'engineering',
   thought: 'Analyze failure modes for authentication system',
   thoughtNumber: 3,
@@ -244,7 +239,6 @@ const fmea = await deepthinking_analytical({
         severity: 6,
         occurrence: 4,
         detection: 7,
-        rpn: 168,
         currentControls: 'Time window tolerance',
         mitigation: 'Increase tolerance window, add clock sync',
         mitigationStatus: 'open'
@@ -258,22 +252,16 @@ const fmea = await deepthinking_analytical({
         severity: 5,
         occurrence: 2,
         detection: 3,
-        rpn: 30,
         currentControls: 'Redis cluster with replication'
       }
     ],
-    rpnThreshold: 100,
-    summary: {
-      totalModes: 15,
-      criticalModes: 3,
-      averageRpn: 85,
-      maxRpn: 168
-    }
+    rpnThreshold: 100
+    // rpn and summary are computed by the handler
   }
 });
 
 // Design decision
-const decision = await deepthinking_analytical({
+const decision = await deepthinking_engineering({
   mode: 'engineering',
   thought: 'Document the authentication architecture decision',
   thoughtNumber: 4,
@@ -362,6 +350,27 @@ const decision = await deepthinking_analytical({
 - Skip context documentation
 - Ignore alternatives
 - Leave rationale vague
+
+## Input Rules
+
+- Every member of an entry is optional on input, except the four numbers of `requirements.coverage`
+  and the four members of `assessment`. The handler fills a member that the client omits.
+- The handler gives an omitted `id` a generated value. It gives an omitted text member an empty
+  string, an omitted `weight` or `score` 0, and an omitted rating 1. It gives an omitted `pros` or
+  `cons` an empty array.
+- The handler computes `rpn` (Severity × Occurrence × Detection) and the FMEA `summary`. It ignores a
+  client value for either. A failure mode is critical when its `rpn` is at or above `rpnThreshold`
+  (100 when absent).
+- `tradeStudy.criteria` takes a string or an object. A bare string has no weight. The handler keeps
+  it as sent, uses weight 0, and adds a warning to `validation.issues`.
+- An unknown `analysisType` keeps the default `comprehensive`. A warning in `validation.issues` names
+  the recognised values.
+- `requirementId`, `fmeaEntry`, `tradeStudy.options` and `tradeStudy.weights` are not advertised. The
+  server still accepts them and ignores them.
+
+Each warning that the handler adds is also stored on the thought in `BaseThought.inputWarnings`, a
+list of sentences. The field exists only on a thought that has a warning. The `json` export and a
+persisted session include it. The other export formats do not print it.
 
 ## EngineeringThought Interface
 

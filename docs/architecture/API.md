@@ -209,10 +209,10 @@ thought with `nextThoughtNeeded` set to `false`.
 `validation` is feedback from the mode validator on the stored thought. It never rejects the call.
 When the validator ran, the object holds `available: true`, `isValid`, `confidence`, `issues` (at
 most 20, errors first, then warnings, then information), `totalIssues`, `issuesTruncated`,
-`strengthMetrics` and `suggestions` (at most 10, without duplicates). A mode handler that replaces
-or ignores a value of the request records one sentence about it in the `inputWarnings` field of the
-stored thought, and each sentence appears in `issues` as a warning. The field exists only on a
-thought that has a sentence. When no validator loads for
+`strengthMetrics` and `suggestions` (at most 10, without duplicates). A mode handler can replace
+or ignore a value of the request. The handler records one sentence about the value in the
+`inputWarnings` field of the stored thought. Each sentence appears in `issues` as a warning. The
+field exists only on a thought that has a sentence. When no validator loads for
 the mode, `issues` holds one warning, `No validator registered for thinking mode: <mode>`, and
 `suggestions` lists the modes that have a validator. When the validator threw, the
 object is `{ "available": false, "reason": "…" }`. The field is absent when the session sets
