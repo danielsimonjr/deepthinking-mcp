@@ -34,7 +34,7 @@
     "docs:deps": "npx tsx tools/create-dependency-graph/create-dependency-graph.ts"
   },
   "dependencies": {
-    "zod": "^4.6.5",
+    "zod": "^4.6.6",
     "@modelcontextprotocol/server": "^2.3.1",
     "@modelcontextprotocol/client": "^2.3.1",
     "@modelcontextprotocol/core": "^2.3.1"

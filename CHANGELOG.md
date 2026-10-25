@@ -24,6 +24,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   of a create against `rmdir`, with no lock code, returned `EINVAL` from `open` on Node 20 and on
   Node 22.
 
+### Security
+
+- **The weekly dependency audit passes again.** `bun audit` reported one high advisory,
+  GHSA-mrhx-c7xc-m3w5: `zod` before 4.6.6 can exhaust memory while it validates an oversized
+  constrained collection. The range of `zod` now starts at `^4.6.6`, and the lockfile resolves it to
+  4.6.7. The three SDK packages take `zod` from this range. The audit finds no advisory. The job
+  `Dependency Audit` had failed on its run of 2026-10-25.
+
 ## [10.0.2] - 2026-10-23
 
 ### Added
