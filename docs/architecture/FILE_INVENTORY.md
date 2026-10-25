@@ -29,7 +29,7 @@ Every tracked TypeScript file in the repository — **506 files** — not just t
 | docs | 2 | 1,828 |
 | src | 243 | 120,748 |
 | templates | 5 | 772 |
-| tests | 240 | 105,014 |
+| tests | 240 | 105,034 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -292,7 +292,7 @@ Every tracked TypeScript file in the repository — **506 files** — not just t
 | `tests/edge-cases/regression.test.ts` | tests | 368 | test |
 | `tests/edge-cases/session-edges.test.ts` | tests | 308 | test |
 | `tests/edge-cases/type-validation.test.ts` | tests | 211 | test |
-| `tests/integration/algorithmic-contract.test.ts` | tests | 710 | test |
+| `tests/integration/algorithmic-contract.test.ts` | tests | 730 | test |
 | `tests/integration/dist-bundle-validators.test.ts` | tests | 191 | test |
 | `tests/integration/engineering-contract.test.ts` | tests | 461 | test |
 | `tests/integration/error-handling.test.ts` | tests | 545 | test |

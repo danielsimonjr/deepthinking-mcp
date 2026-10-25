@@ -16,7 +16,7 @@
       },
       "tests": {
         "files": 240,
-        "loc": 105014
+        "loc": 105034
       },
       "tools": {
         "files": 14,
@@ -1577,7 +1577,7 @@
     {
       "path": "tests/integration/algorithmic-contract.test.ts",
       "area": "tests",
-      "loc": 710,
+      "loc": 730,
       "disposition": "test"
     },
     {

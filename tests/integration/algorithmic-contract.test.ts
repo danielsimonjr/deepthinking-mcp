@@ -611,6 +611,26 @@ describe("a complexity block stores only what the client sent", () => {
     });
   });
 
+  it("a flag block that the handler keeps as sent holds only the members the client sent", async () => {
+    const thought = await stored(
+      await add({
+        timeComplexity: {
+          masterTheorem: { a: 2 },
+          inputSensitive: { parameter: "runs" },
+        },
+        spaceComplexity: { cacheEfficiency: { cacheComplexity: "O(n/B)" } },
+        algorithm: { practical: { stable: true }, clrsReference: { chapter: 2 } },
+      }),
+    );
+    expect(thought.timeComplexity.masterTheorem).toEqual({ a: 2 });
+    expect(thought.timeComplexity.inputSensitive).toEqual({ parameter: "runs" });
+    expect(thought.spaceComplexity.cacheEfficiency).toEqual({
+      cacheComplexity: "O(n/B)",
+    });
+    expect(thought.algorithm.practical).toEqual({ stable: true });
+    expect(thought.algorithm.clrsReference).toEqual({ chapter: 2 });
+  });
+
   it("a space complexity with an auxiliary space keeps the total empty", async () => {
     const answer = await add({ spaceComplexity: { auxiliary: "O(1)" } });
     expect((await stored(answer)).spaceComplexity).toMatchObject({
