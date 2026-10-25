@@ -16,7 +16,7 @@
       },
       "tests": {
         "files": 238,
-        "loc": 103912
+        "loc": 103921
       },
       "tools": {
         "files": 14,
@@ -2099,7 +2099,7 @@
     {
       "path": "tests/unit/benchmarks/validation-performance.test.ts",
       "area": "tests",
-      "loc": 287,
+      "loc": 293,
       "disposition": "test"
     },
     {
@@ -2219,7 +2219,7 @@
     {
       "path": "tests/unit/file-lock.test.ts",
       "area": "tests",
-      "loc": 375,
+      "loc": 378,
       "disposition": "test"
     },
     {

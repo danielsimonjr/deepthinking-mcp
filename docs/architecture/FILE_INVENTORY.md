@@ -29,7 +29,7 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | docs | 2 | 1,828 |
 | src | 243 | 119,794 |
 | templates | 5 | 772 |
-| tests | 238 | 103,912 |
+| tests | 238 | 103,921 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -379,7 +379,7 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | `tests/unit/analogical.test.ts` | tests | 472 | test |
 | `tests/unit/bayesian.test.ts` | tests | 380 | test |
 | `tests/unit/benchmarks/metrics-performance.test.ts` | tests | 126 | test |
-| `tests/unit/benchmarks/validation-performance.test.ts` | tests | 287 | test |
+| `tests/unit/benchmarks/validation-performance.test.ts` | tests | 293 | test |
 | `tests/unit/cache/lru-contract.test.ts` | tests | 44 | test |
 | `tests/unit/cache/lru.test.ts` | tests | 537 | test |
 | `tests/unit/causal.test.ts` | tests | 353 | test |
@@ -399,7 +399,7 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | `tests/unit/export/visual/utils/document-builders.test.ts` | tests | 1127 | test |
 | `tests/unit/export/visual/utils/graph-builders.test.ts` | tests | 680 | test |
 | `tests/unit/export/visual/utils/visual-builders.test.ts` | tests | 955 | test |
-| `tests/unit/file-lock.test.ts` | tests | 375 | test |
+| `tests/unit/file-lock.test.ts` | tests | 378 | test |
 | `tests/unit/file-store-storage-error.test.ts` | tests | 83 | test |
 | `tests/unit/file-store.test.ts` | tests | 542 | test |
 | `tests/unit/gametheory.test.ts` | tests | 681 | test |
