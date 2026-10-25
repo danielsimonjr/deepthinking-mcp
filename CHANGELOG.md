@@ -53,9 +53,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `AlgorithmicHandler` reads through the real server over an in-memory transport and reads the answer
   that a client reads. It covers one test for each group of fields, both shapes of `recurrence`
   (recursive and algorithmic), the three outcomes of `designPattern`, the warning of each vocabulary
-  member, the fields that stay accepted and ignored, the fields that the tool accepts and does not
-  list, and the export of sparse blocks in the 8 formats of the session tool without the text
-  `undefined`. `advertised-omissions.ts` holds the pinned list of unlisted paths, with the reason
+  member, the complexity blocks that keep only the cases that the client sent, the bound of
+  `masterTheorem.case`, the fields that stay accepted and ignored, the fields that the tool accepts
+  and does not list, and the export of sparse blocks in the 8 formats of the session tool without
+  the text `undefined`. `AlgorithmicHandler.test.ts` pins what the handler fills in for an absent
+  member: the first value of a vocabulary, an unweighted graph, the pseudocode of the thought, the
+  position of a trace step, and a recurrence with no solution. `advertised-omissions.ts` holds the pinned list of unlisted paths, with the reason
   "tool size cap", and the cap of 16,000 bytes for one tool. The conformance test fails when a listed
   path is not accepted, when an accepted path is neither listed nor pinned, when the pinned list
   names a path that is listed or not accepted, when the tool is over the cap, and when the tool
