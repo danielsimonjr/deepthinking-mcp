@@ -209,7 +209,10 @@ thought with `nextThoughtNeeded` set to `false`.
 `validation` is feedback from the mode validator on the stored thought. It never rejects the call.
 When the validator ran, the object holds `available: true`, `isValid`, `confidence`, `issues` (at
 most 20, errors first, then warnings, then information), `totalIssues`, `issuesTruncated`,
-`strengthMetrics` and `suggestions` (at most 10, without duplicates). When no validator loads for
+`strengthMetrics` and `suggestions` (at most 10, without duplicates). A mode handler that replaces
+or ignores a value of the request records one sentence about it in the `inputWarnings` field of the
+stored thought, and each sentence appears in `issues` as a warning. The field exists only on a
+thought that has a sentence. When no validator loads for
 the mode, `issues` holds one warning, `No validator registered for thinking mode: <mode>`, and
 `suggestions` lists the modes that have a validator. When the validator threw, the
 object is `{ "available": false, "reason": "…" }`. The field is absent when the session sets
@@ -1022,9 +1025,13 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 | Field | Type | Required | Applies to | Description |
 |---|---|---|---|---|
 | `mode` | `"engineering" \| "algorithmic" \| "recursive"` | **Yes** | all | Engineering reasoning mode. |
-| `requirementId` | string | No | engineering | Requirement ID being analyzed. `IdSchema`. The server accepts the field and does not store it. |
-| `tradeStudy` | object | No | engineering | `{ options?: string[], criteria?: string[], weights?: record<string, number> }`. All members are optional. `options` and `criteria` are arrays of `IdSchema`, ≤ 1,000 items. `weights` is a bounded record (key `IdSchema`, ≤ 1,000 entries). The engineering handler stores `criteria` only. It does not store `options` or `weights`. |
-| `fmeaEntry` | object | No | engineering | `{ failureMode?: string, severity?: integer 1–10, occurrence?: integer 1–10, detection?: integer 1–10, rpn?: integer }`. All members are optional. `failureMode` uses `TextSchema`. `rpn` is the Risk Priority Number (Severity × Occurrence × Detection). The server accepts the field and does not store it, and it does not compute `rpn` from this field. |
+| `analysisType` | string | No | engineering | `requirements`, `trade-study`, `fmea`, `design-decision` or `comprehensive`. `IdSchema`. The handler replaces an unknown value with `comprehensive` and adds a warning to `validation.issues`. |
+| `designChallenge` | string | No | engineering | The problem that the analysis addresses. `TextSchema`. |
+| `requirements` | object | No | engineering | `{ requirements?: object[], coverage?: object }`. Each requirement: `{ id?, title?, description?, source?, priority?, status?, rationale?, verificationMethod?, verificationCriteria?: string[], tracesTo?: string[], satisfiedBy?: string[], relatedTo?: string[] }`. The array holds ≤ 500 items. `coverage` has four required integers ≥ 0: `total`, `verified`, `tracedToSource` and `allocatedToDesign`. The handler computes `coverage` when the client omits it. `source`, `priority`, `status` and `verificationMethod` are bounded strings that the handler stores as sent. |
+| `tradeStudy` | object | No | engineering | `{ title?, objective?, alternatives?: object[], criteria?: (string \| object)[], scores?: object[], recommendation?, justification?, sensitivityNotes? }`. An alternative is `{ id?, name?, description?, pros?: string[], cons?: string[], estimatedCost?: number, riskLevel? }`. A criterion is an object `{ id?, name?, description?, weight?: number, unit?, higherIsBetter?: boolean }` or a bare string. A bare string has no weight: the handler stores it as sent, uses weight 0, and adds a warning to `validation.issues`. A score is `{ alternativeId?, criteriaId?, score?: number, rationale? }`. `recommendation` is the id of one alternative. Each array holds ≤ 500 items. The handler fills each member that a client omits: a generated id for an alternative or an object criterion, an empty string for `name`, `description` and `rationale`, and 0 for a `weight` and a `score`. |
+| `fmea` | object | No | engineering | `{ title?, system?, failureModes?: object[], rpnThreshold?: number }`. A failure mode is `{ id?, component?, function?, failureMode?, cause?, effect?, systemEffect?, severity?, occurrence?, detection?: integer 1–10, currentControls?, mitigation?, responsible?, targetDate?, mitigationStatus? }`. The handler computes `rpn` (severity × occurrence × detection, each rating 1 when absent) and the `summary`, and it ignores a client value for either. `rpnThreshold` is 100 when absent. A failure mode is critical when its `rpn` is at or above `rpnThreshold`. The handler gives an omitted `id` a generated value and an omitted `component`, `failureMode`, `cause` or `effect` an empty string. The array holds ≤ 500 items. |
+| `designDecisions` | object | No | engineering | `{ decisions?: object[], projectName? }`. A decision is `{ id?, title?, date?, status?, context?, decision?, alternatives?: object[], rationale?, consequences?: string[], supersededBy?, relatedDecisions?: string[], stakeholders?: string[] }`. An alternative is `{ option?, description?, pros?: string[], cons?: string[] }`. The handler gives an omitted `option` an empty string and an omitted `pros` or `cons` an empty array. Each array of objects holds ≤ 500 items. |
+| `assessment` | object | No | engineering | `{ confidence: number 0–1, keyRisks: string[], nextSteps: string[], openIssues: string[] }`. All four members are required. |
 | `algorithmName` | string | No | algorithmic | Name of the algorithm being analyzed. `NameSchema` (≤ 500 chars). |
 | `designPattern` | string | No | algorithmic | One of `divide-and-conquer`, `dynamic-programming`, `greedy`, `backtracking`, `branch-and-bound`, `randomized`, `approximation`. |
 | `complexityAnalysis` | object | No | algorithmic | `{ timeComplexity?: string, spaceComplexity?, bestCase?, averageCase?, worstCase? }`, e.g. `"O(n log n)"`. All members are optional and use `IdSchema`. |
@@ -1056,18 +1063,24 @@ The [standard add-thought response](#response-shape-for-add-thought-tools).
     "thoughtNumber": 1,
     "totalThoughts": 1,
     "nextThoughtNeeded": false,
-    "requirementId": "REQ-114",
+    "analysisType": "trade-study",
+    "designChallenge": "Choose the queue for the order pipeline",
     "tradeStudy": {
-      "options": ["SQS", "Kafka", "RabbitMQ"],
-      "criteria": ["latency", "operational overhead", "cost"],
-      "weights": { "latency": 0.4, "operational overhead": 0.35, "cost": 0.25 }
-    },
-    "fmeaEntry": {
-      "failureMode": "Queue backlog exceeds consumer capacity",
-      "severity": 7,
-      "occurrence": 3,
-      "detection": 5,
-      "rpn": 105
+      "alternatives": [
+        { "id": "sqs", "name": "SQS" },
+        { "id": "kafka", "name": "Kafka" }
+      ],
+      "criteria": [
+        { "id": "latency", "weight": 0.6 },
+        { "id": "cost", "weight": 0.4 }
+      ],
+      "scores": [
+        { "alternativeId": "sqs", "criteriaId": "latency", "score": 6, "rationale": "Managed polling" },
+        { "alternativeId": "sqs", "criteriaId": "cost", "score": 9, "rationale": "Pay per request" },
+        { "alternativeId": "kafka", "criteriaId": "latency", "score": 9, "rationale": "Streaming" },
+        { "alternativeId": "kafka", "criteriaId": "cost", "score": 5, "rationale": "Cluster to run" }
+      ],
+      "recommendation": "kafka"
     }
   }
 }
@@ -1685,4 +1698,4 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 501 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 507 | repo-tools map (whole repository) |

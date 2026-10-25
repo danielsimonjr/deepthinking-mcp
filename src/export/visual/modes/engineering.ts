@@ -13,7 +13,10 @@
  * - Modelica: System modeling language for simulation
  */
 
-import type { EngineeringThought } from "../../../types/modes/engineering.js";
+import type {
+  EngineeringThought,
+  TradeCriterion,
+} from "../../../types/modes/engineering.js";
 import type { VisualExportOptions } from "../types.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
@@ -68,6 +71,14 @@ import {
   document as mdDocument,
   progressBar,
 } from "../utils/markdown.js";
+
+/**
+ * A trade-study criterion as the exporters read it. A bare string names a
+ * criterion that has no id and no weight, so it is shown with weight 0.
+ */
+function criterionFields(c: TradeCriterion | string): TradeCriterion {
+  return typeof c === "string" ? { id: c, name: c, weight: 0 } : c;
+}
 
 /**
  * Main export function for engineering analysis
@@ -1024,7 +1035,7 @@ function engineeringToModelica(
 
     // Criteria weights
     lines.push("    // Criteria Weights (sum to 1.0)");
-    for (const crit of thought.tradeStudy.criteria) {
+    for (const crit of thought.tradeStudy.criteria.map(criterionFields)) {
       const critId = sanitizeModelicaId(crit.id);
       lines.push(
         `    parameter Real weight_${critId} = ${crit.weight.toFixed(3)} "${escapeModelicaString(crit.name)}";`,
@@ -1357,11 +1368,13 @@ function engineeringToHTML(
     ` +
         renderTable(
           ["Criterion", "Weight", "Description"],
-          thought.tradeStudy.criteria.map((c) => [
-            c.name,
-            (c.weight * 100).toFixed(0) + "%",
-            c.description || "-",
-          ]),
+          thought.tradeStudy.criteria
+            .map(criterionFields)
+            .map((c) => [
+              c.name,
+              (c.weight * 100).toFixed(0) + "%",
+              c.description || "-",
+            ]),
         ) +
         `
       <h4>Alternatives</h4>
@@ -1764,7 +1777,7 @@ function engineeringToJSON(
           name: a.name,
           riskLevel: a.riskLevel,
         })),
-        criteria: thought.tradeStudy.criteria.map((c) => ({
+        criteria: thought.tradeStudy.criteria.map(criterionFields).map((c) => ({
           id: c.id,
           name: c.name,
           weight: c.weight,
@@ -1972,11 +1985,13 @@ function engineeringToMarkdown(
 
   // Trade Study section
   if (thought.tradeStudy) {
-    const criteriaRows = thought.tradeStudy.criteria.map((c) => [
-      c.name,
-      `${(c.weight * 100).toFixed(0)}%`,
-      c.description || "-",
-    ]);
+    const criteriaRows = thought.tradeStudy.criteria
+      .map(criterionFields)
+      .map((c) => [
+        c.name,
+        `${(c.weight * 100).toFixed(0)}%`,
+        c.description || "-",
+      ]);
 
     const altRows = thought.tradeStudy.alternatives.map((alt) => [
       alt.id === thought.tradeStudy!.recommendation

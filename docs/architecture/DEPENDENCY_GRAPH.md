@@ -44,7 +44,7 @@ The codebase is organized into the following modules:
 - **export**: 47 files
 - **entry**: 1 file
 - **interfaces**: 1 file
-- **modes**: 54 files
+- **modes**: 55 files
 - **proof**: 15 files
 - **services**: 3 files
 - **session**: 4 files
@@ -340,7 +340,7 @@ The codebase is organized into the following modules:
 **Internal Dependencies:**
 | File | Imports | Type |
 |------|---------|------|
-| `../../../types/modes/engineering.js` | `EngineeringThought` | Import (type-only) |
+| `../../../types/modes/engineering.js` | `EngineeringThought, TradeCriterion` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
@@ -1511,9 +1511,10 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../types/core.js` | `ThinkingMode` | Import |
-| `../../types/modes/engineering.js` | `EngineeringThought, EngineeringAnalysisType` | Import (type-only) |
+| `../../types/modes/engineering.js` | `EngineeringThought, EngineeringAnalysisType, TradeAlternative, TradeCriterion, TradeScore, FailureMode, DecisionAlternative` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
 | `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./input-warnings.js` | `inputWarningsField, unrecognisedValueWarning` | Import |
 
 **Exports:**
 - Classes: `EngineeringHandler`
@@ -1675,6 +1676,13 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `InductiveHandler`
+
+---
+
+### `src/modes/handlers/input-warnings.ts` - Input warnings
+
+**Exports:**
+- Functions: `unrecognisedValueWarning`, `inputWarningsField`
 
 ---
 
@@ -2779,7 +2787,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `IdSchema, NameSchema, TextSchema, IdArraySchema, boundedRecord` | Import |
+| `../shared.js` | `IdSchema, NameSchema, TextSchema, IdArraySchema, TextArraySchema, ConfidenceSchema` | Import |
 | `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
@@ -4357,7 +4365,7 @@ graph TD
         N14[intervention]
         N15[types]
         N16[analyzer]
-        N17[...49 more]
+        N17[...50 more]
     end
 
     subgraph Proof
@@ -4465,14 +4473,14 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 242 |
+| Total TypeScript Files | 243 |
 | Total Modules | 14 |
-| Total Lines of Code | 119232 |
-| Total Exports | 1188 |
+| Total Lines of Code | 119794 |
+| Total Exports | 1190 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
 | Total Interfaces | 562 |
-| Total Functions | 435 |
+| Total Functions | 437 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
 | Type-only Imports | 333 |

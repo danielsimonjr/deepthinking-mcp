@@ -154,8 +154,11 @@ export interface TradeStudy {
   objective: string;
   /** Alternatives being compared */
   alternatives: TradeAlternative[];
-  /** Evaluation criteria */
-  criteria: TradeCriterion[];
+  /**
+   * Evaluation criteria. A bare string is accepted as sent: it names a criterion
+   * but has no id and no weight, so it weighs 0 (see TradeCriterion).
+   */
+  criteria: (TradeCriterion | string)[];
   /** Scores for each alternative-criterion pair */
   scores: TradeScore[];
   /** Recommended alternative ID */

@@ -12296,11 +12296,37 @@ var init_AnalysisHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/input-warnings.ts
+function echo(value) {
+  const text = String(value);
+  return JSON.stringify(
+    text.length > MAX_ECHO ? `${text.slice(0, MAX_ECHO)}...` : text
+  );
+}
+function unrecognisedValueWarning(field, value, recognised, fallback) {
+  if (value === void 0 || value === null || value === "") return void 0;
+  if (typeof value === "string" && recognised.includes(value)) return void 0;
+  const outcome = `using the default ${JSON.stringify(fallback)}`;
+  return `Unknown ${field} ${echo(value)}; ${outcome}. Recognised values: ${recognised.join(", ")}.`;
+}
+function inputWarningsField(sentences) {
+  const kept = sentences.filter((s) => s !== void 0);
+  return kept.length > 0 ? { inputWarnings: kept } : {};
+}
+var MAX_ECHO;
+var init_input_warnings = __esm({
+  "src/modes/handlers/input-warnings.ts"() {
+    init_esm_shims();
+    MAX_ECHO = 60;
+  }
+});
 var VALID_ANALYSIS_TYPES, EngineeringHandler;
 var init_EngineeringHandler = __esm({
   "src/modes/handlers/EngineeringHandler.ts"() {
     init_esm_shims();
     init_ModeHandler();
+    init_input_warnings();
     VALID_ANALYSIS_TYPES = [
       "requirements",
       "trade-study",
@@ -12334,6 +12360,15 @@ var init_EngineeringHandler = __esm({
         const tradeStudy = inputAny.tradeStudy ? this.processTradeStudy(inputAny.tradeStudy) : void 0;
         const fmea = inputAny.fmea ? this.processFMEA(inputAny.fmea) : void 0;
         const designDecisions = inputAny.designDecisions ? this.processDesignDecisions(inputAny.designDecisions) : void 0;
+        const inputWarnings = inputWarningsField([
+          unrecognisedValueWarning(
+            "analysisType",
+            inputAny.analysisType,
+            VALID_ANALYSIS_TYPES,
+            "comprehensive"
+          ),
+          this.stringCriteriaWarning(inputAny.tradeStudy?.criteria)
+        ]);
         return {
           id: randomUUID(),
           sessionId,
@@ -12353,8 +12388,22 @@ var init_EngineeringHandler = __esm({
           assessment: inputAny.assessment,
           // Revision tracking
           isRevision: input.isRevision,
-          revisesThought: input.revisesThought
+          revisesThought: input.revisesThought,
+          ...inputWarnings
         };
+      }
+      /**
+       * Say that string criteria have no weight.
+       *
+       * `tradeStudy.criteria` takes a string or an object. A string has no `id` and
+       * no `weight`, so the weighted scores that use it are 0. The handler keeps the
+       * string as sent, as it always did.
+       */
+      stringCriteriaWarning(criteria) {
+        if (!Array.isArray(criteria)) return void 0;
+        const strings = criteria.filter((c) => typeof c === "string").length;
+        if (strings === 0) return void 0;
+        return `tradeStudy.criteria: ${strings} of ${criteria.length} items are strings and have no weight; weight 0 is used for them. Send objects with id and weight.`;
       }
       /**
        * Validate engineering-specific input
@@ -12599,20 +12648,43 @@ var init_EngineeringHandler = __esm({
        * Process trade study
        */
       processTradeStudy(raw) {
-        const scores = raw.scores || [];
+        const alternatives = (raw.alternatives || []).map(
+          (a) => ({
+            ...a,
+            id: a.id || `ALT-${randomUUID().slice(0, 8)}`,
+            name: a.name || "",
+            description: a.description || ""
+          })
+        );
+        const criteria = (raw.criteria || []).map(
+          (c) => typeof c === "string" ? c : {
+            ...c,
+            id: c.id || `CRIT-${randomUUID().slice(0, 8)}`,
+            name: c.name || "",
+            weight: c.weight || 0
+          }
+        );
         const criteriaWeights = {};
-        (raw.criteria || []).forEach((c) => {
-          criteriaWeights[c.id] = c.weight || 0;
+        for (const c of criteria) {
+          if (typeof c !== "string") criteriaWeights[c.id] = c.weight;
+        }
+        const enhancedScores = (raw.scores || []).map((s) => {
+          const criteriaId = s.criteriaId || "";
+          const score = s.score || 0;
+          return {
+            ...s,
+            alternativeId: s.alternativeId || "",
+            criteriaId,
+            score,
+            rationale: s.rationale || "",
+            weightedScore: score * (criteriaWeights[criteriaId] || 0)
+          };
         });
-        const enhancedScores = scores.map((s) => ({
-          ...s,
-          weightedScore: (s.score || 0) * (criteriaWeights[s.criteriaId] || 0)
-        }));
         return {
           title: raw.title || "",
           objective: raw.objective || "",
-          alternatives: raw.alternatives || [],
-          criteria: raw.criteria || [],
+          alternatives,
+          criteria,
           scores: enhancedScores,
           recommendation: raw.recommendation || "",
           justification: raw.justification || "",
@@ -12623,10 +12695,25 @@ var init_EngineeringHandler = __esm({
        * Process FMEA
        */
       processFMEA(raw) {
-        const failureModes = (raw.failureModes || []).map((fm) => ({
-          ...fm,
-          rpn: (fm.severity || 1) * (fm.occurrence || 1) * (fm.detection || 1)
-        }));
+        const failureModes = (raw.failureModes || []).map(
+          (fm) => {
+            const severity = fm.severity || 1;
+            const occurrence = fm.occurrence || 1;
+            const detection = fm.detection || 1;
+            return {
+              ...fm,
+              id: fm.id || `FM-${randomUUID().slice(0, 8)}`,
+              component: fm.component || "",
+              failureMode: fm.failureMode || "",
+              cause: fm.cause || "",
+              effect: fm.effect || "",
+              severity,
+              occurrence,
+              detection,
+              rpn: severity * occurrence * detection
+            };
+          }
+        );
         const rpnThreshold = raw.rpnThreshold || 100;
         const rpnValues = failureModes.map((fm) => fm.rpn);
         return {
@@ -12636,7 +12723,10 @@ var init_EngineeringHandler = __esm({
           rpnThreshold,
           summary: {
             totalModes: failureModes.length,
-            criticalModes: failureModes.filter((fm) => fm.rpn > rpnThreshold).length,
+            // At or above the threshold: the validator and every exporter count it so.
+            criticalModes: failureModes.filter(
+              (fm) => fm.rpn >= rpnThreshold
+            ).length,
             averageRpn: rpnValues.length > 0 ? rpnValues.reduce((a, b) => a + b, 0) / rpnValues.length : 0,
             maxRpn: rpnValues.length > 0 ? Math.max(...rpnValues) : 0
           }
@@ -12654,7 +12744,14 @@ var init_EngineeringHandler = __esm({
             status: d.status || "proposed",
             context: d.context || "",
             decision: d.decision || "",
-            alternatives: d.alternatives || [],
+            alternatives: (d.alternatives || []).map(
+              (a) => ({
+                ...a,
+                option: a.option || "",
+                pros: a.pros || [],
+                cons: a.cons || []
+              })
+            ),
             rationale: d.rationale || "",
             consequences: d.consequences || [],
             supersededBy: d.supersededBy,
@@ -12710,7 +12807,7 @@ var init_EngineeringHandler = __esm({
         const failureModes = fmea.failureModes || [];
         const rpnThreshold = fmea.rpnThreshold || 100;
         const highRpnNoMitigation = failureModes.filter(
-          (fm) => fm.rpn > rpnThreshold && !fm.mitigation
+          (fm) => fm.rpn >= rpnThreshold && !fm.mitigation
         );
         if (highRpnNoMitigation.length > 0) {
           warnings.push(
@@ -18307,6 +18404,15 @@ function validateCommon(thought) {
       category: "structural"
     });
   }
+  for (const sentence of thought.inputWarnings ?? []) {
+    issues.push({
+      severity: "warning",
+      thoughtNumber: thought.thoughtNumber,
+      description: sentence,
+      suggestion: "Send a value the mode recognises, or omit the field",
+      category: "structural"
+    });
+  }
   return issues;
 }
 function validateDependencies(thought, dependencies, context) {
@@ -22121,7 +22227,10 @@ function validateRequirements(thought) {
 function validateTradeStudy(thought) {
   const issues = [];
   const study = thought.tradeStudy;
-  const weightSum = study.criteria.reduce((sum, c) => sum + c.weight, 0);
+  const weightSum = study.criteria.reduce(
+    (sum, c) => sum + (typeof c === "string" ? Number.NaN : c.weight),
+    0
+  );
   if (Math.abs(weightSum - 1) > 0.01) {
     issues.push({
       severity: "error",
@@ -22132,7 +22241,7 @@ function validateTradeStudy(thought) {
     });
   }
   const altIds = study.alternatives.map((a) => a.id);
-  const critIds = study.criteria.map((c) => c.id);
+  const critIds = study.criteria.filter((c) => typeof c === "object" && c !== null).map((c) => c.id);
   for (const altId of altIds) {
     for (const critId of critIds) {
       const score = study.scores.find(
@@ -48851,6 +48960,9 @@ function formalLogicToMarkdown(thought, options) {
 
 // src/export/visual/modes/engineering.ts
 init_esm_shims();
+function criterionFields(c) {
+  return typeof c === "string" ? { id: c, name: c, weight: 0 } : c;
+}
 function exportEngineeringAnalysis(thought, options) {
   const { format } = options;
   switch (format) {
@@ -49558,7 +49670,7 @@ function engineeringToModelica(thought, options) {
     lines.push(`      "Selected alternative based on trade study";`);
     lines.push("");
     lines.push("    // Criteria Weights (sum to 1.0)");
-    for (const crit of thought.tradeStudy.criteria) {
+    for (const crit of thought.tradeStudy.criteria.map(criterionFields)) {
       const critId = sanitizeModelicaId2(crit.id);
       lines.push(
         `    parameter Real weight_${critId} = ${crit.weight.toFixed(3)} "${escapeModelicaString2(crit.name)}";`
@@ -49832,7 +49944,7 @@ function engineeringToHTML(thought, options) {
       <h4>Criteria</h4>
     ` + renderTable(
         ["Criterion", "Weight", "Description"],
-        thought.tradeStudy.criteria.map((c) => [
+        thought.tradeStudy.criteria.map(criterionFields).map((c) => [
           c.name,
           (c.weight * 100).toFixed(0) + "%",
           c.description || "-"
@@ -50143,7 +50255,7 @@ function engineeringToJSON(thought, options) {
           name: a.name,
           riskLevel: a.riskLevel
         })),
-        criteria: thought.tradeStudy.criteria.map((c) => ({
+        criteria: thought.tradeStudy.criteria.map(criterionFields).map((c) => ({
           id: c.id,
           name: c.name,
           weight: c.weight
@@ -50320,7 +50432,7 @@ function engineeringToMarkdown(thought, options) {
     parts.push(section("Requirements Traceability", reqContent));
   }
   if (thought.tradeStudy) {
-    const criteriaRows = thought.tradeStudy.criteria.map((c) => [
+    const criteriaRows = thought.tradeStudy.criteria.map(criterionFields).map((c) => [
       c.name,
       `${(c.weight * 100).toFixed(0)}%`,
       c.description || "-"
@@ -67712,46 +67824,224 @@ var deepthinking_engineering_schema = {
         description: "Step within the mode. Recursive: 'problem_decomposition', 'base_case_identification', 'recursive_step', 'subproblem_solution', 'solution_combination', 'termination_analysis'. An unrecognised value is accepted with a warning."
       },
       // Engineering-specific properties
-      requirementId: {
+      analysisType: {
         type: "string",
-        description: "Requirement ID being analyzed"
+        description: "'requirements', 'trade-study', 'fmea', 'design-decision' or 'comprehensive'. An unrecognised value is replaced by 'comprehensive' with a warning."
+      },
+      designChallenge: {
+        type: "string"
+      },
+      requirements: {
+        type: "object",
+        properties: {
+          requirements: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                title: { type: "string" },
+                description: { type: "string" },
+                source: {
+                  type: "string"
+                },
+                priority: {
+                  type: "string",
+                  description: "must, should, could or wont"
+                },
+                status: {
+                  type: "string"
+                },
+                rationale: { type: "string" },
+                verificationMethod: {
+                  type: "string",
+                  description: "inspection, analysis, demonstration or test"
+                },
+                verificationCriteria: {
+                  type: "array",
+                  items: { type: "string" }
+                },
+                tracesTo: { type: "array", items: { type: "string" } },
+                satisfiedBy: { type: "array", items: { type: "string" } },
+                relatedTo: { type: "array", items: { type: "string" } }
+              },
+              additionalProperties: false
+            }
+          },
+          coverage: {
+            type: "object",
+            properties: {
+              total: { type: "integer" },
+              verified: { type: "integer" },
+              tracedToSource: { type: "integer" },
+              allocatedToDesign: { type: "integer" }
+            },
+            required: [
+              "total",
+              "verified",
+              "tracedToSource",
+              "allocatedToDesign"
+            ],
+            additionalProperties: false
+          }
+        },
+        additionalProperties: false
       },
       tradeStudy: {
         type: "object",
         properties: {
-          options: {
+          title: { type: "string" },
+          objective: { type: "string" },
+          alternatives: {
             type: "array",
-            items: { type: "string" },
-            description: "Options being compared"
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                name: { type: "string" },
+                description: { type: "string" },
+                pros: { type: "array", items: { type: "string" } },
+                cons: { type: "array", items: { type: "string" } },
+                estimatedCost: { type: "number" },
+                riskLevel: {
+                  type: "string",
+                  description: "low, medium or high"
+                }
+              },
+              additionalProperties: false
+            }
           },
           criteria: {
             type: "array",
-            items: { type: "string" },
-            description: "Evaluation criteria"
+            items: {
+              type: ["string", "object"],
+              properties: {
+                id: { type: "string" },
+                name: { type: "string" },
+                description: { type: "string" },
+                weight: {
+                  type: "number",
+                  description: "0 to 1; weights should sum to 1"
+                },
+                unit: { type: "string" },
+                higherIsBetter: { type: "boolean" }
+              },
+              additionalProperties: false,
+              description: "An object with id and weight. A bare string has no weight: weight 0 is used, with a warning."
+            }
           },
-          weights: {
-            type: "object",
-            additionalProperties: { type: "number" },
-            description: "Criteria weights"
-          }
+          scores: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                alternativeId: { type: "string" },
+                criteriaId: { type: "string" },
+                score: { type: "number" },
+                rationale: { type: "string" }
+              },
+              additionalProperties: false
+            }
+          },
+          recommendation: {
+            type: "string"
+          },
+          justification: { type: "string" },
+          sensitivityNotes: { type: "string" }
         },
-        additionalProperties: false,
-        description: "Trade study configuration"
+        additionalProperties: false
       },
-      fmeaEntry: {
+      fmea: {
         type: "object",
         properties: {
-          failureMode: { type: "string" },
-          severity: { type: "integer", minimum: 1, maximum: 10 },
-          occurrence: { type: "integer", minimum: 1, maximum: 10 },
-          detection: { type: "integer", minimum: 1, maximum: 10 },
-          rpn: {
-            type: "integer",
-            description: "Risk Priority Number = S * O * D"
+          title: { type: "string" },
+          system: { type: "string" },
+          failureModes: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                component: { type: "string" },
+                function: { type: "string" },
+                failureMode: { type: "string" },
+                cause: { type: "string" },
+                effect: { type: "string" },
+                systemEffect: { type: "string" },
+                severity: { type: "integer" },
+                occurrence: { type: "integer" },
+                detection: { type: "integer" },
+                currentControls: { type: "string" },
+                mitigation: { type: "string" },
+                responsible: { type: "string" },
+                targetDate: { type: "string" },
+                mitigationStatus: {
+                  type: "string",
+                  description: "open, in-progress, completed or verified"
+                }
+              },
+              additionalProperties: false
+            }
+          },
+          rpnThreshold: {
+            type: "number",
+            description: "RPN needing action; defaults to 100"
           }
         },
-        additionalProperties: false,
-        description: "FMEA analysis entry"
+        additionalProperties: false
+      },
+      designDecisions: {
+        type: "object",
+        properties: {
+          decisions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                title: { type: "string" },
+                date: { type: "string" },
+                status: {
+                  type: "string"
+                },
+                context: { type: "string" },
+                decision: { type: "string" },
+                alternatives: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      option: { type: "string" },
+                      description: { type: "string" },
+                      pros: { type: "array", items: { type: "string" } },
+                      cons: { type: "array", items: { type: "string" } }
+                    },
+                    additionalProperties: false
+                  }
+                },
+                rationale: { type: "string" },
+                consequences: { type: "array", items: { type: "string" } },
+                supersededBy: { type: "string" },
+                relatedDecisions: { type: "array", items: { type: "string" } },
+                stakeholders: { type: "array", items: { type: "string" } }
+              },
+              additionalProperties: false
+            }
+          },
+          projectName: { type: "string" }
+        },
+        additionalProperties: false
+      },
+      assessment: {
+        type: "object",
+        properties: {
+          confidence: { type: "number" },
+          keyRisks: { type: "array", items: { type: "string" } },
+          nextSteps: { type: "array", items: { type: "string" } },
+          openIssues: { type: "array", items: { type: "string" } }
+        },
+        required: ["confidence", "keyRisks", "nextSteps", "openIssues"],
+        additionalProperties: false
       },
       // Algorithmic-specific properties
       algorithmName: {
@@ -69177,17 +69467,125 @@ var ScientificSchema = BaseThoughtSchema.extend({
 init_esm_shims();
 init_shared();
 init_sanitization();
-var TradeStudySchema = z.object({
-  options: IdArraySchema.optional(),
-  criteria: IdArraySchema.optional(),
-  weights: boundedRecord(IdSchema, z.number()).optional()
+var RequirementSchema = z.object({
+  id: IdSchema.optional(),
+  title: NameSchema.optional(),
+  description: TextSchema.optional(),
+  /** stakeholder, regulatory, standard, derived, assumption or constraint. */
+  source: IdSchema.optional(),
+  /** must, should, could or wont. */
+  priority: IdSchema.optional(),
+  /** draft, approved, implemented, verified, deferred or rejected. */
+  status: IdSchema.optional(),
+  rationale: TextSchema.optional(),
+  /** inspection, analysis, demonstration or test. */
+  verificationMethod: IdSchema.optional(),
+  verificationCriteria: TextArraySchema.optional(),
+  tracesTo: IdArraySchema.optional(),
+  satisfiedBy: IdArraySchema.optional(),
+  relatedTo: IdArraySchema.optional()
 });
-var FmeaEntrySchema = z.object({
+var RequirementsSchema = z.object({
+  requirements: z.array(RequirementSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  coverage: z.object({
+    total: z.number().int().min(0),
+    verified: z.number().int().min(0),
+    tracedToSource: z.number().int().min(0),
+    allocatedToDesign: z.number().int().min(0)
+  }).optional()
+});
+var TradeAlternativeSchema = z.object({
+  id: IdSchema.optional(),
+  name: NameSchema.optional(),
+  description: TextSchema.optional(),
+  pros: TextArraySchema.optional(),
+  cons: TextArraySchema.optional(),
+  estimatedCost: z.number().optional(),
+  /** low, medium or high. */
+  riskLevel: IdSchema.optional()
+});
+var TradeCriterionSchema = z.object({
+  id: IdSchema.optional(),
+  name: NameSchema.optional(),
+  description: TextSchema.optional(),
+  /** 0 to 1; the weights of a study should sum to 1. */
+  weight: z.number().optional(),
+  unit: IdSchema.optional(),
+  higherIsBetter: z.boolean().optional()
+});
+var TradeScoreSchema = z.object({
+  alternativeId: IdSchema.optional(),
+  criteriaId: IdSchema.optional(),
+  score: z.number().optional(),
+  rationale: TextSchema.optional()
+});
+var TradeStudySchema = z.object({
+  title: NameSchema.optional(),
+  objective: TextSchema.optional(),
+  alternatives: z.array(TradeAlternativeSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  criteria: z.array(z.union([IdSchema, TradeCriterionSchema])).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  scores: z.array(TradeScoreSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  /** Id of the recommended alternative. */
+  recommendation: IdSchema.optional(),
+  justification: TextSchema.optional(),
+  sensitivityNotes: TextSchema.optional()
+});
+var RatingSchema = z.number().int().min(1).max(10);
+var FailureModeSchema = z.object({
+  id: IdSchema.optional(),
+  component: NameSchema.optional(),
+  function: TextSchema.optional(),
   failureMode: TextSchema.optional(),
-  severity: z.number().int().min(1).max(10).optional(),
-  occurrence: z.number().int().min(1).max(10).optional(),
-  detection: z.number().int().min(1).max(10).optional(),
-  rpn: z.number().int().optional()
+  cause: TextSchema.optional(),
+  effect: TextSchema.optional(),
+  systemEffect: TextSchema.optional(),
+  severity: RatingSchema.optional(),
+  occurrence: RatingSchema.optional(),
+  detection: RatingSchema.optional(),
+  currentControls: TextSchema.optional(),
+  mitigation: TextSchema.optional(),
+  responsible: NameSchema.optional(),
+  targetDate: IdSchema.optional(),
+  /** open, in-progress, completed or verified. */
+  mitigationStatus: IdSchema.optional()
+});
+var FmeaSchema = z.object({
+  title: NameSchema.optional(),
+  system: NameSchema.optional(),
+  failureModes: z.array(FailureModeSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  /** RPN at or above which action is required; the handler defaults it to 100. */
+  rpnThreshold: z.number().optional()
+});
+var DecisionAlternativeSchema = z.object({
+  option: NameSchema.optional(),
+  description: TextSchema.optional(),
+  pros: TextArraySchema.optional(),
+  cons: TextArraySchema.optional()
+});
+var DesignDecisionSchema = z.object({
+  id: IdSchema.optional(),
+  title: NameSchema.optional(),
+  date: IdSchema.optional(),
+  /** proposed, accepted, rejected, deprecated or superseded. */
+  status: IdSchema.optional(),
+  context: TextSchema.optional(),
+  decision: TextSchema.optional(),
+  alternatives: z.array(DecisionAlternativeSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  rationale: TextSchema.optional(),
+  consequences: TextArraySchema.optional(),
+  supersededBy: IdSchema.optional(),
+  relatedDecisions: IdArraySchema.optional(),
+  stakeholders: TextArraySchema.optional()
+});
+var DesignDecisionsSchema = z.object({
+  decisions: z.array(DesignDecisionSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  projectName: NameSchema.optional()
+});
+var AssessmentSchema = z.object({
+  confidence: ConfidenceSchema,
+  keyRisks: TextArraySchema,
+  nextSteps: TextArraySchema,
+  openIssues: TextArraySchema
 });
 var ComplexityAnalysisSchema = z.object({
   timeComplexity: IdSchema.optional(),
@@ -69237,10 +69635,15 @@ var EngineeringSchema = BaseThoughtSchema.extend({
   mode: z.enum(["engineering", "algorithmic", "recursive"]),
   /** Mode-specific step label; every handler here resolves it leniently. */
   thoughtType: IdSchema.optional(),
-  // Engineering mode
-  requirementId: IdSchema.optional(),
+  // Engineering mode. `analysisType` is a bounded string: an unrecognised value
+  // falls back to "comprehensive" and a warning says so.
+  analysisType: IdSchema.optional(),
+  designChallenge: TextSchema.optional(),
+  requirements: RequirementsSchema.optional(),
   tradeStudy: TradeStudySchema.optional(),
-  fmeaEntry: FmeaEntrySchema.optional(),
+  fmea: FmeaSchema.optional(),
+  designDecisions: DesignDecisionsSchema.optional(),
+  assessment: AssessmentSchema.optional(),
   // Algorithmic mode (CLRS)
   algorithmName: NameSchema.optional(),
   designPattern: DesignPatternEnum.optional(),

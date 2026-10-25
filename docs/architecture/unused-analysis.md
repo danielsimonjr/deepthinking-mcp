@@ -10,7 +10,7 @@
 ## Summary
 
 - **Potentially unused files**: 12
-- **Potentially unused exports**: 491
+- **Potentially unused exports**: 486
 
 ## Potentially Unused Files
 
@@ -552,13 +552,8 @@ These exports are not imported by any other file in the codebase:
 
 - `Requirement` (interface)
 - `RequirementsTraceability` (interface)
-- `TradeAlternative` (interface)
-- `TradeCriterion` (interface)
-- `TradeScore` (interface)
 - `TradeStudy` (interface)
-- `FailureMode` (interface)
 - `FailureModeAnalysis` (interface)
-- `DecisionAlternative` (interface)
 - `DesignDecision` (interface)
 - `DesignDecisionLog` (interface)
 - `RequirementPriority` (type)

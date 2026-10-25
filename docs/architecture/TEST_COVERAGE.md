@@ -14,21 +14,21 @@ Most test folders follow the folder names of `src/`: `tests/unit/<area>/` and
 `tests/integration/<area>/` mirror `src/<area>/`. Five folders have no `src/` counterpart:
 `tests/unit/benchmarks/` and `tests/integration/{exports,handlers,scenarios,validators}/`. A file under
 `src/modes/handlers/BayesianHandler.ts` has its unit test at
-`tests/unit/modes/handlers/BayesianHandler.test.ts`. Every one of the 37 files in
+`tests/unit/modes/handlers/BayesianHandler.test.ts`. Every one of the 38 files in
 `src/modes/handlers/` has a test file of the same name.
 
 ### Layout
 
 | Directory | Test files | Purpose |
 |---|---|---|
-| `tests/unit/` | 140 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
-| `tests/integration/` | 77 | Cross-module paths: entry-point dispatch over a real transport, tool-shaped input through the handlers, export round-trips, multi-mode analysis, session lifecycles. |
+| `tests/unit/` | 144 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
+| `tests/integration/` | 78 | Cross-module paths: entry-point dispatch over a real transport, tool-shaped input through the handlers, export round-trips, multi-mode analysis, session lifecycles. |
 | `tests/edge-cases/` | 6 | Boundary conditions, malformed input, regressions pinned from past bugs. |
 | `tests/performance/` | 4 | Counted-work checks for cost, throughput, memory and stress. `helpers/work-probe.ts` holds the counters. |
 | `tests/utils/` | 0 (5 helper files) | Shared fixtures, factories, and assertion helpers. 21 test files import them, all under `tests/integration/tools/`. |
 | `tests/test-results/` | 0 | Reporter code and `TEST_RESULTS_v*.md` summaries. Not test code. |
 
-The suite holds 227 test files. `npx vitest list --filesOnly` lists them. This document maps
+The suite holds 232 test files. `npx vitest list --filesOnly` lists them. This document maps
 files. It holds no test count and no pass or fail state. Run the suite to get those.
 
 ### Running each tier
@@ -44,8 +44,8 @@ npx vitest run                          # everything
 `npm run test:publish` sets `SKIP_BENCHMARKS=1`. That variable switches on one extra entry in the
 `exclude` list of `vitest.config.ts`: `**/benchmarks/**`. The pattern matches the directory
 `tests/unit/benchmarks/`, which holds 2 test files. It does not match `tests/performance/`, so
-the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 225
-files instead of 227.
+the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 230
+files instead of 232.
 
 ### Where reports land
 
@@ -73,12 +73,12 @@ the root-level files that name the area in their subject.
 | Area | `src/` files | Unit test files | `src/` files imported directly by a test | Also exercised by |
 |---|---|---|---|---|
 | `index.ts` | 1 | 0 | 1 (4 test files) | `tests/integration/index-server.test.ts` and 3 more files that import the module. See Gaps. |
-| `types/` | 37 | 11 | 17 | Most handler and validator tests import types from here. No test imports 19 of the mode type files directly. |
-| `modes/` (handlers, combinations, causal graph, stochastic) | 54 | 53 | 52 | `tests/integration/handlers/`, `tests/integration/mode-handler-delegation.test.ts`. |
+| `types/` | 37 | 11 | 18 | Most handler and validator tests import types from here. No test imports 18 of the mode type files directly. |
+| `modes/` (handlers, combinations, causal graph, stochastic) | 55 | 54 | 53 | `tests/integration/handlers/`, `tests/integration/mode-handler-delegation.test.ts`. |
 | `services/` | 3 | 2 | 3 | 68 test files import `ThoughtFactory` or `ExportService` directly. `RecommendationService` has one importer, `tests/unit/taxonomy/taxonomy-wiring.test.ts`. |
-| `session/` | 4 | 10 | 2 | `tests/integration/session-workflow.test.ts`, `multi-session.test.ts`, `edge-cases/session-edges.test.ts`, and 4 `tests/integration/tools/session-*.test.ts` files. |
-| `validation/` | 44 | 20 | 20 | `tests/unit/validation/validators/modes/validator-contract.test.ts` covers all 35 mode validators. See Gaps. |
-| `export/` | 47 | 12 | 21 | 12 integration files under `tests/integration/export/` and `tests/integration/exports/`. The per-mode visual exporters are reached through `visual/modes/index.ts`. |
+| `session/` | 4 | 11 | 2 | `tests/integration/session-workflow.test.ts`, `multi-session.test.ts`, `edge-cases/session-edges.test.ts`, and 4 `tests/integration/tools/session-*.test.ts` files. |
+| `validation/` | 44 | 21 | 21 | `tests/unit/validation/validators/modes/validator-contract.test.ts` covers all 35 mode validators. See Gaps. |
+| `export/` | 47 | 13 | 22 | 12 integration files under `tests/integration/export/` and `tests/integration/exports/`. The per-mode visual exporters are reached through `visual/modes/index.ts`. |
 | `proof/` | 15 | 10 | 13 | `tests/integration/proof/decomposition.test.ts`, and the `proof-*-wiring` tests in `tests/unit/session/`. |
 | `taxonomy/` | 7 | 3 | 6 | `tests/unit/session/reasoning-flow-wiring.test.ts`. |
 | `cache/` | 3 | 2 | 1 | `src/cache/lru.ts` is imported by 2 unit tests. `index.ts` and `types.ts` have no direct importer. |
@@ -212,7 +212,7 @@ and `validation-performance.test.ts` are micro-benchmarks. They are the two file
 
 ## 4. Integration tests
 
-77 files under `tests/integration/`, exercising cross-module paths that a unit test cannot
+78 files under `tests/integration/`, exercising cross-module paths that a unit test cannot
 reach.
 
 **Root files (10) — the server entry point and protocol.** Three of these files import
@@ -468,7 +468,7 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 501 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 507 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 

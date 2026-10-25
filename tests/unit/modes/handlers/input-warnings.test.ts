@@ -1,0 +1,56 @@
+import { describe, it, expect } from "vitest";
+import {
+  inputWarningsField,
+  unrecognisedValueWarning,
+} from "../../../../src/modes/handlers/input-warnings.js";
+
+const RECOGNISED = ["alpha", "beta"] as const;
+
+describe("unrecognisedValueWarning", () => {
+  it("says nothing for an absent, empty or recognised value", () => {
+    expect(unrecognisedValueWarning("f", undefined, RECOGNISED)).toBeUndefined();
+    expect(unrecognisedValueWarning("f", null, RECOGNISED)).toBeUndefined();
+    expect(unrecognisedValueWarning("f", "", RECOGNISED)).toBeUndefined();
+    expect(unrecognisedValueWarning("f", "beta", RECOGNISED)).toBeUndefined();
+  });
+
+  it("names the default when the handler replaces the value", () => {
+    expect(unrecognisedValueWarning("f", "gamma", RECOGNISED, "alpha")).toBe(
+      'Unknown f "gamma"; using the default "alpha". Recognised values: alpha, beta.',
+    );
+  });
+
+  it("says the value is kept when the handler keeps it as sent", () => {
+    expect(unrecognisedValueWarning("f", "gamma", RECOGNISED)).toBe(
+      'Unknown f "gamma"; it is kept as sent. Recognised values: alpha, beta.',
+    );
+  });
+
+  it("treats a value of another type as unrecognised and quotes it as text", () => {
+    expect(unrecognisedValueWarning("f", 7, RECOGNISED, "alpha")).toContain(
+      '"7"',
+    );
+  });
+
+  it("escapes quotes and shortens a long value", () => {
+    expect(unrecognisedValueWarning("f", 'a"b', RECOGNISED, "alpha")).toContain(
+      '"a\\"b"',
+    );
+    const long = unrecognisedValueWarning("f", "y".repeat(61), RECOGNISED, "alpha");
+    expect(long).toContain(`"${"y".repeat(60)}..."`);
+  });
+});
+
+describe("inputWarningsField", () => {
+  it("is an empty object when there is no sentence, so the thought has no field", () => {
+    expect(inputWarningsField([])).toEqual({});
+    expect(inputWarningsField([undefined, undefined])).toEqual({});
+    expect("inputWarnings" in inputWarningsField([undefined])).toBe(false);
+  });
+
+  it("keeps the sentences in order and skips the undefined entries", () => {
+    expect(inputWarningsField(["one", undefined, "two"])).toEqual({
+      inputWarnings: ["one", "two"],
+    });
+  });
+});

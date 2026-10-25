@@ -311,13 +311,17 @@ function for the lock file that already exists, and any other error propagates.
 ## Mode Handlers
 
 `src/modes/handlers/` implements the Strategy pattern: one handler class for each mode. The
-directory holds 37 files: one interface file
+directory holds 38 files: one interface file
 (`ModeHandler.ts`), 35 handlers each bound to exactly one `ThinkingMode` value via
 `registerAllHandlers()` in `src/modes/index.ts`, and `GenericModeHandler.ts`, a 36th handler class
 that is never registered — the registry constructs it on demand as the fallback for any mode
 string with no registered handler. That path is unreachable for a `ThinkingMode` member, because
 all 35 non-generic modes are registered at startup. `ThinkingMode.CUSTOM` (handled by `CustomHandler`) is
-one of the 35 registered modes, not a separate case.
+one of the 35 registered modes, not a separate case. The 38th file, `input-warnings.ts`, is a helper
+module and not a handler. It exports `unrecognisedValueWarning(field, value, recognised, fallback?)`
+and `inputWarningsField(sentences)`. A handler uses them to record a request value that it replaced
+or ignored in the `inputWarnings` field of the thought. `EngineeringHandler` is the first handler
+that does this.
 
 ### ModeHandler (`src/modes/handlers/ModeHandler.ts`)
 
@@ -871,7 +875,7 @@ through `getValidatorForMode()`.
 
 All 35 implement `ModeValidator<T>` the same way: a `getMode()` returning the mode's string key, and
 a `validate(thought, context)` that opens with `validateCommon(thought)` (checks shared structural
-fields) and layers mode-specific checks on top via the same `validation-utils.ts` helpers. Example
+fields and reports each `inputWarnings` sentence as a warning) and layers mode-specific checks on top via the same `validation-utils.ts` helpers. Example
 (`BayesianValidator`, `validators/modes/bayesian.ts`):
 
 ```typescript
@@ -2534,6 +2538,7 @@ export interface BaseThought {
   dependencies?: string[]; assumptions?: string[]; tags?: string[]; importance?: number;
   validation?: AdvisoryValidation;        // advisory, set by SessionManager.addThought()
   proofAnalysis?: AdvisoryProofAnalysis;  // advisory, set when the thought carries proof content
+  inputWarnings?: string[];               // sentences for request values a handler replaced or ignored; validateCommon() reports each as a warning
 }
 
 // The fundamental triad is defined directly in core.ts, not in types/modes/ —
@@ -2691,11 +2696,11 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 501 | repo-tools map (whole repository) |
-| totalLinesOfCode | 229231 | repo-tools map (whole repository) |
-| totalExports | 2160 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 507 | repo-tools map (whole repository) |
+| totalLinesOfCode | 230789 | repo-tools map (whole repository) |
+| totalExports | 2162 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
-| reachableFiles | 234 | repo-tools map (whole repository) |
+| reachableFiles | 235 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 | noImporterFileCount | 12 | repo-tools map (whole repository) |
 

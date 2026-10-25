@@ -13,6 +13,11 @@ import { ThinkingMode } from "../../types/core.js";
 import type {
   EngineeringThought,
   EngineeringAnalysisType,
+  TradeAlternative,
+  TradeCriterion,
+  TradeScore,
+  FailureMode,
+  DecisionAlternative,
 } from "../../types/modes/engineering.js";
 import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
@@ -24,6 +29,10 @@ import {
   createValidationError,
   createValidationWarning,
 } from "./ModeHandler.js";
+import {
+  inputWarningsField,
+  unrecognisedValueWarning,
+} from "./input-warnings.js";
 
 /**
  * Valid engineering analysis types
@@ -94,6 +103,18 @@ export class EngineeringHandler implements ModeHandler {
       ? this.processDesignDecisions(inputAny.designDecisions)
       : undefined;
 
+    // Sentences for the values replaced or ignored above; validateCommon()
+    // reports each one in the `validation` field of the answer.
+    const inputWarnings = inputWarningsField([
+      unrecognisedValueWarning(
+        "analysisType",
+        inputAny.analysisType,
+        VALID_ANALYSIS_TYPES,
+        "comprehensive",
+      ),
+      this.stringCriteriaWarning(inputAny.tradeStudy?.criteria),
+    ]);
+
     return {
       id: randomUUID(),
       sessionId,
@@ -116,7 +137,23 @@ export class EngineeringHandler implements ModeHandler {
       // Revision tracking
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
+
+      ...inputWarnings,
     };
+  }
+
+  /**
+   * Say that string criteria have no weight.
+   *
+   * `tradeStudy.criteria` takes a string or an object. A string has no `id` and
+   * no `weight`, so the weighted scores that use it are 0. The handler keeps the
+   * string as sent, as it always did.
+   */
+  private stringCriteriaWarning(criteria: unknown): string | undefined {
+    if (!Array.isArray(criteria)) return undefined;
+    const strings = criteria.filter((c) => typeof c === "string").length;
+    if (strings === 0) return undefined;
+    return `tradeStudy.criteria: ${strings} of ${criteria.length} items are strings and have no weight; weight 0 is used for them. Send objects with id and weight.`;
   }
 
   /**
@@ -418,24 +455,54 @@ export class EngineeringHandler implements ModeHandler {
    * Process trade study
    */
   private processTradeStudy(raw: any): any {
-    const scores = raw.scores || [];
+    // Fill what the TradeStudy type requires: every field is optional on input,
+    // and the exporters read `name` and `description` without a check.
+    const alternatives = (raw.alternatives || []).map(
+      (a: Partial<TradeAlternative>) => ({
+        ...a,
+        id: a.id || `ALT-${randomUUID().slice(0, 8)}`,
+        name: a.name || "",
+        description: a.description || "",
+      }),
+    );
+
+    // A string criterion is kept as sent: it has no weight (stringCriteriaWarning).
+    const criteria = (raw.criteria || []).map(
+      (c: Partial<TradeCriterion> | string) =>
+        typeof c === "string"
+          ? c
+          : {
+              ...c,
+              id: c.id || `CRIT-${randomUUID().slice(0, 8)}`,
+              name: c.name || "",
+              weight: c.weight || 0,
+            },
+    );
 
     // Calculate weighted scores
     const criteriaWeights: Record<string, number> = {};
-    (raw.criteria || []).forEach((c: any) => {
-      criteriaWeights[c.id] = c.weight || 0;
-    });
+    for (const c of criteria) {
+      if (typeof c !== "string") criteriaWeights[c.id] = c.weight;
+    }
 
-    const enhancedScores = scores.map((s: any) => ({
-      ...s,
-      weightedScore: (s.score || 0) * (criteriaWeights[s.criteriaId] || 0),
-    }));
+    const enhancedScores = (raw.scores || []).map((s: Partial<TradeScore>) => {
+      const criteriaId = s.criteriaId || "";
+      const score = s.score || 0;
+      return {
+        ...s,
+        alternativeId: s.alternativeId || "",
+        criteriaId,
+        score,
+        rationale: s.rationale || "",
+        weightedScore: score * (criteriaWeights[criteriaId] || 0),
+      };
+    });
 
     return {
       title: raw.title || "",
       objective: raw.objective || "",
-      alternatives: raw.alternatives || [],
-      criteria: raw.criteria || [],
+      alternatives,
+      criteria,
       scores: enhancedScores,
       recommendation: raw.recommendation || "",
       justification: raw.justification || "",
@@ -447,13 +514,31 @@ export class EngineeringHandler implements ModeHandler {
    * Process FMEA
    */
   private processFMEA(raw: any): any {
-    const failureModes = (raw.failureModes || []).map((fm: any) => ({
-      ...fm,
-      rpn: (fm.severity || 1) * (fm.occurrence || 1) * (fm.detection || 1),
-    }));
+    // Fill what the FailureMode type requires. A rating that is absent counts as
+    // 1, as the RPN always did; the validator and the exporters read the stored
+    // ratings, so the stored value must be the one the RPN used.
+    const failureModes = (raw.failureModes || []).map(
+      (fm: Partial<FailureMode>) => {
+        const severity = fm.severity || 1;
+        const occurrence = fm.occurrence || 1;
+        const detection = fm.detection || 1;
+        return {
+          ...fm,
+          id: fm.id || `FM-${randomUUID().slice(0, 8)}`,
+          component: fm.component || "",
+          failureMode: fm.failureMode || "",
+          cause: fm.cause || "",
+          effect: fm.effect || "",
+          severity,
+          occurrence,
+          detection,
+          rpn: severity * occurrence * detection,
+        };
+      },
+    );
 
     const rpnThreshold = raw.rpnThreshold || 100;
-    const rpnValues = failureModes.map((fm: any) => fm.rpn);
+    const rpnValues = failureModes.map((fm: { rpn: number }) => fm.rpn);
 
     return {
       title: raw.title || "",
@@ -462,8 +547,10 @@ export class EngineeringHandler implements ModeHandler {
       rpnThreshold,
       summary: {
         totalModes: failureModes.length,
-        criticalModes: failureModes.filter((fm: any) => fm.rpn > rpnThreshold)
-          .length,
+        // At or above the threshold: the validator and every exporter count it so.
+        criticalModes: failureModes.filter(
+          (fm: { rpn: number }) => fm.rpn >= rpnThreshold,
+        ).length,
         averageRpn:
           rpnValues.length > 0
             ? rpnValues.reduce((a: number, b: number) => a + b, 0) /
@@ -486,7 +573,14 @@ export class EngineeringHandler implements ModeHandler {
         status: d.status || "proposed",
         context: d.context || "",
         decision: d.decision || "",
-        alternatives: d.alternatives || [],
+        alternatives: (d.alternatives || []).map(
+          (a: Partial<DecisionAlternative>) => ({
+            ...a,
+            option: a.option || "",
+            pros: a.pros || [],
+            cons: a.cons || [],
+          }),
+        ),
         rationale: d.rationale || "",
         consequences: d.consequences || [],
         supersededBy: d.supersededBy,
@@ -554,7 +648,7 @@ export class EngineeringHandler implements ModeHandler {
     // Check for high-RPN items without mitigation
     const rpnThreshold = fmea.rpnThreshold || 100;
     const highRpnNoMitigation = failureModes.filter(
-      (fm: any) => fm.rpn > rpnThreshold && !fm.mitigation,
+      (fm: any) => fm.rpn >= rpnThreshold && !fm.mitigation,
     );
 
     if (highRpnNoMitigation.length > 0) {

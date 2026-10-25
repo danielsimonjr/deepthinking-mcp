@@ -295,6 +295,17 @@ export interface BaseThought {
   validation?: AdvisoryValidation;
 
   /**
+   * One sentence for each request value the mode handler replaced or ignored,
+   * for example an unrecognised vocabulary value that fell back to its default.
+   * The handler sets the field only when it has a sentence to record; no
+   * sentence means no field. `validateCommon()` turns each sentence into a
+   * warning issue, so the client reads it in `validation.issues` of the
+   * add_thought answer. The field is stored with the thought, so an export or a
+   * persisted session carries it, and it is part of the validation cache key.
+   */
+  inputWarnings?: string[];
+
+  /**
    * Advisory proof analysis, attached by `SessionManager.addThought()` when
    * the thought carries proof content. Never gates thought creation, and
    * never overwrites a caller-supplied `decomposition` - see

@@ -173,7 +173,11 @@ function validateTradeStudy(thought: EngineeringThought): ValidationIssue[] {
   const study = thought.tradeStudy!;
 
   // Check criteria weights sum to 1 (with tolerance)
-  const weightSum = study.criteria.reduce((sum, c) => sum + c.weight, 0);
+  // A bare string has no weight; its NaN keeps the sum the validator always gave.
+  const weightSum = study.criteria.reduce(
+    (sum, c) => sum + (typeof c === "string" ? Number.NaN : c.weight),
+    0,
+  );
   if (Math.abs(weightSum - 1.0) > 0.01) {
     issues.push({
       severity: "error",
@@ -186,7 +190,12 @@ function validateTradeStudy(thought: EngineeringThought): ValidationIssue[] {
 
   // Check all alternatives have all scores
   const altIds = study.alternatives.map((a) => a.id);
-  const critIds = study.criteria.map((c) => c.id);
+  // A criterion sent as a bare string has no id; the handler warns about it
+  // (EngineeringHandler.stringCriteriaWarning), so it does not also produce a
+  // "missing score on criterion undefined" issue here.
+  const critIds = study.criteria
+    .filter((c) => typeof c === "object" && c !== null)
+    .map((c) => c.id);
 
   for (const altId of altIds) {
     for (const critId of critIds) {

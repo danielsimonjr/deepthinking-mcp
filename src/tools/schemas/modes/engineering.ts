@@ -12,32 +12,206 @@ import {
   NameSchema,
   TextSchema,
   IdArraySchema,
-  boundedRecord,
+  TextArraySchema,
+  ConfidenceSchema,
 } from "../shared.js";
 import { MAX_LENGTHS } from "../../../utils/sanitization.js";
 
-/**
- * Trade study schema
- */
-const TradeStudySchema = z.object({
-  options: IdArraySchema.optional(),
-  criteria: IdArraySchema.optional(),
-  weights: boundedRecord(IdSchema, z.number()).optional(),
+// ============================================================
+// ENGINEERING ANALYSIS (what EngineeringHandler reads)
+// ============================================================
+//
+// EngineeringHandler reads `analysisType`, `designChallenge`, `requirements`,
+// `tradeStudy`, `fmea`, `designDecisions` and `assessment`. Zod strips a key
+// that its schema does not declare, so until these were declared the handler
+// never saw them. Rules for what is declared:
+//   - A field the handler reads, or keeps on the stored thought, is declared.
+//   - A field the handler computes (`rpn`, `summary`, `weightedScore`) is not:
+//     the handler replaces what a client sends.
+//   - Vocabulary fields (`analysisType`, `source`, `priority`, `status`, ...) are
+//     bounded strings, NOT enums: the handler resolves an unrecognised value or
+//     keeps it as sent, and a Zod enum would turn that into a hard rejection.
+//   - Every field is optional except where the handler dereferences it
+//     (`coverage`, `assessment`): it defaults the rest.
+
+/** One requirement of a traceability matrix. */
+const RequirementSchema = z.object({
+  id: IdSchema.optional(),
+  title: NameSchema.optional(),
+  description: TextSchema.optional(),
+  /** stakeholder, regulatory, standard, derived, assumption or constraint. */
+  source: IdSchema.optional(),
+  /** must, should, could or wont. */
+  priority: IdSchema.optional(),
+  /** draft, approved, implemented, verified, deferred or rejected. */
+  status: IdSchema.optional(),
+  rationale: TextSchema.optional(),
+  /** inspection, analysis, demonstration or test. */
+  verificationMethod: IdSchema.optional(),
+  verificationCriteria: TextArraySchema.optional(),
+  tracesTo: IdArraySchema.optional(),
+  satisfiedBy: IdArraySchema.optional(),
+  relatedTo: IdArraySchema.optional(),
+});
+
+/** Requirements traceability matrix; the handler computes `coverage` when it is omitted. */
+const RequirementsSchema = z.object({
+  requirements: z
+    .array(RequirementSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  coverage: z
+    .object({
+      total: z.number().int().min(0),
+      verified: z.number().int().min(0),
+      tracedToSource: z.number().int().min(0),
+      allocatedToDesign: z.number().int().min(0),
+    })
+    .optional(),
+});
+
+/** An alternative that a trade study compares. */
+const TradeAlternativeSchema = z.object({
+  id: IdSchema.optional(),
+  name: NameSchema.optional(),
+  description: TextSchema.optional(),
+  pros: TextArraySchema.optional(),
+  cons: TextArraySchema.optional(),
+  estimatedCost: z.number().optional(),
+  /** low, medium or high. */
+  riskLevel: IdSchema.optional(),
 });
 
 /**
- * FMEA entry schema
- *
- * Ratings stay bounded 1-10 when supplied, but none is mandatory: the advertised
- * JSON Schema declares no `required` list, and EngineeringHandler defaults every
- * rating when computing RPN.
+ * A criterion with a weight. A criterion can also be sent as a bare string, which
+ * the handler keeps as sent and weighs at 0: see `TradeStudySchema.criteria`.
  */
-const FmeaEntrySchema = z.object({
+const TradeCriterionSchema = z.object({
+  id: IdSchema.optional(),
+  name: NameSchema.optional(),
+  description: TextSchema.optional(),
+  /** 0 to 1; the weights of a study should sum to 1. */
+  weight: z.number().optional(),
+  unit: IdSchema.optional(),
+  higherIsBetter: z.boolean().optional(),
+});
+
+/** The score of one alternative on one criterion. */
+const TradeScoreSchema = z.object({
+  alternativeId: IdSchema.optional(),
+  criteriaId: IdSchema.optional(),
+  score: z.number().optional(),
+  rationale: TextSchema.optional(),
+});
+
+/**
+ * Trade study.
+ *
+ * `criteria` takes a string or an object. Before this schema declared the
+ * objects, `criteria` was a list of strings, and the handler read it as a list of
+ * objects: a string criterion has no `id` and no `weight`, so it weighs 0. The
+ * string form stays accepted, and the handler says in `validation.issues` that a
+ * string has no weight.
+ */
+const TradeStudySchema = z.object({
+  title: NameSchema.optional(),
+  objective: TextSchema.optional(),
+  alternatives: z
+    .array(TradeAlternativeSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  criteria: z
+    .array(z.union([IdSchema, TradeCriterionSchema]))
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  scores: z
+    .array(TradeScoreSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  /** Id of the recommended alternative. */
+  recommendation: IdSchema.optional(),
+  justification: TextSchema.optional(),
+  sensitivityNotes: TextSchema.optional(),
+});
+
+/** Ratings stay bounded 1-10 when supplied; the handler defaults each one to 1. */
+const RatingSchema = z.number().int().min(1).max(10);
+
+/** One failure mode; the handler computes `rpn` as severity x occurrence x detection. */
+const FailureModeSchema = z.object({
+  id: IdSchema.optional(),
+  component: NameSchema.optional(),
+  function: TextSchema.optional(),
   failureMode: TextSchema.optional(),
-  severity: z.number().int().min(1).max(10).optional(),
-  occurrence: z.number().int().min(1).max(10).optional(),
-  detection: z.number().int().min(1).max(10).optional(),
-  rpn: z.number().int().optional(),
+  cause: TextSchema.optional(),
+  effect: TextSchema.optional(),
+  systemEffect: TextSchema.optional(),
+  severity: RatingSchema.optional(),
+  occurrence: RatingSchema.optional(),
+  detection: RatingSchema.optional(),
+  currentControls: TextSchema.optional(),
+  mitigation: TextSchema.optional(),
+  responsible: NameSchema.optional(),
+  targetDate: IdSchema.optional(),
+  /** open, in-progress, completed or verified. */
+  mitigationStatus: IdSchema.optional(),
+});
+
+/** Failure mode and effects analysis; the handler computes `summary`. */
+const FmeaSchema = z.object({
+  title: NameSchema.optional(),
+  system: NameSchema.optional(),
+  failureModes: z
+    .array(FailureModeSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  /** RPN at or above which action is required; the handler defaults it to 100. */
+  rpnThreshold: z.number().optional(),
+});
+
+/** An option that a design decision weighed. */
+const DecisionAlternativeSchema = z.object({
+  option: NameSchema.optional(),
+  description: TextSchema.optional(),
+  pros: TextArraySchema.optional(),
+  cons: TextArraySchema.optional(),
+});
+
+/** One design decision record. */
+const DesignDecisionSchema = z.object({
+  id: IdSchema.optional(),
+  title: NameSchema.optional(),
+  date: IdSchema.optional(),
+  /** proposed, accepted, rejected, deprecated or superseded. */
+  status: IdSchema.optional(),
+  context: TextSchema.optional(),
+  decision: TextSchema.optional(),
+  alternatives: z
+    .array(DecisionAlternativeSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  rationale: TextSchema.optional(),
+  consequences: TextArraySchema.optional(),
+  supersededBy: IdSchema.optional(),
+  relatedDecisions: IdArraySchema.optional(),
+  stakeholders: TextArraySchema.optional(),
+});
+
+/** Design decision log. */
+const DesignDecisionsSchema = z.object({
+  decisions: z
+    .array(DesignDecisionSchema)
+    .max(MAX_LENGTHS.NESTED_ARRAY_ITEMS)
+    .optional(),
+  projectName: NameSchema.optional(),
+});
+
+/** Overall assessment; the handler stores it as sent and reads all four fields. */
+const AssessmentSchema = z.object({
+  confidence: ConfidenceSchema,
+  keyRisks: TextArraySchema,
+  nextSteps: TextArraySchema,
+  openIssues: TextArraySchema,
 });
 
 /**
@@ -129,10 +303,15 @@ export const EngineeringSchema = BaseThoughtSchema.extend({
   /** Mode-specific step label; every handler here resolves it leniently. */
   thoughtType: IdSchema.optional(),
 
-  // Engineering mode
-  requirementId: IdSchema.optional(),
+  // Engineering mode. `analysisType` is a bounded string: an unrecognised value
+  // falls back to "comprehensive" and a warning says so.
+  analysisType: IdSchema.optional(),
+  designChallenge: TextSchema.optional(),
+  requirements: RequirementsSchema.optional(),
   tradeStudy: TradeStudySchema.optional(),
-  fmeaEntry: FmeaEntrySchema.optional(),
+  fmea: FmeaSchema.optional(),
+  designDecisions: DesignDecisionsSchema.optional(),
+  assessment: AssessmentSchema.optional(),
 
   // Algorithmic mode (CLRS)
   algorithmName: NameSchema.optional(),

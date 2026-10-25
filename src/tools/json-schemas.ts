@@ -1811,46 +1811,226 @@ export const deepthinking_engineering_schema = {
           "Step within the mode. Recursive: 'problem_decomposition', 'base_case_identification', 'recursive_step', 'subproblem_solution', 'solution_combination', 'termination_analysis'. An unrecognised value is accepted with a warning.",
       },
       // Engineering-specific properties
-      requirementId: {
+      analysisType: {
         type: "string",
-        description: "Requirement ID being analyzed",
+        description:
+          "'requirements', 'trade-study', 'fmea', 'design-decision' or 'comprehensive'. An unrecognised value is replaced by 'comprehensive' with a warning.",
+      },
+      designChallenge: {
+        type: "string",
+      },
+      requirements: {
+        type: "object",
+        properties: {
+          requirements: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                title: { type: "string" },
+                description: { type: "string" },
+                source: {
+                  type: "string",
+                },
+                priority: {
+                  type: "string",
+                  description: "must, should, could or wont",
+                },
+                status: {
+                  type: "string",
+                },
+                rationale: { type: "string" },
+                verificationMethod: {
+                  type: "string",
+                  description: "inspection, analysis, demonstration or test",
+                },
+                verificationCriteria: {
+                  type: "array",
+                  items: { type: "string" },
+                },
+                tracesTo: { type: "array", items: { type: "string" } },
+                satisfiedBy: { type: "array", items: { type: "string" } },
+                relatedTo: { type: "array", items: { type: "string" } },
+              },
+              additionalProperties: false,
+            },
+          },
+          coverage: {
+            type: "object",
+            properties: {
+              total: { type: "integer" },
+              verified: { type: "integer" },
+              tracedToSource: { type: "integer" },
+              allocatedToDesign: { type: "integer" },
+            },
+            required: [
+              "total",
+              "verified",
+              "tracedToSource",
+              "allocatedToDesign",
+            ],
+            additionalProperties: false,
+          },
+        },
+        additionalProperties: false,
       },
       tradeStudy: {
         type: "object",
         properties: {
-          options: {
+          title: { type: "string" },
+          objective: { type: "string" },
+          alternatives: {
             type: "array",
-            items: { type: "string" },
-            description: "Options being compared",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                name: { type: "string" },
+                description: { type: "string" },
+                pros: { type: "array", items: { type: "string" } },
+                cons: { type: "array", items: { type: "string" } },
+                estimatedCost: { type: "number" },
+                riskLevel: {
+                  type: "string",
+                  description: "low, medium or high",
+                },
+              },
+              additionalProperties: false,
+            },
           },
           criteria: {
             type: "array",
-            items: { type: "string" },
-            description: "Evaluation criteria",
+            items: {
+              type: ["string", "object"],
+              properties: {
+                id: { type: "string" },
+                name: { type: "string" },
+                description: { type: "string" },
+                weight: {
+                  type: "number",
+                  description: "0 to 1; weights should sum to 1",
+                },
+                unit: { type: "string" },
+                higherIsBetter: { type: "boolean" },
+              },
+              additionalProperties: false,
+              description:
+                "An object with id and weight. A bare string has no weight: weight 0 is used, with a warning.",
+            },
           },
-          weights: {
-            type: "object",
-            additionalProperties: { type: "number" },
-            description: "Criteria weights",
+          scores: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                alternativeId: { type: "string" },
+                criteriaId: { type: "string" },
+                score: { type: "number" },
+                rationale: { type: "string" },
+              },
+              additionalProperties: false,
+            },
           },
+          recommendation: {
+            type: "string",
+          },
+          justification: { type: "string" },
+          sensitivityNotes: { type: "string" },
         },
         additionalProperties: false,
-        description: "Trade study configuration",
       },
-      fmeaEntry: {
+      fmea: {
         type: "object",
         properties: {
-          failureMode: { type: "string" },
-          severity: { type: "integer", minimum: 1, maximum: 10 },
-          occurrence: { type: "integer", minimum: 1, maximum: 10 },
-          detection: { type: "integer", minimum: 1, maximum: 10 },
-          rpn: {
-            type: "integer",
-            description: "Risk Priority Number = S * O * D",
+          title: { type: "string" },
+          system: { type: "string" },
+          failureModes: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                component: { type: "string" },
+                function: { type: "string" },
+                failureMode: { type: "string" },
+                cause: { type: "string" },
+                effect: { type: "string" },
+                systemEffect: { type: "string" },
+                severity: { type: "integer" },
+                occurrence: { type: "integer" },
+                detection: { type: "integer" },
+                currentControls: { type: "string" },
+                mitigation: { type: "string" },
+                responsible: { type: "string" },
+                targetDate: { type: "string" },
+                mitigationStatus: {
+                  type: "string",
+                  description: "open, in-progress, completed or verified",
+                },
+              },
+              additionalProperties: false,
+            },
+          },
+          rpnThreshold: {
+            type: "number",
+            description: "RPN needing action; defaults to 100",
           },
         },
         additionalProperties: false,
-        description: "FMEA analysis entry",
+      },
+      designDecisions: {
+        type: "object",
+        properties: {
+          decisions: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                id: { type: "string" },
+                title: { type: "string" },
+                date: { type: "string" },
+                status: {
+                  type: "string",
+                },
+                context: { type: "string" },
+                decision: { type: "string" },
+                alternatives: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      option: { type: "string" },
+                      description: { type: "string" },
+                      pros: { type: "array", items: { type: "string" } },
+                      cons: { type: "array", items: { type: "string" } },
+                    },
+                    additionalProperties: false,
+                  },
+                },
+                rationale: { type: "string" },
+                consequences: { type: "array", items: { type: "string" } },
+                supersededBy: { type: "string" },
+                relatedDecisions: { type: "array", items: { type: "string" } },
+                stakeholders: { type: "array", items: { type: "string" } },
+              },
+              additionalProperties: false,
+            },
+          },
+          projectName: { type: "string" },
+        },
+        additionalProperties: false,
+      },
+      assessment: {
+        type: "object",
+        properties: {
+          confidence: { type: "number" },
+          keyRisks: { type: "array", items: { type: "string" } },
+          nextSteps: { type: "array", items: { type: "string" } },
+          openIssues: { type: "array", items: { type: "string" } },
+        },
+        required: ["confidence", "keyRisks", "nextSteps", "openIssues"],
+        additionalProperties: false,
       },
       // Algorithmic-specific properties
       algorithmName: {

@@ -24,12 +24,12 @@ document does not repeat it.
 
 | Metric | Value | Scope | Source |
 |---|---|---|---|
-| Source files, whole repo | 501 | repo-wide | `repo-tools map` (498 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
-| TypeScript files, `src/` | 242 | src only | `repo-tools map`, files under `src/` |
-| Lines of code, whole repo | 229,231 | repo-wide | `repo-tools map` |
-| Lines of code, `src/` | 118,990 | src only | `repo-tools map`, files under `src/` |
-| Total exports, whole repo | 2,160 | repo-wide | `repo-tools map` |
-| Total exports, `src/` | 1,188 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
+| Source files, whole repo | 507 | repo-wide | `repo-tools map` (504 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
+| TypeScript files, `src/` | 243 | src only | `repo-tools map`, files under `src/` |
+| Lines of code, whole repo | 230,789 | repo-wide | `repo-tools map` |
+| Lines of code, `src/` | 119,551 | src only | `repo-tools map`, files under `src/` |
+| Total exports, whole repo | 2,162 | repo-wide | `repo-tools map` |
+| Total exports, `src/` | 1,190 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
 | Entry roots | 1 (`src/index.ts`) | repo-wide | `repo-tools map` |
 | Runtime circular dependencies | 0 | repo-wide | `repo-tools map`, confirmed by direct edge inspection |
 | Type-only circular dependencies | 95 | repo-wide | `repo-tools map` |
@@ -38,20 +38,20 @@ document does not repeat it.
 | Reasoning modes | 34, plus `custom` (35 `ThinkingMode` members) | src | `src/types/core.ts` `ThinkingMode` enum |
 | Reasoning types defined | 69 | src | `src/taxonomy/reasoning-types.ts` (surfaced by `recommend_mode`) |
 | MCP tools | 13 | src | `src/index.ts` tool registrations, live-checked below |
-| Specialized mode handlers | 35 | src | `src/modes/index.ts` registers them; `src/modes/handlers/` holds 37 files (the 35 handlers, `GenericModeHandler.ts` and `ModeHandler.ts`) |
+| Specialized mode handlers | 35 | src | `src/modes/index.ts` registers them; `src/modes/handlers/` holds 38 files (the 35 handlers, `GenericModeHandler.ts`, `ModeHandler.ts` and the helper `input-warnings.ts`) |
 | Mode validators | 35 files (34 mode validators and `meta.ts`) | src | `src/validation/validators/modes/` |
 | Visual exporters | 44 files (24 in `modes/`, 14 in `utils/`, 6 at the root) | src | `src/export/visual/` |
 | Fluent builder classes | 14 | src | `src/export/visual/utils/` |
 
-The whole-repo and `src`-only export counts (2,160 vs 1,188) are not a contradiction. They
-come from two tools and count different file sets: `repo-tools map` reads all 501 files, and
-`tools/create-dependency-graph` reads the 242 files of `src/`.
+The whole-repo and `src`-only export counts (2,162 vs 1,190) are not a contradiction. They
+come from two tools and count different file sets: `repo-tools map` reads all 507 files, and
+`tools/create-dependency-graph` reads the 243 files of `src/`.
 
 ## Project Structure
 
 ```
 deepthinking-mcp/
-├── src/                # 242 files, 118,990 LOC — the package
+├── src/                # 243 files, 119,551 LOC — the package
 │   ├── index.ts        # entry point, all 13 tool handlers
 │   ├── types/           # ThinkingMode enum, Thought union, per-mode types
 │   ├── modes/            # mode handlers, registry, combinations, stochastic
@@ -65,7 +65,7 @@ deepthinking-mcp/
 │   ├── config/            # environment-variable configuration
 │   ├── interfaces/       # DI interfaces
 │   └── utils/             # errors, logger, sanitization
-├── tests/               # 233 files, 102,677 LOC
+├── tests/               # 238 files, 103,674 LOC
 ├── tools/                # 15 files, 4,718 LOC — standalone CLI utilities
 ├── cli/                  # mcp-server-wrapper.mjs — launcher script for the Claude Code plugin
 ├── templates/mode-scaffolding/  # 5 copy-paste templates for authoring a new mode
@@ -143,12 +143,12 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 501 | repo-tools map (whole repository) |
-| totalLinesOfCode | 229231 | repo-tools map (whole repository) |
-| totalExports | 2160 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 507 | repo-tools map (whole repository) |
+| totalLinesOfCode | 230789 | repo-tools map (whole repository) |
+| totalExports | 2162 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
-| reachableFiles | 234 | repo-tools map (whole repository) |
+| reachableFiles | 235 | repo-tools map (whole repository) |
 | dormantFiles | 14 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
