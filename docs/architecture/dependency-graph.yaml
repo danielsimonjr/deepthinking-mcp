@@ -2,9 +2,9 @@ metadata:
   name: deepthinking-mcp
   version: 10.0.2
   lastUpdated: '2026-10-25'
-  totalFiles: 242
+  totalFiles: 243
   totalModules: 14
-  totalExports: 1188
+  totalExports: 1190
 entryPoints:
   - file: src/index.ts
     type: main
@@ -926,6 +926,7 @@ modules:
         - file: ../../../types/modes/engineering.js
           imports:
             - EngineeringThought
+            - TradeCriterion
           typeOnly: true
         - file: ../types.js
           imports:
@@ -4283,6 +4284,11 @@ modules:
           imports:
             - EngineeringThought
             - EngineeringAnalysisType
+            - TradeAlternative
+            - TradeCriterion
+            - TradeScore
+            - FailureMode
+            - DecisionAlternative
           typeOnly: true
         - file: ../../tools/thinking.js
           imports:
@@ -4297,6 +4303,10 @@ modules:
             - validationFailure
             - createValidationError
             - createValidationWarning
+        - file: ./input-warnings.js
+          imports:
+            - inputWarningsField
+            - unrecognisedValueWarning
       exports:
         - EngineeringHandler
       classes:
@@ -4577,6 +4587,17 @@ modules:
         - InductiveHandler
       classes:
         - InductiveHandler
+    src/modes/handlers/input-warnings.ts:
+      description: Input warnings
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies: []
+      exports:
+        - unrecognisedValueWarning
+        - inputWarningsField
+      functions:
+        - unrecognisedValueWarning
+        - inputWarningsField
     src/modes/handlers/MathematicsHandler.ts:
       description: MathematicsHandler - Phase 10 Sprint 3 (v8.4.0)
       externalDependencies: []
@@ -7059,7 +7080,8 @@ modules:
             - NameSchema
             - TextSchema
             - IdArraySchema
-            - boundedRecord
+            - TextArraySchema
+            - ConfidenceSchema
         - file: ../../../utils/sanitization.js
           imports:
             - MAX_LENGTHS
@@ -11095,6 +11117,7 @@ dependencyGraph:
         - src/modes/handlers/HistoricalHandler.ts
         - src/modes/handlers/HybridHandler.ts
         - src/modes/handlers/InductiveHandler.ts
+        - src/modes/handlers/input-warnings.ts
         - src/modes/handlers/MathematicsHandler.ts
         - src/modes/handlers/MetaReasoningHandler.ts
         - src/modes/handlers/ModalHandler.ts
@@ -11268,13 +11291,13 @@ dependencyGraph:
         - src/validation/validators/registry.ts
         - src/validation/validators/validation-utils.ts
 statistics:
-  totalTypeScriptFiles: 242
+  totalTypeScriptFiles: 243
   totalModules: 14
-  totalLinesOfCode: 119232
-  totalExports: 1188
+  totalLinesOfCode: 119794
+  totalExports: 1190
   totalClasses: 143
   totalInterfaces: 562
-  totalFunctions: 435
+  totalFunctions: 437
   totalTypeGuards: 87
   totalEnums: 3
   totalConstants: 135
@@ -11283,4 +11306,4 @@ statistics:
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 58
   unusedFilesCount: 12
-  unusedExportsCount: 491
+  unusedExportsCount: 486

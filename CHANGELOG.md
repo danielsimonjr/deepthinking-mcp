@@ -30,6 +30,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   changes in at least one mode of the tool. Its list `KNOWN_UNREACHED` names the 72 accepted fields
   that no mode stores, per tool. The test fails when a field joins or leaves the list without a
   change to the list.
+- **A thought can carry `inputWarnings`: one sentence for each request value that its handler
+  replaced or ignored.** `BaseThought.inputWarnings` is an optional list of strings. The field
+  exists only on a thought that has a sentence. `validateCommon()` reports each sentence in
+  `validation.issues` as a warning, so the client sees it in the answer to the add-thought call.
+  The field is stored with the thought. It appears in the `json` export and in a persisted session
+  file, and it is part of the validation cache key. The markdown, LaTeX, HTML, Jupyter, Mermaid,
+  DOT and ASCII exports print nothing about it. A session file that holds a thought with the field
+  loads again, and a file without the field loads as before. `src/modes/handlers/input-warnings.ts`
+  holds the two helpers `unrecognisedValueWarning` and `inputWarningsField`.
+  `EngineeringHandler` is the first handler that uses them.
+- **Tests hold the engineering contract.** `engineering-contract.test.ts` sends each declared field
+  through the real server over an in-memory transport and reads the answer that a client reads. It
+  covers the string and object forms of `tradeStudy.criteria`, the exact warning texts, the
+  validation cache in both orders, the removed fields, the export of sparse entries in every format
+  of the session tool, and the critical-mode rule of an FMEA.
+  `engineering-accepted-input.test.ts` exports string and sparse entries in all 11 visual formats.
+  `input-warnings.test.ts` (validation and handler helpers) and
+  `input-warnings-persistence.test.ts` (a session file round trip through `FileSessionStore`) pin
+  the new field.
 
 ### Changed
 
@@ -59,6 +78,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `MultiModeAnalysisRequest` lose the options that nothing read: `defaultTimeoutPerMode`,
   `minConfidenceThreshold` and `timeoutPerMode`. The package entry point does not export these
   types.
+- **`deepthinking_engineering` accepts the fields that `EngineeringHandler` reads (engineering mode
+  only).** Zod removes a key that its schema does not declare, so the handler never received
+  `analysisType`, `designChallenge`, `requirements`, `fmea`, `designDecisions`, `assessment`, or the
+  `alternatives`, `scores` and `recommendation` of `tradeStudy`. A client that sent `designChallenge`
+  was told that the thought must specify one, a trade study could never name a valid
+  recommendation, and an object in `tradeStudy.criteria` was rejected with "expected string,
+  received object". These calls now work. This is a client-visible change: fields that the server
+  refused or removed are now accepted and stored. The algorithmic and recursive modes keep their
+  schemas. Every member is optional except `requirements.coverage` (four integers, when given) and
+  `assessment` (four members). A value such as `source`, `priority`, `status` or `riskLevel` is a
+  bounded string and not an enum, so the handler can keep it as sent. `tradeStudy.criteria` takes a
+  string or an object. A string gives the result that it gave before (no weight message and a weight
+  sum of NaN), and a warning in `validation.issues` says that it has no weight. An unknown
+  `analysisType` keeps the default `comprehensive`, and a warning says so.
+- **Four engineering fields are no longer advertised, and the server still accepts and ignores
+  them:** `requirementId`, `fmeaEntry`, `tradeStudy.options` and `tradeStudy.weights`. No handler
+  read them. A call that sends them succeeds and gives the same answer as a call without them.
+  `tools/list` grows from 73,241 to 78,445 bytes of compact JSON (+5,204, or 7.1 percent).
+- **`EngineeringHandler` fills what the thought type requires.** An alternative or an object
+  criterion without an `id` gets a generated one, and a failure mode too. A missing `name`,
+  `description`, `rationale`, `component`, `failureMode`, `cause`, `effect` or `option` is an empty
+  string, a missing `weight` or `score` is 0, a missing rating is 1 (as the RPN always assumed),
+  and a missing `pros` or `cons` is an empty array. The stored ratings are the ones that the RPN
+  used.
+- **`TradeStudy.criteria` is typed `(TradeCriterion | string)[]`.** The exporters show a bare string
+  as the name of a criterion with weight 0. The HTML export printed `undefined` and `NaN%` for it,
+  and the Modelica export threw.
 
 ### Fixed
 
@@ -122,6 +168,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Node 22; the same run after the change (about 7.6 million acquisitions) recorded none. A bare race
   of a create against `rmdir`, with no lock code, returned `EINVAL` from `open` on Node 20 and on
   Node 22.
+- **An FMEA counted a failure mode as critical above `rpnThreshold`, and the validator and every
+  exporter count it at or above.** A mode at exactly the threshold (5 x 5 x 4 against the default
+  100) gave the warning "FMEA summary criticalModes does not match calculated count". The handler
+  now counts at or above. The `fmea` field was removed before the handler ran until this change, so
+  the mismatch could not show.
+- **Sparse engineering entries no longer break an export.** An alternative without a `name` made the
+  Mermaid, DOT and ASCII exports throw, and a failure mode without a `failureMode` made the HTML,
+  Mermaid, DOT and ASCII exports throw. The handler now fills the missing members (see Changed).
 
 ### Security
 

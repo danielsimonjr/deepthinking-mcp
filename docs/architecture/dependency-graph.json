@@ -3,9 +3,9 @@
     "name": "deepthinking-mcp",
     "version": "10.0.2",
     "lastUpdated": "2026-10-25",
-    "totalFiles": 242,
+    "totalFiles": 243,
     "totalModules": 14,
-    "totalExports": 1188
+    "totalExports": 1190
   },
   "entryPoints": [
     {
@@ -1319,7 +1319,8 @@
           {
             "file": "../../../types/modes/engineering.js",
             "imports": [
-              "EngineeringThought"
+              "EngineeringThought",
+              "TradeCriterion"
             ],
             "typeOnly": true
           },
@@ -6189,7 +6190,12 @@
             "file": "../../types/modes/engineering.js",
             "imports": [
               "EngineeringThought",
-              "EngineeringAnalysisType"
+              "EngineeringAnalysisType",
+              "TradeAlternative",
+              "TradeCriterion",
+              "TradeScore",
+              "FailureMode",
+              "DecisionAlternative"
             ],
             "typeOnly": true
           },
@@ -6210,6 +6216,13 @@
               "validationFailure",
               "createValidationError",
               "createValidationWarning"
+            ]
+          },
+          {
+            "file": "./input-warnings.js",
+            "imports": [
+              "inputWarningsField",
+              "unrecognisedValueWarning"
             ]
           }
         ],
@@ -6646,6 +6659,20 @@
         ],
         "classes": [
           "InductiveHandler"
+        ]
+      },
+      "src/modes/handlers/input-warnings.ts": {
+        "description": "Input warnings",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "unrecognisedValueWarning",
+          "inputWarningsField"
+        ],
+        "functions": [
+          "unrecognisedValueWarning",
+          "inputWarningsField"
         ]
       },
       "src/modes/handlers/MathematicsHandler.ts": {
@@ -10347,7 +10374,8 @@
               "NameSchema",
               "TextSchema",
               "IdArraySchema",
-              "boundedRecord"
+              "TextArraySchema",
+              "ConfidenceSchema"
             ]
           },
           {
@@ -16001,6 +16029,7 @@
           "src/modes/handlers/HistoricalHandler.ts",
           "src/modes/handlers/HybridHandler.ts",
           "src/modes/handlers/InductiveHandler.ts",
+          "src/modes/handlers/input-warnings.ts",
           "src/modes/handlers/MathematicsHandler.ts",
           "src/modes/handlers/MetaReasoningHandler.ts",
           "src/modes/handlers/ModalHandler.ts",
@@ -16202,13 +16231,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 242,
+    "totalTypeScriptFiles": 243,
     "totalModules": 14,
-    "totalLinesOfCode": 119232,
-    "totalExports": 1188,
+    "totalLinesOfCode": 119794,
+    "totalExports": 1190,
     "totalClasses": 143,
     "totalInterfaces": 562,
-    "totalFunctions": 435,
+    "totalFunctions": 437,
     "totalTypeGuards": 87,
     "totalEnums": 3,
     "totalConstants": 135,
@@ -16217,6 +16246,6 @@
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 58,
     "unusedFilesCount": 12,
-    "unusedExportsCount": 491
+    "unusedExportsCount": 486
   }
 }

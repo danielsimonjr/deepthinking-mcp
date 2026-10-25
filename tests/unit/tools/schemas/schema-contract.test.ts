@@ -161,18 +161,18 @@ describe('schema contract: engineering optional sub-fields', () => {
     const parsed = EngineeringSchema.parse({
       ...BASE,
       mode: 'engineering',
-      tradeStudy: { options: ['a', 'b'] },
+      tradeStudy: { recommendation: 'a' },
     });
-    expect(parsed.tradeStudy?.options).toEqual(['a', 'b']);
+    expect(parsed.tradeStudy?.recommendation).toBe('a');
   });
 
-  it('accepts a partial fmeaEntry, as advertised', () => {
+  it('accepts a partial fmea failure mode, as advertised', () => {
     const parsed = EngineeringSchema.parse({
       ...BASE,
       mode: 'engineering',
-      fmeaEntry: { failureMode: 'seal leak' },
+      fmea: { failureModes: [{ failureMode: 'seal leak' }] },
     });
-    expect(parsed.fmeaEntry?.failureMode).toBe('seal leak');
+    expect(parsed.fmea?.failureModes?.[0]?.failureMode).toBe('seal leak');
   });
 
   it('accepts a partial complexityAnalysis, as advertised', () => {
@@ -193,11 +193,11 @@ describe('schema contract: engineering optional sub-fields', () => {
     expect(parsed.correctnessProof?.invariant).toBe('sorted prefix');
   });
 
-  it('still enforces the documented bounds on fmeaEntry ratings', () => {
+  it('still enforces the documented bounds on fmea failure mode ratings', () => {
     const bad = EngineeringSchema.safeParse({
       ...BASE,
       mode: 'engineering',
-      fmeaEntry: { failureMode: 'seal leak', severity: 11 },
+      fmea: { failureModes: [{ failureMode: 'seal leak', severity: 11 }] },
     });
     expect(bad.success).toBe(false);
   });
@@ -376,7 +376,7 @@ describe('schema contract: guard introspection self-check', () => {
   it('resolves an optional object field to its shape', () => {
     const shape = objectShape(EngineeringSchema.shape.tradeStudy);
     expect(Object.keys(shape ?? {})).toEqual(
-      expect.arrayContaining(['options', 'criteria', 'weights'])
+      expect.arrayContaining(['alternatives', 'criteria', 'scores'])
     );
   });
 

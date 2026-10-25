@@ -817,4 +817,156 @@ describe('EngineeringHandler', () => {
       expect(finalEnhancements.metrics!.confidence).toBe(0.85);
     });
   });
+
+  const input = {
+    thought: 'Choose a bearing',
+    thoughtNumber: 1,
+    totalThoughts: 3,
+    nextThoughtNeeded: true,
+    mode: 'engineering',
+  };
+  const make = (extra: Record<string, unknown>) =>
+    handler.createThought({ ...input, ...extra } as ThinkingToolInput, 's') as unknown as Record<
+      string,
+      any
+    >;
+
+  describe('input warnings', () => {
+
+    it('an unknown analysisType keeps the default and records one sentence', () => {
+      const thought = make({ analysisType: 'bogus' });
+      expect(thought.analysisType).toBe('comprehensive');
+      expect(thought.inputWarnings).toEqual([
+        'Unknown analysisType "bogus"; using the default "comprehensive". Recognised values: requirements, trade-study, fmea, design-decision, comprehensive.',
+      ]);
+    });
+
+    it('a recognised analysisType records nothing, and the thought has no inputWarnings key', () => {
+      const thought = make({ analysisType: 'fmea' });
+      expect(thought.analysisType).toBe('fmea');
+      expect('inputWarnings' in thought).toBe(false);
+    });
+
+    it('an absent analysisType records nothing', () => {
+      expect('inputWarnings' in make({})).toBe(false);
+    });
+
+    it('repeats a long unknown value in shortened form', () => {
+      const thought = make({ analysisType: 'x'.repeat(100) });
+      expect(thought.inputWarnings[0]).toContain(`"${'x'.repeat(60)}..."`);
+      expect(thought.inputWarnings[0]).not.toContain('x'.repeat(61));
+    });
+
+    it('keeps string criteria as sent, and counts them in one sentence', () => {
+      const criteria = ['cost', { id: 'life', weight: 0.5 }];
+      const thought = make({ tradeStudy: { criteria } });
+      expect(thought.tradeStudy.criteria[0]).toBe('cost');
+      expect(thought.tradeStudy.criteria[1]).toMatchObject({
+        id: 'life',
+        weight: 0.5,
+      });
+      expect(thought.inputWarnings).toEqual([
+        'tradeStudy.criteria: 1 of 2 items are strings and have no weight; weight 0 is used for them. Send objects with id and weight.',
+      ]);
+    });
+
+    it('records nothing for criteria that are all objects', () => {
+      const thought = make({
+        tradeStudy: { criteria: [{ id: 'cost', weight: 1 }] },
+      });
+      expect('inputWarnings' in thought).toBe(false);
+    });
+
+    it('records both sentences when both apply, in a fixed order', () => {
+      const thought = make({ analysisType: 'bogus', tradeStudy: { criteria: ['cost'] } });
+      expect(thought.inputWarnings).toHaveLength(2);
+      expect(thought.inputWarnings[0]).toMatch(/^Unknown analysisType/);
+      expect(thought.inputWarnings[1]).toMatch(/^tradeStudy\.criteria:/);
+    });
+  });
+
+  describe('sparse entries', () => {
+    // Every field of an entry is optional on input; the stored thought must still
+    // satisfy its type, because the validator and the exporters read it unchecked.
+
+    it('fills name, description and a generated id for an alternative', () => {
+      const [alt] = make({ tradeStudy: { alternatives: [{}] } }).tradeStudy
+        .alternatives;
+      expect(alt.id).toMatch(/^ALT-[0-9a-f]{8}$/);
+      expect(alt.name).toBe('');
+      expect(alt.description).toBe('');
+    });
+
+    it('keeps what an alternative does send', () => {
+      const [alt] = make({
+        tradeStudy: {
+          alternatives: [{ id: 'a', name: 'A', description: 'd', pros: ['p'] }],
+        },
+      }).tradeStudy.alternatives;
+      expect(alt).toEqual({ id: 'a', name: 'A', description: 'd', pros: ['p'] });
+    });
+
+    it('fills id, name and weight 0 for an object criterion, and leaves a string alone', () => {
+      const criteria = make({
+        tradeStudy: { criteria: [{}, 'cost'] },
+      }).tradeStudy.criteria;
+      expect(criteria[0].id).toMatch(/^CRIT-[0-9a-f]{8}$/);
+      expect(criteria[0].name).toBe('');
+      expect(criteria[0].weight).toBe(0);
+      expect(criteria[1]).toBe('cost');
+    });
+
+    it('fills a score and weighs it with the generated criterion id', () => {
+      const [score] = make({ tradeStudy: { scores: [{}] } }).tradeStudy.scores;
+      expect(score).toEqual({
+        alternativeId: '',
+        criteriaId: '',
+        score: 0,
+        rationale: '',
+        weightedScore: 0,
+      });
+    });
+
+    it('fills a failure mode: text empty, ratings 1, and the RPN equals the stored ratings', () => {
+      const [fm] = make({ fmea: { failureModes: [{ severity: 9 }] } }).fmea
+        .failureModes;
+      expect(fm.id).toMatch(/^FM-[0-9a-f]{8}$/);
+      expect([fm.component, fm.failureMode, fm.cause, fm.effect]).toEqual([
+        '',
+        '',
+        '',
+        '',
+      ]);
+      expect([fm.severity, fm.occurrence, fm.detection]).toEqual([9, 1, 1]);
+      expect(fm.rpn).toBe(fm.severity * fm.occurrence * fm.detection);
+    });
+
+    it('counts a mode exactly at the threshold as critical', () => {
+      const fmea = make({
+        fmea: {
+          rpnThreshold: 100,
+          failureModes: [
+            { severity: 5, occurrence: 5, detection: 4 },
+            { severity: 5, occurrence: 5, detection: 3 },
+          ],
+        },
+      }).fmea;
+      expect(fmea.summary.criticalModes).toBe(1);
+    });
+
+    it('uses the default threshold of 100 when none is sent', () => {
+      const fmea = make({
+        fmea: { failureModes: [{ severity: 10, occurrence: 10, detection: 1 }] },
+      }).fmea;
+      expect(fmea.rpnThreshold).toBe(100);
+      expect(fmea.summary.criticalModes).toBe(1);
+    });
+
+    it('fills option, pros and cons of a decision alternative', () => {
+      const [alt] = make({
+        designDecisions: { decisions: [{ alternatives: [{}] }] },
+      }).designDecisions.decisions[0].alternatives;
+      expect(alt).toEqual({ option: '', pros: [], cons: [] });
+    });
+  });
 });

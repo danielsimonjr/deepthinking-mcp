@@ -70,6 +70,18 @@ export function validateCommon(thought: Thought): ValidationIssue[] {
     });
   }
 
+  // Sentences the mode handler recorded about request values it replaced or
+  // ignored (BaseThought.inputWarnings). Feedback only, like every issue here.
+  for (const sentence of thought.inputWarnings ?? []) {
+    issues.push({
+      severity: "warning",
+      thoughtNumber: thought.thoughtNumber,
+      description: sentence,
+      suggestion: "Send a value the mode recognises, or omit the field",
+      category: "structural",
+    });
+  }
+
   return issues;
 }
 

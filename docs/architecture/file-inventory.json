@@ -1,22 +1,22 @@
 {
   "summary": {
-    "totalFiles": 498,
+    "totalFiles": 504,
     "byArea": {
       "docs": {
         "files": 2,
         "loc": 1828
       },
       "src": {
-        "files": 242,
-        "loc": 119232
+        "files": 243,
+        "loc": 119794
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 233,
-        "loc": 102910
+        "files": 238,
+        "loc": 103921
       },
       "tools": {
         "files": 14,
@@ -29,10 +29,10 @@
     },
     "byDisposition": {
       "other": 2,
-      "reachable": 230,
+      "reachable": 231,
       "orphan": 12,
       "template": 5,
-      "test": 233,
+      "test": 238,
       "tool": 14,
       "config": 2
     }
@@ -143,7 +143,7 @@
     {
       "path": "src/export/visual/modes/engineering.ts",
       "area": "src",
-      "loc": 2131,
+      "loc": 2146,
       "disposition": "reachable"
     },
     {
@@ -515,7 +515,7 @@
     {
       "path": "src/modes/handlers/EngineeringHandler.ts",
       "area": "src",
-      "loc": 594,
+      "loc": 688,
       "disposition": "reachable"
     },
     {
@@ -648,6 +648,12 @@
       "path": "src/modes/handlers/TemporalHandler.ts",
       "area": "src",
       "loc": 262,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/input-warnings.ts",
+      "area": "src",
+      "loc": 59,
       "disposition": "reachable"
     },
     {
@@ -875,7 +881,7 @@
     {
       "path": "src/tools/json-schemas.ts",
       "area": "src",
-      "loc": 2595,
+      "loc": 2775,
       "disposition": "reachable"
     },
     {
@@ -929,7 +935,7 @@
     {
       "path": "src/tools/schemas/modes/engineering.ts",
       "area": "src",
-      "loc": 161,
+      "loc": 340,
       "disposition": "reachable"
     },
     {
@@ -983,7 +989,7 @@
     {
       "path": "src/types/core.ts",
       "area": "src",
-      "loc": 741,
+      "loc": 752,
       "disposition": "reachable"
     },
     {
@@ -1073,7 +1079,7 @@
     {
       "path": "src/types/modes/engineering.ts",
       "area": "src",
-      "loc": 396,
+      "loc": 399,
       "disposition": "reachable"
     },
     {
@@ -1361,7 +1367,7 @@
     {
       "path": "src/validation/validators/modes/engineering.ts",
       "area": "src",
-      "loc": 382,
+      "loc": 391,
       "disposition": "orphan"
     },
     {
@@ -1499,7 +1505,7 @@
     {
       "path": "src/validation/validators/validation-utils.ts",
       "area": "src",
-      "loc": 239,
+      "loc": 251,
       "disposition": "reachable"
     },
     {
@@ -1572,6 +1578,12 @@
       "path": "tests/integration/dist-bundle-validators.test.ts",
       "area": "tests",
       "loc": 191,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/engineering-contract.test.ts",
+      "area": "tests",
+      "loc": 461,
       "disposition": "test"
     },
     {
@@ -2087,7 +2099,7 @@
     {
       "path": "tests/unit/benchmarks/validation-performance.test.ts",
       "area": "tests",
-      "loc": 287,
+      "loc": 293,
       "disposition": "test"
     },
     {
@@ -2175,6 +2187,12 @@
       "disposition": "test"
     },
     {
+      "path": "tests/unit/export/visual/modes/engineering-accepted-input.test.ts",
+      "area": "tests",
+      "loc": 100,
+      "disposition": "test"
+    },
+    {
       "path": "tests/unit/export/visual/modes/snapshot-baseline.test.ts",
       "area": "tests",
       "loc": 1041,
@@ -2201,7 +2219,7 @@
     {
       "path": "tests/unit/file-lock.test.ts",
       "area": "tests",
-      "loc": 375,
+      "loc": 378,
       "disposition": "test"
     },
     {
@@ -2363,7 +2381,7 @@
     {
       "path": "tests/unit/modes/handlers/EngineeringHandler.test.ts",
       "area": "tests",
-      "loc": 821,
+      "loc": 973,
       "disposition": "test"
     },
     {
@@ -2496,6 +2514,12 @@
       "path": "tests/unit/modes/handlers/TemporalHandler.test.ts",
       "area": "tests",
       "loc": 661,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/input-warnings.test.ts",
+      "area": "tests",
+      "loc": 57,
       "disposition": "test"
     },
     {
@@ -2661,6 +2685,12 @@
       "disposition": "test"
     },
     {
+      "path": "tests/unit/session/input-warnings-persistence.test.ts",
+      "area": "tests",
+      "loc": 149,
+      "disposition": "test"
+    },
+    {
       "path": "tests/unit/session/proof-analysis-wiring.test.ts",
       "area": "tests",
       "loc": 209,
@@ -2741,7 +2771,7 @@
     {
       "path": "tests/unit/tools/schemas/field-reach.test.ts",
       "area": "tests",
-      "loc": 533,
+      "loc": 525,
       "disposition": "test"
     },
     {
@@ -2784,6 +2814,12 @@
       "path": "tests/unit/validation/cache-key.test.ts",
       "area": "tests",
       "loc": 106,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/validation/input-warnings.test.ts",
+      "area": "tests",
+      "loc": 91,
       "disposition": "test"
     },
     {
