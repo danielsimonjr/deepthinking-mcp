@@ -400,8 +400,8 @@ act on. The statements that a file has no direct test importer come from the imp
 `repo-tools map`. The tool counts come from the test bodies, and the exporter count comes from a
 directory listing.
 
-- **Real dispatch of `src/index.ts` covers 8 of the 13 tools.** Four test files import
-  `src/index.ts`. They call `deepthinking_core`, `_standard`, `_probabilistic`, `_strategic`,
+- **Real dispatch of `src/index.ts` covers 8 of the 13 tools.** Eight test files import
+  `src/index.ts`. Between them they call `deepthinking_core`, `_standard`, `_probabilistic`, `_strategic`,
   `_scientific`, `_engineering`, `_session`, `_analyze`, and the hidden legacy `deepthinking`
   tool. `deepthinking_mathematics`, `_temporal`, `_causal`, `_analytical`, and `_academic` never
   go through the `tools/call` handler in any test. Their handlers have tests through
@@ -409,7 +409,7 @@ directory listing.
   the dispatch code that is specific to one of those five tools has no test.
 - **`tests/integration/index-handlers.test.ts` tests a copy.** It does not import
   `src/index.ts`, so it cannot fail when a real handler changes. The tests of the real handlers
-  are the four files that import the module.
+  are the eight files that import the module.
 - **Mode validators: 14 covered deeply, all 35 covered by contract.** The 14 have dedicated unit
   tests. The remaining 21 are covered by `validator-contract.test.ts`, which asserts the shared
   contract: issues carry valid severities, a minimal valid thought of the mode never throws, and

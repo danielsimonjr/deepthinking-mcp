@@ -80,7 +80,7 @@ The tool `deepthinking_engineering` takes these fields in recursive mode. The ad
 
 A subproblem has `id`, `name`, `description`, `size` (a number or a string), `depth`, `parentId`, `status` and `result`. A base case has `id`, `condition`, `result` and `verified`.
 
-The tool does not accept `callStack` or `memoization`. The type `RecursiveThought` names both. The handler never sets them.
+No schema declares `callStack` or `memoization`, so the server removes both from a request. The type `RecursiveThought` names both. The handler never sets them.
 
 ### Recurrence
 

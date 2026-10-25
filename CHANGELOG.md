@@ -203,9 +203,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and `correctnessProof` of the nested `algorithm` object are still removed, because the thought has
   its own top-level fields for them. `clrsCategory` and `clrsAlgorithm` are stored as sent, with no
   warning.
-- **`deepthinking_engineering` accepts the fields that `RecursiveHandler` reads and says what it
-  does with each value (recursive mode only).** The nine fields were already declared. The handler
-  now keeps to them:
+- **`RecursiveHandler` stores what the client sent and says what it replaced, kept or ignored
+  (recursive mode only).** The Zod schema of `deepthinking_engineering` already declared the nine
+  fields that the handler reads. The handler now keeps to them:
   - **Two more thought types are accepted.** `recursive_case_definition` and
     `recurrence_formulation` are in `RecursiveThought` and in `docs/modes/RECURSIVE.md`, and the
     handler replaced both with `problem_decomposition`. It now stores both as sent, with guidance
@@ -224,7 +224,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     `recurrence.id`, `solutionMethod`, `solution`, `solutionProof` and `recursionTree` are not stored,
     because recursive mode does not read them (algorithmic mode does), and one sentence names each
     of them that the request sent. `memoization` and `backtracking` are not strategies of the
-    handler. `docs/modes/RECURSIVE.md` listed both.
+    handler. `docs/modes/RECURSIVE.md` listed both. Each sentence is a warning issue, so it also
+    lowers `validation.confidence` in the answer.
   - **Code.** The handler reads its input through a type that the Zod schema derives
     (`EngineeringInput`), in place of `any`. `ignoredMembersWarning` joins the helpers of
     `input-warnings.ts`.
