@@ -44,6 +44,25 @@ export function unrecognisedValueWarning(
 }
 
 /**
+ * Describe a vocabulary value that the handler does not recognise and does not
+ * store: the thought has no such field, and the sentence is the only trace.
+ *
+ * @param field - Name of the request field, as the client sends it
+ * @param value - The value the client sent
+ * @param recognised - The values the handler recognises
+ * @returns One sentence, or `undefined` when the field is absent, empty or recognised
+ */
+export function droppedValueWarning(
+  field: string,
+  value: unknown,
+  recognised: readonly string[],
+): string | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value === "string" && recognised.includes(value)) return undefined;
+  return `Unknown ${field} ${echo(value)}; it is not stored. Recognised values: ${recognised.join(", ")}.`;
+}
+
+/**
  * Make the `inputWarnings` property of a thought.
  *
  * @param sentences - The sentences a handler collected; entries that are `undefined` are skipped

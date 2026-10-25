@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 504,
+    "totalFiles": 506,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 243,
-        "loc": 119794
+        "loc": 120748
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 238,
-        "loc": 103921
+        "files": 240,
+        "loc": 105014
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 231,
       "orphan": 12,
       "template": 5,
-      "test": 238,
+      "test": 240,
       "tool": 14,
       "config": 2
     }
@@ -437,7 +437,7 @@
     {
       "path": "src/modes/handlers/AlgorithmicHandler.ts",
       "area": "src",
-      "loc": 728,
+      "loc": 1200,
       "disposition": "reachable"
     },
     {
@@ -653,7 +653,7 @@
     {
       "path": "src/modes/handlers/input-warnings.ts",
       "area": "src",
-      "loc": 59,
+      "loc": 78,
       "disposition": "reachable"
     },
     {
@@ -881,7 +881,7 @@
     {
       "path": "src/tools/json-schemas.ts",
       "area": "src",
-      "loc": 2775,
+      "loc": 2844,
       "disposition": "reachable"
     },
     {
@@ -935,7 +935,7 @@
     {
       "path": "src/tools/schemas/modes/engineering.ts",
       "area": "src",
-      "loc": 340,
+      "loc": 720,
       "disposition": "reachable"
     },
     {
@@ -1007,7 +1007,7 @@
     {
       "path": "src/types/modes/algorithmic.ts",
       "area": "src",
-      "loc": 795,
+      "loc": 809,
       "disposition": "reachable"
     },
     {
@@ -1572,6 +1572,12 @@
       "path": "tests/edge-cases/type-validation.test.ts",
       "area": "tests",
       "loc": 211,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/integration/algorithmic-contract.test.ts",
+      "area": "tests",
+      "loc": 710,
       "disposition": "test"
     },
     {
@@ -2303,7 +2309,7 @@
     {
       "path": "tests/unit/modes/handlers/AlgorithmicHandler.test.ts",
       "area": "tests",
-      "loc": 954,
+      "loc": 1118,
       "disposition": "test"
     },
     {
@@ -2519,7 +2525,7 @@
     {
       "path": "tests/unit/modes/handlers/input-warnings.test.ts",
       "area": "tests",
-      "loc": 57,
+      "loc": 80,
       "disposition": "test"
     },
     {
@@ -2745,9 +2751,15 @@
       "disposition": "test"
     },
     {
+      "path": "tests/unit/tools/schemas/advertised-omissions.ts",
+      "area": "tests",
+      "loc": 69,
+      "disposition": "test"
+    },
+    {
       "path": "tests/unit/tools/schemas/advertised-schema-conformance.test.ts",
       "area": "tests",
-      "loc": 208,
+      "loc": 298,
       "disposition": "test"
     },
     {
@@ -2765,19 +2777,19 @@
     {
       "path": "tests/unit/tools/schemas/bounds.test.ts",
       "area": "tests",
-      "loc": 504,
+      "loc": 539,
       "disposition": "test"
     },
     {
       "path": "tests/unit/tools/schemas/field-reach.test.ts",
       "area": "tests",
-      "loc": 525,
+      "loc": 516,
       "disposition": "test"
     },
     {
       "path": "tests/unit/tools/schemas/schema-contract.test.ts",
       "area": "tests",
-      "loc": 412,
+      "loc": 423,
       "disposition": "test"
     },
     {

@@ -318,10 +318,12 @@ that is never registered — the registry constructs it on demand as the fallbac
 string with no registered handler. That path is unreachable for a `ThinkingMode` member, because
 all 35 non-generic modes are registered at startup. `ThinkingMode.CUSTOM` (handled by `CustomHandler`) is
 one of the 35 registered modes, not a separate case. The 38th file, `input-warnings.ts`, is a helper
-module and not a handler. It exports `unrecognisedValueWarning(field, value, recognised, fallback?)`
-and `inputWarningsField(sentences)`. A handler uses them to record a request value that it replaced
-or ignored in the `inputWarnings` field of the thought. `EngineeringHandler` is the first handler
-that does this.
+module and not a handler. It exports `unrecognisedValueWarning(field, value, recognised, fallback?)`,
+`droppedValueWarning(field, value, recognised)` and `inputWarningsField(sentences)`.
+A handler uses them to record a request value that it replaced or ignored in the `inputWarnings`
+field of the thought. `unrecognisedValueWarning` is for a value that the handler keeps or replaces.
+`droppedValueWarning` is for a value that the handler does not store. `EngineeringHandler` and
+`AlgorithmicHandler` use them.
 
 ### ModeHandler (`src/modes/handlers/ModeHandler.ts`)
 
@@ -610,13 +612,15 @@ export class AlgorithmicHandler implements ModeHandler {
   getEnhancements(thought: AlgorithmicThought): ModeEnhancements
   supportsThoughtType(thoughtType: string): boolean
 
-  private normalizeTimeComplexity(tc: any): TimeComplexity
-  private normalizeSpaceComplexity(sc: any): SpaceComplexity
-  private normalizeCorrectnessProof(proof: any): CorrectnessProof
-  private normalizeDPFormulation(dp: any): DPFormulation
-  private normalizeGreedyProof(proof: any): GreedyProof
-  private validateDPFormulation(dp: any): any[]
-  private validateCorrectnessProof(proof: any): any[]
+  private resolveThoughtType(inputType: string | undefined): AlgorithmicThoughtType
+  private resolveDesignPattern(value: unknown, notes: (string | undefined)[]): DesignPattern | undefined
+  private normalizeTimeComplexity(tc: Sent<"timeComplexity">): TimeComplexity
+  private normalizeSpaceComplexity(sc: Sent<"spaceComplexity">): SpaceComplexity
+  private normalizeCorrectnessProof(proof: Sent<"correctnessProof">, vocabulary: Vocabulary): CorrectnessProof
+  private normalizeDPFormulation(dp: Sent<"dpFormulation">, vocabulary: Vocabulary): DPFormulation
+  private normalizeGreedyProof(proof: Sent<"greedyProof">): GreedyProof
+  private validateDPFormulation(dp: Sent<"dpFormulation">): ReturnType<typeof createValidationWarning>[]
+  private validateCorrectnessProof(proof: Sent<"correctnessProof">): ReturnType<typeof createValidationWarning>[]
 }
 ```
 
@@ -625,10 +629,16 @@ Not one algorithm but three formal-formulation shapes lifted from *Introduction 
 termination argument with a decreasing quantity and lower bound), a `DPFormulation` (optimal
 substructure characterization, recursive definition, computation order, reconstruction method,
 complexity), and a `GreedyProof` (greedy-choice property plus optimal-substructure proof, with an
-optional exchange argument or matroid justification). `createThought()` calls the `normalize*`
-methods, which fill structurally required sub-fields with safe defaults when a caller supplies a
-partial object. `validate()` calls `validateDPFormulation` and `validateCorrectnessProof` on the
-raw caller input, not on the normalized structure. They return field-level warnings.
+optional exchange argument or matroid justification). `Sent<K>` is the type that the Zod schema of
+`deepthinking_engineering` gives to the request field `K`. Each normaliser reads a typed request,
+and none reads `any`. `createThought()` calls the `normalize*` methods. A caller can leave out a
+member that the thought type requires. The method then gives it an empty string, an empty list,
+`false` or a generated identifier. It writes no complexity case that the caller did not send. A member with a fixed vocabulary takes the first value of its list when absent, and an
+unrecognised value is kept as sent. A design pattern in the hyphen spelling is read as the
+underscore value. An unknown design pattern is not stored. Each replacement and each ignored value
+adds one sentence to the `inputWarnings` field of the thought. `validate()` calls
+`validateDPFormulation` and `validateCorrectnessProof` on the raw caller input, not on the
+normalized structure. They return field-level warnings.
 
 #### MetaReasoningHandler — strategy recommendation
 
@@ -2697,9 +2707,9 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 507 | repo-tools map (whole repository) |
-| totalLinesOfCode | 230798 | repo-tools map (whole repository) |
-| totalExports | 2162 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 509 | repo-tools map (whole repository) |
+| totalLinesOfCode | 232843 | repo-tools map (whole repository) |
+| totalExports | 2169 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | reachableFiles | 235 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |

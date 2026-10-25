@@ -10,7 +10,7 @@
 ## Summary
 
 - **Potentially unused files**: 12
-- **Potentially unused exports**: 486
+- **Potentially unused exports**: 479
 
 ## Potentially Unused Files
 
@@ -365,10 +365,6 @@ These exports are not imported by any other file in the codebase:
 - `CoreModeInput` (type)
 - `CoreInput` (type)
 
-### `src/tools/schemas/modes/engineering.ts`
-
-- `EngineeringInput` (type)
-
 ### `src/tools/schemas/modes/mathematics.ts`
 
 - `MathInput` (type)
@@ -435,13 +431,7 @@ These exports are not imported by any other file in the codebase:
 - `isAlgorithmicThought` (function)
 - `suggestDesignPattern` (function)
 - `applyMasterTheorem` (function)
-- `LoopInvariant` (interface)
-- `Recurrence` (interface)
 - `AlgorithmSpec` (interface)
-- `GraphAlgorithmContext` (interface)
-- `DataStructureSpec` (interface)
-- `AmortizedAnalysis` (interface)
-- `AlgorithmComparison` (interface)
 - `ComplexityClass` (type)
 - `CLRSCategory` (type)
 - `CLRSAlgorithm` (type)

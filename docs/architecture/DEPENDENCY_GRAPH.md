@@ -1246,9 +1246,11 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../types/core.js` | `ThinkingMode` | Import |
-| `../../types/modes/algorithmic.js` | `AlgorithmicThought, AlgorithmicThoughtType, DesignPattern, TimeComplexity, SpaceComplexity, CorrectnessProof, DPFormulation, GreedyProof` | Import (type-only) |
+| `../../types/modes/algorithmic.js` | `AlgorithmDescription, AlgorithmicThought, AlgorithmicThoughtType, AlgorithmComparison, AmortizedAnalysis, CorrectnessProof, DataStructureSpec, DesignPattern, DPFormulation, GraphAlgorithmContext, GreedyProof, LoopInvariant, Recurrence, SpaceComplexity, TimeComplexity` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `../../tools/schemas/modes/engineering.js` | `EngineeringInput` | Import (type-only) |
 | `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./input-warnings.js` | `droppedValueWarning, inputWarningsField, unrecognisedValueWarning` | Import |
 
 **Exports:**
 - Classes: `AlgorithmicHandler`
@@ -1682,7 +1684,7 @@ The codebase is organized into the following modules:
 ### `src/modes/handlers/input-warnings.ts` - Input warnings
 
 **Exports:**
-- Functions: `unrecognisedValueWarning`, `inputWarningsField`
+- Functions: `unrecognisedValueWarning`, `droppedValueWarning`, `inputWarningsField`
 
 ---
 
@@ -2787,7 +2789,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../base.js` | `BaseThoughtSchema` | Import |
-| `../shared.js` | `IdSchema, NameSchema, TextSchema, IdArraySchema, TextArraySchema, ConfidenceSchema` | Import |
+| `../shared.js` | `IdSchema, NameSchema, TextSchema, IdArraySchema, TextArraySchema, ConfidenceSchema, boundedRecord` | Import |
 | `../../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
@@ -4475,15 +4477,15 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 243 |
 | Total Modules | 14 |
-| Total Lines of Code | 119794 |
-| Total Exports | 1190 |
+| Total Lines of Code | 120748 |
+| Total Exports | 1191 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
 | Total Interfaces | 562 |
-| Total Functions | 437 |
+| Total Functions | 438 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
-| Type-only Imports | 333 |
+| Type-only Imports | 334 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 58 |
 

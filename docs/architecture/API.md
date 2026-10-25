@@ -1032,21 +1032,29 @@ Carries all [shared thought fields](#shared-thought-fields) plus:
 | `fmea` | object | No | engineering | `{ title?, system?, failureModes?: object[], rpnThreshold?: number }`. A failure mode is `{ id?, component?, function?, failureMode?, cause?, effect?, systemEffect?, severity?, occurrence?, detection?: integer 1–10, currentControls?, mitigation?, responsible?, targetDate?, mitigationStatus? }`. The handler computes `rpn` (severity × occurrence × detection, each rating 1 when absent) and the `summary`, and it ignores a client value for either. `rpnThreshold` is 100 when absent. A failure mode is critical when its `rpn` is at or above `rpnThreshold`. The handler gives an omitted `id` a generated value and an omitted `component`, `failureMode`, `cause` or `effect` an empty string. The array holds ≤ 500 items. |
 | `designDecisions` | object | No | engineering | `{ decisions?: object[], projectName? }`. A decision is `{ id?, title?, date?, status?, context?, decision?, alternatives?: object[], rationale?, consequences?: string[], supersededBy?, relatedDecisions?: string[], stakeholders?: string[] }`. An alternative is `{ option?, description?, pros?: string[], cons?: string[] }`. The handler gives an omitted `option` an empty string and an omitted `pros` or `cons` an empty array. Each array of objects holds ≤ 500 items. |
 | `assessment` | object | No | engineering | `{ confidence: number 0–1, keyRisks: string[], nextSteps: string[], openIssues: string[] }`. All four members are required. |
-| `algorithmName` | string | No | algorithmic | Name of the algorithm being analyzed. `NameSchema` (≤ 500 chars). |
-| `designPattern` | string | No | algorithmic | One of `divide-and-conquer`, `dynamic-programming`, `greedy`, `backtracking`, `branch-and-bound`, `randomized`, `approximation`. |
-| `complexityAnalysis` | object | No | algorithmic | `{ timeComplexity?: string, spaceComplexity?, bestCase?, averageCase?, worstCase? }`, e.g. `"O(n log n)"`. All members are optional and use `IdSchema`. |
-| `correctnessProof` | object | No | algorithmic | `{ invariant?: string, termination?: string, correctness?: string }` — loop invariant, termination argument, correctness proof. All members are optional and use `TextSchema`. |
-| `thoughtType` | string | No | all | Step label, `IdSchema`. The server accepts any value and gives a warning, not an error, for an unknown one. The advertised values for `recursive` are `problem_decomposition`, `base_case_identification`, `recursive_step`, `subproblem_solution`, `solution_combination` and `termination_analysis`. |
+| `designPattern` | string | No | algorithmic | One of `brute_force`, `divide_and_conquer`, `dynamic_programming`, `greedy`, `backtracking`, `branch_and_bound`, `randomized`, `approximation`, `online`, `parallel`, `incremental` or `prune_and_search`. `IdSchema`. A known value with hyphens, such as `divide-and-conquer`, is read as the underscore value, stored with underscores, and reported in one warning. An unknown value is not stored, and one warning lists the 12 values. |
+| `algorithm` | object | No | algorithmic | `{ id?, name?, description?, category?, pseudocode?, input?, output?, practical?, alternatives?, advantages?, disadvantages?, clrsReference? }`. The tool lists `name`, `description` and `category`. The members `designPattern`, `timeComplexity`, `spaceComplexity` and `correctnessProof` are top-level fields. |
+| `clrsCategory`, `clrsAlgorithm` | string | No | algorithmic | The CLRS classification. `IdSchema`. The handler stores the value as sent. |
+| `pseudocode`, `keyInsight` | string | No | algorithmic | `TextSchema`. |
+| `timeComplexity` | object | No | algorithmic | `{ bestCase?, averageCase?, worstCase?, amortized?, recurrence?, closedForm?, masterTheorem?: { a?, b?, f?, case?: integer 1–3 }, inputSensitive?: { parameter?, complexity? } }`, e.g. `"O(n log n)"`. All members are optional. |
+| `spaceComplexity` | object | No | algorithmic | `{ auxiliary?, total?, inPlace?: boolean, stackDepth?, cacheEfficiency?: { cacheOblivious?: boolean, cacheComplexity? } }`. All members are optional. |
+| `correctnessProof` | object | No | algorithmic | `{ id?, algorithm?, method?, preconditions?: string[], postconditions?: string[], invariants?: object[], inductionBase?, inductionStep?, terminationArgument?: { decreasingQuantity?, lowerBound?, proof? }, proofSteps?: string[], keyInsights?: string[] }`. The tool does not list `invariants`. An absent `method` is `loop_invariant`. |
+| `loopInvariants` | object[] | No | algorithmic | Each: `{ id?, description?, initialization?, maintenance?, termination?, loopVariable?, loopBounds? }`. The tool does not list this field. Array ≤ 500 items. |
+| `dpFormulation`, `greedyProof`, `graphContext`, `dataStructure`, `amortizedAnalysis`, `comparison`, `executionTrace` | object | No | algorithmic | The tool does not list these fields, and the server accepts them. The members are in [Algorithmic mode](../modes/ALGORITHMIC.md). |
+| `thoughtType` | string | No | all | Step label, `IdSchema`. The server accepts any value and gives a warning, not an error, for an unknown one. The advertised values for `algorithmic` are the 26 thought types in [Algorithmic mode](../modes/ALGORITHMIC.md); an unknown value gives `algorithm_definition`. The advertised values for `recursive` are `problem_decomposition`, `base_case_identification`, `recursive_step`, `subproblem_solution`, `solution_combination` and `termination_analysis`. |
 | `subproblems` | object[] | No | recursive | Each: `{ id?, name?, description?, size?: string \| number, depth?: integer ≥ 0, parentId?, status?, result? }`. Array ≤ 500 items. |
 | `baseCases` | object[] | No | recursive | Each: `{ id?, condition?, result?, verified?: boolean }`. Array ≤ 500 items. |
 | `baseCaseReached` | boolean | No | recursive | Whether the recursion reached a base case. |
 | `currentDepth`, `maxDepth` | integer | No | recursive | Recursion depth now, and the depth limit. Minimum 0. |
-| `recurrence` | object | No | recursive | `{ formula?, baseCase?, closedForm?, complexity? }`. |
-| `strategy` | string | No | recursive | Decomposition strategy, `IdSchema`. The handler recognizes `divide_and_conquer`, `decrease_and_conquer`, `transform_and_conquer` and `dynamic_programming`. These values use underscores, and `designPattern` uses hyphens. |
+| `recurrence` | object | No | recursive, algorithmic | `{ id?, formula?, baseCase?, closedForm?, complexity?, solutionMethod?, solution?, solutionProof?, recursionTree?: { levelWork?, levels?, totalWork? } }`. Both modes use this one object. Recursive mode reads `formula`, `baseCase`, `closedForm` and `complexity`, and it ignores the other members. |
+| `strategy` | string | No | recursive | Decomposition strategy, `IdSchema`. The handler recognizes `divide_and_conquer`, `decrease_and_conquer`, `transform_and_conquer` and `dynamic_programming`. |
 | `divisionFactor` | number | No | recursive | Factor by which each step divides the problem. |
 
-The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
-outside this list and returns no error.
+The advertised JSON Schema of this tool has no `additionalProperties: false` at three levels: the
+tool top level, `algorithm` and `correctnessProof`. The tool accepts fields that it does not list.
+A client that checks a request against the advertised schema would reject them if the key were
+present. The description of the tool names those fields. The server ignores a field outside this
+list and returns no error.
 
 ### Returns
 
@@ -1097,13 +1105,19 @@ The [standard add-thought response](#response-shape-for-add-thought-tools).
     "thoughtNumber": 1,
     "totalThoughts": 1,
     "nextThoughtNeeded": false,
-    "algorithmName": "Closest Pair of Points",
-    "designPattern": "divide-and-conquer",
-    "complexityAnalysis": { "timeComplexity": "O(n log n)", "spaceComplexity": "O(n)" },
+    "thoughtType": "algorithm_definition",
+    "algorithm": { "name": "Closest Pair of Points", "category": "Geometry" },
+    "designPattern": "divide_and_conquer",
+    "timeComplexity": { "worstCase": "O(n log n)", "recurrence": "T(n) = 2T(n/2) + O(n)" },
+    "spaceComplexity": { "auxiliary": "O(n)" },
     "correctnessProof": {
-      "invariant": "The strip check only needs to compare points within delta of the dividing line",
-      "termination": "Recursion terminates when the point set has 3 or fewer points",
-      "correctness": "Any closer pair must lie within delta of the dividing line by the pigeonhole argument"
+      "method": "induction",
+      "terminationArgument": {
+        "decreasingQuantity": "number of points in the set",
+        "lowerBound": "3",
+        "proof": "Recursion terminates when the point set has 3 or fewer points"
+      },
+      "keyInsights": ["A closer pair must lie within delta of the dividing line"]
     }
   }
 }
@@ -1698,4 +1712,4 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 507 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 509 | repo-tools map (whole repository) |

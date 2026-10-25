@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-25",
     "totalFiles": 243,
     "totalModules": 14,
-    "totalExports": 1190
+    "totalExports": 1191
   },
   "entryPoints": [
     {
@@ -5419,14 +5419,21 @@
           {
             "file": "../../types/modes/algorithmic.js",
             "imports": [
+              "AlgorithmDescription",
               "AlgorithmicThought",
               "AlgorithmicThoughtType",
-              "DesignPattern",
-              "TimeComplexity",
-              "SpaceComplexity",
+              "AlgorithmComparison",
+              "AmortizedAnalysis",
               "CorrectnessProof",
+              "DataStructureSpec",
+              "DesignPattern",
               "DPFormulation",
-              "GreedyProof"
+              "GraphAlgorithmContext",
+              "GreedyProof",
+              "LoopInvariant",
+              "Recurrence",
+              "SpaceComplexity",
+              "TimeComplexity"
             ],
             "typeOnly": true
           },
@@ -5434,6 +5441,13 @@
             "file": "../../tools/thinking.js",
             "imports": [
               "ThinkingToolInput"
+            ],
+            "typeOnly": true
+          },
+          {
+            "file": "../../tools/schemas/modes/engineering.js",
+            "imports": [
+              "EngineeringInput"
             ],
             "typeOnly": true
           },
@@ -5447,6 +5461,14 @@
               "validationFailure",
               "createValidationError",
               "createValidationWarning"
+            ]
+          },
+          {
+            "file": "./input-warnings.js",
+            "imports": [
+              "droppedValueWarning",
+              "inputWarningsField",
+              "unrecognisedValueWarning"
             ]
           }
         ],
@@ -6668,10 +6690,12 @@
         "internalDependencies": [],
         "exports": [
           "unrecognisedValueWarning",
+          "droppedValueWarning",
           "inputWarningsField"
         ],
         "functions": [
           "unrecognisedValueWarning",
+          "droppedValueWarning",
           "inputWarningsField"
         ]
       },
@@ -10375,7 +10399,8 @@
               "TextSchema",
               "IdArraySchema",
               "TextArraySchema",
-              "ConfidenceSchema"
+              "ConfidenceSchema",
+              "boundedRecord"
             ]
           },
           {
@@ -16233,19 +16258,19 @@
   "statistics": {
     "totalTypeScriptFiles": 243,
     "totalModules": 14,
-    "totalLinesOfCode": 119794,
-    "totalExports": 1190,
+    "totalLinesOfCode": 120748,
+    "totalExports": 1191,
     "totalClasses": 143,
     "totalInterfaces": 562,
-    "totalFunctions": 437,
+    "totalFunctions": 438,
     "totalTypeGuards": 87,
     "totalEnums": 3,
     "totalConstants": 135,
     "totalReExports": 487,
-    "totalTypeOnlyImports": 333,
+    "totalTypeOnlyImports": 334,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 58,
     "unusedFilesCount": 12,
-    "unusedExportsCount": 486
+    "unusedExportsCount": 479
   }
 }

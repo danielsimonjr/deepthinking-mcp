@@ -100,17 +100,17 @@ export interface TimeComplexity {
   recurrence?: string; // T(n) = 2T(n/2) + O(n)
   closedForm?: string; // Closed-form solution
   masterTheorem?: {
-    // Master theorem application
-    a: number; // Number of subproblems
-    b: number; // Factor by which n is divided
-    f: string; // f(n) term
-    case: 1 | 2 | 3; // Which case applies
+    // Master theorem application; the handler keeps the block as sent
+    a?: number; // Number of subproblems
+    b?: number; // Factor by which n is divided
+    f?: string; // f(n) term
+    case?: 1 | 2 | 3; // Which case applies
   };
 
-  // For input-sensitive analysis
+  // For input-sensitive analysis; the handler keeps the block as sent
   inputSensitive?: {
-    parameter: string; // e.g., "number of inversions"
-    complexity: string; // e.g., "O(n + k)"
+    parameter?: string; // e.g., "number of inversions"
+    complexity?: string; // e.g., "O(n + k)"
   };
 }
 
@@ -125,9 +125,9 @@ export interface SpaceComplexity {
   // Stack space for recursive algorithms
   stackDepth?: string; // Maximum recursion depth
 
-  // For cache analysis
+  // For cache analysis; the handler keeps the block as sent
   cacheEfficiency?: {
-    cacheOblivious: boolean;
+    cacheOblivious?: boolean;
     cacheComplexity?: string; // e.g., O(n/B)
   };
 }
@@ -217,6 +217,10 @@ export interface Recurrence {
     levels: string; // Number of levels
     totalWork: string; // Sum of all levels
   };
+
+  // Members of the recurrence that recursive mode reads; both modes share one shape
+  closedForm?: string; // Closed-form solution
+  complexity?: string; // e.g., O(n log n)
 }
 
 /**
@@ -252,13 +256,13 @@ export interface AlgorithmSpec {
   // Correctness
   correctnessProof?: CorrectnessProof;
 
-  // Practical considerations
+  // Practical considerations; the handler keeps the block as sent
   practical?: {
-    cacheEfficient: boolean;
-    parallelizable: boolean;
+    cacheEfficient?: boolean;
+    parallelizable?: boolean;
     stable?: boolean; // For sorting
     online?: boolean; // Can process streaming input
-    deterministic: boolean;
+    deterministic?: boolean;
     adaptive?: boolean; // Adapts to input characteristics
   };
 
@@ -267,13 +271,23 @@ export interface AlgorithmSpec {
   advantages?: string[];
   disadvantages?: string[];
 
-  // CLRS reference
+  // CLRS reference; the handler keeps the block as sent
   clrsReference?: {
-    chapter: number;
+    chapter?: number;
     section?: number;
     page?: number;
   };
 }
+
+/**
+ * The algorithm a thought describes: an `AlgorithmSpec` without the four members
+ * that a thought carries as its own fields (`designPattern`, `timeComplexity`,
+ * `spaceComplexity`, `correctnessProof`), which the handler resolves once.
+ */
+export type AlgorithmDescription = Omit<
+  AlgorithmSpec,
+  "designPattern" | "timeComplexity" | "spaceComplexity" | "correctnessProof"
+>;
 
 /**
  * Dynamic programming formulation
@@ -636,7 +650,7 @@ export interface AlgorithmicThought extends BaseThought {
   thoughtType: AlgorithmicThoughtType;
 
   // Current algorithm being analyzed
-  algorithm?: AlgorithmSpec;
+  algorithm?: AlgorithmDescription;
 
   // CLRS categorization
   clrsCategory?: CLRSCategory;

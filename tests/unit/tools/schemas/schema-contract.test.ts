@@ -21,6 +21,7 @@ import { AcademicSchema } from '../../../../src/tools/schemas/modes/academic.js'
 import { CausalSchema } from '../../../../src/tools/schemas/modes/causal.js';
 import { EngineeringSchema } from '../../../../src/tools/schemas/modes/engineering.js';
 import { ProbabilisticSchema } from '../../../../src/tools/schemas/modes/probabilistic.js';
+import { omittedPaths } from './advertised-omissions.js';
 
 // ---------------------------------------------------------------------------
 // Zod introspection helpers
@@ -175,22 +176,22 @@ describe('schema contract: engineering optional sub-fields', () => {
     expect(parsed.fmea?.failureModes?.[0]?.failureMode).toBe('seal leak');
   });
 
-  it('accepts a partial complexityAnalysis, as advertised', () => {
+  it('accepts a partial timeComplexity, as advertised', () => {
     const parsed = EngineeringSchema.parse({
       ...BASE,
       mode: 'algorithmic',
-      complexityAnalysis: { spaceComplexity: 'O(n)' },
+      timeComplexity: { worstCase: 'O(n)' },
     });
-    expect(parsed.complexityAnalysis?.spaceComplexity).toBe('O(n)');
+    expect(parsed.timeComplexity?.worstCase).toBe('O(n)');
   });
 
   it('accepts a partial correctnessProof, as advertised', () => {
     const parsed = EngineeringSchema.parse({
       ...BASE,
       mode: 'algorithmic',
-      correctnessProof: { invariant: 'sorted prefix' },
+      correctnessProof: { method: 'induction' },
     });
-    expect(parsed.correctnessProof?.invariant).toBe('sorted prefix');
+    expect(parsed.correctnessProof?.method).toBe('induction');
   });
 
   it('still enforces the documented bounds on fmea failure mode ratings', () => {
@@ -289,13 +290,23 @@ describe('schema contract: divergence guard', () => {
     expect(drift, 'advertised in tools/list but stripped by Zod').toEqual([]);
   });
 
-  /** Enforced but unadvertised => undiscoverable to any client reading tools/list. */
+  /**
+   * Enforced but unadvertised => undiscoverable to any client reading tools/list.
+   * The one allowed exception is a field that the tool size cap keeps out of the
+   * advertisement: it is pinned in `advertised-omissions.ts`, and the tool
+   * description names it.
+   */
   it('accepts no property that it fails to advertise', () => {
     const drift: string[] = [];
     for (const { name, advertised, zodShape } of TOOL_PAIRS) {
       if (!zodShape) continue;
+      const pinned = new Set(omittedPaths(name).filter((p) => !p.includes('.')));
       for (const key of Object.keys(zodShape)) {
-        if (!(key in advertised)) drift.push(`${name}.${key}`);
+        if (!(key in advertised) && !pinned.has(key)) drift.push(`${name}.${key}`);
+      }
+      for (const key of pinned) {
+        if (key in advertised) drift.push(`${name}.${key} is pinned as omitted but advertised`);
+        if (!(key in zodShape)) drift.push(`${name}.${key} is pinned as omitted but not accepted`);
       }
     }
     expect(drift, 'accepted by Zod but absent from tools/list').toEqual([]);

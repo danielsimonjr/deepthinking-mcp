@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **504 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **506 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -18,7 +18,7 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | other | 2 |
 | reachable | 231 |
 | template | 5 |
-| test | 238 |
+| test | 240 |
 | tool | 14 |
 
 ## Per-area counts
@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 243 | 119,794 |
+| src | 243 | 120,748 |
 | templates | 5 | 772 |
-| tests | 238 | 103,921 |
+| tests | 240 | 105,014 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -102,7 +102,7 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | `src/modes/combinations/merger.ts` | src | 728 | reachable |
 | `src/modes/combinations/presets.ts` | src | 301 | reachable |
 | `src/modes/handlers/AbductiveHandler.ts` | src | 352 | reachable |
-| `src/modes/handlers/AlgorithmicHandler.ts` | src | 728 | reachable |
+| `src/modes/handlers/AlgorithmicHandler.ts` | src | 1200 | reachable |
 | `src/modes/handlers/AnalogicalHandler.ts` | src | 446 | reachable |
 | `src/modes/handlers/AnalysisHandler.ts` | src | 603 | reachable |
 | `src/modes/handlers/ArgumentationHandler.ts` | src | 691 | reachable |
@@ -138,7 +138,7 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | `src/modes/handlers/SynthesisHandler.ts` | src | 629 | reachable |
 | `src/modes/handlers/SystemsThinkingHandler.ts` | src | 767 | reachable |
 | `src/modes/handlers/TemporalHandler.ts` | src | 262 | reachable |
-| `src/modes/handlers/input-warnings.ts` | src | 59 | reachable |
+| `src/modes/handlers/input-warnings.ts` | src | 78 | reachable |
 | `src/modes/index.ts` | src | 219 | reachable |
 | `src/modes/registry.ts` | src | 412 | reachable |
 | `src/modes/stochastic/analysis/statistics.ts` | src | 581 | reachable |
@@ -176,7 +176,7 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | `src/taxonomy/reasoning-types.ts` | src | 1457 | reachable |
 | `src/taxonomy/suggestion-engine.ts` | src | 1181 | reachable |
 | `src/tools/definitions.ts` | src | 190 | reachable |
-| `src/tools/json-schemas.ts` | src | 2775 | reachable |
+| `src/tools/json-schemas.ts` | src | 2844 | reachable |
 | `src/tools/schema-bounds.ts` | src | 118 | reachable |
 | `src/tools/schemas/analyze.ts` | src | 299 | reachable |
 | `src/tools/schemas/base.ts` | src | 75 | reachable |
@@ -185,7 +185,7 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | `src/tools/schemas/modes/analytical.ts` | src | 56 | reachable |
 | `src/tools/schemas/modes/causal.ts` | src | 90 | reachable |
 | `src/tools/schemas/modes/core.ts` | src | 74 | reachable |
-| `src/tools/schemas/modes/engineering.ts` | src | 340 | reachable |
+| `src/tools/schemas/modes/engineering.ts` | src | 720 | reachable |
 | `src/tools/schemas/modes/index.ts` | src | 20 | reachable |
 | `src/tools/schemas/modes/mathematics.ts` | src | 77 | reachable |
 | `src/tools/schemas/modes/probabilistic.ts` | src | 161 | reachable |
@@ -197,7 +197,7 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | `src/types/core.ts` | src | 752 | reachable |
 | `src/types/handlers.ts` | src | 276 | reachable |
 | `src/types/index.ts` | src | 272 | reachable |
-| `src/types/modes/algorithmic.ts` | src | 795 | reachable |
+| `src/types/modes/algorithmic.ts` | src | 809 | reachable |
 | `src/types/modes/analogical.ts` | src | 96 | reachable |
 | `src/types/modes/analysis.ts` | src | 367 | reachable |
 | `src/types/modes/argumentation.ts` | src | 287 | reachable |
@@ -292,6 +292,7 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | `tests/edge-cases/regression.test.ts` | tests | 368 | test |
 | `tests/edge-cases/session-edges.test.ts` | tests | 308 | test |
 | `tests/edge-cases/type-validation.test.ts` | tests | 211 | test |
+| `tests/integration/algorithmic-contract.test.ts` | tests | 710 | test |
 | `tests/integration/dist-bundle-validators.test.ts` | tests | 191 | test |
 | `tests/integration/engineering-contract.test.ts` | tests | 461 | test |
 | `tests/integration/error-handling.test.ts` | tests | 545 | test |
@@ -413,7 +414,7 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | `tests/unit/modes/combinations/presets.test.ts` | tests | 483 | test |
 | `tests/unit/modes/handler-registration-coverage.test.ts` | tests | 123 | test |
 | `tests/unit/modes/handlers/AbductiveHandler.test.ts` | tests | 567 | test |
-| `tests/unit/modes/handlers/AlgorithmicHandler.test.ts` | tests | 954 | test |
+| `tests/unit/modes/handlers/AlgorithmicHandler.test.ts` | tests | 1118 | test |
 | `tests/unit/modes/handlers/AnalogicalHandler.test.ts` | tests | 584 | test |
 | `tests/unit/modes/handlers/AnalysisHandler.test.ts` | tests | 990 | test |
 | `tests/unit/modes/handlers/ArgumentationHandler.test.ts` | tests | 855 | test |
@@ -449,7 +450,7 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | `tests/unit/modes/handlers/SynthesisHandler.test.ts` | tests | 434 | test |
 | `tests/unit/modes/handlers/SystemsThinkingHandler.test.ts` | tests | 465 | test |
 | `tests/unit/modes/handlers/TemporalHandler.test.ts` | tests | 661 | test |
-| `tests/unit/modes/handlers/input-warnings.test.ts` | tests | 57 | test |
+| `tests/unit/modes/handlers/input-warnings.test.ts` | tests | 80 | test |
 | `tests/unit/modes/handlers/registry.test.ts` | tests | 298 | test |
 | `tests/unit/modes/handlers/stochastic-engine-wiring.test.ts` | tests | 205 | test |
 | `tests/unit/modes/registry-base-fields.test.ts` | tests | 114 | test |
@@ -487,12 +488,13 @@ Every tracked TypeScript file in the repository — **504 files** — not just t
 | `tests/unit/temporal.test.ts` | tests | 673 | test |
 | `tests/unit/tools/mode-reachability.test.ts` | tests | 591 | test |
 | `tests/unit/tools/schema-bounds.test.ts` | tests | 152 | test |
-| `tests/unit/tools/schemas/advertised-schema-conformance.test.ts` | tests | 208 | test |
+| `tests/unit/tools/schemas/advertised-omissions.ts` | tests | 69 | test |
+| `tests/unit/tools/schemas/advertised-schema-conformance.test.ts` | tests | 298 | test |
 | `tests/unit/tools/schemas/analyze-custom-modes.test.ts` | tests | 65 | test |
 | `tests/unit/tools/schemas/bounded-inputs.test.ts` | tests | 115 | test |
-| `tests/unit/tools/schemas/bounds.test.ts` | tests | 504 | test |
-| `tests/unit/tools/schemas/field-reach.test.ts` | tests | 525 | test |
-| `tests/unit/tools/schemas/schema-contract.test.ts` | tests | 412 | test |
+| `tests/unit/tools/schemas/bounds.test.ts` | tests | 539 | test |
+| `tests/unit/tools/schemas/field-reach.test.ts` | tests | 516 | test |
+| `tests/unit/tools/schemas/schema-contract.test.ts` | tests | 423 | test |
 | `tests/unit/tools/schemas/schema-validation.test.ts` | tests | 233 | test |
 | `tests/unit/tools/schemas/tool-definitions.test.ts` | tests | 325 | test |
 | `tests/unit/types.test.ts` | tests | 443 | test |

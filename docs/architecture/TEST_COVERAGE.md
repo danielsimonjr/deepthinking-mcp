@@ -22,13 +22,13 @@ Most test folders follow the folder names of `src/`: `tests/unit/<area>/` and
 | Directory | Test files | Purpose |
 |---|---|---|
 | `tests/unit/` | 144 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
-| `tests/integration/` | 78 | Cross-module paths: entry-point dispatch over a real transport, tool-shaped input through the handlers, export round-trips, multi-mode analysis, session lifecycles. |
+| `tests/integration/` | 79 | Cross-module paths: entry-point dispatch over a real transport, tool-shaped input through the handlers, export round-trips, multi-mode analysis, session lifecycles. |
 | `tests/edge-cases/` | 6 | Boundary conditions, malformed input, regressions pinned from past bugs. |
 | `tests/performance/` | 4 | Counted-work checks for cost, throughput, memory and stress. `helpers/work-probe.ts` holds the counters. |
 | `tests/utils/` | 0 (5 helper files) | Shared fixtures, factories, and assertion helpers. 21 test files import them, all under `tests/integration/tools/`. |
 | `tests/test-results/` | 0 | Reporter code and `TEST_RESULTS_v*.md` summaries. Not test code. |
 
-The suite holds 232 test files. `npx vitest list --filesOnly` lists them. This document maps
+The suite holds 233 test files. `npx vitest list --filesOnly` lists them. This document maps
 files. It holds no test count and no pass or fail state. Run the suite to get those.
 
 ### Running each tier
@@ -44,8 +44,8 @@ npx vitest run                          # everything
 `npm run test:publish` sets `SKIP_BENCHMARKS=1`. That variable switches on one extra entry in the
 `exclude` list of `vitest.config.ts`: `**/benchmarks/**`. The pattern matches the directory
 `tests/unit/benchmarks/`, which holds 2 test files. It does not match `tests/performance/`, so
-the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 230
-files instead of 232.
+the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 231
+files instead of 233.
 
 ### Where reports land
 
@@ -72,7 +72,7 @@ the root-level files that name the area in their subject.
 
 | Area | `src/` files | Unit test files | `src/` files imported directly by a test | Also exercised by |
 |---|---|---|---|---|
-| `index.ts` | 1 | 0 | 1 (4 test files) | `tests/integration/index-server.test.ts` and 3 more files that import the module. See Gaps. |
+| `index.ts` | 1 | 0 | 1 (7 test files) | `tests/integration/index-server.test.ts` and 6 more files that import the module. See Gaps. |
 | `types/` | 37 | 11 | 18 | Most handler and validator tests import types from here. No test imports 18 of the mode type files directly. |
 | `modes/` (handlers, combinations, causal graph, stochastic) | 55 | 54 | 53 | `tests/integration/handlers/`, `tests/integration/mode-handler-delegation.test.ts`. |
 | `services/` | 3 | 2 | 3 | 68 test files import `ThoughtFactory` or `ExportService` directly. `RecommendationService` has one importer, `tests/unit/taxonomy/taxonomy-wiring.test.ts`. |
@@ -93,7 +93,7 @@ and `toolSchemas`. See Gaps for the exact limits of that coverage.
 
 ## 3. Unit tests
 
-140 files under `tests/unit/`, organized by the `src/` area they cover.
+144 files under `tests/unit/`, organized by the `src/` area they cover.
 
 **`types/` (11 files).** `types.test.ts` covers the core type guards in `src/types/core.ts`.
 `types/thought-guard-coverage.test.ts` pins the type guards against `ThinkingMode` in both
@@ -173,6 +173,9 @@ and `schemas/tool-definitions.test.ts` cover input-size limits, the Zod schema c
 shape, and the 13 tool definitions in `src/tools/definitions.ts` and `src/tools/schemas/`.
 `schemas/analyze-custom-modes.test.ts` pins the `customModes` list of `deepthinking_analyze`. The
 list holds every `ThinkingMode` except `custom`, in the Zod schema and in the advertised schema.
+`schemas/advertised-omissions.ts` is a helper and not a test file. It lists the fields that the
+advertised schema of a tool leaves out, with the reason. `advertised-schema-conformance.test.ts`,
+`schema-contract.test.ts` and `algorithmic-contract.test.ts` read it.
 Three more files in `schemas/` guard the whole class of schema defects.
 `advertised-schema-conformance.test.ts` derives a JSON schema from each Zod schema. It compares
 the result with the advertised schema at every depth: property names, required names, types,
@@ -212,11 +215,11 @@ and `validation-performance.test.ts` are micro-benchmarks. They are the two file
 
 ## 4. Integration tests
 
-78 files under `tests/integration/`, exercising cross-module paths that a unit test cannot
+79 files under `tests/integration/`, exercising cross-module paths that a unit test cannot
 reach.
 
-**Root files (10) — the server entry point and protocol.** Three of these files import
-`src/index.ts`, and one more re-implements it:
+**Root files (13) — the server entry point, the protocol and the mode contracts.** Six of these
+files import `src/index.ts`, and one more re-implements it:
 - `index-importable.test.ts` checks the entry-point guard: importing `src/index.ts` starts no
   stdio server.
 - `index-server.test.ts` drives the exported server over an in-memory transport: `tools/list`
@@ -226,6 +229,13 @@ reach.
   not own return tool errors; the server keeps serving after an error; the hidden legacy
   `deepthinking` tool still answers.
 - `mcp-2-compliance.test.ts` imports `src/index.ts` and checks MCP 2.0 behavior.
+- `engineering-contract.test.ts` and `algorithmic-contract.test.ts` drive the exported server over
+  an in-memory transport. Each sends every field that the handler reads, and checks that the field
+  reaches the answer or the stored thought. `algorithmic-contract.test.ts` also checks the tool
+  description, the sentences in `validation.issues`, the design-pattern spelling, the complexity
+  blocks, and the export of sparse blocks in eight formats.
+- `dist-bundle-validators.test.ts` starts the built `dist/index.js` over stdio and checks that
+  every mode has a validator.
 - `index-handlers.test.ts` does **not** import `src/index.ts`. It re-implements the handler
   logic against `SessionManager`, so it cannot catch a change in the real handlers.
 - `mcp-compliance.test.ts` and `mcp-protocol.test.ts` check the tool definitions, their JSON
@@ -468,7 +478,7 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 507 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 509 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 

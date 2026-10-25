@@ -13,7 +13,7 @@
 
 ## Exports
 
-- **Types**: `AlgorithmicThoughtType`, `DesignPattern`, `ComplexityClass`, `CLRSCategory`, `CLRSAlgorithm`
+- **Types**: `AlgorithmicThoughtType`, `DesignPattern`, `ComplexityClass`, `CLRSCategory`, `CLRSAlgorithm`, `AlgorithmDescription`
 - **Interfaces**: `TimeComplexity`, `SpaceComplexity`, `LoopInvariant`, `CorrectnessProof`, `Recurrence`, `AlgorithmSpec`, `DPFormulation`, `GreedyProof`, `GraphAlgorithmContext`, `DataStructureSpec`, `AmortizedAnalysis`, `AlgorithmComparison`, `AlgorithmicThought`
 - **Functions**: `isAlgorithmicThought`, `suggestDesignPattern`, `applyMasterTheorem`
 - **Constants**: `COMMON_RECURRENCES`
@@ -227,11 +227,106 @@ interface GreedyProof {
 }
 ```
 
+## Request Fields
+
+The tool `deepthinking_engineering` takes these fields in algorithmic mode. The Zod schema accepts
+and bounds every field that `AlgorithmicHandler` reads. The advertised JSON Schema lists a subset,
+because the definition of one tool must stay under 16,000 bytes.
+
+### Fields that the tool lists
+
+| Field | Content |
+|-------|---------|
+| `thoughtType` | One of the 26 thought types in this document |
+| `designPattern` | One of the 12 design patterns |
+| `algorithm` | `name`, `description`, `category` |
+| `clrsCategory`, `clrsAlgorithm` | The CLRS classification, as strings |
+| `pseudocode`, `keyInsight` | Strings |
+| `timeComplexity` | All members of Time Complexity |
+| `spaceComplexity` | All members of Space Complexity |
+| `recurrence` | `id`, `formula`, `baseCase`, `closedForm`, `complexity`, `solutionMethod`, `solution`, `solutionProof`, `recursionTree`. Recursive mode uses the same object. It reads `formula`, `baseCase`, `closedForm` and `complexity`, and it ignores the other members. |
+| `correctnessProof` | All members of Correctness Proof except `invariants` |
+
+### Fields that the tool accepts and does not list
+
+- `dpFormulation`, `greedyProof`, `loopInvariants`, `graphContext`, `dataStructure`,
+  `amortizedAnalysis`, `comparison` and `executionTrace`
+- `correctnessProof.invariants`
+- The members of `algorithm` other than `name`, `description` and `category`: `id`, `input`,
+  `output`, `pseudocode`, `practical`, `alternatives`, `advantages`, `disadvantages` and
+  `clrsReference`
+
+The description of the tool names these fields and ends with a link to this page on the `master`
+branch. The list is a constant in
+`tests/unit/tools/schemas/advertised-omissions.ts`, with the reason "tool size cap". A test fails
+in each of these cases:
+
+- A listed field is not accepted.
+- An accepted field is neither listed nor in the list above.
+- The list and the schemas disagree.
+
+The advertised schema of the tool has no `additionalProperties: false` at three levels: the
+top level, `algorithm` and `correctnessProof`. A client that checks a request against the
+advertised schema would reject the unlisted fields if the key were present. The server removes a
+key that no schema declares, at every depth, and it never rejects one. A block that uses member
+names other than the names in this document is stored with empty members. The answer carries no
+sentence for it.
+
+An algorithm that carries `designPattern`, `timeComplexity`, `spaceComplexity` or
+`correctnessProof` inside `algorithm` loses them. Send them as top-level fields.
+
+### Spelling of design patterns
+
+A design pattern is spelled with underscores: `divide_and_conquer`. Three cases exist.
+
+- A known value is stored as sent.
+- A known value with hyphens, such as `divide-and-conquer`, is read as the underscore value and
+  stored with underscores. The answer carries one sentence in `validation.issues` that names both
+  spellings.
+- An unknown value is not stored. The answer carries one sentence that lists the 12 values.
+
+### What the handler fills in
+
+The thought type requires some members. The handler gives each missing member a value, so that
+no export prints `undefined`.
+
+| Case | Result |
+|------|--------|
+| `thoughtType` absent | `algorithm_definition`, with no sentence |
+| `thoughtType` unknown | `algorithm_definition`, with one sentence |
+| A required text member is absent | The empty string |
+| A required list member is absent | The empty list |
+| An `id` is absent | A generated identifier |
+| `inPlace` or `weighted` is absent | `false` |
+| `algorithm.pseudocode` absent | The top-level `pseudocode` |
+| An optional member is absent | The member stays absent |
+
+The flag objects `practical`, `clrsReference`, `masterTheorem`, `inputSensitive` and
+`cacheEfficiency` are stored as sent.
+
+### Members with a fixed vocabulary
+
+A member that is absent takes the first value of its list (`weightProperty` takes none). An
+unrecognised value is kept as sent, and the answer carries one sentence that lists the recognised
+values.
+
+| Member | Values |
+|--------|--------|
+| `correctnessProof.method` | `loop_invariant`, `induction`, `contradiction`, `direct`, `structural` |
+| `recurrence.solutionMethod` | `master_theorem`, `substitution`, `recursion_tree`, `generating_function` |
+| `amortizedAnalysis.method` | `aggregate`, `accounting`, `potential` |
+| `dpFormulation.computationOrder.direction` | `bottom_up`, `top_down`, `bidirectional` |
+| `graphContext.graphType` | `directed`, `undirected`, `mixed` |
+| `graphContext.representation` | `adjacency_list`, `adjacency_matrix`, `edge_list`, `implicit` |
+| `graphContext.weightProperty` | `non_negative`, `positive`, `arbitrary`, `unit` |
+
+`clrsCategory` and `clrsAlgorithm` are stored as sent, with no sentence.
+
 ## Usage Example
 
 ```typescript
 // Define algorithm
-const algorithm = await deepthinking_standard({
+const algorithm = await deepthinking_engineering({
   mode: 'algorithmic',
   thought: 'Define merge sort algorithm',
   thoughtNumber: 1,
@@ -244,7 +339,6 @@ const algorithm = await deepthinking_standard({
     name: 'Merge Sort',
     description: 'Divide-and-conquer sorting algorithm',
     category: 'Sorting',
-    designPattern: 'divide_and_conquer',
     input: {
       description: 'Array of comparable elements',
       constraints: ['Elements must be comparable'],
@@ -254,25 +348,6 @@ const algorithm = await deepthinking_standard({
       description: 'Sorted array',
       properties: ['Sorted in non-decreasing order', 'Contains same elements']
     },
-    pseudocode: `
-      MERGE-SORT(A, p, r):
-        if p < r:
-          q = ⌊(p + r) / 2⌋
-          MERGE-SORT(A, p, q)
-          MERGE-SORT(A, q+1, r)
-          MERGE(A, p, q, r)
-    `,
-    timeComplexity: {
-      bestCase: 'Θ(n log n)',
-      averageCase: 'Θ(n log n)',
-      worstCase: 'O(n log n)',
-      recurrence: 'T(n) = 2T(n/2) + O(n)'
-    },
-    spaceComplexity: {
-      auxiliary: 'O(n)',
-      total: 'O(n)',
-      inPlace: false
-    },
     practical: {
       cacheEfficient: true,
       parallelizable: true,
@@ -281,6 +356,25 @@ const algorithm = await deepthinking_standard({
     },
     clrsReference: { chapter: 2, section: 3 }
   },
+  pseudocode: `
+    MERGE-SORT(A, p, r):
+      if p < r:
+        q = ⌊(p + r) / 2⌋
+        MERGE-SORT(A, p, q)
+        MERGE-SORT(A, q+1, r)
+        MERGE(A, p, q, r)
+  `,
+  timeComplexity: {
+    bestCase: 'Θ(n log n)',
+    averageCase: 'Θ(n log n)',
+    worstCase: 'O(n log n)',
+    recurrence: 'T(n) = 2T(n/2) + O(n)'
+  },
+  spaceComplexity: {
+    auxiliary: 'O(n)',
+    total: 'O(n)',
+    inPlace: false
+  },
   designPattern: 'divide_and_conquer',
   dependencies: [],
   assumptions: ['Elements are comparable'],
@@ -288,7 +382,7 @@ const algorithm = await deepthinking_standard({
 });
 
 // Solve recurrence
-const recurrence = await deepthinking_standard({
+const recurrence = await deepthinking_engineering({
   mode: 'algorithmic',
   thought: 'Solve the merge sort recurrence using master theorem',
   thoughtNumber: 2,
@@ -317,7 +411,7 @@ const recurrence = await deepthinking_standard({
 });
 
 // Prove correctness
-const correctness = await deepthinking_standard({
+const correctness = await deepthinking_engineering({
   mode: 'algorithmic',
   thought: 'Prove merge sort correctness using loop invariant',
   thoughtNumber: 3,
@@ -370,7 +464,7 @@ const correctness = await deepthinking_standard({
 });
 
 // Dynamic programming example
-const dp = await deepthinking_standard({
+const dp = await deepthinking_engineering({
   mode: 'algorithmic',
   thought: 'Formulate longest common subsequence as DP',
   thoughtNumber: 4,
@@ -416,7 +510,7 @@ const dp = await deepthinking_standard({
 });
 
 // Compare algorithms
-const comparison = await deepthinking_standard({
+const comparison = await deepthinking_engineering({
   mode: 'algorithmic',
   thought: 'Compare sorting algorithms',
   thoughtNumber: 5,
@@ -499,7 +593,7 @@ const comparison = await deepthinking_standard({
 interface AlgorithmicThought extends BaseThought {
   mode: ThinkingMode.ALGORITHMIC;
   thoughtType: AlgorithmicThoughtType;
-  algorithm?: AlgorithmSpec;
+  algorithm?: AlgorithmDescription;
   clrsCategory?: CLRSCategory;
   clrsAlgorithm?: CLRSAlgorithm;
   designPattern?: DesignPattern;
@@ -519,8 +613,17 @@ interface AlgorithmicThought extends BaseThought {
   uncertainty: number;
   keyInsight?: string;
   pseudocode?: string;
+  executionTrace?: {
+    input: string;
+    steps: { step: number; state: string; action: string }[];
+    output: string;
+  };
+  inputWarnings?: string[];   // One sentence per request value that the handler replaced or ignored
 }
 ```
+
+`AlgorithmDescription` is `AlgorithmSpec` without `designPattern`, `timeComplexity`,
+`spaceComplexity` and `correctnessProof`. A thought carries those four as its own fields.
 
 ## Integration with Other Modes
 
