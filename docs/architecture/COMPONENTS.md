@@ -424,6 +424,13 @@ throws. `validate()` runs one universal check first (`thought` must be non-empty
 to the mode's handler; an empty `thought` field fails validation regardless of mode, before any
 handler-specific logic runs.
 
+`createThought()` returns the thought that the handler built, after one more step. A handler builds
+its thought by hand, and most copy only some of the six base fields `revisionReason`, `branchFrom`,
+`branchId`, `uncertainty`, `dependencies` and `assumptions`. The module function `carryBaseFields`
+copies a field from the input onto the thought. The copy happens only when the handler left the
+field `undefined` and the caller sent it. A value that the handler computed is kept, and a call that sends
+none of the six gets the thought unchanged.
+
 ### All handlers
 
 Every row below is a `class X implements ModeHandler` in `src/modes/handlers/`, registered in
@@ -898,7 +905,15 @@ call lives in `src/tools/`. The `tools/call` handler in `src/index.ts` looks the
 `toolSchemas` (`src/tools/definitions.ts`), one Zod schema per focused tool, and calls
 `schema.parse(args)`. The per-mode Zod schemas are under `src/tools/schemas/`. The legacy
 `deepthinking` tool parses with `ThinkingToolSchema` (`src/tools/thinking.ts`). The JSON Schemas
-that `tools/list` advertises come from `src/tools/json-schemas.ts`.
+that `tools/list` advertises come from `src/tools/json-schemas.ts`. That file is written by hand.
+It states a few limits, and the Zod schemas own the rest. `withZodBounds` in
+`src/tools/schema-bounds.ts` returns a copy of an advertised tool definition. The copy carries the
+limits of the Zod schema that enforces the tool: `maxLength`, `minLength`, `maxItems`, `minItems`,
+`minimum` and `maximum`. It copies a limit only where the hand-written node states none, so a
+disagreement stays visible to the conformance test. `withZodBounds` does not copy two record
+limits. The entry count of a record is a `superRefine` in `boundedRecord`, and a JSON Schema
+derivation does not carry it. The length of a record key is in `propertyNames`, which the copy does not visit.
+`definitions.ts` applies it once to each of the 11 thought tools and to the two management tools.
 
 `validation/index.ts` is a barrel that re-exports the constants, `ThoughtValidator`, and the
 advisory wrapper (`validateAdvisory`, `MAX_ADVISORY_ISSUES`, `MAX_ADVISORY_SUGGESTIONS` and the
@@ -2676,11 +2691,11 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 495 | repo-tools map (whole repository) |
-| totalLinesOfCode | 227848 | repo-tools map (whole repository) |
-| totalExports | 2158 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 501 | repo-tools map (whole repository) |
+| totalLinesOfCode | 229231 | repo-tools map (whole repository) |
+| totalExports | 2160 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
-| reachableFiles | 233 | repo-tools map (whole repository) |
+| reachableFiles | 234 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 | noImporterFileCount | 12 | repo-tools map (whole repository) |
 

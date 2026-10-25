@@ -3,9 +3,9 @@
     "name": "deepthinking-mcp",
     "version": "10.0.2",
     "lastUpdated": "2026-10-25",
-    "totalFiles": 241,
+    "totalFiles": 242,
     "totalModules": 14,
-    "totalExports": 1186
+    "totalExports": 1188
   },
   "entryPoints": [
     {
@@ -9789,6 +9789,12 @@
             ]
           },
           {
+            "file": "./schema-bounds.js",
+            "imports": [
+              "withZodBounds"
+            ]
+          },
+          {
             "file": "./schemas/base.js",
             "imports": [
               "SessionActionSchema"
@@ -9863,9 +9869,9 @@
           }
         ],
         "exports": [
+          "toolSchemas",
           "tools",
           "toolList",
-          "toolSchemas",
           "modeToToolMap",
           "getToolForMode",
           "isValidTool",
@@ -9877,9 +9883,9 @@
           "getSchemaForTool"
         ],
         "constants": [
+          "toolSchemas",
           "tools",
           "toolList",
-          "toolSchemas",
           "modeToToolMap"
         ]
       },
@@ -9927,6 +9933,25 @@
           "deepthinking_session_schema",
           "deepthinking_analyze_schema",
           "jsonSchemas"
+        ]
+      },
+      "src/tools/schema-bounds.ts": {
+        "description": "Advertised-schema bounds",
+        "externalDependencies": [
+          {
+            "package": "zod",
+            "imports": [
+              "z"
+            ]
+          }
+        ],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "withZodBounds"
+        ],
+        "functions": [
+          "withZodBounds"
         ]
       },
       "src/tools/schemas/analyze.ts": {
@@ -10670,6 +10695,7 @@
               "NameSchema",
               "TextSchema",
               "IdArraySchema",
+              "PropertyValueSchema",
               "boundedRecord"
             ]
           },
@@ -10716,6 +10742,7 @@
           "ThoughtTextSchema",
           "IdArraySchema",
           "TextArraySchema",
+          "PropertyValueSchema",
           "LevelEnum",
           "ImpactEnum",
           "ExportFormatEnum",
@@ -10747,6 +10774,7 @@
           "ThoughtTextSchema",
           "IdArraySchema",
           "TextArraySchema",
+          "PropertyValueSchema",
           "LevelEnum",
           "ImpactEnum",
           "ExportFormatEnum",
@@ -10784,7 +10812,8 @@
           {
             "file": "./schemas/shared.js",
             "imports": [
-              "boundedRecord"
+              "boundedRecord",
+              "PropertyValueSchema"
             ]
           }
         ],
@@ -16049,6 +16078,7 @@
         "files": [
           "src/tools/definitions.ts",
           "src/tools/json-schemas.ts",
+          "src/tools/schema-bounds.ts",
           "src/tools/schemas/analyze.ts",
           "src/tools/schemas/base.ts",
           "src/tools/schemas/index.ts",
@@ -16172,16 +16202,16 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 241,
+    "totalTypeScriptFiles": 242,
     "totalModules": 14,
-    "totalLinesOfCode": 119018,
-    "totalExports": 1186,
+    "totalLinesOfCode": 119232,
+    "totalExports": 1188,
     "totalClasses": 143,
     "totalInterfaces": 562,
-    "totalFunctions": 434,
+    "totalFunctions": 435,
     "totalTypeGuards": 87,
     "totalEnums": 3,
-    "totalConstants": 134,
+    "totalConstants": 135,
     "totalReExports": 487,
     "totalTypeOnlyImports": 333,
     "runtimeCircularDeps": 0,

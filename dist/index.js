@@ -5711,8 +5711,8 @@ function checkDSeparation(graph, request, config = {}) {
 }
 function isValidBackdoorAdjustment(graph, treatment, outcome, adjustmentSet) {
   const treatmentDescendants = getDescendants(graph, treatment);
-  for (const z15 of adjustmentSet) {
-    if (treatmentDescendants.has(z15)) {
+  for (const z16 of adjustmentSet) {
+    if (treatmentDescendants.has(z16)) {
       return false;
     }
   }
@@ -17557,16 +17557,33 @@ var init_CustomHandler = __esm({
 });
 
 // src/modes/registry.ts
+function carryBaseFields(thought, input) {
+  const carried = {};
+  for (const field of CARRIED_BASE_FIELDS) {
+    if (thought[field] === void 0 && input[field] !== void 0) {
+      carried[field] = input[field];
+    }
+  }
+  return Object.keys(carried).length > 0 ? { ...thought, ...carried } : thought;
+}
 function getRegistry() {
   return ModeHandlerRegistry.getInstance();
 }
-var ModeHandlerRegistry;
+var CARRIED_BASE_FIELDS, ModeHandlerRegistry;
 var init_registry = __esm({
   "src/modes/registry.ts"() {
     init_esm_shims();
     init_core();
     init_ModeHandler();
     init_GenericModeHandler();
+    CARRIED_BASE_FIELDS = [
+      "revisionReason",
+      "branchFrom",
+      "branchId",
+      "uncertainty",
+      "dependencies",
+      "assumptions"
+    ];
     ModeHandlerRegistry = class _ModeHandlerRegistry {
       static instance = null;
       handlers = /* @__PURE__ */ new Map();
@@ -17661,7 +17678,7 @@ var init_registry = __esm({
       createThought(input, sessionId) {
         const mode = input.mode || "hybrid" /* HYBRID */;
         const handler = this.getHandler(mode);
-        return handler.createThought(input, sessionId);
+        return carryBaseFields(handler.createThought(input, sessionId), input);
       }
       /**
        * Validate input using the appropriate handler
@@ -24791,7 +24808,7 @@ function boundedRecord(key, value, maxEntries = MAX_LENGTHS.ARRAY_ITEMS) {
     }
   });
 }
-var ConfidenceSchema, PositiveIntSchema, IdSchema, SessionIdSchema, NameSchema, TextSchema, ThoughtTextSchema, IdArraySchema, TextArraySchema, LevelEnum, ExportFormatEnum, SessionActionEnum, ExportProfileEnum, ProofTypeEnum, TimeUnitEnum, TemporalConstraintEnum, TemporalRelationEnum, EventTypeEnum, TransformationEnum, ShannonStageEnum, EntitySchema;
+var ConfidenceSchema, PositiveIntSchema, IdSchema, SessionIdSchema, NameSchema, TextSchema, ThoughtTextSchema, IdArraySchema, TextArraySchema, PropertyValueSchema, LevelEnum, ExportFormatEnum, SessionActionEnum, ExportProfileEnum, ProofTypeEnum, TimeUnitEnum, TemporalConstraintEnum, TemporalRelationEnum, EventTypeEnum, TransformationEnum, ShannonStageEnum, EntitySchema;
 var init_shared = __esm({
   "src/tools/schemas/shared.ts"() {
     init_esm_shims();
@@ -24805,6 +24822,13 @@ var init_shared = __esm({
     ThoughtTextSchema = z.string().max(MAX_LENGTHS.THOUGHT_CONTENT);
     IdArraySchema = boundedArray(IdSchema);
     TextArraySchema = boundedArray(TextSchema);
+    PropertyValueSchema = z.union([
+      TextSchema,
+      z.number(),
+      z.boolean(),
+      z.null(),
+      boundedArray(z.union([TextSchema, z.number(), z.boolean(), z.null()]))
+    ]);
     LevelEnum = z.enum(["low", "medium", "high"]);
     z.enum(["positive", "negative", "neutral"]);
     ExportFormatEnum = z.enum([
@@ -25265,7 +25289,7 @@ var init_thinking = __esm({
           type: z.enum(["instant", "interval"]),
           properties: boundedRecord(
             z.string().max(MAX_LENGTHS.DESCRIPTION),
-            z.any()
+            PropertyValueSchema
           )
         })
       ).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
@@ -25353,7 +25377,7 @@ var init_thinking = __esm({
         payoffs: z.array(
           z.object({
             strategyProfile: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
-            payoffs: z.array(z.number())
+            payoffs: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS)
           })
         ).max(MAX_LENGTHS.ARRAY_ITEMS)
       }).optional(),
@@ -25387,7 +25411,7 @@ var init_thinking = __esm({
             childNodes: z.array(z.string().max(MAX_LENGTHS.DESCRIPTION)).max(MAX_LENGTHS.ARRAY_ITEMS),
             action: z.string().max(MAX_LENGTHS.DESCRIPTION).optional(),
             probability: z.number().min(0).max(1).optional(),
-            payoffs: z.array(z.number()).optional()
+            payoffs: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS).optional()
           })
         ).max(MAX_LENGTHS.ARRAY_ITEMS),
         informationSets: z.array(
@@ -25806,7 +25830,7 @@ var init_thinking = __esm({
               "contradiction",
               "excluded_middle"
             ]).optional(),
-            referencesSteps: z.array(z.number()).optional(),
+            referencesSteps: z.array(z.number()).max(MAX_LENGTHS.ARRAY_ITEMS).optional(),
             isAssumption: z.boolean().optional(),
             dischargesAssumption: z.number().optional()
           })
@@ -66027,7 +66051,7 @@ var baseThoughtProperties = {
   },
   uncertainty: {
     type: "number",
-    description: "Confidence level (0-1, where 1 is highest confidence)",
+    description: "Uncertainty about this thought (0-1, where 0 is certain and 1 is fully uncertain)",
     minimum: 0,
     maximum: 1
   },
@@ -66046,7 +66070,8 @@ var baseThoughtRequired = [
   "thought",
   "thoughtNumber",
   "totalThoughts",
-  "nextThoughtNeeded"
+  "nextThoughtNeeded",
+  "mode"
 ];
 var deepthinking_core_schema = {
   name: "deepthinking_core",
@@ -66303,7 +66328,7 @@ var deepthinking_mathematics_schema = {
             },
             referencesSteps: {
               type: "array",
-              items: { type: "integer" },
+              items: { type: "number" },
               description: "Step numbers this step references"
             }
           },
@@ -66473,7 +66498,8 @@ var deepthinking_temporal_schema = {
                 },
                 direction: { type: "string" },
                 severity: { type: "number", minimum: 0, maximum: 1 }
-              }
+              },
+              required: ["type"]
             },
             corroboratedBy: {
               type: "array",
@@ -66673,8 +66699,11 @@ var deepthinking_temporal_schema = {
             },
             properties: {
               type: "object",
-              additionalProperties: true,
-              description: "Additional event properties"
+              additionalProperties: {
+                type: ["string", "number", "boolean", "null", "array"],
+                items: { type: ["string", "number", "boolean", "null"] }
+              },
+              description: "Additional event properties: each value is text, a number, a boolean, null, or a list of those"
             }
           },
           required: ["id", "name", "description", "timestamp", "type"],
@@ -66690,7 +66719,16 @@ var deepthinking_temporal_schema = {
             id: { type: "string" },
             type: {
               type: "string",
-              enum: ["before", "after", "during", "simultaneous"],
+              enum: [
+                "before",
+                "after",
+                "during",
+                "overlaps",
+                "meets",
+                "starts",
+                "finishes",
+                "equals"
+              ],
               description: "Constraint type"
             },
             subject: { type: "string", description: "Subject event ID" },
@@ -67015,7 +67053,12 @@ var deepthinking_causal_schema = {
           properties: {
             id: { type: "string" },
             name: { type: "string" },
-            description: { type: "string" }
+            description: { type: "string" },
+            type: {
+              type: "string",
+              enum: ["cause", "effect", "mediator", "confounder"],
+              description: "Role of the node in the causal graph"
+            }
           },
           required: ["id", "name"],
           additionalProperties: false
@@ -67047,7 +67090,12 @@ var deepthinking_causal_schema = {
               properties: {
                 id: { type: "string" },
                 name: { type: "string" },
-                description: { type: "string" }
+                description: { type: "string" },
+                type: {
+                  type: "string",
+                  enum: ["cause", "effect", "mediator", "confounder"],
+                  description: "Role of the node in the causal graph"
+                }
               },
               required: ["id", "name"],
               additionalProperties: false
@@ -68408,6 +68456,79 @@ var jsonSchemas = [
   deepthinking_analyze_schema
 ];
 
+// src/tools/schema-bounds.ts
+init_esm_shims();
+var BOUND_KEYS = [
+  "maxLength",
+  "minLength",
+  "maxItems",
+  "minItems",
+  "minimum",
+  "maximum"
+];
+function isNode(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+function foldUnion(node) {
+  const arms = node.anyOf ?? node.oneOf;
+  if (!Array.isArray(arms)) return node;
+  const nodes = arms.filter(isNode);
+  const live = nodes.filter((arm) => arm.type !== "null");
+  if (live.length === 1 && nodes.length === 2) return foldUnion(live[0]);
+  const folded = {};
+  for (const arm of nodes.map(foldUnion)) {
+    for (const key of [
+      ...BOUND_KEYS,
+      "items",
+      "properties",
+      "additionalProperties"
+    ]) {
+      if (folded[key] === void 0 && arm[key] !== void 0)
+        folded[key] = arm[key];
+    }
+  }
+  return folded;
+}
+function copyBounds(target, derived) {
+  if (!isNode(target) || !isNode(derived)) return;
+  const source = foldUnion(derived);
+  for (const key of BOUND_KEYS) {
+    const value = source[key];
+    if (target[key] === void 0 && typeof value === "number" && Math.abs(value) < Number.MAX_SAFE_INTEGER) {
+      target[key] = value;
+    }
+  }
+  if (isNode(target.properties) && isNode(source.properties)) {
+    for (const [name, child] of Object.entries(target.properties)) {
+      copyBounds(child, source.properties[name]);
+    }
+  }
+  const targetArms = target.oneOf ?? target.anyOf;
+  const derivedArms = derived.anyOf ?? derived.oneOf;
+  if (Array.isArray(targetArms) && Array.isArray(derivedArms)) {
+    for (const arm of targetArms) {
+      if (!isNode(arm)) continue;
+      copyBounds(
+        arm,
+        derivedArms.find((d) => isNode(d) && d.type === arm.type)
+      );
+    }
+  }
+  copyBounds(target.items, source.items);
+  copyBounds(target.additionalProperties, source.additionalProperties);
+}
+function withZodBounds(tool, zodSchema) {
+  const copy = structuredClone(tool);
+  const derived = z.toJSONSchema(zodSchema, {
+    io: "input",
+    unrepresentable: "any",
+    reused: "inline",
+    cycles: "ref"
+  });
+  copyBounds(copy.inputSchema, derived);
+  return copy;
+}
+
 // src/tools/schemas/base.ts
 init_esm_shims();
 init_shared();
@@ -68675,7 +68796,7 @@ var TemporalEventSchema = z.object({
   timestamp: z.number(),
   type: EventTypeEnum,
   duration: z.number().optional(),
-  properties: boundedRecord(IdSchema, z.unknown()).optional()
+  properties: boundedRecord(IdSchema, PropertyValueSchema).optional()
 });
 var TemporalConstraintSchema = z.object({
   id: IdSchema,
@@ -69447,7 +69568,8 @@ z.object({
     mergeTime: z.number()
   })
 });
-var toolList = jsonSchemas;
+
+// src/tools/definitions.ts
 var toolSchemas = {
   deepthinking_core: CoreModeSchema,
   deepthinking_standard: StandardSchema,
@@ -69463,6 +69585,28 @@ var toolSchemas = {
   deepthinking_session: SessionActionSchema,
   deepthinking_analyze: analyzeInputSchema
 };
+var advertised = jsonSchemas.map(
+  (definition) => withZodBounds(
+    definition,
+    toolSchemas[definition.name]
+  )
+);
+({
+  deepthinking_core: advertised[0],
+  deepthinking_standard: advertised[1],
+  deepthinking_mathematics: advertised[2],
+  deepthinking_temporal: advertised[3],
+  deepthinking_probabilistic: advertised[4],
+  deepthinking_causal: advertised[5],
+  deepthinking_strategic: advertised[6],
+  deepthinking_analytical: advertised[7],
+  deepthinking_scientific: advertised[8],
+  deepthinking_engineering: advertised[9],
+  deepthinking_academic: advertised[10],
+  deepthinking_session: advertised[11],
+  deepthinking_analyze: advertised[12]
+});
+var toolList = advertised;
 var modeToToolMap = {
   // Core reasoning modes (fundamental)
   inductive: "deepthinking_core",
