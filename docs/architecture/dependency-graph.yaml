@@ -1,7 +1,7 @@
 metadata:
   name: deepthinking-mcp
   version: 10.0.2
-  lastUpdated: '2026-10-23'
+  lastUpdated: '2026-10-25'
   totalFiles: 241
   totalModules: 14
   totalExports: 1186
@@ -7367,7 +7367,7 @@ modules:
         - thinkingTool
   types:
     src/types/core.ts:
-      description: Core type definitions for the DeepThinking MCP server v9.1.0
+      description: Core type definitions for the DeepThinking MCP server
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -11250,7 +11250,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 241
   totalModules: 14
-  totalLinesOfCode: 119028
+  totalLinesOfCode: 119018
   totalExports: 1186
   totalClasses: 143
   totalInterfaces: 562

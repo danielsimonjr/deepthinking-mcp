@@ -618,8 +618,9 @@ carries `confidenceScore` and the per-insight `confidence` only when the basis i
 
 A mode that throws is recorded in `errors` (`{ mode, message, recoverable }`). `handleAnalyze()`
 always sets `continueOnError: true`, so the analysis goes on with the other modes.
-`timeoutPerMode` is validated (1,000–120,000 ms) and passed to the analyzer, but nothing in the
-analyzer reads it, and each `runMode()` call is synchronous, so no per-mode timeout is enforced.
+`timeoutPerMode` is validated (1,000–120,000 ms) and then dropped. `handleAnalyze()` does not pass
+it to the analyzer. Each `runMode()` call is synchronous, so nothing can interrupt a mode and no
+per-mode time limit applies.
 
 ### Merge strategies
 
@@ -918,7 +919,7 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 494 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 495 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
 | reachableFiles | 233 | repo-tools map (whole repository) |
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |

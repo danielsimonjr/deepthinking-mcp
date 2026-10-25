@@ -1,10 +1,9 @@
 /**
  * Recommendation service
  *
- * Builds the `recommend_mode` response. Extracted from `src/index.ts` so the
- * response can be tested: `src/index.ts` calls `main()` at module scope, so
- * importing it from a test starts an MCP server on stdio. That untestability
- * is why the taxonomy could sit unreferenced behind this action for so long.
+ * Builds the `recommend_mode` response. It lives outside `src/index.ts` so a
+ * unit test can call it with plain arguments, without the MCP request handler
+ * in the way.
  *
  * The `ModeRecommender` verdict is authoritative and unchanged. Reasoning-type
  * advice from `src/taxonomy/` is APPENDED to it, never substituted for it, and

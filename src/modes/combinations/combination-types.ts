@@ -349,9 +349,6 @@ export interface MultiModeAnalysisRequest {
   /** Session ID for tracking */
   sessionId?: string;
 
-  /** Maximum time per mode (ms) */
-  timeoutPerMode?: number;
-
   /** Additional context for the analysis */
   context?: string;
 }

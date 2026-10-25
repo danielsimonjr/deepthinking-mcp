@@ -2429,7 +2429,7 @@ export const deepthinking_analyze_schema = {
   name: "deepthinking_analyze",
   description: `Multi-mode reasoning analysis: combines insights from multiple thinking modes.
 
-Executes 2-10 reasoning modes in parallel, merges insights using a specified strategy,
+Runs 2-10 reasoning modes on the same thought, merges insights using a specified strategy,
 handles conflicts between perspectives, and produces a synthesized conclusion.
 
 **Presets:**
@@ -2537,7 +2537,8 @@ handles conflicts between perspectives, and produces a synthesized conclusion.
         minimum: 1000,
         maximum: 120000,
         default: 30000,
-        description: "Maximum time in milliseconds per mode (default: 30000)",
+        description:
+          "Ignored. Accepted for compatibility only: each mode runs to completion and no time limit applies (range 1000-120000, default 30000)",
       },
     },
     required: ["thought"],

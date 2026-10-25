@@ -27462,12 +27462,8 @@ var init_analyzer = __esm({
     init_conflict_resolver();
     init_presets();
     ANALYZER_CONSTANTS = {
-      /** Default timeout per mode in milliseconds */
-      DEFAULT_TIMEOUT_MS: 3e4,
-      /** Maximum parallel mode execution */
+      /** Number of modes in one batch. */
       MAX_PARALLEL_MODES: 5,
-      /** Minimum confidence threshold for insights */
-      MIN_CONFIDENCE_THRESHOLD: 0.3,
       /** Most mode-specific fields named in one insight before truncating. */
       MAX_FIELDS_LISTED: 8,
       /** Most handler advisories quoted in one insight before truncating. */
@@ -27499,10 +27495,8 @@ var init_analyzer = __esm({
     ]);
     NO_CONFIDENCE_NOTE = "No confidence was computed. deepthinking_analyze supplies only the problem statement, and this mode's handler derives confidence from mode-specific inputs it was not given. Run the mode through its own tool with those inputs to obtain a real confidence.";
     DEFAULT_CONFIG5 = {
-      defaultTimeoutPerMode: ANALYZER_CONSTANTS.DEFAULT_TIMEOUT_MS,
       continueOnError: true,
       maxParallelModes: ANALYZER_CONSTANTS.MAX_PARALLEL_MODES,
-      minConfidenceThreshold: ANALYZER_CONSTANTS.MIN_CONFIDENCE_THRESHOLD,
       verbose: false
     };
     MultiModeAnalyzer = class {
@@ -27669,9 +27663,10 @@ var init_analyzer = __esm({
        * handlers and all of which the analyzer executes, so the list understated
        * what the code does.
        *
-       * NOTE: `deepthinking_analyze`'s own `customModes` enum in
-       * `src/tools/schemas/analyze.ts` still lists the same 29. Widening it is a
-       * separate, deliberate change in `src/tools/`.
+       * `deepthinking_analyze`'s `customModes` enum in
+       * `src/tools/schemas/analyze.ts` lists every `ThinkingMode` except `custom`
+       * (34 modes); `tests/unit/tools/schemas/analyze-custom-modes.test.ts` pins
+       * that.
        */
       getSupportedModes() {
         return this.factory.getRegistry().getRegisteredModes();
@@ -27976,7 +27971,7 @@ Context: ${request.context}` : request.thought;
         return conclusion;
       }
       /**
-       * Create batches for parallel execution
+       * Split the items into batches of at most `batchSize`
        */
       createBatches(items, batchSize) {
         const batches = [];
@@ -68285,7 +68280,7 @@ var deepthinking_analyze_schema = {
   name: "deepthinking_analyze",
   description: `Multi-mode reasoning analysis: combines insights from multiple thinking modes.
 
-Executes 2-10 reasoning modes in parallel, merges insights using a specified strategy,
+Runs 2-10 reasoning modes on the same thought, merges insights using a specified strategy,
 handles conflicts between perspectives, and produces a synthesized conclusion.
 
 **Presets:**
@@ -68390,7 +68385,7 @@ handles conflicts between perspectives, and produces a synthesized conclusion.
         minimum: 1e3,
         maximum: 12e4,
         default: 3e4,
-        description: "Maximum time in milliseconds per mode (default: 30000)"
+        description: "Ignored. Accepted for compatibility only: each mode runs to completion and no time limit applies (range 1000-120000, default 30000)"
       }
     },
     required: ["thought"],
@@ -69375,9 +69370,13 @@ var analyzeInputSchema = z.object({
   context: z.string().max(MAX_LENGTHS.DESCRIPTION).optional().describe(
     "Additional context or background information to consider during analysis"
   ),
-  /** Optional timeout per mode in milliseconds */
+  /**
+   * Accepted for compatibility, never read. The analyzer runs every mode's
+   * handler synchronously, so nothing can interrupt a mode and no time limit
+   * applies. The range stays so that an earlier caller's value still validates.
+   */
   timeoutPerMode: z.number().int().min(1e3).max(12e4).optional().default(3e4).describe(
-    "Maximum time in milliseconds to spend on each mode (default: 30000, max: 120000)"
+    "Ignored. Accepted for compatibility only: each mode runs to completion and no time limit applies (range 1000-120000, default 30000)"
   )
 });
 z.object({
@@ -70085,9 +70084,7 @@ async function handleDeleteSession(input) {
 }
 async function handleAnalyze(input) {
   const { MultiModeAnalyzer: MultiModeAnalyzer2 } = await Promise.resolve().then(() => (init_combinations(), combinations_exports));
-  const DEFAULT_TIMEOUT_PER_MODE = 3e4;
   const analyzer = new MultiModeAnalyzer2({
-    defaultTimeoutPerMode: input.timeoutPerMode || DEFAULT_TIMEOUT_PER_MODE,
     continueOnError: true,
     verbose: false
   });
@@ -70101,8 +70098,7 @@ async function handleAnalyze(input) {
     customModes,
     mergeStrategy: input.mergeStrategy || "union",
     sessionId: input.sessionId,
-    context: input.context,
-    timeoutPerMode: input.timeoutPerMode
+    context: input.context
   });
   const sessionManager = await getSessionManager();
   const TITLE_MAX_LENGTH = 50;

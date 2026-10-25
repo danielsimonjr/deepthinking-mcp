@@ -108,7 +108,11 @@ export const analyzeInputSchema = z.object({
       "Additional context or background information to consider during analysis",
     ),
 
-  /** Optional timeout per mode in milliseconds */
+  /**
+   * Accepted for compatibility, never read. The analyzer runs every mode's
+   * handler synchronously, so nothing can interrupt a mode and no time limit
+   * applies. The range stays so that an earlier caller's value still validates.
+   */
   timeoutPerMode: z
     .number()
     .int()
@@ -117,7 +121,7 @@ export const analyzeInputSchema = z.object({
     .optional()
     .default(30000)
     .describe(
-      "Maximum time in milliseconds to spend on each mode (default: 30000, max: 120000)",
+      "Ignored. Accepted for compatibility only: each mode runs to completion and no time limit applies (range 1000-120000, default 30000)",
     ),
 });
 
@@ -226,7 +230,7 @@ export const analyzeToolDefinition = {
   name: "deepthinking_analyze",
   description: `Multi-mode reasoning analysis tool that combines insights from multiple thinking modes.
 
-This tool executes 2-10 reasoning modes in parallel on a given thought or problem,
+This tool executes 2-10 reasoning modes on a given thought or problem,
 then merges the resulting insights using a specified strategy. It handles conflicts
 between different perspectives and produces a synthesized conclusion.
 

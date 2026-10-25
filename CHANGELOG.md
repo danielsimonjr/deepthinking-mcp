@@ -7,7 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Changed
+
+- **`deepthinking_analyze` says that `timeoutPerMode` has no effect.** The schema accepted the value
+  and described it as "Maximum time in milliseconds to spend on each mode". The analyzer runs every
+  mode's handler synchronously, so nothing can interrupt a mode and no limit was ever enforced. The
+  value is still accepted and validated. The server would ignore an unknown field, but the advertised
+  schema sets `additionalProperties` to `false`, so a client that validates a request against that
+  schema before it sends it would reject its own request if the field were removed. Its description,
+  `docs/architecture/API.md` and `docs/architecture/DATAFLOW.md` now say that it is ignored.
+  `handleAnalyze` no longer passes it on, and `MultiModeAnalyzerConfig` and
+  `MultiModeAnalysisRequest` lose the options that nothing read: `defaultTimeoutPerMode`,
+  `minConfidenceThreshold` and `timeoutPerMode`. The package entry point does not export these
+  types.
+
 ### Fixed
+
+- **Source comments and `CLAUDE.md` name the right modes and exports.** The comment in
+  `ThoughtValidator.performValidation()` listed `recursive`, `modal`, `stochastic` and `constraint`
+  as modes with no validator, but the registry has an entry for each one; only `custom` has none. The
+  comment on `MultiModeAnalyzer.getSupportedModes()` and the note in `CLAUDE.md` said that the
+  `customModes` enum of `deepthinking_analyze` lists 29 modes, and `CLAUDE.md` said that the analyzer
+  generates canned insights from a `switch`; the enum lists 34 modes and the analyzer runs each
+  mode's real handler. The header of `src/types/core.ts` counted 34 identifiers in `ThinkingMode`,
+  which has 35. The header of `src/services/RecommendationService.ts` said that importing
+  `src/index.ts` starts a server, but the entry-point guard prevents that. The barrel headers of
+  `src/validation`, `src/cache` and `src/proof` said that `src/index.ts` has no exports or that
+  `dist/index.d.ts` is one line; `src/index.ts` exports the server, its builder, its entry point and
+  the protocol version. The new test `tests/unit/tools/schemas/analyze-custom-modes.test.ts` pins
+  the `customModes` list to every `ThinkingMode` except `custom`, in the Zod schema and in the
+  advertised schema.
+- **`deepthinking_analyze` no longer says that it runs its modes in parallel.** The advertised
+  description, the Zod description and the header of `MultiModeAnalyzer` said so. `runMode()` is
+  synchronous, so the modes of a batch run one after another. The comments on `maxParallelModes`,
+  which sets the size of a batch, say the same. A mode in the enum with no specialized handler runs
+  through the generic `hybrid` handler and reports no error; the new test fails when a mode has no
+  specialized handler.
 
 - **A shared-lock read that meets the removal of its lock directory is retried on macOS.**
   `acquireSharedLock` creates its lock file inside the shared-lock directory, and a reader that

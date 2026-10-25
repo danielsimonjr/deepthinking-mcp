@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **491 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **492 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -18,7 +18,7 @@ Every tracked TypeScript file in the repository — **491 files** — not just t
 | other | 2 |
 | reachable | 229 |
 | template | 5 |
-| test | 227 |
+| test | 228 |
 | tool | 14 |
 
 ## Per-area counts
@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **491 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 241 | 119,028 |
+| src | 241 | 119,018 |
 | templates | 5 | 772 |
-| tests | 227 | 101,672 |
+| tests | 228 | 101,735 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -89,14 +89,14 @@ Every tracked TypeScript file in the repository — **491 files** — not just t
 | `src/export/visual/utils/tikz.ts` | src | 1013 | reachable |
 | `src/export/visual/utils/uml.ts` | src | 991 | reachable |
 | `src/export/visual/visual-exporter.ts` | src | 230 | reachable |
-| `src/index.ts` | src | 1061 | reachable |
+| `src/index.ts` | src | 1057 | reachable |
 | `src/interfaces/ILogger.ts` | src | 179 | reachable |
 | `src/modes/causal/graph/algorithms/centrality.ts` | src | 610 | reachable |
 | `src/modes/causal/graph/algorithms/d-separation.ts` | src | 668 | reachable |
 | `src/modes/causal/graph/algorithms/intervention.ts` | src | 724 | reachable |
 | `src/modes/causal/graph/types.ts` | src | 472 | reachable |
-| `src/modes/combinations/analyzer.ts` | src | 941 | reachable |
-| `src/modes/combinations/combination-types.ts` | src | 415 | reachable |
+| `src/modes/combinations/analyzer.ts` | src | 932 | reachable |
+| `src/modes/combinations/combination-types.ts` | src | 412 | reachable |
 | `src/modes/combinations/conflict-resolver.ts` | src | 623 | reachable |
 | `src/modes/combinations/index.ts` | src | 100 | reachable |
 | `src/modes/combinations/merger.ts` | src | 728 | reachable |
@@ -156,12 +156,12 @@ Every tracked TypeScript file in the repository — **491 files** — not just t
 | `src/proof/gap-analyzer.ts` | src | 887 | reachable |
 | `src/proof/hierarchical-proof.ts` | src | 659 | reachable |
 | `src/proof/inconsistency-detector.ts` | src | 684 | reachable |
-| `src/proof/index.ts` | src | 117 | reachable |
+| `src/proof/index.ts` | src | 118 | reachable |
 | `src/proof/patterns/warnings.ts` | src | 406 | reachable |
 | `src/proof/strategy-recommender.ts` | src | 970 | reachable |
 | `src/proof/verifier.ts` | src | 684 | reachable |
 | `src/services/ExportService.ts` | src | 1619 | reachable |
-| `src/services/RecommendationService.ts` | src | 123 | reachable |
+| `src/services/RecommendationService.ts` | src | 122 | reachable |
 | `src/services/ThoughtFactory.ts` | src | 233 | reachable |
 | `src/session/SessionMetricsCalculator.ts` | src | 281 | reachable |
 | `src/session/manager.ts` | src | 1187 | reachable |
@@ -175,8 +175,8 @@ Every tracked TypeScript file in the repository — **491 files** — not just t
 | `src/taxonomy/reasoning-types.ts` | src | 1457 | reachable |
 | `src/taxonomy/suggestion-engine.ts` | src | 1181 | reachable |
 | `src/tools/definitions.ts` | src | 176 | reachable |
-| `src/tools/json-schemas.ts` | src | 2568 | reachable |
-| `src/tools/schemas/analyze.ts` | src | 295 | reachable |
+| `src/tools/json-schemas.ts` | src | 2569 | reachable |
+| `src/tools/schemas/analyze.ts` | src | 299 | reachable |
 | `src/tools/schemas/base.ts` | src | 75 | reachable |
 | `src/tools/schemas/index.ts` | src | 27 | reachable |
 | `src/tools/schemas/modes/academic.ts` | src | 261 | reachable |
@@ -239,7 +239,7 @@ Every tracked TypeScript file in the repository — **491 files** — not just t
 | `src/validation/cache.ts` | src | 202 | reachable |
 | `src/validation/constants.ts` | src | 101 | reachable |
 | `src/validation/index.ts` | src | 56 | reachable |
-| `src/validation/validator.ts` | src | 232 | reachable |
+| `src/validation/validator.ts` | src | 233 | reachable |
 | `src/validation/validators/base.ts` | src | 35 | reachable |
 | `src/validation/validators/index.ts` | src | 57 | reachable |
 | `src/validation/validators/modes/abductive.ts` | src | 115 | reachable |
@@ -336,7 +336,7 @@ Every tracked TypeScript file in the repository — **491 files** — not just t
 | `tests/integration/tools/analytical-firstprinciples.test.ts` | tests | 518 | test |
 | `tests/integration/tools/analytical-metareasoning.test.ts` | tests | 532 | test |
 | `tests/integration/tools/analyze-confidence-contract.test.ts` | tests | 89 | test |
-| `tests/integration/tools/analyze.test.ts` | tests | 546 | test |
+| `tests/integration/tools/analyze.test.ts` | tests | 544 | test |
 | `tests/integration/tools/causal.test.ts` | tests | 767 | test |
 | `tests/integration/tools/common-parameters.test.ts` | tests | 1055 | test |
 | `tests/integration/tools/computability.test.ts` | tests | 559 | test |
@@ -479,6 +479,7 @@ Every tracked TypeScript file in the repository — **491 files** — not just t
 | `tests/unit/taxonomy/taxonomy-wiring.test.ts` | tests | 108 | test |
 | `tests/unit/temporal.test.ts` | tests | 673 | test |
 | `tests/unit/tools/mode-reachability.test.ts` | tests | 591 | test |
+| `tests/unit/tools/schemas/analyze-custom-modes.test.ts` | tests | 65 | test |
 | `tests/unit/tools/schemas/bounds.test.ts` | tests | 504 | test |
 | `tests/unit/tools/schemas/schema-contract.test.ts` | tests | 412 | test |
 | `tests/unit/tools/schemas/schema-validation.test.ts` | tests | 233 | test |
