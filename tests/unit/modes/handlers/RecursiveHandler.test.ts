@@ -401,6 +401,119 @@ describe('RecursiveHandler', () => {
     });
   });
 
+  describe('input warnings', () => {
+    const base = {
+      thought: 'Decomposing the problem into subproblems',
+      thoughtNumber: 1,
+      totalThoughts: 5,
+      nextThoughtNeeded: true,
+      mode: 'recursive',
+    };
+    const create = (extra: Record<string, unknown>) =>
+      handler.createThought({ ...base, ...extra } as any, 'session-1');
+
+    it('carries no inputWarnings field when every value is recognised', () => {
+      const thought = create({
+        thoughtType: 'recursive_step',
+        strategy: 'dynamic_programming',
+        subproblems: [{ id: 'a', status: 'solved' }, { id: 'b' }],
+        recurrence: { formula: 'T(n) = T(n-1) + 1', complexity: 'O(n)' },
+      });
+
+      expect('inputWarnings' in thought).toBe(false);
+    });
+
+    it('replaces an unknown thought type with the default and says so once', () => {
+      const thought = create({ thoughtType: 'bogus' });
+
+      expect(thought.thoughtType).toBe('problem_decomposition');
+      expect(thought.inputWarnings).toHaveLength(1);
+      expect(thought.inputWarnings![0]).toContain(
+        'Unknown thoughtType "bogus"; using the default "problem_decomposition".'
+      );
+    });
+
+    it('replaces an unknown strategy with the default and says so once', () => {
+      const thought = create({ strategy: 'memoization' });
+
+      expect(thought.strategy).toBe('divide_and_conquer');
+      expect(thought.inputWarnings).toHaveLength(1);
+      expect(thought.inputWarnings![0]).toContain(
+        'Unknown strategy "memoization"; using the default "divide_and_conquer".'
+      );
+    });
+
+    it('keeps an unknown subproblem status as sent and says so once for each value', () => {
+      const thought = create({
+        subproblems: [{ status: 'stuck' }, { status: 'stuck' }, { status: 'lost' }],
+      });
+
+      expect(thought.subproblems!.map((s) => s.status)).toEqual(['stuck', 'stuck', 'lost']);
+      expect(thought.inputWarnings).toHaveLength(2);
+      expect(thought.inputWarnings![0]).toContain(
+        'Unknown subproblems[].status "stuck"; it is kept as sent.'
+      );
+      expect(thought.inputWarnings![1]).toContain(
+        'Unknown subproblems[].status "lost"; it is kept as sent.'
+      );
+    });
+
+    it('gives an absent subproblem status the first value of the list and no sentence', () => {
+      const thought = create({ subproblems: [{ id: 'a' }] });
+
+      expect(thought.subproblems![0].status).toBe('pending');
+      expect('inputWarnings' in thought).toBe(false);
+    });
+
+    it('names the recurrence members that recursive mode ignores, once', () => {
+      const thought = create({
+        recurrence: {
+          formula: 'T(n) = 2T(n/2) + n',
+          solution: 'Theta(n log n)',
+          solutionMethod: 'master_theorem',
+          recursionTree: { levels: 'log n' },
+        },
+      });
+
+      expect(thought.recurrence).toEqual({
+        formula: 'T(n) = 2T(n/2) + n',
+        baseCase: '',
+        closedForm: undefined,
+        complexity: undefined,
+      });
+      expect(thought.inputWarnings).toHaveLength(1);
+      expect(thought.inputWarnings![0]).toBe(
+        'Recursive mode ignores recurrence.solutionMethod, recurrence.solution and ' +
+          'recurrence.recursionTree; they are not stored (algorithmic mode reads them).'
+      );
+    });
+
+    it('says nothing about a recurrence that holds only members that recursive mode reads', () => {
+      const thought = create({
+        recurrence: { formula: 'T(n) = T(n/2) + 1', baseCase: 'T(1) = 1', closedForm: 'log n', complexity: 'O(log n)' },
+      });
+
+      expect('inputWarnings' in thought).toBe(false);
+    });
+
+    it('collects the sentences of several fields in the order of the fields', () => {
+      const thought = create({
+        thoughtType: 'bogus',
+        strategy: 'bogus',
+        subproblems: [{ status: 'stuck' }],
+        recurrence: { id: 'r-1' },
+      });
+
+      expect(thought.inputWarnings).toHaveLength(4);
+      expect(thought.inputWarnings!.map((s) => s.split(';')[0])).toEqual([
+        'Unknown thoughtType "bogus"',
+        'Unknown strategy "bogus"',
+        'Unknown subproblems[].status "stuck"',
+        'Recursive mode ignores recurrence.id',
+      ]);
+    });
+  });
+
   describe('end-to-end flow', () => {
     it('should handle merge sort decomposition', () => {
       const sessionId = 'merge-sort-session';

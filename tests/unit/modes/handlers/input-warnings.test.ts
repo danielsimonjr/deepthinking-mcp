@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   droppedValueWarning,
+  ignoredMembersWarning,
   inputWarningsField,
   unrecognisedValueWarning,
 } from "../../../../src/modes/handlers/input-warnings.js";
@@ -61,6 +62,48 @@ describe("unrecognisedValueWarning", () => {
     );
     const long = unrecognisedValueWarning("f", "y".repeat(61), RECOGNISED, "alpha");
     expect(long).toContain(`"${"y".repeat(60)}..."`);
+  });
+});
+
+describe("ignoredMembersWarning", () => {
+  it("says nothing when the client sent no member that the mode ignores", () => {
+    expect(
+      ignoredMembersWarning("recursive", "recurrence", [], "algorithmic"),
+    ).toBeUndefined();
+  });
+
+  it("names one member in the singular", () => {
+    expect(
+      ignoredMembersWarning("recursive", "recurrence", ["id"], "algorithmic"),
+    ).toBe(
+      "Recursive mode ignores recurrence.id; it is not stored (algorithmic mode reads it).",
+    );
+  });
+
+  it("names two members with 'and' and no comma", () => {
+    expect(
+      ignoredMembersWarning(
+        "recursive",
+        "recurrence",
+        ["id", "solution"],
+        "algorithmic",
+      ),
+    ).toBe(
+      "Recursive mode ignores recurrence.id and recurrence.solution; they are not stored (algorithmic mode reads them).",
+    );
+  });
+
+  it("names more members with commas and 'and' before the last", () => {
+    expect(
+      ignoredMembersWarning(
+        "recursive",
+        "recurrence",
+        ["id", "solution", "solutionProof"],
+        "algorithmic",
+      ),
+    ).toBe(
+      "Recursive mode ignores recurrence.id, recurrence.solution and recurrence.solutionProof; they are not stored (algorithmic mode reads them).",
+    );
   });
 });
 

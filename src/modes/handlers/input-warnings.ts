@@ -63,6 +63,34 @@ export function droppedValueWarning(
 }
 
 /**
+ * Describe members of an object that this mode does not read and does not
+ * store, although the schema accepts them because another mode reads the same
+ * object.
+ *
+ * @param mode - The mode that ignores the members, as the client names it
+ * @param field - Name of the request field that holds the members
+ * @param members - The members the client sent that this mode ignores
+ * @param readBy - The mode that reads them
+ * @returns One sentence, or `undefined` when `members` is empty
+ */
+export function ignoredMembersWarning(
+  mode: string,
+  field: string,
+  members: readonly string[],
+  readBy: string,
+): string | undefined {
+  if (members.length === 0) return undefined;
+  const names = members.map((member) => `${field}.${member}`);
+  const list =
+    names.length === 1
+      ? names[0]
+      : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  const [subject, object] =
+    names.length === 1 ? ["it is", "it"] : ["they are", "them"];
+  return `${mode.charAt(0).toUpperCase()}${mode.slice(1)} mode ignores ${list}; ${subject} not stored (${readBy} mode reads ${object}).`;
+}
+
+/**
  * Make the `inputWarnings` property of a thought.
  *
  * @param sentences - The sentences a handler collected; entries that are `undefined` are skipped
