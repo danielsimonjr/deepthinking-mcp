@@ -1808,7 +1808,7 @@ export const deepthinking_engineering_schema = {
       thoughtType: {
         type: "string",
         description:
-          "Step within the mode. Algorithmic: 'algorithm_definition', 'complexity_analysis', 'recurrence_solving', 'correctness_proof', 'invariant_identification', 'divide_and_conquer', 'dynamic_programming', 'greedy_choice', 'backtracking', 'branch_and_bound', 'randomized_analysis', 'amortized_analysis', 'data_structure_design', 'data_structure_analysis', 'augmentation', 'graph_traversal', 'shortest_path', 'minimum_spanning_tree', 'network_flow', 'matching', 'string_matching', 'computational_geometry', 'number_theoretic', 'approximation', 'online_algorithm', 'parallel_algorithm'. Recursive: 'problem_decomposition', 'base_case_identification', 'recursive_step', 'subproblem_solution', 'solution_combination', 'termination_analysis'. An unrecognised value is accepted with a warning; algorithmic mode then uses 'algorithm_definition'.",
+          "Step within the mode. Algorithmic: 'algorithm_definition', 'complexity_analysis', 'recurrence_solving', 'correctness_proof', 'invariant_identification', 'divide_and_conquer', 'dynamic_programming', 'greedy_choice', 'backtracking', 'branch_and_bound', 'randomized_analysis', 'amortized_analysis', 'data_structure_design', 'data_structure_analysis', 'augmentation', 'graph_traversal', 'shortest_path', 'minimum_spanning_tree', 'network_flow', 'matching', 'string_matching', 'computational_geometry', 'number_theoretic', 'approximation', 'online_algorithm', 'parallel_algorithm'. Recursive: 'problem_decomposition', 'base_case_identification', 'recursive_case_definition', 'recurrence_formulation', 'recursive_step', 'subproblem_solution', 'solution_combination', 'termination_analysis'. An unrecognised value is accepted with a warning; algorithmic mode then uses 'algorithm_definition' and recursive mode uses 'problem_decomposition'.",
       },
       // Engineering-specific properties
       analysisType: {
@@ -2184,7 +2184,8 @@ export const deepthinking_engineering_schema = {
       maxDepth: {
         type: "integer",
         minimum: 0,
-        description: "Maximum allowed recursion depth",
+        description:
+          "Recursion depth limit; omitted means no limit and no depth warning",
       },
       recurrence: {
         type: "object",

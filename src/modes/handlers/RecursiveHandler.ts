@@ -43,6 +43,8 @@ export type { RecursiveThought };
 const VALID_THOUGHT_TYPES = [
   "problem_decomposition",
   "base_case_identification",
+  "recursive_case_definition",
+  "recurrence_formulation",
   "recursive_step",
   "subproblem_solution",
   "solution_combination",
@@ -50,6 +52,13 @@ const VALID_THOUGHT_TYPES = [
 ] as const;
 
 type RecursiveThoughtType = (typeof VALID_THOUGHT_TYPES)[number];
+
+/** The thought types that work on the recurrence; each one prints it in the suggestions */
+const RECURRENCE_THOUGHT_TYPES: readonly RecursiveThoughtType[] = [
+  "recursive_case_definition",
+  "recurrence_formulation",
+  "recursive_step",
+];
 
 /**
  * Valid decomposition strategies
@@ -187,10 +196,12 @@ export class RecursiveHandler implements ModeHandler {
       ? this.normalizeRecurrence(req.recurrence, notes)
       : undefined;
 
-    // Calculate depths
+    // The current depth is inferred from the subproblems when absent. The depth
+    // limit is the client's: it is stored only when sent, so a thought holds no
+    // limit that the client did not choose.
     const currentDepth =
       req.currentDepth ?? this.calculateCurrentDepth(subproblems);
-    const maxDepth = req.maxDepth ?? Math.max(10, currentDepth + 5);
+    const maxDepth = req.maxDepth;
 
     return {
       id: randomUUID(),
@@ -345,7 +356,6 @@ export class RecursiveHandler implements ModeHandler {
       warnings: [],
       metrics: {
         currentDepth: recThought.currentDepth,
-        maxDepth: recThought.maxDepth,
         subproblemCount: recThought.subproblems?.length || 0,
         baseCaseCount: recThought.baseCases?.length || 0,
         baseCaseReached: recThought.baseCaseReached ? 1 : 0,
@@ -358,6 +368,11 @@ export class RecursiveHandler implements ModeHandler {
         "Recursive Problem Structure",
       ],
     };
+
+    // The depth limit is a metric only when the client sent one
+    if (recThought.maxDepth !== undefined) {
+      enhancements.metrics!.maxDepth = recThought.maxDepth;
+    }
 
     // Strategy-specific guidance
     enhancements.suggestions!.push(
@@ -401,22 +416,28 @@ export class RecursiveHandler implements ModeHandler {
         }
         break;
 
+      case "recursive_case_definition":
+        enhancements.guidingQuestions!.push(
+          "How does the recursive case reduce the problem to smaller instances?",
+          "Does every recursive call move toward a base case?",
+          "How are the results of the recursive calls combined?",
+        );
+        break;
+
+      case "recurrence_formulation":
+        enhancements.guidingQuestions!.push(
+          "What is the recurrence relation?",
+          "Which base case ends the recurrence?",
+          "Does the formula give a closed form or a complexity?",
+        );
+        break;
+
       case "recursive_step":
         enhancements.guidingQuestions!.push(
           "How do we reduce the problem to smaller instances?",
           "Is progress guaranteed toward base case?",
           "What is the recurrence relation?",
         );
-        if (recThought.recurrence) {
-          enhancements.suggestions!.push(
-            `Recurrence: ${recThought.recurrence.formula}`,
-          );
-          if (recThought.recurrence.closedForm) {
-            enhancements.suggestions!.push(
-              `Closed form: ${recThought.recurrence.closedForm}`,
-            );
-          }
-        }
         break;
 
       case "subproblem_solution":
@@ -454,8 +475,26 @@ export class RecursiveHandler implements ModeHandler {
         break;
     }
 
-    // Depth warnings
-    if (recThought.currentDepth > recThought.maxDepth * 0.8) {
+    // The thought types that work on the recurrence print it
+    if (
+      recThought.recurrence &&
+      RECURRENCE_THOUGHT_TYPES.includes(recThought.thoughtType)
+    ) {
+      enhancements.suggestions!.push(
+        `Recurrence: ${recThought.recurrence.formula}`,
+      );
+      if (recThought.recurrence.closedForm) {
+        enhancements.suggestions!.push(
+          `Closed form: ${recThought.recurrence.closedForm}`,
+        );
+      }
+    }
+
+    // Depth warning: only against a limit that the client sent
+    if (
+      recThought.maxDepth !== undefined &&
+      recThought.currentDepth > recThought.maxDepth * 0.8
+    ) {
       enhancements.warnings!.push(
         `High recursion depth (${recThought.currentDepth}/${recThought.maxDepth}) - nearing limit`,
       );

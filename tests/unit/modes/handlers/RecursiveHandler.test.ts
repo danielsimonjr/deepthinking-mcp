@@ -396,8 +396,146 @@ describe('RecursiveHandler', () => {
       expect(handler.supportsThoughtType('termination_analysis')).toBe(true);
     });
 
+    it('should support recursive_case_definition', () => {
+      expect(handler.supportsThoughtType('recursive_case_definition')).toBe(true);
+    });
+
+    it('should support recurrence_formulation', () => {
+      expect(handler.supportsThoughtType('recurrence_formulation')).toBe(true);
+    });
+
     it('should not support unknown types', () => {
       expect(handler.supportsThoughtType('unknown')).toBe(false);
+    });
+  });
+
+  describe('thought types that the type and the docs name', () => {
+    const base = {
+      thought: 'Defining the recursive case',
+      thoughtNumber: 2,
+      totalThoughts: 5,
+      nextThoughtNeeded: true,
+      mode: 'recursive',
+    };
+    const create = (extra: Record<string, unknown>) =>
+      handler.createThought({ ...base, ...extra } as any, 'session-1');
+
+    it.each(['recursive_case_definition', 'recurrence_formulation'])(
+      'stores %s as sent and says nothing',
+      (thoughtType) => {
+        const thought = create({ thoughtType });
+
+        expect(thought.thoughtType).toBe(thoughtType);
+        expect('inputWarnings' in thought).toBe(false);
+      }
+    );
+
+    it.each(['recursive_case_definition', 'recurrence_formulation'])(
+      'gives %s no unknown-thought-type warning in validate()',
+      (thoughtType) => {
+        const result = handler.validate({ ...base, thoughtType } as any);
+
+        expect(result.valid).toBe(true);
+        expect(result.warnings.some((w) => w.field === 'thoughtType')).toBe(false);
+      }
+    );
+
+    it('gives recursive_case_definition guidance on the recursive case and prints the recurrence', () => {
+      const thought = create({
+        thoughtType: 'recursive_case_definition',
+        recurrence: { formula: 'T(n) = T(n-1) + O(1)', closedForm: 'O(n)' },
+      });
+
+      const enhancements = handler.getEnhancements(thought);
+
+      expect(enhancements.guidingQuestions!.some((q) => q.includes('recursive case'))).toBe(true);
+      expect(enhancements.suggestions).toContain('Recurrence: T(n) = T(n-1) + O(1)');
+      expect(enhancements.suggestions).toContain('Closed form: O(n)');
+    });
+
+    it('gives recurrence_formulation guidance on the recurrence and prints it', () => {
+      const thought = create({
+        thoughtType: 'recurrence_formulation',
+        recurrence: { formula: 'T(n) = 2T(n/2) + O(n)', closedForm: 'O(n log n)' },
+      });
+
+      const enhancements = handler.getEnhancements(thought);
+
+      expect(enhancements.guidingQuestions!.some((q) => q.includes('recurrence'))).toBe(true);
+      expect(enhancements.suggestions).toContain('Recurrence: T(n) = 2T(n/2) + O(n)');
+      expect(enhancements.suggestions).toContain('Closed form: O(n log n)');
+    });
+
+    it('prints no recurrence line for these types when the client sent no recurrence', () => {
+      for (const thoughtType of ['recursive_case_definition', 'recurrence_formulation']) {
+        const enhancements = handler.getEnhancements(create({ thoughtType }));
+
+        expect(enhancements.suggestions!.some((s) => s.startsWith('Recurrence:'))).toBe(false);
+      }
+    });
+
+    it('lists all eight recognised thought types, in order, in the sentence for an unknown one', () => {
+      const thought = create({ thoughtType: 'bogus' });
+
+      expect(thought.inputWarnings![0]).toContain(
+        'Recognised values: problem_decomposition, base_case_identification, ' +
+          'recursive_case_definition, recurrence_formulation, recursive_step, ' +
+          'subproblem_solution, solution_combination, termination_analysis.'
+      );
+    });
+  });
+
+  describe('a depth limit that the client did not send', () => {
+    const base = {
+      thought: 'Descending',
+      thoughtNumber: 1,
+      totalThoughts: 5,
+      nextThoughtNeeded: true,
+      mode: 'recursive',
+    };
+    const create = (extra: Record<string, unknown>) =>
+      handler.createThought({ ...base, ...extra } as any, 'session-1');
+
+    it('stores no maxDepth when the client sent none', () => {
+      const thought = create({ currentDepth: 25 });
+
+      expect(thought.maxDepth).toBeUndefined();
+      expect(thought.currentDepth).toBe(25);
+    });
+
+    it('stores no maxDepth for subproblems that give a depth', () => {
+      const thought = create({ subproblems: [{ name: 'a', depth: 30 }] });
+
+      expect(thought.maxDepth).toBeUndefined();
+      expect(thought.currentDepth).toBe(31);
+    });
+
+    it('gives no depth warning and no maxDepth metric at depth 25 without a limit', () => {
+      const enhancements = handler.getEnhancements(create({ currentDepth: 25 }));
+
+      expect(enhancements.warnings!.some((w) => w.includes('nearing limit'))).toBe(false);
+      expect(enhancements.metrics!.currentDepth).toBe(25);
+      expect('maxDepth' in enhancements.metrics!).toBe(false);
+    });
+
+    it('stores a sent maxDepth as sent, zero included', () => {
+      expect(create({ maxDepth: 12 }).maxDepth).toBe(12);
+      expect(create({ maxDepth: 0 }).maxDepth).toBe(0);
+    });
+
+    it('warns near a sent limit and reports it as a metric', () => {
+      const enhancements = handler.getEnhancements(create({ currentDepth: 9, maxDepth: 10 }));
+
+      expect(enhancements.warnings!.some((w) => w.includes('9/10'))).toBe(true);
+      expect(enhancements.metrics!.maxDepth).toBe(10);
+    });
+
+    it('does not warn at 80 percent of a sent limit and warns above it', () => {
+      const at = handler.getEnhancements(create({ currentDepth: 8, maxDepth: 10 }));
+      const above = handler.getEnhancements(create({ currentDepth: 9, maxDepth: 10 }));
+
+      expect(at.warnings!.some((w) => w.includes('nearing limit'))).toBe(false);
+      expect(above.warnings!.some((w) => w.includes('nearing limit'))).toBe(true);
     });
   });
 
