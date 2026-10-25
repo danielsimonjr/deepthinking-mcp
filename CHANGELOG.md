@@ -27,7 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `required`, properties and bounds. `bounded-inputs.test.ts` fails on any string, array or value of
   unknown type without a bound, in the 13 tools and in the legacy `deepthinking` tool.
   `field-reach.test.ts` changes one accepted field at a time and checks that the stored thought
-  changes in at least one mode of the tool. Its list `KNOWN_UNREACHED` names the 72 accepted fields
+  changes in at least one mode of the tool. Its list `KNOWN_UNREACHED` names the 55 accepted fields
   that no mode stores, per tool. The test fails when a field joins or leaves the list without a
   change to the list.
 - **A thought can carry `inputWarnings`: one sentence for each request value that its handler
@@ -49,6 +49,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `input-warnings.test.ts` (validation and handler helpers) and
   `input-warnings-persistence.test.ts` (a session file round trip through `FileSessionStore`) pin
   the new field.
+- **Tests hold the algorithmic contract.** `algorithmic-contract.test.ts` sends each field that
+  `AlgorithmicHandler` reads through the real server over an in-memory transport and reads the answer
+  that a client reads. It covers one test for each group of fields, both shapes of `recurrence`
+  (recursive and algorithmic), the three outcomes of `designPattern`, the warning of each vocabulary
+  member, the complexity blocks that keep only the cases that the client sent, the bound of
+  `masterTheorem.case`, the fields that stay accepted and ignored, the fields that the tool accepts
+  and does not list, and the export of sparse blocks in the 8 formats of the session tool without
+  the text `undefined`. `AlgorithmicHandler.test.ts` pins what the handler fills in for an absent
+  member: the first value of the list for the proof method and the computation direction, no value for
+  the other vocabulary members, an unweighted graph, the pseudocode of the thought, the position of a
+  trace step, and a recurrence with no solution. `advertised-omissions.ts` holds the pinned list of unlisted paths, with the reason
+  "tool size cap", and the cap of 16,000 bytes for one tool. The conformance test fails when a listed
+  path is not accepted, when an accepted path is neither listed nor pinned, when the pinned list
+  names a path that is listed or not accepted, when the tool is over the cap, and when the tool
+  description does not name every pinned top-level field.
 
 ### Changed
 
@@ -105,6 +120,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`TradeStudy.criteria` is typed `(TradeCriterion | string)[]`.** The exporters show a bare string
   as the name of a criterion with weight 0. The HTML export printed `undefined` and `NaN%` for it,
   and the Modelica export threw.
+- **`deepthinking_engineering` accepts the fields that `AlgorithmicHandler` reads (algorithmic mode
+  only).** Zod removes a key that its schema does not declare, so the handler never received
+  `algorithm`, `clrsCategory`, `clrsAlgorithm`, `timeComplexity`, `spaceComplexity`, `loopInvariants`,
+  `dpFormulation`, `greedyProof`, `graphContext`, `dataStructure`, `amortizedAnalysis`, `comparison`,
+  `pseudocode`, `executionTrace`, `keyInsight`, the solution members of `recurrence`, or any member of
+  `correctnessProof`. These calls now work. This is a client-visible change: fields that the server
+  removed are now accepted and stored. Every member is optional, and every string, array and record is
+  bounded. The recursive and engineering modes keep their schemas.
+  - **`designPattern` is spelled with underscores, as the handler always read it.** The schema was an
+    enum of seven hyphenated values, so the server rejected `divide_and_conquer` and stored
+    `divide-and-conquer` with the warning "Unknown design pattern". The field is now a bounded string.
+    A known value is stored as sent. A known value with hyphens is read as the underscore value and
+    stored with underscores, and one sentence in `inputWarnings` names both spellings. An unknown
+    value is not stored, and one sentence lists the 12 values. The enum had 7 values, and the handler
+    knows 12.
+  - **`recurrence` is one object for the recursive and the algorithmic mode.** It takes the union of
+    both shapes (`id`, `formula`, `baseCase`, `closedForm`, `complexity`, `solutionMethod`, `solution`,
+    `solutionProof`, `recursionTree`). A recursive thought stores what it stored before: it reads
+    `formula`, `baseCase`, `closedForm` and `complexity`, and it does not read the other members.
+  - **`thoughtType` lists the 26 algorithmic values.** An unknown value falls back to
+    `algorithm_definition`, and one sentence says so.
+  - **A member with a fixed vocabulary keeps an unrecognised value as sent, with one sentence, and
+    is stored only when the client sent it.** The members are `correctnessProof.method`,
+    `recurrence.solutionMethod`, `amortizedAnalysis.method`, `dpFormulation.computationOrder.direction`,
+    `graphContext.graphType`, `graphContext.representation` and `graphContext.weightProperty`. Two
+    take the first value of their list when absent: `correctnessProof.method` and
+    `dpFormulation.computationOrder.direction`. The suggestions of a thought print the amortized
+    method and the graph type only when the thought holds them.
+  - **A sparse block is complete.** The handler gives a missing required member an empty string,
+    an empty list, `false` or a generated identifier, so that no export prints `undefined` and no
+    exporter reads a missing member. A time or space complexity that lacks a case keeps that case
+    empty. The handler does not write a case that the client did not send (`bestCase` `Ω(1)`,
+    `worstCase` `O(n)` and `auxiliary` `O(1)` were the values that the earlier normaliser would
+    have written), so the validator warning "Complexity analysis should include worst-case
+    analysis" fires for a block without a worst case. The flag objects `practical`,
+    `clrsReference`, `masterTheorem`, `inputSensitive` and `cacheEfficiency` are stored as sent.
+    `getEnhancements` no longer prints `Solution: undefined` for a recurrence without a solution.
+  - **The tool lists a part of these fields, and its description names the rest.** The advertised
+    schema lists `thoughtType`, `designPattern`, `algorithm` (`name`, `description`, `category`),
+    `clrsCategory`, `clrsAlgorithm`, `pseudocode`, `keyInsight`, `timeComplexity`, `spaceComplexity`,
+    `recurrence` and `correctnessProof` without `invariants`. One sentence of 367 bytes in the tool
+    description names the other fields: `dpFormulation`, `greedyProof`, `loopInvariants`,
+    `graphContext`, `dataStructure`, `amortizedAnalysis`, `comparison`, `executionTrace`,
+    `correctnessProof.invariants` and the members of `algorithm` beyond `name`, `description` and
+    `category`. The sentence ends with a link to `docs/modes/ALGORITHMIC.md` on the `master` branch,
+    because a client has no other way to learn the members of those fields and the package does not
+    ship `docs/modes`. The reason for the omission is the size cap of one tool definition, 16,000
+    bytes. A test pins the list and the link.
+    The advertised schema of the tool has no `additionalProperties: false` at three levels now: the
+    tool, `algorithm` and `correctnessProof`. A client that checks a request against the advertised
+    schema would reject the unlisted fields if the key stayed. The server never rejected an unknown
+    key.
+  - **Size.** `deepthinking_engineering` grows from 11,634 to 14,972 bytes (+3,338), and `tools/list`
+    from 78,445 to 81,783 bytes of compact JSON (+4.3 percent). The other 12 tools are byte for byte
+    the same. The recursive mode has 1,028 bytes left under the cap.
+- **Four algorithmic fields are no longer advertised, and the server still accepts and ignores
+  them:** `algorithmName`, `complexityAnalysis` and the members `invariant`, `termination` and
+  `correctness` of `correctnessProof`. No handler read them. A call that sends them succeeds and gives
+  the same answer as a call without them.
+- **Types.** `AlgorithmicThought.algorithm` is `AlgorithmDescription`, the new exported type
+  `Omit<AlgorithmSpec, "designPattern" | "timeComplexity" | "spaceComplexity" | "correctnessProof">`.
+  A thought carries those four members as its own fields, and the handler never filled them inside
+  `algorithm`. `Recurrence` gains the optional members `closedForm` and `complexity`. The members of
+  `masterTheorem` (`a`, `b`, `f`, `case`), `inputSensitive` (`parameter`, `complexity`),
+  `cacheEfficiency.cacheOblivious`, `practical` (`cacheEfficient`, `parallelizable`,
+  `deterministic`) and `clrsReference.chapter` are optional, because the handler keeps these blocks
+  as sent and a client can send a part of one.
+  `droppedValueWarning` joins `unrecognisedValueWarning` in `input-warnings.ts`.
+- **What stays outside this change.** The members `designPattern`, `timeComplexity`, `spaceComplexity`
+  and `correctnessProof` of the nested `algorithm` object are still removed, because the thought has
+  its own top-level fields for them. `clrsCategory` and `clrsAlgorithm` are stored as sent, with no
+  warning. The recursive mode keeps its own handler contract.
 
 ### Fixed
 

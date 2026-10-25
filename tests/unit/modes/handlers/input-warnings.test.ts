@@ -1,10 +1,33 @@
 import { describe, it, expect } from "vitest";
 import {
+  droppedValueWarning,
   inputWarningsField,
   unrecognisedValueWarning,
 } from "../../../../src/modes/handlers/input-warnings.js";
 
 const RECOGNISED = ["alpha", "beta"] as const;
+
+describe("droppedValueWarning", () => {
+  it("says nothing for an absent, empty or recognised value", () => {
+    expect(droppedValueWarning("f", undefined, RECOGNISED)).toBeUndefined();
+    expect(droppedValueWarning("f", null, RECOGNISED)).toBeUndefined();
+    expect(droppedValueWarning("f", "", RECOGNISED)).toBeUndefined();
+    expect(droppedValueWarning("f", "beta", RECOGNISED)).toBeUndefined();
+  });
+
+  it("says the value is not stored and lists the recognised ones", () => {
+    expect(droppedValueWarning("f", "gamma", RECOGNISED)).toBe(
+      'Unknown f "gamma"; it is not stored. Recognised values: alpha, beta.',
+    );
+  });
+
+  it("quotes a value of another type as text and shortens a long value", () => {
+    expect(droppedValueWarning("f", 7, RECOGNISED)).toContain('"7"');
+    expect(droppedValueWarning("f", "y".repeat(61), RECOGNISED)).toContain(
+      `"${"y".repeat(60)}..."`,
+    );
+  });
+});
 
 describe("unrecognisedValueWarning", () => {
   it("says nothing for an absent, empty or recognised value", () => {

@@ -12299,16 +12299,21 @@ var init_AnalysisHandler = __esm({
 
 // src/modes/handlers/input-warnings.ts
 function echo(value) {
-  const text = String(value);
+  const text2 = String(value);
   return JSON.stringify(
-    text.length > MAX_ECHO ? `${text.slice(0, MAX_ECHO)}...` : text
+    text2.length > MAX_ECHO ? `${text2.slice(0, MAX_ECHO)}...` : text2
   );
 }
 function unrecognisedValueWarning(field, value, recognised, fallback) {
   if (value === void 0 || value === null || value === "") return void 0;
   if (typeof value === "string" && recognised.includes(value)) return void 0;
-  const outcome = `using the default ${JSON.stringify(fallback)}`;
+  const outcome = fallback === void 0 ? "it is kept as sent" : `using the default ${JSON.stringify(fallback)}`;
   return `Unknown ${field} ${echo(value)}; ${outcome}. Recognised values: ${recognised.join(", ")}.`;
+}
+function droppedValueWarning(field, value, recognised) {
+  if (value === void 0 || value === null || value === "") return void 0;
+  if (typeof value === "string" && recognised.includes(value)) return void 0;
+  return `Unknown ${field} ${echo(value)}; it is not stored. Recognised values: ${recognised.join(", ")}.`;
 }
 function inputWarningsField(sentences) {
   const kept = sentences.filter((s) => s !== void 0);
@@ -13775,11 +13780,12 @@ var init_CryptanalyticHandler = __esm({
     };
   }
 });
-var VALID_THOUGHT_TYPES7, VALID_DESIGN_PATTERNS, AlgorithmicHandler;
+var VALID_THOUGHT_TYPES7, VALID_DESIGN_PATTERNS, DEFAULT_THOUGHT_TYPE, PROOF_METHODS, AMORTIZED_METHODS, GRAPH_TYPES, GRAPH_REPRESENTATIONS, WEIGHT_PROPERTIES, SOLUTION_METHODS, COMPUTATION_DIRECTIONS, text, texts, entries, underscored, AlgorithmicHandler;
 var init_AlgorithmicHandler = __esm({
   "src/modes/handlers/AlgorithmicHandler.ts"() {
     init_esm_shims();
     init_ModeHandler();
+    init_input_warnings();
     VALID_THOUGHT_TYPES7 = [
       "algorithm_definition",
       "complexity_analysis",
@@ -13822,6 +13828,43 @@ var init_AlgorithmicHandler = __esm({
       "incremental",
       "prune_and_search"
     ];
+    DEFAULT_THOUGHT_TYPE = "algorithm_definition";
+    PROOF_METHODS = [
+      "loop_invariant",
+      "induction",
+      "contradiction",
+      "direct",
+      "structural"
+    ];
+    AMORTIZED_METHODS = ["aggregate", "accounting", "potential"];
+    GRAPH_TYPES = ["directed", "undirected", "mixed"];
+    GRAPH_REPRESENTATIONS = [
+      "adjacency_list",
+      "adjacency_matrix",
+      "edge_list",
+      "implicit"
+    ];
+    WEIGHT_PROPERTIES = [
+      "non_negative",
+      "positive",
+      "arbitrary",
+      "unit"
+    ];
+    SOLUTION_METHODS = [
+      "master_theorem",
+      "substitution",
+      "recursion_tree",
+      "generating_function"
+    ];
+    COMPUTATION_DIRECTIONS = [
+      "bottom_up",
+      "top_down",
+      "bidirectional"
+    ];
+    text = (value) => typeof value === "string" ? value : "";
+    texts = (value) => Array.isArray(value) ? value.filter((item) => typeof item === "string") : [];
+    entries = (value, map) => Array.isArray(value) ? value.map((entry, i) => map(entry ?? {}, i)) : [];
+    underscored = (value) => typeof value === "string" ? value.replace(/-/g, "_") : "";
     AlgorithmicHandler = class {
       mode = "algorithmic" /* ALGORITHMIC */;
       modeName = "Algorithmic Analysis";
@@ -13834,13 +13877,30 @@ var init_AlgorithmicHandler = __esm({
        * Create an algorithmic thought from input
        */
       createThought(input, sessionId) {
-        const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
-        const timeComplexity = inputAny.timeComplexity ? this.normalizeTimeComplexity(inputAny.timeComplexity) : void 0;
-        const spaceComplexity = inputAny.spaceComplexity ? this.normalizeSpaceComplexity(inputAny.spaceComplexity) : void 0;
-        const correctnessProof = inputAny.correctnessProof ? this.normalizeCorrectnessProof(inputAny.correctnessProof) : void 0;
-        const dpFormulation = inputAny.dpFormulation ? this.normalizeDPFormulation(inputAny.dpFormulation) : void 0;
-        const greedyProof = inputAny.greedyProof ? this.normalizeGreedyProof(inputAny.greedyProof) : void 0;
+        const req = input;
+        const notes = [];
+        const vocabulary = (field, value, recognised, fallback) => {
+          notes.push(unrecognisedValueWarning(field, value, recognised));
+          return typeof value === "string" && value !== "" ? value : fallback;
+        };
+        notes.push(
+          unrecognisedValueWarning(
+            "thoughtType",
+            req.thoughtType,
+            VALID_THOUGHT_TYPES7,
+            DEFAULT_THOUGHT_TYPE
+          )
+        );
+        const thoughtType = this.resolveThoughtType(req.thoughtType);
+        const designPattern = this.resolveDesignPattern(req.designPattern, notes);
+        const timeComplexity = req.timeComplexity ? this.normalizeTimeComplexity(req.timeComplexity) : void 0;
+        const spaceComplexity = req.spaceComplexity ? this.normalizeSpaceComplexity(req.spaceComplexity) : void 0;
+        const recurrence = req.recurrence ? this.normalizeRecurrence(req.recurrence, vocabulary) : void 0;
+        const correctnessProof = req.correctnessProof ? this.normalizeCorrectnessProof(req.correctnessProof, vocabulary) : void 0;
+        const dpFormulation = req.dpFormulation ? this.normalizeDPFormulation(req.dpFormulation, vocabulary) : void 0;
+        const greedyProof = req.greedyProof ? this.normalizeGreedyProof(req.greedyProof) : void 0;
+        const graphContext = req.graphContext ? this.normalizeGraphContext(req.graphContext, vocabulary) : void 0;
+        const amortizedAnalysis = req.amortizedAnalysis ? this.normalizeAmortizedAnalysis(req.amortizedAnalysis, vocabulary) : void 0;
         return {
           id: randomUUID(),
           sessionId,
@@ -13852,31 +13912,33 @@ var init_AlgorithmicHandler = __esm({
           mode: "algorithmic" /* ALGORITHMIC */,
           // Core algorithmic fields
           thoughtType,
-          algorithm: inputAny.algorithm,
-          clrsCategory: inputAny.clrsCategory,
-          clrsAlgorithm: inputAny.clrsAlgorithm,
-          designPattern: inputAny.designPattern,
+          algorithm: req.algorithm ? this.normalizeAlgorithm(req.algorithm, req.pseudocode) : void 0,
+          // Stored as sent: the handler does not check these two against the CLRS lists
+          clrsCategory: req.clrsCategory,
+          clrsAlgorithm: req.clrsAlgorithm,
+          designPattern,
           timeComplexity,
           spaceComplexity,
-          recurrence: inputAny.recurrence,
+          recurrence,
           correctnessProof,
-          loopInvariants: inputAny.loopInvariants,
+          loopInvariants: Array.isArray(req.loopInvariants) ? entries(req.loopInvariants, (inv) => this.normalizeLoopInvariant(inv)) : void 0,
           dpFormulation,
           greedyProof,
-          graphContext: inputAny.graphContext,
-          dataStructure: inputAny.dataStructure,
-          amortizedAnalysis: inputAny.amortizedAnalysis,
-          comparison: inputAny.comparison,
-          pseudocode: inputAny.pseudocode,
-          executionTrace: inputAny.executionTrace,
-          keyInsight: inputAny.keyInsight,
+          graphContext,
+          dataStructure: req.dataStructure ? this.normalizeDataStructure(req.dataStructure) : void 0,
+          amortizedAnalysis,
+          comparison: req.comparison ? this.normalizeComparison(req.comparison) : void 0,
+          pseudocode: req.pseudocode,
+          executionTrace: req.executionTrace ? this.normalizeExecutionTrace(req.executionTrace) : void 0,
+          keyInsight: req.keyInsight,
           // Dependencies and assumptions
           dependencies: input.dependencies || [],
           assumptions: input.assumptions || [],
           uncertainty: input.uncertainty ?? 0.5,
           // Revision tracking
           isRevision: input.isRevision,
-          revisesThought: input.revisesThought
+          revisesThought: input.revisesThought,
+          ...inputWarningsField(notes)
         };
       }
       /**
@@ -13885,7 +13947,7 @@ var init_AlgorithmicHandler = __esm({
       validate(input) {
         const errors = [];
         const warnings = [];
-        const inputAny = input;
+        const req = input;
         if (!input.thought || input.thought.trim().length === 0) {
           return validationFailure([
             createValidationError(
@@ -13904,20 +13966,22 @@ var init_AlgorithmicHandler = __esm({
             )
           ]);
         }
-        if (inputAny.thoughtType && !VALID_THOUGHT_TYPES7.includes(inputAny.thoughtType)) {
+        if (req.thoughtType && !VALID_THOUGHT_TYPES7.includes(req.thoughtType)) {
           warnings.push(
             createValidationWarning(
               "thoughtType",
-              `Unknown thought type: ${inputAny.thoughtType}`,
+              `Unknown thought type: ${req.thoughtType}`,
               `Valid types include: ${VALID_THOUGHT_TYPES7.slice(0, 5).join(", ")}...`
             )
           );
         }
-        if (inputAny.designPattern && !VALID_DESIGN_PATTERNS.includes(inputAny.designPattern)) {
+        if (req.designPattern && !VALID_DESIGN_PATTERNS.includes(
+          underscored(req.designPattern)
+        )) {
           warnings.push(
             createValidationWarning(
               "designPattern",
-              `Unknown design pattern: ${inputAny.designPattern}`,
+              `Unknown design pattern: ${req.designPattern}`,
               `Valid patterns: ${VALID_DESIGN_PATTERNS.join(", ")}`
             )
           );
@@ -13933,17 +13997,15 @@ var init_AlgorithmicHandler = __esm({
             );
           }
         }
-        if (inputAny.dpFormulation) {
-          const dpWarnings = this.validateDPFormulation(inputAny.dpFormulation);
+        if (req.dpFormulation) {
+          const dpWarnings = this.validateDPFormulation(req.dpFormulation);
           warnings.push(...dpWarnings);
         }
-        if (inputAny.correctnessProof) {
-          const proofWarnings = this.validateCorrectnessProof(
-            inputAny.correctnessProof
-          );
+        if (req.correctnessProof) {
+          const proofWarnings = this.validateCorrectnessProof(req.correctnessProof);
           warnings.push(...proofWarnings);
         }
-        if (inputAny.thoughtType === "algorithm_definition" && !inputAny.timeComplexity) {
+        if (req.thoughtType === "algorithm_definition" && !req.timeComplexity) {
           warnings.push(
             createValidationWarning(
               "timeComplexity",
@@ -13952,7 +14014,7 @@ var init_AlgorithmicHandler = __esm({
             )
           );
         }
-        if (inputAny.thoughtType === "dynamic_programming" && !inputAny.dpFormulation) {
+        if (req.thoughtType === "dynamic_programming" && !req.dpFormulation) {
           warnings.push(
             createValidationWarning(
               "dpFormulation",
@@ -14025,9 +14087,13 @@ var init_AlgorithmicHandler = __esm({
             );
             if (thought.recurrence) {
               enhancements.suggestions.push(
-                `Recurrence: ${thought.recurrence.formula}`,
-                `Solution: ${thought.recurrence.solution}`
+                `Recurrence: ${thought.recurrence.formula}`
               );
+              if (thought.recurrence.solution) {
+                enhancements.suggestions.push(
+                  `Solution: ${thought.recurrence.solution}`
+                );
+              }
             }
             break;
           case "correctness_proof":
@@ -14092,8 +14158,12 @@ var init_AlgorithmicHandler = __esm({
               "Is the credit/potential always non-negative?"
             );
             if (thought.amortizedAnalysis) {
+              if (thought.amortizedAnalysis.method) {
+                enhancements.suggestions.push(
+                  `Method: ${thought.amortizedAnalysis.method}`
+                );
+              }
               enhancements.suggestions.push(
-                `Method: ${thought.amortizedAnalysis.method}`,
                 `Amortized cost: ${thought.amortizedAnalysis.result}`
               );
             }
@@ -14103,10 +14173,11 @@ var init_AlgorithmicHandler = __esm({
           case "minimum_spanning_tree":
           case "network_flow":
             if (thought.graphContext) {
-              enhancements.metrics.graphType = thought.graphContext.graphType;
-              enhancements.metrics.weighted = thought.graphContext.weighted ? 1 : 0;
+              const { graphType, weighted } = thought.graphContext;
+              if (graphType) enhancements.metrics.graphType = graphType;
+              enhancements.metrics.weighted = weighted ? 1 : 0;
               enhancements.suggestions.push(
-                `Graph: ${thought.graphContext.graphType}, ${thought.graphContext.weighted ? "weighted" : "unweighted"}`
+                `Graph: ${[graphType, weighted ? "weighted" : "unweighted"].filter(Boolean).join(", ")}`
               );
             }
             break;
@@ -14153,19 +14224,45 @@ var init_AlgorithmicHandler = __esm({
         if (inputType && VALID_THOUGHT_TYPES7.includes(inputType)) {
           return inputType;
         }
-        return "algorithm_definition";
+        return DEFAULT_THOUGHT_TYPE;
+      }
+      /**
+       * Resolve the design pattern from input.
+       *
+       * The underscore spelling is the one the type, this handler and the validator
+       * use. A hyphenated known value is read as its underscore form and a sentence
+       * names both spellings. An unknown value is not stored: the field has no
+       * default, so a guess would claim a pattern the client did not name.
+       */
+      resolveDesignPattern(value, notes) {
+        if (value === void 0 || value === null || value === "") return void 0;
+        if (VALID_DESIGN_PATTERNS.includes(value)) {
+          return value;
+        }
+        const pattern = underscored(value);
+        if (VALID_DESIGN_PATTERNS.includes(pattern)) {
+          notes.push(
+            `designPattern ${JSON.stringify(value)} uses hyphens; it is read as ${JSON.stringify(pattern)}, the spelling that is stored.`
+          );
+          return pattern;
+        }
+        notes.push(
+          droppedValueWarning("designPattern", value, VALID_DESIGN_PATTERNS)
+        );
+        return void 0;
       }
       /**
        * Normalize time complexity
        */
       normalizeTimeComplexity(tc) {
         return {
-          bestCase: tc.bestCase || "\u03A9(1)",
-          averageCase: tc.averageCase || tc.worstCase || "O(n)",
-          worstCase: tc.worstCase || "O(n)",
+          bestCase: text(tc.bestCase),
+          averageCase: text(tc.averageCase),
+          worstCase: text(tc.worstCase),
           amortized: tc.amortized,
           recurrence: tc.recurrence,
           closedForm: tc.closedForm,
+          // The schema bounds `case` to 1 to 3
           masterTheorem: tc.masterTheorem,
           inputSensitive: tc.inputSensitive
         };
@@ -14175,30 +14272,119 @@ var init_AlgorithmicHandler = __esm({
        */
       normalizeSpaceComplexity(sc) {
         return {
-          auxiliary: sc.auxiliary || "O(1)",
-          total: sc.total || sc.auxiliary || "O(n)",
+          auxiliary: text(sc.auxiliary),
+          total: text(sc.total),
           inPlace: sc.inPlace ?? false,
           stackDepth: sc.stackDepth,
           cacheEfficiency: sc.cacheEfficiency
         };
       }
       /**
+       * Normalize the algorithm under analysis.
+       *
+       * `id` and the required text members are filled; the optional blocks
+       * (`practical`, `clrsReference`) are kept as sent. `designPattern`,
+       * `timeComplexity` and `spaceComplexity` of the specification are the fields of
+       * the thought, so the description leaves them out.
+       */
+      normalizeAlgorithm(a, pseudocode) {
+        return {
+          id: a.id || randomUUID(),
+          name: text(a.name),
+          description: text(a.description),
+          category: text(a.category),
+          input: {
+            description: text(a.input?.description),
+            constraints: texts(a.input?.constraints),
+            dataStructure: text(a.input?.dataStructure)
+          },
+          output: {
+            description: text(a.output?.description),
+            properties: texts(a.output?.properties)
+          },
+          pseudocode: text(a.pseudocode) || text(pseudocode),
+          practical: a.practical,
+          alternatives: a.alternatives,
+          advantages: a.advantages,
+          disadvantages: a.disadvantages,
+          clrsReference: a.clrsReference
+        };
+      }
+      /**
+       * Normalize a recurrence.
+       *
+       * One shape serves two modes: recursive mode sends `closedForm` and
+       * `complexity`, which are kept, and algorithmic mode sends the solution
+       * members.
+       */
+      normalizeRecurrence(rec, vocabulary) {
+        return {
+          id: rec.id || randomUUID(),
+          formula: text(rec.formula),
+          baseCase: text(rec.baseCase),
+          solutionMethod: vocabulary(
+            "recurrence.solutionMethod",
+            rec.solutionMethod,
+            SOLUTION_METHODS
+          ),
+          solution: text(rec.solution),
+          solutionProof: rec.solutionProof,
+          recursionTree: rec.recursionTree ? {
+            levelWork: text(rec.recursionTree.levelWork),
+            levels: text(rec.recursionTree.levels),
+            totalWork: text(rec.recursionTree.totalWork)
+          } : void 0,
+          closedForm: rec.closedForm,
+          complexity: rec.complexity
+        };
+      }
+      /**
+       * Normalize a loop invariant: the three parts of the proof exist, empty
+       * where the client sent nothing.
+       */
+      normalizeLoopInvariant(inv) {
+        return {
+          id: inv.id || randomUUID(),
+          description: text(inv.description),
+          initialization: {
+            statement: text(inv.initialization?.statement),
+            proof: text(inv.initialization?.proof)
+          },
+          maintenance: {
+            statement: text(inv.maintenance?.statement),
+            proof: text(inv.maintenance?.proof)
+          },
+          termination: {
+            statement: text(inv.termination?.statement),
+            proof: text(inv.termination?.proof),
+            conclusionFollows: text(inv.termination?.conclusionFollows)
+          },
+          loopVariable: text(inv.loopVariable),
+          loopBounds: text(inv.loopBounds)
+        };
+      }
+      /**
        * Normalize correctness proof
        */
-      normalizeCorrectnessProof(proof) {
+      normalizeCorrectnessProof(proof, vocabulary) {
         return {
           id: proof.id || randomUUID(),
           algorithm: proof.algorithm || "",
-          method: proof.method || "loop_invariant",
+          method: vocabulary(
+            "correctnessProof.method",
+            proof.method,
+            PROOF_METHODS,
+            PROOF_METHODS[0]
+          ),
           preconditions: proof.preconditions || [],
           postconditions: proof.postconditions || [],
-          invariants: proof.invariants,
+          invariants: Array.isArray(proof.invariants) ? entries(proof.invariants, (inv) => this.normalizeLoopInvariant(inv)) : void 0,
           inductionBase: proof.inductionBase,
           inductionStep: proof.inductionStep,
-          terminationArgument: proof.terminationArgument || {
-            decreasingQuantity: "",
-            lowerBound: "",
-            proof: ""
+          terminationArgument: {
+            decreasingQuantity: text(proof.terminationArgument?.decreasingQuantity),
+            lowerBound: text(proof.terminationArgument?.lowerBound),
+            proof: text(proof.terminationArgument?.proof)
           },
           proofSteps: proof.proofSteps || [],
           keyInsights: proof.keyInsights || []
@@ -14207,31 +14393,36 @@ var init_AlgorithmicHandler = __esm({
       /**
        * Normalize DP formulation
        */
-      normalizeDPFormulation(dp) {
+      normalizeDPFormulation(dp, vocabulary) {
         return {
           id: dp.id || randomUUID(),
           problem: dp.problem || "",
-          characterization: dp.characterization || {
-            optimalSubstructure: "",
-            subproblemDefinition: ""
+          characterization: {
+            optimalSubstructure: text(dp.characterization?.optimalSubstructure),
+            subproblemDefinition: text(dp.characterization?.subproblemDefinition)
           },
-          recursiveDefinition: dp.recursiveDefinition || {
-            stateSpace: "",
-            recurrence: "",
-            baseCases: []
+          recursiveDefinition: {
+            stateSpace: text(dp.recursiveDefinition?.stateSpace),
+            recurrence: text(dp.recursiveDefinition?.recurrence),
+            baseCases: texts(dp.recursiveDefinition?.baseCases)
           },
-          computationOrder: dp.computationOrder || {
-            direction: "bottom_up",
-            fillOrder: ""
+          computationOrder: {
+            direction: vocabulary(
+              "dpFormulation.computationOrder.direction",
+              dp.computationOrder?.direction,
+              COMPUTATION_DIRECTIONS,
+              COMPUTATION_DIRECTIONS[0]
+            ),
+            fillOrder: text(dp.computationOrder?.fillOrder)
           },
-          reconstruction: dp.reconstruction || {
-            method: "",
-            traceback: ""
+          reconstruction: {
+            method: text(dp.reconstruction?.method),
+            traceback: text(dp.reconstruction?.traceback)
           },
-          complexity: dp.complexity || {
-            states: "",
-            transitionCost: "",
-            total: ""
+          complexity: {
+            states: text(dp.complexity?.states),
+            transitionCost: text(dp.complexity?.transitionCost),
+            total: text(dp.complexity?.total)
           },
           optimizations: dp.optimizations
         };
@@ -14243,17 +14434,148 @@ var init_AlgorithmicHandler = __esm({
         return {
           id: proof.id || randomUUID(),
           problem: proof.problem || "",
-          greedyChoice: proof.greedyChoice || {
-            description: "",
-            localOptimum: "",
-            globalOptimumProof: ""
+          greedyChoice: {
+            description: text(proof.greedyChoice?.description),
+            localOptimum: text(proof.greedyChoice?.localOptimum),
+            globalOptimumProof: text(proof.greedyChoice?.globalOptimumProof)
           },
-          optimalSubstructure: proof.optimalSubstructure || {
-            description: "",
-            proof: ""
+          optimalSubstructure: {
+            description: text(proof.optimalSubstructure?.description),
+            proof: text(proof.optimalSubstructure?.proof)
           },
-          exchangeArgument: proof.exchangeArgument,
-          matroid: proof.matroid
+          exchangeArgument: proof.exchangeArgument ? {
+            assumption: text(proof.exchangeArgument.assumption),
+            modification: text(proof.exchangeArgument.modification),
+            noWorse: text(proof.exchangeArgument.noWorse),
+            conclusion: text(proof.exchangeArgument.conclusion)
+          } : void 0,
+          matroid: proof.matroid ? {
+            groundSet: text(proof.matroid.groundSet),
+            independentSets: text(proof.matroid.independentSets),
+            proof: text(proof.matroid.proof)
+          } : void 0
+        };
+      }
+      /**
+       * Normalize the graph the algorithm runs on. `graphType`, `representation` and
+       * `weightProperty` are choices from a list: each is stored only when the
+       * client sent it. `properties` is a bag of optional flags and is kept as sent.
+       */
+      normalizeGraphContext(g, vocabulary) {
+        return {
+          graphType: vocabulary(
+            "graphContext.graphType",
+            g.graphType,
+            GRAPH_TYPES
+          ),
+          weighted: g.weighted ?? false,
+          properties: g.properties,
+          representation: vocabulary(
+            "graphContext.representation",
+            g.representation,
+            GRAPH_REPRESENTATIONS
+          ),
+          source: g.source,
+          sink: g.sink,
+          weightProperty: vocabulary(
+            "graphContext.weightProperty",
+            g.weightProperty,
+            WEIGHT_PROPERTIES
+          )
+        };
+      }
+      /**
+       * Normalize a data structure specification
+       */
+      normalizeDataStructure(ds) {
+        return {
+          id: ds.id || randomUUID(),
+          name: text(ds.name),
+          description: text(ds.description),
+          operations: entries(ds.operations, (op) => ({
+            name: text(op.name),
+            description: text(op.description),
+            worstCase: text(op.worstCase),
+            amortized: op.amortized,
+            averageCase: op.averageCase
+          })),
+          spaceUsage: text(ds.spaceUsage),
+          representation: text(ds.representation),
+          invariants: texts(ds.invariants),
+          augmentation: ds.augmentation ? {
+            additionalData: text(ds.augmentation.additionalData),
+            purpose: text(ds.augmentation.purpose),
+            maintenanceCost: text(ds.augmentation.maintenanceCost)
+          } : void 0,
+          tradeoffs: Array.isArray(ds.tradeoffs) ? entries(ds.tradeoffs, (t) => ({
+            versus: text(t.versus),
+            advantages: texts(t.advantages),
+            disadvantages: texts(t.disadvantages)
+          })) : void 0
+        };
+      }
+      /**
+       * Normalize an amortized analysis
+       */
+      normalizeAmortizedAnalysis(a, vocabulary) {
+        return {
+          id: a.id || randomUUID(),
+          dataStructure: text(a.dataStructure),
+          operation: text(a.operation),
+          method: vocabulary(
+            "amortizedAnalysis.method",
+            a.method,
+            AMORTIZED_METHODS
+          ),
+          aggregate: a.aggregate ? {
+            totalCost: text(a.aggregate.totalCost),
+            perOperation: text(a.aggregate.perOperation)
+          } : void 0,
+          accounting: a.accounting ? {
+            actualCost: text(a.accounting.actualCost),
+            amortizedCost: text(a.accounting.amortizedCost),
+            credit: text(a.accounting.credit),
+            creditInvariant: text(a.accounting.creditInvariant)
+          } : void 0,
+          potential: a.potential ? {
+            potentialFunction: text(a.potential.potentialFunction),
+            initialPotential: text(a.potential.initialPotential),
+            amortizedCost: text(a.potential.amortizedCost),
+            proof: text(a.potential.proof)
+          } : void 0,
+          result: text(a.result)
+        };
+      }
+      /**
+       * Normalize a comparison of algorithms
+       */
+      normalizeComparison(c) {
+        return {
+          algorithms: texts(c.algorithms),
+          criteria: entries(c.criteria, (criterion) => ({
+            criterion: text(criterion.criterion),
+            values: criterion.values ?? {},
+            winner: criterion.winner
+          })),
+          recommendation: entries(c.recommendation, (r) => ({
+            useCase: text(r.useCase),
+            bestAlgorithm: text(r.bestAlgorithm),
+            reasoning: text(r.reasoning)
+          }))
+        };
+      }
+      /**
+       * Normalize an execution trace; a step with no number takes its position.
+       */
+      normalizeExecutionTrace(trace) {
+        return {
+          input: text(trace.input),
+          steps: entries(trace.steps, (step, i) => ({
+            step: typeof step.step === "number" ? step.step : i + 1,
+            state: text(step.state),
+            action: text(step.action)
+          })),
+          output: text(trace.output)
         };
       }
       /**
@@ -18206,7 +18528,7 @@ function sanitizeThoughtContent(content) {
     "thought content"
   );
 }
-function escapeLatex(text) {
+function escapeLatex(text2) {
   const latexEscapeMap = {
     "\\": "\\textbackslash{}",
     "{": "\\{",
@@ -18219,7 +18541,7 @@ function escapeLatex(text) {
     "~": "\\textasciitilde{}",
     "^": "\\textasciicircum{}"
   };
-  return text.replace(/[\\{}$&%#_~^]/g, (char) => latexEscapeMap[char] || char);
+  return text2.replace(/[\\{}$&%#_~^]/g, (char) => latexEscapeMap[char] || char);
 }
 var MAX_LENGTHS;
 var init_sanitization = __esm({
@@ -27901,11 +28223,11 @@ var init_analyzer = __esm({
        * somewhere no handler reads.
        */
       buildModeInput(mode, request) {
-        const text = request.context ? `${request.thought}
+        const text2 = request.context ? `${request.thought}
 
 Context: ${request.context}` : request.thought;
         return {
-          thought: text,
+          thought: text2,
           thoughtNumber: 1,
           totalThoughts: 1,
           nextThoughtNeeded: false,
@@ -28004,8 +28326,8 @@ Context: ${request.context}` : request.thought;
         const joined = names.join(", ");
         return truncated > 0 ? `${joined} (+${truncated} more)` : joined;
       }
-      truncate(text, max) {
-        return text.length <= max ? text : `${text.slice(0, max - 3)}...`;
+      truncate(text2, max) {
+        return text2.length <= max ? text2 : `${text2.slice(0, max - 3)}...`;
       }
       /**
        * Collect insights from mode results into a map
@@ -28213,9 +28535,9 @@ init_esm_shims();
 function sanitizeId(id) {
   return id.replace(/[^a-zA-Z0-9_]/g, "_");
 }
-function truncateWithSuffix(text, maxLength, suffix = "...") {
-  if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength - suffix.length) + suffix;
+function truncateWithSuffix(text2, maxLength, suffix = "...") {
+  if (text2.length <= maxLength) return text2;
+  return text2.substring(0, maxLength - suffix.length) + suffix;
 }
 
 // src/export/visual/visual-exporter.ts
@@ -29880,8 +30202,8 @@ var ASCIIDocBuilder = class _ASCIIDocBuilder {
    * @param text - The text to add
    * @returns this for chaining
    */
-  addText(text) {
-    this.content.push(text);
+  addText(text2) {
+    this.content.push(text2);
     return this;
   }
   /**
@@ -30020,11 +30342,11 @@ function getNodeColor(type, colorScheme = "default") {
   const palette = COLOR_PALETTES[colorScheme] || COLOR_PALETTES.default;
   return palette[type] || palette.neutral;
 }
-function escapeSVGText(text) {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+function escapeSVGText(text2) {
+  return text2.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
-function truncateText(text, maxChars = 30) {
-  return truncateWithSuffix(text, maxChars);
+function truncateText(text2, maxChars = 30) {
+  return truncateWithSuffix(text2, maxChars);
 }
 function generateSVGHeader(width, height, title) {
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -30874,8 +31196,8 @@ function renderProgressBar(percent, color = "primary") {
       <div class="progress-fill" style="width: ${clampedPercent}%; background: var(--${color}-color)"></div>
     </div>`;
 }
-function renderBadge(text, type = "primary") {
-  return `<span class="badge badge-${type}">${escapeHTML(text)}</span>`;
+function renderBadge(text2, type = "primary") {
+  return `<span class="badge badge-${type}">${escapeHTML(text2)}</span>`;
 }
 function renderTable(headers, rows, options = {}) {
   const headerCells = headers.map((h) => `<th>${escapeHTML(h)}</th>`).join("");
@@ -31518,13 +31840,13 @@ function generateCausalJson(title, mode, causes, effects, links, options = {}) {
 
 // src/export/visual/utils/markdown.ts
 init_esm_shims();
-function heading(text, level = 1) {
+function heading(text2, level = 1) {
   const prefix = "#".repeat(level);
-  return `${prefix} ${text}
+  return `${prefix} ${text2}
 `;
 }
-function bold(text) {
-  return `**${text}**`;
+function bold(text2) {
+  return `**${text2}**`;
 }
 function codeBlock(code, language = "") {
   return `\`\`\`${language}
@@ -31532,18 +31854,18 @@ ${code}
 \`\`\`
 `;
 }
-function listItem(text, style = "bullet", indent = 0) {
+function listItem(text2, style = "bullet", indent = 0) {
   const indentStr = "  ".repeat(indent);
   switch (style) {
     case "numbered":
-      return `${indentStr}1. ${text}`;
+      return `${indentStr}1. ${text2}`;
     case "checkbox":
-      return `${indentStr}- [ ] ${text}`;
+      return `${indentStr}- [ ] ${text2}`;
     case "checkbox-checked":
-      return `${indentStr}- [x] ${text}`;
+      return `${indentStr}- [x] ${text2}`;
     case "bullet":
     default:
-      return `${indentStr}- ${text}`;
+      return `${indentStr}- ${text2}`;
   }
 }
 function list(items, style = "bullet") {
@@ -31565,8 +31887,8 @@ function getAlignmentSeparator(alignment) {
       return ":---";
   }
 }
-function escapeTableCell(text) {
-  return text.replace(/\|/g, "\\|");
+function escapeTableCell(text2) {
+  return text2.replace(/\|/g, "\\|");
 }
 function table(headers, rows, alignments) {
   const aligns = headers.map(() => "left");
@@ -37663,8 +37985,8 @@ function renderGraphModel(model, format) {
       );
   }
 }
-function truncateGraphLabel(text, max) {
-  const flat = text.replace(/\s+/g, " ").trim();
+function truncateGraphLabel(text2, max) {
+  const flat = text2.replace(/\s+/g, " ").trim();
   return flat.length > max ? `${flat.slice(0, max - 3)}...` : flat;
 }
 function itemNodes(model) {
@@ -38140,14 +38462,14 @@ function historicalToASCII(thought) {
     builder.addEmptyLine().addSection("HISTORICAL EVENTS");
     const eventItems = thought.events.map((event) => {
       const dateStr = formatDate(event.date);
-      let text = `[${event.significance.toUpperCase()}] ${event.name} (${dateStr})`;
+      let text2 = `[${event.significance.toUpperCase()}] ${event.name} (${dateStr})`;
       if (event.location) {
-        text += ` - ${event.location}`;
+        text2 += ` - ${event.location}`;
       }
       if (event.actors && event.actors.length > 0) {
-        text += ` | Actors: ${event.actors.join(", ")}`;
+        text2 += ` | Actors: ${event.actors.join(", ")}`;
       }
-      return text;
+      return text2;
     });
     builder.addBulletList(eventItems);
   }
@@ -38171,14 +38493,14 @@ function historicalToASCII(thought) {
     builder.addEmptyLine().addSection("SOURCES");
     const sourceItems = thought.sources.map((source) => {
       const reliability = Math.round(source.reliability * 100);
-      let text = `[${source.type.toUpperCase()}] ${source.title} (${reliability}% reliable)`;
+      let text2 = `[${source.type.toUpperCase()}] ${source.title} (${reliability}% reliable)`;
       if (source.author) {
-        text += ` by ${source.author}`;
+        text2 += ` by ${source.author}`;
       }
       if (source.bias) {
-        text += ` | Bias: ${source.bias.type}`;
+        text2 += ` | Bias: ${source.bias.type}`;
       }
-      return text;
+      return text2;
     });
     builder.addBulletList(sourceItems);
   }
@@ -38196,22 +38518,22 @@ function historicalToASCII(thought) {
   if (thought.actors && thought.actors.length > 0) {
     builder.addEmptyLine().addSection("HISTORICAL ACTORS");
     const actorItems = thought.actors.map((actor) => {
-      let text = `${actor.name} (${actor.type})`;
+      let text2 = `${actor.name} (${actor.type})`;
       if (actor.roles && actor.roles.length > 0) {
-        text += ` | Roles: ${actor.roles.join(", ")}`;
+        text2 += ` | Roles: ${actor.roles.join(", ")}`;
       }
-      return text;
+      return text2;
     });
     builder.addBulletList(actorItems);
   }
   if (thought.patterns && thought.patterns.length > 0) {
     builder.addEmptyLine().addSection("DETECTED PATTERNS");
     const patternItems = thought.patterns.map((pattern) => {
-      let text = `${pattern.name} [${pattern.type}] - ${Math.round(pattern.confidence * 100)}% confidence`;
+      let text2 = `${pattern.name} [${pattern.type}] - ${Math.round(pattern.confidence * 100)}% confidence`;
       if (pattern.description) {
-        text += `: ${pattern.description}`;
+        text2 += `: ${pattern.description}`;
       }
-      return text;
+      return text2;
     });
     builder.addBulletList(patternItems);
   }
@@ -51790,12 +52112,12 @@ function getSVGColors(type, colorScheme) {
   };
   return colors[type] || colors.derived;
 }
-function escapeSVGText2(text) {
-  return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+function escapeSVGText2(text2) {
+  return text2.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
-function truncateText2(text, maxChars) {
-  if (text.length <= maxChars) return text;
-  return text.substring(0, maxChars - 3) + "...";
+function truncateText2(text2, maxChars) {
+  if (text2.length <= maxChars) return text2;
+  return text2.substring(0, maxChars - 3) + "...";
 }
 function renderSVGNode(pos, colorScheme) {
   const colors = getSVGColors(pos.type, colorScheme);
@@ -54454,8 +54776,8 @@ var ValidationCache = class {
    * Get entries sorted by hit count (most used first)
    */
   getTopEntries(limit = 10) {
-    const entries = Array.from(this.cache.entries()).map(([key, entry]) => ({ key, entry })).sort((a, b) => b.entry.hitCount - a.entry.hitCount);
-    return entries.slice(0, limit);
+    const entries2 = Array.from(this.cache.entries()).map(([key, entry]) => ({ key, entry })).sort((a, b) => b.entry.hitCount - a.entry.hitCount);
+    return entries2.slice(0, limit);
   }
   /**
    * Remove entries older than a certain age
@@ -55553,8 +55875,8 @@ var ProofDecomposer = class {
   /**
    * Parse proof text into structured steps
    */
-  parseProofText(text) {
-    const sentences = text.split(/(?<=[.!?])\s+|\n+/).map((s) => s.trim()).filter((s) => s.length > 0);
+  parseProofText(text2) {
+    const sentences = text2.split(/(?<=[.!?])\s+|\n+/).map((s) => s.trim()).filter((s) => s.length > 0);
     return sentences.map((content) => ({ content }));
   }
   /**
@@ -55777,7 +56099,7 @@ var ProofDecomposer = class {
       {
         pattern: /(?:clearly|obviously|trivially|it is clear that)/i,
         type: "existence_assumption",
-        suggestedFormulation: (text) => `Explicitly state and justify: "${text.substring(0, 50)}..."`
+        suggestedFormulation: (text2) => `Explicitly state and justify: "${text2.substring(0, 50)}..."`
       },
       {
         pattern: /(?:for\s+(?:all|any|every)|∀)\s+([a-zA-Z_]\w*)/i,
@@ -57904,7 +58226,7 @@ var ProofVerifier = class {
    */
   extractReferences(step, currentIndex) {
     const refs = [];
-    const text = `${step.content} ${step.justification || ""}`;
+    const text2 = `${step.content} ${step.justification || ""}`;
     const patterns = [
       /step\s*(\d+)/gi,
       /\((\d+)\)/g,
@@ -57913,7 +58235,7 @@ var ProofVerifier = class {
     ];
     for (const pattern of patterns) {
       let match;
-      while ((match = pattern.exec(text)) !== null) {
+      while ((match = pattern.exec(text2)) !== null) {
         const ref = parseInt(match[1], 10) - 1;
         if (ref >= 0 && ref < currentIndex) {
           refs.push(ref);
@@ -58726,7 +59048,7 @@ var HierarchicalProofManager = class {
   extractDependencies(steps) {
     const deps = /* @__PURE__ */ new Set();
     for (const step of steps) {
-      const text = `${step.content} ${step.justification || ""}`;
+      const text2 = `${step.content} ${step.justification || ""}`;
       const refPatterns = [
         /(?:by|from|using)\s+(Lemma|Theorem|Corollary|Proposition|Claim)\s*(\d+|[A-Z])?/gi,
         /\[([^\]]+)\]/g
@@ -58734,7 +59056,7 @@ var HierarchicalProofManager = class {
       ];
       for (const pattern of refPatterns) {
         let match;
-        while ((match = pattern.exec(text)) !== null) {
+        while ((match = pattern.exec(text2)) !== null) {
           const ref = match[0].replace(/^(?:by|from|using)\s+/i, "").trim();
           if (ref && ref.length > 0) {
             deps.add(ref);
@@ -60226,8 +60548,8 @@ function proofFields(thought) {
 function toSteps(statements) {
   return statements.map((s) => s.trim()).filter((s) => s.length > 0).map((content) => ({ content }));
 }
-function splitText(text) {
-  return toSteps(text.split(STATEMENT_SPLIT));
+function splitText(text2) {
+  return toSteps(text2.split(STATEMENT_SPLIT));
 }
 function findProofContent(thought) {
   const t = proofFields(thought);
@@ -63560,8 +63882,8 @@ var TaxonomyClassifier = class {
    * scoring applies to any prose - including a problem description supplied to
    * `recommend_mode`, which is not a thought and never becomes one.
    */
-  classifyText(text) {
-    const content = text.toLowerCase();
+  classifyText(text2) {
+    const content = text2.toLowerCase();
     const tokens = this.tokenize(content);
     const matches = /* @__PURE__ */ new Map();
     for (const token of tokens) {
@@ -63610,8 +63932,8 @@ var TaxonomyClassifier = class {
   /**
    * Tokenize content for analysis
    */
-  tokenize(text) {
-    return text.toLowerCase().split(/\W+/).filter((token) => token.length > 2);
+  tokenize(text2) {
+    return text2.toLowerCase().split(/\W+/).filter((token) => token.length > 2);
   }
   /**
    * Calculate keyword match score
@@ -65210,8 +65532,8 @@ function project(suggestion) {
   };
 }
 function suggestReasoningTypesAdvisory(input, deps = {}) {
-  const text = classifiableText(input);
-  if (!input.characteristics && !text) {
+  const text2 = classifiableText(input);
+  if (!input.characteristics && !text2) {
     return {
       available: false,
       reason: "Reasoning-type advice unavailable: no problem description was supplied."
@@ -65220,9 +65542,9 @@ function suggestReasoningTypesAdvisory(input, deps = {}) {
   const classifier = deps.classifier ?? defaultClassifier;
   const engine = deps.engine ?? defaultEngine;
   let classification;
-  if (text) {
+  if (text2) {
     try {
-      const result = classifier.classifyText(text);
+      const result = classifier.classifyText(text2);
       classification = {
         primaryTypeId: result.primaryType.id,
         primaryTypeName: result.primaryType.name,
@@ -67809,7 +68131,7 @@ var deepthinking_scientific_schema = {
 };
 var deepthinking_engineering_schema = {
   name: "deepthinking_engineering",
-  description: "Engineering: requirements, trade studies, FMEA, ADRs, algorithm design (CLRS), recursive decomposition",
+  description: "Engineering: requirements, trade studies, FMEA, ADRs, algorithm design (CLRS), recursive decomposition. Algorithmic mode also accepts these fields, which are not listed: dpFormulation, greedyProof, loopInvariants, graphContext, dataStructure, amortizedAnalysis, comparison, executionTrace, correctnessProof.invariants, and algorithm members beyond name, description and category. See https://github.com/danielsimonjr/deepthinking-mcp/blob/master/docs/modes/ALGORITHMIC.md",
   inputSchema: {
     type: "object",
     properties: {
@@ -67821,7 +68143,7 @@ var deepthinking_engineering_schema = {
       },
       thoughtType: {
         type: "string",
-        description: "Step within the mode. Recursive: 'problem_decomposition', 'base_case_identification', 'recursive_step', 'subproblem_solution', 'solution_combination', 'termination_analysis'. An unrecognised value is accepted with a warning."
+        description: "Step within the mode. Algorithmic: 'algorithm_definition', 'complexity_analysis', 'recurrence_solving', 'correctness_proof', 'invariant_identification', 'divide_and_conquer', 'dynamic_programming', 'greedy_choice', 'backtracking', 'branch_and_bound', 'randomized_analysis', 'amortized_analysis', 'data_structure_design', 'data_structure_analysis', 'augmentation', 'graph_traversal', 'shortest_path', 'minimum_spanning_tree', 'network_flow', 'matching', 'string_matching', 'computational_geometry', 'number_theoretic', 'approximation', 'online_algorithm', 'parallel_algorithm'. Recursive: 'problem_decomposition', 'base_case_identification', 'recursive_step', 'subproblem_solution', 'solution_combination', 'termination_analysis'. An unrecognised value is accepted with a warning; algorithmic mode then uses 'algorithm_definition'."
       },
       // Engineering-specific properties
       analysisType: {
@@ -68043,51 +68365,101 @@ var deepthinking_engineering_schema = {
         required: ["confidence", "keyRisks", "nextSteps", "openIssues"],
         additionalProperties: false
       },
-      // Algorithmic-specific properties
-      algorithmName: {
-        type: "string",
-        description: "Name of the algorithm being analyzed"
-      },
+      // Algorithmic-specific properties. The Zod schema accepts more than is listed
+      // here; the omitted paths are pinned in tests/unit/tools/schemas/advertised-omissions.ts.
       designPattern: {
         type: "string",
-        enum: [
-          "divide-and-conquer",
-          "dynamic-programming",
-          "greedy",
-          "backtracking",
-          "branch-and-bound",
-          "randomized",
-          "approximation"
-        ],
-        description: "Algorithm design pattern"
+        description: "Design pattern: brute_force, divide_and_conquer, dynamic_programming, greedy, backtracking, branch_and_bound, randomized, approximation, online, parallel, incremental, prune_and_search. An unrecognised value is not stored, with a warning; hyphens are read as underscores."
       },
-      complexityAnalysis: {
+      algorithm: {
         type: "object",
         properties: {
-          timeComplexity: {
-            type: "string",
-            description: "Time complexity (e.g., O(n log n))"
-          },
-          spaceComplexity: {
-            type: "string",
-            description: "Space complexity (e.g., O(n))"
-          },
+          name: { type: "string" },
+          description: { type: "string" },
+          category: { type: "string" }
+        },
+        description: "The algorithm under analysis"
+      },
+      clrsCategory: { type: "string" },
+      clrsAlgorithm: { type: "string" },
+      pseudocode: { type: "string" },
+      keyInsight: { type: "string" },
+      timeComplexity: {
+        type: "object",
+        properties: {
           bestCase: { type: "string" },
           averageCase: { type: "string" },
-          worstCase: { type: "string" }
+          worstCase: { type: "string" },
+          amortized: { type: "string" },
+          recurrence: { type: "string" },
+          closedForm: { type: "string" },
+          masterTheorem: {
+            type: "object",
+            properties: {
+              a: { type: "number" },
+              b: { type: "number" },
+              f: { type: "string" },
+              case: { type: "integer" }
+            },
+            additionalProperties: false
+          },
+          inputSensitive: {
+            type: "object",
+            properties: {
+              parameter: { type: "string" },
+              complexity: { type: "string" }
+            },
+            additionalProperties: false
+          }
         },
         additionalProperties: false,
-        description: "Complexity analysis"
+        description: "Time complexity"
+      },
+      spaceComplexity: {
+        type: "object",
+        properties: {
+          auxiliary: { type: "string" },
+          total: { type: "string" },
+          inPlace: { type: "boolean" },
+          stackDepth: { type: "string" },
+          cacheEfficiency: {
+            type: "object",
+            properties: {
+              cacheOblivious: { type: "boolean" },
+              cacheComplexity: { type: "string" }
+            },
+            additionalProperties: false
+          }
+        },
+        additionalProperties: false,
+        description: "Space complexity"
       },
       correctnessProof: {
         type: "object",
         properties: {
-          invariant: { type: "string", description: "Loop invariant" },
-          termination: { type: "string", description: "Termination argument" },
-          correctness: { type: "string", description: "Correctness proof" }
+          id: { type: "string" },
+          algorithm: { type: "string" },
+          method: {
+            type: "string",
+            description: "'loop_invariant', 'induction', 'contradiction', 'direct' or 'structural'"
+          },
+          preconditions: { type: "array", items: { type: "string" } },
+          postconditions: { type: "array", items: { type: "string" } },
+          inductionBase: { type: "string" },
+          inductionStep: { type: "string" },
+          terminationArgument: {
+            type: "object",
+            properties: {
+              decreasingQuantity: { type: "string" },
+              lowerBound: { type: "string" },
+              proof: { type: "string" }
+            },
+            additionalProperties: false
+          },
+          proofSteps: { type: "array", items: { type: "string" } },
+          keyInsights: { type: "array", items: { type: "string" } }
         },
-        additionalProperties: false,
-        description: "Algorithm correctness proof"
+        description: "Correctness proof"
       },
       // --- Recursive mode (v9.3.4) ---
       subproblems: {
@@ -68145,28 +68517,43 @@ var deepthinking_engineering_schema = {
       recurrence: {
         type: "object",
         properties: {
+          id: { type: "string" },
           formula: {
             type: "string",
             description: "e.g. T(n) = 2T(n/2) + O(n)"
           },
           baseCase: { type: "string" },
           closedForm: { type: "string" },
-          complexity: { type: "string", description: "e.g. O(n log n)" }
+          complexity: { type: "string", description: "e.g. O(n log n)" },
+          solutionMethod: {
+            type: "string",
+            description: "'master_theorem', 'substitution', 'recursion_tree' or 'generating_function'"
+          },
+          solution: { type: "string" },
+          solutionProof: { type: "string" },
+          recursionTree: {
+            type: "object",
+            properties: {
+              levelWork: { type: "string" },
+              levels: { type: "string" },
+              totalWork: { type: "string" }
+            },
+            additionalProperties: false
+          }
         },
         additionalProperties: false,
-        description: "Recurrence relation for the decomposition"
+        description: "Recurrence relation. Recursive mode reads formula, baseCase, closedForm and complexity; algorithmic mode reads every member."
       },
       strategy: {
         type: "string",
-        description: "Decomposition strategy: 'divide_and_conquer', 'decrease_and_conquer', 'transform_and_conquer' or 'dynamic_programming'. Underscored, unlike the hyphenated `designPattern` values."
+        description: "Decomposition strategy: 'divide_and_conquer', 'decrease_and_conquer', 'transform_and_conquer' or 'dynamic_programming'."
       },
       divisionFactor: {
         type: "number",
         description: "Branching factor for divide and conquer"
       }
     },
-    required: [...baseThoughtRequired],
-    additionalProperties: false
+    required: [...baseThoughtRequired]
   }
 };
 var deepthinking_academic_schema = {
@@ -69587,27 +69974,254 @@ var AssessmentSchema = z.object({
   nextSteps: TextArraySchema,
   openIssues: TextArraySchema
 });
-var ComplexityAnalysisSchema = z.object({
-  timeComplexity: IdSchema.optional(),
-  spaceComplexity: IdSchema.optional(),
+var InvariantStepSchema = z.object({
+  statement: TextSchema.optional(),
+  proof: TextSchema.optional()
+});
+var LoopInvariantSchema = z.object({
+  id: IdSchema.optional(),
+  description: TextSchema.optional(),
+  initialization: InvariantStepSchema.optional(),
+  maintenance: InvariantStepSchema.optional(),
+  termination: z.object({
+    statement: TextSchema.optional(),
+    proof: TextSchema.optional(),
+    conclusionFollows: TextSchema.optional()
+  }).optional(),
+  loopVariable: IdSchema.optional(),
+  loopBounds: IdSchema.optional()
+});
+var TimeComplexitySchema = z.object({
   bestCase: IdSchema.optional(),
   averageCase: IdSchema.optional(),
-  worstCase: IdSchema.optional()
+  worstCase: IdSchema.optional(),
+  amortized: IdSchema.optional(),
+  recurrence: IdSchema.optional(),
+  closedForm: IdSchema.optional(),
+  masterTheorem: z.object({
+    a: z.number().optional(),
+    b: z.number().optional(),
+    f: IdSchema.optional(),
+    /** Which case of the master theorem applies. */
+    case: z.number().int().min(1).max(3).optional()
+  }).optional(),
+  inputSensitive: z.object({
+    parameter: IdSchema.optional(),
+    complexity: IdSchema.optional()
+  }).optional()
+});
+var SpaceComplexitySchema = z.object({
+  auxiliary: IdSchema.optional(),
+  total: IdSchema.optional(),
+  inPlace: z.boolean().optional(),
+  stackDepth: IdSchema.optional(),
+  cacheEfficiency: z.object({
+    cacheOblivious: z.boolean().optional(),
+    cacheComplexity: IdSchema.optional()
+  }).optional()
 });
 var CorrectnessProofSchema = z.object({
-  invariant: TextSchema.optional(),
-  termination: TextSchema.optional(),
-  correctness: TextSchema.optional()
+  id: IdSchema.optional(),
+  algorithm: NameSchema.optional(),
+  method: IdSchema.optional(),
+  preconditions: TextArraySchema.optional(),
+  postconditions: TextArraySchema.optional(),
+  invariants: z.array(LoopInvariantSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  inductionBase: TextSchema.optional(),
+  inductionStep: TextSchema.optional(),
+  terminationArgument: z.object({
+    decreasingQuantity: TextSchema.optional(),
+    lowerBound: TextSchema.optional(),
+    proof: TextSchema.optional()
+  }).optional(),
+  proofSteps: TextArraySchema.optional(),
+  keyInsights: TextArraySchema.optional()
 });
-var DesignPatternEnum = z.enum([
-  "divide-and-conquer",
-  "dynamic-programming",
-  "greedy",
-  "backtracking",
-  "branch-and-bound",
-  "randomized",
-  "approximation"
-]);
+var AlgorithmSpecSchema = z.object({
+  id: IdSchema.optional(),
+  name: NameSchema.optional(),
+  description: TextSchema.optional(),
+  /** For example Sorting, Graph or String. */
+  category: IdSchema.optional(),
+  pseudocode: TextSchema.optional(),
+  input: z.object({
+    description: TextSchema.optional(),
+    constraints: TextArraySchema.optional(),
+    dataStructure: IdSchema.optional()
+  }).optional(),
+  output: z.object({
+    description: TextSchema.optional(),
+    properties: TextArraySchema.optional()
+  }).optional(),
+  practical: z.object({
+    cacheEfficient: z.boolean().optional(),
+    parallelizable: z.boolean().optional(),
+    stable: z.boolean().optional(),
+    online: z.boolean().optional(),
+    deterministic: z.boolean().optional(),
+    adaptive: z.boolean().optional()
+  }).optional(),
+  alternatives: TextArraySchema.optional(),
+  advantages: TextArraySchema.optional(),
+  disadvantages: TextArraySchema.optional(),
+  clrsReference: z.object({
+    chapter: z.number().int().min(0).optional(),
+    section: z.number().int().min(0).optional(),
+    page: z.number().int().min(0).optional()
+  }).optional()
+});
+var DPFormulationSchema = z.object({
+  id: IdSchema.optional(),
+  problem: TextSchema.optional(),
+  characterization: z.object({
+    optimalSubstructure: TextSchema.optional(),
+    subproblemDefinition: TextSchema.optional()
+  }).optional(),
+  recursiveDefinition: z.object({
+    stateSpace: TextSchema.optional(),
+    recurrence: TextSchema.optional(),
+    baseCases: TextArraySchema.optional()
+  }).optional(),
+  computationOrder: z.object({
+    /** bottom_up, top_down or bidirectional. */
+    direction: IdSchema.optional(),
+    fillOrder: TextSchema.optional()
+  }).optional(),
+  reconstruction: z.object({
+    method: TextSchema.optional(),
+    traceback: TextSchema.optional()
+  }).optional(),
+  complexity: z.object({
+    states: IdSchema.optional(),
+    transitionCost: IdSchema.optional(),
+    total: IdSchema.optional()
+  }).optional(),
+  optimizations: z.object({
+    spaceOptimization: TextSchema.optional(),
+    memoization: z.boolean().optional(),
+    monotonicity: TextSchema.optional()
+  }).optional()
+});
+var GreedyProofSchema = z.object({
+  id: IdSchema.optional(),
+  problem: TextSchema.optional(),
+  greedyChoice: z.object({
+    description: TextSchema.optional(),
+    localOptimum: TextSchema.optional(),
+    globalOptimumProof: TextSchema.optional()
+  }).optional(),
+  optimalSubstructure: z.object({
+    description: TextSchema.optional(),
+    proof: TextSchema.optional()
+  }).optional(),
+  exchangeArgument: z.object({
+    assumption: TextSchema.optional(),
+    modification: TextSchema.optional(),
+    noWorse: TextSchema.optional(),
+    conclusion: TextSchema.optional()
+  }).optional(),
+  matroid: z.object({
+    groundSet: TextSchema.optional(),
+    independentSets: TextSchema.optional(),
+    proof: TextSchema.optional()
+  }).optional()
+});
+var GraphContextSchema = z.object({
+  graphType: IdSchema.optional(),
+  weighted: z.boolean().optional(),
+  properties: z.object({
+    connected: z.boolean().optional(),
+    acyclic: z.boolean().optional(),
+    bipartite: z.boolean().optional(),
+    planar: z.boolean().optional(),
+    sparse: z.boolean().optional(),
+    dense: z.boolean().optional()
+  }).optional(),
+  representation: IdSchema.optional(),
+  source: IdSchema.optional(),
+  sink: IdSchema.optional(),
+  weightProperty: IdSchema.optional()
+});
+var DataStructureOperationSchema = z.object({
+  name: NameSchema.optional(),
+  description: TextSchema.optional(),
+  worstCase: IdSchema.optional(),
+  amortized: IdSchema.optional(),
+  averageCase: IdSchema.optional()
+});
+var DataStructureSchema = z.object({
+  id: IdSchema.optional(),
+  name: NameSchema.optional(),
+  description: TextSchema.optional(),
+  operations: z.array(DataStructureOperationSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  spaceUsage: IdSchema.optional(),
+  representation: TextSchema.optional(),
+  invariants: TextArraySchema.optional(),
+  augmentation: z.object({
+    additionalData: TextSchema.optional(),
+    purpose: TextSchema.optional(),
+    maintenanceCost: IdSchema.optional()
+  }).optional(),
+  tradeoffs: z.array(
+    z.object({
+      versus: NameSchema.optional(),
+      advantages: TextArraySchema.optional(),
+      disadvantages: TextArraySchema.optional()
+    })
+  ).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional()
+});
+var AmortizedAnalysisSchema = z.object({
+  id: IdSchema.optional(),
+  dataStructure: NameSchema.optional(),
+  operation: NameSchema.optional(),
+  method: IdSchema.optional(),
+  aggregate: z.object({
+    totalCost: IdSchema.optional(),
+    perOperation: IdSchema.optional()
+  }).optional(),
+  accounting: z.object({
+    actualCost: IdSchema.optional(),
+    amortizedCost: IdSchema.optional(),
+    credit: TextSchema.optional(),
+    creditInvariant: TextSchema.optional()
+  }).optional(),
+  potential: z.object({
+    potentialFunction: TextSchema.optional(),
+    initialPotential: TextSchema.optional(),
+    amortizedCost: TextSchema.optional(),
+    proof: TextSchema.optional()
+  }).optional(),
+  result: IdSchema.optional()
+});
+var ComparisonSchema = z.object({
+  algorithms: IdArraySchema.optional(),
+  criteria: z.array(
+    z.object({
+      criterion: NameSchema.optional(),
+      /** The value of each algorithm on this criterion, by algorithm name. */
+      values: boundedRecord(IdSchema, IdSchema).optional(),
+      winner: NameSchema.optional()
+    })
+  ).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  recommendation: z.array(
+    z.object({
+      useCase: TextSchema.optional(),
+      bestAlgorithm: NameSchema.optional(),
+      reasoning: TextSchema.optional()
+    })
+  ).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional()
+});
+var ExecutionTraceSchema = z.object({
+  input: TextSchema.optional(),
+  steps: z.array(
+    z.object({
+      step: z.number().int().min(0).optional(),
+      state: TextSchema.optional(),
+      action: TextSchema.optional()
+    })
+  ).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  output: TextSchema.optional()
+});
 var SubproblemSchema = z.object({
   id: IdSchema.optional(),
   name: NameSchema.optional(),
@@ -69626,10 +70240,19 @@ var BaseCaseSchema = z.object({
   verified: z.boolean().optional()
 });
 var RecurrenceRelationSchema = z.object({
+  id: IdSchema.optional(),
   formula: TextSchema.optional(),
   baseCase: TextSchema.optional(),
   closedForm: TextSchema.optional(),
-  complexity: IdSchema.optional()
+  complexity: IdSchema.optional(),
+  solutionMethod: IdSchema.optional(),
+  solution: TextSchema.optional(),
+  solutionProof: TextSchema.optional(),
+  recursionTree: z.object({
+    levelWork: TextSchema.optional(),
+    levels: TextSchema.optional(),
+    totalWork: TextSchema.optional()
+  }).optional()
 });
 var EngineeringSchema = BaseThoughtSchema.extend({
   mode: z.enum(["engineering", "algorithmic", "recursive"]),
@@ -69644,12 +70267,27 @@ var EngineeringSchema = BaseThoughtSchema.extend({
   fmea: FmeaSchema.optional(),
   designDecisions: DesignDecisionsSchema.optional(),
   assessment: AssessmentSchema.optional(),
-  // Algorithmic mode (CLRS)
-  algorithmName: NameSchema.optional(),
-  designPattern: DesignPatternEnum.optional(),
-  complexityAnalysis: ComplexityAnalysisSchema.optional(),
+  // Algorithmic mode (CLRS). `designPattern` is a bounded string: the handler
+  // reads a hyphenated known value as its underscore form and does not store an
+  // unknown one, and a Zod enum would turn either into a hard rejection.
+  designPattern: IdSchema.optional(),
+  algorithm: AlgorithmSpecSchema.optional(),
+  clrsCategory: IdSchema.optional(),
+  clrsAlgorithm: IdSchema.optional(),
+  timeComplexity: TimeComplexitySchema.optional(),
+  spaceComplexity: SpaceComplexitySchema.optional(),
   correctnessProof: CorrectnessProofSchema.optional(),
-  // Recursive mode
+  loopInvariants: z.array(LoopInvariantSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
+  dpFormulation: DPFormulationSchema.optional(),
+  greedyProof: GreedyProofSchema.optional(),
+  graphContext: GraphContextSchema.optional(),
+  dataStructure: DataStructureSchema.optional(),
+  amortizedAnalysis: AmortizedAnalysisSchema.optional(),
+  comparison: ComparisonSchema.optional(),
+  pseudocode: TextSchema.optional(),
+  executionTrace: ExecutionTraceSchema.optional(),
+  keyInsight: TextSchema.optional(),
+  // Recursive mode; `recurrence` is shared with algorithmic mode
   subproblems: z.array(SubproblemSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
   baseCases: z.array(BaseCaseSchema).max(MAX_LENGTHS.NESTED_ARRAY_ITEMS).optional(),
   baseCaseReached: z.boolean().optional(),

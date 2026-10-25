@@ -152,10 +152,45 @@ describe("H-2: schema-layer input bounding", () => {
       expect(() => AcademicSchema.parse(tooManySources)).toThrow();
     });
 
-    it("EngineeringSchema rejects an oversized algorithmName", () => {
+    it("EngineeringSchema rejects an oversized algorithm name", () => {
       const input = baseThought({
         mode: "algorithmic",
-        algorithmName: "n".repeat(MAX_LENGTHS.TITLE + 1),
+        algorithm: { name: "n".repeat(MAX_LENGTHS.TITLE + 1) },
+      });
+      expect(() => EngineeringSchema.parse(input)).toThrow();
+    });
+
+    // The advertisement leaves these fields out (tool size cap); the schema still bounds them.
+    it("EngineeringSchema rejects oversized text in an unlisted algorithmic field", () => {
+      const input = baseThought({
+        mode: "algorithmic",
+        dpFormulation: {
+          recursiveDefinition: {
+            recurrence: "r".repeat(MAX_LENGTHS.DESCRIPTION + 1),
+          },
+        },
+      });
+      expect(() => EngineeringSchema.parse(input)).toThrow();
+    });
+
+    it("EngineeringSchema rejects too many loop invariants", () => {
+      const input = baseThought({
+        mode: "algorithmic",
+        loopInvariants: Array.from(
+          { length: MAX_LENGTHS.NESTED_ARRAY_ITEMS + 1 },
+          () => ({}),
+        ),
+      });
+      expect(() => EngineeringSchema.parse(input)).toThrow();
+    });
+
+    it("EngineeringSchema rejects too many entries in a comparison value map", () => {
+      const values = Object.fromEntries(
+        Array.from({ length: MAX_LENGTHS.ARRAY_ITEMS + 1 }, (_, i) => [`a${i}`, "x"]),
+      );
+      const input = baseThought({
+        mode: "algorithmic",
+        comparison: { criteria: [{ values }] },
       });
       expect(() => EngineeringSchema.parse(input)).toThrow();
     });

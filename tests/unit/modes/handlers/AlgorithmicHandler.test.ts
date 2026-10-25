@@ -950,4 +950,240 @@ describe('AlgorithmicHandler', () => {
       expect(enhancements.guidingQuestions!.some((q) => q.includes('overlapping'))).toBe(true);
     });
   });
+
+  describe('designPattern spelling', () => {
+    const base = {
+      thought: 'Divide the input',
+      thoughtNumber: 1,
+      totalThoughts: 2,
+      nextThoughtNeeded: true,
+      mode: 'algorithmic',
+    };
+
+    it('reads a hyphenated known value as its underscore form and says so once', () => {
+      const thought = handler.createThought({ ...base, designPattern: 'divide-and-conquer' } as any, 's');
+      expect(thought.designPattern).toBe('divide_and_conquer');
+      expect(thought.inputWarnings).toEqual([
+        'designPattern "divide-and-conquer" uses hyphens; it is read as "divide_and_conquer", the spelling that is stored.',
+      ]);
+    });
+
+    it('stores an underscore value as sent, with no sentence', () => {
+      const thought = handler.createThought({ ...base, designPattern: 'greedy' } as any, 's');
+      expect(thought.designPattern).toBe('greedy');
+      expect(thought).not.toHaveProperty('inputWarnings');
+    });
+
+    it('does not store an unknown value and lists the recognised ones', () => {
+      const thought = handler.createThought({ ...base, designPattern: 'bogus' } as any, 's');
+      expect(thought.designPattern).toBeUndefined();
+      expect(thought.inputWarnings).toHaveLength(1);
+      expect(thought.inputWarnings![0]).toMatch(/^Unknown designPattern "bogus"; it is not stored\. Recognised values: brute_force, /);
+    });
+
+    it('validate() gives no unknown-pattern warning for a hyphenated known value', () => {
+      const result = handler.validate({ ...base, designPattern: 'dynamic-programming' } as any);
+      expect(result.warnings.some((w) => w.field === 'designPattern')).toBe(false);
+    });
+  });
+
+  describe('a sparse block does not break the enhancements', () => {
+    const base = {
+      thought: 'Sparse block',
+      thoughtNumber: 1,
+      totalThoughts: 2,
+      nextThoughtNeeded: true,
+      mode: 'algorithmic',
+    };
+
+    const CASES: [string, Record<string, unknown>][] = [
+      ['recurrence with a formula only', { thoughtType: 'recurrence_solving', recurrence: { formula: 'T(n) = T(n/2) + 1' } }],
+      ['empty comparison', { comparison: {} }],
+      ['empty amortizedAnalysis', { thoughtType: 'amortized_analysis', amortizedAnalysis: {} }],
+      ['empty graphContext', { thoughtType: 'graph_traversal', graphContext: {} }],
+      ['empty correctnessProof', { thoughtType: 'correctness_proof', correctnessProof: {} }],
+      ['empty loopInvariants entry', { thoughtType: 'invariant_identification', loopInvariants: [{}] }],
+      ['empty dpFormulation', { thoughtType: 'dynamic_programming', dpFormulation: {} }],
+      ['empty greedyProof', { thoughtType: 'greedy_choice', greedyProof: {} }],
+      ['empty timeComplexity and spaceComplexity', { thoughtType: 'complexity_analysis', timeComplexity: {}, spaceComplexity: {} }],
+    ];
+
+    it.each(CASES)('%s', (_label, fields) => {
+      const thought = handler.createThought({ ...base, ...fields } as any, 's');
+      const enhancements = handler.getEnhancements(thought);
+      const text = JSON.stringify([enhancements.suggestions, enhancements.metrics, thought]);
+      expect(text).not.toMatch(/undefined|NaN/);
+    });
+
+    it('fills the members the thought type requires in a sparse invariant', () => {
+      const thought = handler.createThought(
+        { ...base, loopInvariants: [{}], correctnessProof: { invariants: [{}] } } as any,
+        's',
+      );
+      for (const invariant of [thought.loopInvariants![0], thought.correctnessProof!.invariants![0]]) {
+        expect(invariant).toMatchObject({
+          description: '',
+          initialization: { statement: '', proof: '' },
+          maintenance: { statement: '', proof: '' },
+          termination: { statement: '', proof: '', conclusionFollows: '' },
+          loopVariable: '',
+          loopBounds: '',
+        });
+        expect(typeof invariant.id).toBe('string');
+      }
+    });
+
+    it('replaces a null entry of a list with a sparse entry', () => {
+      const thought = handler.createThought(
+        { ...base, loopInvariants: [null], executionTrace: { steps: [null] } } as any,
+        's',
+      );
+      expect(thought.loopInvariants).toHaveLength(1);
+      expect(typeof thought.loopInvariants![0].id).toBe('string');
+      expect(thought.executionTrace!.steps).toEqual([{ step: 1, state: '', action: '' }]);
+    });
+  });
+
+  describe('what the handler fills in for an absent member', () => {
+    const base = {
+      thought: 'Defaults',
+      thoughtNumber: 1,
+      totalThoughts: 2,
+      nextThoughtNeeded: true,
+      mode: 'algorithmic',
+    };
+
+    it('takes the first value of the vocabulary for an absent proof method', () => {
+      const thought = handler.createThought({ ...base, correctnessProof: {} } as any, 's');
+      expect(thought.correctnessProof!.method).toBe('loop_invariant');
+      expect(thought).not.toHaveProperty('inputWarnings');
+    });
+
+    it('stores no graph type and no representation for a graphContext that sends none, and an unweighted graph', () => {
+      const thought = handler.createThought({ ...base, graphContext: {} } as any, 's');
+      expect(thought.graphContext!.graphType).toBeUndefined();
+      expect(thought.graphContext!.representation).toBeUndefined();
+      expect(thought.graphContext!.weighted).toBe(false);
+      expect(thought).not.toHaveProperty('inputWarnings');
+    });
+
+    it('keeps a graph that the client marks as weighted, with no graph type and no representation', () => {
+      const thought = handler.createThought({ ...base, graphContext: { weighted: true } } as any, 's');
+      expect(thought.graphContext!.weighted).toBe(true);
+      expect(thought.graphContext!.graphType).toBeUndefined();
+      expect(thought.graphContext!.representation).toBeUndefined();
+    });
+
+    it('stores no method for an amortizedAnalysis that sends none', () => {
+      const thought = handler.createThought(
+        { ...base, amortizedAnalysis: { operation: 'push' } } as any,
+        's',
+      );
+      expect(thought.amortizedAnalysis!.method).toBeUndefined();
+      expect(thought.amortizedAnalysis!.operation).toBe('push');
+      expect(thought).not.toHaveProperty('inputWarnings');
+    });
+
+    it('stores no solution method for a recurrence that sends none', () => {
+      const thought = handler.createThought(
+        { ...base, recurrence: { formula: 'T(n) = T(n/2) + 1' } } as any,
+        's',
+      );
+      expect(thought.recurrence!.solutionMethod).toBeUndefined();
+      expect(thought.recurrence!.formula).toBe('T(n) = T(n/2) + 1');
+      expect(thought).not.toHaveProperty('inputWarnings');
+    });
+
+    it('stores a vocabulary member as sent, with no sentence, when the client sends a recognised value', () => {
+      const thought = handler.createThought(
+        {
+          ...base,
+          graphContext: { graphType: 'undirected', representation: 'edge_list' },
+          amortizedAnalysis: { method: 'potential' },
+          recurrence: { solutionMethod: 'substitution' },
+        } as any,
+        's',
+      );
+      expect(thought.graphContext).toMatchObject({ graphType: 'undirected', representation: 'edge_list' });
+      expect(thought.amortizedAnalysis!.method).toBe('potential');
+      expect(thought.recurrence!.solutionMethod).toBe('substitution');
+      expect(thought).not.toHaveProperty('inputWarnings');
+    });
+
+    it('still keeps an unrecognised vocabulary member as sent, with one sentence each', () => {
+      const thought = handler.createThought(
+        {
+          ...base,
+          graphContext: { graphType: 'bogus', representation: 'bogus' },
+          amortizedAnalysis: { method: 'bogus' },
+          recurrence: { solutionMethod: 'bogus' },
+        } as any,
+        's',
+      );
+      expect(thought.graphContext!.graphType).toBe('bogus');
+      expect(thought.amortizedAnalysis!.method).toBe('bogus');
+      expect(thought.recurrence!.solutionMethod).toBe('bogus');
+      expect(thought.inputWarnings).toHaveLength(4);
+    });
+
+    it('prints a method and a graph type in the suggestions only when the thought has them', () => {
+      const method = (extra: Record<string, unknown>) =>
+        handler.getEnhancements(
+          handler.createThought({ ...base, thoughtType: 'amortized_analysis', ...extra } as any, 's'),
+        ).suggestions!;
+      expect(method({ amortizedAnalysis: { method: 'accounting', result: 'O(1)' } })).toContain('Method: accounting');
+      expect(method({ amortizedAnalysis: { result: 'O(1)' } }).some((s) => s.startsWith('Method:'))).toBe(false);
+      expect(method({ amortizedAnalysis: { result: 'O(1)' } })).toContain('Amortized cost: O(1)');
+
+      const graph = (graphContext: Record<string, unknown>) =>
+        handler.getEnhancements(
+          handler.createThought({ ...base, thoughtType: 'shortest_path', graphContext } as any, 's'),
+        );
+      expect(graph({ graphType: 'directed', weighted: true }).suggestions).toContain('Graph: directed, weighted');
+      expect(graph({ graphType: 'directed', weighted: true }).metrics!.graphType).toBe('directed');
+      expect(graph({ weighted: true }).suggestions).toContain('Graph: weighted');
+      expect(graph({ weighted: true }).metrics).not.toHaveProperty('graphType');
+      expect(graph({}).suggestions).toContain('Graph: unweighted');
+    });
+
+    it('gives an algorithm with no pseudocode the pseudocode of the thought', () => {
+      const thought = handler.createThought(
+        { ...base, algorithm: { name: 'Merge sort' }, pseudocode: 'MERGE-SORT(A)' } as any,
+        's',
+      );
+      expect(thought.algorithm!.pseudocode).toBe('MERGE-SORT(A)');
+    });
+
+    it('keeps the pseudocode of the algorithm when both are sent', () => {
+      const thought = handler.createThought(
+        { ...base, algorithm: { name: 'Merge sort', pseudocode: 'INNER' }, pseudocode: 'OUTER' } as any,
+        's',
+      );
+      expect(thought.algorithm!.pseudocode).toBe('INNER');
+    });
+
+    it('numbers the steps of a trace by position when the client sends no number', () => {
+      const thought = handler.createThought(
+        { ...base, executionTrace: { steps: [{ action: 'a' }, { action: 'b' }, { step: 9, action: 'c' }] } } as any,
+        's',
+      );
+      expect(thought.executionTrace!.steps.map((s) => s.step)).toEqual([1, 2, 9]);
+    });
+
+    it('prints the solution of a recurrence only when there is one', () => {
+      const recurrence = { formula: 'T(n) = T(n/2) + 1' };
+      const without = handler.createThought(
+        { ...base, thoughtType: 'recurrence_solving', recurrence } as any,
+        's',
+      );
+      const withSolution = handler.createThought(
+        { ...base, thoughtType: 'recurrence_solving', recurrence: { ...recurrence, solution: 'O(log n)' } } as any,
+        's',
+      );
+      const lines = (t: typeof without) => handler.getEnhancements(t).suggestions!;
+      expect(lines(without)).toContain('Recurrence: T(n) = T(n/2) + 1');
+      expect(lines(without).some((s) => s.startsWith('Solution:'))).toBe(false);
+      expect(lines(withSolution)).toContain('Solution: O(log n)');
+    });
+  });
 });

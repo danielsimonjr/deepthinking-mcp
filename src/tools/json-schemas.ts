@@ -1795,7 +1795,7 @@ export const deepthinking_scientific_schema = {
 export const deepthinking_engineering_schema = {
   name: "deepthinking_engineering",
   description:
-    "Engineering: requirements, trade studies, FMEA, ADRs, algorithm design (CLRS), recursive decomposition",
+    "Engineering: requirements, trade studies, FMEA, ADRs, algorithm design (CLRS), recursive decomposition. Algorithmic mode also accepts these fields, which are not listed: dpFormulation, greedyProof, loopInvariants, graphContext, dataStructure, amortizedAnalysis, comparison, executionTrace, correctnessProof.invariants, and algorithm members beyond name, description and category. See https://github.com/danielsimonjr/deepthinking-mcp/blob/master/docs/modes/ALGORITHMIC.md",
   inputSchema: {
     type: "object",
     properties: {
@@ -1808,7 +1808,7 @@ export const deepthinking_engineering_schema = {
       thoughtType: {
         type: "string",
         description:
-          "Step within the mode. Recursive: 'problem_decomposition', 'base_case_identification', 'recursive_step', 'subproblem_solution', 'solution_combination', 'termination_analysis'. An unrecognised value is accepted with a warning.",
+          "Step within the mode. Algorithmic: 'algorithm_definition', 'complexity_analysis', 'recurrence_solving', 'correctness_proof', 'invariant_identification', 'divide_and_conquer', 'dynamic_programming', 'greedy_choice', 'backtracking', 'branch_and_bound', 'randomized_analysis', 'amortized_analysis', 'data_structure_design', 'data_structure_analysis', 'augmentation', 'graph_traversal', 'shortest_path', 'minimum_spanning_tree', 'network_flow', 'matching', 'string_matching', 'computational_geometry', 'number_theoretic', 'approximation', 'online_algorithm', 'parallel_algorithm'. Recursive: 'problem_decomposition', 'base_case_identification', 'recursive_step', 'subproblem_solution', 'solution_combination', 'termination_analysis'. An unrecognised value is accepted with a warning; algorithmic mode then uses 'algorithm_definition'.",
       },
       // Engineering-specific properties
       analysisType: {
@@ -2032,51 +2032,103 @@ export const deepthinking_engineering_schema = {
         required: ["confidence", "keyRisks", "nextSteps", "openIssues"],
         additionalProperties: false,
       },
-      // Algorithmic-specific properties
-      algorithmName: {
-        type: "string",
-        description: "Name of the algorithm being analyzed",
-      },
+      // Algorithmic-specific properties. The Zod schema accepts more than is listed
+      // here; the omitted paths are pinned in tests/unit/tools/schemas/advertised-omissions.ts.
       designPattern: {
         type: "string",
-        enum: [
-          "divide-and-conquer",
-          "dynamic-programming",
-          "greedy",
-          "backtracking",
-          "branch-and-bound",
-          "randomized",
-          "approximation",
-        ],
-        description: "Algorithm design pattern",
+        description:
+          "Design pattern: brute_force, divide_and_conquer, dynamic_programming, greedy, backtracking, branch_and_bound, randomized, approximation, online, parallel, incremental, prune_and_search. An unrecognised value is not stored, with a warning; hyphens are read as underscores.",
       },
-      complexityAnalysis: {
+      algorithm: {
         type: "object",
         properties: {
-          timeComplexity: {
-            type: "string",
-            description: "Time complexity (e.g., O(n log n))",
-          },
-          spaceComplexity: {
-            type: "string",
-            description: "Space complexity (e.g., O(n))",
-          },
+          name: { type: "string" },
+          description: { type: "string" },
+          category: { type: "string" },
+        },
+        description: "The algorithm under analysis",
+      },
+      clrsCategory: { type: "string" },
+      clrsAlgorithm: { type: "string" },
+      pseudocode: { type: "string" },
+      keyInsight: { type: "string" },
+      timeComplexity: {
+        type: "object",
+        properties: {
           bestCase: { type: "string" },
           averageCase: { type: "string" },
           worstCase: { type: "string" },
+          amortized: { type: "string" },
+          recurrence: { type: "string" },
+          closedForm: { type: "string" },
+          masterTheorem: {
+            type: "object",
+            properties: {
+              a: { type: "number" },
+              b: { type: "number" },
+              f: { type: "string" },
+              case: { type: "integer" },
+            },
+            additionalProperties: false,
+          },
+          inputSensitive: {
+            type: "object",
+            properties: {
+              parameter: { type: "string" },
+              complexity: { type: "string" },
+            },
+            additionalProperties: false,
+          },
         },
         additionalProperties: false,
-        description: "Complexity analysis",
+        description: "Time complexity",
+      },
+      spaceComplexity: {
+        type: "object",
+        properties: {
+          auxiliary: { type: "string" },
+          total: { type: "string" },
+          inPlace: { type: "boolean" },
+          stackDepth: { type: "string" },
+          cacheEfficiency: {
+            type: "object",
+            properties: {
+              cacheOblivious: { type: "boolean" },
+              cacheComplexity: { type: "string" },
+            },
+            additionalProperties: false,
+          },
+        },
+        additionalProperties: false,
+        description: "Space complexity",
       },
       correctnessProof: {
         type: "object",
         properties: {
-          invariant: { type: "string", description: "Loop invariant" },
-          termination: { type: "string", description: "Termination argument" },
-          correctness: { type: "string", description: "Correctness proof" },
+          id: { type: "string" },
+          algorithm: { type: "string" },
+          method: {
+            type: "string",
+            description:
+              "'loop_invariant', 'induction', 'contradiction', 'direct' or 'structural'",
+          },
+          preconditions: { type: "array", items: { type: "string" } },
+          postconditions: { type: "array", items: { type: "string" } },
+          inductionBase: { type: "string" },
+          inductionStep: { type: "string" },
+          terminationArgument: {
+            type: "object",
+            properties: {
+              decreasingQuantity: { type: "string" },
+              lowerBound: { type: "string" },
+              proof: { type: "string" },
+            },
+            additionalProperties: false,
+          },
+          proofSteps: { type: "array", items: { type: "string" } },
+          keyInsights: { type: "array", items: { type: "string" } },
         },
-        additionalProperties: false,
-        description: "Algorithm correctness proof",
+        description: "Correctness proof",
       },
       // --- Recursive mode (v9.3.4) ---
       subproblems: {
@@ -2137,6 +2189,7 @@ export const deepthinking_engineering_schema = {
       recurrence: {
         type: "object",
         properties: {
+          id: { type: "string" },
           formula: {
             type: "string",
             description: "e.g. T(n) = 2T(n/2) + O(n)",
@@ -2144,14 +2197,31 @@ export const deepthinking_engineering_schema = {
           baseCase: { type: "string" },
           closedForm: { type: "string" },
           complexity: { type: "string", description: "e.g. O(n log n)" },
+          solutionMethod: {
+            type: "string",
+            description:
+              "'master_theorem', 'substitution', 'recursion_tree' or 'generating_function'",
+          },
+          solution: { type: "string" },
+          solutionProof: { type: "string" },
+          recursionTree: {
+            type: "object",
+            properties: {
+              levelWork: { type: "string" },
+              levels: { type: "string" },
+              totalWork: { type: "string" },
+            },
+            additionalProperties: false,
+          },
         },
         additionalProperties: false,
-        description: "Recurrence relation for the decomposition",
+        description:
+          "Recurrence relation. Recursive mode reads formula, baseCase, closedForm and complexity; algorithmic mode reads every member.",
       },
       strategy: {
         type: "string",
         description:
-          "Decomposition strategy: 'divide_and_conquer', 'decrease_and_conquer', 'transform_and_conquer' or 'dynamic_programming'. Underscored, unlike the hyphenated `designPattern` values.",
+          "Decomposition strategy: 'divide_and_conquer', 'decrease_and_conquer', 'transform_and_conquer' or 'dynamic_programming'.",
       },
       divisionFactor: {
         type: "number",
@@ -2159,7 +2229,6 @@ export const deepthinking_engineering_schema = {
       },
     },
     required: [...baseThoughtRequired],
-    additionalProperties: false,
   },
 } as const;
 

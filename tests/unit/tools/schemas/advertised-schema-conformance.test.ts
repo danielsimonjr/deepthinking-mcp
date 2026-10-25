@@ -13,6 +13,12 @@
  * stays hand-written for Claude Desktop compatibility (see the v4.4.0 CHANGELOG
  * entry); only the comparison is generated.
  *
+ * One difference is allowed: a Zod property that the advertisement leaves out
+ * because of the tool size cap. `advertised-omissions.ts` pins those paths. The
+ * comparison fails for a Zod property that is not pinned, and for a pinned path
+ * that is advertised or absent from the Zod schema, so a new omission is never
+ * silent.
+ *
  * `schema-contract.test.ts` holds the per-defect regressions; this file holds the
  * class-wide guard.
  */
@@ -20,6 +26,12 @@
 import { describe, it, expect } from "vitest";
 import { z } from "zod";
 import { toolList, toolSchemas } from "../../../../src/tools/definitions.js";
+import {
+  MAX_TOOL_BYTES,
+  OMISSION_REASON,
+  omittedPaths,
+  topLevelOf,
+} from "./advertised-omissions.js";
 
 type Json = Record<string, any>;
 
@@ -97,6 +109,8 @@ function compare(
   derived: Json | undefined,
   path: string,
   diffs: string[],
+  omitted: ReadonlySet<string> = new Set(),
+  used: Set<string> = new Set(),
 ): void {
   if (!advertised || !derived) {
     diffs.push(
@@ -135,10 +149,12 @@ function compare(
     const ap: Json = a.properties ?? {};
     const dp: Json = d.properties ?? {};
     for (const key of new Set([...Object.keys(ap), ...Object.keys(dp)])) {
-      if (!(key in ap)) diffs.push(`${path}.${key}: in Zod, not advertised`);
-      else if (!(key in dp))
-        diffs.push(`${path}.${key}: advertised, not in Zod`);
-      else compare(ap[key], dp[key], `${path}.${key}`, diffs);
+      const at = `${path}.${key}`;
+      if (!(key in ap)) {
+        if (omitted.has(at)) used.add(at);
+        else diffs.push(`${at}: in Zod, not advertised`);
+      } else if (!(key in dp)) diffs.push(`${at}: advertised, not in Zod`);
+      else compare(ap[key], dp[key], at, diffs, omitted, used);
     }
     const ar = [...(a.required ?? [])].sort().join(",");
     const dr = [...(d.required ?? [])].sort().join(",");
@@ -152,6 +168,8 @@ function compare(
         d.additionalProperties,
         `${path}{}`,
         diffs,
+        omitted,
+        used,
       );
     } else {
       diffs.push(
@@ -160,7 +178,23 @@ function compare(
     }
   }
 
-  if (a.items || d.items) compare(a.items, d.items, `${path}[]`, diffs);
+  if (a.items || d.items)
+    compare(a.items, d.items, `${path}[]`, diffs, omitted, used);
+}
+
+/** Compare one tool with the pinned omissions applied; a pinned path that was not omitted is a difference. */
+function compareTool(name: string, advertised: Json, zod: z.ZodType): string[] {
+  const diffs: string[] = [];
+  const pinned = new Set(omittedPaths(name).map((p) => `${name}.${p}`));
+  const used = new Set<string>();
+  compare(advertised, deriveJsonSchema(zod), name, diffs, pinned, used);
+  for (const path of pinned) {
+    if (!used.has(path))
+      diffs.push(
+        `${path}: pinned as omitted (${OMISSION_REASON}), but it is advertised or absent from the Zod schema`,
+      );
+  }
+  return diffs;
 }
 
 function deriveJsonSchema(schema: z.ZodType): Json {
@@ -182,9 +216,26 @@ describe("advertised JSON Schema conforms to the Zod schema that enforces the ca
     toolList.map((t) => [(t as Json).name as string, t as Json] as const),
   )("%s agrees with its Zod schema at every depth", (name, tool) => {
     const zod = (toolSchemas as Record<string, z.ZodType>)[name];
-    const diffs: string[] = [];
-    compare(tool.inputSchema, deriveJsonSchema(zod), name, diffs);
+    const diffs = compareTool(name, tool.inputSchema, zod);
     expect(diffs, diffs.join("\n")).toEqual([]);
+  });
+
+  it.each(
+    toolList.map((t) => [(t as Json).name as string, t as Json] as const),
+  )("%s stays within the tool size cap", (_name, tool) => {
+    expect(JSON.stringify(tool).length).toBeLessThanOrEqual(MAX_TOOL_BYTES);
+  });
+
+  it.each(
+    toolList
+      .map((t) => t as Json)
+      .filter((t) => omittedPaths(t.name).length > 0)
+      .map((t) => [t.name as string, t] as const),
+  )("%s names every omitted field in its description", (name, tool) => {
+    const missing = omittedPaths(name)
+      .map(topLevelOf)
+      .filter((field) => !tool.description.includes(field));
+    expect(missing).toEqual([]);
   });
 
   it("the comparison itself reports a difference (control)", () => {
@@ -203,5 +254,44 @@ describe("advertised JSON Schema conforms to the Zod schema that enforces the ca
       "probe.a: maxLength undefined advertised, 5 in Zod",
       "probe: required [] advertised, [a] in Zod",
     ]);
+  });
+
+  describe("pinned omissions (control)", () => {
+    const advertised = {
+      type: "object",
+      properties: { a: { type: "string" } },
+    };
+    const derived = {
+      type: "object",
+      properties: { a: { type: "string" }, b: { type: "string" } },
+    };
+
+    it("a pinned omission is not a difference and is marked used", () => {
+      const diffs: string[] = [];
+      const used = new Set<string>();
+      compare(advertised, derived, "probe", diffs, new Set(["probe.b"]), used);
+      expect(diffs).toEqual([]);
+      expect([...used]).toEqual(["probe.b"]);
+    });
+
+    it("a Zod property that is not pinned is still a difference", () => {
+      const diffs: string[] = [];
+      compare(advertised, derived, "probe", diffs, new Set(["probe.c"]));
+      expect(diffs).toEqual(["probe.b: in Zod, not advertised"]);
+    });
+
+    it("a pinned path that is advertised is not marked used", () => {
+      const diffs: string[] = [];
+      const used = new Set<string>();
+      compare(derived, derived, "probe", diffs, new Set(["probe.b"]), used);
+      expect(diffs).toEqual([]);
+      expect([...used]).toEqual([]);
+    });
+
+    it("an advertised property that Zod lacks is a difference even when pinned", () => {
+      const diffs: string[] = [];
+      compare(derived, advertised, "probe", diffs, new Set(["probe.b"]));
+      expect(diffs).toEqual(["probe.b: advertised, not in Zod"]);
+    });
   });
 });
