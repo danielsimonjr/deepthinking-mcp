@@ -230,7 +230,7 @@ export const analyzeToolDefinition = {
   name: "deepthinking_analyze",
   description: `Multi-mode reasoning analysis tool that combines insights from multiple thinking modes.
 
-This tool executes 2-10 reasoning modes in parallel on a given thought or problem,
+This tool executes 2-10 reasoning modes on a given thought or problem,
 then merges the resulting insights using a specified strategy. It handles conflicts
 between different perspectives and produces a synthesized conclusion.
 

@@ -2429,7 +2429,7 @@ export const deepthinking_analyze_schema = {
   name: "deepthinking_analyze",
   description: `Multi-mode reasoning analysis: combines insights from multiple thinking modes.
 
-Executes 2-10 reasoning modes in parallel, merges insights using a specified strategy,
+Runs 2-10 reasoning modes on the same thought, merges insights using a specified strategy,
 handles conflicts between perspectives, and produces a synthesized conclusion.
 
 **Presets:**

@@ -9,7 +9,7 @@
  * there is no dead code here; only the barrel is unimported. Kept as the
  * conventional import surface. The published package exposes no library API
  * for it to serve: `tsup` builds the single entry `src/index.ts`, whose few
- * exports are the server and its entry point (`dist/index.d.ts` lists them).
+ * exports (`dist/index.d.ts` lists them) do not include this module.
  */
 
 export { LRUCache } from "./lru.js";

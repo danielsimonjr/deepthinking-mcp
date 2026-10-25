@@ -1,8 +1,8 @@
 /**
  * Multi-Mode Analyzer - Phase 12 Sprint 3
  *
- * Orchestrates multi-mode analysis by executing multiple reasoning modes
- * in parallel, collecting insights, detecting conflicts, and merging results.
+ * Orchestrates multi-mode analysis by executing multiple reasoning modes,
+ * collecting insights, detecting conflicts, and merging results.
  *
  * This is the main entry point for multi-mode analysis workflows.
  */
@@ -35,7 +35,7 @@ export interface MultiModeAnalyzerConfig {
   /** Whether to continue analysis if some modes fail */
   continueOnError?: boolean;
 
-  /** Maximum number of modes to run in parallel */
+  /** Number of modes in one batch. A batch runs its modes one after another. */
   maxParallelModes?: number;
 
   /** Enable verbose logging */
@@ -55,7 +55,7 @@ export interface MultiModeAnalyzerConfig {
  * Constants for multi-mode analysis
  */
 const ANALYZER_CONSTANTS = {
-  /** Maximum parallel mode execution */
+  /** Number of modes in one batch. */
   MAX_PARALLEL_MODES: 5,
   /** Most mode-specific fields named in one insight before truncating. */
   MAX_FIELDS_LISTED: 8,
@@ -456,7 +456,8 @@ export class MultiModeAnalyzer {
     const results = new Map<ThinkingMode, ModeAnalysisResult>();
     let completed = 0;
 
-    // Execute modes in batches for controlled parallelism
+    // Execute modes in batches. `runMode` is synchronous, so the modes of a
+    // batch run one after another.
     const batches = this.createBatches(modes, this.config.maxParallelModes);
 
     for (const batch of batches) {
@@ -846,7 +847,7 @@ Context: ${request.context}`
   }
 
   /**
-   * Create batches for parallel execution
+   * Split the items into batches of at most `batchSize`
    */
   private createBatches<T>(items: T[], batchSize: number): T[][] {
     const batches: T[][] = [];

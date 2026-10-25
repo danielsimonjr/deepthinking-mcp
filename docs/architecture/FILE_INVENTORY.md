@@ -27,7 +27,7 @@ Every tracked TypeScript file in the repository — **492 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 241 | 119,017 |
+| src | 241 | 119,018 |
 | templates | 5 | 772 |
 | tests | 228 | 101,735 |
 | tools | 14 | 4,599 |
@@ -95,7 +95,7 @@ Every tracked TypeScript file in the repository — **492 files** — not just t
 | `src/modes/causal/graph/algorithms/d-separation.ts` | src | 668 | reachable |
 | `src/modes/causal/graph/algorithms/intervention.ts` | src | 724 | reachable |
 | `src/modes/causal/graph/types.ts` | src | 472 | reachable |
-| `src/modes/combinations/analyzer.ts` | src | 931 | reachable |
+| `src/modes/combinations/analyzer.ts` | src | 932 | reachable |
 | `src/modes/combinations/combination-types.ts` | src | 412 | reachable |
 | `src/modes/combinations/conflict-resolver.ts` | src | 623 | reachable |
 | `src/modes/combinations/index.ts` | src | 100 | reachable |

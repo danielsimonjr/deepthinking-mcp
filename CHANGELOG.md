@@ -33,9 +33,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   which has 35. The header of `src/services/RecommendationService.ts` said that importing
   `src/index.ts` starts a server, but the entry-point guard prevents that. The barrel headers of
   `src/validation`, `src/cache` and `src/proof` said that `src/index.ts` has no exports or that
-  `dist/index.d.ts` is one line; `src/index.ts` exports the server and its entry point. The new test
-  `tests/unit/tools/schemas/analyze-custom-modes.test.ts` pins the `customModes` list to every
-  `ThinkingMode` except `custom`, in the Zod schema and in the advertised schema.
+  `dist/index.d.ts` is one line; `src/index.ts` exports the server, its builder, its entry point and
+  the protocol version. The new test `tests/unit/tools/schemas/analyze-custom-modes.test.ts` pins
+  the `customModes` list to every `ThinkingMode` except `custom`, in the Zod schema and in the
+  advertised schema.
+- **`deepthinking_analyze` no longer says that it runs its modes in parallel.** The advertised
+  description, the Zod description and the header of `MultiModeAnalyzer` said so. `runMode()` is
+  synchronous, so the modes of a batch run one after another. The comments on `maxParallelModes`,
+  which sets the size of a batch, say the same. A mode in the enum with no specialized handler runs
+  through the generic `hybrid` handler and reports no error; the new test fails when a mode has no
+  specialized handler.
 
 - **A shared-lock read that meets the removal of its lock directory is retried on macOS.**
   `acquireSharedLock` creates its lock file inside the shared-lock directory, and a reader that

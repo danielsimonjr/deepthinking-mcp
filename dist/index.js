@@ -27462,7 +27462,7 @@ var init_analyzer = __esm({
     init_conflict_resolver();
     init_presets();
     ANALYZER_CONSTANTS = {
-      /** Maximum parallel mode execution */
+      /** Number of modes in one batch. */
       MAX_PARALLEL_MODES: 5,
       /** Most mode-specific fields named in one insight before truncating. */
       MAX_FIELDS_LISTED: 8,
@@ -27971,7 +27971,7 @@ Context: ${request.context}` : request.thought;
         return conclusion;
       }
       /**
-       * Create batches for parallel execution
+       * Split the items into batches of at most `batchSize`
        */
       createBatches(items, batchSize) {
         const batches = [];
@@ -68280,7 +68280,7 @@ var deepthinking_analyze_schema = {
   name: "deepthinking_analyze",
   description: `Multi-mode reasoning analysis: combines insights from multiple thinking modes.
 
-Executes 2-10 reasoning modes in parallel, merges insights using a specified strategy,
+Runs 2-10 reasoning modes on the same thought, merges insights using a specified strategy,
 handles conflicts between perspectives, and produces a synthesized conclusion.
 
 **Presets:**

@@ -8,7 +8,7 @@
       },
       "src": {
         "files": 241,
-        "loc": 119017
+        "loc": 119018
       },
       "templates": {
         "files": 5,
@@ -395,7 +395,7 @@
     {
       "path": "src/modes/combinations/analyzer.ts",
       "area": "src",
-      "loc": 931,
+      "loc": 932,
       "disposition": "reachable"
     },
     {

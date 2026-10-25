@@ -26,8 +26,8 @@ document does not repeat it.
 |---|---|---|---|
 | Source files, whole repo | 495 | repo-wide | `repo-tools map` (492 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
 | TypeScript files, `src/` | 241 | src only | `repo-tools map`, files under `src/` |
-| Lines of code, whole repo | 227,847 | repo-wide | `repo-tools map` |
-| Lines of code, `src/` | 118,776 | src only | `repo-tools map`, files under `src/` |
+| Lines of code, whole repo | 227,848 | repo-wide | `repo-tools map` |
+| Lines of code, `src/` | 118,777 | src only | `repo-tools map`, files under `src/` |
 | Total exports, whole repo | 2,158 | repo-wide | `repo-tools map` |
 | Total exports, `src/` | 1,186 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
 | Entry roots | 1 (`src/index.ts`) | repo-wide | `repo-tools map` |
@@ -51,7 +51,7 @@ come from two tools and count different file sets: `repo-tools map` reads all 49
 
 ```
 deepthinking-mcp/
-├── src/                # 241 files, 118,776 LOC — the package
+├── src/                # 241 files, 118,777 LOC — the package
 │   ├── index.ts        # entry point, all 13 tool handlers
 │   ├── types/           # ThinkingMode enum, Thought union, per-mode types
 │   ├── modes/            # mode handlers, registry, combinations, stochastic
@@ -144,7 +144,7 @@ counts differ for that reason.
 | Claim | Value | Source |
 |---|---|---|
 | totalTypeScriptFiles | 495 | repo-tools map (whole repository) |
-| totalLinesOfCode | 227847 | repo-tools map (whole repository) |
+| totalLinesOfCode | 227848 | repo-tools map (whole repository) |
 | totalExports | 2158 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
