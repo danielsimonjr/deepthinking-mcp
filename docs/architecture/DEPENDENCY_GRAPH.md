@@ -2941,7 +2941,7 @@ The codebase is organized into the following modules:
 
 ## Types Dependencies
 
-### `src/types/core.ts` - Core type definitions for the DeepThinking MCP server v9.1.0
+### `src/types/core.ts` - Core type definitions for the DeepThinking MCP server
 
 **Internal Dependencies:**
 | File | Imports | Type |
@@ -4467,7 +4467,7 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 242 |
 | Total Modules | 14 |
-| Total Lines of Code | 119242 |
+| Total Lines of Code | 119232 |
 | Total Exports | 1188 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |

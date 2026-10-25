@@ -1403,7 +1403,7 @@ call runs a complete analysis.
 | `mergeStrategy` | string | No | `union` (combine all, dedupe), `intersection` (only insights agreed by all modes), `weighted` (weight by confidence/importance), `hierarchical` (primary mode + supporting evidence), or `dialectical` (thesis–antithesis–synthesis). Default `union`. |
 | `sessionId` | string | No | At most 100 characters (both schemas state the bound). The server uses it only as a label for the internal mode runs. It does not add the analysis to that session, and it does not look the session up. The response always holds a new `sessionId`. |
 | `context` | string | No | Additional context or background for the analysis. `TextSchema` (≤ 10,000 chars). |
-| `timeoutPerMode` | integer | No | Milliseconds per mode. 1,000–120,000, default 30,000. The server accepts and validates the value but does not enforce it: the analyzer runs each mode synchronously and never reads the value. |
+| `timeoutPerMode` | integer | No | Ignored. 1,000–120,000, default 30,000. The server accepts and validates the value so that an earlier caller's request still passes, then drops it. The analyzer runs each mode synchronously, so no per-mode time limit applies. |
 
 The advertised JSON Schema sets `additionalProperties` to `false`. The server ignores a field
 outside this list and returns no error. Neither `preset` nor `customModes` is required — if both are
@@ -1487,8 +1487,7 @@ exportable via `deepthinking_session`'s `export` action as `exportHint` states.
     "thought": "Our checkout conversion rate dropped 8% after last week's deploy. What's the root cause and what should we do?",
     "preset": "root_cause",
     "mergeStrategy": "weighted",
-    "context": "Deploy included a payment-provider SDK bump and a new address-autocomplete widget.",
-    "timeoutPerMode": 20000
+    "context": "Deploy included a payment-provider SDK bump and a new address-autocomplete widget."
   }
 }
 ```
@@ -1686,4 +1685,4 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 500 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 501 | repo-tools map (whole repository) |

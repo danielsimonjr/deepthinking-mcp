@@ -7386,7 +7386,7 @@ modules:
         - thinkingTool
   types:
     src/types/core.ts:
-      description: Core type definitions for the DeepThinking MCP server v9.1.0
+      description: Core type definitions for the DeepThinking MCP server
       externalDependencies: []
       nodeDependencies: []
       internalDependencies:
@@ -11270,7 +11270,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 242
   totalModules: 14
-  totalLinesOfCode: 119242
+  totalLinesOfCode: 119232
   totalExports: 1188
   totalClasses: 143
   totalInterfaces: 562

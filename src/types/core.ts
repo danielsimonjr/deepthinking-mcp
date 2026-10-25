@@ -1,8 +1,8 @@
 /**
- * Core type definitions for the DeepThinking MCP server v9.1.0
+ * Core type definitions for the DeepThinking MCP server
  *
  * This file contains ONLY:
- * - ThinkingMode enum (all 34 mode identifiers)
+ * - ThinkingMode enum (all 35 identifiers: the 34 reasoning modes and `custom`)
  * - Base types shared by all modes (BaseThought, ShannonStage, ExtendedThoughtType)
  * - The fundamental reasoning triad: Inductive, Deductive, Abductive
  * - Thought union type (importing from mode-specific files)

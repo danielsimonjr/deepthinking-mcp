@@ -30,10 +30,8 @@ describe('MultiModeAnalyzer Integration Tests', () => {
 
     it('should accept custom configuration', () => {
       const config: MultiModeAnalyzerConfig = {
-        defaultTimeoutPerMode: 60000,
         continueOnError: false,
         maxParallelModes: 3,
-        minConfidenceThreshold: 0.5,
         verbose: false,
       };
       const analyzer = new MultiModeAnalyzer(config);

@@ -2691,8 +2691,8 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 500 | repo-tools map (whole repository) |
-| totalLinesOfCode | 229179 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 501 | repo-tools map (whole repository) |
+| totalLinesOfCode | 229231 | repo-tools map (whole repository) |
 | totalExports | 2160 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | reachableFiles | 234 | repo-tools map (whole repository) |

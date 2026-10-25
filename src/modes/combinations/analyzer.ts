@@ -1,8 +1,8 @@
 /**
  * Multi-Mode Analyzer - Phase 12 Sprint 3
  *
- * Orchestrates multi-mode analysis by executing multiple reasoning modes
- * in parallel, collecting insights, detecting conflicts, and merging results.
+ * Orchestrates multi-mode analysis by executing multiple reasoning modes,
+ * collecting insights, detecting conflicts, and merging results.
  *
  * This is the main entry point for multi-mode analysis workflows.
  */
@@ -32,17 +32,11 @@ import type { ModeCombination } from "./combination-types.js";
  * Configuration for MultiModeAnalyzer
  */
 export interface MultiModeAnalyzerConfig {
-  /** Default timeout per mode in milliseconds */
-  defaultTimeoutPerMode?: number;
-
   /** Whether to continue analysis if some modes fail */
   continueOnError?: boolean;
 
-  /** Maximum number of modes to run in parallel */
+  /** Number of modes in one batch. A batch runs its modes one after another. */
   maxParallelModes?: number;
-
-  /** Minimum confidence threshold for insights */
-  minConfidenceThreshold?: number;
 
   /** Enable verbose logging */
   verbose?: boolean;
@@ -58,18 +52,11 @@ export interface MultiModeAnalyzerConfig {
 }
 
 /**
- * Default configuration values
- */
-/**
  * Constants for multi-mode analysis
  */
 const ANALYZER_CONSTANTS = {
-  /** Default timeout per mode in milliseconds */
-  DEFAULT_TIMEOUT_MS: 30000,
-  /** Maximum parallel mode execution */
+  /** Number of modes in one batch. */
   MAX_PARALLEL_MODES: 5,
-  /** Minimum confidence threshold for insights */
-  MIN_CONFIDENCE_THRESHOLD: 0.3,
   /** Most mode-specific fields named in one insight before truncating. */
   MAX_FIELDS_LISTED: 8,
   /** Most handler advisories quoted in one insight before truncating. */
@@ -110,13 +97,14 @@ const BASE_THOUGHT_KEYS: ReadonlySet<string> = new Set([
  * Why no mode can report a confidence on this path.
  *
  * `deepthinking_analyze` accepts `thought`, `preset`, `customModes`,
- * `mergeStrategy`, `sessionId`, `context` and `timeoutPerMode` — and no
- * mode-specific field. A handler computes a confidence FROM mode data (a
- * Bayesian posterior from a prior and a likelihood, an inductive confidence
- * from observations, an evidential belief from masses). Given only a problem
- * statement there is nothing to compute from, so any number emitted here would
- * be invented. Callers wanting a real confidence must run the mode through its
- * own focused tool with that mode's inputs.
+ * `mergeStrategy`, `sessionId`, `context` and `timeoutPerMode` (accepted and
+ * ignored, see `src/tools/schemas/analyze.ts`) — and no mode-specific field.
+ * A handler computes a confidence FROM mode data (a Bayesian posterior from a
+ * prior and a likelihood, an inductive confidence from observations, an
+ * evidential belief from masses). Given only a problem statement there is
+ * nothing to compute from, so any number emitted here would be invented.
+ * Callers wanting a real confidence must run the mode through its own focused
+ * tool with that mode's inputs.
  */
 const NO_CONFIDENCE_NOTE =
   "No confidence was computed. deepthinking_analyze supplies only the problem " +
@@ -124,14 +112,15 @@ const NO_CONFIDENCE_NOTE =
   "inputs it was not given. Run the mode through its own tool with those " +
   "inputs to obtain a real confidence.";
 
+/**
+ * Default configuration values
+ */
 const DEFAULT_CONFIG: Omit<
   Required<MultiModeAnalyzerConfig>,
   "thoughtFactory"
 > = {
-  defaultTimeoutPerMode: ANALYZER_CONSTANTS.DEFAULT_TIMEOUT_MS,
   continueOnError: true,
   maxParallelModes: ANALYZER_CONSTANTS.MAX_PARALLEL_MODES,
-  minConfidenceThreshold: ANALYZER_CONSTANTS.MIN_CONFIDENCE_THRESHOLD,
   verbose: false,
 };
 
@@ -411,9 +400,10 @@ export class MultiModeAnalyzer {
    * handlers and all of which the analyzer executes, so the list understated
    * what the code does.
    *
-   * NOTE: `deepthinking_analyze`'s own `customModes` enum in
-   * `src/tools/schemas/analyze.ts` still lists the same 29. Widening it is a
-   * separate, deliberate change in `src/tools/`.
+   * `deepthinking_analyze`'s `customModes` enum in
+   * `src/tools/schemas/analyze.ts` lists every `ThinkingMode` except `custom`
+   * (34 modes); `tests/unit/tools/schemas/analyze-custom-modes.test.ts` pins
+   * that.
    */
   getSupportedModes(): ThinkingMode[] {
     return this.factory.getRegistry().getRegisteredModes();
@@ -466,7 +456,8 @@ export class MultiModeAnalyzer {
     const results = new Map<ThinkingMode, ModeAnalysisResult>();
     let completed = 0;
 
-    // Execute modes in batches for controlled parallelism
+    // Execute modes in batches. `runMode` is synchronous, so the modes of a
+    // batch run one after another.
     const batches = this.createBatches(modes, this.config.maxParallelModes);
 
     for (const batch of batches) {
@@ -856,7 +847,7 @@ Context: ${request.context}`
   }
 
   /**
-   * Create batches for parallel execution
+   * Split the items into batches of at most `batchSize`
    */
   private createBatches<T>(items: T[], batchSize: number): T[][] {
     const batches: T[][] = [];

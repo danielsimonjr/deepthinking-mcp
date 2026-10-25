@@ -122,10 +122,11 @@ export class ThoughtValidator {
     } else {
       // No validator registered for this mode. Unreachable through the MCP
       // tools - every mode in the focused tools' schemas and in the legacy
-      // tool has a validator - but reachable for a library caller and for the
-      // ThinkingMode members with no registry entry (recursive, modal,
-      // stochastic, constraint, custom). Warning severity on purpose: an
-      // unvalidated mode is not an invalid thought.
+      // tool has a validator - but reachable for a library caller and for
+      // `custom`, the one ThinkingMode member with no registry entry (its
+      // shape comes from the caller, so a mode validator has nothing to
+      // check). Warning severity on purpose: an unvalidated mode is not an
+      // invalid thought.
       issues.push({
         severity: "warning",
         thoughtNumber: thought.thoughtNumber,

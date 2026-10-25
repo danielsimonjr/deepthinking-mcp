@@ -21,14 +21,14 @@ Most test folders follow the folder names of `src/`: `tests/unit/<area>/` and
 
 | Directory | Test files | Purpose |
 |---|---|---|
-| `tests/unit/` | 139 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
+| `tests/unit/` | 140 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
 | `tests/integration/` | 77 | Cross-module paths: entry-point dispatch over a real transport, tool-shaped input through the handlers, export round-trips, multi-mode analysis, session lifecycles. |
 | `tests/edge-cases/` | 6 | Boundary conditions, malformed input, regressions pinned from past bugs. |
 | `tests/performance/` | 4 | Counted-work checks for cost, throughput, memory and stress. `helpers/work-probe.ts` holds the counters. |
 | `tests/utils/` | 0 (5 helper files) | Shared fixtures, factories, and assertion helpers. 21 test files import them, all under `tests/integration/tools/`. |
 | `tests/test-results/` | 0 | Reporter code and `TEST_RESULTS_v*.md` summaries. Not test code. |
 
-The suite holds 226 test files. `npx vitest list --filesOnly` lists them. This document maps
+The suite holds 227 test files. `npx vitest list --filesOnly` lists them. This document maps
 files. It holds no test count and no pass or fail state. Run the suite to get those.
 
 ### Running each tier
@@ -44,8 +44,8 @@ npx vitest run                          # everything
 `npm run test:publish` sets `SKIP_BENCHMARKS=1`. That variable switches on one extra entry in the
 `exclude` list of `vitest.config.ts`: `**/benchmarks/**`. The pattern matches the directory
 `tests/unit/benchmarks/`, which holds 2 test files. It does not match `tests/performance/`, so
-the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 224
-files instead of 226.
+the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 225
+files instead of 227.
 
 ### Where reports land
 
@@ -83,17 +83,17 @@ the root-level files that name the area in their subject.
 | `taxonomy/` | 7 | 3 | 6 | `tests/unit/session/reasoning-flow-wiring.test.ts`. |
 | `cache/` | 3 | 2 | 1 | `src/cache/lru.ts` is imported by 2 unit tests. `index.ts` and `types.ts` have no direct importer. |
 | `utils/` + `interfaces/` | 7 | 4 | 5 | `type-guards.ts` and `logger-types.ts` have no direct importer. |
-| `tools/` | 19 | 9 | 16 | 40 files under `tests/integration/tools/`. `json-schemas.ts` and 2 barrel files have no direct importer. |
+| `tools/` | 19 | 10 | 17 | 40 files under `tests/integration/tools/`. 2 barrel files have no direct importer. |
 | `config/` | 1 | 1 | 1 | `config-index.test.ts` has 5 tests. They set no environment variable. |
 
 **Headline:** `modes/` has a test file for every handler. The validation area shows a low
 count of direct importers, but its contract test discovers the mode validators by glob. The
-`tools/` area has 16 of its 19 files imported, and `schema-contract.test.ts` walks `toolList`
+`tools/` area has 17 of its 19 files imported, and `schema-contract.test.ts` walks `toolList`
 and `toolSchemas`. See Gaps for the exact limits of that coverage.
 
 ## 3. Unit tests
 
-139 files under `tests/unit/`, organized by the `src/` area they cover.
+140 files under `tests/unit/`, organized by the `src/` area they cover.
 
 **`types/` (11 files).** `types.test.ts` covers the core type guards in `src/types/core.ts`.
 `types/thought-guard-coverage.test.ts` pins the type guards against `ThinkingMode` in both
@@ -162,7 +162,7 @@ navigator, the suggestion engine, and the multi-modal analyzer. `taxonomy-adviso
 the advisory wrapper `suggestReasoningTypesAdvisory`. `taxonomy-wiring.test.ts` checks that
 `recommend_mode` reaches the taxonomy through `RecommendationService`.
 
-**`tools/` (9 files).** `mode-reachability.test.ts` checks that every implemented mode is
+**`tools/` (10 files).** `mode-reachability.test.ts` checks that every implemented mode is
 selectable through a tool. `schema-bounds.test.ts` covers `withZodBounds` in
 `src/tools/schema-bounds.ts`. That function copies the length, count and numeric limits of a Zod
 schema into the hand-written JSON schema of the same tool. The test checks four rules. A limit
@@ -171,6 +171,8 @@ limits of `.int()` are not copied. The function does not change its inputs.
 `schemas/bounds.test.ts`, `schemas/schema-contract.test.ts`, `schemas/schema-validation.test.ts`,
 and `schemas/tool-definitions.test.ts` cover input-size limits, the Zod schema contract, schema
 shape, and the 13 tool definitions in `src/tools/definitions.ts` and `src/tools/schemas/`.
+`schemas/analyze-custom-modes.test.ts` pins the `customModes` list of `deepthinking_analyze`. The
+list holds every `ThinkingMode` except `custom`, in the Zod schema and in the advertised schema.
 Three more files in `schemas/` guard the whole class of schema defects.
 `advertised-schema-conformance.test.ts` derives a JSON schema from each Zod schema. It compares
 the result with the advertised schema at every depth: property names, required names, types,
@@ -417,13 +419,10 @@ directory listing.
   own tests (`cache-key.test.ts`, `validation-performance.test.ts`).
 - **`src/session/SessionMetricsCalculator.ts` has no direct test importer.** The session tests
   reach it through `src/session/manager.ts`. Nothing tests the calculator in isolation.
-- **`src/utils/type-guards.ts`, `src/utils/logger-types.ts`, and `src/tools/json-schemas.ts`
-  have no direct test importer.** The first two are narrow: `type-guards.ts` holds type
-  predicates and two conversion helpers (`toExtendedThoughtType`, `safeCast`), and
-  `logger-types.ts` holds the `LogLevel` enum and two interfaces. The JSON Schemas that `tools/list`
-  advertises are asserted on by `index-server.test.ts`, `mcp-compliance.test.ts` and the
-  `schema-contract`, `schema-validation` and `tool-definitions` tests in `tests/unit/tools/schemas/`,
-  but no test imports `json-schemas.ts` itself.
+- **`src/utils/type-guards.ts` and `src/utils/logger-types.ts` have no direct test importer.**
+  Both are narrow: `type-guards.ts` holds type predicates and two conversion helpers
+  (`toExtendedThoughtType`, `safeCast`), and `logger-types.ts` holds the `LogLevel` enum and two
+  interfaces.
 
 ## 8. Running the suite
 
@@ -469,7 +468,7 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 500 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 501 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 
