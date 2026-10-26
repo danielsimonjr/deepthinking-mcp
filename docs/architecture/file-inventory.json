@@ -1,22 +1,22 @@
 {
   "summary": {
-    "totalFiles": 526,
+    "totalFiles": 528,
     "byArea": {
       "docs": {
         "files": 2,
         "loc": 1828
       },
       "src": {
-        "files": 247,
-        "loc": 119503
+        "files": 248,
+        "loc": 119519
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 256,
-        "loc": 108150
+        "files": 257,
+        "loc": 108332
       },
       "tools": {
         "files": 14,
@@ -29,10 +29,10 @@
     },
     "byDisposition": {
       "other": 2,
-      "reachable": 235,
+      "reachable": 236,
       "orphan": 12,
       "template": 5,
-      "test": 256,
+      "test": 257,
       "tool": 14,
       "config": 2
     }
@@ -749,13 +749,13 @@
     {
       "path": "src/proof/circular-detector.ts",
       "area": "src",
-      "loc": 493,
+      "loc": 485,
       "disposition": "reachable"
     },
     {
       "path": "src/proof/decomposer.ts",
       "area": "src",
-      "loc": 789,
+      "loc": 780,
       "disposition": "reachable"
     },
     {
@@ -773,7 +773,7 @@
     {
       "path": "src/proof/gap-analyzer.ts",
       "area": "src",
-      "loc": 887,
+      "loc": 871,
       "disposition": "reachable"
     },
     {
@@ -810,6 +810,12 @@
       "path": "src/proof/verifier.ts",
       "area": "src",
       "loc": 684,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/proof/word-overlap.ts",
+      "area": "src",
+      "loc": 49,
       "disposition": "reachable"
     },
     {
@@ -2754,6 +2760,12 @@
       "path": "tests/unit/proof/warning-patterns.test.ts",
       "area": "tests",
       "loc": 290,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/proof/word-overlap.test.ts",
+      "area": "tests",
+      "loc": 182,
       "disposition": "test"
     },
     {

@@ -45,7 +45,7 @@ The codebase is organized into the following modules:
 - **entry**: 1 file
 - **interfaces**: 1 file
 - **modes**: 58 files
-- **proof**: 15 files
+- **proof**: 16 files
 - **services**: 3 files
 - **session**: 4 files
 - **taxonomy**: 7 files
@@ -2181,6 +2181,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../types/modes/mathematics.js` | `AtomicStatement, DependencyGraph, CircularPath, ProofDecomposition` | Import (type-only) |
+| `./word-overlap.js` | `wordOverlap` | Import |
 
 **Exports:**
 - Classes: `CircularReasoningDetector`
@@ -2200,6 +2201,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../types/modes/mathematics.js` | `AtomicStatement, InferenceRule, ProofDecomposition, DependencyGraph, ProofGap, ImplicitAssumption, AssumptionChain` | Import (type-only) |
 | `./dependency-graph.js` | `DependencyGraphBuilder` | Import |
+| `./word-overlap.js` | `wordOverlap` | Import |
 
 **Exports:**
 - Classes: `ProofDecomposer`
@@ -2252,6 +2254,7 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../types/modes/mathematics.js` | `AtomicStatement, DependencyGraph, ProofGap, ImplicitAssumption, GapAnalysis, ProofDecomposition` | Import (type-only) |
+| `./word-overlap.js` | `wordOverlap` | Import |
 
 **Exports:**
 - Classes: `GapAnalyzer`
@@ -2348,6 +2351,14 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `ProofVerifier`
 - Interfaces: `ProofVerifierConfig`
+
+---
+
+### `src/proof/word-overlap.ts` - Word overlap shared by the proof decomposer, the gap analyzer and the circular reasoning
+
+**Exports:**
+- Interfaces: `WordOverlapOptions`
+- Functions: `wordOverlap`
 
 ---
 
@@ -4370,7 +4381,7 @@ graph TD
         N20[branch-analyzer]
         N21[branch-types]
         N22[circular-detector]
-        N23[...10 more]
+        N23[...11 more]
     end
 
     subgraph Services
@@ -4469,14 +4480,14 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 247 |
+| Total TypeScript Files | 248 |
 | Total Modules | 14 |
-| Total Lines of Code | 119503 |
-| Total Exports | 1201 |
+| Total Lines of Code | 119519 |
+| Total Exports | 1202 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
-| Total Interfaces | 563 |
-| Total Functions | 447 |
+| Total Interfaces | 564 |
+| Total Functions | 448 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
 | Type-only Imports | 337 |

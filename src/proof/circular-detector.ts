@@ -11,6 +11,7 @@ import type {
   CircularPath,
   ProofDecomposition,
 } from "../types/modes/mathematics.js";
+import { wordOverlap } from "./word-overlap.js";
 
 /**
  * Circular reasoning result
@@ -298,19 +299,10 @@ export class CircularReasoningDetector {
     if (checkEquivalence(normA, normB) || checkEquivalence(normB, normA))
       return true;
 
-    // Check word overlap for near-equivalence
-    const wordsA = new Set(normA.split(/\s+/).filter((w) => w.length > 3));
-    const wordsB = new Set(normB.split(/\s+/).filter((w) => w.length > 3));
-
-    if (wordsA.size === 0 || wordsB.size === 0) return false;
-
-    let overlap = 0;
-    for (const word of wordsA) {
-      if (wordsB.has(word)) overlap++;
-    }
-
-    // High overlap suggests equivalence
-    return overlap / Math.max(wordsA.size, wordsB.size) > 0.8;
+    // High word overlap suggests near-equivalence
+    return (
+      wordOverlap(normA, normB, { longerThan: 3, denominator: "larger" }) > 0.8
+    );
   }
 
   /**

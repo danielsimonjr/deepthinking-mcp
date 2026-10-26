@@ -16,6 +16,7 @@ import type {
   AssumptionChain,
 } from "../types/modes/mathematics.js";
 import { DependencyGraphBuilder } from "./dependency-graph.js";
+import { wordOverlap } from "./word-overlap.js";
 
 /**
  * Proof step input format
@@ -219,17 +220,7 @@ export class ProofDecomposer {
    * Check if two strings have significant word overlap
    */
   private hasSignificantOverlap(a: string, b: string): boolean {
-    const wordsA = new Set(a.split(/\s+/).filter((w) => w.length > 2));
-    const wordsB = new Set(b.split(/\s+/).filter((w) => w.length > 2));
-
-    if (wordsA.size === 0 || wordsB.size === 0) return false;
-
-    let overlap = 0;
-    for (const word of wordsA) {
-      if (wordsB.has(word)) overlap++;
-    }
-
-    return overlap / Math.min(wordsA.size, wordsB.size) > 0.5;
+    return wordOverlap(a, b, { longerThan: 2, denominator: "smaller" }) > 0.5;
   }
 
   /**

@@ -10,7 +10,7 @@
 ## Summary
 
 - **Potentially unused files**: 12
-- **Potentially unused exports**: 478
+- **Potentially unused exports**: 479
 
 ## Potentially Unused Files
 
@@ -257,6 +257,10 @@ These exports are not imported by any other file in the codebase:
 ### `src/proof/verifier.ts`
 
 - `ProofVerifierConfig` (interface)
+
+### `src/proof/word-overlap.ts`
+
+- `WordOverlapOptions` (interface)
 
 ### `src/services/RecommendationService.ts`
 
