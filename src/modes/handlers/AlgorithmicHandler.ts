@@ -34,10 +34,10 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  checkUncertaintyRange,
   createThoughtBase,
   validationSuccess,
   validationFailure,
-  createValidationError,
   createValidationWarning,
 } from "./ModeHandler.js";
 import {
@@ -384,17 +384,8 @@ export class AlgorithmicHandler implements ModeHandler {
     }
 
     // Validate uncertainty
-    if (input.uncertainty !== undefined) {
-      if (input.uncertainty < 0 || input.uncertainty > 1) {
-        errors.push(
-          createValidationError(
-            "uncertainty",
-            `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
-            "UNCERTAINTY_OUT_OF_RANGE",
-          ),
-        );
-      }
-    }
+    const uncertaintyError = checkUncertaintyRange(input);
+    if (uncertaintyError) errors.push(uncertaintyError);
 
     // Validate DP formulation
     if (req.dpFormulation) {

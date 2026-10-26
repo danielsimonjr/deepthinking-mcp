@@ -7,6 +7,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   checkThoughtBasics,
+  checkThoughtType,
+  checkUncertaintyRange,
   createThoughtBase,
   validationSuccess,
   validationFailure,
@@ -186,6 +188,122 @@ describe('ModeHandler Interface', () => {
 
         expect(a).not.toBe(b);
         expect(a?.errors).not.toBe(b?.errors);
+      });
+    });
+
+    describe('checkThoughtType', () => {
+      const input = (over: Record<string, unknown> = {}) =>
+        ({
+          thought: 'a real thought',
+          thoughtNumber: 1,
+          totalThoughts: 3,
+          nextThoughtNeeded: true,
+          ...over,
+        }) as ThinkingToolInput;
+      const valid = ['alpha', 'beta', 'gamma'];
+
+      it('returns undefined when the input has no thought type', () => {
+        expect(checkThoughtType(input(), valid)).toBeUndefined();
+      });
+
+      it.each([
+        ['an empty string', ''],
+        ['zero', 0],
+        ['null', null],
+        ['false', false],
+      ])('returns undefined for %s, which is not a thought type', (_label, thoughtType) => {
+        expect(checkThoughtType(input({ thoughtType }), valid)).toBeUndefined();
+      });
+
+      it.each(valid)('returns undefined for the valid type %s', (thoughtType) => {
+        expect(checkThoughtType(input({ thoughtType }), valid)).toBeUndefined();
+      });
+
+      it('warns about an unknown type and lists the valid types in order', () => {
+        expect(checkThoughtType(input({ thoughtType: 'bogus' }), valid)).toEqual({
+          field: 'thoughtType',
+          message: 'Unknown thought type: bogus',
+          suggestion: 'Valid types: alpha, beta, gamma',
+        });
+      });
+
+      it('compares the type with the valid types exactly, so the case matters', () => {
+        expect(checkThoughtType(input({ thoughtType: 'ALPHA' }), valid)?.message).toBe(
+          'Unknown thought type: ALPHA'
+        );
+      });
+
+      it.each([
+        ['a number', 5, 'Unknown thought type: 5'],
+        ['true', true, 'Unknown thought type: true'],
+        ['an object', {}, 'Unknown thought type: [object Object]'],
+      ])('warns about %s that is not a type name', (_label, thoughtType, message) => {
+        expect(checkThoughtType(input({ thoughtType }), valid)?.message).toBe(message);
+      });
+
+      it.each(['toString', '__proto__', 'constructor'])(
+        'warns about %s, a name that exists on every object but is not a valid type',
+        (thoughtType) => {
+          expect(checkThoughtType(input({ thoughtType }), valid)?.message).toBe(
+            `Unknown thought type: ${thoughtType}`
+          );
+        }
+      );
+
+      it('warns for every type when the list of valid types is empty', () => {
+        expect(checkThoughtType(input({ thoughtType: 'alpha' }), [])?.suggestion).toBe('Valid types: ');
+      });
+
+      it('returns a new warning on every call', () => {
+        const a = checkThoughtType(input({ thoughtType: 'bogus' }), valid);
+        const b = checkThoughtType(input({ thoughtType: 'bogus' }), valid);
+
+        expect(a).toEqual(b);
+        expect(a).not.toBe(b);
+      });
+    });
+
+    describe('checkUncertaintyRange', () => {
+      const input = (over: Record<string, unknown> = {}) =>
+        ({
+          thought: 'a real thought',
+          thoughtNumber: 1,
+          totalThoughts: 3,
+          nextThoughtNeeded: true,
+          ...over,
+        }) as ThinkingToolInput;
+
+      it('returns undefined when the input has no uncertainty', () => {
+        expect(checkUncertaintyRange(input())).toBeUndefined();
+        expect(checkUncertaintyRange(input({ uncertainty: undefined }))).toBeUndefined();
+      });
+
+      it.each([0, 0.25, 0.5, 1])('returns undefined for the uncertainty %s, which is in range', (uncertainty) => {
+        expect(checkUncertaintyRange(input({ uncertainty }))).toBeUndefined();
+      });
+
+      it.each([-1, -0.0001, 1.0001, 2, Infinity, -Infinity])(
+        'fails with UNCERTAINTY_OUT_OF_RANGE for %s',
+        (uncertainty) => {
+          expect(checkUncertaintyRange(input({ uncertainty }))).toEqual({
+            field: 'uncertainty',
+            message: `Uncertainty (${uncertainty}) must be between 0 and 1`,
+            code: 'UNCERTAINTY_OUT_OF_RANGE',
+          });
+        }
+      );
+
+      it('keeps the rule of the handlers: a value that no comparison can order is not an error', () => {
+        expect(checkUncertaintyRange(input({ uncertainty: NaN }))).toBeUndefined();
+        expect(checkUncertaintyRange(input({ uncertainty: null }))).toBeUndefined();
+      });
+
+      it('returns a new error on every call', () => {
+        const a = checkUncertaintyRange(input({ uncertainty: 2 }));
+        const b = checkUncertaintyRange(input({ uncertainty: 2 }));
+
+        expect(a).toEqual(b);
+        expect(a).not.toBe(b);
       });
     });
 

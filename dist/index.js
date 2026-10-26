@@ -201,6 +201,27 @@ function checkThoughtBasics(input) {
   }
   return void 0;
 }
+function checkThoughtType(input, validTypes) {
+  const { thoughtType } = input;
+  if (thoughtType && !validTypes.includes(thoughtType)) {
+    return createValidationWarning(
+      "thoughtType",
+      `Unknown thought type: ${thoughtType}`,
+      `Valid types: ${validTypes.join(", ")}`
+    );
+  }
+  return void 0;
+}
+function checkUncertaintyRange(input) {
+  if (input.uncertainty !== void 0 && (input.uncertainty < 0 || input.uncertainty > 1)) {
+    return createValidationError(
+      "uncertainty",
+      `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
+      "UNCERTAINTY_OUT_OF_RANGE"
+    );
+  }
+  return void 0;
+}
 function createThoughtBase(input, sessionId) {
   return {
     id: randomUUID(),
@@ -2853,17 +2874,8 @@ var init_ShannonHandler = __esm({
             )
           );
         }
-        if (input.uncertainty !== void 0) {
-          if (input.uncertainty < 0 || input.uncertainty > 1) {
-            errors.push(
-              createValidationError(
-                "uncertainty",
-                `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
-                "UNCERTAINTY_OUT_OF_RANGE"
-              )
-            );
-          }
-        }
+        const uncertaintyError = checkUncertaintyRange(input);
+        if (uncertaintyError) errors.push(uncertaintyError);
         if (inputAny.confidenceFactors) {
           const cf = inputAny.confidenceFactors;
           const cfFields = [
@@ -3144,26 +3156,10 @@ var init_MathematicsHandler = __esm({
         const inputAny = input;
         const basicFailure = checkThoughtBasics(input);
         if (basicFailure) return basicFailure;
-        if (inputAny.thoughtType && !VALID_THOUGHT_TYPES2.includes(inputAny.thoughtType)) {
-          warnings.push(
-            createValidationWarning(
-              "thoughtType",
-              `Unknown thought type: ${inputAny.thoughtType}`,
-              `Valid types: ${VALID_THOUGHT_TYPES2.join(", ")}`
-            )
-          );
-        }
-        if (input.uncertainty !== void 0) {
-          if (input.uncertainty < 0 || input.uncertainty > 1) {
-            errors.push(
-              createValidationError(
-                "uncertainty",
-                `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
-                "UNCERTAINTY_OUT_OF_RANGE"
-              )
-            );
-          }
-        }
+        const thoughtTypeWarning = checkThoughtType(input, VALID_THOUGHT_TYPES2);
+        if (thoughtTypeWarning) warnings.push(thoughtTypeWarning);
+        const uncertaintyError = checkUncertaintyRange(input);
+        if (uncertaintyError) errors.push(uncertaintyError);
         if (input.mathematicalModel) {
           const modelValidation = this.validateModel(input.mathematicalModel);
           errors.push(...modelValidation.errors);
@@ -3510,26 +3506,10 @@ var init_PhysicsHandler = __esm({
         const inputAny = input;
         const basicFailure = checkThoughtBasics(input);
         if (basicFailure) return basicFailure;
-        if (inputAny.thoughtType && !VALID_THOUGHT_TYPES3.includes(inputAny.thoughtType)) {
-          warnings.push(
-            createValidationWarning(
-              "thoughtType",
-              `Unknown thought type: ${inputAny.thoughtType}`,
-              `Valid types: ${VALID_THOUGHT_TYPES3.join(", ")}`
-            )
-          );
-        }
-        if (input.uncertainty !== void 0) {
-          if (input.uncertainty < 0 || input.uncertainty > 1) {
-            errors.push(
-              createValidationError(
-                "uncertainty",
-                `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
-                "UNCERTAINTY_OUT_OF_RANGE"
-              )
-            );
-          }
-        }
+        const thoughtTypeWarning = checkThoughtType(input, VALID_THOUGHT_TYPES3);
+        if (thoughtTypeWarning) warnings.push(thoughtTypeWarning);
+        const uncertaintyError = checkUncertaintyRange(input);
+        if (uncertaintyError) errors.push(uncertaintyError);
         if (input.tensorProperties) {
           const tensorValidation = this.validateTensor(input.tensorProperties);
           errors.push(...tensorValidation.errors);
@@ -4040,15 +4020,8 @@ var init_HybridHandler = __esm({
         const inputAny = input;
         const basicFailure = checkThoughtBasics(input);
         if (basicFailure) return basicFailure;
-        if (inputAny.thoughtType && !VALID_THOUGHT_TYPES4.includes(inputAny.thoughtType)) {
-          warnings.push(
-            createValidationWarning(
-              "thoughtType",
-              `Unknown thought type: ${inputAny.thoughtType}`,
-              `Valid types: ${VALID_THOUGHT_TYPES4.join(", ")}`
-            )
-          );
-        }
+        const thoughtTypeWarning = checkThoughtType(input, VALID_THOUGHT_TYPES4);
+        if (thoughtTypeWarning) warnings.push(thoughtTypeWarning);
         if (inputAny.synthesisStrategy && !VALID_STRATEGIES.includes(inputAny.synthesisStrategy)) {
           warnings.push(
             createValidationWarning(
@@ -12541,26 +12514,10 @@ var init_ComputabilityHandler = __esm({
         const inputAny = input;
         const basicFailure = checkThoughtBasics(input);
         if (basicFailure) return basicFailure;
-        if (inputAny.thoughtType && !VALID_THOUGHT_TYPES5.includes(inputAny.thoughtType)) {
-          warnings.push(
-            createValidationWarning(
-              "thoughtType",
-              `Unknown thought type: ${inputAny.thoughtType}`,
-              `Valid types: ${VALID_THOUGHT_TYPES5.join(", ")}`
-            )
-          );
-        }
-        if (input.uncertainty !== void 0) {
-          if (input.uncertainty < 0 || input.uncertainty > 1) {
-            errors.push(
-              createValidationError(
-                "uncertainty",
-                `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
-                "UNCERTAINTY_OUT_OF_RANGE"
-              )
-            );
-          }
-        }
+        const thoughtTypeWarning = checkThoughtType(input, VALID_THOUGHT_TYPES5);
+        if (thoughtTypeWarning) warnings.push(thoughtTypeWarning);
+        const uncertaintyError = checkUncertaintyRange(input);
+        if (uncertaintyError) errors.push(uncertaintyError);
         if (inputAny.machines) {
           for (let i = 0; i < inputAny.machines.length; i++) {
             const machineWarnings = this.validateMachine(inputAny.machines[i], i);
@@ -13011,15 +12968,8 @@ var init_CryptanalyticHandler = __esm({
         const inputAny = input;
         const basicFailure = checkThoughtBasics(input);
         if (basicFailure) return basicFailure;
-        if (inputAny.thoughtType && !VALID_THOUGHT_TYPES6.includes(inputAny.thoughtType)) {
-          warnings.push(
-            createValidationWarning(
-              "thoughtType",
-              `Unknown thought type: ${inputAny.thoughtType}`,
-              `Valid types: ${VALID_THOUGHT_TYPES6.join(", ")}`
-            )
-          );
-        }
+        const thoughtTypeWarning = checkThoughtType(input, VALID_THOUGHT_TYPES6);
+        if (thoughtTypeWarning) warnings.push(thoughtTypeWarning);
         if (inputAny.cipherType && !VALID_CIPHER_TYPES.includes(inputAny.cipherType)) {
           warnings.push(
             createValidationWarning(
@@ -13029,17 +12979,8 @@ var init_CryptanalyticHandler = __esm({
             )
           );
         }
-        if (input.uncertainty !== void 0) {
-          if (input.uncertainty < 0 || input.uncertainty > 1) {
-            errors.push(
-              createValidationError(
-                "uncertainty",
-                `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
-                "UNCERTAINTY_OUT_OF_RANGE"
-              )
-            );
-          }
-        }
+        const uncertaintyError = checkUncertaintyRange(input);
+        if (uncertaintyError) errors.push(uncertaintyError);
         if (inputAny.hypotheses) {
           for (let i = 0; i < inputAny.hypotheses.length; i++) {
             const hypWarnings = this.validateHypothesis(inputAny.hypotheses[i], i);
@@ -13545,17 +13486,8 @@ var init_AlgorithmicHandler = __esm({
             )
           );
         }
-        if (input.uncertainty !== void 0) {
-          if (input.uncertainty < 0 || input.uncertainty > 1) {
-            errors.push(
-              createValidationError(
-                "uncertainty",
-                `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
-                "UNCERTAINTY_OUT_OF_RANGE"
-              )
-            );
-          }
-        }
+        const uncertaintyError = checkUncertaintyRange(input);
+        if (uncertaintyError) errors.push(uncertaintyError);
         if (req.dpFormulation) {
           const dpWarnings = this.validateDPFormulation(req.dpFormulation);
           warnings.push(...dpWarnings);
@@ -15084,15 +15016,8 @@ var init_ModalHandler = __esm({
         const inputAny = input;
         const basicFailure = checkThoughtBasics(input);
         if (basicFailure) return basicFailure;
-        if (inputAny.thoughtType && !VALID_THOUGHT_TYPES9.includes(inputAny.thoughtType)) {
-          warnings.push(
-            createValidationWarning(
-              "thoughtType",
-              `Unknown thought type: ${inputAny.thoughtType}`,
-              `Valid types: ${VALID_THOUGHT_TYPES9.join(", ")}`
-            )
-          );
-        }
+        const thoughtTypeWarning = checkThoughtType(input, VALID_THOUGHT_TYPES9);
+        if (thoughtTypeWarning) warnings.push(thoughtTypeWarning);
         if (inputAny.modalLogicType && !VALID_LOGIC_SYSTEMS.includes(inputAny.modalLogicType)) {
           warnings.push(
             createValidationWarning(
@@ -15681,15 +15606,8 @@ var init_StochasticHandler = __esm({
         const inputAny = input;
         const basicFailure = checkThoughtBasics(input);
         if (basicFailure) return basicFailure;
-        if (inputAny.thoughtType && !VALID_THOUGHT_TYPES10.includes(inputAny.thoughtType)) {
-          warnings.push(
-            createValidationWarning(
-              "thoughtType",
-              `Unknown thought type: ${inputAny.thoughtType}`,
-              `Valid types: ${VALID_THOUGHT_TYPES10.join(", ")}`
-            )
-          );
-        }
+        const thoughtTypeWarning = checkThoughtType(input, VALID_THOUGHT_TYPES10);
+        if (thoughtTypeWarning) warnings.push(thoughtTypeWarning);
         if (inputAny.processType && !VALID_PROCESS_TYPES.includes(inputAny.processType)) {
           warnings.push(
             createValidationWarning(
@@ -16273,15 +16191,8 @@ var init_ConstraintHandler = __esm({
         const inputAny = input;
         const basicFailure = checkThoughtBasics(input);
         if (basicFailure) return basicFailure;
-        if (inputAny.thoughtType && !VALID_THOUGHT_TYPES11.includes(inputAny.thoughtType)) {
-          warnings.push(
-            createValidationWarning(
-              "thoughtType",
-              `Unknown thought type: ${inputAny.thoughtType}`,
-              `Valid types: ${VALID_THOUGHT_TYPES11.join(", ")}`
-            )
-          );
-        }
+        const thoughtTypeWarning = checkThoughtType(input, VALID_THOUGHT_TYPES11);
+        if (thoughtTypeWarning) warnings.push(thoughtTypeWarning);
         if (inputAny.variables) {
           for (let i = 0; i < inputAny.variables.length; i++) {
             const v = inputAny.variables[i];
@@ -16736,15 +16647,8 @@ var init_OptimizationHandler = __esm({
         const inputAny = input;
         const basicFailure = checkThoughtBasics(input);
         if (basicFailure) return basicFailure;
-        if (inputAny.thoughtType && !VALID_THOUGHT_TYPES12.includes(inputAny.thoughtType)) {
-          warnings.push(
-            createValidationWarning(
-              "thoughtType",
-              `Unknown thought type: ${inputAny.thoughtType}`,
-              `Valid types: ${VALID_THOUGHT_TYPES12.join(", ")}`
-            )
-          );
-        }
+        const thoughtTypeWarning = checkThoughtType(input, VALID_THOUGHT_TYPES12);
+        if (thoughtTypeWarning) warnings.push(thoughtTypeWarning);
         if (inputAny.problem?.type && !VALID_PROBLEM_TYPES.includes(inputAny.problem.type)) {
           warnings.push(
             createValidationWarning(

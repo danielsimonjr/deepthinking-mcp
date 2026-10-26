@@ -142,6 +142,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before and after. The run covered the 35 mode handlers and 35 generic handlers, one for each mode.
   Each handler received 7 thought values, 7 pairs of thought numbers and 4 sets of extra fields. Ten new tests in `ModeHandler.test.ts` pin
   the error codes, the messages, the order of the two checks and the fresh result on each call.
+- **Eleven handlers share two more checks of `validate`.** Nine handlers repeated the same check
+  of `thoughtType`: `ComputabilityHandler`, `ConstraintHandler`, `CryptanalyticHandler`,
+  `HybridHandler`, `MathematicsHandler`, `ModalHandler`, `OptimizationHandler`, `PhysicsHandler`
+  and `StochasticHandler`. Six repeated the same check of `uncertainty`: `AlgorithmicHandler`,
+  `ComputabilityHandler`, `CryptanalyticHandler`, `MathematicsHandler`, `PhysicsHandler` and
+  `ShannonHandler`. The new `checkThoughtType` and `checkUncertaintyRange` in
+  `src/modes/handlers/ModeHandler.ts` hold each check once. Each returns the warning or the error,
+  or `undefined` when the input passes. The handlers add the result to their own list in the order
+  that they used before. The thought-type blocks of `AlgorithmicHandler` and `RecursiveHandler`
+  differ from the others and stay as they are. The 11 handlers lose 177 lines and gain 45.
+  `CryptanalyticHandler`, `ComputabilityHandler` and `AlgorithmicHandler` also lose the import of
+  `createValidationError` that no code uses. Results do not change. A run of 26,190 calls gave the
+  same `validate` result before and after. The run covered the 11 handlers and `RecursiveHandler`.
+  Each received 15 fixed values of `thoughtType`, the types of its own list and two of those in
+  upper case, 16 values of `uncertainty` (`NaN`, both infinities, strings and objects among them),
+  2 pairs of thought numbers and 3 thought texts. Thirty-one new tests in `ModeHandler.test.ts` pin
+  the messages, the codes, the limits of the range and the exact match of the type.
+  `validate-checks-wiring.test.ts` holds 57 tests that show each of the 15 call sites uses the
+  right helper with its own list. 33 mutants of the helpers and the call sites all fail a test.
 - **Thirty-six handlers share one builder for the first seven fields of a thought.** Each of the 36
   handler classes began the thought that `createThought` returns with the same seven fields: `id`,
   `sessionId`, `thoughtNumber`, `totalThoughts`, `content`, `timestamp` and `nextThoughtNeeded`.

@@ -29,10 +29,11 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  checkThoughtType,
+  checkUncertaintyRange,
   createThoughtBase,
   validationSuccess,
   validationFailure,
-  createValidationError,
   createValidationWarning,
 } from "./ModeHandler.js";
 
@@ -168,18 +169,8 @@ export class CryptanalyticHandler implements ModeHandler {
     if (basicFailure) return basicFailure;
 
     // Validate thought type
-    if (
-      inputAny.thoughtType &&
-      !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)
-    ) {
-      warnings.push(
-        createValidationWarning(
-          "thoughtType",
-          `Unknown thought type: ${inputAny.thoughtType}`,
-          `Valid types: ${VALID_THOUGHT_TYPES.join(", ")}`,
-        ),
-      );
-    }
+    const thoughtTypeWarning = checkThoughtType(input, VALID_THOUGHT_TYPES);
+    if (thoughtTypeWarning) warnings.push(thoughtTypeWarning);
 
     // Validate cipher type
     if (
@@ -196,17 +187,8 @@ export class CryptanalyticHandler implements ModeHandler {
     }
 
     // Validate uncertainty
-    if (input.uncertainty !== undefined) {
-      if (input.uncertainty < 0 || input.uncertainty > 1) {
-        errors.push(
-          createValidationError(
-            "uncertainty",
-            `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
-            "UNCERTAINTY_OUT_OF_RANGE",
-          ),
-        );
-      }
-    }
+    const uncertaintyError = checkUncertaintyRange(input);
+    if (uncertaintyError) errors.push(uncertaintyError);
 
     // Validate hypotheses
     if (inputAny.hypotheses) {
