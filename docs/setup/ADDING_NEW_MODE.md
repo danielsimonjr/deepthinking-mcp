@@ -20,7 +20,7 @@ Adding a new mode requires touching **12 core locations** across the codebase:
 | 1 | Type Definition | ✅ | `src/types/modes/yourmode.ts` | types: 37 files |
 | 2 | Core Enum & Union | ✅ | `src/types/core.ts` | 84 exports, 33 imports |
 | 3 | Mode Validator | ✅ | `src/validation/validators/modes/yourmode.ts` | validation: 44 files, 36 validators |
-| 4 | **ModeHandler** | ✅ | `src/modes/handlers/YourModeHandler.ts` | modes: 53 files, 37 handlers |
+| 4 | **ModeHandler** | ✅ | `src/modes/handlers/YourModeHandler.ts` | modes: 58 files, 36 handlers |
 | 5 | **Handler Registration** | ✅ | `src/modes/index.ts` | 74 imports, re-exports all handlers |
 | 6 | MCP Tool Schema | ✅ | `src/tools/json-schemas.ts` | tools: 18 files |
 | 7 | Visual Exporter | ⚠️ Optional | `src/export/visual/modes/yourmode.ts` | export: 45 files, 14 builder classes |
@@ -68,7 +68,7 @@ DeepThinking MCP v9.x uses a **Strategy Pattern** for mode handling:
 
 Key concepts:
 - **ModeHandler Interface**: Contract for mode-specific thought creation and validation
-- **ModeHandlerRegistry**: Singleton that manages all 37 handlers (34 modes + GenericModeHandler + CustomHandler + utility)
+- **ModeHandlerRegistry**: Singleton that manages all 36 handlers (34 modes + GenericModeHandler + CustomHandler)
 - **registerAllHandlers()**: Function that registers all handlers at startup
 - **Grouped MCP Tools**: 13 tools group related modes (not one tool per mode)
 

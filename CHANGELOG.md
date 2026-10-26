@@ -142,6 +142,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before and after. The run covered the 35 mode handlers and 35 generic handlers, one for each mode.
   Each handler received 7 thought values, 7 pairs of thought numbers and 4 sets of extra fields. Ten new tests in `ModeHandler.test.ts` pin
   the error codes, the messages, the order of the two checks and the fresh result on each call.
+- **The hand-kept docs name the shared handler helpers and the real counts.** `COMPONENTS.md` now
+  lists `checkThoughtType`, `checkUncertaintyRange` and `createThoughtTail` with the handlers that
+  call each one, and says why three handlers keep their own five lines. `TEST_COVERAGE.md` counts
+  160 files under `tests/unit/` (it said 151), and its text for `modes/`, `export/`, `validation/`
+  and `session/` names the test files added since. `CLAUDE.md` lists the 16 files of `src/proof/`
+  (it listed 11, one under a wrong path), the 36 handlers (it said 37 and left out `ConstraintHandler`
+  and `OptimizationHandler`), and the current counts of files, lines, exports and tests. `README.md`
+  and `ADDING_NEW_MODE.md` say 36 handlers. The architecture gate checks counts only, so it did not
+  see this text. No code, version or bundle change.
 - **Three proof checks share one word-overlap helper.** `ProofDecomposer.hasSignificantOverlap`,
   `GapAnalyzer.computeWordOverlap` and `CircularReasoningDetector.statementsEquivalent` each split two
   statements on white space, kept the distinct words longer than a limit, counted the words in

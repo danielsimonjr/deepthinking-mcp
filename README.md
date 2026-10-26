@@ -192,7 +192,7 @@ record sizes (`src/tools/schemas/shared.ts`), and export paths are sandboxed to
 ## Architecture
 
 `src/index.ts` receives a tool call, validates it, and hands off to `ThoughtFactory`, which asks
-`ModeHandlerRegistry` for the handler matching the requested mode. Each of the 37 handlers owns its
+`ModeHandlerRegistry` for the handler matching the requested mode. Each of the 36 handlers owns its
 mode's validation and enrichment; a generic handler backs modes without a specialised one. Results
 land in `SessionManager`. Exports take a parallel path through `ExportService`.
 

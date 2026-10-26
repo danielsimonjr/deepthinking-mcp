@@ -14,14 +14,15 @@ Most test folders follow the folder names of `src/`: `tests/unit/<area>/` and
 `tests/integration/<area>/` mirror `src/<area>/`. Five folders have no `src/` counterpart:
 `tests/unit/benchmarks/` and `tests/integration/{exports,handlers,scenarios,validators}/`. A file under
 `src/modes/handlers/BayesianHandler.ts` has its unit test at
-`tests/unit/modes/handlers/BayesianHandler.test.ts`. Every one of the 38 files in
-`src/modes/handlers/` has a test file of the same name.
+`tests/unit/modes/handlers/BayesianHandler.test.ts`. Of the 39 files in `src/modes/handlers/`,
+38 have a test file of the same name. `resolve-mode.ts` is the exception: its test is
+`mode-name-resolution.test.ts`.
 
 ### Layout
 
 | Directory | Test files | Purpose |
 |---|---|---|
-| `tests/unit/` | 151 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
+| `tests/unit/` | 160 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
 | `tests/integration/` | 80 | Cross-module paths: entry-point dispatch over a real transport, tool-shaped input through the handlers, export round-trips, multi-mode analysis, session lifecycles. |
 | `tests/edge-cases/` | 6 | Boundary conditions, malformed input, regressions pinned from past bugs. |
 | `tests/performance/` | 4 | Counted-work checks for cost, throughput, memory and stress. `helpers/work-probe.ts` holds the counters. |
@@ -74,11 +75,11 @@ the root-level files that name the area in their subject.
 |---|---|---|---|---|
 | `index.ts` | 1 | 0 | 1 (8 test files) | `tests/integration/index-server.test.ts` and 7 more files that import the module. See Gaps. |
 | `types/` | 37 | 11 | 18 | Most handler and validator tests import types from here. No test imports 18 of the mode type files directly. |
-| `modes/` (handlers, combinations, causal graph, stochastic) | 58 | 59 | 56 | `tests/integration/handlers/`, `tests/integration/mode-handler-delegation.test.ts`. |
+| `modes/` (handlers, combinations, causal graph, stochastic) | 58 | 62 | 56 | `tests/integration/handlers/`, `tests/integration/mode-handler-delegation.test.ts`. |
 | `services/` | 3 | 2 | 3 | 68 test files import `ThoughtFactory` or `ExportService` directly. `RecommendationService` has one importer, `tests/unit/taxonomy/taxonomy-wiring.test.ts`. |
 | `session/` | 4 | 11 | 2 | `tests/integration/session-workflow.test.ts`, `multi-session.test.ts`, `edge-cases/session-edges.test.ts`, and 4 `tests/integration/tools/session-*.test.ts` files. |
 | `validation/` | 44 | 21 | 21 | `tests/unit/validation/validators/modes/validator-contract.test.ts` covers all 35 mode validators. See Gaps. |
-| `export/` | 48 | 15 | 23 | 12 integration files under `tests/integration/export/` and `tests/integration/exports/`. The per-mode visual exporters are reached through `visual/modes/index.ts`. |
+| `export/` | 48 | 20 | 23 | 12 integration files under `tests/integration/export/` and `tests/integration/exports/`. The per-mode visual exporters are reached through `visual/modes/index.ts`. |
 | `proof/` | 16 | 11 | 14 | `tests/integration/proof/decomposition.test.ts`, and the `proof-*-wiring` tests in `tests/unit/session/`. |
 | `taxonomy/` | 7 | 3 | 6 | `tests/unit/session/reasoning-flow-wiring.test.ts`. |
 | `cache/` | 3 | 2 | 1 | `src/cache/lru.ts` is imported by 2 unit tests. `index.ts` and `types.ts` have no direct importer. |
@@ -93,7 +94,7 @@ and `toolSchemas`. See Gaps for the exact limits of that coverage.
 
 ## 3. Unit tests
 
-151 files under `tests/unit/`, organized by the `src/` area they cover.
+160 files under `tests/unit/`, organized by the `src/` area they cover.
 
 **`types/` (11 files).** `types.test.ts` covers the core type guards in `src/types/core.ts`.
 `types/thought-guard-coverage.test.ts` pins the type guards against `ThinkingMode` in both
@@ -103,15 +104,23 @@ directions. Eight files pair one reasoning mode's type guard with `ThoughtValida
 `temporal.test.ts`. `recommendations.test.ts` covers `ModeRecommender` in
 `src/types/modes/recommendations.ts`.
 
-**`modes/` (59 files).** The largest concentration in the suite:
-- `tests/unit/modes/handlers/` (42 files) has one test per file in `src/modes/handlers/`
+**`modes/` (62 files).** The largest concentration in the suite:
+- `tests/unit/modes/handlers/` (45 files) has one test per file in `src/modes/handlers/`
   (`AbductiveHandler.test.ts` through `TemporalHandler.test.ts`, and `ModeHandler.test.ts` for the
   interface file). It also holds `registry.test.ts` for the `ModeHandlerRegistry` singleton in
   `src/modes/registry.ts`, and `stochastic-engine-wiring.test.ts`, which checks that
   `StochasticHandler` uses the Monte Carlo engine. `GameTheoryEquilibria.test.ts` pins the
   equilibrium set, the `isStrict` flag and the stability score on five small games.
   `mode-name-resolution.test.ts` checks `resolveMode` and the mode names that `CustomHandler` and
-  `HybridHandler` accept.
+  `HybridHandler` accept. `mode-name-warning.test.ts` checks that those two handlers list each
+  replaced mode name in `inputWarnings` and add no field when every name is a mode.
+  `input-warnings.test.ts` pins the helpers in `src/modes/handlers/input-warnings.ts`.
+  `ModeHandler.test.ts` also pins the shared helpers of `ModeHandler.ts`: `checkThoughtBasics`,
+  `checkThoughtType`, `checkUncertaintyRange` and `createThoughtBase`.
+  `validate-checks-wiring.test.ts` checks that each handler that calls `checkThoughtType` or
+  `checkUncertaintyRange` passes its own list of valid thought types and puts the result in its
+  answer. `thought-tail.test.ts` pins `createThoughtTail` and its three handlers, and checks that
+  `MathematicsHandler`, `PhysicsHandler` and `ShannonHandler` keep the key order of their thoughts.
 - `tests/unit/modes/handler-registration-coverage.test.ts` checks that `registerAllHandlers`
   covers every `ThinkingMode`. The expected list comes from the enum, not from a copy.
 - `tests/unit/modes/registry-base-fields.test.ts` checks that `ModeHandlerRegistry.createThought`
@@ -129,24 +138,33 @@ directions. Eight files pair one reasoning mode's type guard with `ThoughtValida
   `large-sample.test.ts`, `moments.test.ts`, `rng.test.ts`, `statistics.test.ts`, covering
   `src/modes/stochastic/{models,sampling,analysis}/`.
 
-**`validation/` (20 files).** `tests/unit/validation/validators/modes/` holds 15 files. Fourteen
+**`validation/` (21 files).** `tests/unit/validation/validators/modes/` holds 15 files. Fourteen
 are per-mode validator tests: `bayesian`, `causal`, `computability`, `constraint`, `cryptanalytic`,
 `deductive`, `evidential`, `gametheory`, `inductive`, `metareasoning`, `modal`, `optimization`,
 `recursive`, `stochastic`. The fifteenth, `validator-contract.test.ts`, discovers the validator
-files with `import.meta.glob` and asserts the shared contract for all 35 mode validators. Five
+files with `import.meta.glob` and asserts the shared contract for all 35 mode validators. Six
 files sit one level up: `advisory.test.ts` (the `validateAdvisory` wrapper), `cache-key.test.ts`
-(validation cache key derivation), `registry-mode-coverage.test.ts` (`VALIDATOR_REGISTRY` covers
-`ThinkingMode`), `unknown-mode.test.ts` (a mode with no registered validator), and
-`validator-file-coverage.test.ts` (validator files and `VALIDATOR_REGISTRY` agree in both
-directions).
+(validation cache key derivation), `input-warnings.test.ts` (`validateCommon` turns each
+`inputWarnings` sentence of a thought into a warning issue), `registry-mode-coverage.test.ts`
+(`VALIDATOR_REGISTRY` covers `ThinkingMode`), `unknown-mode.test.ts` (a mode with no registered
+validator), and `validator-file-coverage.test.ts` (validator files and `VALIDATOR_REGISTRY` agree
+in both directions).
 
-**`export/` (14 files).** Five files sit in `tests/unit/export/`: `file-exporter.test.ts`,
-`latex.test.ts`, `latex-export.test.ts`, `profiles.test.ts`, `proof-decomposition-visual.test.ts`.
-Two more pin shared behavior: `duplicate-implementations.test.ts` (copies of the same logic must agree)
+**`export/` (19 files).** Six files sit in `tests/unit/export/`: `file-exporter.test.ts`,
+`latex.test.ts`, `latex-export.test.ts`, `latex-item-lists.test.ts`, `profiles.test.ts`,
+`proof-decomposition-visual.test.ts`. `latex-item-lists.test.ts` pins the eight thought fields that
+the LaTeX exporter writes as a list of escaped strings. Two more pin shared behavior: `duplicate-implementations.test.ts` (copies of the same logic must agree)
 and `mode-exporter-format-matrix.test.ts` (every mode renders every visual format).
 `visual/modes/snapshot-baseline.test.ts` pins visual-exporter output against snapshots.
+`visual/modes/dispatch-wiring.test.ts` holds a hash of the output of every format for each mode
+exporter that calls `exportByFormat`, so a converter in the wrong slot fails the test.
+`visual/modes/engineering-accepted-input.test.ts` checks that the engineering exporter exports every
+input that the tool contract accepts, including the formats that the session tool does not offer.
 `visual/utils/{document-builders,graph-builders,svg-shared-elements,visual-builders}.test.ts` cover the fluent builder
-classes in `src/export/visual/utils/`. `visual/utils/dispatch.test.ts` covers the format dispatch of `exportByFormat`. `visual.test.ts` (at the `tests/unit/` root) exercises
+classes in `src/export/visual/utils/`. `visual/utils/dispatch.test.ts` covers the format dispatch of `exportByFormat`.
+`visual/utils/dot-output.test.ts` pins every line of the output of the two DOT writers.
+`visual/utils/svg-node-renderers.test.ts` covers the rectangle and stadium node renderers, and
+`visual/utils/svg-paint-attributes.test.ts` covers the paint attributes of the four SVG shapes that carry them. `visual.test.ts` (at the `tests/unit/` root) exercises
 `VisualExporter` across causal, temporal, game-theory, and Bayesian thought types.
 
 **`proof/` (11 files).** `advisory.test.ts` covers the `analyzeProofAdvisory` wrapper. Nine files
@@ -189,15 +207,17 @@ has no bound. `field-reach.test.ts` changes one leaf of an input at a time. It c
 leaf reaches the stored thought. A list names the leaves that no mode stores. The test compares
 that list with the measured one in both directions.
 
-**`session/` (10 files).** Four files sit at the `tests/unit/` root: `session-manager.test.ts` and
+**`session/` (11 files).** Four files sit at the `tests/unit/` root: `session-manager.test.ts` and
 `session-manager-remediation.test.ts` cover `src/session/manager.ts`; `file-store.test.ts` and
 `file-store-storage-error.test.ts` cover `src/session/storage/file-store.ts`, including the error
-paths a healthy run never hits. Six regression guards sit in `tests/unit/session/`:
+paths a healthy run never hits. Seven regression guards sit in `tests/unit/session/`:
 `advisory-validation-wiring`, `proof-analysis-wiring`, `proof-extended-wiring`, and
 `reasoning-flow-wiring` check that the validation engine, the proof engines and the reasoning-flow
 analyzer sit on the live request path. `create-session-mode-sync` checks that `createSession`
 sets the session mode in both places it is stored. `default-config-leak` checks that a session
-never mutates `DEFAULT_CONFIG`.
+never mutates `DEFAULT_CONFIG`. `input-warnings-persistence` checks that a thought with
+`inputWarnings` loads from `FileSessionStore` with the field, and that a thought without it loads
+as it was saved.
 
 **`services/` (2 files).** `ThoughtFactory.test.ts` and `ExportService.test.ts`.
 
