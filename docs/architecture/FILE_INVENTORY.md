@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **532 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **533 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -18,7 +18,7 @@ Every tracked TypeScript file in the repository — **532 files** — not just t
 | other | 2 |
 | reachable | 237 |
 | template | 5 |
-| test | 260 |
+| test | 261 |
 | tool | 14 |
 
 ## Per-area counts
@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **532 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 249 | 119,352 |
+| src | 249 | 119,338 |
 | templates | 5 | 754 |
-| tests | 260 | 109,129 |
+| tests | 261 | 109,279 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -146,7 +146,7 @@ Every tracked TypeScript file in the repository — **532 files** — not just t
 | `src/modes/handlers/resolve-mode.ts` | src | 53 | reachable |
 | `src/modes/index.ts` | src | 219 | reachable |
 | `src/modes/registry.ts` | src | 412 | reachable |
-| `src/modes/stochastic/analysis/statistics.ts` | src | 581 | reachable |
+| `src/modes/stochastic/analysis/statistics.ts` | src | 567 | reachable |
 | `src/modes/stochastic/models/distribution.ts` | src | 642 | orphan |
 | `src/modes/stochastic/models/moments.ts` | src | 171 | reachable |
 | `src/modes/stochastic/sampling/rng.ts` | src | 324 | orphan |
@@ -483,6 +483,7 @@ Every tracked TypeScript file in the repository — **532 files** — not just t
 | `tests/unit/modes/stochastic/large-sample.test.ts` | tests | 52 | test |
 | `tests/unit/modes/stochastic/moments.test.ts` | tests | 152 | test |
 | `tests/unit/modes/stochastic/rng.test.ts` | tests | 366 | test |
+| `tests/unit/modes/stochastic/statistics-matrices.test.ts` | tests | 150 | test |
 | `tests/unit/modes/stochastic/statistics.test.ts` | tests | 405 | test |
 | `tests/unit/proof/advisory.test.ts` | tests | 381 | test |
 | `tests/unit/proof/branch-analyzer.test.ts` | tests | 432 | test |

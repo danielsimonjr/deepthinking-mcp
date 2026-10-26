@@ -78,6 +78,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **`correlationMatrix` and `covarianceMatrix` share one matrix builder.** Both functions in
+  `src/modes/stochastic/analysis/statistics.ts` read the columns of the table of samples, filled a
+  square matrix, and copied each cell below the diagonal from the cell above it. They differed in
+  one rule: the diagonal of the correlation matrix is 1, and the diagonal of the covariance matrix
+  is the covariance of a column with itself. The new private `pairwiseMatrix(samples, cell)` holds
+  the loop and the new private `columnsOf(samples)` holds the read of the columns. The callers pass
+  their cell rule. `computeSampleStatistics` also calls `columnsOf` in place of its own copy of
+  the read. The file loses 46 lines and gains 32. Results do not change. A run of 3,584 calls gave
+  the same result before and after, with the sign of zero, `NaN` and infinity compared exactly:
+  896 tables of 0 to 9 rows and 0 to 5 columns (finite values, `NaN`, infinities, `-0`,
+  constant columns, rows of different length, and first rows that are not lists) in
+  `correlationMatrix`, `covarianceMatrix`, `computeSampleStatistics` and `summarizeAllPosteriors`.
+  The new test file `statistics-matrices.test.ts` (14 tests) pins the cells, the diagonal of
+  each matrix (also for a constant column and a column of `NaN`), the symmetry, the shape for
+  one column and for no column, the separate row arrays, and the columns that
+  `computeSampleStatistics` reads.
 - **The temporal timeline exporter sorts the events with one function.** The sort step
   `[...thought.events].sort((a, b) => a.timestamp - b.timestamp)` stood 10 times in
   `src/export/visual/modes/temporal.ts`. The new private `sortByTimestamp` copies the list and sorts

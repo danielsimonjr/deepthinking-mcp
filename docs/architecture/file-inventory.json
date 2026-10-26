@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 532,
+    "totalFiles": 533,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 249,
-        "loc": 119352
+        "loc": 119338
       },
       "templates": {
         "files": 5,
         "loc": 754
       },
       "tests": {
-        "files": 260,
-        "loc": 109129
+        "files": 261,
+        "loc": 109279
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 237,
       "orphan": 12,
       "template": 5,
-      "test": 260,
+      "test": 261,
       "tool": 14,
       "config": 2
     }
@@ -701,7 +701,7 @@
     {
       "path": "src/modes/stochastic/analysis/statistics.ts",
       "area": "src",
-      "loc": 581,
+      "loc": 567,
       "disposition": "reachable"
     },
     {
@@ -2718,6 +2718,12 @@
       "path": "tests/unit/modes/stochastic/rng.test.ts",
       "area": "tests",
       "loc": 366,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/stochastic/statistics-matrices.test.ts",
+      "area": "tests",
+      "loc": 150,
       "disposition": "test"
     },
     {
