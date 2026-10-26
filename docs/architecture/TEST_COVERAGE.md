@@ -21,14 +21,14 @@ Most test folders follow the folder names of `src/`: `tests/unit/<area>/` and
 
 | Directory | Test files | Purpose |
 |---|---|---|
-| `tests/unit/` | 144 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
+| `tests/unit/` | 150 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
 | `tests/integration/` | 80 | Cross-module paths: entry-point dispatch over a real transport, tool-shaped input through the handlers, export round-trips, multi-mode analysis, session lifecycles. |
 | `tests/edge-cases/` | 6 | Boundary conditions, malformed input, regressions pinned from past bugs. |
 | `tests/performance/` | 4 | Counted-work checks for cost, throughput, memory and stress. `helpers/work-probe.ts` holds the counters. |
 | `tests/utils/` | 0 (5 helper files) | Shared fixtures, factories, and assertion helpers. 21 test files import them, all under `tests/integration/tools/`. |
 | `tests/test-results/` | 0 | Reporter code and `TEST_RESULTS_v*.md` summaries. Not test code. |
 
-The suite holds 234 test files. `npx vitest list --filesOnly` lists them. This document maps
+The suite holds 240 test files. `npx vitest list --filesOnly` lists them. This document maps
 files. It holds no test count and no pass or fail state. Run the suite to get those.
 
 ### Running each tier
@@ -44,8 +44,8 @@ npx vitest run                          # everything
 `npm run test:publish` sets `SKIP_BENCHMARKS=1`. That variable switches on one extra entry in the
 `exclude` list of `vitest.config.ts`: `**/benchmarks/**`. The pattern matches the directory
 `tests/unit/benchmarks/`, which holds 2 test files. It does not match `tests/performance/`, so
-the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 232
-files instead of 234.
+the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 238
+files instead of 240.
 
 ### Where reports land
 
@@ -74,11 +74,11 @@ the root-level files that name the area in their subject.
 |---|---|---|---|---|
 | `index.ts` | 1 | 0 | 1 (8 test files) | `tests/integration/index-server.test.ts` and 7 more files that import the module. See Gaps. |
 | `types/` | 37 | 11 | 18 | Most handler and validator tests import types from here. No test imports 18 of the mode type files directly. |
-| `modes/` (handlers, combinations, causal graph, stochastic) | 55 | 54 | 53 | `tests/integration/handlers/`, `tests/integration/mode-handler-delegation.test.ts`. |
+| `modes/` (handlers, combinations, causal graph, stochastic) | 58 | 59 | 56 | `tests/integration/handlers/`, `tests/integration/mode-handler-delegation.test.ts`. |
 | `services/` | 3 | 2 | 3 | 68 test files import `ThoughtFactory` or `ExportService` directly. `RecommendationService` has one importer, `tests/unit/taxonomy/taxonomy-wiring.test.ts`. |
 | `session/` | 4 | 11 | 2 | `tests/integration/session-workflow.test.ts`, `multi-session.test.ts`, `edge-cases/session-edges.test.ts`, and 4 `tests/integration/tools/session-*.test.ts` files. |
 | `validation/` | 44 | 21 | 21 | `tests/unit/validation/validators/modes/validator-contract.test.ts` covers all 35 mode validators. See Gaps. |
-| `export/` | 47 | 13 | 22 | 12 integration files under `tests/integration/export/` and `tests/integration/exports/`. The per-mode visual exporters are reached through `visual/modes/index.ts`. |
+| `export/` | 47 | 14 | 22 | 12 integration files under `tests/integration/export/` and `tests/integration/exports/`. The per-mode visual exporters are reached through `visual/modes/index.ts`. |
 | `proof/` | 15 | 10 | 13 | `tests/integration/proof/decomposition.test.ts`, and the `proof-*-wiring` tests in `tests/unit/session/`. |
 | `taxonomy/` | 7 | 3 | 6 | `tests/unit/session/reasoning-flow-wiring.test.ts`. |
 | `cache/` | 3 | 2 | 1 | `src/cache/lru.ts` is imported by 2 unit tests. `index.ts` and `types.ts` have no direct importer. |
@@ -93,7 +93,7 @@ and `toolSchemas`. See Gaps for the exact limits of that coverage.
 
 ## 3. Unit tests
 
-144 files under `tests/unit/`, organized by the `src/` area they cover.
+150 files under `tests/unit/`, organized by the `src/` area they cover.
 
 **`types/` (11 files).** `types.test.ts` covers the core type guards in `src/types/core.ts`.
 `types/thought-guard-coverage.test.ts` pins the type guards against `ThinkingMode` in both
@@ -103,12 +103,15 @@ directions. Eight files pair one reasoning mode's type guard with `ThoughtValida
 `temporal.test.ts`. `recommendations.test.ts` covers `ModeRecommender` in
 `src/types/modes/recommendations.ts`.
 
-**`modes/` (53 files).** The largest concentration in the suite:
-- `tests/unit/modes/handlers/` (39 files) has one test per file in `src/modes/handlers/`
+**`modes/` (59 files).** The largest concentration in the suite:
+- `tests/unit/modes/handlers/` (42 files) has one test per file in `src/modes/handlers/`
   (`AbductiveHandler.test.ts` through `TemporalHandler.test.ts`, and `ModeHandler.test.ts` for the
   interface file). It also holds `registry.test.ts` for the `ModeHandlerRegistry` singleton in
   `src/modes/registry.ts`, and `stochastic-engine-wiring.test.ts`, which checks that
-  `StochasticHandler` uses the Monte Carlo engine.
+  `StochasticHandler` uses the Monte Carlo engine. `GameTheoryEquilibria.test.ts` pins the
+  equilibrium set, the `isStrict` flag and the stability score on five small games.
+  `mode-name-resolution.test.ts` checks `resolveMode` and the mode names that `CustomHandler` and
+  `HybridHandler` accept.
 - `tests/unit/modes/handler-registration-coverage.test.ts` checks that `registerAllHandlers`
   covers every `ThinkingMode`. The expected list comes from the enum, not from a copy.
 - `tests/unit/modes/registry-base-fields.test.ts` checks that `ModeHandlerRegistry.createThought`
@@ -116,14 +119,14 @@ directions. Eight files pair one reasoning mode's type guard with `ThoughtValida
   `dependencies`, `assumptions`) from the input to the thought, for every mode. It also checks
   that a value the handler computed stays, and that the registry adds no key when the input
   carries none of the six.
-- `tests/unit/modes/combinations/` (4 files): `analyzer-execution.test.ts`,
-  `conflict-resolver.test.ts`, `merger.test.ts`, `presets.test.ts`. The first one checks that
+- `tests/unit/modes/combinations/` (5 files): `analyzer-execution.test.ts`,
+  `conflict-resolver.test.ts`, `merger.test.ts`, `presets.test.ts`, `text-similarity.test.ts`. The first one checks that
   `deepthinking_analyze` runs real modes through `ThoughtFactory`.
-- `tests/unit/modes/causal/graph/` (3 files): `centrality.test.ts`, `d-separation.test.ts`,
-  `intervention.test.ts`, covering the causal-graph algorithms in
+- `tests/unit/modes/causal/graph/` (4 files): `centrality.test.ts`, `d-separation.test.ts`,
+  `graph-utils.test.ts`, `intervention.test.ts`, covering the causal-graph algorithms in
   `src/modes/causal/graph/algorithms/`.
-- `tests/unit/modes/stochastic/` (5 files): `distribution.test.ts`, `large-sample.test.ts`,
-  `moments.test.ts`, `rng.test.ts`, `statistics.test.ts`, covering
+- `tests/unit/modes/stochastic/` (6 files): `distribution.test.ts`, `gamma-variates.test.ts`,
+  `large-sample.test.ts`, `moments.test.ts`, `rng.test.ts`, `statistics.test.ts`, covering
   `src/modes/stochastic/{models,sampling,analysis}/`.
 
 **`validation/` (20 files).** `tests/unit/validation/validators/modes/` holds 15 files. Fourteen
@@ -137,12 +140,12 @@ files sit one level up: `advisory.test.ts` (the `validateAdvisory` wrapper), `ca
 `validator-file-coverage.test.ts` (validator files and `VALIDATOR_REGISTRY` agree in both
 directions).
 
-**`export/` (12 files).** Seven files sit in `tests/unit/export/`: `file-exporter.test.ts`,
-`latex.test.ts`, `latex-export.test.ts`, `profiles.test.ts`, `proof-decomposition-visual.test.ts`,
-`duplicate-implementations.test.ts` (copies of the same logic must agree), and
-`mode-exporter-format-matrix.test.ts` (every mode renders every visual format).
+**`export/` (13 files).** Five files sit in `tests/unit/export/`: `file-exporter.test.ts`,
+`latex.test.ts`, `latex-export.test.ts`, `profiles.test.ts`, `proof-decomposition-visual.test.ts`.
+Two more pin shared behavior: `duplicate-implementations.test.ts` (copies of the same logic must agree)
+and `mode-exporter-format-matrix.test.ts` (every mode renders every visual format).
 `visual/modes/snapshot-baseline.test.ts` pins visual-exporter output against snapshots.
-`visual/utils/{document-builders,graph-builders,visual-builders}.test.ts` cover the fluent builder
+`visual/utils/{document-builders,graph-builders,svg-shared-elements,visual-builders}.test.ts` cover the fluent builder
 classes in `src/export/visual/utils/`. `visual.test.ts` (at the `tests/unit/` root) exercises
 `VisualExporter` across causal, temporal, game-theory, and Bayesian thought types.
 
@@ -215,7 +218,7 @@ and `validation-performance.test.ts` are micro-benchmarks. They are the two file
 
 ## 4. Integration tests
 
-79 files under `tests/integration/`, exercising cross-module paths that a unit test cannot
+80 files under `tests/integration/`, exercising cross-module paths that a unit test cannot
 reach.
 
 **Root files (13) — the server entry point, the protocol and the mode contracts.** Six of these
@@ -478,7 +481,7 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 510 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 519 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 

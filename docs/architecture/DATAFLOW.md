@@ -566,7 +566,7 @@ const { MultiModeAnalyzer } = await import("./modes/combinations/index.js");   /
 ```
 
 The import loads the whole `src/modes/combinations/` module — analyzer, merger, conflict-resolver,
-presets — on the first `deepthinking_analyze` call rather than at server startup. The export
+text-similarity, presets — on the first `deepthinking_analyze` call rather than at server startup. The export
 handlers and the legacy-tool branch also use dynamic `import()`, for `config/index.js`,
 `export/file-exporter.js`, `export/profiles.js` and `tools/thinking.js`.
 
@@ -922,9 +922,9 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 510 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 519 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
-| reachableFiles | 235 | repo-tools map (whole repository) |
+| reachableFiles | 238 | repo-tools map (whole repository) |
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |
 | typeOnlyCircularDeps | 95 | repo-tools map (whole repository) |
 

@@ -311,19 +311,23 @@ function for the lock file that already exists, and any other error propagates.
 ## Mode Handlers
 
 `src/modes/handlers/` implements the Strategy pattern: one handler class for each mode. The
-directory holds 38 files: one interface file
-(`ModeHandler.ts`), 35 handlers each bound to exactly one `ThinkingMode` value via
-`registerAllHandlers()` in `src/modes/index.ts`, and `GenericModeHandler.ts`, a 36th handler class
-that is never registered — the registry constructs it on demand as the fallback for any mode
-string with no registered handler. That path is unreachable for a `ThinkingMode` member, because
-all 35 non-generic modes are registered at startup. `ThinkingMode.CUSTOM` (handled by `CustomHandler`) is
-one of the 35 registered modes, not a separate case. The 38th file, `input-warnings.ts`, is a helper
-module and not a handler. It exports `unrecognisedValueWarning(field, value, recognised, fallback?)`,
+directory holds 39 files: the interface file (`ModeHandler.ts`), 35 handlers, `GenericModeHandler.ts`
+and two helper modules. `registerAllHandlers()` in `src/modes/index.ts` binds each of the 35 handlers
+to exactly one `ThinkingMode` value. `GenericModeHandler.ts` is a 36th handler class that is never
+registered. The registry constructs it on demand as the fallback for any mode string with no
+registered handler. That path is unreachable for a `ThinkingMode` member, because all 35 non-generic
+modes are registered at startup. `ThinkingMode.CUSTOM` (handled by `CustomHandler`) is one of the 35
+registered modes, not a separate case. The helper modules are `input-warnings.ts` and
+`resolve-mode.ts`. They are not handlers. `input-warnings.ts` exports `unrecognisedValueWarning(field, value, recognised, fallback?)`,
 `droppedValueWarning(field, value, recognised)` and `inputWarningsField(sentences)`.
 A handler uses them to record a request value that it replaced or ignored in the `inputWarnings`
 field of the thought. `unrecognisedValueWarning` is for a value that the handler keeps or replaces.
 `droppedValueWarning` is for a value that the handler does not store. `EngineeringHandler` and
 `AlgorithmicHandler` use them.
+
+`resolve-mode.ts` exports `resolveMode(name)`. `CustomHandler` and `HybridHandler` use it to turn a mode
+name from `basedOnModes` or `activeModes` into a `ThinkingMode`. `resolveMode` ignores case and returns
+`sequential` for a name that is not a mode.
 
 ### ModeHandler (`src/modes/handlers/ModeHandler.ts`)
 
@@ -1288,7 +1292,7 @@ export class ASCIIDocBuilder {
 #### SVGBuilder, SVGGroupBuilder (`svg.ts`) — native SVG
 
 ```typescript
-export class SVGGroupBuilder {
+export class SVGGroupBuilder extends SVGElementBuilder {
   constructor(id?: string)
   setTransform(transform: string): this
   setClassName(className: string): this
@@ -1300,7 +1304,7 @@ export class SVGGroupBuilder {
   render(): string
 }
 
-export class SVGBuilder {
+export class SVGBuilder extends SVGElementBuilder {
   setDimensions(width: number, height: number): this
   setWidth(width: number): this
   setHeight(height: number): this
@@ -1332,6 +1336,10 @@ export class SVGBuilder {
 `addGroup()` is the one method on this list that breaks the `this`-chaining convention by design —
 it returns a child `SVGGroupBuilder` so nested-group content can be composed independently, then
 folded back in via `addRenderedGroup()`.
+
+Both classes extend `SVGElementBuilder`, which `svg.ts` does not export. It holds the element list and
+the methods `addRect`, `addCircle`, `addText` and `addLine`. Each subclass sets `indent`, the spaces
+before each element line: four in a group and two in a document.
 
 #### TikZBuilder (`tikz.ts`) — LaTeX TikZ
 
@@ -2708,11 +2716,11 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 510 | repo-tools map (whole repository) |
-| totalLinesOfCode | 234018 | repo-tools map (whole repository) |
-| totalExports | 2170 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 519 | repo-tools map (whole repository) |
+| totalLinesOfCode | 234268 | repo-tools map (whole repository) |
+| totalExports | 2174 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
-| reachableFiles | 235 | repo-tools map (whole repository) |
+| reachableFiles | 238 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 | noImporterFileCount | 12 | repo-tools map (whole repository) |
 

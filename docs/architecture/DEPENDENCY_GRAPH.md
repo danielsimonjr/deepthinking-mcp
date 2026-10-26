@@ -5,7 +5,7 @@
 
 # deepthinking-mcp - Dependency Graph
 
-**Version**: 10.0.2 | **Last Updated**: 2026-10-25
+**Version**: 10.0.2 | **Last Updated**: 2026-10-26
 
 This document provides a comprehensive dependency graph of all files, components, imports, functions, and variables in the codebase.
 
@@ -44,7 +44,7 @@ The codebase is organized into the following modules:
 - **export**: 47 files
 - **entry**: 1 file
 - **interfaces**: 1 file
-- **modes**: 55 files
+- **modes**: 58 files
 - **proof**: 15 files
 - **services**: 3 files
 - **session**: 4 files
@@ -1083,9 +1083,22 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../types.js` | `CausalGraph, GraphEdge, Path, PathEdge, DSeparationResult, DSeparationRequest, DSeparationConfig, VStructure` | Import (type-only) |
+| `./graph-utils.js` | `combinations, getAncestors, getDescendants` | Import |
 
 **Exports:**
-- Functions: `getAncestors`, `findVStructures`, `findAllPaths`, `isPathBlocked`, `checkDSeparation`, `findMinimalSeparator`, `isValidBackdoorAdjustment`, `findBackdoorAdjustmentSet`, `computeMarkovBlanket`, `getImpliedIndependencies`
+- Functions: `findVStructures`, `findAllPaths`, `isPathBlocked`, `checkDSeparation`, `findMinimalSeparator`, `isValidBackdoorAdjustment`, `findBackdoorAdjustmentSet`, `computeMarkovBlanket`, `getImpliedIndependencies`
+
+---
+
+### `src/modes/causal/graph/algorithms/graph-utils.ts` - Graph utilities shared by the d-separation and intervention analyzers.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types.js` | `CausalGraph` | Import (type-only) |
+
+**Exports:**
+- Functions: `getDescendants`, `getAncestors`
 
 ---
 
@@ -1096,6 +1109,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../types.js` | `CausalGraph, GraphEdge, Intervention, InterventionResult, InterventionRequest, AdjustmentFormula` | Import (type-only) |
 | `./d-separation.js` | `checkDSeparation, findBackdoorAdjustmentSet, isValidBackdoorAdjustment` | Import |
+| `./graph-utils.js` | `combinations, getAncestors, getDescendants` | Import |
 
 **Exports:**
 - Functions: `createMutilatedGraph`, `createMarginalizedGraph`, `isIdentifiable`, `findAllBackdoorSets`, `generateBackdoorFormula`, `checkFrontdoorCriterion`, `generateFrontdoorFormula`, `findInstrumentalVariable`, `generateIVFormula`, `applyRule1`, `applyRule2`, `applyRule3`, `analyzeIntervention`
@@ -1159,6 +1173,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `./combination-types.js` | `Insight, ConflictingInsight, ConflictResolution, ConflictType` | Import (type-only) |
 | `./combination-types.js` | `SYNTHESIS_CONFIDENCE_NOTE` | Import |
+| `./text-similarity.js` | `wordSimilarity` | Import |
 
 **Exports:**
 - Classes: `ConflictResolver`
@@ -1195,6 +1210,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode` | Import (type-only) |
 | `./combination-types.js` | `Insight, MergeStrategy, WeightedMergeConfig, HierarchicalMergeConfig, DialecticalMergeConfig, MergeStatistics, ConflictingInsight` | Import (type-only) |
 | `./combination-types.js` | `SYNTHESIS_CONFIDENCE_NOTE` | Import |
+| `./text-similarity.js` | `wordSimilarity` | Import |
 
 **Exports:**
 - Classes: `InsightMerger`
@@ -1213,6 +1229,13 @@ The codebase is organized into the following modules:
 **Exports:**
 - Functions: `getPreset`, `getAllPresets`, `getPresetsByTag`, `getPresetsWithMode`, `getPresetsByStrategy`, `combinePresets`, `isValidPresetId`, `getPresetMetadata`, `listPresetIds`
 - Constants: `PRESETS`
+
+---
+
+### `src/modes/combinations/text-similarity.ts` - Text similarity shared by the conflict resolver and the insight merger.
+
+**Exports:**
+- Functions: `wordSimilarity`
 
 ---
 
@@ -1476,6 +1499,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, BaseThought` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
 | `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./resolve-mode.js` | `resolveMode` | Import |
 
 **Exports:**
 - Classes: `CustomHandler`
@@ -1655,6 +1679,7 @@ The codebase is organized into the following modules:
 | `../../types/modes/recommendations.js` | `ModeRecommender, ProblemCharacteristics, ModeRecommendation` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
 | `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./resolve-mode.js` | `resolveMode` | Import |
 
 **Exports:**
 - Classes: `HybridHandler`
@@ -1821,6 +1846,18 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Classes: `RecursiveHandler`
+
+---
+
+### `src/modes/handlers/resolve-mode.ts` - Mode-name resolution
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode` | Import |
+
+**Exports:**
+- Functions: `resolveMode`
 
 ---
 
@@ -4366,10 +4403,10 @@ graph TD
     subgraph Modes
         N12[centrality]
         N13[d-separation]
-        N14[intervention]
-        N15[types]
-        N16[analyzer]
-        N17[...50 more]
+        N14[graph-utils]
+        N15[intervention]
+        N16[types]
+        N17[...53 more]
     end
 
     subgraph Proof
@@ -4453,12 +4490,13 @@ graph TD
     N10 --> N37
     N10 --> N45
     N11 --> N51
-    N12 --> N15
-    N13 --> N15
-    N14 --> N15
-    N14 --> N13
-    N16 --> N43
-    N16 --> N26
+    N12 --> N16
+    N13 --> N16
+    N13 --> N14
+    N14 --> N16
+    N15 --> N16
+    N15 --> N13
+    N15 --> N14
     N18 --> N43
     N18 --> N22
     N20 --> N21
@@ -4468,7 +4506,6 @@ graph TD
     N24 --> N11
     N24 --> N52
     N25 --> N31
-    N26 --> N45
 ```
 
 ---
@@ -4477,21 +4514,21 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 243 |
+| Total TypeScript Files | 246 |
 | Total Modules | 14 |
-| Total Lines of Code | 120910 |
-| Total Exports | 1192 |
+| Total Lines of Code | 120624 |
+| Total Exports | 1196 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
 | Total Interfaces | 562 |
-| Total Functions | 439 |
+| Total Functions | 442 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
-| Type-only Imports | 335 |
+| Type-only Imports | 336 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 58 |
 
 ---
 
-*Last Updated*: 2026-10-25
+*Last Updated*: 2026-10-26
 *Version*: 10.0.2
