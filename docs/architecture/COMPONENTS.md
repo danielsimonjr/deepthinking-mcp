@@ -382,22 +382,44 @@ export function validationFailure(errors: HandlerValidationError[], warnings?: V
 export function createValidationError(field: string, message: string, code: string): HandlerValidationError
 export function createValidationWarning(field: string, message: string, suggestion?: string): ValidationWarning
 
-// Shared check
+// Shared checks
 export function checkThoughtBasics(input: ThinkingToolInput): ValidationResult | undefined
+export function checkThoughtType(input: ThinkingToolInput, validTypes: readonly string[]): ValidationWarning | undefined
+export function checkUncertaintyRange(input: ThinkingToolInput): HandlerValidationError | undefined
 
 // Shared thought fields
 export function createThoughtBase(input: ThinkingToolInput, sessionId: string): ThoughtBase
+export function createThoughtTail(input: ThinkingToolInput): ThoughtTail
 ```
 
 `checkThoughtBasics` returns a failure for a blank thought or for a thought number above the total,
 and `undefined` when both checks pass. 26 handlers call the function at the start of `validate`.
 The other 10 handlers make neither check.
 
+`checkThoughtType` returns a warning for a `thoughtType` that is set but is not in the list of
+valid types, and `undefined` otherwise. The match is exact, so the case matters. 9 handlers call it
+in `validate`: `ComputabilityHandler`, `ConstraintHandler`, `CryptanalyticHandler`, `HybridHandler`,
+`MathematicsHandler`, `ModalHandler`, `OptimizationHandler`, `PhysicsHandler` and `StochasticHandler`.
+
+`checkUncertaintyRange` returns an error for an `uncertainty` outside the range 0 to 1, and
+`undefined` otherwise. A value that no comparison can order, such as `NaN`, is not an error. 6
+handlers call it in `validate`: `AlgorithmicHandler`, `ComputabilityHandler`, `CryptanalyticHandler`,
+`MathematicsHandler`, `PhysicsHandler` and `ShannonHandler`.
+
 `createThoughtBase` returns the seven fields that start every thought: a new `id`, `sessionId`,
 `thoughtNumber`, `totalThoughts`, `content`, `timestamp` and `nextThoughtNeeded`. `ThoughtBase` is
 the type of that result, and only `ModeHandler.ts` uses its name. All 36 handler classes spread the
 result first in the thought they return. Each handler then adds the revision fields, `mode` and
 its own fields in its own order.
+
+`createThoughtTail` returns the five fields that close a thought: `dependencies`, `assumptions`,
+`uncertainty`, `isRevision` and `revisesThought`, in that order. The two lists default to an empty
+list. The uncertainty defaults to 0.5, and an uncertainty of 0 stays 0. `ThoughtTail` is the type of
+that result. 3 handlers spread the result where their own five lines stood: `AlgorithmicHandler`,
+`ComputabilityHandler` and `CryptanalyticHandler`. `MathematicsHandler`, `PhysicsHandler` and
+`ShannonHandler` also write these five fields, but they keep their own lines, because a spread
+would change the order of the keys of their thought. `GenericModeHandler` keeps its own lines for
+a different reason: it uses `||` for the uncertainty, so an uncertainty of 0 becomes 0.5.
 
 `getEnhancements` and `supportsThoughtType` are optional on the interface. All 36 handler classes
 implement `getEnhancements`. All handlers except `AbductiveHandler`, `AnalogicalHandler` and
