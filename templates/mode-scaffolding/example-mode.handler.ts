@@ -20,6 +20,7 @@ import {
   ModeHandler,
   ValidationResult,
   ModeEnhancements,
+  ValidationWarning,
   validationSuccess,
   createThoughtBase,
   checkThoughtBasics,
@@ -107,8 +108,7 @@ export class ExampleModeHandler implements ModeHandler {
    * Return validation errors for critical issues, warnings for suggestions.
    */
   validate(input: ThinkingToolInput): ValidationResult {
-    const warnings = [];
-    const inputAny = input as any;
+    const warnings: ValidationWarning[] = [];
 
     // ============================================================
     // BASIC VALIDATION (keep this)
@@ -126,6 +126,10 @@ export class ExampleModeHandler implements ModeHandler {
     // Add your validation rules here. The examples use validationFailure,
     // createValidationError and createValidationWarning. Import the ones that your
     // rules use from './ModeHandler.js'.
+    //
+    // The examples read the mode-specific fields through a cast. Add this line
+    // above the first rule that you keep:
+    //   const inputAny = input as any;
     //
     // Examples:
     //
