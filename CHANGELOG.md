@@ -78,6 +78,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **`getDescendants` and `getAncestors` share one walk.** The two functions in
+  `src/modes/causal/graph/algorithms/graph-utils.ts` ran the same stack walk over the edge list.
+  They differed in two places only: the end of an edge that is compared with the current node, and
+  the end that is added to the result. The new private `collectReachable(graph, nodeId, near, far)`
+  holds the walk. `getDescendants` passes `"from"` and `"to"`. `getAncestors` passes `"to"` and
+  `"from"`. The walk is unchanged, so the set lists the nodes in the same order as before. Results
+  do not change. A run of 7,462 helper calls gave the same ordered set before and after, on 287
+  graphs (empty graphs, self-loops, parallel edges, cycles, edges of every type, and edges that
+  name nodes the graph does not list). A run of 43,200 calls of the d-separation and intervention
+  exports on 180 acyclic graphs gave equal results. The graph-utils test file gains 9 tests. They pin
+  the order of the walk (diamond, fork and join), the order of the edge list, parallel edges, the
+  self-loop, the cycle, edges of other types, nodes that the graph does not list, an unknown start
+  node, and a fresh set for each call.
 - **`correlationMatrix` and `covarianceMatrix` share one matrix builder.** Both functions in
   `src/modes/stochastic/analysis/statistics.ts` read the columns of the table of samples, filled a
   square matrix, and copied each cell below the diagonal from the cell above it. They differed in

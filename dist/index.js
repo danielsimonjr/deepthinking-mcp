@@ -5448,33 +5448,25 @@ var init_centrality = __esm({
 });
 
 // src/modes/causal/graph/algorithms/graph-utils.ts
-function getDescendants(graph, nodeId) {
-  const descendants = /* @__PURE__ */ new Set();
+function collectReachable(graph, nodeId, near, far) {
+  const reached = /* @__PURE__ */ new Set();
   const stack = [nodeId];
   while (stack.length > 0) {
     const current = stack.pop();
     for (const edge of graph.edges) {
-      if (edge.from === current && !descendants.has(edge.to)) {
-        descendants.add(edge.to);
-        stack.push(edge.to);
+      if (edge[near] === current && !reached.has(edge[far])) {
+        reached.add(edge[far]);
+        stack.push(edge[far]);
       }
     }
   }
-  return descendants;
+  return reached;
+}
+function getDescendants(graph, nodeId) {
+  return collectReachable(graph, nodeId, "from", "to");
 }
 function getAncestors(graph, nodeId) {
-  const ancestors = /* @__PURE__ */ new Set();
-  const stack = [nodeId];
-  while (stack.length > 0) {
-    const current = stack.pop();
-    for (const edge of graph.edges) {
-      if (edge.to === current && !ancestors.has(edge.from)) {
-        ancestors.add(edge.from);
-        stack.push(edge.from);
-      }
-    }
-  }
-  return ancestors;
+  return collectReachable(graph, nodeId, "to", "from");
 }
 function* combinations(arr, k) {
   if (k === 0) {
