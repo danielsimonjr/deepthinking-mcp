@@ -78,6 +78,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **The temporal timeline exporter sorts the events with one function.** The sort step
+  `[...thought.events].sort((a, b) => a.timestamp - b.timestamp)` stood 10 times in
+  `src/export/visual/modes/temporal.ts`. The new private `sortByTimestamp` copies the list and sorts
+  the copy, and the 10 places call it. `timelineToGraphML` and `timelineToTikZ` also lose a branch:
+  the early return for a missing or empty list built the same graph from an empty list of labels
+  that the main path builds. Both functions now sort `thought.events || []` and build the labels
+  once. The file loses 43 lines and gains 20. Output does not change. A run of 39,600 calls gave
+  the same text before and after: 900 thoughts (a missing list, a `null` list, an empty list and 87
+  lists of 1 to 8 events, with names that hold quotes, angle brackets, a line break and a
+  backslash, with equal, negative, fractional, `NaN` and infinite timestamps, and with and without
+  a timeline) in 11 formats with 4 sets of options. No call changed the list of the thought. The
+  new test file `temporal-event-order.test.ts` (50 tests) pins the order by timestamp in 10
+  formats, the order of the input in the Mermaid format, the stable order of equal timestamps, the
+  unchanged input list, and the same output of the GraphML and TikZ formats for a missing, a
+  `null` and an empty list.
 - **Twenty handlers share one function that picks the thought type of a new thought.** The 20
   handlers `AlgorithmicHandler`, `AnalysisHandler`, `ArgumentationHandler`, `ComputabilityHandler`,
   `ConstraintHandler`, `CritiqueHandler`, `CryptanalyticHandler`, `EvidentialHandler`,
@@ -97,7 +112,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `toString` and `__proto__` among them). The test file `resolve-thought-type.test.ts` pins the
   helper (exact match, empty value, empty list, prefix of a supported type) and the list and the
   default type of each of the 20 handlers, as the handlers had them before this change.
-
 - **Six pieces of code that existed twice or more now exist once.** A run of `repo-tools clones`
   listed 13 groups of identical functions and 402 pairs of similar functions in `src/`. The review
   of the groups gave these changes. Output and results do not change. The tests of each changed

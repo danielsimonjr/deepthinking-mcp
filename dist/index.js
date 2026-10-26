@@ -36565,6 +36565,9 @@ function causalToMarkdown(thought, options) {
 
 // src/export/visual/modes/temporal.ts
 init_esm_shims();
+function sortByTimestamp(events) {
+  return [...events].sort((a, b) => a.timestamp - b.timestamp);
+}
 function exportTemporalTimeline(thought, options) {
   return exportByFormat(thought, options, {
     mermaid: (t, _colorScheme, includeLabels) => timelineToMermaidGantt(t, includeLabels),
@@ -36611,9 +36614,7 @@ function timelineToDOT(thought, includeLabels) {
   if (!thought.events) {
     return builder.render();
   }
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
   for (const event of sortedEvents) {
     const nodeId = sanitizeId(event.id);
     const label = includeLabels ? `${event.name}\\n(t=${event.timestamp})` : nodeId;
@@ -36645,9 +36646,7 @@ function timelineToASCII(thought) {
     builder.addText("No events\n");
     return builder.render();
   }
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
   builder.addSection("Events");
   for (const event of sortedEvents) {
     const marker = event.type === "instant" ? "\u29BF" : "\u2501";
@@ -36665,31 +36664,18 @@ function timelineToASCII(thought) {
   return builder.render();
 }
 function timelineToGraphML(thought, _options) {
-  if (!thought.events || thought.events.length === 0) {
-    return createLinearGraphML([], {
-      graphName: thought.timeline?.name || "Timeline",
-      directed: true
-    });
-  }
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp
+  const labels = sortByTimestamp(thought.events || []).map(
+    (event) => event.name
   );
-  const labels = sortedEvents.map((event) => event.name);
   return createLinearGraphML(labels, {
     graphName: thought.timeline?.name || "Timeline",
     directed: true
   });
 }
 function timelineToTikZ(thought, _options) {
-  if (!thought.events || thought.events.length === 0) {
-    return createLinearTikZ([], {
-      title: thought.timeline?.name || "Timeline"
-    });
-  }
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp
+  const labels = sortByTimestamp(thought.events || []).map(
+    (event) => event.name
   );
-  const labels = sortedEvents.map((event) => event.name);
   return createLinearTikZ(labels, {
     title: thought.timeline?.name || "Timeline"
   });
@@ -36705,9 +36691,7 @@ function timelineToSVG(thought, options) {
   if (!thought.events || thought.events.length === 0) {
     return generateSVGHeader(svgWidth, 200, title) + '\n  <text x="400" y="100" text-anchor="middle" class="subtitle">No events</text>\n' + generateSVGFooter();
   }
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
   const nodes = sortedEvents.map((event) => ({
     id: event.id,
     label: includeLabels ? event.name : event.id,
@@ -36779,9 +36763,7 @@ function timelineToHTML(thought, options) {
     html += generateHTMLFooter(htmlStandalone);
     return html;
   }
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
   if (includeMetrics) {
     const instants = sortedEvents.filter((e) => e.type === "instant");
     const intervals = sortedEvents.filter((e) => e.type === "interval");
@@ -36851,9 +36833,7 @@ function temporalToModelica(thought, _options) {
 `;
     return modelica;
   }
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
   modelica += "  // Event Records\n";
   for (const event of sortedEvents) {
     const eventId = sanitizeModelicaId(event.id);
@@ -36907,9 +36887,7 @@ function temporalToUML(thought, _options) {
       title: thought.timeline?.name || "Timeline"
     });
   }
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
   const states = sortedEvents.map((event) => event.name);
   const transitions = [];
   for (let i = 0; i < sortedEvents.length - 1; i++) {
@@ -36941,9 +36919,7 @@ function temporalToJSON(thought, _options) {
   if (!thought.events || thought.events.length === 0) {
     return serializeGraph(graph, _options);
   }
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
   for (const event of sortedEvents) {
     addNode(graph, {
       id: event.id,
@@ -37011,9 +36987,7 @@ function temporalToMarkdown(thought, options) {
       includeTableOfContents: markdownIncludeToc
     });
   }
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
   const instants = sortedEvents.filter((e) => e.type === "instant");
   const intervals = sortedEvents.filter((e) => e.type === "interval");
   if (includeMetrics) {
