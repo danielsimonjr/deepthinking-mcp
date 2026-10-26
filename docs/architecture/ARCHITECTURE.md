@@ -164,7 +164,7 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 535 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 536 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |
 | typeOnlyCircularDeps | 95 | repo-tools map (whole repository) |

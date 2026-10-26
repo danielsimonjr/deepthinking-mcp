@@ -162,30 +162,35 @@ export function correlation(x: number[], y: number[]): number {
 }
 
 /**
- * Compute correlation matrix for multiple variables
+ * Read the columns of a table of samples: one row for each sample, one column for each variable
  */
-export function correlationMatrix(samples: number[][]): number[][] {
-  if (samples.length === 0) return [];
+function columnsOf(samples: number[][]): number[][] {
   const numVars = samples[0].length;
-  const matrix: number[][] = [];
-
-  // Extract columns
   const columns: number[][] = [];
   for (let j = 0; j < numVars; j++) {
     columns.push(samples.map((row) => row[j]));
   }
+  return columns;
+}
 
-  // Compute correlations
-  for (let i = 0; i < numVars; i++) {
+/**
+ * Fill a square matrix with one cell for each pair of columns of a table of samples.
+ * A cell below the diagonal copies the cell above it. The function `cell` receives the two
+ * columns and a flag that is true when both are the same column.
+ */
+function pairwiseMatrix(
+  samples: number[][],
+  cell: (x: number[], y: number[], sameColumn: boolean) => number,
+): number[][] {
+  if (samples.length === 0) return [];
+  const columns = columnsOf(samples);
+  const matrix: number[][] = [];
+
+  for (let i = 0; i < columns.length; i++) {
     matrix[i] = [];
-    for (let j = 0; j < numVars; j++) {
-      if (i === j) {
-        matrix[i][j] = 1;
-      } else if (j < i) {
-        matrix[i][j] = matrix[j][i]; // Use symmetry
-      } else {
-        matrix[i][j] = correlation(columns[i], columns[j]);
-      }
+    for (let j = 0; j < columns.length; j++) {
+      matrix[i][j] =
+        j < i ? matrix[j][i] : cell(columns[i], columns[j], i === j);
     }
   }
 
@@ -193,32 +198,19 @@ export function correlationMatrix(samples: number[][]): number[][] {
 }
 
 /**
+ * Compute correlation matrix for multiple variables
+ */
+export function correlationMatrix(samples: number[][]): number[][] {
+  return pairwiseMatrix(samples, (x, y, sameColumn) =>
+    sameColumn ? 1 : correlation(x, y),
+  );
+}
+
+/**
  * Compute covariance matrix for multiple variables
  */
 export function covarianceMatrix(samples: number[][]): number[][] {
-  if (samples.length === 0) return [];
-  const numVars = samples[0].length;
-  const matrix: number[][] = [];
-
-  // Extract columns
-  const columns: number[][] = [];
-  for (let j = 0; j < numVars; j++) {
-    columns.push(samples.map((row) => row[j]));
-  }
-
-  // Compute covariances
-  for (let i = 0; i < numVars; i++) {
-    matrix[i] = [];
-    for (let j = 0; j < numVars; j++) {
-      if (j < i) {
-        matrix[i][j] = matrix[j][i]; // Use symmetry
-      } else {
-        matrix[i][j] = covariance(columns[i], columns[j]);
-      }
-    }
-  }
-
-  return matrix;
+  return pairwiseMatrix(samples, covariance);
 }
 
 // ============================================================================
@@ -307,13 +299,7 @@ export function computeSampleStatistics(
     };
   }
 
-  const numVars = samples[0].length;
-
-  // Extract columns
-  const columns: number[][] = [];
-  for (let j = 0; j < numVars; j++) {
-    columns.push(samples.map((row) => row[j]));
-  }
+  const columns = columnsOf(samples);
 
   // Compute statistics for each variable
   const means = columns.map((col) => mean(col));
