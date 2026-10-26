@@ -135,30 +135,24 @@ export class DependencyGraphBuilder {
    * Get all ancestors of a node (all nodes that lead to this node)
    */
   getAncestors(nodeId: string): string[] {
-    const ancestors = new Set<string>();
-    const visited = new Set<string>();
-    const stack = [nodeId];
-
-    while (stack.length > 0) {
-      const current = stack.pop()!;
-      if (visited.has(current)) continue;
-      visited.add(current);
-
-      const parents = this.reverseAdjacencyList.get(current) || [];
-      for (const parent of parents) {
-        ancestors.add(parent);
-        stack.push(parent);
-      }
-    }
-
-    return Array.from(ancestors);
+    return this.collectReachable(nodeId, this.reverseAdjacencyList);
   }
 
   /**
    * Get all descendants of a node (all nodes that depend on this node)
    */
   getDescendants(nodeId: string): string[] {
-    const descendants = new Set<string>();
+    return this.collectReachable(nodeId, this.adjacencyList);
+  }
+
+  /**
+   * Collect every node reachable from a node along one adjacency list
+   */
+  private collectReachable(
+    nodeId: string,
+    adjacency: Map<string, string[]>,
+  ): string[] {
+    const reachable = new Set<string>();
     const visited = new Set<string>();
     const stack = [nodeId];
 
@@ -167,14 +161,13 @@ export class DependencyGraphBuilder {
       if (visited.has(current)) continue;
       visited.add(current);
 
-      const children = this.adjacencyList.get(current) || [];
-      for (const child of children) {
-        descendants.add(child);
-        stack.push(child);
+      for (const next of adjacency.get(current) || []) {
+        reachable.add(next);
+        stack.push(next);
       }
     }
 
-    return Array.from(descendants);
+    return Array.from(reachable);
   }
 
   /**
