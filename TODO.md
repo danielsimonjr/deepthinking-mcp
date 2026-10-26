@@ -70,8 +70,10 @@ with the entry.
     `historical`. They pass other arguments to the converters or have another `default:` case.
     `hybrid` reads `options.includeLabels !== false`, and `physics` reads `?? true`. A merge must
     keep both results, so write a test of the exact output first.
-  - `generateDotGraph` and `DOTGraphBuilder.render` in `src/export/visual/utils/dot.ts` overlap by
-    95 percent. Write a test of the exact output first, then merge them.
+  - `renderDotSubgraph` in `src/export/visual/utils/dot.ts` is exported and no file in `src/` or
+    `tests/` calls it. `DOTGraphBuilder.render` writes its own subgraph text, which differs: it puts
+    the node definitions inside the subgraph. Remove the function, or make the builder call it and
+    write a test of the exact output first.
   - About 120 pairs scored 0.6 to 0.8 are unread.
   - Left alone on purpose: `CausalHandler.findEntryNodes` and `findExitNodes`, and the two default
     tables of `GenericModeHandler`.

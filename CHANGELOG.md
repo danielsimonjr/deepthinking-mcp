@@ -135,6 +135,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   and a generic handler for each of the 35 modes, with 5 inputs and 3 sets of extra fields. Six
   new tests in `ModeHandler.test.ts` pin the copied fields, the key order, the new `id` and the new
   `Date` on each call. The 17 handlers that no longer use `randomUUID` lose the `crypto` import.
+- **`generateDotGraph` and `DOTGraphBuilder.render` write the graph text in one place.** The two
+  repeated the header, the graph attributes, the default lines, the nodes and the edges. About 85
+  lines were the same. `generateDotGraph` now builds a `DOTGraphBuilder` from its arguments and
+  calls `render`. A graph with no subgraph gives the same text from both. The output does not
+  change. A run of 1,613 calls gave the same text before and after. The run covered 700 calls of
+  `generateDotGraph`, 900 builders (318 with subgraphs), and the linear, hierarchy and network
+  writers. Eight new tests in `dot-output.test.ts` pin every line of the output of both writers.
+  The documentation of `DOTGraphBuilder` no longer says that `renderDotSubgraph` writes its
+  subgraphs. The builder writes them itself.
 - **The advertised JSON Schema now agrees with the Zod schema on `mode`, the temporal constraint
   types and the causal node type.** `mode` is in `required` for the 11 thought tools (the Zod schema
   already required it). The temporal `constraints[].type` lists `before`, `after`, `during`,

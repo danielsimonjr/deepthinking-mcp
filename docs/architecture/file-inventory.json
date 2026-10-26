@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 518,
+    "totalFiles": 519,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 247,
-        "loc": 119783
+        "loc": 119705
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 248,
-        "loc": 106876
+        "files": 249,
+        "loc": 107029
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 235,
       "orphan": 12,
       "template": 5,
-      "test": 248,
+      "test": 249,
       "tool": 14,
       "config": 2
     }
@@ -281,7 +281,7 @@
     {
       "path": "src/export/visual/utils/dot.ts",
       "area": "src",
-      "loc": 1010,
+      "loc": 932,
       "disposition": "reachable"
     },
     {
@@ -2244,6 +2244,12 @@
       "path": "tests/unit/export/visual/utils/document-builders.test.ts",
       "area": "tests",
       "loc": 1127,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/visual/utils/dot-output.test.ts",
+      "area": "tests",
+      "loc": 153,
       "disposition": "test"
     },
     {
