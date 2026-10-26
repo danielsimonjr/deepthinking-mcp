@@ -1712,4 +1712,4 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 521 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 522 | repo-tools map (whole repository) |
