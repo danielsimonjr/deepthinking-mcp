@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 531,
+    "totalFiles": 532,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 249,
-        "loc": 119375
+        "loc": 119352
       },
       "templates": {
         "files": 5,
         "loc": 754
       },
       "tests": {
-        "files": 259,
-        "loc": 108951
+        "files": 260,
+        "loc": 109129
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 237,
       "orphan": 12,
       "template": 5,
-      "test": 259,
+      "test": 260,
       "tool": 14,
       "config": 2
     }
@@ -245,7 +245,7 @@
     {
       "path": "src/export/visual/modes/temporal.ts",
       "area": "src",
-      "loc": 736,
+      "loc": 713,
       "disposition": "reachable"
     },
     {
@@ -2256,6 +2256,12 @@
       "path": "tests/unit/export/visual/modes/snapshot-baseline.test.ts",
       "area": "tests",
       "loc": 1041,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/visual/modes/temporal-event-order.test.ts",
+      "area": "tests",
+      "loc": 178,
       "disposition": "test"
     },
     {

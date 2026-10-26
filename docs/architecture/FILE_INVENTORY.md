@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **531 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **532 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -18,7 +18,7 @@ Every tracked TypeScript file in the repository — **531 files** — not just t
 | other | 2 |
 | reachable | 237 |
 | template | 5 |
-| test | 259 |
+| test | 260 |
 | tool | 14 |
 
 ## Per-area counts
@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **531 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 249 | 119,375 |
+| src | 249 | 119,352 |
 | templates | 5 | 754 |
-| tests | 259 | 108,951 |
+| tests | 260 | 109,129 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -70,7 +70,7 @@ Every tracked TypeScript file in the repository — **531 files** — not just t
 | `src/export/visual/modes/sequential.ts` | src | 868 | reachable |
 | `src/export/visual/modes/shannon.ts` | src | 679 | reachable |
 | `src/export/visual/modes/systems-thinking.ts` | src | 1003 | reachable |
-| `src/export/visual/modes/temporal.ts` | src | 736 | reachable |
+| `src/export/visual/modes/temporal.ts` | src | 713 | reachable |
 | `src/export/visual/session-graph.ts` | src | 121 | reachable |
 | `src/export/visual/types.ts` | src | 63 | reachable |
 | `src/export/visual/utils.ts` | src | 32 | reachable |
@@ -406,6 +406,7 @@ Every tracked TypeScript file in the repository — **531 files** — not just t
 | `tests/unit/export/visual/modes/dispatch-wiring.test.ts` | tests | 225 | test |
 | `tests/unit/export/visual/modes/engineering-accepted-input.test.ts` | tests | 100 | test |
 | `tests/unit/export/visual/modes/snapshot-baseline.test.ts` | tests | 1041 | test |
+| `tests/unit/export/visual/modes/temporal-event-order.test.ts` | tests | 178 | test |
 | `tests/unit/export/visual/utils/dispatch.test.ts` | tests | 151 | test |
 | `tests/unit/export/visual/utils/document-builders.test.ts` | tests | 1127 | test |
 | `tests/unit/export/visual/utils/dot-output.test.ts` | tests | 153 | test |

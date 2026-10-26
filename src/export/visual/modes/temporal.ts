@@ -54,6 +54,14 @@ import {
 } from "../utils/markdown.js";
 
 /**
+ * Copy a list of events and order the copy by timestamp. The sort is stable, so events with
+ * the same timestamp keep the order of the input, and the input list does not change.
+ */
+function sortByTimestamp<T extends { timestamp: number }>(events: T[]): T[] {
+  return [...events].sort((a, b) => a.timestamp - b.timestamp);
+}
+
+/**
  * Export temporal timeline to visual format
  */
 export function exportTemporalTimeline(
@@ -128,9 +136,7 @@ function timelineToDOT(
     return builder.render();
   }
 
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
 
   // Add event nodes
   for (const event of sortedEvents) {
@@ -177,9 +183,7 @@ function timelineToASCII(thought: TemporalThought): string {
     return builder.render();
   }
 
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
 
   builder.addSection("Events");
   for (const event of sortedEvents) {
@@ -204,17 +208,9 @@ function timelineToGraphML(
   thought: TemporalThought,
   _options: VisualExportOptions,
 ): string {
-  if (!thought.events || thought.events.length === 0) {
-    return createLinearGraphML([], {
-      graphName: thought.timeline?.name || "Timeline",
-      directed: true,
-    });
-  }
-
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp,
+  const labels = sortByTimestamp(thought.events || []).map(
+    (event) => event.name,
   );
-  const labels = sortedEvents.map((event) => event.name);
 
   return createLinearGraphML(labels, {
     graphName: thought.timeline?.name || "Timeline",
@@ -229,16 +225,9 @@ function timelineToTikZ(
   thought: TemporalThought,
   _options: VisualExportOptions,
 ): string {
-  if (!thought.events || thought.events.length === 0) {
-    return createLinearTikZ([], {
-      title: thought.timeline?.name || "Timeline",
-    });
-  }
-
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp,
+  const labels = sortByTimestamp(thought.events || []).map(
+    (event) => event.name,
   );
-  const labels = sortedEvents.map((event) => event.name);
 
   return createLinearTikZ(labels, {
     title: thought.timeline?.name || "Timeline",
@@ -269,9 +258,7 @@ function timelineToSVG(
     );
   }
 
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
 
   // Create nodes from events
   const nodes = sortedEvents.map((event) => ({
@@ -368,9 +355,7 @@ function timelineToHTML(
     return html;
   }
 
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
 
   // Metrics section
   if (includeMetrics) {
@@ -455,9 +440,7 @@ function temporalToModelica(
     return modelica;
   }
 
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
 
   // Define event records
   modelica += "  // Event Records\n";
@@ -525,9 +508,7 @@ function temporalToUML(
     });
   }
 
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
 
   // Create states from events (map to just the names)
   const states = sortedEvents.map((event) => event.name);
@@ -575,9 +556,7 @@ function temporalToJSON(
     return serializeGraph(graph, _options);
   }
 
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
 
   // Add event nodes
   for (const event of sortedEvents) {
@@ -664,9 +643,7 @@ function temporalToMarkdown(
     });
   }
 
-  const sortedEvents = [...thought.events].sort(
-    (a, b) => a.timestamp - b.timestamp,
-  );
+  const sortedEvents = sortByTimestamp(thought.events);
   const instants = sortedEvents.filter((e) => e.type === "instant");
   const intervals = sortedEvents.filter((e) => e.type === "interval");
 
