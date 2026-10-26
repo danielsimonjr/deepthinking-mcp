@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 520,
+    "totalFiles": 521,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 247,
-        "loc": 119683
+        "loc": 119599
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 250,
-        "loc": 107180
+        "files": 251,
+        "loc": 107405
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 235,
       "orphan": 12,
       "template": 5,
-      "test": 250,
+      "test": 251,
       "tool": 14,
       "config": 2
     }
@@ -143,7 +143,7 @@
     {
       "path": "src/export/visual/modes/engineering.ts",
       "area": "src",
-      "loc": 2146,
+      "loc": 2132,
       "disposition": "reachable"
     },
     {
@@ -179,7 +179,7 @@
     {
       "path": "src/export/visual/modes/hybrid.ts",
       "area": "src",
-      "loc": 1653,
+      "loc": 1633,
       "disposition": "reachable"
     },
     {
@@ -209,7 +209,7 @@
     {
       "path": "src/export/visual/modes/physics.ts",
       "area": "src",
-      "loc": 2009,
+      "loc": 1986,
       "disposition": "reachable"
     },
     {
@@ -227,7 +227,7 @@
     {
       "path": "src/export/visual/modes/sequential.ts",
       "area": "src",
-      "loc": 882,
+      "loc": 868,
       "disposition": "reachable"
     },
     {
@@ -245,7 +245,7 @@
     {
       "path": "src/export/visual/modes/temporal.ts",
       "area": "src",
-      "loc": 749,
+      "loc": 736,
       "disposition": "reachable"
     },
     {
@@ -2220,6 +2220,12 @@
       "path": "tests/unit/export/proof-decomposition-visual.test.ts",
       "area": "tests",
       "loc": 450,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/visual/modes/dispatch-wiring.test.ts",
+      "area": "tests",
+      "loc": 225,
       "disposition": "test"
     },
     {

@@ -113,6 +113,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   4 colour schemes, and 3 values each for the label and metric flags.
   `tests/unit/export/visual/utils/dispatch.test.ts` pins which converter each format calls and with
   which arguments.
+- **Five more mode exporters share the format dispatch.** `exportSequentialDependencyGraph`,
+  `exportTemporalTimeline`, `exportHybridOrchestration`, `exportPhysicsVisualization` and
+  `exportEngineeringAnalysis` now call `exportByFormat`. The Mermaid converter of the temporal
+  exporter takes the label flag as its second argument. The Mermaid and DOT converters of the
+  engineering exporter read the options themselves. These three get a small wrapper.
+  `exportProofDecomposition`, `exportComputability` and `exportHistoricalTimeline` keep their own
+  `switch`. The first has no GraphML or TikZ case and passes other arguments to SVG. The other two
+  render the shared graph model in their `default:` case. Output does not change for any value
+  that `VisualExportOptions` allows. A run of 12,960 calls gave the same output before and after.
+  The run covered 5 exporters with 2 thoughts each, 11 formats and an unknown one, and 4 colour
+  schemes. The label and metric flags took `undefined`, `true` and `false`. One flag at a time also
+  took `null`, `0` and the empty string. One case differs, and no caller reaches it.
+  `exportHybridOrchestration` counted `null`, `0` and `""` as true for `includeLabels`, and
+  `exportPhysicsVisualization` counted `null` as true for both flags. They now count as false, as in
+  the 15 other exporters. The type allows only `boolean` and `undefined` there, and the code that
+  calls the exporters passes `true`. `tests/unit/export/visual/modes/dispatch-wiring.test.ts` holds a
+  hash of the output of every format of the five exporters.
 - **Twenty-six handlers share one check of the thought and its number.** Twenty-six of the 36
   handler classes began `validate` with the same two checks. The thought must have text, and the
   thought number must not exceed the total. The new `checkThoughtBasics` in

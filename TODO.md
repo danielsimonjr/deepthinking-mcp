@@ -65,11 +65,9 @@ with the entry.
 ## Open
 
 - [ ] **Remove the duplicates that `repo-tools clones` found and this change left.**
-  - Eight exporters in `src/export/visual/modes/` keep their own `switch (format)`: `engineering`,
-    `hybrid`, `physics`, `proof-decomposition`, `sequential`, `temporal`, `computability` and
-    `historical`. They pass other arguments to the converters or have another `default:` case.
-    `hybrid` reads `options.includeLabels !== false`, and `physics` reads `?? true`. A merge must
-    keep both results, so write a test of the exact output first.
+  - Three exporters in `src/export/visual/modes/` keep their own `switch (format)`.
+    `proof-decomposition` has no GraphML or TikZ case and passes other arguments to SVG.
+    `computability` and `historical` render the shared graph model in a `default:` case.
   - About 120 pairs scored 0.6 to 0.8 are unread.
   - Left alone on purpose: `CausalHandler.findEntryNodes` and `findExitNodes`, and the two default
     tables of `GenericModeHandler`.

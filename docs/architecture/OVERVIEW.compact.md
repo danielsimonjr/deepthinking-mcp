@@ -8,8 +8,8 @@ export. ESM, Node >=20, stdio transport. Entry point: `src/index.ts`. Publishes 
 
 | Metric | Value |
 |---|---|
-| Source files, whole repo / `src/` only | 523 / 247 |
-| LOC, whole repo / `src/` only | 233,930 / 119,436 |
+| Source files, whole repo / `src/` only | 524 / 247 |
+| LOC, whole repo / `src/` only | 234,070 / 119,352 |
 | Exports, whole repo / `src/` only | 2,177 / 1,198 (487 re-exports) |
 | Runtime circular deps | 0 |
 | Type-only circular deps | 95 |
@@ -73,6 +73,6 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 523 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 524 | repo-tools map (whole repository) |
 | typeOnlyCircularDeps | 95 | repo-tools map (whole repository) |
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |

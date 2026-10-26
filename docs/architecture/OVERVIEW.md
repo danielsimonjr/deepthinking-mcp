@@ -24,10 +24,10 @@ document does not repeat it.
 
 | Metric | Value | Scope | Source |
 |---|---|---|---|
-| Source files, whole repo | 523 | repo-wide | `repo-tools map` (520 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
+| Source files, whole repo | 524 | repo-wide | `repo-tools map` (521 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
 | TypeScript files, `src/` | 247 | src only | `repo-tools map`, files under `src/` |
-| Lines of code, whole repo | 233,930 | repo-wide | `repo-tools map` |
-| Lines of code, `src/` | 119,436 | src only | `repo-tools map`, files under `src/` |
+| Lines of code, whole repo | 234,070 | repo-wide | `repo-tools map` |
+| Lines of code, `src/` | 119,352 | src only | `repo-tools map`, files under `src/` |
 | Total exports, whole repo | 2,177 | repo-wide | `repo-tools map` |
 | Total exports, `src/` | 1,198 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
 | Entry roots | 1 (`src/index.ts`) | repo-wide | `repo-tools map` |
@@ -44,14 +44,14 @@ document does not repeat it.
 | Fluent builder classes | 14 | src | `src/export/visual/utils/` |
 
 The whole-repo and `src`-only export counts (2,177 vs 1,198) are not a contradiction. They
-come from two tools and count different file sets: `repo-tools map` reads all 523 files, and
+come from two tools and count different file sets: `repo-tools map` reads all 524 files, and
 `tools/create-dependency-graph` reads the 247 files of `src/`.
 
 ## Project Structure
 
 ```
 deepthinking-mcp/
-├── src/                # 247 files, 119,436 LOC — the package
+├── src/                # 247 files, 119,352 LOC — the package
 │   ├── index.ts        # entry point, all 13 tool handlers
 │   ├── types/           # ThinkingMode enum, Thought union, per-mode types
 │   ├── modes/            # mode handlers, registry, combinations, stochastic
@@ -65,7 +65,7 @@ deepthinking-mcp/
 │   ├── config/            # environment-variable configuration
 │   ├── interfaces/       # DI interfaces
 │   └── utils/             # errors, logger, sanitization
-├── tests/               # 251 files, 107,568 LOC
+├── tests/               # 251 files, 107,154 LOC
 ├── tools/                # 15 files, 4,718 LOC — standalone CLI utilities
 ├── cli/                  # mcp-server-wrapper.mjs — launcher script for the Claude Code plugin
 ├── templates/mode-scaffolding/  # 5 copy-paste templates for authoring a new mode
@@ -143,8 +143,8 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 523 | repo-tools map (whole repository) |
-| totalLinesOfCode | 233930 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 524 | repo-tools map (whole repository) |
+| totalLinesOfCode | 234070 | repo-tools map (whole repository) |
 | totalExports | 2177 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |

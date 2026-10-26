@@ -1362,6 +1362,12 @@
             "typeOnly": true
           },
           {
+            "file": "../utils/dispatch.js",
+            "imports": [
+              "exportByFormat"
+            ]
+          },
+          {
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
@@ -2105,6 +2111,12 @@
               "VisualExportOptions"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/dispatch.js",
+            "imports": [
+              "exportByFormat"
+            ]
           },
           {
             "file": "../utils.js",
@@ -2871,6 +2883,12 @@
             "typeOnly": true
           },
           {
+            "file": "../utils/dispatch.js",
+            "imports": [
+              "exportByFormat"
+            ]
+          },
+          {
             "file": "../utils.js",
             "imports": [
               "sanitizeId"
@@ -3237,6 +3255,12 @@
               "VisualExportOptions"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/dispatch.js",
+            "imports": [
+              "exportByFormat"
+            ]
           },
           {
             "file": "../utils.js",
@@ -3628,6 +3652,12 @@
               "VisualExportOptions"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "../utils/dispatch.js",
+            "imports": [
+              "exportByFormat"
+            ]
           },
           {
             "file": "../utils.js",
@@ -16438,7 +16468,7 @@
   "statistics": {
     "totalTypeScriptFiles": 247,
     "totalModules": 14,
-    "totalLinesOfCode": 119683,
+    "totalLinesOfCode": 119599,
     "totalExports": 1198,
     "totalClasses": 143,
     "totalInterfaces": 563,
