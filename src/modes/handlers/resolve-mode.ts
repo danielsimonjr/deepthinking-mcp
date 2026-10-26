@@ -1,8 +1,9 @@
 /**
  * Mode-name resolution
  *
- * CustomHandler (basedOnModes) and HybridHandler (activeModes) accept mode names
- * as strings from the client. This lookup turns one name into a ThinkingMode.
+ * CustomHandler (basedOnModes) and HybridHandler (activeModes) accept mode names.
+ * The names are strings from the client.
+ * This lookup maps a name to a ThinkingMode.
  */
 
 import { ThinkingMode } from "../../types/core.js";

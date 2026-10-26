@@ -9,6 +9,7 @@
 import { describe, it, expect } from 'vitest';
 import { CustomHandler } from '../../../../src/modes/handlers/CustomHandler.js';
 import { HybridHandler } from '../../../../src/modes/handlers/HybridHandler.js';
+import { resolveMode } from '../../../../src/modes/handlers/resolve-mode.js';
 import { ThinkingMode } from '../../../../src/types/core.js';
 
 const baseInput = {
@@ -64,5 +65,20 @@ describe('mode-name resolution in CustomHandler and HybridHandler', () => {
       ThinkingMode.SEQUENTIAL,
       ThinkingMode.SEQUENTIAL,
     ]);
+  });
+});
+
+describe('resolveMode', () => {
+  it.each(everyMode)('maps %s to itself', (mode) => {
+    expect(resolveMode(mode)).toBe(mode);
+  });
+
+  it('ignores case', () => {
+    expect(resolveMode('GameTheory')).toBe(ThinkingMode.GAMETHEORY);
+  });
+
+  it('returns sequential for a name that is not a mode', () => {
+    expect(resolveMode('')).toBe(ThinkingMode.SEQUENTIAL);
+    expect(resolveMode('__proto__')).toBe(ThinkingMode.SEQUENTIAL);
   });
 });
