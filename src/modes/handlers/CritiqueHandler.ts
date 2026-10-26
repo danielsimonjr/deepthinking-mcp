@@ -26,6 +26,7 @@ import {
   ValidationWarning,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationWarning,
@@ -180,13 +181,7 @@ export class CritiqueHandler implements ModeHandler {
     );
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.CRITIQUE,

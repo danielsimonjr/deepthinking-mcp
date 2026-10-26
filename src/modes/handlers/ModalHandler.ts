@@ -24,6 +24,7 @@ import {
   ValidationWarning,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationWarning,
@@ -131,13 +132,7 @@ export class ModalHandler implements ModeHandler {
     const modalDomain = this.resolveModalDomain(inputAny.modalDomain);
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.MODAL,
 
       // Core modal fields

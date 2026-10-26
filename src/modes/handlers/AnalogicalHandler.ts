@@ -8,7 +8,6 @@
  * - Transfer inference suggestions
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode } from "../../types/core.js";
 import {
   AnalogicalThought,
@@ -26,6 +25,7 @@ import {
   ValidationResult,
   ValidationWarning,
   ModeEnhancements,
+  createThoughtBase,
   validationSuccess,
   createValidationWarning,
 } from "./ModeHandler.js";
@@ -89,13 +89,7 @@ export class AnalogicalHandler implements ModeHandler {
       this.calculateAnalogyStrength(sourceDomain, targetDomain, mapping);
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.ANALOGICAL,

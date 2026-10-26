@@ -18,6 +18,7 @@ import {
   ValidationWarning,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationWarning,
@@ -185,13 +186,7 @@ export class StochasticHandler implements ModeHandler {
     const processType = this.resolveProcessType(inputAny.processType);
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.STOCHASTIC,
 
       // Core stochastic fields

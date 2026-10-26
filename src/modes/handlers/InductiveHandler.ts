@@ -8,7 +8,6 @@
  * - Sample size and confidence correlation
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode, InductiveThought } from "../../types/core.js";
 import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
@@ -16,6 +15,7 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationError,
@@ -59,13 +59,7 @@ export class InductiveHandler implements ModeHandler {
     const confidence = this.calculateConfidence(inputAny);
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.INDUCTIVE,
 
       // Core inductive fields

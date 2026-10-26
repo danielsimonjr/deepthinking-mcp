@@ -8,7 +8,6 @@
  * - Consistency checking
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode, MathematicsThought } from "../../types/core.js";
 import type {
   MathematicsThoughtType,
@@ -21,6 +20,7 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationError,
@@ -92,13 +92,7 @@ export class MathematicsHandler implements ModeHandler {
     const proofStrategy = this.normalizeProofStrategy(input.proofStrategy);
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.MATHEMATICS,
 
       // Core mathematics fields

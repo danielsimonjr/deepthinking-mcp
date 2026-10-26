@@ -29,6 +29,7 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationError,
@@ -125,13 +126,7 @@ export class CryptanalyticHandler implements ModeHandler {
       : hypotheses?.[0];
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.CRYPTANALYTIC,
 
       // Core cryptanalytic fields

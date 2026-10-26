@@ -8,7 +8,6 @@
  * - Dimensional analysis support
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode, PhysicsThought } from "../../types/core.js";
 import type {
   PhysicsThoughtType,
@@ -22,6 +21,7 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationError,
@@ -81,13 +81,7 @@ export class PhysicsHandler implements ModeHandler {
     );
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.PHYSICS,
 
       // Core physics fields

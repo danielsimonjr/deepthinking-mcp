@@ -33,6 +33,7 @@ import {
   ValidationWarning,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationWarning,
@@ -137,13 +138,7 @@ export class ConstraintHandler implements ModeHandler {
     );
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.CONSTRAINT,
 
       // Core constraint fields

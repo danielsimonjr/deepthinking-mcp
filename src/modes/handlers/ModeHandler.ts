@@ -10,7 +10,8 @@
  * - Optional enhancements (suggestions, warnings, etc.)
  */
 
-import type { ThinkingMode, Thought } from "../../types/core.js";
+import { randomUUID } from "crypto";
+import type { BaseThought, ThinkingMode, Thought } from "../../types/core.js";
 import type { ThinkingToolInput } from "../../tools/thinking.js";
 
 /**
@@ -254,6 +255,42 @@ export function checkThoughtBasics(
   }
 
   return undefined;
+}
+
+/**
+ * The fields that every handler copies from the input into a new thought.
+ */
+type ThoughtBase = Pick<
+  BaseThought,
+  | "id"
+  | "sessionId"
+  | "thoughtNumber"
+  | "totalThoughts"
+  | "content"
+  | "timestamp"
+  | "nextThoughtNeeded"
+>;
+
+/**
+ * Build the seven fields that start every thought: a new `id`, the session,
+ * the thought numbers, the content, the time and `nextThoughtNeeded`.
+ *
+ * A handler spreads the result first in the thought it returns, then adds the
+ * revision fields, `mode` and its own fields in the order it needs.
+ */
+export function createThoughtBase(
+  input: ThinkingToolInput,
+  sessionId: string,
+): ThoughtBase {
+  return {
+    id: randomUUID(),
+    sessionId,
+    thoughtNumber: input.thoughtNumber,
+    totalThoughts: input.totalThoughts,
+    content: input.thought,
+    timestamp: new Date(),
+    nextThoughtNeeded: input.nextThoughtNeeded,
+  };
 }
 
 /**

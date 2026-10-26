@@ -10,7 +10,6 @@
  * - Serves as a base class for specialized handlers
  */
 
-import { randomUUID } from "crypto";
 import {
   ThinkingMode,
   Thought,
@@ -33,6 +32,7 @@ import {
   ModeEnhancements,
   ModeStatus,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   createValidationWarning,
 } from "./ModeHandler.js";
@@ -93,13 +93,7 @@ export class GenericModeHandler implements ModeHandler {
    */
   protected createBaseThought(input: ThinkingToolInput, sessionId: string) {
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
     };

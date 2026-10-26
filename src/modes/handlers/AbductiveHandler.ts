@@ -23,6 +23,7 @@ import {
   ValidationResult,
   ValidationWarning,
   ModeEnhancements,
+  createThoughtBase,
   validationSuccess,
   createValidationWarning,
 } from "./ModeHandler.js";
@@ -73,13 +74,7 @@ export class AbductiveHandler implements ModeHandler {
       : this.getDefaultCriteria();
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.ABDUCTIVE,

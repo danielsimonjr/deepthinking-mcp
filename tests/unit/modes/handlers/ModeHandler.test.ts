@@ -4,9 +4,10 @@
  * Tests for the ModeHandler interface contracts and helper functions.
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationError,
@@ -185,6 +186,84 @@ describe('ModeHandler Interface', () => {
 
         expect(a).not.toBe(b);
         expect(a?.errors).not.toBe(b?.errors);
+      });
+    });
+
+    describe('createThoughtBase', () => {
+      const input = (over: Record<string, unknown> = {}) =>
+        ({
+          thought: 'a real thought',
+          thoughtNumber: 2,
+          totalThoughts: 5,
+          nextThoughtNeeded: true,
+          isRevision: true,
+          revisesThought: '1',
+          ...over,
+        }) as ThinkingToolInput;
+
+      beforeEach(() => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-01-02T03:04:05.000Z'));
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('copies the seven shared fields from the input', () => {
+        expect(createThoughtBase(input(), 'sess-1')).toEqual({
+          id: expect.any(String),
+          sessionId: 'sess-1',
+          thoughtNumber: 2,
+          totalThoughts: 5,
+          content: 'a real thought',
+          timestamp: new Date('2026-01-02T03:04:05.000Z'),
+          nextThoughtNeeded: true,
+        });
+      });
+
+      it('gives the fields in the order that the thoughts have always had', () => {
+        expect(Object.keys(createThoughtBase(input(), 's'))).toEqual([
+          'id',
+          'sessionId',
+          'thoughtNumber',
+          'totalThoughts',
+          'content',
+          'timestamp',
+          'nextThoughtNeeded',
+        ]);
+      });
+
+      it('leaves the revision fields and the mode to the handler', () => {
+        const keys = Object.keys(createThoughtBase(input(), 's'));
+
+        expect(keys).not.toContain('isRevision');
+        expect(keys).not.toContain('revisesThought');
+        expect(keys).not.toContain('mode');
+      });
+
+      it('keeps a nextThoughtNeeded of false', () => {
+        expect(createThoughtBase(input({ nextThoughtNeeded: false }), 's').nextThoughtNeeded).toBe(
+          false
+        );
+      });
+
+      it('gives a new UUID on every call', () => {
+        const a = createThoughtBase(input(), 's');
+        const b = createThoughtBase(input(), 's');
+
+        expect(a.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
+        expect(a.id).not.toBe(b.id);
+      });
+
+      it('sets the timestamp to the time of the call and gives each call its own Date', () => {
+        const a = createThoughtBase(input(), 's');
+        vi.setSystemTime(new Date('2026-01-02T03:04:06.000Z'));
+        const b = createThoughtBase(input(), 's');
+
+        expect(a.timestamp.toISOString()).toBe('2026-01-02T03:04:05.000Z');
+        expect(b.timestamp.toISOString()).toBe('2026-01-02T03:04:06.000Z');
+        expect(a.timestamp).not.toBe(b.timestamp);
       });
     });
   });

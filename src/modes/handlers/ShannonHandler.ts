@@ -8,7 +8,6 @@
  * - Alternative approach suggestions
  */
 
-import { randomUUID } from "crypto";
 import {
   ThinkingMode,
   ShannonStage,
@@ -20,6 +19,7 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationError,
@@ -80,13 +80,7 @@ export class ShannonHandler implements ModeHandler {
       inputAny.confidenceFactors || this.calculateConfidenceFactors(inputAny);
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.SHANNON,
 
       // Core Shannon fields

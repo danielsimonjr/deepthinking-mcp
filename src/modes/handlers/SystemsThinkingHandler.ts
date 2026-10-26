@@ -8,7 +8,6 @@
  * - Warning signs and intervention suggestions
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode, SystemsThinkingThought } from "../../types/core.js";
 import type {
   SystemDefinition,
@@ -25,6 +24,7 @@ import {
   ModeEnhancements,
   DetectedArchetype,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationWarning,
@@ -238,13 +238,7 @@ export class SystemsThinkingHandler implements ModeHandler {
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.SYSTEMSTHINKING,

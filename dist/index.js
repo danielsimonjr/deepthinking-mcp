@@ -163,8 +163,6 @@ var init_session = __esm({
     init_esm_shims();
   }
 });
-
-// src/modes/handlers/ModeHandler.ts
 function validationSuccess(warnings = []) {
   return {
     valid: true,
@@ -202,6 +200,17 @@ function checkThoughtBasics(input) {
     ]);
   }
   return void 0;
+}
+function createThoughtBase(input, sessionId) {
+  return {
+    id: randomUUID(),
+    sessionId,
+    thoughtNumber: input.thoughtNumber,
+    totalThoughts: input.totalThoughts,
+    content: input.thought,
+    timestamp: /* @__PURE__ */ new Date(),
+    nextThoughtNeeded: input.nextThoughtNeeded
+  };
 }
 function createValidationWarning(field, message, suggestion) {
   return { field, message, suggestion };
@@ -2160,6 +2169,8 @@ var init_type_guards = __esm({
     ];
   }
 });
+
+// src/modes/handlers/GenericModeHandler.ts
 var GenericModeHandler;
 var init_GenericModeHandler = __esm({
   "src/modes/handlers/GenericModeHandler.ts"() {
@@ -2191,13 +2202,7 @@ var init_GenericModeHandler = __esm({
        */
       createBaseThought(input, sessionId) {
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought
         };
@@ -2599,6 +2604,8 @@ var init_GenericModeHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/SequentialHandler.ts
 var SequentialHandler;
 var init_SequentialHandler = __esm({
   "src/modes/handlers/SequentialHandler.ts"() {
@@ -2624,13 +2631,7 @@ var init_SequentialHandler = __esm({
       createThought(input, sessionId) {
         const inputAny = input;
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "sequential" /* SEQUENTIAL */,
           // Revision tracking
           isRevision: input.isRevision,
@@ -2769,6 +2770,8 @@ var init_SequentialHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/ShannonHandler.ts
 var STAGE_ORDER, ShannonHandler;
 var init_ShannonHandler = __esm({
   "src/modes/handlers/ShannonHandler.ts"() {
@@ -2805,13 +2808,7 @@ var init_ShannonHandler = __esm({
         const stage = this.resolveStage(input.stage);
         const confidenceFactors = inputAny.confidenceFactors || this.calculateConfidenceFactors(inputAny);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "shannon" /* SHANNON */,
           // Core Shannon fields
           stage,
@@ -3072,6 +3069,8 @@ var init_ShannonHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/MathematicsHandler.ts
 var VALID_THOUGHT_TYPES2, VALID_PROOF_TYPES, MathematicsHandler;
 var init_MathematicsHandler = __esm({
   "src/modes/handlers/MathematicsHandler.ts"() {
@@ -3113,13 +3112,7 @@ var init_MathematicsHandler = __esm({
         const mathematicalModel = this.normalizeModel(input.mathematicalModel);
         const proofStrategy = this.normalizeProofStrategy(input.proofStrategy);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "mathematics" /* MATHEMATICS */,
           // Core mathematics fields
           thoughtType,
@@ -3458,6 +3451,8 @@ var init_MathematicsHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/PhysicsHandler.ts
 var VALID_THOUGHT_TYPES3, VALID_TRANSFORMATIONS, PhysicsHandler;
 var init_PhysicsHandler = __esm({
   "src/modes/handlers/PhysicsHandler.ts"() {
@@ -3490,13 +3485,7 @@ var init_PhysicsHandler = __esm({
           input.physicalInterpretation
         );
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "physics" /* PHYSICS */,
           // Core physics fields
           thoughtType,
@@ -3887,6 +3876,8 @@ var init_resolve_mode = __esm({
     );
   }
 });
+
+// src/modes/handlers/HybridHandler.ts
 var VALID_THOUGHT_TYPES4, VALID_STRATEGIES, TARGET_CONFIDENCE, HybridHandler;
 var init_HybridHandler = __esm({
   "src/modes/handlers/HybridHandler.ts"() {
@@ -3946,13 +3937,7 @@ var init_HybridHandler = __esm({
         const primaryMode = this.resolvePrimaryMode(modeContributions, activeModes);
         const secondaryFeatures = inputAny.secondaryFeatures || activeModes.filter((m) => m !== primaryMode).map((m) => `${m} reasoning`);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "hybrid" /* HYBRID */,
           // Base hybrid fields
           primaryMode: this.mapToPrimaryMode(primaryMode),
@@ -4350,6 +4335,8 @@ var init_HybridHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/InductiveHandler.ts
 var InductiveHandler;
 var init_InductiveHandler = __esm({
   "src/modes/handlers/InductiveHandler.ts"() {
@@ -4377,13 +4364,7 @@ var init_InductiveHandler = __esm({
         const inputAny = input;
         const confidence = this.calculateConfidence(inputAny);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "inductive" /* INDUCTIVE */,
           // Core inductive fields
           observations: inputAny.observations || [],
@@ -4591,6 +4572,8 @@ var init_InductiveHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/DeductiveHandler.ts
 var VALID_LOGIC_FORMS, DeductiveHandler;
 var init_DeductiveHandler = __esm({
   "src/modes/handlers/DeductiveHandler.ts"() {
@@ -4633,13 +4616,7 @@ var init_DeductiveHandler = __esm({
         const inputAny = input;
         const validityCheck = this.assessValidity(inputAny);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "deductive" /* DEDUCTIVE */,
           // Core deductive fields
           premises: inputAny.premises || [],
@@ -4888,13 +4865,7 @@ var init_AbductiveHandler = __esm({
         const evidence = this.processEvidence(inputAny.evidence || []);
         const evaluationCriteria = inputAny.evaluationCriteria ? this.processEvaluationCriteria(inputAny.evaluationCriteria) : this.getDefaultCriteria();
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "abductive" /* ABDUCTIVE */,
@@ -5905,6 +5876,8 @@ var init_intervention = __esm({
     init_graph_utils();
   }
 });
+
+// src/modes/handlers/CausalHandler.ts
 var CausalHandler;
 var init_CausalHandler = __esm({
   "src/modes/handlers/CausalHandler.ts"() {
@@ -5939,13 +5912,7 @@ var init_CausalHandler = __esm({
           edges: inputAny.edges || []
         };
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "causal" /* CAUSAL */,
@@ -6452,13 +6419,7 @@ var init_BayesianHandler = __esm({
         );
         const bayesFactor = this.calculateBayesFactor(evidence);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "bayesian" /* BAYESIAN */,
@@ -6862,13 +6823,7 @@ var init_CounterfactualHandler = __esm({
           expectedImpact: 0.5
         };
         const thought = {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "counterfactual" /* COUNTERFACTUAL */,
@@ -7223,6 +7178,8 @@ var init_CounterfactualHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/TemporalHandler.ts
 var TemporalHandler;
 var init_TemporalHandler = __esm({
   "src/modes/handlers/TemporalHandler.ts"() {
@@ -7246,13 +7203,7 @@ var init_TemporalHandler = __esm({
         const inputAny = input;
         const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "temporal" /* TEMPORAL */,
@@ -7433,13 +7384,7 @@ var init_HistoricalHandler = __esm({
         const inputAny = input;
         const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
         const thought = {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "historical" /* HISTORICAL */,
@@ -7870,13 +7815,7 @@ var init_GameTheoryHandler = __esm({
           );
         }
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "gametheory" /* GAMETHEORY */,
@@ -8450,6 +8389,8 @@ var init_GameTheoryHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/EvidentialHandler.ts
 var EvidentialHandler;
 var init_EvidentialHandler = __esm({
   "src/modes/handlers/EvidentialHandler.ts"() {
@@ -8491,13 +8432,7 @@ var init_EvidentialHandler = __esm({
           ];
         }
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "evidential" /* EVIDENTIAL */,
@@ -8639,6 +8574,8 @@ var init_EvidentialHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/AnalogicalHandler.ts
 var AnalogicalHandler;
 var init_AnalogicalHandler = __esm({
   "src/modes/handlers/AnalogicalHandler.ts"() {
@@ -8671,13 +8608,7 @@ var init_AnalogicalHandler = __esm({
         const limitations = inputAny.limitations || this.identifyLimitations(mapping);
         const analogyStrength = inputAny.analogyStrength ?? this.calculateAnalogyStrength(sourceDomain, targetDomain, mapping);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "analogical" /* ANALOGICAL */,
@@ -8978,6 +8909,8 @@ var init_AnalogicalHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/FirstPrinciplesHandler.ts
 var FirstPrinciplesHandler;
 var init_FirstPrinciplesHandler = __esm({
   "src/modes/handlers/FirstPrinciplesHandler.ts"() {
@@ -8993,13 +8926,7 @@ var init_FirstPrinciplesHandler = __esm({
       createThought(input, sessionId) {
         const inputAny = input;
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "firstprinciples" /* FIRSTPRINCIPLES */,
@@ -9135,6 +9062,8 @@ var init_FirstPrinciplesHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/SystemsThinkingHandler.ts
 var SYSTEMS_ARCHETYPES, SystemsThinkingHandler;
 var init_SystemsThinkingHandler = __esm({
   "src/modes/handlers/SystemsThinkingHandler.ts"() {
@@ -9291,13 +9220,7 @@ var init_SystemsThinkingHandler = __esm({
         const inputAny = input;
         const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "systemsthinking" /* SYSTEMSTHINKING */,
@@ -9688,6 +9611,8 @@ var init_SystemsThinkingHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/ScientificMethodHandler.ts
 var ScientificMethodHandler;
 var init_ScientificMethodHandler = __esm({
   "src/modes/handlers/ScientificMethodHandler.ts"() {
@@ -9712,13 +9637,7 @@ var init_ScientificMethodHandler = __esm({
         const inputAny = input;
         const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "scientificmethod" /* SCIENTIFICMETHOD */,
@@ -9887,6 +9806,8 @@ var init_ScientificMethodHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/FormalLogicHandler.ts
 var FormalLogicHandler;
 var init_FormalLogicHandler = __esm({
   "src/modes/handlers/FormalLogicHandler.ts"() {
@@ -9910,13 +9831,7 @@ var init_FormalLogicHandler = __esm({
         const inputAny = input;
         const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "formallogic" /* FORMALLOGIC */,
@@ -10089,13 +10004,7 @@ var init_SynthesisHandler = __esm({
           inputAny.themes || []
         );
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "synthesis" /* SYNTHESIS */,
@@ -10591,13 +10500,7 @@ var init_ArgumentationHandler = __esm({
         );
         const detectedFallacies = inputAny.fallacies || this.detectFallacies(inputAny);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "argumentation" /* ARGUMENTATION */,
@@ -11143,13 +11046,7 @@ var init_CritiqueHandler = __esm({
           weaknessesIdentified
         );
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "critique" /* CRITIQUE */,
@@ -11657,13 +11554,7 @@ var init_AnalysisHandler = __esm({
         );
         const rigorAssessment = inputAny.rigorAssessment || this.assessRigor(inputAny);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "analysis" /* ANALYSIS */,
@@ -12101,13 +11992,7 @@ var init_EngineeringHandler = __esm({
           this.stringCriteriaWarning(inputAny.tradeStudy?.criteria)
         ]);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "engineering" /* ENGINEERING */,
           // Core engineering fields
           analysisType,
@@ -12591,13 +12476,7 @@ var init_ComputabilityHandler = __esm({
         const reductions = inputAny.reductions ? inputAny.reductions.map((r) => this.normalizeReduction(r)) : void 0;
         const diagonalization = inputAny.diagonalization ? this.normalizeDiagonalization(inputAny.diagonalization) : void 0;
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "computability" /* COMPUTABILITY */,
           // Core computability fields
           thoughtType,
@@ -13068,13 +12947,7 @@ var init_CryptanalyticHandler = __esm({
         const evidenceChains = inputAny.evidenceChains ? inputAny.evidenceChains.map((e) => this.normalizeEvidenceChain(e)) : void 0;
         const currentHypothesis = inputAny.currentHypothesis ? this.normalizeHypothesis(inputAny.currentHypothesis) : hypotheses?.[0];
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "cryptanalytic" /* CRYPTANALYTIC */,
           // Core cryptanalytic fields
           thoughtType,
@@ -13580,13 +13453,7 @@ var init_AlgorithmicHandler = __esm({
         const graphContext = req.graphContext ? this.normalizeGraphContext(req.graphContext, vocabulary) : void 0;
         const amortizedAnalysis = req.amortizedAnalysis ? this.normalizeAmortizedAnalysis(req.amortizedAnalysis, vocabulary) : void 0;
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "algorithmic" /* ALGORITHMIC */,
           // Core algorithmic fields
           thoughtType,
@@ -14320,6 +14187,8 @@ var init_AlgorithmicHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/MetaReasoningHandler.ts
 var VALID_META_ACTIONS, MetaReasoningHandler;
 var init_MetaReasoningHandler = __esm({
   "src/modes/handlers/MetaReasoningHandler.ts"() {
@@ -14374,13 +14243,7 @@ var init_MetaReasoningHandler = __esm({
           sessionId
         );
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "metareasoning" /* METAREASONING */,
           // Core meta-reasoning fields
           currentStrategy,
@@ -14780,13 +14643,7 @@ var init_RecursiveHandler = __esm({
         const currentDepth = req.currentDepth ?? this.calculateCurrentDepth(subproblems);
         const maxDepth = req.maxDepth;
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "recursive" /* RECURSIVE */,
           // Core recursive fields
           thoughtType,
@@ -15172,13 +15029,7 @@ var init_ModalHandler = __esm({
         const modalLogicType = this.resolveLogicSystem(inputAny.modalLogicType);
         const modalDomain = this.resolveModalDomain(inputAny.modalDomain);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "modal" /* MODAL */,
           // Core modal fields
           thoughtType,
@@ -15774,13 +15625,7 @@ var init_StochasticHandler = __esm({
         ) : void 0;
         const processType = this.resolveProcessType(inputAny.processType);
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "stochastic" /* STOCHASTIC */,
           // Core stochastic fields
           thoughtType,
@@ -16370,13 +16215,7 @@ var init_ConstraintHandler = __esm({
           currentAssignments
         );
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "constraint" /* CONSTRAINT */,
           // Core constraint fields
           thoughtType,
@@ -16843,13 +16682,7 @@ var init_OptimizationHandler = __esm({
         const solution = inputAny.solution ? this.normalizeSolution(inputAny.solution, optimizationConstraints) : void 0;
         const analysis = inputAny.analysis ? this.normalizeAnalysis(inputAny.analysis) : void 0;
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "optimization" /* OPTIMIZATION */,
           // Core optimization fields
           thoughtType,
@@ -17259,13 +17092,7 @@ var init_CustomHandler = __esm({
         ) : void 0;
         const basedOnModes = inputAny.basedOnModes ? inputAny.basedOnModes.map((m) => resolveMode(m)) : void 0;
         return {
-          id: randomUUID(),
-          sessionId,
-          thoughtNumber: input.thoughtNumber,
-          totalThoughts: input.totalThoughts,
-          content: input.thought,
-          timestamp: /* @__PURE__ */ new Date(),
-          nextThoughtNeeded: input.nextThoughtNeeded,
+          ...createThoughtBase(input, sessionId),
           mode: "custom" /* CUSTOM */,
           // Custom configuration
           thoughtType: inputAny.thoughtType || "custom_analysis",

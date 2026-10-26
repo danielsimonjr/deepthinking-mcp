@@ -8,7 +8,6 @@
  * - Quality metrics tracking
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode } from "../../types/core.js";
 import type {
   MetaReasoningThought,
@@ -27,6 +26,7 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationWarning,
@@ -117,13 +117,7 @@ export class MetaReasoningHandler implements ModeHandler {
     );
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.METAREASONING,
 
       // Core meta-reasoning fields

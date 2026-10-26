@@ -70,8 +70,6 @@ with the entry.
     `historical`. They pass other arguments to the converters or have another `default:` case.
     `hybrid` reads `options.includeLabels !== false`, and `physics` reads `?? true`. A merge must
     keep both results, so write a test of the exact output first.
-  - 36 handler files repeat the thought-field envelope. The tool reads functions, not blocks
-    inside a function, so it did not list them.
   - `generateDotGraph` and `DOTGraphBuilder.render` in `src/export/visual/utils/dot.ts` overlap by
     95 percent. Write a test of the exact output first, then merge them.
   - About 120 pairs scored 0.6 to 0.8 are unread.

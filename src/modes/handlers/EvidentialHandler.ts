@@ -8,7 +8,6 @@
  * - Uncertainty quantification
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode, EvidentialThought } from "../../types/core.js";
 import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
@@ -17,6 +16,7 @@ import {
   HandlerValidationError,
   ValidationWarning,
   ModeEnhancements,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationError,
@@ -91,13 +91,7 @@ export class EvidentialHandler implements ModeHandler {
     }
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.EVIDENTIAL,
