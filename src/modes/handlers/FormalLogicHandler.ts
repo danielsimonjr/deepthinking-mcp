@@ -8,7 +8,6 @@
  * - Logical fallacy detection
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode, FormalLogicThought } from "../../types/core.js";
 import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
@@ -16,6 +15,7 @@ import {
   ValidationResult,
   ValidationWarning,
   ModeEnhancements,
+  createThoughtBase,
   validationSuccess,
   createValidationWarning,
 } from "./ModeHandler.js";
@@ -63,13 +63,7 @@ export class FormalLogicHandler implements ModeHandler {
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.FORMALLOGIC,

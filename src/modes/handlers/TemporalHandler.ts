@@ -8,7 +8,6 @@
  * - Duration and overlap analysis
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode, TemporalThought } from "../../types/core.js";
 import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
@@ -17,6 +16,7 @@ import {
   HandlerValidationError,
   ValidationWarning,
   ModeEnhancements,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationError,
@@ -63,13 +63,7 @@ export class TemporalHandler implements ModeHandler {
     const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.TEMPORAL,

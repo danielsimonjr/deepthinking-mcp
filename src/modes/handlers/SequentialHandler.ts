@@ -7,7 +7,6 @@
  * - Dependency tracking between thoughts
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode, SequentialThought } from "../../types/core.js";
 import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
@@ -15,6 +14,7 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   createValidationWarning,
 } from "./ModeHandler.js";
@@ -55,13 +55,7 @@ export class SequentialHandler implements ModeHandler {
     const inputAny = input as any;
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.SEQUENTIAL,
 
       // Revision tracking

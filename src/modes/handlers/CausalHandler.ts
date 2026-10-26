@@ -11,7 +11,6 @@
  * - Do-calculus identifiability checking
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode, CausalThought } from "../../types/core.js";
 import type { CausalGraph, Intervention } from "../../types/modes/causal.js";
 import type { ThinkingToolInput } from "../../tools/thinking.js";
@@ -20,6 +19,7 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationError,
@@ -77,13 +77,7 @@ export class CausalHandler implements ModeHandler {
     };
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.CAUSAL,

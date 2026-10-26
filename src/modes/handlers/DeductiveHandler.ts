@@ -8,7 +8,6 @@
  * - Logical fallacy detection
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode, DeductiveThought } from "../../types/core.js";
 import type { ThinkingToolInput } from "../../tools/thinking.js";
 import {
@@ -16,6 +15,7 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationWarning,
@@ -77,13 +77,7 @@ export class DeductiveHandler implements ModeHandler {
     const validityCheck = this.assessValidity(inputAny);
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.DEDUCTIVE,
 
       // Core deductive fields

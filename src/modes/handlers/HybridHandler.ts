@@ -8,7 +8,6 @@
  * - Dynamic mode switching based on problem evolution
  */
 
-import { randomUUID } from "crypto";
 import { ThinkingMode } from "../../types/core.js";
 import type { HybridThought as BaseHybridThought } from "../../types/modes/hybrid.js";
 import {
@@ -22,6 +21,7 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationWarning,
@@ -182,13 +182,7 @@ export class HybridHandler implements ModeHandler {
         .map((m: ThinkingMode) => `${m} reasoning`);
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.HYBRID,
 
       // Base hybrid fields

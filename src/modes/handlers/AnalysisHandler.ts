@@ -24,6 +24,7 @@ import {
   HandlerValidationError,
   ValidationWarning,
   ModeEnhancements,
+  createThoughtBase,
   validationSuccess,
   validationFailure,
   createValidationWarning,
@@ -171,13 +172,7 @@ export class AnalysisHandler implements ModeHandler {
       inputAny.rigorAssessment || this.assessRigor(inputAny);
 
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.ANALYSIS,
