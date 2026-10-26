@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **516 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **518 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -16,9 +16,9 @@ Every tracked TypeScript file in the repository — **516 files** — not just t
 | config | 2 |
 | orphan | 12 |
 | other | 2 |
-| reachable | 234 |
+| reachable | 235 |
 | template | 5 |
-| test | 247 |
+| test | 248 |
 | tool | 14 |
 
 ## Per-area counts
@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **516 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 246 | 120,624 |
+| src | 247 | 120,343 |
 | templates | 5 | 772 |
-| tests | 247 | 106,573 |
+| tests | 248 | 106,724 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -47,34 +47,35 @@ Every tracked TypeScript file in the repository — **516 files** — not just t
 | `src/export/profiles.ts` | src | 406 | reachable |
 | `src/export/visual/graph-render.ts` | src | 419 | reachable |
 | `src/export/visual/index.ts` | src | 21 | reachable |
-| `src/export/visual/modes/abductive.ts` | src | 844 | reachable |
-| `src/export/visual/modes/analogical.ts` | src | 1012 | reachable |
-| `src/export/visual/modes/bayesian.ts` | src | 872 | reachable |
-| `src/export/visual/modes/causal.ts` | src | 1053 | reachable |
+| `src/export/visual/modes/abductive.ts` | src | 820 | reachable |
+| `src/export/visual/modes/analogical.ts` | src | 988 | reachable |
+| `src/export/visual/modes/bayesian.ts` | src | 848 | reachable |
+| `src/export/visual/modes/causal.ts` | src | 1029 | reachable |
 | `src/export/visual/modes/computability.ts` | src | 1142 | reachable |
-| `src/export/visual/modes/counterfactual.ts` | src | 996 | reachable |
+| `src/export/visual/modes/counterfactual.ts` | src | 972 | reachable |
 | `src/export/visual/modes/engineering.ts` | src | 2146 | reachable |
-| `src/export/visual/modes/evidential.ts` | src | 1180 | reachable |
-| `src/export/visual/modes/first-principles.ts` | src | 1452 | reachable |
-| `src/export/visual/modes/formal-logic.ts` | src | 1415 | reachable |
-| `src/export/visual/modes/game-theory.ts` | src | 1235 | reachable |
+| `src/export/visual/modes/evidential.ts` | src | 1156 | reachable |
+| `src/export/visual/modes/first-principles.ts` | src | 1428 | reachable |
+| `src/export/visual/modes/formal-logic.ts` | src | 1391 | reachable |
+| `src/export/visual/modes/game-theory.ts` | src | 1211 | reachable |
 | `src/export/visual/modes/historical.ts` | src | 534 | reachable |
 | `src/export/visual/modes/hybrid.ts` | src | 1653 | reachable |
 | `src/export/visual/modes/index.ts` | src | 44 | reachable |
-| `src/export/visual/modes/mathematics.ts` | src | 1331 | reachable |
-| `src/export/visual/modes/metareasoning.ts` | src | 1917 | reachable |
-| `src/export/visual/modes/optimization.ts` | src | 1392 | reachable |
+| `src/export/visual/modes/mathematics.ts` | src | 1307 | reachable |
+| `src/export/visual/modes/metareasoning.ts` | src | 1893 | reachable |
+| `src/export/visual/modes/optimization.ts` | src | 1368 | reachable |
 | `src/export/visual/modes/physics.ts` | src | 2009 | reachable |
 | `src/export/visual/modes/proof-decomposition.ts` | src | 1869 | reachable |
-| `src/export/visual/modes/scientific-method.ts` | src | 1469 | reachable |
+| `src/export/visual/modes/scientific-method.ts` | src | 1445 | reachable |
 | `src/export/visual/modes/sequential.ts` | src | 882 | reachable |
-| `src/export/visual/modes/shannon.ts` | src | 703 | reachable |
-| `src/export/visual/modes/systems-thinking.ts` | src | 1027 | reachable |
+| `src/export/visual/modes/shannon.ts` | src | 679 | reachable |
+| `src/export/visual/modes/systems-thinking.ts` | src | 1003 | reachable |
 | `src/export/visual/modes/temporal.ts` | src | 749 | reachable |
 | `src/export/visual/session-graph.ts` | src | 121 | reachable |
 | `src/export/visual/types.ts` | src | 63 | reachable |
 | `src/export/visual/utils.ts` | src | 32 | reachable |
 | `src/export/visual/utils/ascii.ts` | src | 1184 | reachable |
+| `src/export/visual/utils/dispatch.ts` | src | 79 | reachable |
 | `src/export/visual/utils/dot.ts` | src | 1010 | reachable |
 | `src/export/visual/utils/graphml.ts` | src | 670 | reachable |
 | `src/export/visual/utils/html.ts` | src | 669 | reachable |
@@ -401,6 +402,7 @@ Every tracked TypeScript file in the repository — **516 files** — not just t
 | `tests/unit/export/proof-decomposition-visual.test.ts` | tests | 450 | test |
 | `tests/unit/export/visual/modes/engineering-accepted-input.test.ts` | tests | 100 | test |
 | `tests/unit/export/visual/modes/snapshot-baseline.test.ts` | tests | 1041 | test |
+| `tests/unit/export/visual/utils/dispatch.test.ts` | tests | 151 | test |
 | `tests/unit/export/visual/utils/document-builders.test.ts` | tests | 1127 | test |
 | `tests/unit/export/visual/utils/graph-builders.test.ts` | tests | 680 | test |
 | `tests/unit/export/visual/utils/svg-shared-elements.test.ts` | tests | 132 | test |

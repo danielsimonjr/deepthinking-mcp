@@ -41,7 +41,7 @@ The codebase is organized into the following modules:
 
 - **cache**: 3 files
 - **config**: 1 file
-- **export**: 47 files
+- **export**: 48 files
 - **entry**: 1 file
 - **interfaces**: 1 file
 - **modes**: 58 files
@@ -194,6 +194,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `AbductiveThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -219,6 +220,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `AnalogicalThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -244,6 +246,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `BayesianThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
 | `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
@@ -268,6 +271,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `CausalThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder, DotNodeShape` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -317,6 +321,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `CounterfactualThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder, DotNodeStyle` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -366,6 +371,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `EvidentialThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -391,6 +397,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `FirstPrinciplesThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -416,6 +423,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `FormalLogicThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -441,6 +449,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `GameTheoryThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -543,6 +552,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/modes/mathematics.js` | `MathematicsThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -568,6 +578,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/modes/metareasoning.js` | `MetaReasoningThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -593,6 +604,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `OptimizationThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -665,6 +677,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `ScientificMethodThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -715,6 +728,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `ShannonThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -740,6 +754,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `SystemsThinkingThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -813,6 +828,19 @@ The codebase is organized into the following modules:
 - Interfaces: `AsciiNode`, `AsciiEdge`, `AsciiSection`, `AsciiTableColumn`, `AsciiOptions`, `AsciiTreeNode`, `ASCIIDocBuilderOptions`
 - Functions: `truncateAscii`, `padAscii`, `wrapText`, `indentText`, `generateAsciiHeader`, `generateAsciiSectionHeader`, `generateAsciiBoxedTitle`, `generateAsciiBox`, `generateAsciiBulletList`, `generateAsciiNumberedList`, `generateAsciiTreeList`, `generateAsciiTable`, `getAsciiArrow`, `generateAsciiFlowDiagram`, `generateAsciiSection`, `generateAsciiDocument`, `generateAsciiProgressBar`, `generateAsciiMetric`, `generateAsciiMetricsPanel`, `generateAsciiGraph`, `generateLinearFlowAscii`, `generateHierarchyAscii`
 - Constants: `BOX_CHARS`, `ARROWS`, `BULLETS`
+
+---
+
+### `src/export/visual/utils/dispatch.ts` - Format dispatch for the mode exporters
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../types.js` | `VisualExportOptions` | Import (type-only) |
+
+**Exports:**
+- Interfaces: `ModeConverters`
+- Functions: `exportByFormat`
 
 ---
 
@@ -4320,26 +4348,26 @@ The codebase is organized into the following modules:
 | `profiles` | 0 files | 3 files |
 | `graph-render` | 10 files | 3 files |
 | `index` | 5 files | 2 files |
-| `abductive` | 14 files | 1 files |
-| `analogical` | 14 files | 1 files |
-| `bayesian` | 13 files | 1 files |
-| `causal` | 14 files | 1 files |
+| `abductive` | 15 files | 1 files |
+| `analogical` | 15 files | 1 files |
+| `bayesian` | 14 files | 1 files |
+| `causal` | 15 files | 1 files |
 | `computability` | 13 files | 1 files |
-| `counterfactual` | 14 files | 1 files |
+| `counterfactual` | 15 files | 1 files |
 | `engineering` | 13 files | 1 files |
-| `evidential` | 14 files | 1 files |
-| `first-principles` | 14 files | 1 files |
-| `formal-logic` | 14 files | 1 files |
-| `game-theory` | 14 files | 1 files |
+| `evidential` | 15 files | 1 files |
+| `first-principles` | 15 files | 1 files |
+| `formal-logic` | 15 files | 1 files |
+| `game-theory` | 15 files | 1 files |
 | `historical` | 7 files | 1 files |
 | `hybrid` | 14 files | 1 files |
 | `index` | 23 files | 2 files |
-| `mathematics` | 14 files | 1 files |
-| `metareasoning` | 14 files | 1 files |
-| `optimization` | 14 files | 1 files |
+| `mathematics` | 15 files | 1 files |
+| `metareasoning` | 15 files | 1 files |
+| `optimization` | 15 files | 1 files |
 | `physics` | 14 files | 1 files |
 | `proof-decomposition` | 11 files | 1 files |
-| `scientific-method` | 14 files | 1 files |
+| `scientific-method` | 15 files | 1 files |
 | `sequential` | 14 files | 1 files |
 
 ---
@@ -4389,7 +4417,7 @@ graph TD
         N6[profiles]
         N7[graph-render]
         N8[index]
-        N9[...42 more]
+        N9[...43 more]
     end
 
     subgraph Entry
@@ -4514,17 +4542,17 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 246 |
+| Total TypeScript Files | 247 |
 | Total Modules | 14 |
-| Total Lines of Code | 120624 |
-| Total Exports | 1196 |
+| Total Lines of Code | 120343 |
+| Total Exports | 1197 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
-| Total Interfaces | 562 |
-| Total Functions | 442 |
+| Total Interfaces | 563 |
+| Total Functions | 443 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
-| Type-only Imports | 336 |
+| Type-only Imports | 337 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 58 |
 

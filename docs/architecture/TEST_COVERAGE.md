@@ -21,14 +21,14 @@ Most test folders follow the folder names of `src/`: `tests/unit/<area>/` and
 
 | Directory | Test files | Purpose |
 |---|---|---|
-| `tests/unit/` | 150 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
+| `tests/unit/` | 151 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
 | `tests/integration/` | 80 | Cross-module paths: entry-point dispatch over a real transport, tool-shaped input through the handlers, export round-trips, multi-mode analysis, session lifecycles. |
 | `tests/edge-cases/` | 6 | Boundary conditions, malformed input, regressions pinned from past bugs. |
 | `tests/performance/` | 4 | Counted-work checks for cost, throughput, memory and stress. `helpers/work-probe.ts` holds the counters. |
 | `tests/utils/` | 0 (5 helper files) | Shared fixtures, factories, and assertion helpers. 21 test files import them, all under `tests/integration/tools/`. |
 | `tests/test-results/` | 0 | Reporter code and `TEST_RESULTS_v*.md` summaries. Not test code. |
 
-The suite holds 240 test files. `npx vitest list --filesOnly` lists them. This document maps
+The suite holds 241 test files. `npx vitest list --filesOnly` lists them. This document maps
 files. It holds no test count and no pass or fail state. Run the suite to get those.
 
 ### Running each tier
@@ -44,8 +44,8 @@ npx vitest run                          # everything
 `npm run test:publish` sets `SKIP_BENCHMARKS=1`. That variable switches on one extra entry in the
 `exclude` list of `vitest.config.ts`: `**/benchmarks/**`. The pattern matches the directory
 `tests/unit/benchmarks/`, which holds 2 test files. It does not match `tests/performance/`, so
-the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 238
-files instead of 240.
+the 4 performance files run under `test:publish`. With the variable set, `vitest list` shows 239
+files instead of 241.
 
 ### Where reports land
 
@@ -78,7 +78,7 @@ the root-level files that name the area in their subject.
 | `services/` | 3 | 2 | 3 | 68 test files import `ThoughtFactory` or `ExportService` directly. `RecommendationService` has one importer, `tests/unit/taxonomy/taxonomy-wiring.test.ts`. |
 | `session/` | 4 | 11 | 2 | `tests/integration/session-workflow.test.ts`, `multi-session.test.ts`, `edge-cases/session-edges.test.ts`, and 4 `tests/integration/tools/session-*.test.ts` files. |
 | `validation/` | 44 | 21 | 21 | `tests/unit/validation/validators/modes/validator-contract.test.ts` covers all 35 mode validators. See Gaps. |
-| `export/` | 47 | 14 | 22 | 12 integration files under `tests/integration/export/` and `tests/integration/exports/`. The per-mode visual exporters are reached through `visual/modes/index.ts`. |
+| `export/` | 48 | 15 | 23 | 12 integration files under `tests/integration/export/` and `tests/integration/exports/`. The per-mode visual exporters are reached through `visual/modes/index.ts`. |
 | `proof/` | 15 | 10 | 13 | `tests/integration/proof/decomposition.test.ts`, and the `proof-*-wiring` tests in `tests/unit/session/`. |
 | `taxonomy/` | 7 | 3 | 6 | `tests/unit/session/reasoning-flow-wiring.test.ts`. |
 | `cache/` | 3 | 2 | 1 | `src/cache/lru.ts` is imported by 2 unit tests. `index.ts` and `types.ts` have no direct importer. |
@@ -93,7 +93,7 @@ and `toolSchemas`. See Gaps for the exact limits of that coverage.
 
 ## 3. Unit tests
 
-150 files under `tests/unit/`, organized by the `src/` area they cover.
+151 files under `tests/unit/`, organized by the `src/` area they cover.
 
 **`types/` (11 files).** `types.test.ts` covers the core type guards in `src/types/core.ts`.
 `types/thought-guard-coverage.test.ts` pins the type guards against `ThinkingMode` in both
@@ -140,13 +140,13 @@ files sit one level up: `advisory.test.ts` (the `validateAdvisory` wrapper), `ca
 `validator-file-coverage.test.ts` (validator files and `VALIDATOR_REGISTRY` agree in both
 directions).
 
-**`export/` (13 files).** Five files sit in `tests/unit/export/`: `file-exporter.test.ts`,
+**`export/` (14 files).** Five files sit in `tests/unit/export/`: `file-exporter.test.ts`,
 `latex.test.ts`, `latex-export.test.ts`, `profiles.test.ts`, `proof-decomposition-visual.test.ts`.
 Two more pin shared behavior: `duplicate-implementations.test.ts` (copies of the same logic must agree)
 and `mode-exporter-format-matrix.test.ts` (every mode renders every visual format).
 `visual/modes/snapshot-baseline.test.ts` pins visual-exporter output against snapshots.
 `visual/utils/{document-builders,graph-builders,svg-shared-elements,visual-builders}.test.ts` cover the fluent builder
-classes in `src/export/visual/utils/`. `visual.test.ts` (at the `tests/unit/` root) exercises
+classes in `src/export/visual/utils/`. `visual/utils/dispatch.test.ts` covers the format dispatch of `exportByFormat`. `visual.test.ts` (at the `tests/unit/` root) exercises
 `VisualExporter` across causal, temporal, game-theory, and Bayesian thought types.
 
 **`proof/` (10 files).** `advisory.test.ts` covers the `analyzeProofAdvisory` wrapper. Eight files
@@ -481,7 +481,7 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 519 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 521 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 

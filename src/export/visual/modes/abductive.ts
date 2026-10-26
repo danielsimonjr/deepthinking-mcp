@@ -8,6 +8,7 @@
 
 import type { AbductiveThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -64,44 +65,19 @@ export function exportAbductiveHypotheses(
   thought: AbductiveThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return abductiveToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return abductiveToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return abductiveToASCII(thought);
-    case "svg":
-      return abductiveToSVG(thought, options);
-    case "graphml":
-      return abductiveToGraphML(thought, options);
-    case "tikz":
-      return abductiveToTikZ(thought, options);
-    case "html":
-      return abductiveToHTML(thought, options);
-    case "modelica":
-      return abductiveToModelica(thought, options);
-    case "uml":
-      return abductiveToUML(thought, options);
-    case "json":
-      return abductiveToJSON(thought, options);
-    case "markdown":
-      return abductiveToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: abductiveToMermaid,
+    dot: abductiveToDOT,
+    ascii: abductiveToASCII,
+    svg: abductiveToSVG,
+    graphml: abductiveToGraphML,
+    tikz: abductiveToTikZ,
+    html: abductiveToHTML,
+    modelica: abductiveToModelica,
+    uml: abductiveToUML,
+    json: abductiveToJSON,
+    markdown: abductiveToMarkdown,
+  });
 }
 
 function abductiveToMermaid(

@@ -1,22 +1,22 @@
 {
   "summary": {
-    "totalFiles": 516,
+    "totalFiles": 518,
     "byArea": {
       "docs": {
         "files": 2,
         "loc": 1828
       },
       "src": {
-        "files": 246,
-        "loc": 120624
+        "files": 247,
+        "loc": 120343
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 247,
-        "loc": 106573
+        "files": 248,
+        "loc": 106724
       },
       "tools": {
         "files": 14,
@@ -29,10 +29,10 @@
     },
     "byDisposition": {
       "other": 2,
-      "reachable": 234,
+      "reachable": 235,
       "orphan": 12,
       "template": 5,
-      "test": 247,
+      "test": 248,
       "tool": 14,
       "config": 2
     }
@@ -107,25 +107,25 @@
     {
       "path": "src/export/visual/modes/abductive.ts",
       "area": "src",
-      "loc": 844,
+      "loc": 820,
       "disposition": "reachable"
     },
     {
       "path": "src/export/visual/modes/analogical.ts",
       "area": "src",
-      "loc": 1012,
+      "loc": 988,
       "disposition": "reachable"
     },
     {
       "path": "src/export/visual/modes/bayesian.ts",
       "area": "src",
-      "loc": 872,
+      "loc": 848,
       "disposition": "reachable"
     },
     {
       "path": "src/export/visual/modes/causal.ts",
       "area": "src",
-      "loc": 1053,
+      "loc": 1029,
       "disposition": "reachable"
     },
     {
@@ -137,7 +137,7 @@
     {
       "path": "src/export/visual/modes/counterfactual.ts",
       "area": "src",
-      "loc": 996,
+      "loc": 972,
       "disposition": "reachable"
     },
     {
@@ -149,25 +149,25 @@
     {
       "path": "src/export/visual/modes/evidential.ts",
       "area": "src",
-      "loc": 1180,
+      "loc": 1156,
       "disposition": "reachable"
     },
     {
       "path": "src/export/visual/modes/first-principles.ts",
       "area": "src",
-      "loc": 1452,
+      "loc": 1428,
       "disposition": "reachable"
     },
     {
       "path": "src/export/visual/modes/formal-logic.ts",
       "area": "src",
-      "loc": 1415,
+      "loc": 1391,
       "disposition": "reachable"
     },
     {
       "path": "src/export/visual/modes/game-theory.ts",
       "area": "src",
-      "loc": 1235,
+      "loc": 1211,
       "disposition": "reachable"
     },
     {
@@ -191,19 +191,19 @@
     {
       "path": "src/export/visual/modes/mathematics.ts",
       "area": "src",
-      "loc": 1331,
+      "loc": 1307,
       "disposition": "reachable"
     },
     {
       "path": "src/export/visual/modes/metareasoning.ts",
       "area": "src",
-      "loc": 1917,
+      "loc": 1893,
       "disposition": "reachable"
     },
     {
       "path": "src/export/visual/modes/optimization.ts",
       "area": "src",
-      "loc": 1392,
+      "loc": 1368,
       "disposition": "reachable"
     },
     {
@@ -221,7 +221,7 @@
     {
       "path": "src/export/visual/modes/scientific-method.ts",
       "area": "src",
-      "loc": 1469,
+      "loc": 1445,
       "disposition": "reachable"
     },
     {
@@ -233,13 +233,13 @@
     {
       "path": "src/export/visual/modes/shannon.ts",
       "area": "src",
-      "loc": 703,
+      "loc": 679,
       "disposition": "reachable"
     },
     {
       "path": "src/export/visual/modes/systems-thinking.ts",
       "area": "src",
-      "loc": 1027,
+      "loc": 1003,
       "disposition": "reachable"
     },
     {
@@ -270,6 +270,12 @@
       "path": "src/export/visual/utils/ascii.ts",
       "area": "src",
       "loc": 1184,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/export/visual/utils/dispatch.ts",
+      "area": "src",
+      "loc": 79,
       "disposition": "reachable"
     },
     {
@@ -2226,6 +2232,12 @@
       "path": "tests/unit/export/visual/modes/snapshot-baseline.test.ts",
       "area": "tests",
       "loc": 1041,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/visual/utils/dispatch.test.ts",
+      "area": "tests",
+      "loc": 151,
       "disposition": "test"
     },
     {

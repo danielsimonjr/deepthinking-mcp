@@ -7,6 +7,7 @@
 
 import type { GameTheoryThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -74,44 +75,19 @@ export function exportGameTree(
   thought: GameTheoryThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return gameTreeToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return gameTreeToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return gameTreeToASCII(thought);
-    case "svg":
-      return gameTreeToSVG(thought, options);
-    case "graphml":
-      return gameTreeToGraphML(thought, options);
-    case "tikz":
-      return gameTreeToTikZ(thought, options);
-    case "html":
-      return gameTreeToHTML(thought, options);
-    case "modelica":
-      return gameTheoryToModelica(thought, options);
-    case "uml":
-      return gameTheoryToUML(thought, options);
-    case "json":
-      return gameTheoryToJSON(thought, options);
-    case "markdown":
-      return gameTheoryToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: gameTreeToMermaid,
+    dot: gameTreeToDOT,
+    ascii: gameTreeToASCII,
+    svg: gameTreeToSVG,
+    graphml: gameTreeToGraphML,
+    tikz: gameTreeToTikZ,
+    html: gameTreeToHTML,
+    modelica: gameTheoryToModelica,
+    uml: gameTheoryToUML,
+    json: gameTheoryToJSON,
+    markdown: gameTheoryToMarkdown,
+  });
 }
 
 function gameTreeToMermaid(

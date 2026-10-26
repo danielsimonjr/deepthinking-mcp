@@ -8,6 +8,7 @@
 
 import type { CausalThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder, type DotNodeShape } from "../utils/dot.js";
@@ -72,44 +73,19 @@ export function exportCausalGraph(
   thought: CausalThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return causalGraphToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return causalGraphToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return causalGraphToASCII(thought);
-    case "svg":
-      return causalGraphToSVG(thought, options);
-    case "graphml":
-      return causalGraphToGraphML(thought, options);
-    case "tikz":
-      return causalGraphToTikZ(thought, options);
-    case "html":
-      return causalGraphToHTML(thought, options);
-    case "modelica":
-      return causalToModelica(thought, options);
-    case "uml":
-      return causalToUML(thought, options);
-    case "json":
-      return causalToJSON(thought, options);
-    case "markdown":
-      return causalToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: causalGraphToMermaid,
+    dot: causalGraphToDOT,
+    ascii: causalGraphToASCII,
+    svg: causalGraphToSVG,
+    graphml: causalGraphToGraphML,
+    tikz: causalGraphToTikZ,
+    html: causalGraphToHTML,
+    modelica: causalToModelica,
+    uml: causalToUML,
+    json: causalToJSON,
+    markdown: causalToMarkdown,
+  });
 }
 
 function causalGraphToMermaid(

@@ -8,6 +8,7 @@
 
 import type { CounterfactualThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder, type DotNodeStyle } from "../utils/dot.js";
@@ -73,44 +74,19 @@ export function exportCounterfactualScenarios(
   thought: CounterfactualThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return counterfactualToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return counterfactualToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return counterfactualToASCII(thought);
-    case "svg":
-      return counterfactualToSVG(thought, options);
-    case "graphml":
-      return counterfactualToGraphML(thought, options);
-    case "tikz":
-      return counterfactualToTikZ(thought, options);
-    case "html":
-      return counterfactualToHTML(thought, options);
-    case "modelica":
-      return counterfactualToModelica(thought, options);
-    case "uml":
-      return counterfactualToUML(thought, options);
-    case "json":
-      return counterfactualToJSON(thought, options);
-    case "markdown":
-      return counterfactualToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: counterfactualToMermaid,
+    dot: counterfactualToDOT,
+    ascii: counterfactualToASCII,
+    svg: counterfactualToSVG,
+    graphml: counterfactualToGraphML,
+    tikz: counterfactualToTikZ,
+    html: counterfactualToHTML,
+    modelica: counterfactualToModelica,
+    uml: counterfactualToUML,
+    json: counterfactualToJSON,
+    markdown: counterfactualToMarkdown,
+  });
 }
 
 function counterfactualToMermaid(

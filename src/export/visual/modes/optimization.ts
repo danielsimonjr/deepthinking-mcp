@@ -8,6 +8,7 @@
 
 import type { OptimizationThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -70,44 +71,19 @@ export function exportOptimizationSolution(
   thought: OptimizationThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return optimizationToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return optimizationToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return optimizationToASCII(thought);
-    case "svg":
-      return optimizationToSVG(thought, options);
-    case "graphml":
-      return optimizationToGraphML(thought, options);
-    case "tikz":
-      return optimizationToTikZ(thought, options);
-    case "html":
-      return optimizationToHTML(thought, options);
-    case "modelica":
-      return optimizationToModelica(thought, options);
-    case "uml":
-      return optimizationToUML(thought, options);
-    case "json":
-      return optimizationToJSON(thought, options);
-    case "markdown":
-      return optimizationToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: optimizationToMermaid,
+    dot: optimizationToDOT,
+    ascii: optimizationToASCII,
+    svg: optimizationToSVG,
+    graphml: optimizationToGraphML,
+    tikz: optimizationToTikZ,
+    html: optimizationToHTML,
+    modelica: optimizationToModelica,
+    uml: optimizationToUML,
+    json: optimizationToJSON,
+    markdown: optimizationToMarkdown,
+  });
 }
 
 function optimizationToMermaid(

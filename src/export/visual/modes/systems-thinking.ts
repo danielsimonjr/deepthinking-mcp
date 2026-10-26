@@ -8,6 +8,7 @@
 
 import type { SystemsThinkingThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -70,44 +71,19 @@ export function exportSystemsThinkingCausalLoops(
   thought: SystemsThinkingThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return systemsThinkingToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return systemsThinkingToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return systemsThinkingToASCII(thought);
-    case "svg":
-      return systemsThinkingToSVG(thought, options);
-    case "graphml":
-      return systemsThinkingToGraphML(thought, options);
-    case "tikz":
-      return systemsThinkingToTikZ(thought, options);
-    case "html":
-      return systemsThinkingToHTML(thought, options);
-    case "modelica":
-      return systemsThinkingToModelica(thought, options);
-    case "uml":
-      return systemsThinkingToUML(thought, options);
-    case "json":
-      return systemsThinkingToJSON(thought, options);
-    case "markdown":
-      return systemsThinkingToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: systemsThinkingToMermaid,
+    dot: systemsThinkingToDOT,
+    ascii: systemsThinkingToASCII,
+    svg: systemsThinkingToSVG,
+    graphml: systemsThinkingToGraphML,
+    tikz: systemsThinkingToTikZ,
+    html: systemsThinkingToHTML,
+    modelica: systemsThinkingToModelica,
+    uml: systemsThinkingToUML,
+    json: systemsThinkingToJSON,
+    markdown: systemsThinkingToMarkdown,
+  });
 }
 
 function systemsThinkingToMermaid(

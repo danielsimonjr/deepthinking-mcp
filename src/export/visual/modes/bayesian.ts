@@ -8,6 +8,7 @@
 
 import type { BayesianThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
 import { MermaidGraphBuilder } from "../utils/mermaid.js";
@@ -63,44 +64,19 @@ export function exportBayesianNetwork(
   thought: BayesianThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return bayesianToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return bayesianToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return bayesianToASCII(thought);
-    case "svg":
-      return bayesianToSVG(thought, options);
-    case "graphml":
-      return bayesianToGraphML(thought, options);
-    case "tikz":
-      return bayesianToTikZ(thought, options);
-    case "html":
-      return bayesianToHTML(thought, options);
-    case "modelica":
-      return bayesianToModelica(thought, options);
-    case "uml":
-      return bayesianToUML(thought, options);
-    case "json":
-      return bayesianToJSON(thought, options);
-    case "markdown":
-      return bayesianToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: bayesianToMermaid,
+    dot: bayesianToDOT,
+    ascii: bayesianToASCII,
+    svg: bayesianToSVG,
+    graphml: bayesianToGraphML,
+    tikz: bayesianToTikZ,
+    html: bayesianToHTML,
+    modelica: bayesianToModelica,
+    uml: bayesianToUML,
+    json: bayesianToJSON,
+    markdown: bayesianToMarkdown,
+  });
 }
 
 function bayesianToMermaid(
