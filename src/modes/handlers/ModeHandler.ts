@@ -340,6 +340,33 @@ export function createThoughtBase(
 }
 
 /**
+ * The five fields that close a thought in several handlers.
+ */
+type ThoughtTail = Required<
+  Pick<BaseThought, "dependencies" | "assumptions" | "uncertainty">
+> &
+  Pick<BaseThought, "isRevision" | "revisesThought">;
+
+/**
+ * Build the five fields that close a thought: the dependencies, the
+ * assumptions, the uncertainty and the two revision fields, in that order.
+ * The lists default to an empty list. The uncertainty defaults to 0.5, and an
+ * uncertainty of 0 stays 0.
+ *
+ * A handler spreads the result where its own five lines stood, so the key
+ * order of the thought does not change.
+ */
+export function createThoughtTail(input: ThinkingToolInput): ThoughtTail {
+  return {
+    dependencies: input.dependencies || [],
+    assumptions: input.assumptions || [],
+    uncertainty: input.uncertainty ?? 0.5,
+    isRevision: input.isRevision,
+    revisesThought: input.revisesThought,
+  };
+}
+
+/**
  * Create a validation warning
  */
 export function createValidationWarning(

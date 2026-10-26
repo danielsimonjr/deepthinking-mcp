@@ -1305,7 +1305,7 @@ The codebase is organized into the following modules:
 | `../../types/modes/algorithmic.js` | `AlgorithmDescription, AlgorithmicThought, AlgorithmicThoughtType, AlgorithmComparison, AmortizedAnalysis, CorrectnessProof, DataStructureSpec, DesignPattern, DPFormulation, GraphAlgorithmContext, GreedyProof, LoopInvariant, Recurrence, SpaceComplexity, TimeComplexity` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
 | `../../tools/schemas/modes/engineering.js` | `EngineeringInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, checkUncertaintyRange, createThoughtBase, validationSuccess, validationFailure, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, checkUncertaintyRange, createThoughtBase, createThoughtTail, validationSuccess, validationFailure, createValidationWarning` | Import |
 | `./input-warnings.js` | `droppedValueWarning, inputWarningsField, unrecognisedValueWarning` | Import |
 
 **Exports:**
@@ -1421,7 +1421,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode` | Import |
 | `../../types/modes/computability.js` | `ComputabilityThought, ComputabilityThoughtType, TuringMachine, DecidabilityProof, Reduction, DiagonalizationArgument` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, checkThoughtType, checkUncertaintyRange, createThoughtBase, validationSuccess, validationFailure, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, checkThoughtType, checkUncertaintyRange, createThoughtBase, createThoughtTail, validationSuccess, validationFailure, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `ComputabilityHandler`
@@ -1502,7 +1502,7 @@ The codebase is organized into the following modules:
 | `../../types/modes/cryptanalytic.js` | `CryptanalyticThought, CryptanalyticThoughtType, DecibanEvidence, EvidenceChain, CryptographicHypothesis, CipherType` | Import (type-only) |
 | `../../types/modes/cryptanalytic.js` | `toDecibans, fromDecibans, decibansToProbability` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, checkThoughtType, checkUncertaintyRange, createThoughtBase, validationSuccess, validationFailure, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, checkThoughtType, checkUncertaintyRange, createThoughtBase, createThoughtTail, validationSuccess, validationFailure, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `CryptanalyticHandler`
@@ -1768,7 +1768,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `ValidationResult`, `HandlerValidationError`, `ValidationWarning`, `DetectedArchetype`, `ModeEnhancements`, `ModeHandler`, `ModeStatus`
-- Functions: `validationSuccess`, `validationFailure`, `createValidationError`, `checkThoughtBasics`, `checkThoughtType`, `checkUncertaintyRange`, `createThoughtBase`, `createValidationWarning`
+- Functions: `validationSuccess`, `validationFailure`, `createValidationError`, `checkThoughtBasics`, `checkThoughtType`, `checkUncertaintyRange`, `createThoughtBase`, `createThoughtTail`, `createValidationWarning`
 
 ---
 
@@ -4471,12 +4471,12 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 247 |
 | Total Modules | 14 |
-| Total Lines of Code | 119491 |
-| Total Exports | 1200 |
+| Total Lines of Code | 119503 |
+| Total Exports | 1201 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
 | Total Interfaces | 563 |
-| Total Functions | 446 |
+| Total Functions | 447 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
 | Type-only Imports | 337 |

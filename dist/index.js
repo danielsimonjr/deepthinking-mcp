@@ -233,6 +233,15 @@ function createThoughtBase(input, sessionId) {
     nextThoughtNeeded: input.nextThoughtNeeded
   };
 }
+function createThoughtTail(input) {
+  return {
+    dependencies: input.dependencies || [],
+    assumptions: input.assumptions || [],
+    uncertainty: input.uncertainty ?? 0.5,
+    isRevision: input.isRevision,
+    revisesThought: input.revisesThought
+  };
+}
 function createValidationWarning(field, message, suggestion) {
   return { field, message, suggestion };
 }
@@ -12496,13 +12505,8 @@ var init_ComputabilityHandler = __esm({
           oracleAnalysis: inputAny.oracleAnalysis,
           classicProblems: inputAny.classicProblems,
           keyInsight: inputAny.keyInsight,
-          // Dependencies and assumptions
-          dependencies: input.dependencies || [],
-          assumptions: input.assumptions || [],
-          uncertainty: input.uncertainty ?? 0.5,
-          // Revision tracking
-          isRevision: input.isRevision,
-          revisesThought: input.revisesThought
+          // Dependencies, assumptions, uncertainty and revision tracking
+          ...createThoughtTail(input)
         };
       }
       /**
@@ -12950,13 +12954,8 @@ var init_CryptanalyticHandler = __esm({
           patterns: inputAny.patterns,
           cipherType: inputAny.cipherType,
           keyInsight: inputAny.keyInsight,
-          // Dependencies and assumptions
-          dependencies: input.dependencies || [],
-          assumptions: input.assumptions || [],
-          uncertainty: input.uncertainty ?? 0.5,
-          // Revision tracking
-          isRevision: input.isRevision,
-          revisesThought: input.revisesThought
+          // Dependencies, assumptions, uncertainty and revision tracking
+          ...createThoughtTail(input)
         };
       }
       /**
@@ -13447,13 +13446,8 @@ var init_AlgorithmicHandler = __esm({
           pseudocode: req.pseudocode,
           executionTrace: req.executionTrace ? this.normalizeExecutionTrace(req.executionTrace) : void 0,
           keyInsight: req.keyInsight,
-          // Dependencies and assumptions
-          dependencies: input.dependencies || [],
-          assumptions: input.assumptions || [],
-          uncertainty: input.uncertainty ?? 0.5,
-          // Revision tracking
-          isRevision: input.isRevision,
-          revisesThought: input.revisesThought,
+          // Dependencies, assumptions, uncertainty and revision tracking
+          ...createThoughtTail(input),
           ...inputWarningsField(notes)
         };
       }
