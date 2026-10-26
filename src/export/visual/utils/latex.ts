@@ -426,11 +426,7 @@ ${content}
     // Assumptions
     if (thought.assumptions && thought.assumptions.length > 0) {
       sections.push("\\paragraph{Assumptions}");
-      sections.push("\\begin{itemize}");
-      thought.assumptions.forEach((assumption) => {
-        sections.push(`  \\item ${this.escapeLatex(assumption)}`);
-      });
-      sections.push("\\end{itemize}");
+      this.pushItemList(sections, "itemize", thought.assumptions);
       sections.push("");
     }
 
@@ -464,11 +460,11 @@ ${content}
         thought.mathematicalModel.invariants.length > 0
       ) {
         sections.push("\\textit{Invariants:}");
-        sections.push("\\begin{itemize}");
-        thought.mathematicalModel.invariants.forEach((inv) => {
-          sections.push(`  \\item ${this.escapeLatex(inv)}`);
-        });
-        sections.push("\\end{itemize}");
+        this.pushItemList(
+          sections,
+          "itemize",
+          thought.mathematicalModel.invariants,
+        );
       }
 
       sections.push("");
@@ -527,11 +523,7 @@ ${content}
 
     if (theorem.hypotheses && theorem.hypotheses.length > 0) {
       sections.push("\\\\\\textbf{Hypotheses:}");
-      sections.push("\\begin{enumerate}");
-      theorem.hypotheses.forEach((hyp: string) => {
-        sections.push(`  \\item ${this.escapeLatex(hyp)}`);
-      });
-      sections.push("\\end{enumerate}");
+      this.pushItemList(sections, "enumerate", theorem.hypotheses);
     }
 
     sections.push("\\end{theorem}");
@@ -598,11 +590,7 @@ ${content}
 
     if (logic.premises && logic.premises.length > 0) {
       sections.push("\\textbf{Premises:}");
-      sections.push("\\begin{enumerate}");
-      logic.premises.forEach((premise: string) => {
-        sections.push(`  \\item ${this.escapeLatex(premise)}`);
-      });
-      sections.push("\\end{enumerate}");
+      this.pushItemList(sections, "enumerate", logic.premises);
     }
 
     if (logic.conclusion) {
@@ -614,11 +602,7 @@ ${content}
 
     if (logic.rules && logic.rules.length > 0) {
       sections.push("\\textbf{Inference Rules:}");
-      sections.push("\\begin{itemize}");
-      logic.rules.forEach((rule: string) => {
-        sections.push(`  \\item ${this.escapeLatex(rule)}`);
-      });
-      sections.push("\\end{itemize}");
+      this.pushItemList(sections, "itemize", logic.rules);
     }
 
     sections.push("");
@@ -655,11 +639,11 @@ ${content}
 
       if (thought.physicalInterpretation.conservationLaws.length > 0) {
         sections.push("\\textbf{Conservation Laws:}");
-        sections.push("\\begin{itemize}");
-        thought.physicalInterpretation.conservationLaws.forEach((law) => {
-          sections.push(`  \\item ${this.escapeLatex(law)}`);
-        });
-        sections.push("\\end{itemize}");
+        this.pushItemList(
+          sections,
+          "itemize",
+          thought.physicalInterpretation.conservationLaws,
+        );
       }
       sections.push("");
     }
@@ -913,11 +897,7 @@ ${content}
       thought.hypothesis.alternatives.length > 0
     ) {
       sections.push("\\\\\\textit{Alternatives:}");
-      sections.push("\\begin{itemize}");
-      thought.hypothesis.alternatives.forEach((alt) => {
-        sections.push(`  \\item ${this.escapeLatex(alt)}`);
-      });
-      sections.push("\\end{itemize}");
+      this.pushItemList(sections, "itemize", thought.hypothesis.alternatives);
     }
     sections.push("");
 
@@ -1095,11 +1075,7 @@ ${content}
     // Limitations
     if (thought.limitations && thought.limitations.length > 0) {
       sections.push("\\paragraph{Limitations}");
-      sections.push("\\begin{itemize}");
-      thought.limitations.forEach((lim: string) => {
-        sections.push(`  \\item ${this.escapeLatex(lim)}`);
-      });
-      sections.push("\\end{itemize}");
+      this.pushItemList(sections, "itemize", thought.limitations);
       sections.push("");
     }
 
@@ -1389,6 +1365,22 @@ ${content}
     // chained-replace version re-escaped the braces it had just inserted for
     // \textbackslash{}, so a literal backslash typeset as \{}.
     return escapeLatex(text);
+  }
+
+  /**
+   * Push a LaTeX list of escaped strings: the begin line, one item line per
+   * element, and the end line. The heading and the guard stay with the caller.
+   */
+  private pushItemList(
+    sections: string[],
+    env: "itemize" | "enumerate",
+    items: readonly string[],
+  ): void {
+    sections.push(`\\begin{${env}}`);
+    items.forEach((item) => {
+      sections.push(`  \\item ${this.escapeLatex(item)}`);
+    });
+    sections.push(`\\end{${env}}`);
   }
 
   /**

@@ -142,6 +142,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before and after. The run covered the 35 mode handlers and 35 generic handlers, one for each mode.
   Each handler received 7 thought values, 7 pairs of thought numbers and 4 sets of extra fields. Ten new tests in `ModeHandler.test.ts` pin
   the error codes, the messages, the order of the two checks and the fresh result on each call.
+- **Eight lists in the LaTeX exporter share one helper.** `LaTeXExporter` wrote eight lists of
+  escaped strings with the same four lines: the begin line, a loop that writes one `\item` line per
+  element, and the end line. The lists are the assumptions, the invariants of a model, the
+  hypotheses of a theorem, the premises and the rules of a logical form, the conservation laws, the
+  alternatives of a hypothesis, and the limitations of an analogy. The private `pushItemList` in
+  `src/export/visual/utils/latex.ts` writes them once. The heading above each list and the guard
+  that decides whether to write it stay with the caller. Results do not change. A run of 15,452
+  exports gave the same hash before and after. It covered up to 9 variants of each list (absent,
+  empty, one element, special characters, empty strings, numbers, a null, an object, a sparse list),
+  three sets of options and four modes. 49 new tests in `latex-item-lists.test.ts` pin the output of each list,
+  and 27 mutants of the helper and the eight call sites all fail a test.
 - **`renderStadiumNode` calls `renderRectNode`, and four SVG shapes share one paint helper.**
   `renderStadiumNode` held a copy of `renderRectNode` with a corner radius of 20. It now returns
   `renderRectNode(pos, colors, 20)`. `addRect`, `addCircle`, `addEllipse` and `addPolygon` each wrote
