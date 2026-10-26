@@ -182,6 +182,27 @@ function validationFailure(errors, warnings = []) {
 function createValidationError(field, message, code) {
   return { field, message, code };
 }
+function checkThoughtBasics(input) {
+  if (!input.thought || input.thought.trim().length === 0) {
+    return validationFailure([
+      createValidationError(
+        "thought",
+        "Thought content is required",
+        "EMPTY_THOUGHT"
+      )
+    ]);
+  }
+  if (input.thoughtNumber > input.totalThoughts) {
+    return validationFailure([
+      createValidationError(
+        "thoughtNumber",
+        `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
+        "INVALID_THOUGHT_NUMBER"
+      )
+    ]);
+  }
+  return void 0;
+}
 function createValidationWarning(field, message, suggestion) {
   return { field, message, suggestion };
 }
@@ -2320,24 +2341,8 @@ var init_GenericModeHandler = __esm({
        */
       validate(input) {
         const warnings = [];
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         const mode = input.mode || "hybrid" /* HYBRID */;
         if (!isFullyImplemented(mode)) {
           warnings.push(
@@ -2647,24 +2652,8 @@ var init_SequentialHandler = __esm({
        */
       validate(input) {
         const warnings = [];
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (input.isRevision && !input.revisesThought) {
           warnings.push(
             createValidationWarning(
@@ -2846,24 +2835,8 @@ var init_ShannonHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (input.stage) {
           if (!STAGE_ORDER.includes(input.stage)) {
             errors.push(
@@ -3176,24 +3149,8 @@ var init_MathematicsHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.thoughtType && !VALID_THOUGHT_TYPES2.includes(inputAny.thoughtType)) {
           warnings.push(
             createValidationWarning(
@@ -3562,24 +3519,8 @@ var init_PhysicsHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.thoughtType && !VALID_THOUGHT_TYPES3.includes(inputAny.thoughtType)) {
           warnings.push(
             createValidationWarning(
@@ -4045,24 +3986,8 @@ var init_HybridHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.thoughtType && !VALID_THOUGHT_TYPES4.includes(inputAny.thoughtType)) {
           warnings.push(
             createValidationWarning(
@@ -4479,24 +4404,8 @@ var init_InductiveHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.confidence !== void 0) {
           if (inputAny.confidence < 0 || inputAny.confidence > 1) {
             errors.push(
@@ -4750,24 +4659,8 @@ var init_DeductiveHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (!inputAny.premises || inputAny.premises.length === 0) {
           warnings.push(
             createValidationWarning(
@@ -6079,24 +5972,8 @@ var init_CausalHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         const causalGraph = input.causalGraph || {
           nodes: inputAny.nodes || [],
           edges: inputAny.edges || []
@@ -6607,24 +6484,8 @@ var init_BayesianHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         const priorProb = inputAny.priorProbability;
         if (priorProb !== void 0) {
           const priorValidation = this.validateProbability(
@@ -7026,24 +6887,8 @@ var init_CounterfactualHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.actual) {
           const actualValidation = this.validateScenario(inputAny.actual, "actual");
           errors.push(...actualValidation.errors);
@@ -8061,24 +7906,8 @@ var init_GameTheoryHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         const players = inputAny.players || [];
         const strategies = inputAny.strategies || [];
         const payoffMatrix = inputAny.payoffMatrix;
@@ -9487,24 +9316,8 @@ var init_SystemsThinkingHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         const componentIds = /* @__PURE__ */ new Set();
         if (inputAny.components && Array.isArray(inputAny.components)) {
           for (const component of inputAny.components) {
@@ -10313,24 +10126,8 @@ var init_SynthesisHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.sources && Array.isArray(inputAny.sources)) {
           const sourceIds = /* @__PURE__ */ new Set();
           for (let i = 0; i < inputAny.sources.length; i++) {
@@ -11381,24 +11178,8 @@ var init_CritiqueHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.work) {
           const workValidation = this.validateWork(inputAny.work);
           warnings.push(...workValidation.warnings);
@@ -12362,24 +12143,8 @@ var init_EngineeringHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.analysisType && !VALID_ANALYSIS_TYPES.includes(inputAny.analysisType)) {
           warnings.push(
             createValidationWarning(
@@ -12865,24 +12630,8 @@ var init_ComputabilityHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.thoughtType && !VALID_THOUGHT_TYPES5.includes(inputAny.thoughtType)) {
           warnings.push(
             createValidationWarning(
@@ -13357,24 +13106,8 @@ var init_CryptanalyticHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.thoughtType && !VALID_THOUGHT_TYPES6.includes(inputAny.thoughtType)) {
           warnings.push(
             createValidationWarning(
@@ -13893,24 +13626,8 @@ var init_AlgorithmicHandler = __esm({
         const errors = [];
         const warnings = [];
         const req = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (req.thoughtType && !VALID_THOUGHT_TYPES7.includes(req.thoughtType)) {
           warnings.push(
             createValidationWarning(
@@ -14685,24 +14402,8 @@ var init_MetaReasoningHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (!inputAny.currentStrategy) {
           warnings.push(
             createValidationWarning(
@@ -15110,24 +14811,8 @@ var init_RecursiveHandler = __esm({
         const errors = [];
         const warnings = [];
         const req = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (req.thoughtType && !isThoughtType(req.thoughtType)) {
           warnings.push(
             createValidationWarning(
@@ -15516,24 +15201,8 @@ var init_ModalHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.thoughtType && !VALID_THOUGHT_TYPES9.includes(inputAny.thoughtType)) {
           warnings.push(
             createValidationWarning(
@@ -16135,24 +15804,8 @@ var init_StochasticHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.thoughtType && !VALID_THOUGHT_TYPES10.includes(inputAny.thoughtType)) {
           warnings.push(
             createValidationWarning(
@@ -16749,24 +16402,8 @@ var init_ConstraintHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.thoughtType && !VALID_THOUGHT_TYPES11.includes(inputAny.thoughtType)) {
           warnings.push(
             createValidationWarning(
@@ -17234,24 +16871,8 @@ var init_OptimizationHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (inputAny.thoughtType && !VALID_THOUGHT_TYPES12.includes(inputAny.thoughtType)) {
           warnings.push(
             createValidationWarning(
@@ -17673,24 +17294,8 @@ var init_CustomHandler = __esm({
         const errors = [];
         const warnings = [];
         const inputAny = input;
-        if (!input.thought || input.thought.trim().length === 0) {
-          return validationFailure([
-            createValidationError(
-              "thought",
-              "Thought content is required",
-              "EMPTY_THOUGHT"
-            )
-          ]);
-        }
-        if (input.thoughtNumber > input.totalThoughts) {
-          return validationFailure([
-            createValidationError(
-              "thoughtNumber",
-              `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-              "INVALID_THOUGHT_NUMBER"
-            )
-          ]);
-        }
+        const basicFailure = checkThoughtBasics(input);
+        if (basicFailure) return basicFailure;
         if (!inputAny.customModeName) {
           warnings.push(
             createValidationWarning(
