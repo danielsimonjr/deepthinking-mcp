@@ -21,6 +21,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 type EvidentialThoughtType =
@@ -63,7 +64,11 @@ export class EvidentialHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      this.supportedThoughtTypes,
+      "hypothesis_definition",
+    );
 
     // Phase 12 fix: Map massFunction from API to beliefFunctions format
     let beliefFunctions = inputAny.beliefFunctions || [];
@@ -244,20 +249,5 @@ export class EvidentialHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as EvidentialThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type to valid EvidentialThoughtType
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): EvidentialThoughtType {
-    if (
-      inputType &&
-      this.supportedThoughtTypes.includes(inputType as EvidentialThoughtType)
-    ) {
-      return inputType as EvidentialThoughtType;
-    }
-    return "hypothesis_definition";
   }
 }

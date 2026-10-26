@@ -30,6 +30,7 @@ import {
   validationSuccess,
   validationFailure,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 /**
@@ -99,7 +100,11 @@ export class OptimizationHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      VALID_THOUGHT_TYPES,
+      "problem_formulation",
+    );
 
     // Process problem
     const problem = inputAny.problem
@@ -448,21 +453,6 @@ export class OptimizationHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as OptimizationThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type from input
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): OptimizationThoughtType {
-    if (
-      inputType &&
-      VALID_THOUGHT_TYPES.includes(inputType as OptimizationThoughtType)
-    ) {
-      return inputType as OptimizationThoughtType;
-    }
-    return "problem_formulation";
   }
 
   /**

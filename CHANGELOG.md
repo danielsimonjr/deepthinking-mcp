@@ -78,6 +78,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Twenty handlers share one function that picks the thought type of a new thought.** The 20
+  handlers `AlgorithmicHandler`, `AnalysisHandler`, `ArgumentationHandler`, `ComputabilityHandler`,
+  `ConstraintHandler`, `CritiqueHandler`, `CryptanalyticHandler`, `EvidentialHandler`,
+  `FormalLogicHandler`, `GameTheoryHandler`, `HistoricalHandler`, `MathematicsHandler`,
+  `ModalHandler`, `OptimizationHandler`, `PhysicsHandler`, `ScientificMethodHandler`,
+  `StochasticHandler`, `SynthesisHandler`, `SystemsThinkingHandler` and `TemporalHandler` each held a
+  private method `resolveThoughtType` with the same body: keep `thoughtType` when the handler
+  supports it, else use the default type. The new `resolveThoughtType(inputType, supported,
+  fallback)` in `src/modes/handlers/ModeHandler.ts` holds the body once. Each handler passes its
+  own list of types and its own default type. The 20 handlers lose 321 lines and gain 142.
+  `RecursiveHandler` stays as it is, because it checks the type with the type guard
+  `isThoughtType`. `GameTheoryHandler` types its list as `GameTheoryThoughtType[]`, so the helper
+  returns that type. Results do not change. A run of 2,072 `createThought` calls gave the same
+  thought before and after for each of the 20 handlers. Each handler received its own supported
+  types, those types in upper case, with a leading space and with an added `s`, and 19 other
+  values (missing, empty, `null`, numbers, `NaN`, booleans, an array, objects, `constructor`,
+  `toString` and `__proto__` among them). The test file `resolve-thought-type.test.ts` pins the
+  helper (exact match, empty value, empty list, prefix of a supported type) and the list and the
+  default type of each of the 20 handlers, as the handlers had them before this change.
+
 - **Six pieces of code that existed twice or more now exist once.** A run of `repo-tools clones`
   listed 13 groups of identical functions and 402 pairs of similar functions in `src/`. The review
   of the groups gave these changes. Output and results do not change. The tests of each changed

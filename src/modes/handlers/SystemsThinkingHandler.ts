@@ -28,6 +28,7 @@ import {
   validationSuccess,
   validationFailure,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 /**
@@ -235,7 +236,11 @@ export class SystemsThinkingHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      this.supportedThoughtTypes,
+      "system_definition",
+    );
 
     return {
       ...createThoughtBase(input, sessionId),
@@ -446,23 +451,6 @@ export class SystemsThinkingHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as SystemsThinkingThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type to valid SystemsThinkingThoughtType
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): SystemsThinkingThoughtType {
-    if (
-      inputType &&
-      this.supportedThoughtTypes.includes(
-        inputType as SystemsThinkingThoughtType,
-      )
-    ) {
-      return inputType as SystemsThinkingThoughtType;
-    }
-    return "system_definition";
   }
 
   /**

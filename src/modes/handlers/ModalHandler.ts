@@ -29,6 +29,7 @@ import {
   validationSuccess,
   validationFailure,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 // Re-export for backwards compatibility
@@ -91,7 +92,11 @@ export class ModalHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      VALID_THOUGHT_TYPES,
+      "proposition_analysis",
+    );
 
     // Process worlds
     const worlds = (inputAny.worlds || []).map((w: any) =>
@@ -449,19 +454,6 @@ export class ModalHandler implements ModeHandler {
    */
   supportsThoughtType(thoughtType: string): boolean {
     return this.supportedThoughtTypes.includes(thoughtType as ModalThoughtType);
-  }
-
-  /**
-   * Resolve thought type from input
-   */
-  private resolveThoughtType(inputType: string | undefined): ModalThoughtType {
-    if (
-      inputType &&
-      VALID_THOUGHT_TYPES.includes(inputType as ModalThoughtType)
-    ) {
-      return inputType as ModalThoughtType;
-    }
-    return "proposition_analysis";
   }
 
   /**

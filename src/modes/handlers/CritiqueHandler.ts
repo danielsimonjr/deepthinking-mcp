@@ -30,6 +30,7 @@ import {
   validationSuccess,
   validationFailure,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 /**
@@ -154,7 +155,11 @@ export class CritiqueHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      this.supportedThoughtTypes,
+      "work_characterization",
+    );
 
     // Build work being critiqued
     const work: CritiquedWork = inputAny.work || {
@@ -426,21 +431,6 @@ export class CritiqueHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as CritiqueThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type to valid CritiqueThoughtType
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): CritiqueThoughtType {
-    if (
-      inputType &&
-      this.supportedThoughtTypes.includes(inputType as CritiqueThoughtType)
-    ) {
-      return inputType as CritiqueThoughtType;
-    }
-    return "work_characterization";
   }
 
   /**

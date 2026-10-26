@@ -36,6 +36,7 @@ import {
   validationSuccess,
   validationFailure,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 /**
@@ -110,7 +111,11 @@ export class CryptanalyticHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      VALID_THOUGHT_TYPES,
+      "hypothesis_formation",
+    );
 
     // Process hypotheses
     const hypotheses = inputAny.hypotheses
@@ -398,21 +403,6 @@ export class CryptanalyticHandler implements ModeHandler {
    */
   supportsThoughtType(thoughtType: string): boolean {
     return this.supportedThoughtTypes.includes(thoughtType);
-  }
-
-  /**
-   * Resolve thought type from input
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): CryptanalyticThoughtType {
-    if (
-      inputType &&
-      VALID_THOUGHT_TYPES.includes(inputType as CryptanalyticThoughtType)
-    ) {
-      return inputType as CryptanalyticThoughtType;
-    }
-    return "hypothesis_formation";
   }
 
   /**

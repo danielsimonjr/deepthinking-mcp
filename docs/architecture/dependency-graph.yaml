@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-26'
   totalFiles: 249
   totalModules: 14
-  totalExports: 1204
+  totalExports: 1205
 entryPoints:
   - file: src/index.ts
     type: main
@@ -3934,6 +3934,7 @@ modules:
             - validationSuccess
             - validationFailure
             - createValidationWarning
+            - resolveThoughtType
         - file: ./input-warnings.js
           imports:
             - droppedValueWarning
@@ -4013,6 +4014,7 @@ modules:
             - validationSuccess
             - validationFailure
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - AnalysisHandler
       classes:
@@ -4053,6 +4055,7 @@ modules:
             - validationFailure
             - createValidationError
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - ArgumentationHandler
       classes:
@@ -4215,6 +4218,7 @@ modules:
             - validationSuccess
             - validationFailure
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - ComputabilityHandler
       classes:
@@ -4254,6 +4258,7 @@ modules:
             - validationSuccess
             - validationFailure
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - ConstraintHandler
       classes:
@@ -4335,6 +4340,7 @@ modules:
             - validationSuccess
             - validationFailure
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - CritiqueHandler
       classes:
@@ -4381,6 +4387,7 @@ modules:
             - validationSuccess
             - validationFailure
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - CryptanalyticHandler
       classes:
@@ -4519,6 +4526,7 @@ modules:
             - validationFailure
             - createValidationError
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - EvidentialHandler
       classes:
@@ -4571,6 +4579,7 @@ modules:
             - createThoughtBase
             - validationSuccess
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - FormalLogicHandler
       classes:
@@ -4612,6 +4621,7 @@ modules:
             - validationFailure
             - createValidationError
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - GameTheoryHandler
       classes:
@@ -4695,6 +4705,7 @@ modules:
             - validationFailure
             - createValidationError
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - HistoricalHandler
       classes:
@@ -4819,6 +4830,7 @@ modules:
             - validationFailure
             - createValidationError
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - MathematicsHandler
       classes:
@@ -4897,6 +4909,7 @@ modules:
             - validationSuccess
             - validationFailure
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - ModalHandler
       classes:
@@ -4925,6 +4938,7 @@ modules:
         - createValidationError
         - checkThoughtBasics
         - checkThoughtType
+        - resolveThoughtType
         - checkUncertaintyRange
         - createThoughtBase
         - createThoughtTail
@@ -4943,6 +4957,7 @@ modules:
         - createValidationError
         - checkThoughtBasics
         - checkThoughtType
+        - resolveThoughtType
         - checkUncertaintyRange
         - createThoughtBase
         - createThoughtTail
@@ -4983,6 +4998,7 @@ modules:
             - validationSuccess
             - validationFailure
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - OptimizationHandler
       classes:
@@ -5020,6 +5036,7 @@ modules:
             - validationFailure
             - createValidationError
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - PhysicsHandler
       classes:
@@ -5110,6 +5127,7 @@ modules:
             - createThoughtBase
             - validationSuccess
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - ScientificMethodHandler
       classes:
@@ -5202,6 +5220,7 @@ modules:
             - validationSuccess
             - validationFailure
             - createValidationWarning
+            - resolveThoughtType
         - file: ../stochastic/models/moments.js
           imports:
             - analyticMoments
@@ -5249,6 +5268,7 @@ modules:
             - validationFailure
             - createValidationError
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - SynthesisHandler
       classes:
@@ -5286,6 +5306,7 @@ modules:
             - validationSuccess
             - validationFailure
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - SystemsThinkingHandler
       classes:
@@ -5315,6 +5336,7 @@ modules:
             - validationFailure
             - createValidationError
             - createValidationWarning
+            - resolveThoughtType
       exports:
         - TemporalHandler
       classes:
@@ -11546,11 +11568,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 249
   totalModules: 14
-  totalLinesOfCode: 119554
-  totalExports: 1204
+  totalLinesOfCode: 119375
+  totalExports: 1205
   totalClasses: 143
   totalInterfaces: 564
-  totalFunctions: 450
+  totalFunctions: 451
   totalTypeGuards: 87
   totalEnums: 3
   totalConstants: 135

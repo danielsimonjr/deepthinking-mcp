@@ -18,6 +18,7 @@ import {
   createThoughtBase,
   validationSuccess,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 type FormalLogicThoughtType =
@@ -60,7 +61,11 @@ export class FormalLogicHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      this.supportedThoughtTypes,
+      "proposition_definition",
+    );
 
     return {
       ...createThoughtBase(input, sessionId),
@@ -207,20 +212,5 @@ export class FormalLogicHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as FormalLogicThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type to valid FormalLogicThoughtType
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): FormalLogicThoughtType {
-    if (
-      inputType &&
-      this.supportedThoughtTypes.includes(inputType as FormalLogicThoughtType)
-    ) {
-      return inputType as FormalLogicThoughtType;
-    }
-    return "proposition_definition";
   }
 }

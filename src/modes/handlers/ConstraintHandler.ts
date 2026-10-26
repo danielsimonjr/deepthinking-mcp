@@ -38,6 +38,7 @@ import {
   validationSuccess,
   validationFailure,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 // Re-export for backwards compatibility
@@ -100,7 +101,11 @@ export class ConstraintHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      VALID_THOUGHT_TYPES,
+      "problem_formulation",
+    );
 
     // Process variables
     const variables = (inputAny.variables || []).map((v: any) =>
@@ -478,21 +483,6 @@ export class ConstraintHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as ConstraintThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type from input
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): ConstraintThoughtType {
-    if (
-      inputType &&
-      VALID_THOUGHT_TYPES.includes(inputType as ConstraintThoughtType)
-    ) {
-      return inputType as ConstraintThoughtType;
-    }
-    return "problem_formulation";
   }
 
   /**

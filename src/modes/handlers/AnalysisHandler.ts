@@ -28,6 +28,7 @@ import {
   validationSuccess,
   validationFailure,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 /**
@@ -156,7 +157,11 @@ export class AnalysisHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      this.supportedThoughtTypes,
+      "initial_coding",
+    );
 
     // Process codebook
     const codebook = this.processCodebook(inputAny.codebook);
@@ -408,21 +413,6 @@ export class AnalysisHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as AnalysisThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type to valid AnalysisThoughtType
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): AnalysisThoughtType {
-    if (
-      inputType &&
-      this.supportedThoughtTypes.includes(inputType as AnalysisThoughtType)
-    ) {
-      return inputType as AnalysisThoughtType;
-    }
-    return "initial_coding";
   }
 
   /**
