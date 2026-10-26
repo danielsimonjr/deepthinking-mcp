@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **520 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **521 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -18,7 +18,7 @@ Every tracked TypeScript file in the repository — **520 files** — not just t
 | other | 2 |
 | reachable | 235 |
 | template | 5 |
-| test | 250 |
+| test | 251 |
 | tool | 14 |
 
 ## Per-area counts
@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **520 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 247 | 119,683 |
+| src | 247 | 119,599 |
 | templates | 5 | 772 |
-| tests | 250 | 107,180 |
+| tests | 251 | 107,405 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -53,24 +53,24 @@ Every tracked TypeScript file in the repository — **520 files** — not just t
 | `src/export/visual/modes/causal.ts` | src | 1029 | reachable |
 | `src/export/visual/modes/computability.ts` | src | 1142 | reachable |
 | `src/export/visual/modes/counterfactual.ts` | src | 972 | reachable |
-| `src/export/visual/modes/engineering.ts` | src | 2146 | reachable |
+| `src/export/visual/modes/engineering.ts` | src | 2132 | reachable |
 | `src/export/visual/modes/evidential.ts` | src | 1156 | reachable |
 | `src/export/visual/modes/first-principles.ts` | src | 1428 | reachable |
 | `src/export/visual/modes/formal-logic.ts` | src | 1391 | reachable |
 | `src/export/visual/modes/game-theory.ts` | src | 1211 | reachable |
 | `src/export/visual/modes/historical.ts` | src | 534 | reachable |
-| `src/export/visual/modes/hybrid.ts` | src | 1653 | reachable |
+| `src/export/visual/modes/hybrid.ts` | src | 1633 | reachable |
 | `src/export/visual/modes/index.ts` | src | 44 | reachable |
 | `src/export/visual/modes/mathematics.ts` | src | 1307 | reachable |
 | `src/export/visual/modes/metareasoning.ts` | src | 1893 | reachable |
 | `src/export/visual/modes/optimization.ts` | src | 1368 | reachable |
-| `src/export/visual/modes/physics.ts` | src | 2009 | reachable |
+| `src/export/visual/modes/physics.ts` | src | 1986 | reachable |
 | `src/export/visual/modes/proof-decomposition.ts` | src | 1869 | reachable |
 | `src/export/visual/modes/scientific-method.ts` | src | 1445 | reachable |
-| `src/export/visual/modes/sequential.ts` | src | 882 | reachable |
+| `src/export/visual/modes/sequential.ts` | src | 868 | reachable |
 | `src/export/visual/modes/shannon.ts` | src | 679 | reachable |
 | `src/export/visual/modes/systems-thinking.ts` | src | 1003 | reachable |
-| `src/export/visual/modes/temporal.ts` | src | 749 | reachable |
+| `src/export/visual/modes/temporal.ts` | src | 736 | reachable |
 | `src/export/visual/session-graph.ts` | src | 121 | reachable |
 | `src/export/visual/types.ts` | src | 63 | reachable |
 | `src/export/visual/utils.ts` | src | 32 | reachable |
@@ -400,6 +400,7 @@ Every tracked TypeScript file in the repository — **520 files** — not just t
 | `tests/unit/export/mode-exporter-format-matrix.test.ts` | tests | 196 | test |
 | `tests/unit/export/profiles.test.ts` | tests | 534 | test |
 | `tests/unit/export/proof-decomposition-visual.test.ts` | tests | 450 | test |
+| `tests/unit/export/visual/modes/dispatch-wiring.test.ts` | tests | 225 | test |
 | `tests/unit/export/visual/modes/engineering-accepted-input.test.ts` | tests | 100 | test |
 | `tests/unit/export/visual/modes/snapshot-baseline.test.ts` | tests | 1041 | test |
 | `tests/unit/export/visual/utils/dispatch.test.ts` | tests | 151 | test |

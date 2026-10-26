@@ -347,6 +347,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/modes/engineering.js` | `EngineeringThought, TradeCriterion` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -493,6 +494,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/core.js` | `HybridThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -630,6 +632,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/modes/physics.js` | `PhysicsThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -703,6 +706,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `SequentialThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/mermaid.js` | `MermaidGraphBuilder` | Import |
@@ -780,6 +784,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../../types/index.js` | `TemporalThought` | Import (type-only) |
 | `../types.js` | `VisualExportOptions` | Import (type-only) |
+| `../utils/dispatch.js` | `exportByFormat` | Import |
 | `../utils.js` | `sanitizeId` | Import |
 | `../utils/dot.js` | `DOTGraphBuilder` | Import |
 | `../utils/ascii.js` | `ASCIIDocBuilder` | Import |
@@ -4276,21 +4281,21 @@ The codebase is organized into the following modules:
 | `causal` | 15 files | 1 files |
 | `computability` | 13 files | 1 files |
 | `counterfactual` | 15 files | 1 files |
-| `engineering` | 13 files | 1 files |
+| `engineering` | 14 files | 1 files |
 | `evidential` | 15 files | 1 files |
 | `first-principles` | 15 files | 1 files |
 | `formal-logic` | 15 files | 1 files |
 | `game-theory` | 15 files | 1 files |
 | `historical` | 7 files | 1 files |
-| `hybrid` | 14 files | 1 files |
+| `hybrid` | 15 files | 1 files |
 | `index` | 23 files | 2 files |
 | `mathematics` | 15 files | 1 files |
 | `metareasoning` | 15 files | 1 files |
 | `optimization` | 15 files | 1 files |
-| `physics` | 14 files | 1 files |
+| `physics` | 15 files | 1 files |
 | `proof-decomposition` | 11 files | 1 files |
 | `scientific-method` | 15 files | 1 files |
-| `sequential` | 14 files | 1 files |
+| `sequential` | 15 files | 1 files |
 
 ---
 
@@ -4466,7 +4471,7 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 247 |
 | Total Modules | 14 |
-| Total Lines of Code | 119683 |
+| Total Lines of Code | 119599 |
 | Total Exports | 1198 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |

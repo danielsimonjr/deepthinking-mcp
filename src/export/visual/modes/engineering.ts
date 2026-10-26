@@ -18,6 +18,7 @@ import type {
   TradeCriterion,
 } from "../../../types/modes/engineering.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -87,34 +88,19 @@ export function exportEngineeringAnalysis(
   thought: EngineeringThought,
   options: VisualExportOptions,
 ): string {
-  const { format } = options;
-
-  switch (format) {
-    case "mermaid":
-      return engineeringToMermaid(thought, options);
-    case "dot":
-      return engineeringToDOT(thought, options);
-    case "ascii":
-      return engineeringToASCII(thought);
-    case "svg":
-      return engineeringToSVG(thought, options);
-    case "graphml":
-      return engineeringToGraphML(thought, options);
-    case "tikz":
-      return engineeringToTikZ(thought, options);
-    case "modelica":
-      return engineeringToModelica(thought, options);
-    case "html":
-      return engineeringToHTML(thought, options);
-    case "uml":
-      return engineeringToUML(thought, options);
-    case "json":
-      return engineeringToJSON(thought, options);
-    case "markdown":
-      return engineeringToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: (t) => engineeringToMermaid(t, options),
+    dot: (t) => engineeringToDOT(t, options),
+    ascii: engineeringToASCII,
+    svg: engineeringToSVG,
+    graphml: engineeringToGraphML,
+    tikz: engineeringToTikZ,
+    html: engineeringToHTML,
+    modelica: engineeringToModelica,
+    uml: engineeringToUML,
+    json: engineeringToJSON,
+    markdown: engineeringToMarkdown,
+  });
 }
 
 // =============================================================================

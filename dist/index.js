@@ -27988,6 +27988,48 @@ init_esm_shims();
 // src/export/visual/modes/sequential.ts
 init_esm_shims();
 
+// src/export/visual/utils/dispatch.ts
+init_esm_shims();
+function exportByFormat(thought, options, converters) {
+  const {
+    format,
+    colorScheme = "default",
+    includeLabels = true,
+    includeMetrics = true
+  } = options;
+  switch (format) {
+    case "mermaid":
+      return converters.mermaid(
+        thought,
+        colorScheme,
+        includeLabels,
+        includeMetrics
+      );
+    case "dot":
+      return converters.dot(thought, includeLabels, includeMetrics);
+    case "ascii":
+      return converters.ascii(thought);
+    case "svg":
+      return converters.svg(thought, options);
+    case "graphml":
+      return converters.graphml(thought, options);
+    case "tikz":
+      return converters.tikz(thought, options);
+    case "html":
+      return converters.html(thought, options);
+    case "modelica":
+      return converters.modelica(thought, options);
+    case "uml":
+      return converters.uml(thought, options);
+    case "json":
+      return converters.json(thought, options);
+    case "markdown":
+      return converters.markdown(thought, options);
+    default:
+      throw new Error(`Unsupported format: ${format}`);
+  }
+}
+
 // src/export/visual/utils/dot.ts
 init_esm_shims();
 function sanitizeDotId(id) {
@@ -31396,33 +31438,19 @@ function document(title, content, options = {}) {
 
 // src/export/visual/modes/sequential.ts
 function exportSequentialDependencyGraph(thought, options) {
-  const { format, colorScheme = "default", includeLabels = true } = options;
-  switch (format) {
-    case "mermaid":
-      return sequentialToMermaid(thought, colorScheme, includeLabels);
-    case "dot":
-      return sequentialToDOT(thought, includeLabels);
-    case "ascii":
-      return sequentialToASCII(thought);
-    case "svg":
-      return sequentialToSVG(thought, options);
-    case "graphml":
-      return sequentialToGraphML(thought, options);
-    case "tikz":
-      return sequentialToTikZ(thought, options);
-    case "html":
-      return sequentialToHTML(thought, options);
-    case "modelica":
-      return sequentialToModelica(thought, options);
-    case "uml":
-      return sequentialToUML(thought, options);
-    case "json":
-      return sequentialToJSON(thought, options);
-    case "markdown":
-      return sequentialToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: sequentialToMermaid,
+    dot: sequentialToDOT,
+    ascii: sequentialToASCII,
+    svg: sequentialToSVG,
+    graphml: sequentialToGraphML,
+    tikz: sequentialToTikZ,
+    html: sequentialToHTML,
+    modelica: sequentialToModelica,
+    uml: sequentialToUML,
+    json: sequentialToJSON,
+    markdown: sequentialToMarkdown
+  });
 }
 function sequentialToMermaid(thought, colorScheme, includeLabels) {
   const scheme = colorScheme;
@@ -31986,50 +32014,6 @@ function sequentialToMarkdown(thought, options) {
 
 // src/export/visual/modes/shannon.ts
 init_esm_shims();
-
-// src/export/visual/utils/dispatch.ts
-init_esm_shims();
-function exportByFormat(thought, options, converters) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return converters.mermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return converters.dot(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return converters.ascii(thought);
-    case "svg":
-      return converters.svg(thought, options);
-    case "graphml":
-      return converters.graphml(thought, options);
-    case "tikz":
-      return converters.tikz(thought, options);
-    case "html":
-      return converters.html(thought, options);
-    case "modelica":
-      return converters.modelica(thought, options);
-    case "uml":
-      return converters.uml(thought, options);
-    case "json":
-      return converters.json(thought, options);
-    case "markdown":
-      return converters.markdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
-}
-
-// src/export/visual/modes/shannon.ts
 function exportShannonStageFlow(thought, options) {
   return exportByFormat(thought, options, {
     mermaid: shannonToMermaid,
@@ -33448,42 +33432,19 @@ function mathematicsToMarkdown(thought, options) {
 // src/export/visual/modes/physics.ts
 init_esm_shims();
 function exportPhysicsVisualization(thought, options) {
-  const { format, colorScheme = "default" } = options;
-  switch (format) {
-    case "mermaid":
-      return physicsToMermaid(
-        thought,
-        colorScheme,
-        options.includeLabels ?? true,
-        options.includeMetrics ?? true
-      );
-    case "dot":
-      return physicsToDOT(
-        thought,
-        options.includeLabels ?? true,
-        options.includeMetrics ?? true
-      );
-    case "ascii":
-      return physicsToASCII(thought);
-    case "svg":
-      return physicsToSVG(thought, options);
-    case "graphml":
-      return physicsToGraphML(thought, options);
-    case "tikz":
-      return physicsToTikZ(thought, options);
-    case "html":
-      return physicsToHTML(thought, options);
-    case "modelica":
-      return physicsToModelica(thought, options);
-    case "uml":
-      return physicsToUML(thought, options);
-    case "json":
-      return physicsToJSON(thought, options);
-    case "markdown":
-      return physicsToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: physicsToMermaid,
+    dot: physicsToDOT,
+    ascii: physicsToASCII,
+    svg: physicsToSVG,
+    graphml: physicsToGraphML,
+    tikz: physicsToTikZ,
+    html: physicsToHTML,
+    modelica: physicsToModelica,
+    uml: physicsToUML,
+    json: physicsToJSON,
+    markdown: physicsToMarkdown
+  });
 }
 function physicsToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -34936,39 +34897,19 @@ function physicsToMarkdown(thought, options) {
 // src/export/visual/modes/hybrid.ts
 init_esm_shims();
 function exportHybridOrchestration(thought, options) {
-  const { format, colorScheme = "default", includeMetrics = true } = options;
-  const includeLabels = options.includeLabels !== false;
-  switch (format) {
-    case "mermaid":
-      return hybridToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return hybridToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return hybridToASCII(thought);
-    case "svg":
-      return hybridToSVG(thought, options);
-    case "graphml":
-      return hybridToGraphML(thought, options);
-    case "tikz":
-      return hybridToTikZ(thought, options);
-    case "html":
-      return hybridToHTML(thought, options);
-    case "modelica":
-      return hybridToModelica(thought, options);
-    case "uml":
-      return hybridToUML(thought, options);
-    case "json":
-      return hybridToJSON(thought, options);
-    case "markdown":
-      return hybridToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: hybridToMermaid,
+    dot: hybridToDOT,
+    ascii: hybridToASCII,
+    svg: hybridToSVG,
+    graphml: hybridToGraphML,
+    tikz: hybridToTikZ,
+    html: hybridToHTML,
+    modelica: hybridToModelica,
+    uml: hybridToUML,
+    json: hybridToJSON,
+    markdown: hybridToMarkdown
+  });
 }
 function hybridToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -36837,33 +36778,19 @@ function causalToMarkdown(thought, options) {
 // src/export/visual/modes/temporal.ts
 init_esm_shims();
 function exportTemporalTimeline(thought, options) {
-  const { format, includeLabels = true } = options;
-  switch (format) {
-    case "mermaid":
-      return timelineToMermaidGantt(thought, includeLabels);
-    case "dot":
-      return timelineToDOT(thought, includeLabels);
-    case "ascii":
-      return timelineToASCII(thought);
-    case "svg":
-      return timelineToSVG(thought, options);
-    case "graphml":
-      return timelineToGraphML(thought);
-    case "tikz":
-      return timelineToTikZ(thought);
-    case "html":
-      return timelineToHTML(thought, options);
-    case "modelica":
-      return temporalToModelica(thought);
-    case "uml":
-      return temporalToUML(thought);
-    case "json":
-      return temporalToJSON(thought, options);
-    case "markdown":
-      return temporalToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: (t, _colorScheme, includeLabels) => timelineToMermaidGantt(t, includeLabels),
+    dot: timelineToDOT,
+    ascii: timelineToASCII,
+    svg: timelineToSVG,
+    graphml: timelineToGraphML,
+    tikz: timelineToTikZ,
+    html: timelineToHTML,
+    modelica: temporalToModelica,
+    uml: temporalToUML,
+    json: temporalToJSON,
+    markdown: temporalToMarkdown
+  });
 }
 function timelineToMermaidGantt(thought, includeLabels) {
   const builder = new MermaidGanttBuilder().setTitle(thought.timeline?.name || "Timeline").setDateFormat("X").setAxisFormat("%s").addSection("Events");
@@ -48409,33 +48336,19 @@ function criterionFields(c) {
   return typeof c === "string" ? { id: c, name: c, weight: 0 } : c;
 }
 function exportEngineeringAnalysis(thought, options) {
-  const { format } = options;
-  switch (format) {
-    case "mermaid":
-      return engineeringToMermaid(thought, options);
-    case "dot":
-      return engineeringToDOT(thought, options);
-    case "ascii":
-      return engineeringToASCII(thought);
-    case "svg":
-      return engineeringToSVG(thought, options);
-    case "graphml":
-      return engineeringToGraphML(thought, options);
-    case "tikz":
-      return engineeringToTikZ(thought, options);
-    case "modelica":
-      return engineeringToModelica(thought, options);
-    case "html":
-      return engineeringToHTML(thought, options);
-    case "uml":
-      return engineeringToUML(thought, options);
-    case "json":
-      return engineeringToJSON(thought, options);
-    case "markdown":
-      return engineeringToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: (t) => engineeringToMermaid(t, options),
+    dot: (t) => engineeringToDOT(t, options),
+    ascii: engineeringToASCII,
+    svg: engineeringToSVG,
+    graphml: engineeringToGraphML,
+    tikz: engineeringToTikZ,
+    html: engineeringToHTML,
+    modelica: engineeringToModelica,
+    uml: engineeringToUML,
+    json: engineeringToJSON,
+    markdown: engineeringToMarkdown
+  });
 }
 function engineeringToMermaid(thought, options) {
   const { includeLabels = true, includeMetrics = true } = options;
