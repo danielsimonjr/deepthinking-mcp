@@ -142,6 +142,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before and after. The run covered the 35 mode handlers and 35 generic handlers, one for each mode.
   Each handler received 7 thought values, 7 pairs of thought numbers and 4 sets of extra fields. Ten new tests in `ModeHandler.test.ts` pin
   the error codes, the messages, the order of the two checks and the fresh result on each call.
+- **`renderStadiumNode` calls `renderRectNode`, and four SVG shapes share one paint helper.**
+  `renderStadiumNode` held a copy of `renderRectNode` with a corner radius of 20. It now returns
+  `renderRectNode(pos, colors, 20)`. `addRect`, `addCircle`, `addEllipse` and `addPolygon` each wrote
+  the same four attributes: fill, stroke, stroke-width and opacity. The private `pushPaint` in
+  `src/export/visual/utils/svg.ts` writes them once, in the same order. A falsy fill, stroke or
+  stroke width is still left out, and an opacity of 0 is still kept. Results do not change. A run of
+  24,013 calls gave the same hash before and after. It covered the two node renderers over 81 mixes
+  of position, label and color, and the four shapes over 3,894 sets of options (rect and circle in
+  both builders, ellipse and polygon in the document builder).
+  Thirty-nine new tests pin the output of the node renderers and of the paint attributes. 26 mutants
+  of the helper, the four call sites and the radius all fail a test.
 - **Eleven handlers share two more checks of `validate`.** Nine handlers repeated the same check
   of `thoughtType`: `ComputabilityHandler`, `ConstraintHandler`, `CryptanalyticHandler`,
   `HybridHandler`, `MathematicsHandler`, `ModalHandler`, `OptimizationHandler`, `PhysicsHandler`

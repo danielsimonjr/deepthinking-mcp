@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **522 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **524 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -18,7 +18,7 @@ Every tracked TypeScript file in the repository — **522 files** — not just t
 | other | 2 |
 | reachable | 235 |
 | template | 5 |
-| test | 252 |
+| test | 254 |
 | tool | 14 |
 
 ## Per-area counts
@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **522 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 247 | 119,513 |
+| src | 247 | 119,499 |
 | templates | 5 | 772 |
-| tests | 252 | 107,660 |
+| tests | 254 | 107,811 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -86,7 +86,7 @@ Every tracked TypeScript file in the repository — **522 files** — not just t
 | `src/export/visual/utils/markdown.ts` | src | 791 | reachable |
 | `src/export/visual/utils/mermaid.ts` | src | 1357 | reachable |
 | `src/export/visual/utils/modelica.ts` | src | 558 | reachable |
-| `src/export/visual/utils/svg.ts` | src | 1209 | reachable |
+| `src/export/visual/utils/svg.ts` | src | 1195 | reachable |
 | `src/export/visual/utils/tikz.ts` | src | 1013 | reachable |
 | `src/export/visual/utils/uml.ts` | src | 991 | reachable |
 | `src/export/visual/visual-exporter.ts` | src | 230 | reachable |
@@ -407,6 +407,8 @@ Every tracked TypeScript file in the repository — **522 files** — not just t
 | `tests/unit/export/visual/utils/document-builders.test.ts` | tests | 1127 | test |
 | `tests/unit/export/visual/utils/dot-output.test.ts` | tests | 153 | test |
 | `tests/unit/export/visual/utils/graph-builders.test.ts` | tests | 680 | test |
+| `tests/unit/export/visual/utils/svg-node-renderers.test.ts` | tests | 61 | test |
+| `tests/unit/export/visual/utils/svg-paint-attributes.test.ts` | tests | 90 | test |
 | `tests/unit/export/visual/utils/svg-shared-elements.test.ts` | tests | 132 | test |
 | `tests/unit/export/visual/utils/visual-builders.test.ts` | tests | 955 | test |
 | `tests/unit/file-lock.test.ts` | tests | 378 | test |

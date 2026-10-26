@@ -29781,14 +29781,7 @@ function renderRectNode(pos, colors, rx = 8) {
     </g>`;
 }
 function renderStadiumNode(pos, colors) {
-  const escapedLabel = escapeSVGText(truncateText(pos.label, 25));
-  return `
-    <g class="node" data-id="${pos.id}">
-      <rect x="${pos.x}" y="${pos.y}" width="${pos.width}" height="${pos.height}"
-            rx="20" ry="20" fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
-      <text x="${pos.x + pos.width / 2}" y="${pos.y + pos.height / 2 + 5}"
-            text-anchor="middle" class="node-label">${escapedLabel}</text>
-    </g>`;
+  return renderRectNode(pos, colors, 20);
 }
 function renderDiamondNode(pos, colors) {
   const cx = pos.x + pos.width / 2;
