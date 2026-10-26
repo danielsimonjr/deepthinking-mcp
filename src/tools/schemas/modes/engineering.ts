@@ -603,8 +603,10 @@ const ExecutionTraceSchema = z.object({
 // carries a closed form and a complexity, as the algorithmic `recurrence` does.
 //
 // Vocabulary fields (`thoughtType`, `strategy`, subproblem `status`) are
-// bounded strings, NOT enums: RecursiveHandler warns on or silently defaults an
-// unrecognised value. A Zod enum would turn that into a hard rejection.
+// bounded strings, NOT enums: RecursiveHandler replaces an unrecognised
+// `thoughtType` or `strategy` with its default and keeps an unrecognised
+// subproblem `status` as sent, and each case adds a sentence to the answer.
+// A Zod enum would turn each of them into a hard rejection.
 
 /** One subproblem produced by the decomposition. */
 const SubproblemSchema = z.object({

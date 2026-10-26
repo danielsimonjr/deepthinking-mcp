@@ -160,9 +160,9 @@ describe('Standard Workflows Integration - Runtime-Only Modes', () => {
       const thought = factory.createThought(input, 'session-std-032b') as RecursiveThought;
 
       expect(thought.mode).toBe(ThinkingMode.RECURSIVE);
-      // The handler should set default values for recursive properties
+      // The handler infers the current depth; it stores a depth limit only when the client sent one
       expect(thought.currentDepth).toBeDefined();
-      expect(thought.maxDepth).toBeDefined();
+      expect(thought.maxDepth).toBeUndefined();
     });
   });
 

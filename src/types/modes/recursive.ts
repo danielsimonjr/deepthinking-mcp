@@ -23,8 +23,8 @@ export interface RecursiveThought extends BaseThought {
   /** Current recursion depth */
   currentDepth: number;
 
-  /** Maximum allowed recursion depth */
-  maxDepth: number;
+  /** Maximum allowed recursion depth; present only when the client sent it */
+  maxDepth?: number;
 
   /** Whether a base case has been reached */
   baseCaseReached: boolean;

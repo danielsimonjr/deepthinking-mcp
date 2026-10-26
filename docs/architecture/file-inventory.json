@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 506,
+    "totalFiles": 507,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 243,
-        "loc": 120752
+        "loc": 120910
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 240,
-        "loc": 105159
+        "files": 241,
+        "loc": 106028
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 231,
       "orphan": 12,
       "template": 5,
-      "test": 240,
+      "test": 241,
       "tool": 14,
       "config": 2
     }
@@ -605,7 +605,7 @@
     {
       "path": "src/modes/handlers/RecursiveHandler.ts",
       "area": "src",
-      "loc": 499,
+      "loc": 626,
       "disposition": "reachable"
     },
     {
@@ -653,7 +653,7 @@
     {
       "path": "src/modes/handlers/input-warnings.ts",
       "area": "src",
-      "loc": 78,
+      "loc": 106,
       "disposition": "reachable"
     },
     {
@@ -881,7 +881,7 @@
     {
       "path": "src/tools/json-schemas.ts",
       "area": "src",
-      "loc": 2844,
+      "loc": 2845,
       "disposition": "reachable"
     },
     {
@@ -935,7 +935,7 @@
     {
       "path": "src/tools/schemas/modes/engineering.ts",
       "area": "src",
-      "loc": 720,
+      "loc": 722,
       "disposition": "reachable"
     },
     {
@@ -1773,6 +1773,12 @@
       "disposition": "test"
     },
     {
+      "path": "tests/integration/recursive-contract.test.ts",
+      "area": "tests",
+      "loc": 525,
+      "disposition": "test"
+    },
+    {
       "path": "tests/integration/scenarios/complex-branching.test.ts",
       "area": "tests",
       "loc": 488,
@@ -2477,7 +2483,7 @@
     {
       "path": "tests/unit/modes/handlers/RecursiveHandler.test.ts",
       "area": "tests",
-      "loc": 520,
+      "loc": 821,
       "disposition": "test"
     },
     {
@@ -2525,7 +2531,7 @@
     {
       "path": "tests/unit/modes/handlers/input-warnings.test.ts",
       "area": "tests",
-      "loc": 80,
+      "loc": 123,
       "disposition": "test"
     },
     {

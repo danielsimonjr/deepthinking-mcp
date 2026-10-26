@@ -1684,7 +1684,7 @@ The codebase is organized into the following modules:
 ### `src/modes/handlers/input-warnings.ts` - Input warnings
 
 **Exports:**
-- Functions: `unrecognisedValueWarning`, `droppedValueWarning`, `inputWarningsField`
+- Functions: `unrecognisedValueWarning`, `droppedValueWarning`, `ignoredMembersWarning`, `inputWarningsField`
 
 ---
 
@@ -1815,7 +1815,9 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, Thought` | Import |
 | `../../types/modes/recursive.js` | `RecursiveThought, Subproblem, BaseCase, RecurrenceRelation` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `../../tools/schemas/modes/engineering.js` | `EngineeringInput` | Import (type-only) |
 | `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationWarning, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./input-warnings.js` | `ignoredMembersWarning, inputWarningsField, unrecognisedValueWarning` | Import |
 
 **Exports:**
 - Classes: `RecursiveHandler`
@@ -4477,15 +4479,15 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 243 |
 | Total Modules | 14 |
-| Total Lines of Code | 120752 |
-| Total Exports | 1191 |
+| Total Lines of Code | 120910 |
+| Total Exports | 1192 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
 | Total Interfaces | 562 |
-| Total Functions | 438 |
+| Total Functions | 439 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
-| Type-only Imports | 334 |
+| Type-only Imports | 335 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 58 |
 

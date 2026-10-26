@@ -64,6 +64,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   path is not accepted, when an accepted path is neither listed nor pinned, when the pinned list
   names a path that is listed or not accepted, when the tool is over the cap, and when the tool
   description does not name every pinned top-level field.
+- **Tests hold the recursive contract.** `recursive-contract.test.ts` sends each field that
+  `RecursiveHandler` reads through the real server over an in-memory transport and reads the answer
+  and the stored thought that a client reads. It covers one test for each group of fields, the eight
+  thought types, the four strategies, the sentence for an unknown `thoughtType`, `strategy` and
+  subproblem `status`, the values that the handler infers or fills in, a `maxDepth` that is stored
+  only when sent, the four members of `recurrence` that recursive mode reads and the five that it
+  ignores, the advertised descriptions, the export of sparse blocks in the 8 formats of the session
+  tool without the text `undefined`, and the request that `docs/modes/RECURSIVE.md` shows.
+  `RecursiveHandler.test.ts` pins what `getEnhancements` prints: the thought types that print the
+  recurrence, the closed-form line, the base case warning, and the depth metric and warning that
+  need a limit that the client sent.
 
 ### Changed
 
@@ -174,7 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     key.
   - **Size.** `deepthinking_engineering` grows from 11,634 to 14,972 bytes (+3,338), and `tools/list`
     from 78,445 to 81,783 bytes of compact JSON (+4.3 percent). The other 12 tools are byte for byte
-    the same. The recursive mode has 1,028 bytes left under the cap.
+    the same.
 - **Four algorithmic fields are no longer advertised, and the server still accepts and ignores
   them:** `algorithmName`, `complexityAnalysis` and the members `invariant`, `termination` and
   `correctness` of `correctnessProof`. No handler read them. A call that sends them succeeds and gives
@@ -191,7 +202,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **What stays outside this change.** The members `designPattern`, `timeComplexity`, `spaceComplexity`
   and `correctnessProof` of the nested `algorithm` object are still removed, because the thought has
   its own top-level fields for them. `clrsCategory` and `clrsAlgorithm` are stored as sent, with no
-  warning. The recursive mode keeps its own handler contract.
+  warning.
+- **`RecursiveHandler` stores what the client sent and says what it replaced, kept or ignored
+  (recursive mode only).** The Zod schema of `deepthinking_engineering` already declared the nine
+  fields that the handler reads. The handler now keeps to them:
+  - **Two more thought types are accepted.** `recursive_case_definition` and
+    `recurrence_formulation` are in `RecursiveThought` and in `docs/modes/RECURSIVE.md`, and the
+    handler replaced both with `problem_decomposition`. It now stores both as sent, with guidance
+    questions of their own. These two types and `recursive_step` print the `Recurrence:` and
+    `Closed form:` suggestions. The advertised `thoughtType` description names the eight recursive
+    values and the default.
+  - **`maxDepth` is stored only when the client sent it.** The handler stored
+    `max(10, currentDepth + 5)` when the field was absent, so a thought held a limit that the client
+    never chose, and the depth warning and the depth metric measured against it. A thought without
+    `maxDepth` now has no limit, no `maxDepth` metric and no depth warning. A `maxDepth` of 0 is
+    stored as sent. `RecursiveThought.maxDepth` is optional. The advertised description says that an
+    omitted limit means no limit.
+  - **A replaced, kept or ignored value gets one sentence in `inputWarnings`, and so in
+    `validation.issues`.** An unknown `thoughtType` becomes `problem_decomposition`, and an unknown
+    `strategy` becomes `divide_and_conquer`. An unrecognised subproblem `status` is kept as sent.
+    `recurrence.id`, `solutionMethod`, `solution`, `solutionProof` and `recursionTree` are not stored,
+    because recursive mode does not read them (algorithmic mode does), and one sentence names each
+    of them that the request sent. `memoization` and `backtracking` are not strategies of the
+    handler. `docs/modes/RECURSIVE.md` listed both. Each sentence is a warning issue, so it also
+    lowers `validation.confidence` in the answer.
+  - **Code.** The handler reads its input through a type that the Zod schema derives
+    (`EngineeringInput`), in place of `any`. `ignoredMembersWarning` joins the helpers of
+    `input-warnings.ts`.
+  - **Size.** `deepthinking_engineering` grows from 14,972 to 15,110 bytes (+138), and `tools/list`
+    from 81,783 to 81,921 bytes of compact JSON. The two changed parts are the descriptions of
+    `thoughtType` and `maxDepth`. The other 12 tools are byte for byte the same. 890 bytes remain
+    under the cap of 16,000.
+  - **Docs.** `docs/modes/RECURSIVE.md` names the tool `deepthinking_engineering` (it named
+    `deepthinking_analytical`). It lists the eight thought types, the four strategies and the nine
+    request fields, and it holds a table of what the handler replaces, keeps and ignores. A test
+    sends the request that the page shows.
+  - **What stays outside this change.** The suggestions, warnings and metrics of `getEnhancements`
+    are not part of the answer to the add-thought call. The depth warning and the depth metric are
+    visible in handler tests only.
 
 ### Fixed
 

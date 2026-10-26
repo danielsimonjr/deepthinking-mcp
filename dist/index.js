@@ -12315,6 +12315,13 @@ function droppedValueWarning(field, value, recognised) {
   if (typeof value === "string" && recognised.includes(value)) return void 0;
   return `Unknown ${field} ${echo(value)}; it is not stored. Recognised values: ${recognised.join(", ")}.`;
 }
+function ignoredMembersWarning(mode, field, members, readBy) {
+  if (members.length === 0) return void 0;
+  const names = members.map((member) => `${field}.${member}`);
+  const list2 = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  const [subject, object] = names.length === 1 ? ["it is", "it"] : ["they are", "them"];
+  return `${mode.charAt(0).toUpperCase()}${mode.slice(1)} mode ignores ${list2}; ${subject} not stored (${readBy} mode reads ${object}).`;
+}
 function inputWarningsField(sentences) {
   const kept = sentences.filter((s) => s !== void 0);
   return kept.length > 0 ? { inputWarnings: kept } : {};
@@ -15049,18 +15056,26 @@ var init_MetaReasoningHandler = __esm({
     };
   }
 });
-var VALID_THOUGHT_TYPES8, VALID_STRATEGIES2, RecursiveHandler;
+var VALID_THOUGHT_TYPES8, RECURRENCE_THOUGHT_TYPES, VALID_STRATEGIES2, DEFAULT_THOUGHT_TYPE2, DEFAULT_STRATEGY, SUBPROBLEM_STATUSES, IGNORED_RECURRENCE_MEMBERS, isThoughtType, isStrategy, RecursiveHandler;
 var init_RecursiveHandler = __esm({
   "src/modes/handlers/RecursiveHandler.ts"() {
     init_esm_shims();
     init_ModeHandler();
+    init_input_warnings();
     VALID_THOUGHT_TYPES8 = [
       "problem_decomposition",
       "base_case_identification",
+      "recursive_case_definition",
+      "recurrence_formulation",
       "recursive_step",
       "subproblem_solution",
       "solution_combination",
       "termination_analysis"
+    ];
+    RECURRENCE_THOUGHT_TYPES = [
+      "recursive_case_definition",
+      "recurrence_formulation",
+      "recursive_step"
     ];
     VALID_STRATEGIES2 = [
       "divide_and_conquer",
@@ -15068,6 +15083,23 @@ var init_RecursiveHandler = __esm({
       "transform_and_conquer",
       "dynamic_programming"
     ];
+    DEFAULT_THOUGHT_TYPE2 = "problem_decomposition";
+    DEFAULT_STRATEGY = "divide_and_conquer";
+    SUBPROBLEM_STATUSES = [
+      "pending",
+      "in_progress",
+      "solving",
+      "solved"
+    ];
+    IGNORED_RECURRENCE_MEMBERS = [
+      "id",
+      "solutionMethod",
+      "solution",
+      "solutionProof",
+      "recursionTree"
+    ];
+    isThoughtType = (value) => typeof value === "string" && VALID_THOUGHT_TYPES8.includes(value);
+    isStrategy = (value) => typeof value === "string" && VALID_STRATEGIES2.includes(value);
     RecursiveHandler = class {
       mode = "recursive" /* RECURSIVE */;
       modeName = "Recursive Reasoning";
@@ -15080,15 +15112,34 @@ var init_RecursiveHandler = __esm({
        * Create a recursive thought from input
        */
       createThought(input, sessionId) {
-        const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
-        const subproblems = inputAny.subproblems ? inputAny.subproblems.map((s) => this.normalizeSubproblem(s, 0)) : void 0;
-        const baseCases = inputAny.baseCases ? inputAny.baseCases.map((b) => this.normalizeBaseCase(b)) : void 0;
-        const baseCaseReached = inputAny.baseCaseReached ?? (baseCases?.some((b) => b.verified) || false);
-        const recurrence = inputAny.recurrence ? this.normalizeRecurrence(inputAny.recurrence) : void 0;
-        const strategy = this.resolveStrategy(inputAny.strategy);
-        const currentDepth = inputAny.currentDepth ?? this.calculateCurrentDepth(subproblems);
-        const maxDepth = inputAny.maxDepth ?? Math.max(10, currentDepth + 5);
+        const req = input;
+        const notes = /* @__PURE__ */ new Set();
+        notes.add(
+          unrecognisedValueWarning(
+            "thoughtType",
+            req.thoughtType,
+            VALID_THOUGHT_TYPES8,
+            DEFAULT_THOUGHT_TYPE2
+          )
+        );
+        const thoughtType = this.resolveThoughtType(req.thoughtType);
+        notes.add(
+          unrecognisedValueWarning(
+            "strategy",
+            req.strategy,
+            VALID_STRATEGIES2,
+            DEFAULT_STRATEGY
+          )
+        );
+        const strategy = this.resolveStrategy(req.strategy);
+        const subproblems = req.subproblems?.map(
+          (s) => this.normalizeSubproblem(s, 0, notes)
+        );
+        const baseCases = req.baseCases?.map((b) => this.normalizeBaseCase(b));
+        const baseCaseReached = req.baseCaseReached ?? (baseCases?.some((b) => b.verified) || false);
+        const recurrence = req.recurrence ? this.normalizeRecurrence(req.recurrence, notes) : void 0;
+        const currentDepth = req.currentDepth ?? this.calculateCurrentDepth(subproblems);
+        const maxDepth = req.maxDepth;
         return {
           id: randomUUID(),
           sessionId,
@@ -15107,10 +15158,11 @@ var init_RecursiveHandler = __esm({
           baseCaseReached,
           recurrence,
           strategy,
-          divisionFactor: inputAny.divisionFactor,
+          divisionFactor: req.divisionFactor,
           // Revision tracking
           isRevision: input.isRevision,
-          revisesThought: input.revisesThought
+          revisesThought: input.revisesThought,
+          ...inputWarningsField([...notes])
         };
       }
       /**
@@ -15119,7 +15171,7 @@ var init_RecursiveHandler = __esm({
       validate(input) {
         const errors = [];
         const warnings = [];
-        const inputAny = input;
+        const req = input;
         if (!input.thought || input.thought.trim().length === 0) {
           return validationFailure([
             createValidationError(
@@ -15138,37 +15190,37 @@ var init_RecursiveHandler = __esm({
             )
           ]);
         }
-        if (inputAny.thoughtType && !VALID_THOUGHT_TYPES8.includes(inputAny.thoughtType)) {
+        if (req.thoughtType && !isThoughtType(req.thoughtType)) {
           warnings.push(
             createValidationWarning(
               "thoughtType",
-              `Unknown thought type: ${inputAny.thoughtType}`,
+              `Unknown thought type: ${req.thoughtType}`,
               `Valid types: ${VALID_THOUGHT_TYPES8.join(", ")}`
             )
           );
         }
-        if (inputAny.strategy && !VALID_STRATEGIES2.includes(inputAny.strategy)) {
+        if (req.strategy && !isStrategy(req.strategy)) {
           warnings.push(
             createValidationWarning(
               "strategy",
-              `Unknown strategy: ${inputAny.strategy}`,
+              `Unknown strategy: ${req.strategy}`,
               `Valid strategies: ${VALID_STRATEGIES2.join(", ")}`
             )
           );
         }
-        if (inputAny.currentDepth !== void 0 && inputAny.maxDepth !== void 0) {
-          if (inputAny.currentDepth > inputAny.maxDepth) {
+        if (req.currentDepth !== void 0 && req.maxDepth !== void 0) {
+          if (req.currentDepth > req.maxDepth) {
             warnings.push(
               createValidationWarning(
                 "currentDepth",
-                `Current depth (${inputAny.currentDepth}) exceeds max depth (${inputAny.maxDepth})`,
+                `Current depth (${req.currentDepth}) exceeds max depth (${req.maxDepth})`,
                 "Recursion may be too deep - check for infinite recursion"
               )
             );
           }
         }
-        if (inputAny.thoughtType === "solution_combination") {
-          if (!inputAny.baseCases || inputAny.baseCases.length === 0) {
+        if (req.thoughtType === "solution_combination") {
+          if (!req.baseCases || req.baseCases.length === 0) {
             warnings.push(
               createValidationWarning(
                 "baseCases",
@@ -15178,8 +15230,8 @@ var init_RecursiveHandler = __esm({
             );
           }
         }
-        if (inputAny.thoughtType === "problem_decomposition") {
-          if (!inputAny.subproblems || inputAny.subproblems.length === 0) {
+        if (req.thoughtType === "problem_decomposition") {
+          if (!req.subproblems || req.subproblems.length === 0) {
             warnings.push(
               createValidationWarning(
                 "subproblems",
@@ -15189,11 +15241,11 @@ var init_RecursiveHandler = __esm({
             );
           }
         }
-        if (inputAny.divisionFactor !== void 0 && inputAny.divisionFactor < 2) {
+        if (req.divisionFactor !== void 0 && req.divisionFactor < 2) {
           warnings.push(
             createValidationWarning(
               "divisionFactor",
-              `Division factor (${inputAny.divisionFactor}) should be >= 2`,
+              `Division factor (${req.divisionFactor}) should be >= 2`,
               "Typical values are 2 (binary) or 3 (ternary)"
             )
           );
@@ -15219,7 +15271,6 @@ var init_RecursiveHandler = __esm({
           warnings: [],
           metrics: {
             currentDepth: recThought.currentDepth,
-            maxDepth: recThought.maxDepth,
             subproblemCount: recThought.subproblems?.length || 0,
             baseCaseCount: recThought.baseCases?.length || 0,
             baseCaseReached: recThought.baseCaseReached ? 1 : 0
@@ -15232,6 +15283,9 @@ var init_RecursiveHandler = __esm({
             "Recursive Problem Structure"
           ]
         };
+        if (recThought.maxDepth !== void 0) {
+          enhancements.metrics.maxDepth = recThought.maxDepth;
+        }
         enhancements.suggestions.push(
           `Strategy: ${recThought.strategy.replace(/_/g, " ")}`
         );
@@ -15269,22 +15323,26 @@ var init_RecursiveHandler = __esm({
               );
             }
             break;
+          case "recursive_case_definition":
+            enhancements.guidingQuestions.push(
+              "How does the recursive case reduce the problem to smaller instances?",
+              "Does every recursive call move toward a base case?",
+              "How are the results of the recursive calls combined?"
+            );
+            break;
+          case "recurrence_formulation":
+            enhancements.guidingQuestions.push(
+              "What is the recurrence relation?",
+              "Which base case ends the recurrence?",
+              "Does the formula give a closed form or a complexity?"
+            );
+            break;
           case "recursive_step":
             enhancements.guidingQuestions.push(
               "How do we reduce the problem to smaller instances?",
               "Is progress guaranteed toward base case?",
               "What is the recurrence relation?"
             );
-            if (recThought.recurrence) {
-              enhancements.suggestions.push(
-                `Recurrence: ${recThought.recurrence.formula}`
-              );
-              if (recThought.recurrence.closedForm) {
-                enhancements.suggestions.push(
-                  `Closed form: ${recThought.recurrence.closedForm}`
-                );
-              }
-            }
             break;
           case "subproblem_solution":
             enhancements.guidingQuestions.push(
@@ -15318,7 +15376,17 @@ var init_RecursiveHandler = __esm({
             }
             break;
         }
-        if (recThought.currentDepth > recThought.maxDepth * 0.8) {
+        if (recThought.recurrence && RECURRENCE_THOUGHT_TYPES.includes(recThought.thoughtType)) {
+          enhancements.suggestions.push(
+            `Recurrence: ${recThought.recurrence.formula}`
+          );
+          if (recThought.recurrence.closedForm) {
+            enhancements.suggestions.push(
+              `Closed form: ${recThought.recurrence.closedForm}`
+            );
+          }
+        }
+        if (recThought.maxDepth !== void 0 && recThought.currentDepth > recThought.maxDepth * 0.8) {
           enhancements.warnings.push(
             `High recursion depth (${recThought.currentDepth}/${recThought.maxDepth}) - nearing limit`
           );
@@ -15350,24 +15418,26 @@ var init_RecursiveHandler = __esm({
        * Resolve thought type from input
        */
       resolveThoughtType(inputType) {
-        if (inputType && VALID_THOUGHT_TYPES8.includes(inputType)) {
-          return inputType;
-        }
-        return "problem_decomposition";
+        return isThoughtType(inputType) ? inputType : DEFAULT_THOUGHT_TYPE2;
       }
       /**
        * Resolve strategy from input
        */
       resolveStrategy(inputStrategy) {
-        if (inputStrategy && VALID_STRATEGIES2.includes(inputStrategy)) {
-          return inputStrategy;
-        }
-        return "divide_and_conquer";
+        return isStrategy(inputStrategy) ? inputStrategy : DEFAULT_STRATEGY;
       }
       /**
-       * Normalize subproblem
+       * Normalize subproblem. An absent status is `pending`; an unrecognised one is
+       * kept as sent and recorded in `notes`.
        */
-      normalizeSubproblem(sub, defaultDepth) {
+      normalizeSubproblem(sub, defaultDepth, notes) {
+        notes.add(
+          unrecognisedValueWarning(
+            "subproblems[].status",
+            sub.status,
+            SUBPROBLEM_STATUSES
+          )
+        );
         return {
           id: sub.id || randomUUID(),
           name: sub.name || "",
@@ -15375,7 +15445,7 @@ var init_RecursiveHandler = __esm({
           size: sub.size ?? "unknown",
           depth: sub.depth ?? defaultDepth,
           parentId: sub.parentId,
-          status: sub.status || "pending",
+          status: sub.status || SUBPROBLEM_STATUSES[0],
           result: sub.result
         };
       }
@@ -15391,9 +15461,20 @@ var init_RecursiveHandler = __esm({
         };
       }
       /**
-       * Normalize recurrence relation
+       * Normalize recurrence relation. Recursive mode reads four members; a sentence
+       * in `notes` names each of the others that the client sent.
        */
-      normalizeRecurrence(rec) {
+      normalizeRecurrence(rec, notes) {
+        notes.add(
+          ignoredMembersWarning(
+            "recursive",
+            "recurrence",
+            IGNORED_RECURRENCE_MEMBERS.filter(
+              (member) => rec[member] !== void 0
+            ),
+            "algorithmic"
+          )
+        );
         return {
           formula: rec.formula || "",
           baseCase: rec.baseCase || "",
@@ -68143,7 +68224,7 @@ var deepthinking_engineering_schema = {
       },
       thoughtType: {
         type: "string",
-        description: "Step within the mode. Algorithmic: 'algorithm_definition', 'complexity_analysis', 'recurrence_solving', 'correctness_proof', 'invariant_identification', 'divide_and_conquer', 'dynamic_programming', 'greedy_choice', 'backtracking', 'branch_and_bound', 'randomized_analysis', 'amortized_analysis', 'data_structure_design', 'data_structure_analysis', 'augmentation', 'graph_traversal', 'shortest_path', 'minimum_spanning_tree', 'network_flow', 'matching', 'string_matching', 'computational_geometry', 'number_theoretic', 'approximation', 'online_algorithm', 'parallel_algorithm'. Recursive: 'problem_decomposition', 'base_case_identification', 'recursive_step', 'subproblem_solution', 'solution_combination', 'termination_analysis'. An unrecognised value is accepted with a warning; algorithmic mode then uses 'algorithm_definition'."
+        description: "Step within the mode. Algorithmic: 'algorithm_definition', 'complexity_analysis', 'recurrence_solving', 'correctness_proof', 'invariant_identification', 'divide_and_conquer', 'dynamic_programming', 'greedy_choice', 'backtracking', 'branch_and_bound', 'randomized_analysis', 'amortized_analysis', 'data_structure_design', 'data_structure_analysis', 'augmentation', 'graph_traversal', 'shortest_path', 'minimum_spanning_tree', 'network_flow', 'matching', 'string_matching', 'computational_geometry', 'number_theoretic', 'approximation', 'online_algorithm', 'parallel_algorithm'. Recursive: 'problem_decomposition', 'base_case_identification', 'recursive_case_definition', 'recurrence_formulation', 'recursive_step', 'subproblem_solution', 'solution_combination', 'termination_analysis'. An unrecognised value is accepted with a warning; algorithmic mode then uses 'algorithm_definition' and recursive mode uses 'problem_decomposition'."
       },
       // Engineering-specific properties
       analysisType: {
@@ -68512,7 +68593,7 @@ var deepthinking_engineering_schema = {
       maxDepth: {
         type: "integer",
         minimum: 0,
-        description: "Maximum allowed recursion depth"
+        description: "Recursion depth limit; omitted means no limit and no depth warning"
       },
       recurrence: {
         type: "object",

@@ -17,6 +17,7 @@ import type {
   RecurrenceRelation,
 } from "../../types/modes/recursive.js";
 import type { ThinkingToolInput } from "../../tools/thinking.js";
+import type { EngineeringInput } from "../../tools/schemas/modes/engineering.js";
 import {
   ModeHandler,
   ValidationResult,
@@ -27,6 +28,11 @@ import {
   createValidationError,
   createValidationWarning,
 } from "./ModeHandler.js";
+import {
+  ignoredMembersWarning,
+  inputWarningsField,
+  unrecognisedValueWarning,
+} from "./input-warnings.js";
 
 // Re-export for backwards compatibility
 export type { RecursiveThought };
@@ -37,6 +43,8 @@ export type { RecursiveThought };
 const VALID_THOUGHT_TYPES = [
   "problem_decomposition",
   "base_case_identification",
+  "recursive_case_definition",
+  "recurrence_formulation",
   "recursive_step",
   "subproblem_solution",
   "solution_combination",
@@ -44,6 +52,13 @@ const VALID_THOUGHT_TYPES = [
 ] as const;
 
 type RecursiveThoughtType = (typeof VALID_THOUGHT_TYPES)[number];
+
+/** The thought types that work on the recurrence; each one prints it in the suggestions */
+const RECURRENCE_THOUGHT_TYPES: readonly RecursiveThoughtType[] = [
+  "recursive_case_definition",
+  "recurrence_formulation",
+  "recursive_step",
+];
 
 /**
  * Valid decomposition strategies
@@ -56,6 +71,59 @@ const VALID_STRATEGIES = [
 ] as const;
 
 type DecompositionStrategy = (typeof VALID_STRATEGIES)[number];
+
+/** The thought type that an absent or unrecognised value becomes */
+const DEFAULT_THOUGHT_TYPE: RecursiveThoughtType = "problem_decomposition";
+
+/** The strategy that an absent or unrecognised value becomes */
+const DEFAULT_STRATEGY: DecompositionStrategy = "divide_and_conquer";
+
+/** Subproblem statuses; an absent status is the first one */
+const SUBPROBLEM_STATUSES: readonly Subproblem["status"][] = [
+  "pending",
+  "in_progress",
+  "solving",
+  "solved",
+];
+
+/**
+ * Members of `recurrence` that recursive mode does not read. The Zod schema
+ * accepts them because algorithmic mode reads the same object.
+ */
+const IGNORED_RECURRENCE_MEMBERS = [
+  "id",
+  "solutionMethod",
+  "solution",
+  "solutionProof",
+  "recursionTree",
+] as const;
+
+/** What a request carries in one field, as the Zod schema of the tool types it. */
+type Sent<K extends keyof EngineeringInput> = NonNullable<EngineeringInput[K]>;
+
+/** The request fields that this handler reads, typed by the Zod schema that lets them through. */
+type RecursiveRequest = Pick<
+  EngineeringInput,
+  | "thoughtType"
+  | "subproblems"
+  | "baseCases"
+  | "baseCaseReached"
+  | "currentDepth"
+  | "maxDepth"
+  | "recurrence"
+  | "strategy"
+  | "divisionFactor"
+>;
+
+/** Whether a value is one of the thought types that this handler recognises. */
+const isThoughtType = (value: unknown): value is RecursiveThoughtType =>
+  typeof value === "string" &&
+  (VALID_THOUGHT_TYPES as readonly string[]).includes(value);
+
+/** Whether a value is one of the strategies that this handler recognises. */
+const isStrategy = (value: unknown): value is DecompositionStrategy =>
+  typeof value === "string" &&
+  (VALID_STRATEGIES as readonly string[]).includes(value);
 
 /**
  * RecursiveHandler - Specialized handler for recursive reasoning
@@ -81,38 +149,59 @@ export class RecursiveHandler implements ModeHandler {
    * Create a recursive thought from input
    */
   createThought(input: ThinkingToolInput, sessionId: string): RecursiveThought {
-    const inputAny = input as any;
+    const req = input as unknown as RecursiveRequest;
+
+    // Sentences for the values replaced, kept as sent or ignored below;
+    // validateCommon() reports each one in the `validation` field of the answer.
+    // A sentence that repeats (the same status on two subproblems) counts once.
+    const notes = new Set<string | undefined>();
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    notes.add(
+      unrecognisedValueWarning(
+        "thoughtType",
+        req.thoughtType,
+        VALID_THOUGHT_TYPES,
+        DEFAULT_THOUGHT_TYPE,
+      ),
+    );
+    const thoughtType = this.resolveThoughtType(req.thoughtType);
+
+    // Resolve strategy
+    notes.add(
+      unrecognisedValueWarning(
+        "strategy",
+        req.strategy,
+        VALID_STRATEGIES,
+        DEFAULT_STRATEGY,
+      ),
+    );
+    const strategy = this.resolveStrategy(req.strategy);
 
     // Process subproblems
-    const subproblems = inputAny.subproblems
-      ? inputAny.subproblems.map((s: any) => this.normalizeSubproblem(s, 0))
-      : undefined;
+    const subproblems = req.subproblems?.map((s) =>
+      this.normalizeSubproblem(s, 0, notes),
+    );
 
     // Process base cases
-    const baseCases = inputAny.baseCases
-      ? inputAny.baseCases.map((b: any) => this.normalizeBaseCase(b))
-      : undefined;
+    const baseCases = req.baseCases?.map((b) => this.normalizeBaseCase(b));
 
     // Determine if base case is reached
     const baseCaseReached =
-      inputAny.baseCaseReached ??
+      req.baseCaseReached ??
       (baseCases?.some((b: BaseCase) => b.verified) || false);
 
     // Process recurrence
-    const recurrence = inputAny.recurrence
-      ? this.normalizeRecurrence(inputAny.recurrence)
+    const recurrence = req.recurrence
+      ? this.normalizeRecurrence(req.recurrence, notes)
       : undefined;
 
-    // Resolve strategy
-    const strategy = this.resolveStrategy(inputAny.strategy);
-
-    // Calculate depths
+    // The current depth is inferred from the subproblems when absent. The depth
+    // limit is the client's: it is stored only when sent, so a thought holds no
+    // limit that the client did not choose.
     const currentDepth =
-      inputAny.currentDepth ?? this.calculateCurrentDepth(subproblems);
-    const maxDepth = inputAny.maxDepth ?? Math.max(10, currentDepth + 5);
+      req.currentDepth ?? this.calculateCurrentDepth(subproblems);
+    const maxDepth = req.maxDepth;
 
     return {
       id: randomUUID(),
@@ -133,11 +222,13 @@ export class RecursiveHandler implements ModeHandler {
       baseCaseReached,
       recurrence,
       strategy,
-      divisionFactor: inputAny.divisionFactor,
+      divisionFactor: req.divisionFactor,
 
       // Revision tracking
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
+
+      ...inputWarningsField([...notes]),
     };
   }
 
@@ -147,7 +238,7 @@ export class RecursiveHandler implements ModeHandler {
   validate(input: ThinkingToolInput): ValidationResult {
     const errors: { field: string; message: string; code: string }[] = [];
     const warnings: ValidationWarning[] = [];
-    const inputAny = input as any;
+    const req = input as unknown as RecursiveRequest;
 
     // Basic validation
     if (!input.thought || input.thought.trim().length === 0) {
@@ -171,40 +262,34 @@ export class RecursiveHandler implements ModeHandler {
     }
 
     // Validate thought type
-    if (
-      inputAny.thoughtType &&
-      !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)
-    ) {
+    if (req.thoughtType && !isThoughtType(req.thoughtType)) {
       warnings.push(
         createValidationWarning(
           "thoughtType",
-          `Unknown thought type: ${inputAny.thoughtType}`,
+          `Unknown thought type: ${req.thoughtType}`,
           `Valid types: ${VALID_THOUGHT_TYPES.join(", ")}`,
         ),
       );
     }
 
     // Validate strategy
-    if (inputAny.strategy && !VALID_STRATEGIES.includes(inputAny.strategy)) {
+    if (req.strategy && !isStrategy(req.strategy)) {
       warnings.push(
         createValidationWarning(
           "strategy",
-          `Unknown strategy: ${inputAny.strategy}`,
+          `Unknown strategy: ${req.strategy}`,
           `Valid strategies: ${VALID_STRATEGIES.join(", ")}`,
         ),
       );
     }
 
     // Validate depth limits
-    if (
-      inputAny.currentDepth !== undefined &&
-      inputAny.maxDepth !== undefined
-    ) {
-      if (inputAny.currentDepth > inputAny.maxDepth) {
+    if (req.currentDepth !== undefined && req.maxDepth !== undefined) {
+      if (req.currentDepth > req.maxDepth) {
         warnings.push(
           createValidationWarning(
             "currentDepth",
-            `Current depth (${inputAny.currentDepth}) exceeds max depth (${inputAny.maxDepth})`,
+            `Current depth (${req.currentDepth}) exceeds max depth (${req.maxDepth})`,
             "Recursion may be too deep - check for infinite recursion",
           ),
         );
@@ -212,8 +297,8 @@ export class RecursiveHandler implements ModeHandler {
     }
 
     // Validate base cases for solution combination
-    if (inputAny.thoughtType === "solution_combination") {
-      if (!inputAny.baseCases || inputAny.baseCases.length === 0) {
+    if (req.thoughtType === "solution_combination") {
+      if (!req.baseCases || req.baseCases.length === 0) {
         warnings.push(
           createValidationWarning(
             "baseCases",
@@ -225,8 +310,8 @@ export class RecursiveHandler implements ModeHandler {
     }
 
     // Warn about missing subproblems for decomposition
-    if (inputAny.thoughtType === "problem_decomposition") {
-      if (!inputAny.subproblems || inputAny.subproblems.length === 0) {
+    if (req.thoughtType === "problem_decomposition") {
+      if (!req.subproblems || req.subproblems.length === 0) {
         warnings.push(
           createValidationWarning(
             "subproblems",
@@ -238,11 +323,11 @@ export class RecursiveHandler implements ModeHandler {
     }
 
     // Validate division factor
-    if (inputAny.divisionFactor !== undefined && inputAny.divisionFactor < 2) {
+    if (req.divisionFactor !== undefined && req.divisionFactor < 2) {
       warnings.push(
         createValidationWarning(
           "divisionFactor",
-          `Division factor (${inputAny.divisionFactor}) should be >= 2`,
+          `Division factor (${req.divisionFactor}) should be >= 2`,
           "Typical values are 2 (binary) or 3 (ternary)",
         ),
       );
@@ -271,7 +356,6 @@ export class RecursiveHandler implements ModeHandler {
       warnings: [],
       metrics: {
         currentDepth: recThought.currentDepth,
-        maxDepth: recThought.maxDepth,
         subproblemCount: recThought.subproblems?.length || 0,
         baseCaseCount: recThought.baseCases?.length || 0,
         baseCaseReached: recThought.baseCaseReached ? 1 : 0,
@@ -284,6 +368,11 @@ export class RecursiveHandler implements ModeHandler {
         "Recursive Problem Structure",
       ],
     };
+
+    // The depth limit is a metric only when the client sent one
+    if (recThought.maxDepth !== undefined) {
+      enhancements.metrics!.maxDepth = recThought.maxDepth;
+    }
 
     // Strategy-specific guidance
     enhancements.suggestions!.push(
@@ -327,22 +416,28 @@ export class RecursiveHandler implements ModeHandler {
         }
         break;
 
+      case "recursive_case_definition":
+        enhancements.guidingQuestions!.push(
+          "How does the recursive case reduce the problem to smaller instances?",
+          "Does every recursive call move toward a base case?",
+          "How are the results of the recursive calls combined?",
+        );
+        break;
+
+      case "recurrence_formulation":
+        enhancements.guidingQuestions!.push(
+          "What is the recurrence relation?",
+          "Which base case ends the recurrence?",
+          "Does the formula give a closed form or a complexity?",
+        );
+        break;
+
       case "recursive_step":
         enhancements.guidingQuestions!.push(
           "How do we reduce the problem to smaller instances?",
           "Is progress guaranteed toward base case?",
           "What is the recurrence relation?",
         );
-        if (recThought.recurrence) {
-          enhancements.suggestions!.push(
-            `Recurrence: ${recThought.recurrence.formula}`,
-          );
-          if (recThought.recurrence.closedForm) {
-            enhancements.suggestions!.push(
-              `Closed form: ${recThought.recurrence.closedForm}`,
-            );
-          }
-        }
         break;
 
       case "subproblem_solution":
@@ -380,8 +475,26 @@ export class RecursiveHandler implements ModeHandler {
         break;
     }
 
-    // Depth warnings
-    if (recThought.currentDepth > recThought.maxDepth * 0.8) {
+    // The thought types that work on the recurrence print it
+    if (
+      recThought.recurrence &&
+      RECURRENCE_THOUGHT_TYPES.includes(recThought.thoughtType)
+    ) {
+      enhancements.suggestions!.push(
+        `Recurrence: ${recThought.recurrence.formula}`,
+      );
+      if (recThought.recurrence.closedForm) {
+        enhancements.suggestions!.push(
+          `Closed form: ${recThought.recurrence.closedForm}`,
+        );
+      }
+    }
+
+    // Depth warning: only against a limit that the client sent
+    if (
+      recThought.maxDepth !== undefined &&
+      recThought.currentDepth > recThought.maxDepth * 0.8
+    ) {
       enhancements.warnings!.push(
         `High recursion depth (${recThought.currentDepth}/${recThought.maxDepth}) - nearing limit`,
       );
@@ -422,13 +535,7 @@ export class RecursiveHandler implements ModeHandler {
   private resolveThoughtType(
     inputType: string | undefined,
   ): RecursiveThoughtType {
-    if (
-      inputType &&
-      VALID_THOUGHT_TYPES.includes(inputType as RecursiveThoughtType)
-    ) {
-      return inputType as RecursiveThoughtType;
-    }
-    return "problem_decomposition";
+    return isThoughtType(inputType) ? inputType : DEFAULT_THOUGHT_TYPE;
   }
 
   /**
@@ -437,19 +544,25 @@ export class RecursiveHandler implements ModeHandler {
   private resolveStrategy(
     inputStrategy: string | undefined,
   ): DecompositionStrategy {
-    if (
-      inputStrategy &&
-      VALID_STRATEGIES.includes(inputStrategy as DecompositionStrategy)
-    ) {
-      return inputStrategy as DecompositionStrategy;
-    }
-    return "divide_and_conquer";
+    return isStrategy(inputStrategy) ? inputStrategy : DEFAULT_STRATEGY;
   }
 
   /**
-   * Normalize subproblem
+   * Normalize subproblem. An absent status is `pending`; an unrecognised one is
+   * kept as sent and recorded in `notes`.
    */
-  private normalizeSubproblem(sub: any, defaultDepth: number): Subproblem {
+  private normalizeSubproblem(
+    sub: Sent<"subproblems">[number],
+    defaultDepth: number,
+    notes: Set<string | undefined>,
+  ): Subproblem {
+    notes.add(
+      unrecognisedValueWarning(
+        "subproblems[].status",
+        sub.status,
+        SUBPROBLEM_STATUSES,
+      ),
+    );
     return {
       id: sub.id || randomUUID(),
       name: sub.name || "",
@@ -457,7 +570,7 @@ export class RecursiveHandler implements ModeHandler {
       size: sub.size ?? "unknown",
       depth: sub.depth ?? defaultDepth,
       parentId: sub.parentId,
-      status: sub.status || "pending",
+      status: (sub.status || SUBPROBLEM_STATUSES[0]) as Subproblem["status"],
       result: sub.result,
     };
   }
@@ -465,7 +578,7 @@ export class RecursiveHandler implements ModeHandler {
   /**
    * Normalize base case
    */
-  private normalizeBaseCase(baseCase: any): BaseCase {
+  private normalizeBaseCase(baseCase: Sent<"baseCases">[number]): BaseCase {
     return {
       id: baseCase.id || randomUUID(),
       condition: baseCase.condition || "",
@@ -475,9 +588,23 @@ export class RecursiveHandler implements ModeHandler {
   }
 
   /**
-   * Normalize recurrence relation
+   * Normalize recurrence relation. Recursive mode reads four members; a sentence
+   * in `notes` names each of the others that the client sent.
    */
-  private normalizeRecurrence(rec: any): RecurrenceRelation {
+  private normalizeRecurrence(
+    rec: Sent<"recurrence">,
+    notes: Set<string | undefined>,
+  ): RecurrenceRelation {
+    notes.add(
+      ignoredMembersWarning(
+        "recursive",
+        "recurrence",
+        IGNORED_RECURRENCE_MEMBERS.filter(
+          (member) => rec[member] !== undefined,
+        ),
+        "algorithmic",
+      ),
+    );
     return {
       formula: rec.formula || "",
       baseCase: rec.baseCase || "",

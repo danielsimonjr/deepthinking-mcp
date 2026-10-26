@@ -24,11 +24,11 @@ document does not repeat it.
 
 | Metric | Value | Scope | Source |
 |---|---|---|---|
-| Source files, whole repo | 509 | repo-wide | `repo-tools map` (506 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
+| Source files, whole repo | 510 | repo-wide | `repo-tools map` (507 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
 | TypeScript files, `src/` | 243 | src only | `repo-tools map`, files under `src/` |
-| Lines of code, whole repo | 232,992 | repo-wide | `repo-tools map` |
-| Lines of code, `src/` | 120,509 | src only | `repo-tools map`, files under `src/` |
-| Total exports, whole repo | 2,169 | repo-wide | `repo-tools map` |
+| Lines of code, whole repo | 234,018 | repo-wide | `repo-tools map` |
+| Lines of code, `src/` | 120,667 | src only | `repo-tools map`, files under `src/` |
+| Total exports, whole repo | 2,170 | repo-wide | `repo-tools map` |
 | Total exports, `src/` | 1,191 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
 | Entry roots | 1 (`src/index.ts`) | repo-wide | `repo-tools map` |
 | Runtime circular dependencies | 0 | repo-wide | `repo-tools map`, confirmed by direct edge inspection |
@@ -43,8 +43,8 @@ document does not repeat it.
 | Visual exporters | 44 files (24 in `modes/`, 14 in `utils/`, 6 at the root) | src | `src/export/visual/` |
 | Fluent builder classes | 14 | src | `src/export/visual/utils/` |
 
-The whole-repo and `src`-only export counts (2,169 vs 1,191) are not a contradiction. They
-come from two tools and count different file sets: `repo-tools map` reads all 509 files, and
+The whole-repo and `src`-only export counts (2,170 vs 1,192) are not a contradiction. They
+come from two tools and count different file sets: `repo-tools map` reads all 510 files, and
 `tools/create-dependency-graph` reads the 243 files of `src/`.
 
 ## Project Structure
@@ -143,9 +143,9 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 509 | repo-tools map (whole repository) |
-| totalLinesOfCode | 232992 | repo-tools map (whole repository) |
-| totalExports | 2169 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 510 | repo-tools map (whole repository) |
+| totalLinesOfCode | 234018 | repo-tools map (whole repository) |
+| totalExports | 2170 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
 | reachableFiles | 235 | repo-tools map (whole repository) |
