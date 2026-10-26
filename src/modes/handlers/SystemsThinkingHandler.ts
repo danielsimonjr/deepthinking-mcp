@@ -24,9 +24,9 @@ import {
   ValidationWarning,
   ModeEnhancements,
   DetectedArchetype,
+  checkThoughtBasics,
   validationSuccess,
   validationFailure,
-  createValidationError,
   createValidationWarning,
 } from "./ModeHandler.js";
 
@@ -266,25 +266,8 @@ export class SystemsThinkingHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Basic validation
-    if (!input.thought || input.thought.trim().length === 0) {
-      return validationFailure([
-        createValidationError(
-          "thought",
-          "Thought content is required",
-          "EMPTY_THOUGHT",
-        ),
-      ]);
-    }
-
-    if (input.thoughtNumber > input.totalThoughts) {
-      return validationFailure([
-        createValidationError(
-          "thoughtNumber",
-          `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          "INVALID_THOUGHT_NUMBER",
-        ),
-      ]);
-    }
+    const basicFailure = checkThoughtBasics(input);
+    if (basicFailure) return basicFailure;
 
     // Collect component IDs for validation
     const componentIds = new Set<string>();

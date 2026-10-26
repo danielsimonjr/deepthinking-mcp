@@ -32,9 +32,8 @@ import {
   ValidationResult,
   ModeEnhancements,
   ModeStatus,
+  checkThoughtBasics,
   validationSuccess,
-  validationFailure,
-  createValidationError,
   createValidationWarning,
 } from "./ModeHandler.js";
 import { toExtendedThoughtType } from "../../utils/type-guards.js";
@@ -270,26 +269,8 @@ export class GenericModeHandler implements ModeHandler {
     const warnings = [];
 
     // Basic validation - check thought content
-    if (!input.thought || input.thought.trim().length === 0) {
-      return validationFailure([
-        createValidationError(
-          "thought",
-          "Thought content is required",
-          "EMPTY_THOUGHT",
-        ),
-      ]);
-    }
-
-    // Check thought numbers
-    if (input.thoughtNumber > input.totalThoughts) {
-      return validationFailure([
-        createValidationError(
-          "thoughtNumber",
-          `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          "INVALID_THOUGHT_NUMBER",
-        ),
-      ]);
-    }
+    const basicFailure = checkThoughtBasics(input);
+    if (basicFailure) return basicFailure;
 
     // Warn about experimental modes
     const mode = (input.mode as ThinkingMode) || ThinkingMode.HYBRID;

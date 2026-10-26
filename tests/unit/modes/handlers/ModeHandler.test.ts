@@ -6,6 +6,7 @@
 
 import { describe, it, expect } from 'vitest';
 import {
+  checkThoughtBasics,
   validationSuccess,
   validationFailure,
   createValidationError,
@@ -16,6 +17,7 @@ import {
   type ModeStatus,
 } from '../../../../src/modes/handlers/ModeHandler.js';
 import { ThinkingMode } from '../../../../src/types/core.js';
+import type { ThinkingToolInput } from '../../../../src/tools/thinking.js';
 
 describe('ModeHandler Interface', () => {
   describe('Helper Functions', () => {
@@ -112,6 +114,77 @@ describe('ModeHandler Interface', () => {
 
         expect(warning.field).toBe('mode');
         expect(warning.suggestion).toBe('Use sequential mode instead');
+      });
+    });
+
+    describe('checkThoughtBasics', () => {
+      const input = (over: Record<string, unknown> = {}) =>
+        ({
+          thought: 'a real thought',
+          thoughtNumber: 1,
+          totalThoughts: 3,
+          nextThoughtNeeded: true,
+          ...over,
+        }) as ThinkingToolInput;
+
+      it('returns undefined when the thought has text and the number fits', () => {
+        expect(checkThoughtBasics(input())).toBeUndefined();
+      });
+
+      it('accepts a thought number equal to the total', () => {
+        expect(checkThoughtBasics(input({ thoughtNumber: 3 }))).toBeUndefined();
+      });
+
+      it.each([
+        ['an empty string', ''],
+        ['spaces only', '   '],
+        ['tabs and newlines only', '\n\t'],
+        ['undefined', undefined],
+        ['null', null],
+      ])('fails with EMPTY_THOUGHT for %s', (_label, thought) => {
+        const result = checkThoughtBasics(input({ thought }));
+
+        expect(result).toEqual({
+          valid: false,
+          errors: [
+            {
+              field: 'thought',
+              message: 'Thought content is required',
+              code: 'EMPTY_THOUGHT',
+            },
+          ],
+          warnings: [],
+        });
+      });
+
+      it('fails with INVALID_THOUGHT_NUMBER when the number exceeds the total', () => {
+        const result = checkThoughtBasics(input({ thoughtNumber: 4, totalThoughts: 3 }));
+
+        expect(result).toEqual({
+          valid: false,
+          errors: [
+            {
+              field: 'thoughtNumber',
+              message: 'Thought number (4) exceeds total thoughts (3)',
+              code: 'INVALID_THOUGHT_NUMBER',
+            },
+          ],
+          warnings: [],
+        });
+      });
+
+      it('reports the empty thought first when both checks fail', () => {
+        const result = checkThoughtBasics(input({ thought: '', thoughtNumber: 9, totalThoughts: 1 }));
+
+        expect(result?.errors.map((e) => e.code)).toEqual(['EMPTY_THOUGHT']);
+      });
+
+      it('returns a new result on every call', () => {
+        const a = checkThoughtBasics(input({ thought: '' }));
+        const b = checkThoughtBasics(input({ thought: '' }));
+
+        expect(a).not.toBe(b);
+        expect(a?.errors).not.toBe(b?.errors);
       });
     });
   });
