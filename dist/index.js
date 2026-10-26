@@ -32519,7 +32519,10 @@ function sequentialToMarkdown(thought, options) {
 
 // src/export/visual/modes/shannon.ts
 init_esm_shims();
-function exportShannonStageFlow(thought, options) {
+
+// src/export/visual/utils/dispatch.ts
+init_esm_shims();
+function exportByFormat(thought, options, converters) {
   const {
     format,
     colorScheme = "default",
@@ -32528,35 +32531,52 @@ function exportShannonStageFlow(thought, options) {
   } = options;
   switch (format) {
     case "mermaid":
-      return shannonToMermaid(
+      return converters.mermaid(
         thought,
         colorScheme,
         includeLabels,
         includeMetrics
       );
     case "dot":
-      return shannonToDOT(thought, includeLabels, includeMetrics);
+      return converters.dot(thought, includeLabels, includeMetrics);
     case "ascii":
-      return shannonToASCII(thought);
+      return converters.ascii(thought);
     case "svg":
-      return shannonToSVG(thought, options);
+      return converters.svg(thought, options);
     case "graphml":
-      return shannonToGraphML(thought, options);
+      return converters.graphml(thought, options);
     case "tikz":
-      return shannonToTikZ(thought, options);
+      return converters.tikz(thought, options);
     case "html":
-      return shannonToHTML(thought, options);
+      return converters.html(thought, options);
     case "modelica":
-      return shannonToModelica(thought, options);
+      return converters.modelica(thought, options);
     case "uml":
-      return shannonToUML(thought, options);
+      return converters.uml(thought, options);
     case "json":
-      return shannonToJSON(thought, options);
+      return converters.json(thought, options);
     case "markdown":
-      return shannonToMarkdown(thought, options);
+      return converters.markdown(thought, options);
     default:
       throw new Error(`Unsupported format: ${format}`);
   }
+}
+
+// src/export/visual/modes/shannon.ts
+function exportShannonStageFlow(thought, options) {
+  return exportByFormat(thought, options, {
+    mermaid: shannonToMermaid,
+    dot: shannonToDOT,
+    ascii: shannonToASCII,
+    svg: shannonToSVG,
+    graphml: shannonToGraphML,
+    tikz: shannonToTikZ,
+    html: shannonToHTML,
+    modelica: shannonToModelica,
+    uml: shannonToUML,
+    json: shannonToJSON,
+    markdown: shannonToMarkdown
+  });
 }
 var stages = [
   "problem_definition",
@@ -32988,43 +33008,19 @@ Uncertainty: ${(thought.uncertainty * 100).toFixed(0)}%`
 // src/export/visual/modes/mathematics.ts
 init_esm_shims();
 function exportMathematicsDerivation(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return mathematicsToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return mathematicsToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return mathematicsToASCII(thought);
-    case "svg":
-      return mathematicsToSVG(thought, options);
-    case "graphml":
-      return mathematicsToGraphML(thought, options);
-    case "tikz":
-      return mathematicsToTikZ(thought, options);
-    case "html":
-      return mathematicsToHTML(thought, options);
-    case "modelica":
-      return mathematicsToModelica(thought, options);
-    case "uml":
-      return mathematicsToUML(thought, options);
-    case "json":
-      return mathematicsToJSON(thought, options);
-    case "markdown":
-      return mathematicsToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: mathematicsToMermaid,
+    dot: mathematicsToDOT,
+    ascii: mathematicsToASCII,
+    svg: mathematicsToSVG,
+    graphml: mathematicsToGraphML,
+    tikz: mathematicsToTikZ,
+    html: mathematicsToHTML,
+    modelica: mathematicsToModelica,
+    uml: mathematicsToUML,
+    json: mathematicsToJSON,
+    markdown: mathematicsToMarkdown
+  });
 }
 function mathematicsToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -36655,43 +36651,19 @@ function hybridToMarkdown(thought, options) {
 // src/export/visual/modes/causal.ts
 init_esm_shims();
 function exportCausalGraph(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return causalGraphToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return causalGraphToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return causalGraphToASCII(thought);
-    case "svg":
-      return causalGraphToSVG(thought, options);
-    case "graphml":
-      return causalGraphToGraphML(thought, options);
-    case "tikz":
-      return causalGraphToTikZ(thought, options);
-    case "html":
-      return causalGraphToHTML(thought, options);
-    case "modelica":
-      return causalToModelica(thought, options);
-    case "uml":
-      return causalToUML(thought, options);
-    case "json":
-      return causalToJSON(thought, options);
-    case "markdown":
-      return causalToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: causalGraphToMermaid,
+    dot: causalGraphToDOT,
+    ascii: causalGraphToASCII,
+    svg: causalGraphToSVG,
+    graphml: causalGraphToGraphML,
+    tikz: causalGraphToTikZ,
+    html: causalGraphToHTML,
+    modelica: causalToModelica,
+    uml: causalToUML,
+    json: causalToJSON,
+    markdown: causalToMarkdown
+  });
 }
 function causalGraphToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -38557,43 +38529,19 @@ function getSignificanceShape(significance) {
 // src/export/visual/modes/counterfactual.ts
 init_esm_shims();
 function exportCounterfactualScenarios(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return counterfactualToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return counterfactualToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return counterfactualToASCII(thought);
-    case "svg":
-      return counterfactualToSVG(thought, options);
-    case "graphml":
-      return counterfactualToGraphML(thought, options);
-    case "tikz":
-      return counterfactualToTikZ(thought, options);
-    case "html":
-      return counterfactualToHTML(thought, options);
-    case "modelica":
-      return counterfactualToModelica(thought, options);
-    case "uml":
-      return counterfactualToUML(thought, options);
-    case "json":
-      return counterfactualToJSON(thought, options);
-    case "markdown":
-      return counterfactualToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: counterfactualToMermaid,
+    dot: counterfactualToDOT,
+    ascii: counterfactualToASCII,
+    svg: counterfactualToSVG,
+    graphml: counterfactualToGraphML,
+    tikz: counterfactualToTikZ,
+    html: counterfactualToHTML,
+    modelica: counterfactualToModelica,
+    uml: counterfactualToUML,
+    json: counterfactualToJSON,
+    markdown: counterfactualToMarkdown
+  });
 }
 function counterfactualToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -39225,43 +39173,19 @@ function counterfactualToMarkdown(thought, options) {
 // src/export/visual/modes/bayesian.ts
 init_esm_shims();
 function exportBayesianNetwork(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return bayesianToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return bayesianToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return bayesianToASCII(thought);
-    case "svg":
-      return bayesianToSVG(thought, options);
-    case "graphml":
-      return bayesianToGraphML(thought, options);
-    case "tikz":
-      return bayesianToTikZ(thought, options);
-    case "html":
-      return bayesianToHTML(thought, options);
-    case "modelica":
-      return bayesianToModelica(thought, options);
-    case "uml":
-      return bayesianToUML(thought, options);
-    case "json":
-      return bayesianToJSON(thought, options);
-    case "markdown":
-      return bayesianToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: bayesianToMermaid,
+    dot: bayesianToDOT,
+    ascii: bayesianToASCII,
+    svg: bayesianToSVG,
+    graphml: bayesianToGraphML,
+    tikz: bayesianToTikZ,
+    html: bayesianToHTML,
+    modelica: bayesianToModelica,
+    uml: bayesianToUML,
+    json: bayesianToJSON,
+    markdown: bayesianToMarkdown
+  });
 }
 function bayesianToMermaid(thought, colorScheme, _includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -39814,43 +39738,19 @@ Bayes Factor of ${thought.bayesFactor.toFixed(2)} indicates ${thought.bayesFacto
 // src/export/visual/modes/evidential.ts
 init_esm_shims();
 function exportEvidentialBeliefs(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return evidentialToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return evidentialToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return evidentialToASCII(thought);
-    case "svg":
-      return evidentialToSVG(thought, options);
-    case "graphml":
-      return evidentialToGraphML(thought, options);
-    case "tikz":
-      return evidentialToTikZ(thought, options);
-    case "html":
-      return evidentialToHTML(thought, options);
-    case "modelica":
-      return evidentialToModelica(thought, options);
-    case "uml":
-      return evidentialToUML(thought, options);
-    case "json":
-      return evidentialToJSON(thought, options);
-    case "markdown":
-      return evidentialToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: evidentialToMermaid,
+    dot: evidentialToDOT,
+    ascii: evidentialToASCII,
+    svg: evidentialToSVG,
+    graphml: evidentialToGraphML,
+    tikz: evidentialToTikZ,
+    html: evidentialToHTML,
+    modelica: evidentialToModelica,
+    uml: evidentialToUML,
+    json: evidentialToJSON,
+    markdown: evidentialToMarkdown
+  });
 }
 function evidentialToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -40644,43 +40544,19 @@ function evidentialToMarkdown(thought, options) {
 // src/export/visual/modes/game-theory.ts
 init_esm_shims();
 function exportGameTree(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return gameTreeToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return gameTreeToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return gameTreeToASCII(thought);
-    case "svg":
-      return gameTreeToSVG(thought, options);
-    case "graphml":
-      return gameTreeToGraphML(thought, options);
-    case "tikz":
-      return gameTreeToTikZ(thought, options);
-    case "html":
-      return gameTreeToHTML(thought, options);
-    case "modelica":
-      return gameTheoryToModelica(thought, options);
-    case "uml":
-      return gameTheoryToUML(thought, options);
-    case "json":
-      return gameTheoryToJSON(thought, options);
-    case "markdown":
-      return gameTheoryToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: gameTreeToMermaid,
+    dot: gameTreeToDOT,
+    ascii: gameTreeToASCII,
+    svg: gameTreeToSVG,
+    graphml: gameTreeToGraphML,
+    tikz: gameTreeToTikZ,
+    html: gameTreeToHTML,
+    modelica: gameTheoryToModelica,
+    uml: gameTheoryToUML,
+    json: gameTheoryToJSON,
+    markdown: gameTheoryToMarkdown
+  });
 }
 function gameTreeToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -41578,43 +41454,19 @@ function gameTheoryToMarkdown(thought, options) {
 // src/export/visual/modes/optimization.ts
 init_esm_shims();
 function exportOptimizationSolution(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return optimizationToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return optimizationToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return optimizationToASCII(thought);
-    case "svg":
-      return optimizationToSVG(thought, options);
-    case "graphml":
-      return optimizationToGraphML(thought, options);
-    case "tikz":
-      return optimizationToTikZ(thought, options);
-    case "html":
-      return optimizationToHTML(thought, options);
-    case "modelica":
-      return optimizationToModelica(thought, options);
-    case "uml":
-      return optimizationToUML(thought, options);
-    case "json":
-      return optimizationToJSON(thought, options);
-    case "markdown":
-      return optimizationToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: optimizationToMermaid,
+    dot: optimizationToDOT,
+    ascii: optimizationToASCII,
+    svg: optimizationToSVG,
+    graphml: optimizationToGraphML,
+    tikz: optimizationToTikZ,
+    html: optimizationToHTML,
+    modelica: optimizationToModelica,
+    uml: optimizationToUML,
+    json: optimizationToJSON,
+    markdown: optimizationToMarkdown
+  });
 }
 function optimizationToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -42569,43 +42421,19 @@ function optimizationToMarkdown(thought, options) {
 // src/export/visual/modes/abductive.ts
 init_esm_shims();
 function exportAbductiveHypotheses(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return abductiveToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return abductiveToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return abductiveToASCII(thought);
-    case "svg":
-      return abductiveToSVG(thought, options);
-    case "graphml":
-      return abductiveToGraphML(thought, options);
-    case "tikz":
-      return abductiveToTikZ(thought, options);
-    case "html":
-      return abductiveToHTML(thought, options);
-    case "modelica":
-      return abductiveToModelica(thought, options);
-    case "uml":
-      return abductiveToUML(thought, options);
-    case "json":
-      return abductiveToJSON(thought, options);
-    case "markdown":
-      return abductiveToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: abductiveToMermaid,
+    dot: abductiveToDOT,
+    ascii: abductiveToASCII,
+    svg: abductiveToSVG,
+    graphml: abductiveToGraphML,
+    tikz: abductiveToTikZ,
+    html: abductiveToHTML,
+    modelica: abductiveToModelica,
+    uml: abductiveToUML,
+    json: abductiveToJSON,
+    markdown: abductiveToMarkdown
+  });
 }
 function abductiveToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -43142,43 +42970,19 @@ ${assumptions}`
 // src/export/visual/modes/analogical.ts
 init_esm_shims();
 function exportAnalogicalMapping(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return analogicalToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return analogicalToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return analogicalToASCII(thought);
-    case "svg":
-      return analogicalToSVG(thought, options);
-    case "graphml":
-      return analogicalToGraphML(thought, options);
-    case "tikz":
-      return analogicalToTikZ(thought, options);
-    case "html":
-      return analogicalToHTML(thought, options);
-    case "modelica":
-      return analogicalToModelica(thought, options);
-    case "uml":
-      return analogicalToUML(thought, options);
-    case "json":
-      return analogicalToJSON(thought, options);
-    case "markdown":
-      return analogicalToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: analogicalToMermaid,
+    dot: analogicalToDOT,
+    ascii: analogicalToASCII,
+    svg: analogicalToSVG,
+    graphml: analogicalToGraphML,
+    tikz: analogicalToTikZ,
+    html: analogicalToHTML,
+    modelica: analogicalToModelica,
+    uml: analogicalToUML,
+    json: analogicalToJSON,
+    markdown: analogicalToMarkdown
+  });
 }
 function analogicalToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -43902,43 +43706,19 @@ ${list(thought.targetDomain.entities.map((e) => `${e.name}: ${e.description || "
 // src/export/visual/modes/first-principles.ts
 init_esm_shims();
 function exportFirstPrinciplesDerivation(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return firstPrinciplesToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return firstPrinciplesToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return firstPrinciplesToASCII(thought);
-    case "svg":
-      return firstPrinciplesToSVG(thought, options);
-    case "graphml":
-      return firstPrinciplesToGraphML(thought, options);
-    case "tikz":
-      return firstPrinciplesToTikZ(thought, options);
-    case "html":
-      return firstPrinciplesToHTML(thought, options);
-    case "modelica":
-      return firstPrinciplesToModelica(thought, options);
-    case "uml":
-      return firstPrinciplesToUML(thought, options);
-    case "json":
-      return firstPrinciplesToJSON(thought, options);
-    case "markdown":
-      return firstPrinciplesToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: firstPrinciplesToMermaid,
+    dot: firstPrinciplesToDOT,
+    ascii: firstPrinciplesToASCII,
+    svg: firstPrinciplesToSVG,
+    graphml: firstPrinciplesToGraphML,
+    tikz: firstPrinciplesToTikZ,
+    html: firstPrinciplesToHTML,
+    modelica: firstPrinciplesToModelica,
+    uml: firstPrinciplesToUML,
+    json: firstPrinciplesToJSON,
+    markdown: firstPrinciplesToMarkdown
+  });
 }
 function firstPrinciplesToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -44959,43 +44739,19 @@ ${list(thought.conclusion.limitations)}`;
 // src/export/visual/modes/metareasoning.ts
 init_esm_shims();
 function exportMetaReasoningVisualization(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return metaReasoningToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return metaReasoningToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return metaReasoningToASCII(thought);
-    case "svg":
-      return metaReasoningToSVG(thought, options);
-    case "graphml":
-      return metaReasoningToGraphML(thought, options);
-    case "tikz":
-      return metaReasoningToTikZ(thought, options);
-    case "html":
-      return metaReasoningToHTML(thought, options);
-    case "modelica":
-      return metaReasoningToModelica(thought, options);
-    case "uml":
-      return metaReasoningToUML(thought, options);
-    case "json":
-      return metaReasoningToJSON(thought, options);
-    case "markdown":
-      return metaReasoningToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: metaReasoningToMermaid,
+    dot: metaReasoningToDOT,
+    ascii: metaReasoningToASCII,
+    svg: metaReasoningToSVG,
+    graphml: metaReasoningToGraphML,
+    tikz: metaReasoningToTikZ,
+    html: metaReasoningToHTML,
+    modelica: metaReasoningToModelica,
+    uml: metaReasoningToUML,
+    json: metaReasoningToJSON,
+    markdown: metaReasoningToMarkdown
+  });
 }
 function metaReasoningToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -46411,43 +46167,19 @@ function metaReasoningToMarkdown(thought, options) {
 // src/export/visual/modes/systems-thinking.ts
 init_esm_shims();
 function exportSystemsThinkingCausalLoops(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return systemsThinkingToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return systemsThinkingToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return systemsThinkingToASCII(thought);
-    case "svg":
-      return systemsThinkingToSVG(thought, options);
-    case "graphml":
-      return systemsThinkingToGraphML(thought, options);
-    case "tikz":
-      return systemsThinkingToTikZ(thought, options);
-    case "html":
-      return systemsThinkingToHTML(thought, options);
-    case "modelica":
-      return systemsThinkingToModelica(thought, options);
-    case "uml":
-      return systemsThinkingToUML(thought, options);
-    case "json":
-      return systemsThinkingToJSON(thought, options);
-    case "markdown":
-      return systemsThinkingToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: systemsThinkingToMermaid,
+    dot: systemsThinkingToDOT,
+    ascii: systemsThinkingToASCII,
+    svg: systemsThinkingToSVG,
+    graphml: systemsThinkingToGraphML,
+    tikz: systemsThinkingToTikZ,
+    html: systemsThinkingToHTML,
+    modelica: systemsThinkingToModelica,
+    uml: systemsThinkingToUML,
+    json: systemsThinkingToJSON,
+    markdown: systemsThinkingToMarkdown
+  });
 }
 function systemsThinkingToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -47140,43 +46872,19 @@ function systemsThinkingToMarkdown(thought, options) {
 // src/export/visual/modes/scientific-method.ts
 init_esm_shims();
 function exportScientificMethodExperiment(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return scientificMethodToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return scientificMethodToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return scientificMethodToASCII(thought);
-    case "svg":
-      return scientificMethodToSVG(thought, options);
-    case "graphml":
-      return scientificMethodToGraphML(thought, options);
-    case "tikz":
-      return scientificMethodToTikZ(thought, options);
-    case "html":
-      return scientificMethodToHTML(thought, options);
-    case "modelica":
-      return scientificMethodToModelica(thought, options);
-    case "uml":
-      return scientificMethodToUML(thought, options);
-    case "json":
-      return scientificMethodToJSON(thought, options);
-    case "markdown":
-      return scientificMethodToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: scientificMethodToMermaid,
+    dot: scientificMethodToDOT,
+    ascii: scientificMethodToASCII,
+    svg: scientificMethodToSVG,
+    graphml: scientificMethodToGraphML,
+    tikz: scientificMethodToTikZ,
+    html: scientificMethodToHTML,
+    modelica: scientificMethodToModelica,
+    uml: scientificMethodToUML,
+    json: scientificMethodToJSON,
+    markdown: scientificMethodToMarkdown
+  });
 }
 function scientificMethodToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
@@ -48209,43 +47917,19 @@ function scientificMethodToMarkdown(thought, options) {
 // src/export/visual/modes/formal-logic.ts
 init_esm_shims();
 function exportFormalLogicProof(thought, options) {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true
-  } = options;
-  switch (format) {
-    case "mermaid":
-      return formalLogicToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics
-      );
-    case "dot":
-      return formalLogicToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return formalLogicToASCII(thought);
-    case "svg":
-      return formalLogicToSVG(thought, options);
-    case "graphml":
-      return formalLogicToGraphML(thought, options);
-    case "tikz":
-      return formalLogicToTikZ(thought, options);
-    case "html":
-      return formalLogicToHTML(thought, options);
-    case "modelica":
-      return formalLogicToModelica(thought, options);
-    case "uml":
-      return formalLogicToUML(thought, options);
-    case "json":
-      return formalLogicToJSON(thought, options);
-    case "markdown":
-      return formalLogicToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: formalLogicToMermaid,
+    dot: formalLogicToDOT,
+    ascii: formalLogicToASCII,
+    svg: formalLogicToSVG,
+    graphml: formalLogicToGraphML,
+    tikz: formalLogicToTikZ,
+    html: formalLogicToHTML,
+    modelica: formalLogicToModelica,
+    uml: formalLogicToUML,
+    json: formalLogicToJSON,
+    markdown: formalLogicToMarkdown
+  });
 }
 function formalLogicToMermaid(thought, colorScheme, includeLabels, includeMetrics) {
   const scheme = colorScheme;
