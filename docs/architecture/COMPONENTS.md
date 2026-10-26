@@ -538,8 +538,10 @@ export class GameTheoryHandler implements ModeHandler {
   private findPureStrategyNashEquilibria(
     matrix: PayoffMatrix, players: Player[], strategies: Strategy[],
   ): NashEquilibrium[]
-  private isNashEquilibrium(entry: PayoffEntry, matrix: PayoffMatrix, players: Player[], strategies: Strategy[]): boolean
-  private isStrictEquilibrium(entry: PayoffEntry, matrix: PayoffMatrix, players: Player[], strategies: Strategy[]): boolean
+  private isNashEquilibrium(entry: PayoffEntry, matrix: PayoffMatrix): boolean
+  private isStrictEquilibrium(entry: PayoffEntry, matrix: PayoffMatrix): boolean
+  private hasTemptingDeviation(entry: PayoffEntry, matrix: PayoffMatrix, tempts: (deviationPayoff: number, currentPayoff: number) => boolean): boolean
+  private unilateralDeviations(entry: PayoffEntry, matrix: PayoffMatrix, playerIdx: number): PayoffEntry[]
   private calculateEquilibriumStability(entry: PayoffEntry, matrix: PayoffMatrix, players: Player[], strategies: Strategy[]): number
   private findDominantStrategies(matrix: PayoffMatrix, players: Player[], strategies: Strategy[]): DominantStrategy[]
   private checkDominance(strategy: Strategy, playerIdx: number, matrix: PayoffMatrix, playerStrategies: Strategy[]): string[]
@@ -715,7 +717,6 @@ export class CustomHandler implements ModeHandler {
   private resolveFieldType(type: string | undefined): CustomField["type"]
   private normalizeStage(stage: any, defaultOrder: number): CustomStage
   private normalizeValidationRule(rule: any): CustomValidationRule
-  private resolveMode(mode: string): ThinkingMode          // string -> ThinkingMode, defaults to SEQUENTIAL
   private evaluateRule(rule: string, value: unknown, allFields: Map<string, unknown>): boolean
 }
 ```
