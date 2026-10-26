@@ -25,7 +25,7 @@ import {
   createValidationError,
   createValidationWarning,
 } from "./ModeHandler.js";
-import { toExtendedThoughtType } from "../../utils/type-guards.js";
+import { createCausalFields, readCausalGraph } from "./causal-fields.js";
 import {
   computeDegreeCentrality,
   getMostCentralNode,
@@ -68,27 +68,11 @@ export class CausalHandler implements ModeHandler {
    * Create a causal thought from input
    */
   createThought(input: ThinkingToolInput, sessionId: string): CausalThought {
-    const inputAny = input as any;
-
-    // Build causal graph from input
-    const causalGraph: CausalGraph = input.causalGraph || {
-      nodes: inputAny.nodes || [],
-      edges: inputAny.edges || [],
-    };
-
     return {
       ...createThoughtBase(input, sessionId),
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
-      mode: ThinkingMode.CAUSAL,
-      thoughtType: toExtendedThoughtType(
-        input.thoughtType,
-        "problem_definition",
-      ),
-      causalGraph,
-      interventions: input.interventions || [],
-      mechanisms: input.mechanisms || [],
-      confounders: input.confounders || [],
+      ...createCausalFields(input),
     } as CausalThought;
   }
 
@@ -104,17 +88,13 @@ export class CausalHandler implements ModeHandler {
   validate(input: ThinkingToolInput): ValidationResult {
     const errors = [];
     const warnings = [];
-    const inputAny = input as any;
 
     // Basic validation
     const basicFailure = checkThoughtBasics(input);
     if (basicFailure) return basicFailure;
 
     // Build causal graph from input
-    const causalGraph: CausalGraph = input.causalGraph || {
-      nodes: inputAny.nodes || [],
-      edges: inputAny.edges || [],
-    };
+    const causalGraph: CausalGraph = readCausalGraph(input);
 
     // Validate graph structure if provided
     if (causalGraph.nodes.length > 0 || causalGraph.edges.length > 0) {

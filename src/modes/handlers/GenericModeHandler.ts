@@ -37,6 +37,7 @@ import {
   createValidationWarning,
 } from "./ModeHandler.js";
 import { toExtendedThoughtType } from "../../utils/type-guards.js";
+import { createCausalFields } from "./causal-fields.js";
 
 /**
  * GenericModeHandler - Default implementation for all modes
@@ -210,23 +211,9 @@ export class GenericModeHandler implements ModeHandler {
     input: ThinkingToolInput,
     baseThought: ReturnType<typeof this.createBaseThought>,
   ): CausalThought {
-    const inputAny = input as any;
-    const causalGraph = input.causalGraph || {
-      nodes: inputAny.nodes || [],
-      edges: inputAny.edges || [],
-    };
-
     return {
       ...baseThought,
-      mode: ThinkingMode.CAUSAL,
-      thoughtType: toExtendedThoughtType(
-        input.thoughtType,
-        "problem_definition",
-      ),
-      causalGraph,
-      interventions: input.interventions || [],
-      mechanisms: input.mechanisms || [],
-      confounders: input.confounders || [],
+      ...createCausalFields(input),
     } as CausalThought;
   }
 

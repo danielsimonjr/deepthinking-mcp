@@ -14,15 +14,15 @@ Most test folders follow the folder names of `src/`: `tests/unit/<area>/` and
 `tests/integration/<area>/` mirror `src/<area>/`. Five folders have no `src/` counterpart:
 `tests/unit/benchmarks/` and `tests/integration/{exports,handlers,scenarios,validators}/`. A file under
 `src/modes/handlers/BayesianHandler.ts` has its unit test at
-`tests/unit/modes/handlers/BayesianHandler.test.ts`. Of the 39 files in `src/modes/handlers/`,
-38 have a test file of the same name. `resolve-mode.ts` is the exception: its test is
+`tests/unit/modes/handlers/BayesianHandler.test.ts`. Of the 40 files in `src/modes/handlers/`,
+39 have a test file of the same name. `resolve-mode.ts` is the exception: its test is
 `mode-name-resolution.test.ts`.
 
 ### Layout
 
 | Directory | Test files | Purpose |
 |---|---|---|
-| `tests/unit/` | 160 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
+| `tests/unit/` | 161 | Type guards, handlers, validators, exporters, session storage, and regression guards that pin one wiring or one contract. |
 | `tests/integration/` | 80 | Cross-module paths: entry-point dispatch over a real transport, tool-shaped input through the handlers, export round-trips, multi-mode analysis, session lifecycles. |
 | `tests/edge-cases/` | 6 | Boundary conditions, malformed input, regressions pinned from past bugs. |
 | `tests/performance/` | 4 | Counted-work checks for cost, throughput, memory and stress. `helpers/work-probe.ts` holds the counters. |
@@ -75,7 +75,7 @@ the root-level files that name the area in their subject.
 |---|---|---|---|---|
 | `index.ts` | 1 | 0 | 1 (8 test files) | `tests/integration/index-server.test.ts` and 7 more files that import the module. See Gaps. |
 | `types/` | 37 | 11 | 18 | Most handler and validator tests import types from here. No test imports 18 of the mode type files directly. |
-| `modes/` (handlers, combinations, causal graph, stochastic) | 58 | 62 | 56 | `tests/integration/handlers/`, `tests/integration/mode-handler-delegation.test.ts`. |
+| `modes/` (handlers, combinations, causal graph, stochastic) | 59 | 63 | 57 | `tests/integration/handlers/`, `tests/integration/mode-handler-delegation.test.ts`. |
 | `services/` | 3 | 2 | 3 | 68 test files import `ThoughtFactory` or `ExportService` directly. `RecommendationService` has one importer, `tests/unit/taxonomy/taxonomy-wiring.test.ts`. |
 | `session/` | 4 | 11 | 2 | `tests/integration/session-workflow.test.ts`, `multi-session.test.ts`, `edge-cases/session-edges.test.ts`, and 4 `tests/integration/tools/session-*.test.ts` files. |
 | `validation/` | 44 | 21 | 21 | `tests/unit/validation/validators/modes/validator-contract.test.ts` covers all 35 mode validators. See Gaps. |
@@ -94,7 +94,7 @@ and `toolSchemas`. See Gaps for the exact limits of that coverage.
 
 ## 3. Unit tests
 
-160 files under `tests/unit/`, organized by the `src/` area they cover.
+161 files under `tests/unit/`, organized by the `src/` area they cover.
 
 **`types/` (11 files).** `types.test.ts` covers the core type guards in `src/types/core.ts`.
 `types/thought-guard-coverage.test.ts` pins the type guards against `ThinkingMode` in both
@@ -104,8 +104,8 @@ directions. Eight files pair one reasoning mode's type guard with `ThoughtValida
 `temporal.test.ts`. `recommendations.test.ts` covers `ModeRecommender` in
 `src/types/modes/recommendations.ts`.
 
-**`modes/` (62 files).** The largest concentration in the suite:
-- `tests/unit/modes/handlers/` (45 files) has one test per file in `src/modes/handlers/`
+**`modes/` (63 files).** The largest concentration in the suite:
+- `tests/unit/modes/handlers/` (46 files) has one test per file in `src/modes/handlers/`
   (`AbductiveHandler.test.ts` through `TemporalHandler.test.ts`, and `ModeHandler.test.ts` for the
   interface file). It also holds `registry.test.ts` for the `ModeHandlerRegistry` singleton in
   `src/modes/registry.ts`, and `stochastic-engine-wiring.test.ts`, which checks that
@@ -121,6 +121,9 @@ directions. Eight files pair one reasoning mode's type guard with `ThoughtValida
   `checkUncertaintyRange` passes its own list of valid thought types and puts the result in its
   answer. `thought-tail.test.ts` pins `createThoughtTail` and its three handlers, and checks that
   `MathematicsHandler`, `PhysicsHandler` and `ShannonHandler` keep the key order of their thoughts.
+  `causal-fields.test.ts` pins `createCausalFields` and `readCausalGraph`, and checks that `CausalHandler` and
+  `GenericModeHandler` (in causal mode) end their thought with the six causal fields and give the same values.
+  It also checks that `CausalHandler.validate` reads the graph of the input in the same way.
 - `tests/unit/modes/handler-registration-coverage.test.ts` checks that `registerAllHandlers`
   covers every `ThinkingMode`. The expected list comes from the enum, not from a copy.
 - `tests/unit/modes/registry-base-fields.test.ts` checks that `ModeHandlerRegistry.createThought`
@@ -502,7 +505,7 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 531 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 533 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 

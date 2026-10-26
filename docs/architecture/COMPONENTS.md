@@ -311,14 +311,14 @@ function for the lock file that already exists, and any other error propagates.
 ## Mode Handlers
 
 `src/modes/handlers/` implements the Strategy pattern: one handler class for each mode. The
-directory holds 39 files: the interface file (`ModeHandler.ts`), 35 handlers, `GenericModeHandler.ts`
-and two helper modules. `registerAllHandlers()` in `src/modes/index.ts` binds each of the 35 handlers
+directory holds 40 files: the interface file (`ModeHandler.ts`), 35 handlers, `GenericModeHandler.ts`
+and three helper modules. `registerAllHandlers()` in `src/modes/index.ts` binds each of the 35 handlers
 to exactly one `ThinkingMode` value. `GenericModeHandler.ts` is a 36th handler class that is never
 registered. The registry constructs it on demand as the fallback for any mode string with no
 registered handler. That path is unreachable for a `ThinkingMode` member, because all 35 non-generic
 modes are registered at startup. `ThinkingMode.CUSTOM` (handled by `CustomHandler`) is one of the 35
-registered modes, not a separate case. The helper modules are `input-warnings.ts` and
-`resolve-mode.ts`. They are not handlers. `input-warnings.ts` exports `unrecognisedValueWarning(field, value, recognised, fallback?)`,
+registered modes, not a separate case. The helper modules are `input-warnings.ts`,
+`resolve-mode.ts` and `causal-fields.ts`. They are not handlers. `input-warnings.ts` exports `unrecognisedValueWarning(field, value, recognised, fallback?)`,
 `droppedValueWarning(field, value, recognised)` and `inputWarningsField(sentences)`.
 A handler uses them to record a request value that it replaced or ignored in the `inputWarnings`
 field of the thought. `unrecognisedValueWarning` is for a value that the handler keeps or replaces.
@@ -328,6 +328,13 @@ field of the thought. `unrecognisedValueWarning` is for a value that the handler
 `resolve-mode.ts` exports `resolveMode(name)`. `CustomHandler` and `HybridHandler` use it to turn a mode
 name from `basedOnModes` or `activeModes` into a `ThinkingMode`. `resolveMode` ignores case and returns
 `sequential` for a name that is not a mode.
+
+`causal-fields.ts` exports `readCausalGraph(input)` and `createCausalFields(input)`. `readCausalGraph` returns
+`input.causalGraph`, or a graph built from `input.nodes` and `input.edges` (each defaults to an empty list)
+when the input has no graph. `createCausalFields` returns the six fields that a causal thought takes from the
+input, in this order: `mode`, `thoughtType`, `causalGraph`, `interventions`, `mechanisms` and `confounders`.
+`CausalHandler` and `GenericModeHandler` (in causal mode) spread the result into their thought after the base
+fields and the two revision fields. `CausalHandler.validate` calls `readCausalGraph`.
 
 ### ModeHandler (`src/modes/handlers/ModeHandler.ts`)
 
@@ -2768,11 +2775,11 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 531 | repo-tools map (whole repository) |
-| totalLinesOfCode | 234910 | repo-tools map (whole repository) |
-| totalExports | 2182 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 533 | repo-tools map (whole repository) |
+| totalLinesOfCode | 235246 | repo-tools map (whole repository) |
+| totalExports | 2184 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
-| reachableFiles | 240 | repo-tools map (whole repository) |
+| reachableFiles | 241 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 | noImporterFileCount | 12 | repo-tools map (whole repository) |
 

@@ -142,6 +142,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before and after. The run covered the 35 mode handlers and 35 generic handlers, one for each mode.
   Each handler received 7 thought values, 7 pairs of thought numbers and 4 sets of extra fields. Ten new tests in `ModeHandler.test.ts` pin
   the error codes, the messages, the order of the two checks and the fresh result on each call.
+- **Two handlers share the six causal fields, and `validate` shares the causal graph.**
+  `CausalHandler.createThought` and `GenericModeHandler.createCausalThought` (causal mode) each wrote
+  the same six lines: `mode`, `thoughtType`, `causalGraph`, `interventions`, `mechanisms` and
+  `confounders`. `CausalHandler.validate` built the graph again in the same way. The new
+  `createCausalFields(input)` and `readCausalGraph(input)` in `src/modes/handlers/causal-fields.ts`
+  hold that code once. Each handler keeps its base fields and its revision fields, and spreads the
+  six fields where its own lines stood, so the key order of the thought does not change. Results do
+  not change. A run of 1,886,976 `createThought` calls over four handlers gave the same output before
+  and after, and so did 14,580 `validate` calls. 35 new tests in `causal-fields.test.ts` pin the
+  helpers and both handlers, and 43 mutants of the helpers and the call sites all fail a test.
 - **The hand-kept docs name the shared handler helpers and the real counts.** `COMPONENTS.md` now
   lists `checkThoughtType`, `checkUncertaintyRange` and `createThoughtTail` with the handlers that
   call each one, and says why three handlers keep their own five lines. `TEST_COVERAGE.md` counts
