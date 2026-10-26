@@ -1611,7 +1611,7 @@ format outside the list above.
 
 ## Proof
 
-`src/proof/` (15 files, 10 classes) implements proof decomposition, gap analysis, assumption
+`src/proof/` (16 files, 10 classes) implements proof decomposition, gap analysis, assumption
 tracking, inconsistency detection, circular-reasoning detection, and strategy recommendation for
 the Mathematics and Formal Logic modes. Its `index.ts` barrel is unused: no file under `src/`
 imports it. `SessionManager.addThought()` reaches the proof classes through `advisory.ts` and
@@ -1625,6 +1625,14 @@ mathematics or formal-logic thought, runs the decomposer, gap analyzer, circular
 detector and inconsistency detector, and returns an `AdvisoryProofAnalysis`, or `undefined` when
 the thought carries no proof content. `extended-advisory.ts` adds the assumption tracker, verifier,
 branch analyzer, hierarchical proof manager, strategy recommender and fallacy patterns.
+
+`word-overlap.ts` exports `wordOverlap(a, b, options)`. It returns the share of the words that two
+texts have in common, from 0 to 1. A word counts when it has more characters than
+`options.longerThan`. `options.denominator` says whether the shared words are divided by the words
+of the smaller text or of the larger text. The result is 0 when either text has no word that counts.
+`ProofDecomposer.hasSignificantOverlap`, `GapAnalyzer.computeWordOverlap` and
+`CircularReasoningDetector.statementsEquivalent` call it. Each caller keeps its own word limit,
+denominator, lowercasing and threshold.
 
 ### ProofDecomposer (`decomposer.ts`)
 
@@ -2738,11 +2746,11 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 529 | repo-tools map (whole repository) |
-| totalLinesOfCode | 234714 | repo-tools map (whole repository) |
-| totalExports | 2180 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 531 | repo-tools map (whole repository) |
+| totalLinesOfCode | 234910 | repo-tools map (whole repository) |
+| totalExports | 2182 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
-| reachableFiles | 239 | repo-tools map (whole repository) |
+| reachableFiles | 240 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 | noImporterFileCount | 12 | repo-tools map (whole repository) |
 

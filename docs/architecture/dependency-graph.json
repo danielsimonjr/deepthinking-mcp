@@ -3,9 +3,9 @@
     "name": "deepthinking-mcp",
     "version": "10.0.2",
     "lastUpdated": "2026-10-26",
-    "totalFiles": 247,
+    "totalFiles": 248,
     "totalModules": 14,
-    "totalExports": 1201
+    "totalExports": 1202
   },
   "entryPoints": [
     {
@@ -8752,6 +8752,12 @@
               "ProofDecomposition"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "./word-overlap.js",
+            "imports": [
+              "wordOverlap"
+            ]
           }
         ],
         "exports": [
@@ -8793,6 +8799,12 @@
             "file": "./dependency-graph.js",
             "imports": [
               "DependencyGraphBuilder"
+            ]
+          },
+          {
+            "file": "./word-overlap.js",
+            "imports": [
+              "wordOverlap"
             ]
           }
         ],
@@ -8957,6 +8969,12 @@
               "ProofDecomposition"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "./word-overlap.js",
+            "imports": [
+              "wordOverlap"
+            ]
           }
         ],
         "exports": [
@@ -9324,6 +9342,21 @@
         ],
         "interfaces": [
           "ProofVerifierConfig"
+        ]
+      },
+      "src/proof/word-overlap.ts": {
+        "description": "Word overlap shared by the proof decomposer, the gap analyzer and the circular reasoning",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "wordOverlap"
+        ],
+        "interfaces": [
+          "WordOverlapOptions"
+        ],
+        "functions": [
+          "wordOverlap"
         ]
       }
     },
@@ -16326,7 +16359,8 @@
           "src/proof/index.ts",
           "src/proof/patterns/warnings.ts",
           "src/proof/strategy-recommender.ts",
-          "src/proof/verifier.ts"
+          "src/proof/verifier.ts",
+          "src/proof/word-overlap.ts"
         ]
       },
       {
@@ -16487,13 +16521,13 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 247,
+    "totalTypeScriptFiles": 248,
     "totalModules": 14,
-    "totalLinesOfCode": 119503,
-    "totalExports": 1201,
+    "totalLinesOfCode": 119519,
+    "totalExports": 1202,
     "totalClasses": 143,
-    "totalInterfaces": 563,
-    "totalFunctions": 447,
+    "totalInterfaces": 564,
+    "totalFunctions": 448,
     "totalTypeGuards": 87,
     "totalEnums": 3,
     "totalConstants": 135,
@@ -16502,6 +16536,6 @@
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 58,
     "unusedFilesCount": 12,
-    "unusedExportsCount": 478
+    "unusedExportsCount": 479
   }
 }

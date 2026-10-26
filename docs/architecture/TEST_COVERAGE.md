@@ -79,7 +79,7 @@ the root-level files that name the area in their subject.
 | `session/` | 4 | 11 | 2 | `tests/integration/session-workflow.test.ts`, `multi-session.test.ts`, `edge-cases/session-edges.test.ts`, and 4 `tests/integration/tools/session-*.test.ts` files. |
 | `validation/` | 44 | 21 | 21 | `tests/unit/validation/validators/modes/validator-contract.test.ts` covers all 35 mode validators. See Gaps. |
 | `export/` | 48 | 15 | 23 | 12 integration files under `tests/integration/export/` and `tests/integration/exports/`. The per-mode visual exporters are reached through `visual/modes/index.ts`. |
-| `proof/` | 15 | 10 | 13 | `tests/integration/proof/decomposition.test.ts`, and the `proof-*-wiring` tests in `tests/unit/session/`. |
+| `proof/` | 16 | 11 | 14 | `tests/integration/proof/decomposition.test.ts`, and the `proof-*-wiring` tests in `tests/unit/session/`. |
 | `taxonomy/` | 7 | 3 | 6 | `tests/unit/session/reasoning-flow-wiring.test.ts`. |
 | `cache/` | 3 | 2 | 1 | `src/cache/lru.ts` is imported by 2 unit tests. `index.ts` and `types.ts` have no direct importer. |
 | `utils/` + `interfaces/` | 7 | 4 | 5 | `type-guards.ts` and `logger-types.ts` have no direct importer. |
@@ -149,10 +149,11 @@ and `mode-exporter-format-matrix.test.ts` (every mode renders every visual forma
 classes in `src/export/visual/utils/`. `visual/utils/dispatch.test.ts` covers the format dispatch of `exportByFormat`. `visual.test.ts` (at the `tests/unit/` root) exercises
 `VisualExporter` across causal, temporal, game-theory, and Bayesian thought types.
 
-**`proof/` (10 files).** `advisory.test.ts` covers the `analyzeProofAdvisory` wrapper. Eight files
+**`proof/` (11 files).** `advisory.test.ts` covers the `analyzeProofAdvisory` wrapper. Nine files
 cover one proof module each: `branch-analyzer`, `circular-detector`, `dependency-graph`,
 `hierarchical-proof`, `inconsistency-detector`, `strategy-recommender`, `verifier`, `warning-patterns`
-(covers `patterns/warnings.ts`). `types.test.ts` tests the proof-decomposition types in
+(covers `patterns/warnings.ts`) and `word-overlap`. `word-overlap.test.ts` also pins the word limit,
+the denominator and the threshold of the three callers of `wordOverlap`. `types.test.ts` tests the proof-decomposition types in
 `src/types/modes/mathematics.ts` and the `isMathematicsThought` guard in `src/types/core.ts`. It
 imports no module from `src/proof/`.
 `assumption-tracker.ts`, `decomposer.ts`, and `gap-analyzer.ts` have no file of their own here.
@@ -481,7 +482,7 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 529 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 531 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 

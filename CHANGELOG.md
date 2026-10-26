@@ -142,6 +142,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before and after. The run covered the 35 mode handlers and 35 generic handlers, one for each mode.
   Each handler received 7 thought values, 7 pairs of thought numbers and 4 sets of extra fields. Ten new tests in `ModeHandler.test.ts` pin
   the error codes, the messages, the order of the two checks and the fresh result on each call.
+- **Three proof checks share one word-overlap helper.** `ProofDecomposer.hasSignificantOverlap`,
+  `GapAnalyzer.computeWordOverlap` and `CircularReasoningDetector.statementsEquivalent` each split two
+  statements on white space, kept the distinct words longer than a limit, counted the words in
+  common, and divided by the size of one text. The new `wordOverlap(a, b, { longerThan, denominator })`
+  in `src/proof/word-overlap.ts` does the counting once. Each caller keeps what differs: the
+  decomposer counts words longer than 2 and divides by the smaller text (a ratio above 0.5 is
+  significant), the gap analyzer lowercases both texts first, counts words longer than 2 and divides
+  by the larger text, and the circular detector counts words longer than 3 in its normalized
+  statements and divides by the larger text (a ratio above 0.8 is equivalent). An empty word set
+  gives 0, which each caller already treated as no match. Results do not change. A run of 107,081
+  statement pairs through the three methods gave the same output before and after. 28 new tests in
+  `word-overlap.test.ts` pin the helper and the limit, denominator and threshold of each caller, and
+  35 mutants of the helper and the call sites all fail a test.
 - **Three handlers end their thought with one shared helper.** `AlgorithmicHandler`,
   `ComputabilityHandler` and `CryptanalyticHandler` each wrote the same five fields in the same
   order: the dependencies, the assumptions, the uncertainty, `isRevision` and `revisesThought`. The

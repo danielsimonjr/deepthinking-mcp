@@ -8,9 +8,9 @@ export. ESM, Node >=20, stdio transport. Entry point: `src/index.ts`. Publishes 
 
 | Metric | Value |
 |---|---|
-| Source files, whole repo / `src/` only | 529 / 247 |
-| LOC, whole repo / `src/` only | 234,714 / 119,256 |
-| Exports, whole repo / `src/` only | 2,180 / 1,201 (487 re-exports) |
+| Source files, whole repo / `src/` only | 531 / 248 |
+| LOC, whole repo / `src/` only | 234,910 / 119,271 |
+| Exports, whole repo / `src/` only | 2,182 / 1,202 (487 re-exports) |
 | Runtime circular deps | 0 |
 | Type-only circular deps | 95 |
 | Files with no static importer | 12 (6 barrels, 5 templates, 1 launcher script) |
@@ -23,10 +23,10 @@ export. ESM, Node >=20, stdio transport. Entry point: `src/index.ts`. Publishes 
 ## Structure
 
 ```
-src/            247 files — index.ts, types/, modes/, services/, session/,
+src/            248 files — index.ts, types/, modes/, services/, session/,
                  validation/, export/, proof/, taxonomy/, cache/, config/,
                  interfaces/, utils/
-tests/          256 files, mirrors src/
+tests/          257 files, mirrors src/
 tools/          15 files — standalone CLI utilities
 cli/            mcp-server-wrapper.mjs — launcher script for the Claude Code plugin
 templates/mode-scaffolding/  5 copy-paste files, by-design unimported
@@ -73,6 +73,6 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 529 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 531 | repo-tools map (whole repository) |
 | typeOnlyCircularDeps | 95 | repo-tools map (whole repository) |
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |

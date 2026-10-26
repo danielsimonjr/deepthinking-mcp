@@ -13,6 +13,7 @@ import type {
   GapAnalysis,
   ProofDecomposition,
 } from "../types/modes/mathematics.js";
+import { wordOverlap } from "./word-overlap.js";
 
 /**
  * Transition validity result
@@ -770,27 +771,10 @@ export class GapAnalyzer {
    * Compute word overlap between two statements
    */
   private computeWordOverlap(a: string, b: string): number {
-    const wordsA = new Set(
-      a
-        .toLowerCase()
-        .split(/\s+/)
-        .filter((w) => w.length > 2),
-    );
-    const wordsB = new Set(
-      b
-        .toLowerCase()
-        .split(/\s+/)
-        .filter((w) => w.length > 2),
-    );
-
-    if (wordsA.size === 0 || wordsB.size === 0) return 0;
-
-    let overlap = 0;
-    for (const w of wordsA) {
-      if (wordsB.has(w)) overlap++;
-    }
-
-    return overlap / Math.max(wordsA.size, wordsB.size);
+    return wordOverlap(a.toLowerCase(), b.toLowerCase(), {
+      longerThan: 2,
+      denominator: "larger",
+    });
   }
 
   /**

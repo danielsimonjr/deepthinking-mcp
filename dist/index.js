@@ -54596,6 +54596,23 @@ var DependencyGraphBuilder = class {
   }
 };
 
+// src/proof/word-overlap.ts
+init_esm_shims();
+function longWords(text2, longerThan) {
+  return new Set(text2.split(/\s+/).filter((w) => w.length > longerThan));
+}
+function wordOverlap(a, b, { longerThan, denominator }) {
+  const wordsA = longWords(a, longerThan);
+  const wordsB = longWords(b, longerThan);
+  if (wordsA.size === 0 || wordsB.size === 0) return 0;
+  let shared = 0;
+  for (const word of wordsA) {
+    if (wordsB.has(word)) shared++;
+  }
+  const size = denominator === "smaller" ? Math.min(wordsA.size, wordsB.size) : Math.max(wordsA.size, wordsB.size);
+  return shared / size;
+}
+
 // src/proof/decomposer.ts
 var ProofDecomposer = class {
   statementPatterns;
@@ -54744,14 +54761,7 @@ var ProofDecomposer = class {
    * Check if two strings have significant word overlap
    */
   hasSignificantOverlap(a, b) {
-    const wordsA = new Set(a.split(/\s+/).filter((w) => w.length > 2));
-    const wordsB = new Set(b.split(/\s+/).filter((w) => w.length > 2));
-    if (wordsA.size === 0 || wordsB.size === 0) return false;
-    let overlap = 0;
-    for (const word of wordsA) {
-      if (wordsB.has(word)) overlap++;
-    }
-    return overlap / Math.min(wordsA.size, wordsB.size) > 0.5;
+    return wordOverlap(a, b, { longerThan: 2, denominator: "smaller" }) > 0.5;
   }
   /**
    * Decompose a proof into atomic statements
@@ -55651,18 +55661,10 @@ var GapAnalyzer = class {
    * Compute word overlap between two statements
    */
   computeWordOverlap(a, b) {
-    const wordsA = new Set(
-      a.toLowerCase().split(/\s+/).filter((w) => w.length > 2)
-    );
-    const wordsB = new Set(
-      b.toLowerCase().split(/\s+/).filter((w) => w.length > 2)
-    );
-    if (wordsA.size === 0 || wordsB.size === 0) return 0;
-    let overlap = 0;
-    for (const w of wordsA) {
-      if (wordsB.has(w)) overlap++;
-    }
-    return overlap / Math.max(wordsA.size, wordsB.size);
+    return wordOverlap(a.toLowerCase(), b.toLowerCase(), {
+      longerThan: 2,
+      denominator: "larger"
+    });
   }
   /**
    * Generate improvement suggestions
@@ -55917,14 +55919,7 @@ var CircularReasoningDetector = class {
     };
     if (checkEquivalence(normA, normB) || checkEquivalence(normB, normA))
       return true;
-    const wordsA = new Set(normA.split(/\s+/).filter((w) => w.length > 3));
-    const wordsB = new Set(normB.split(/\s+/).filter((w) => w.length > 3));
-    if (wordsA.size === 0 || wordsB.size === 0) return false;
-    let overlap = 0;
-    for (const word of wordsA) {
-      if (wordsB.has(word)) overlap++;
-    }
-    return overlap / Math.max(wordsA.size, wordsB.size) > 0.8;
+    return wordOverlap(normA, normB, { longerThan: 3, denominator: "larger" }) > 0.8;
   }
   /**
    * Find tautological statements

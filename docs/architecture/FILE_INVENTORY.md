@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **526 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **528 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -16,9 +16,9 @@ Every tracked TypeScript file in the repository — **526 files** — not just t
 | config | 2 |
 | orphan | 12 |
 | other | 2 |
-| reachable | 235 |
+| reachable | 236 |
 | template | 5 |
-| test | 256 |
+| test | 257 |
 | tool | 14 |
 
 ## Per-area counts
@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **526 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 247 | 119,503 |
+| src | 248 | 119,519 |
 | templates | 5 | 772 |
-| tests | 256 | 108,150 |
+| tests | 257 | 108,332 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -154,17 +154,18 @@ Every tracked TypeScript file in the repository — **526 files** — not just t
 | `src/proof/assumption-tracker.ts` | src | 548 | reachable |
 | `src/proof/branch-analyzer.ts` | src | 521 | reachable |
 | `src/proof/branch-types.ts` | src | 400 | reachable |
-| `src/proof/circular-detector.ts` | src | 493 | reachable |
-| `src/proof/decomposer.ts` | src | 789 | reachable |
+| `src/proof/circular-detector.ts` | src | 485 | reachable |
+| `src/proof/decomposer.ts` | src | 780 | reachable |
 | `src/proof/dependency-graph.ts` | src | 526 | reachable |
 | `src/proof/extended-advisory.ts` | src | 438 | reachable |
-| `src/proof/gap-analyzer.ts` | src | 887 | reachable |
+| `src/proof/gap-analyzer.ts` | src | 871 | reachable |
 | `src/proof/hierarchical-proof.ts` | src | 659 | reachable |
 | `src/proof/inconsistency-detector.ts` | src | 684 | reachable |
 | `src/proof/index.ts` | src | 118 | reachable |
 | `src/proof/patterns/warnings.ts` | src | 406 | reachable |
 | `src/proof/strategy-recommender.ts` | src | 970 | reachable |
 | `src/proof/verifier.ts` | src | 684 | reachable |
+| `src/proof/word-overlap.ts` | src | 49 | reachable |
 | `src/services/ExportService.ts` | src | 1619 | reachable |
 | `src/services/RecommendationService.ts` | src | 122 | reachable |
 | `src/services/ThoughtFactory.ts` | src | 233 | reachable |
@@ -489,6 +490,7 @@ Every tracked TypeScript file in the repository — **526 files** — not just t
 | `tests/unit/proof/types.test.ts` | tests | 521 | test |
 | `tests/unit/proof/verifier.test.ts` | tests | 487 | test |
 | `tests/unit/proof/warning-patterns.test.ts` | tests | 290 | test |
+| `tests/unit/proof/word-overlap.test.ts` | tests | 182 | test |
 | `tests/unit/recommendations.test.ts` | tests | 400 | test |
 | `tests/unit/sanitization.test.ts` | tests | 159 | test |
 | `tests/unit/services/ExportService.test.ts` | tests | 398 | test |
