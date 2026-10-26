@@ -80,8 +80,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Six pieces of code that existed twice or more now exist once.** A run of `repo-tools clones`
   listed 13 groups of identical functions and 402 pairs of similar functions in `src/`. The review
-  of the groups gave these changes. Output and results do not change. Each change has a test that
-  passes on the code before and after.
+  of the groups gave these changes. Output and results do not change. The tests of each changed
+  module pass on the code before and after.
   - The causal analyzers `d-separation.ts` and `intervention.ts` each had `getAncestors` and
     `getDescendants`. The k-subset generator existed four times: three in `d-separation.ts` and one
     in `intervention.ts`. All now come from `src/modes/causal/graph/algorithms/graph-utils.ts`.
