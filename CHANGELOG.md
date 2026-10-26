@@ -122,8 +122,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `AnalysisHandler`, `ArgumentationHandler`, `EvidentialHandler`, `FirstPrinciplesHandler`,
   `FormalLogicHandler`, `HistoricalHandler`, `ScientificMethodHandler` and `TemporalHandler`. They
   stay as they are. Results do not change. A run of 13,720 calls gave the same `validate` result
-  before and after. The run covered the 35 mode handlers and the generic handler, 7 thought values,
-  7 pairs of thought numbers and 4 sets of extra fields. Ten new tests in `ModeHandler.test.ts` pin
+  before and after. The run covered the 35 mode handlers and one generic handler for each of the 35
+  modes, with 7 thought values, 7 pairs of thought numbers and 4 sets of extra fields. Ten new tests in `ModeHandler.test.ts` pin
   the error codes, the messages, the order of the two checks and the fresh result on each call.
 - **The advertised JSON Schema now agrees with the Zod schema on `mode`, the temporal constraint
   types and the causal node type.** `mode` is in `required` for the 11 thought tools (the Zod schema
