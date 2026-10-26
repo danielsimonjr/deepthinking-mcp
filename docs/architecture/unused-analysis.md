@@ -10,7 +10,7 @@
 ## Summary
 
 - **Potentially unused files**: 12
-- **Potentially unused exports**: 478
+- **Potentially unused exports**: 479
 
 ## Potentially Unused Files
 
@@ -71,6 +71,10 @@ These exports are not imported by any other file in the codebase:
 ### `src/export/visual/session-graph.ts`
 
 - `SessionGraphModel` (interface)
+
+### `src/export/visual/utils/dispatch.ts`
+
+- `ModeConverters` (interface)
 
 ### `src/modes/causal/graph/algorithms/centrality.ts`
 

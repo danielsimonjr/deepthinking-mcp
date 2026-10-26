@@ -2,9 +2,9 @@ metadata:
   name: deepthinking-mcp
   version: 10.0.2
   lastUpdated: '2026-10-26'
-  totalFiles: 246
+  totalFiles: 247
   totalModules: 14
-  totalExports: 1196
+  totalExports: 1197
 entryPoints:
   - file: src/index.ts
     type: main
@@ -427,6 +427,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -507,6 +510,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -595,6 +601,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils/dot.js
           imports:
             - DOTGraphBuilder
@@ -673,6 +682,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -846,6 +858,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -1015,6 +1030,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -1097,6 +1115,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -1193,6 +1214,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -1279,6 +1303,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -1632,6 +1659,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -1716,6 +1746,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -1805,6 +1838,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -2041,6 +2077,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -2203,6 +2242,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -2279,6 +2321,9 @@ modules:
           imports:
             - VisualExportOptions
           typeOnly: true
+        - file: ../utils/dispatch.js
+          imports:
+            - exportByFormat
         - file: ../utils.js
           imports:
             - sanitizeId
@@ -2529,6 +2574,21 @@ modules:
         - BOX_CHARS
         - ARROWS
         - BULLETS
+    src/export/visual/utils/dispatch.ts:
+      description: Format dispatch for the mode exporters
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../types.js
+          imports:
+            - VisualExportOptions
+          typeOnly: true
+      exports:
+        - exportByFormat
+      interfaces:
+        - ModeConverters
+      functions:
+        - exportByFormat
     src/export/visual/utils/dot.ts:
       description: DOT/GraphViz Utilities (v8.5.0)
       externalDependencies: []
@@ -11148,6 +11208,7 @@ dependencyGraph:
         - src/export/visual/session-graph.ts
         - src/export/visual/types.ts
         - src/export/visual/utils/ascii.ts
+        - src/export/visual/utils/dispatch.ts
         - src/export/visual/utils/dot.ts
         - src/export/visual/utils/graphml.ts
         - src/export/visual/utils/html.ts
@@ -11381,19 +11442,19 @@ dependencyGraph:
         - src/validation/validators/registry.ts
         - src/validation/validators/validation-utils.ts
 statistics:
-  totalTypeScriptFiles: 246
+  totalTypeScriptFiles: 247
   totalModules: 14
-  totalLinesOfCode: 120624
-  totalExports: 1196
+  totalLinesOfCode: 120343
+  totalExports: 1197
   totalClasses: 143
-  totalInterfaces: 562
-  totalFunctions: 442
+  totalInterfaces: 563
+  totalFunctions: 443
   totalTypeGuards: 87
   totalEnums: 3
   totalConstants: 135
   totalReExports: 487
-  totalTypeOnlyImports: 336
+  totalTypeOnlyImports: 337
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 58
   unusedFilesCount: 12
-  unusedExportsCount: 478
+  unusedExportsCount: 479

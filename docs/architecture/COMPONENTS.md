@@ -1095,8 +1095,13 @@ output with `MermaidGraphBuilder`, `DOTGraphBuilder` and `ASCIIDocBuilder` (and 
 `MermaidGanttBuilder` in `temporal.ts` and `historical.ts`, and `MermaidStateDiagramBuilder` in
 `computability.ts`). It builds the other eight formats with helper functions from
 `visual/utils/*.ts` (for example `generateGraphML`, `generateTikZ`, `generateSVGHeader` and
-`generateHTMLHeader`). 21 of the 23 exporter files throw `Unsupported format: <format>` in their
-`default:` case.
+`generateHTMLHeader`).
+
+15 of the 23 exporter functions call `exportByFormat` (`visual/utils/dispatch.ts`). It picks the
+converter for `options.format` and throws `Unsupported format: <format>` for any other value. Six
+exporter files keep their own `switch` with the same `default:` throw: `engineering.ts`, `hybrid.ts`,
+`physics.ts`, `proof-decomposition.ts`, `sequential.ts` and `temporal.ts`. `computability.ts` and
+`historical.ts` render the normalized graph for the formats they do not name.
 
 | Function | File | Mode |
 |---|---|---|
@@ -2717,11 +2722,11 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 519 | repo-tools map (whole repository) |
-| totalLinesOfCode | 234268 | repo-tools map (whole repository) |
-| totalExports | 2174 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 521 | repo-tools map (whole repository) |
+| totalLinesOfCode | 234136 | repo-tools map (whole repository) |
+| totalExports | 2176 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
-| reachableFiles | 238 | repo-tools map (whole repository) |
+| reachableFiles | 239 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 | noImporterFileCount | 12 | repo-tools map (whole repository) |
 

@@ -65,8 +65,11 @@ with the entry.
 ## Open
 
 - [ ] **Remove the duplicates that `repo-tools clones` found and this change left.**
-  - The 15 `export...` functions in `src/export/visual/modes/*.ts` differ only in a mode prefix and
-    a thought type. One helper that takes the converters can replace them.
+  - Eight exporters in `src/export/visual/modes/` keep their own `switch (format)`: `engineering`,
+    `hybrid`, `physics`, `proof-decomposition`, `sequential`, `temporal`, `computability` and
+    `historical`. They pass other arguments to the converters or have another `default:` case.
+    `hybrid` reads `options.includeLabels !== false`, and `physics` reads `?? true`. A merge must
+    keep both results, so write a test of the exact output first.
   - 36 handler files repeat the thought-field envelope, and 25 handlers repeat the `validate`
     prologue. The tool reads functions, not blocks inside a function, so it did not list them.
   - `generateDotGraph` and `DOTGraphBuilder.render` in `src/export/visual/utils/dot.ts` overlap by

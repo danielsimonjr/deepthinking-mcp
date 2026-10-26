@@ -99,6 +99,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `SVGBuilder` and `SVGGroupBuilder` wrote `rect`, `circle`, `line` and `text` elements with the
     same code, which differed only in the indent. An abstract base class holds that code, and each
     builder sets its indent. The exported classes and their output stay the same.
+- **Fifteen mode exporters share one format dispatch.** The functions `exportAbductiveHypotheses`,
+  `exportAnalogicalMapping`, `exportBayesianNetwork`, `exportCausalGraph`,
+  `exportCounterfactualScenarios`, `exportEvidentialBeliefs`, `exportFirstPrinciplesDerivation`,
+  `exportFormalLogicProof`, `exportGameTree`, `exportMathematicsDerivation`,
+  `exportMetaReasoningVisualization`, `exportOptimizationSolution`,
+  `exportScientificMethodExperiment`, `exportShannonStageFlow` and
+  `exportSystemsThinkingCausalLoops` each repeated the same `switch (format)`. The new
+  `exportByFormat` in `src/export/visual/utils/dispatch.ts` holds it once, and each exporter passes
+  its eleven converters. The other eight exporters pass other arguments or have another `default:`
+  case, so they keep their own `switch`. Output and results do not change. A run of 6,480 calls gave
+  the same output before and after. The run covered 15 exporters, 11 formats and an unknown one,
+  4 colour schemes, and 3 values each for the label and metric flags.
+  `tests/unit/export/visual/utils/dispatch.test.ts` pins which converter each format calls and with
+  which arguments.
 - **The advertised JSON Schema now agrees with the Zod schema on `mode`, the temporal constraint
   types and the causal node type.** `mode` is in `required` for the 11 thought tools (the Zod schema
   already required it). The temporal `constraints[].type` lists `before`, `after`, `during`,
