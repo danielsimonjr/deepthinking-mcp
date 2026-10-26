@@ -922,9 +922,9 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 531 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 533 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
-| reachableFiles | 240 | repo-tools map (whole repository) |
+| reachableFiles | 241 | repo-tools map (whole repository) |
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |
 | typeOnlyCircularDeps | 95 | repo-tools map (whole repository) |
 

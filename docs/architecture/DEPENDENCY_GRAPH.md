@@ -44,7 +44,7 @@ The codebase is organized into the following modules:
 - **export**: 48 files
 - **entry**: 1 file
 - **interfaces**: 1 file
-- **modes**: 58 files
+- **modes**: 59 files
 - **proof**: 16 files
 - **services**: 3 files
 - **session**: 4 files
@@ -1388,6 +1388,22 @@ The codebase is organized into the following modules:
 
 ---
 
+### `src/modes/handlers/causal-fields.ts` - The causal fields of a causal thought.
+
+**Internal Dependencies:**
+| File | Imports | Type |
+|------|---------|------|
+| `../../types/core.js` | `ThinkingMode` | Import |
+| `../../types/core.js` | `CausalThought, ExtendedThoughtType` | Import (type-only) |
+| `../../types/modes/causal.js` | `CausalGraph` | Import (type-only) |
+| `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
+| `../../utils/type-guards.js` | `toExtendedThoughtType` | Import |
+
+**Exports:**
+- Functions: `readCausalGraph`, `createCausalFields`
+
+---
+
 ### `src/modes/handlers/CausalHandler.ts` - CausalHandler - Phase 12 Sprint 6 Enhanced (v8.3.0)
 
 **Internal Dependencies:**
@@ -1397,7 +1413,7 @@ The codebase is organized into the following modules:
 | `../../types/modes/causal.js` | `CausalGraph, Intervention` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
 | `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, createThoughtBase, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
-| `../../utils/type-guards.js` | `toExtendedThoughtType` | Import |
+| `./causal-fields.js` | `createCausalFields, readCausalGraph` | Import |
 | `../causal/graph/algorithms/centrality.js` | `computeDegreeCentrality, getMostCentralNode` | Import |
 | `../causal/graph/algorithms/d-separation.js` | `findVStructures` | Import |
 | `../causal/graph/algorithms/intervention.js` | `isIdentifiable, findAllBackdoorSets` | Import |
@@ -1637,6 +1653,7 @@ The codebase is organized into the following modules:
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
 | `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, ModeStatus, checkThoughtBasics, createThoughtBase, validationSuccess, createValidationWarning` | Import |
 | `../../utils/type-guards.js` | `toExtendedThoughtType` | Import |
+| `./causal-fields.js` | `createCausalFields` | Import |
 
 **Exports:**
 - Classes: `GenericModeHandler`
@@ -4372,7 +4389,7 @@ graph TD
         N14[graph-utils]
         N15[intervention]
         N16[types]
-        N17[...53 more]
+        N17[...54 more]
     end
 
     subgraph Proof
@@ -4480,17 +4497,17 @@ graph TD
 
 | Category | Count |
 |----------|-------|
-| Total TypeScript Files | 248 |
+| Total TypeScript Files | 249 |
 | Total Modules | 14 |
-| Total Lines of Code | 119519 |
-| Total Exports | 1202 |
+| Total Lines of Code | 119547 |
+| Total Exports | 1204 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
 | Total Interfaces | 564 |
-| Total Functions | 448 |
+| Total Functions | 450 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
-| Type-only Imports | 337 |
+| Type-only Imports | 340 |
 | Runtime Circular Deps | 0 |
 | Type-only Circular Deps | 58 |
 

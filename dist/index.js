@@ -2200,6 +2200,31 @@ var init_type_guards = __esm({
   }
 });
 
+// src/modes/handlers/causal-fields.ts
+function readCausalGraph(input) {
+  const { nodes, edges } = input;
+  return input.causalGraph || {
+    nodes: nodes || [],
+    edges: edges || []
+  };
+}
+function createCausalFields(input) {
+  return {
+    mode: "causal" /* CAUSAL */,
+    thoughtType: toExtendedThoughtType(input.thoughtType, "problem_definition"),
+    causalGraph: readCausalGraph(input),
+    interventions: input.interventions || [],
+    mechanisms: input.mechanisms || [],
+    confounders: input.confounders || []
+  };
+}
+var init_causal_fields = __esm({
+  "src/modes/handlers/causal-fields.ts"() {
+    init_esm_shims();
+    init_type_guards();
+  }
+});
+
 // src/modes/handlers/GenericModeHandler.ts
 var GenericModeHandler;
 var init_GenericModeHandler = __esm({
@@ -2208,6 +2233,7 @@ var init_GenericModeHandler = __esm({
     init_core();
     init_ModeHandler();
     init_type_guards();
+    init_causal_fields();
     GenericModeHandler = class {
       mode;
       modeName;
@@ -2331,22 +2357,9 @@ var init_GenericModeHandler = __esm({
        * Create a causal thought with graph handling
        */
       createCausalThought(input, baseThought) {
-        const inputAny = input;
-        const causalGraph = input.causalGraph || {
-          nodes: inputAny.nodes || [],
-          edges: inputAny.edges || []
-        };
         return {
           ...baseThought,
-          mode: "causal" /* CAUSAL */,
-          thoughtType: toExtendedThoughtType(
-            input.thoughtType,
-            "problem_definition"
-          ),
-          causalGraph,
-          interventions: input.interventions || [],
-          mechanisms: input.mechanisms || [],
-          confounders: input.confounders || []
+          ...createCausalFields(input)
         };
       }
       /**
@@ -5932,7 +5945,7 @@ var init_CausalHandler = __esm({
   "src/modes/handlers/CausalHandler.ts"() {
     init_esm_shims();
     init_ModeHandler();
-    init_type_guards();
+    init_causal_fields();
     init_centrality();
     init_d_separation();
     init_intervention();
@@ -5955,24 +5968,11 @@ var init_CausalHandler = __esm({
        * Create a causal thought from input
        */
       createThought(input, sessionId) {
-        const inputAny = input;
-        const causalGraph = input.causalGraph || {
-          nodes: inputAny.nodes || [],
-          edges: inputAny.edges || []
-        };
         return {
           ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
-          mode: "causal" /* CAUSAL */,
-          thoughtType: toExtendedThoughtType(
-            input.thoughtType,
-            "problem_definition"
-          ),
-          causalGraph,
-          interventions: input.interventions || [],
-          mechanisms: input.mechanisms || [],
-          confounders: input.confounders || []
+          ...createCausalFields(input)
         };
       }
       /**
@@ -5987,13 +5987,9 @@ var init_CausalHandler = __esm({
       validate(input) {
         const errors = [];
         const warnings = [];
-        const inputAny = input;
         const basicFailure = checkThoughtBasics(input);
         if (basicFailure) return basicFailure;
-        const causalGraph = input.causalGraph || {
-          nodes: inputAny.nodes || [],
-          edges: inputAny.edges || []
-        };
+        const causalGraph = readCausalGraph(input);
         if (causalGraph.nodes.length > 0 || causalGraph.edges.length > 0) {
           const graphValidation = this.validateCausalGraph(causalGraph);
           errors.push(...graphValidation.errors);

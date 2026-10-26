@@ -16,10 +16,10 @@ hand-editing the numbers below — they have drifted from source repeatedly.
 
 | Metric | Value |
 |--------|-------|
-| TypeScript Files | 248 (`src/`) |
-| Lines of Code | 119,519 (`src/*.ts`) |
-| Total Exports | 1,202 (487 re-exports) |
-| Passing Tests | 7,257 (248 test files) |
+| TypeScript Files | 249 (`src/`) |
+| Lines of Code | 119,547 (`src/*.ts`) |
+| Total Exports | 1,204 (487 re-exports) |
+| Passing Tests | 7,292 (249 test files) |
 | Reasoning Modes | 34 (30 with dedicated types + 4 advanced runtime) |
 | MCP Tools | 13 listed (legacy `deepthinking` still callable but hidden, see below) |
 | Export Formats | 15 accepted by `ExportService.exportSession` (5 document: json, markdown, latex, html, jupyter; 11 visual incl. native SVG, minus overlap) + file export |

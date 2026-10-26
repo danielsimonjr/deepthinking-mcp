@@ -1,22 +1,22 @@
 {
   "summary": {
-    "totalFiles": 528,
+    "totalFiles": 530,
     "byArea": {
       "docs": {
         "files": 2,
         "loc": 1828
       },
       "src": {
-        "files": 248,
-        "loc": 119519
+        "files": 249,
+        "loc": 119547
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 257,
-        "loc": 108332
+        "files": 258,
+        "loc": 108642
       },
       "tools": {
         "files": 14,
@@ -29,10 +29,10 @@
     },
     "byDisposition": {
       "other": 2,
-      "reachable": 236,
+      "reachable": 237,
       "orphan": 12,
       "template": 5,
-      "test": 257,
+      "test": 258,
       "tool": 14,
       "config": 2
     }
@@ -485,7 +485,7 @@
     {
       "path": "src/modes/handlers/CausalHandler.ts",
       "area": "src",
-      "loc": 675,
+      "loc": 655,
       "disposition": "reachable"
     },
     {
@@ -563,7 +563,7 @@
     {
       "path": "src/modes/handlers/GenericModeHandler.ts",
       "area": "src",
-      "loc": 539,
+      "loc": 526,
       "disposition": "reachable"
     },
     {
@@ -666,6 +666,12 @@
       "path": "src/modes/handlers/TemporalHandler.ts",
       "area": "src",
       "loc": 256,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/handlers/causal-fields.ts",
+      "area": "src",
+      "loc": 61,
       "disposition": "reachable"
     },
     {
@@ -2616,6 +2622,12 @@
       "path": "tests/unit/modes/handlers/TemporalHandler.test.ts",
       "area": "tests",
       "loc": 661,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/causal-fields.test.ts",
+      "area": "tests",
+      "loc": 310,
       "disposition": "test"
     },
     {

@@ -2,9 +2,9 @@ metadata:
   name: deepthinking-mcp
   version: 10.0.2
   lastUpdated: '2026-10-26'
-  totalFiles: 248
+  totalFiles: 249
   totalModules: 14
-  totalExports: 1202
+  totalExports: 1204
 entryPoints:
   - file: src/index.ts
     type: main
@@ -4096,6 +4096,36 @@ modules:
         - BayesianHandler
       classes:
         - BayesianHandler
+    src/modes/handlers/causal-fields.ts:
+      description: The causal fields of a causal thought.
+      externalDependencies: []
+      nodeDependencies: []
+      internalDependencies:
+        - file: ../../types/core.js
+          imports:
+            - ThinkingMode
+        - file: ../../types/core.js
+          imports:
+            - CausalThought
+            - ExtendedThoughtType
+          typeOnly: true
+        - file: ../../types/modes/causal.js
+          imports:
+            - CausalGraph
+          typeOnly: true
+        - file: ../../tools/thinking.js
+          imports:
+            - ThinkingToolInput
+          typeOnly: true
+        - file: ../../utils/type-guards.js
+          imports:
+            - toExtendedThoughtType
+      exports:
+        - readCausalGraph
+        - createCausalFields
+      functions:
+        - readCausalGraph
+        - createCausalFields
     src/modes/handlers/CausalHandler.ts:
       description: CausalHandler - Phase 12 Sprint 6 Enhanced (v8.3.0)
       externalDependencies: []
@@ -4125,9 +4155,10 @@ modules:
             - validationFailure
             - createValidationError
             - createValidationWarning
-        - file: ../../utils/type-guards.js
+        - file: ./causal-fields.js
           imports:
-            - toExtendedThoughtType
+            - createCausalFields
+            - readCausalGraph
         - file: ../causal/graph/algorithms/centrality.js
           imports:
             - computeDegreeCentrality
@@ -4622,6 +4653,9 @@ modules:
         - file: ../../utils/type-guards.js
           imports:
             - toExtendedThoughtType
+        - file: ./causal-fields.js
+          imports:
+            - createCausalFields
       exports:
         - GenericModeHandler
       classes:
@@ -11316,6 +11350,7 @@ dependencyGraph:
         - src/modes/handlers/AnalysisHandler.ts
         - src/modes/handlers/ArgumentationHandler.ts
         - src/modes/handlers/BayesianHandler.ts
+        - src/modes/handlers/causal-fields.ts
         - src/modes/handlers/CausalHandler.ts
         - src/modes/handlers/ComputabilityHandler.ts
         - src/modes/handlers/ConstraintHandler.ts
@@ -11509,18 +11544,18 @@ dependencyGraph:
         - src/validation/validators/registry.ts
         - src/validation/validators/validation-utils.ts
 statistics:
-  totalTypeScriptFiles: 248
+  totalTypeScriptFiles: 249
   totalModules: 14
-  totalLinesOfCode: 119519
-  totalExports: 1202
+  totalLinesOfCode: 119547
+  totalExports: 1204
   totalClasses: 143
   totalInterfaces: 564
-  totalFunctions: 448
+  totalFunctions: 450
   totalTypeGuards: 87
   totalEnums: 3
   totalConstants: 135
   totalReExports: 487
-  totalTypeOnlyImports: 337
+  totalTypeOnlyImports: 340
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 58
   unusedFilesCount: 12
