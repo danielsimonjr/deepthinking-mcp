@@ -8,6 +8,7 @@
 
 import type { TemporalThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -59,34 +60,20 @@ export function exportTemporalTimeline(
   thought: TemporalThought,
   options: VisualExportOptions,
 ): string {
-  const { format, includeLabels = true } = options;
-
-  switch (format) {
-    case "mermaid":
-      return timelineToMermaidGantt(thought, includeLabels);
-    case "dot":
-      return timelineToDOT(thought, includeLabels);
-    case "ascii":
-      return timelineToASCII(thought);
-    case "svg":
-      return timelineToSVG(thought, options);
-    case "graphml":
-      return timelineToGraphML(thought, options);
-    case "tikz":
-      return timelineToTikZ(thought, options);
-    case "html":
-      return timelineToHTML(thought, options);
-    case "modelica":
-      return temporalToModelica(thought, options);
-    case "uml":
-      return temporalToUML(thought, options);
-    case "json":
-      return temporalToJSON(thought, options);
-    case "markdown":
-      return temporalToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: (t, _colorScheme, includeLabels) =>
+      timelineToMermaidGantt(t, includeLabels),
+    dot: timelineToDOT,
+    ascii: timelineToASCII,
+    svg: timelineToSVG,
+    graphml: timelineToGraphML,
+    tikz: timelineToTikZ,
+    html: timelineToHTML,
+    modelica: temporalToModelica,
+    uml: temporalToUML,
+    json: temporalToJSON,
+    markdown: temporalToMarkdown,
+  });
 }
 
 function timelineToMermaidGantt(

@@ -7,6 +7,7 @@
 
 import type { HybridThought } from "../../../types/core.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -70,40 +71,19 @@ export function exportHybridOrchestration(
   thought: HybridThought,
   options: VisualExportOptions,
 ): string {
-  const { format, colorScheme = "default", includeMetrics = true } = options;
-  const includeLabels = options.includeLabels !== false;
-
-  switch (format) {
-    case "mermaid":
-      return hybridToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return hybridToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return hybridToASCII(thought);
-    case "svg":
-      return hybridToSVG(thought, options);
-    case "graphml":
-      return hybridToGraphML(thought, options);
-    case "tikz":
-      return hybridToTikZ(thought, options);
-    case "html":
-      return hybridToHTML(thought, options);
-    case "modelica":
-      return hybridToModelica(thought, options);
-    case "uml":
-      return hybridToUML(thought, options);
-    case "json":
-      return hybridToJSON(thought, options);
-    case "markdown":
-      return hybridToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: hybridToMermaid,
+    dot: hybridToDOT,
+    ascii: hybridToASCII,
+    svg: hybridToSVG,
+    graphml: hybridToGraphML,
+    tikz: hybridToTikZ,
+    html: hybridToHTML,
+    modelica: hybridToModelica,
+    uml: hybridToUML,
+    json: hybridToJSON,
+    markdown: hybridToMarkdown,
+  });
 }
 
 function hybridToMermaid(

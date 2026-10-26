@@ -8,6 +8,7 @@
 
 import type { SequentialThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -64,34 +65,19 @@ export function exportSequentialDependencyGraph(
   thought: SequentialThought,
   options: VisualExportOptions,
 ): string {
-  const { format, colorScheme = "default", includeLabels = true } = options;
-
-  switch (format) {
-    case "mermaid":
-      return sequentialToMermaid(thought, colorScheme, includeLabels);
-    case "dot":
-      return sequentialToDOT(thought, includeLabels);
-    case "ascii":
-      return sequentialToASCII(thought);
-    case "svg":
-      return sequentialToSVG(thought, options);
-    case "graphml":
-      return sequentialToGraphML(thought, options);
-    case "tikz":
-      return sequentialToTikZ(thought, options);
-    case "html":
-      return sequentialToHTML(thought, options);
-    case "modelica":
-      return sequentialToModelica(thought, options);
-    case "uml":
-      return sequentialToUML(thought, options);
-    case "json":
-      return sequentialToJSON(thought, options);
-    case "markdown":
-      return sequentialToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: sequentialToMermaid,
+    dot: sequentialToDOT,
+    ascii: sequentialToASCII,
+    svg: sequentialToSVG,
+    graphml: sequentialToGraphML,
+    tikz: sequentialToTikZ,
+    html: sequentialToHTML,
+    modelica: sequentialToModelica,
+    uml: sequentialToUML,
+    json: sequentialToJSON,
+    markdown: sequentialToMarkdown,
+  });
 }
 
 function sequentialToMermaid(

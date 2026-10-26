@@ -8,6 +8,7 @@
 
 import type { PhysicsThought } from "../../../types/modes/physics.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -77,43 +78,19 @@ export function exportPhysicsVisualization(
   thought: PhysicsThought,
   options: VisualExportOptions,
 ): string {
-  const { format, colorScheme = "default" } = options;
-
-  switch (format) {
-    case "mermaid":
-      return physicsToMermaid(
-        thought,
-        colorScheme,
-        options.includeLabels ?? true,
-        options.includeMetrics ?? true,
-      );
-    case "dot":
-      return physicsToDOT(
-        thought,
-        options.includeLabels ?? true,
-        options.includeMetrics ?? true,
-      );
-    case "ascii":
-      return physicsToASCII(thought);
-    case "svg":
-      return physicsToSVG(thought, options);
-    case "graphml":
-      return physicsToGraphML(thought, options);
-    case "tikz":
-      return physicsToTikZ(thought, options);
-    case "html":
-      return physicsToHTML(thought, options);
-    case "modelica":
-      return physicsToModelica(thought, options);
-    case "uml":
-      return physicsToUML(thought, options);
-    case "json":
-      return physicsToJSON(thought, options);
-    case "markdown":
-      return physicsToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: physicsToMermaid,
+    dot: physicsToDOT,
+    ascii: physicsToASCII,
+    svg: physicsToSVG,
+    graphml: physicsToGraphML,
+    tikz: physicsToTikZ,
+    html: physicsToHTML,
+    modelica: physicsToModelica,
+    uml: physicsToUML,
+    json: physicsToJSON,
+    markdown: physicsToMarkdown,
+  });
 }
 
 function physicsToMermaid(
