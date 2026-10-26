@@ -397,6 +397,9 @@ export function checkUncertaintyRange(input: ThinkingToolInput): HandlerValidati
 // Shared thought fields
 export function createThoughtBase(input: ThinkingToolInput, sessionId: string): ThoughtBase
 export function createThoughtTail(input: ThinkingToolInput): ThoughtTail
+
+// Shared choice of the thought type
+export function resolveThoughtType<T extends string>(inputType: string | undefined, supported: readonly T[], fallback: T): T
 ```
 
 `checkThoughtBasics` returns a failure for a blank thought or for a thought number above the total,
@@ -427,6 +430,12 @@ that result. 3 handlers spread the result where their own five lines stood: `Alg
 `ShannonHandler` also write these five fields, but they keep their own lines, because a spread
 would change the order of the keys of their thought. `GenericModeHandler` keeps its own lines for
 a different reason: it uses `||` for the uncertainty, so an uncertainty of 0 becomes 0.5.
+
+`resolveThoughtType` returns the `thoughtType` of the input when it is in the list `supported`,
+and `fallback` for any other value, including a missing or empty one. The match is exact, so the
+case matters. 20 handlers call it in `createThought`: `AlgorithmicHandler`, `AnalysisHandler`, `ArgumentationHandler`, `ComputabilityHandler`, `ConstraintHandler`, `CritiqueHandler`, `CryptanalyticHandler`, `EvidentialHandler`, `FormalLogicHandler`, `GameTheoryHandler`, `HistoricalHandler`, `MathematicsHandler`, `ModalHandler`, `OptimizationHandler`, `PhysicsHandler`, `ScientificMethodHandler`, `StochasticHandler`, `SynthesisHandler`, `SystemsThinkingHandler` and `TemporalHandler`.
+`RecursiveHandler` keeps its own private method, because that method tests the value with a type
+guard.
 
 `getEnhancements` and `supportsThoughtType` are optional on the interface. All 36 handler classes
 implement `getEnhancements`. All handlers except `AbductiveHandler`, `AnalogicalHandler` and
@@ -663,7 +672,6 @@ export class AlgorithmicHandler implements ModeHandler {
   getEnhancements(thought: AlgorithmicThought): ModeEnhancements
   supportsThoughtType(thoughtType: string): boolean
 
-  private resolveThoughtType(inputType: string | undefined): AlgorithmicThoughtType
   private resolveDesignPattern(value: unknown, notes: (string | undefined)[]): DesignPattern | undefined
   private normalizeTimeComplexity(tc: Sent<"timeComplexity">): TimeComplexity
   private normalizeSpaceComplexity(sc: Sent<"spaceComplexity">): SpaceComplexity

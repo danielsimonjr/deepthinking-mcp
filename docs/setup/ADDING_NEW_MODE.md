@@ -262,12 +262,12 @@ import {
   ModeHandler,
   ValidationResult,
   ModeEnhancements,
+  ValidationWarning,
   validationSuccess,
-  createValidationWarning,
   createThoughtBase,
   checkThoughtBasics,
+  resolveThoughtType,
 } from './ModeHandler.js';
-import { toExtendedThoughtType } from '../../utils/type-guards.js';
 
 /**
  * YourModeHandler - Specialized handler for yourmode reasoning
@@ -295,7 +295,11 @@ export class YourModeHandler implements ModeHandler {
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.YOURMODE,
-      thoughtType: toExtendedThoughtType(input.thoughtType, 'analysis'),
+      thoughtType: resolveThoughtType(
+        input.thoughtType,
+        this.supportedThoughtTypes,
+        'analysis',
+      ),
       // Map mode-specific properties from input
       // hypotheses: input.hypotheses || [],
     } as YourModeThought;
@@ -307,7 +311,7 @@ export class YourModeHandler implements ModeHandler {
    * Performs semantic validation beyond schema validation.
    */
   validate(input: ThinkingToolInput): ValidationResult {
-    const warnings = [];
+    const warnings: ValidationWarning[] = [];
 
     // Basic validation
     const basicFailure = checkThoughtBasics(input);
@@ -315,6 +319,8 @@ export class YourModeHandler implements ModeHandler {
 
     // Add mode-specific validation
     // Example: Check for required fields when certain thought types are used
+    // To report a suggestion, import createValidationWarning from './ModeHandler.js' and call
+    //   warnings.push(createValidationWarning('field', 'Message', 'Suggestion'));
 
     return validationSuccess(warnings);
   }
@@ -322,7 +328,8 @@ export class YourModeHandler implements ModeHandler {
   /**
    * Get mode-specific enhancements
    */
-  getEnhancements(thought: YourModeThought): ModeEnhancements {
+  getEnhancements(_thought: YourModeThought): ModeEnhancements {
+    // Rename _thought to thought when your enhancements read it
     return {
       suggestions: [
         // Context-aware suggestions based on thought content
@@ -353,6 +360,7 @@ export class YourModeHandler implements ModeHandler {
 **Notes**:
 - `createThoughtBase(input, sessionId)` builds the seven fields that start every thought. Spread it first, then add the revision fields, `mode` and the fields of your mode.
 - `checkThoughtBasics(input)` fails for a blank thought and for a thought number above the total. Call it first in `validate`, and return its failure when there is one.
+- `resolveThoughtType(inputType, supported, fallback)` returns the thought type of the input when your list has it, and your default type for any other value. Call it in `createThought` in place of your own check.
 - `ModeHandler.ts` also exports `checkThoughtType`, `checkUncertaintyRange` and `createThoughtTail`. `docs/architecture/COMPONENTS.md` describes each one.
 
 **Reference Examples**:

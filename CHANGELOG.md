@@ -519,6 +519,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The mode template and the setup guide compile under the strict settings.** A copy of
+  `templates/mode-scaffolding/example-mode.handler.ts` and a copy of the handler block in
+  `docs/setup/ADDING_NEW_MODE.md` gave 8 errors under the settings of this repository. In both,
+  `const warnings = [];` is an implicit `any[]` (TS7034 and TS7005). The template declared
+  `inputAny` and never read it. The guide imported `createValidationWarning` and named `thought`
+  without reading either. The guide also called `toExtendedThoughtType(input.thoughtType, 'analysis')`,
+  but `'analysis'` is not an `ExtendedThoughtType`. Now `warnings` has the type `ValidationWarning[]`
+  in both files. The `inputAny` line of the template stands in the comment above the first example
+  rule. The guide calls the shared `resolveThoughtType`, writes the use of `createValidationWarning`
+  in a comment, and names the parameter `_thought`. A scratch copy of each block, with the
+  placeholder mode replaced, compiles with 0 errors after the change. `COMPONENTS.md` now describes
+  `resolveThoughtType` and no longer lists the private method that `AlgorithmicHandler` lost when 20
+  handlers began to share the function. The guide has a note on the function.
 - **The formula that a do-calculus rule returns had empty parts.** `applyRule1`, `applyRule2` and
   `applyRule3` in `src/modes/causal/graph/algorithms/intervention.ts` joined the lists with fixed
   commas. An empty W gave `P(Y|do(X),)`. An empty Z in rule 2 gave `P(Y|do(X),,W)`. An empty X gave
