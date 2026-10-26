@@ -220,14 +220,7 @@ export function renderStadiumNode(
   pos: SVGNodePosition,
   colors: { fill: string; stroke: string },
 ): string {
-  const escapedLabel = escapeSVGText(truncateText(pos.label, 25));
-  return `
-    <g class="node" data-id="${pos.id}">
-      <rect x="${pos.x}" y="${pos.y}" width="${pos.width}" height="${pos.height}"
-            rx="20" ry="20" fill="${colors.fill}" stroke="${colors.stroke}" stroke-width="2"/>
-      <text x="${pos.x + pos.width / 2}" y="${pos.y + pos.height / 2 + 5}"
-            text-anchor="middle" class="node-label">${escapedLabel}</text>
-    </g>`;
+  return renderRectNode(pos, colors, 20);
 }
 
 /**
@@ -602,6 +595,19 @@ export interface SVGPathOptions extends SVGLineOptions {
 }
 
 /**
+ * Push the paint attributes of a rect, circle, ellipse or polygon: fill, stroke,
+ * stroke-width and opacity, in that order. A falsy fill, stroke or stroke width is
+ * left out. An opacity of 0 is kept.
+ */
+function pushPaint(attrs: string[], options?: SVGShapeOptions): void {
+  if (options?.fill) attrs.push(`fill="${options.fill}"`);
+  if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
+  if (options?.strokeWidth) attrs.push(`stroke-width="${options.strokeWidth}"`);
+  if (options?.opacity !== undefined)
+    attrs.push(`opacity="${options.opacity}"`);
+}
+
+/**
  * The shapes SVGBuilder and SVGGroupBuilder write the same way.
  * A subclass sets `indent`, the spaces before each element line.
  */
@@ -631,12 +637,7 @@ abstract class SVGElementBuilder {
       `width="${width}"`,
       `height="${height}"`,
     ];
-    if (options?.fill) attrs.push(`fill="${options.fill}"`);
-    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth)
-      attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.opacity !== undefined)
-      attrs.push(`opacity="${options.opacity}"`);
+    pushPaint(attrs, options);
     if (options?.rx) attrs.push(`rx="${options.rx}"`);
     if (options?.ry) attrs.push(`ry="${options.ry}"`);
     if (options?.className) attrs.push(`class="${options.className}"`);
@@ -660,12 +661,7 @@ abstract class SVGElementBuilder {
     options?: SVGShapeOptions,
   ): this {
     const attrs = [`cx="${cx}"`, `cy="${cy}"`, `r="${r}"`];
-    if (options?.fill) attrs.push(`fill="${options.fill}"`);
-    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth)
-      attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.opacity !== undefined)
-      attrs.push(`opacity="${options.opacity}"`);
+    pushPaint(attrs, options);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
     this.elements.push(`${this.indent}<circle ${attrs.join(" ")}/>`);
@@ -923,12 +919,7 @@ export class SVGBuilder extends SVGElementBuilder {
     options?: SVGShapeOptions,
   ): this {
     const attrs = [`cx="${cx}"`, `cy="${cy}"`, `rx="${rx}"`, `ry="${ry}"`];
-    if (options?.fill) attrs.push(`fill="${options.fill}"`);
-    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth)
-      attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.opacity !== undefined)
-      attrs.push(`opacity="${options.opacity}"`);
+    pushPaint(attrs, options);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
     this.elements.push(`  <ellipse ${attrs.join(" ")}/>`);
@@ -965,12 +956,7 @@ export class SVGBuilder extends SVGElementBuilder {
   addPolygon(points: Array<[number, number]>, options?: SVGShapeOptions): this {
     const pointsStr = points.map((p) => `${p[0]},${p[1]}`).join(" ");
     const attrs = [`points="${pointsStr}"`];
-    if (options?.fill) attrs.push(`fill="${options.fill}"`);
-    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth)
-      attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.opacity !== undefined)
-      attrs.push(`opacity="${options.opacity}"`);
+    pushPaint(attrs, options);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
     this.elements.push(`  <polygon ${attrs.join(" ")}/>`);

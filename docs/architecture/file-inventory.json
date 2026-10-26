@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 522,
+    "totalFiles": 524,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 247,
-        "loc": 119513
+        "loc": 119499
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 252,
-        "loc": 107660
+        "files": 254,
+        "loc": 107811
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 235,
       "orphan": 12,
       "template": 5,
-      "test": 252,
+      "test": 254,
       "tool": 14,
       "config": 2
     }
@@ -341,7 +341,7 @@
     {
       "path": "src/export/visual/utils/svg.ts",
       "area": "src",
-      "loc": 1209,
+      "loc": 1195,
       "disposition": "reachable"
     },
     {
@@ -2262,6 +2262,18 @@
       "path": "tests/unit/export/visual/utils/graph-builders.test.ts",
       "area": "tests",
       "loc": 680,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/visual/utils/svg-node-renderers.test.ts",
+      "area": "tests",
+      "loc": 61,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/visual/utils/svg-paint-attributes.test.ts",
+      "area": "tests",
+      "loc": 90,
       "disposition": "test"
     },
     {
