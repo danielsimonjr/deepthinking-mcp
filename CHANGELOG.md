@@ -142,6 +142,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before and after. The run covered the 35 mode handlers and 35 generic handlers, one for each mode.
   Each handler received 7 thought values, 7 pairs of thought numbers and 4 sets of extra fields. Ten new tests in `ModeHandler.test.ts` pin
   the error codes, the messages, the order of the two checks and the fresh result on each call.
+- **Three handlers end their thought with one shared helper.** `AlgorithmicHandler`,
+  `ComputabilityHandler` and `CryptanalyticHandler` each wrote the same five fields in the same
+  order: the dependencies, the assumptions, the uncertainty, `isRevision` and `revisesThought`. The
+  exported `createThoughtTail(input)` in `src/modes/handlers/ModeHandler.ts` now builds them. The
+  lists default to an empty list, the uncertainty defaults to 0.5 (an uncertainty of 0 stays 0), and
+  the two revision fields are copied as given. Each handler spreads the result where its five lines
+  stood, so the key order of the returned thought does not change. `MathematicsHandler`,
+  `PhysicsHandler` and `ShannonHandler` write the same fields in another order or apart, so they keep
+  their own lines; a spread there would reorder the keys of the thought they return.
+  `GenericModeHandler` uses `||` for the uncertainty and also stays. Results do not change. A run of
+  201,600 `createThought` calls over ten handlers gave the same output, key order included, before
+  and after. 22 new tests in `thought-tail.test.ts` pin the helper and the three call sites, and 26
+  mutants of the helper and the call sites all fail a test.
 - **Eight lists in the LaTeX exporter share one helper.** `LaTeXExporter` wrote eight lists of
   escaped strings with the same four lines: the begin line, a loop that writes one `\item` line per
   element, and the end line. The lists are the assumptions, the invariants of a model, the

@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 525,
+    "totalFiles": 526,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 247,
-        "loc": 119491
+        "loc": 119503
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 255,
-        "loc": 107979
+        "files": 256,
+        "loc": 108150
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 235,
       "orphan": 12,
       "template": 5,
-      "test": 255,
+      "test": 256,
       "tool": 14,
       "config": 2
     }
@@ -455,7 +455,7 @@
     {
       "path": "src/modes/handlers/AlgorithmicHandler.ts",
       "area": "src",
-      "loc": 1173,
+      "loc": 1168,
       "disposition": "reachable"
     },
     {
@@ -491,7 +491,7 @@
     {
       "path": "src/modes/handlers/ComputabilityHandler.ts",
       "area": "src",
-      "loc": 583,
+      "loc": 578,
       "disposition": "reachable"
     },
     {
@@ -515,7 +515,7 @@
     {
       "path": "src/modes/handlers/CryptanalyticHandler.ts",
       "area": "src",
-      "loc": 575,
+      "loc": 570,
       "disposition": "reachable"
     },
     {
@@ -605,7 +605,7 @@
     {
       "path": "src/modes/handlers/ModeHandler.ts",
       "area": "src",
-      "loc": 352,
+      "loc": 379,
       "disposition": "reachable"
     },
     {
@@ -2640,6 +2640,12 @@
       "path": "tests/unit/modes/handlers/stochastic-engine-wiring.test.ts",
       "area": "tests",
       "loc": 205,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/thought-tail.test.ts",
+      "area": "tests",
+      "loc": 171,
       "disposition": "test"
     },
     {

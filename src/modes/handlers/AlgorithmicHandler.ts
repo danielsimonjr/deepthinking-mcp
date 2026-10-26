@@ -36,6 +36,7 @@ import {
   checkThoughtBasics,
   checkUncertaintyRange,
   createThoughtBase,
+  createThoughtTail,
   validationSuccess,
   validationFailure,
   createValidationWarning,
@@ -328,14 +329,8 @@ export class AlgorithmicHandler implements ModeHandler {
         : undefined,
       keyInsight: req.keyInsight,
 
-      // Dependencies and assumptions
-      dependencies: input.dependencies || [],
-      assumptions: input.assumptions || [],
-      uncertainty: input.uncertainty ?? 0.5,
-
-      // Revision tracking
-      isRevision: input.isRevision,
-      revisesThought: input.revisesThought,
+      // Dependencies, assumptions, uncertainty and revision tracking
+      ...createThoughtTail(input),
 
       ...inputWarningsField(notes),
     };
