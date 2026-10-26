@@ -18,6 +18,9 @@ import type {
   DSeparationConfig,
   VStructure,
 } from "../types.js";
+import { combinations, getAncestors, getDescendants } from "./graph-utils.js";
+
+export { getAncestors };
 
 // ============================================================================
 // GRAPH UTILITIES
@@ -67,46 +70,6 @@ function getParents(graph: CausalGraph, nodeId: string): string[] {
   return graph.edges
     .filter((e) => e.to === nodeId && e.type !== "bidirected")
     .map((e) => e.from);
-}
-
-/**
- * Get all descendants of a node
- */
-function getDescendants(graph: CausalGraph, nodeId: string): Set<string> {
-  const descendants = new Set<string>();
-  const stack = [nodeId];
-
-  while (stack.length > 0) {
-    const current = stack.pop()!;
-    for (const edge of graph.edges) {
-      if (edge.from === current && !descendants.has(edge.to)) {
-        descendants.add(edge.to);
-        stack.push(edge.to);
-      }
-    }
-  }
-
-  return descendants;
-}
-
-/**
- * Get all ancestors of a node
- */
-export function getAncestors(graph: CausalGraph, nodeId: string): Set<string> {
-  const ancestors = new Set<string>();
-  const stack = [nodeId];
-
-  while (stack.length > 0) {
-    const current = stack.pop()!;
-    for (const edge of graph.edges) {
-      if (edge.to === current && !ancestors.has(edge.from)) {
-        ancestors.add(edge.from);
-        stack.push(edge.from);
-      }
-    }
-  }
-
-  return ancestors;
 }
 
 // ============================================================================
@@ -377,18 +340,6 @@ function findSeparatorOfSize(
     return result.separated ? [] : null;
   }
 
-  function* combinations(arr: string[], k: number): Generator<string[]> {
-    if (k === 0) {
-      yield [];
-      return;
-    }
-    for (let i = 0; i <= arr.length - k; i++) {
-      for (const rest of combinations(arr.slice(i + 1), k - 1)) {
-        yield [arr[i], ...rest];
-      }
-    }
-  }
-
   for (const subset of combinations(candidates, size)) {
     const result = checkDSeparation(graph, { x, y, z: subset });
     if (result.separated) {
@@ -540,18 +491,6 @@ function findBackdoorSetOfSize(
   candidates: string[],
   size: number,
 ): string[] | null {
-  function* combinations(arr: string[], k: number): Generator<string[]> {
-    if (k === 0) {
-      yield [];
-      return;
-    }
-    for (let i = 0; i <= arr.length - k; i++) {
-      for (const rest of combinations(arr.slice(i + 1), k - 1)) {
-        yield [arr[i], ...rest];
-      }
-    }
-  }
-
   for (const subset of combinations(candidates, size)) {
     if (isValidBackdoorAdjustment(graph, treatment, outcome, subset)) {
       return subset;
@@ -638,7 +577,7 @@ export function getImpliedIndependencies(
         size <= Math.min(maxConditioningSize, others.length);
         size++
       ) {
-        for (const z of getCombinations(others, size)) {
+        for (const z of combinations(others, size)) {
           const result = checkDSeparation(graph, { x: [x], y: [y], z });
           if (result.separated) {
             independencies.push({ x, y, z, separated: true });
@@ -649,19 +588,4 @@ export function getImpliedIndependencies(
   }
 
   return independencies;
-}
-
-/**
- * Generate combinations helper
- */
-function* getCombinations(arr: string[], k: number): Generator<string[]> {
-  if (k === 0) {
-    yield [];
-    return;
-  }
-  for (let i = 0; i <= arr.length - k; i++) {
-    for (const rest of getCombinations(arr.slice(i + 1), k - 1)) {
-      yield [arr[i], ...rest];
-    }
-  }
 }

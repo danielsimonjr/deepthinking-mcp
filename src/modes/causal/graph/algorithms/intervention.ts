@@ -21,6 +21,7 @@ import {
   findBackdoorAdjustmentSet,
   isValidBackdoorAdjustment,
 } from "./d-separation.js";
+import { combinations, getAncestors, getDescendants } from "./graph-utils.js";
 
 // ============================================================================
 // GRAPH MANIPULATION
@@ -185,7 +186,7 @@ export function findAllBackdoorSets(
 
   // Generate all subsets up to maxSize
   for (let size = 0; size <= Math.min(maxSize, candidates.length); size++) {
-    for (const subset of getCombinations(candidates, size)) {
+    for (const subset of combinations(candidates, size)) {
       if (isValidBackdoorAdjustment(graph, treatment, outcome, subset)) {
         validSets.push(subset);
       }
@@ -670,54 +671,4 @@ export function analyzeIntervention(
     estimand: adjustment?.latex,
     adjustment,
   };
-}
-
-// ============================================================================
-// HELPER FUNCTIONS
-// ============================================================================
-
-function getDescendants(graph: CausalGraph, nodeId: string): Set<string> {
-  const descendants = new Set<string>();
-  const stack = [nodeId];
-
-  while (stack.length > 0) {
-    const current = stack.pop()!;
-    for (const edge of graph.edges) {
-      if (edge.from === current && !descendants.has(edge.to)) {
-        descendants.add(edge.to);
-        stack.push(edge.to);
-      }
-    }
-  }
-
-  return descendants;
-}
-
-function getAncestors(graph: CausalGraph, nodeId: string): Set<string> {
-  const ancestors = new Set<string>();
-  const stack = [nodeId];
-
-  while (stack.length > 0) {
-    const current = stack.pop()!;
-    for (const edge of graph.edges) {
-      if (edge.to === current && !ancestors.has(edge.from)) {
-        ancestors.add(edge.from);
-        stack.push(edge.from);
-      }
-    }
-  }
-
-  return ancestors;
-}
-
-function* getCombinations(arr: string[], k: number): Generator<string[]> {
-  if (k === 0) {
-    yield [];
-    return;
-  }
-  for (let i = 0; i <= arr.length - k; i++) {
-    for (const rest of getCombinations(arr.slice(i + 1), k - 1)) {
-      yield [arr[i], ...rest];
-    }
-  }
 }
