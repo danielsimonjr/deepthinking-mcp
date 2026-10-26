@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-26'
   totalFiles: 247
   totalModules: 14
-  totalExports: 1198
+  totalExports: 1200
 entryPoints:
   - file: src/index.ts
     type: main
@@ -3928,10 +3928,10 @@ modules:
             - ValidationResult
             - ModeEnhancements
             - checkThoughtBasics
+            - checkUncertaintyRange
             - createThoughtBase
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
         - file: ./input-warnings.js
           imports:
@@ -4176,10 +4176,11 @@ modules:
             - ValidationResult
             - ModeEnhancements
             - checkThoughtBasics
+            - checkThoughtType
+            - checkUncertaintyRange
             - createThoughtBase
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
       exports:
         - ComputabilityHandler
@@ -4215,6 +4216,7 @@ modules:
             - ValidationWarning
             - ModeEnhancements
             - checkThoughtBasics
+            - checkThoughtType
             - createThoughtBase
             - validationSuccess
             - validationFailure
@@ -4339,10 +4341,11 @@ modules:
             - ValidationResult
             - ModeEnhancements
             - checkThoughtBasics
+            - checkThoughtType
+            - checkUncertaintyRange
             - createThoughtBase
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
       exports:
         - CryptanalyticHandler
@@ -4686,6 +4689,7 @@ modules:
             - ValidationResult
             - ModeEnhancements
             - checkThoughtBasics
+            - checkThoughtType
             - createThoughtBase
             - validationSuccess
             - validationFailure
@@ -4771,6 +4775,8 @@ modules:
             - ValidationResult
             - ModeEnhancements
             - checkThoughtBasics
+            - checkThoughtType
+            - checkUncertaintyRange
             - createThoughtBase
             - validationSuccess
             - validationFailure
@@ -4849,6 +4855,7 @@ modules:
             - ValidationWarning
             - ModeEnhancements
             - checkThoughtBasics
+            - checkThoughtType
             - createThoughtBase
             - validationSuccess
             - validationFailure
@@ -4880,6 +4887,8 @@ modules:
         - validationFailure
         - createValidationError
         - checkThoughtBasics
+        - checkThoughtType
+        - checkUncertaintyRange
         - createThoughtBase
         - createValidationWarning
       interfaces:
@@ -4895,6 +4904,8 @@ modules:
         - validationFailure
         - createValidationError
         - checkThoughtBasics
+        - checkThoughtType
+        - checkUncertaintyRange
         - createThoughtBase
         - createValidationWarning
     src/modes/handlers/OptimizationHandler.ts:
@@ -4928,6 +4939,7 @@ modules:
             - ValidationResult
             - ModeEnhancements
             - checkThoughtBasics
+            - checkThoughtType
             - createThoughtBase
             - validationSuccess
             - validationFailure
@@ -4962,6 +4974,8 @@ modules:
             - ValidationResult
             - ModeEnhancements
             - checkThoughtBasics
+            - checkThoughtType
+            - checkUncertaintyRange
             - createThoughtBase
             - validationSuccess
             - validationFailure
@@ -5107,6 +5121,7 @@ modules:
             - ValidationResult
             - ModeEnhancements
             - checkThoughtBasics
+            - checkUncertaintyRange
             - createThoughtBase
             - validationSuccess
             - validationFailure
@@ -5143,6 +5158,7 @@ modules:
             - ValidationWarning
             - ModeEnhancements
             - checkThoughtBasics
+            - checkThoughtType
             - createThoughtBase
             - validationSuccess
             - validationFailure
@@ -11469,11 +11485,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 247
   totalModules: 14
-  totalLinesOfCode: 119599
-  totalExports: 1198
+  totalLinesOfCode: 119513
+  totalExports: 1200
   totalClasses: 143
   totalInterfaces: 563
-  totalFunctions: 444
+  totalFunctions: 446
   totalTypeGuards: 87
   totalEnums: 3
   totalConstants: 135

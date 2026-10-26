@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-26",
     "totalFiles": 247,
     "totalModules": 14,
-    "totalExports": 1198
+    "totalExports": 1200
   },
   "entryPoints": [
     {
@@ -5661,10 +5661,10 @@
               "ValidationResult",
               "ModeEnhancements",
               "checkThoughtBasics",
+              "checkUncertaintyRange",
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           },
@@ -6039,10 +6039,11 @@
               "ValidationResult",
               "ModeEnhancements",
               "checkThoughtBasics",
+              "checkThoughtType",
+              "checkUncertaintyRange",
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           }
@@ -6098,6 +6099,7 @@
               "ValidationWarning",
               "ModeEnhancements",
               "checkThoughtBasics",
+              "checkThoughtType",
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
@@ -6285,10 +6287,11 @@
               "ValidationResult",
               "ModeEnhancements",
               "checkThoughtBasics",
+              "checkThoughtType",
+              "checkUncertaintyRange",
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           }
@@ -6806,6 +6809,7 @@
               "ValidationResult",
               "ModeEnhancements",
               "checkThoughtBasics",
+              "checkThoughtType",
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
@@ -6930,6 +6934,8 @@
               "ValidationResult",
               "ModeEnhancements",
               "checkThoughtBasics",
+              "checkThoughtType",
+              "checkUncertaintyRange",
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
@@ -7044,6 +7050,7 @@
               "ValidationWarning",
               "ModeEnhancements",
               "checkThoughtBasics",
+              "checkThoughtType",
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
@@ -7092,6 +7099,8 @@
           "validationFailure",
           "createValidationError",
           "checkThoughtBasics",
+          "checkThoughtType",
+          "checkUncertaintyRange",
           "createThoughtBase",
           "createValidationWarning"
         ],
@@ -7109,6 +7118,8 @@
           "validationFailure",
           "createValidationError",
           "checkThoughtBasics",
+          "checkThoughtType",
+          "checkUncertaintyRange",
           "createThoughtBase",
           "createValidationWarning"
         ]
@@ -7158,6 +7169,7 @@
               "ValidationResult",
               "ModeEnhancements",
               "checkThoughtBasics",
+              "checkThoughtType",
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
@@ -7208,6 +7220,8 @@
               "ValidationResult",
               "ModeEnhancements",
               "checkThoughtBasics",
+              "checkThoughtType",
+              "checkUncertaintyRange",
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
@@ -7428,6 +7442,7 @@
               "ValidationResult",
               "ModeEnhancements",
               "checkThoughtBasics",
+              "checkUncertaintyRange",
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
@@ -7484,6 +7499,7 @@
               "ValidationWarning",
               "ModeEnhancements",
               "checkThoughtBasics",
+              "checkThoughtType",
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
@@ -16468,11 +16484,11 @@
   "statistics": {
     "totalTypeScriptFiles": 247,
     "totalModules": 14,
-    "totalLinesOfCode": 119599,
-    "totalExports": 1198,
+    "totalLinesOfCode": 119513,
+    "totalExports": 1200,
     "totalClasses": 143,
     "totalInterfaces": 563,
-    "totalFunctions": 444,
+    "totalFunctions": 446,
     "totalTypeGuards": 87,
     "totalEnums": 3,
     "totalConstants": 135,

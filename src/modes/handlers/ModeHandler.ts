@@ -258,6 +258,52 @@ export function checkThoughtBasics(
 }
 
 /**
+ * Check the `thoughtType` of the input against the types a handler accepts.
+ *
+ * Returns the warning for a `thoughtType` that is set but is not in
+ * `validTypes`, or `undefined` when the field is empty or valid. The match is
+ * exact, so the case matters. A handler calls this in `validate` after
+ * `checkThoughtBasics` and adds the warning to its list when there is one.
+ */
+export function checkThoughtType(
+  input: ThinkingToolInput,
+  validTypes: readonly string[],
+): ValidationWarning | undefined {
+  const { thoughtType } = input as { thoughtType?: unknown };
+  if (thoughtType && !validTypes.includes(thoughtType as string)) {
+    return createValidationWarning(
+      "thoughtType",
+      `Unknown thought type: ${thoughtType}`,
+      `Valid types: ${validTypes.join(", ")}`,
+    );
+  }
+  return undefined;
+}
+
+/**
+ * Check that the `uncertainty` of the input, when it is set, lies from 0 to 1.
+ *
+ * Returns the error for a value outside that range, or `undefined`. A value
+ * that no comparison can order, such as `NaN`, is not an error. A handler adds
+ * the error to its list when there is one.
+ */
+export function checkUncertaintyRange(
+  input: ThinkingToolInput,
+): HandlerValidationError | undefined {
+  if (
+    input.uncertainty !== undefined &&
+    (input.uncertainty < 0 || input.uncertainty > 1)
+  ) {
+    return createValidationError(
+      "uncertainty",
+      `Uncertainty (${input.uncertainty}) must be between 0 and 1`,
+      "UNCERTAINTY_OUT_OF_RANGE",
+    );
+  }
+  return undefined;
+}
+
+/**
  * The fields that every handler copies from the input into a new thought.
  */
 type ThoughtBase = Pick<

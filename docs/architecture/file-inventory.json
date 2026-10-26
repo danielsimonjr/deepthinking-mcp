@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 521,
+    "totalFiles": 522,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 247,
-        "loc": 119599
+        "loc": 119513
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 251,
-        "loc": 107405
+        "files": 252,
+        "loc": 107660
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 235,
       "orphan": 12,
       "template": 5,
-      "test": 251,
+      "test": 252,
       "tool": 14,
       "config": 2
     }
@@ -455,7 +455,7 @@
     {
       "path": "src/modes/handlers/AlgorithmicHandler.ts",
       "area": "src",
-      "loc": 1182,
+      "loc": 1173,
       "disposition": "reachable"
     },
     {
@@ -491,13 +491,13 @@
     {
       "path": "src/modes/handlers/ComputabilityHandler.ts",
       "area": "src",
-      "loc": 601,
+      "loc": 583,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/ConstraintHandler.ts",
       "area": "src",
-      "loc": 658,
+      "loc": 649,
       "disposition": "reachable"
     },
     {
@@ -515,7 +515,7 @@
     {
       "path": "src/modes/handlers/CryptanalyticHandler.ts",
       "area": "src",
-      "loc": 593,
+      "loc": 575,
       "disposition": "reachable"
     },
     {
@@ -575,7 +575,7 @@
     {
       "path": "src/modes/handlers/HybridHandler.ts",
       "area": "src",
-      "loc": 711,
+      "loc": 702,
       "disposition": "reachable"
     },
     {
@@ -587,7 +587,7 @@
     {
       "path": "src/modes/handlers/MathematicsHandler.ts",
       "area": "src",
-      "loc": 514,
+      "loc": 497,
       "disposition": "reachable"
     },
     {
@@ -599,25 +599,25 @@
     {
       "path": "src/modes/handlers/ModalHandler.ts",
       "area": "src",
-      "loc": 643,
+      "loc": 634,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/ModeHandler.ts",
       "area": "src",
-      "loc": 306,
+      "loc": 352,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/OptimizationHandler.ts",
       "area": "src",
-      "loc": 596,
+      "loc": 587,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/PhysicsHandler.ts",
       "area": "src",
-      "loc": 555,
+      "loc": 538,
       "disposition": "reachable"
     },
     {
@@ -641,13 +641,13 @@
     {
       "path": "src/modes/handlers/ShannonHandler.ts",
       "area": "src",
-      "loc": 399,
+      "loc": 391,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/StochasticHandler.ts",
       "area": "src",
-      "loc": 841,
+      "loc": 832,
       "disposition": "reachable"
     },
     {
@@ -2531,7 +2531,7 @@
     {
       "path": "tests/unit/modes/handlers/ModeHandler.test.ts",
       "area": "tests",
-      "loc": 300,
+      "loc": 418,
       "disposition": "test"
     },
     {
@@ -2622,6 +2622,12 @@
       "path": "tests/unit/modes/handlers/stochastic-engine-wiring.test.ts",
       "area": "tests",
       "loc": 205,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/validate-checks-wiring.test.ts",
+      "area": "tests",
+      "loc": 137,
       "disposition": "test"
     },
     {

@@ -21,6 +21,7 @@ import {
   ValidationResult,
   ModeEnhancements,
   checkThoughtBasics,
+  checkThoughtType,
   createThoughtBase,
   validationSuccess,
   validationFailure,
@@ -241,18 +242,8 @@ export class HybridHandler implements ModeHandler {
     if (basicFailure) return basicFailure;
 
     // Validate thought type
-    if (
-      inputAny.thoughtType &&
-      !VALID_THOUGHT_TYPES.includes(inputAny.thoughtType)
-    ) {
-      warnings.push(
-        createValidationWarning(
-          "thoughtType",
-          `Unknown thought type: ${inputAny.thoughtType}`,
-          `Valid types: ${VALID_THOUGHT_TYPES.join(", ")}`,
-        ),
-      );
-    }
+    const thoughtTypeWarning = checkThoughtType(input, VALID_THOUGHT_TYPES);
+    if (thoughtTypeWarning) warnings.push(thoughtTypeWarning);
 
     // Validate synthesis strategy
     if (

@@ -2738,9 +2738,9 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 524 | repo-tools map (whole repository) |
-| totalLinesOfCode | 234070 | repo-tools map (whole repository) |
-| totalExports | 2177 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 525 | repo-tools map (whole repository) |
+| totalLinesOfCode | 234238 | repo-tools map (whole repository) |
+| totalExports | 2179 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | reachableFiles | 239 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
