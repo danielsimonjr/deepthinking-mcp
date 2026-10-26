@@ -393,94 +393,16 @@ export function getDotColor(
 
 /**
  * Generate a complete DOT graph
+ *
+ * Builds the text with {@link DOTGraphBuilder}, so this function and
+ * `DOTGraphBuilder.render` always write the same output.
  */
 export function generateDotGraph(
   nodes: DotNode[],
   edges: DotEdge[],
   options: DotOptions = {},
 ): string {
-  const {
-    graphType = "digraph",
-    graphName = "G",
-    rankDir = "TB",
-    splines,
-    overlap,
-    concentrate,
-    compound,
-    bgcolor,
-    fontName,
-    fontSize,
-    nodeDefaults,
-    edgeDefaults,
-  } = options;
-
-  const lines: string[] = [];
-  const directed = graphType === "digraph";
-
-  // Graph header
-  lines.push(`${graphType} ${sanitizeDotId(graphName)} {`);
-
-  // Graph attributes
-  lines.push(`  rankdir=${rankDir};`);
-  if (splines) lines.push(`  splines=${splines};`);
-  if (overlap !== undefined) lines.push(`  overlap=${overlap};`);
-  if (concentrate) lines.push("  concentrate=true;");
-  if (compound) lines.push("  compound=true;");
-  if (bgcolor) lines.push(`  bgcolor="${bgcolor}";`);
-  if (fontName) lines.push(`  fontname="${fontName}";`);
-  if (fontSize) lines.push(`  fontsize=${fontSize};`);
-
-  // Node defaults
-  if (nodeDefaults) {
-    const defaultAttrs: string[] = [];
-    if (nodeDefaults.shape) defaultAttrs.push(`shape=${nodeDefaults.shape}`);
-    if (nodeDefaults.style) {
-      const styleStr = Array.isArray(nodeDefaults.style)
-        ? nodeDefaults.style.join(",")
-        : nodeDefaults.style;
-      defaultAttrs.push(`style="${styleStr}"`);
-    }
-    if (nodeDefaults.fillColor)
-      defaultAttrs.push(`fillcolor="${nodeDefaults.fillColor}"`);
-    if (nodeDefaults.fontName)
-      defaultAttrs.push(`fontname="${nodeDefaults.fontName}"`);
-    if (nodeDefaults.fontSize)
-      defaultAttrs.push(`fontsize=${nodeDefaults.fontSize}`);
-    if (defaultAttrs.length > 0) {
-      lines.push(`  node [${defaultAttrs.join(", ")}];`);
-    }
-  }
-
-  // Edge defaults
-  if (edgeDefaults) {
-    const defaultAttrs: string[] = [];
-    if (edgeDefaults.style) defaultAttrs.push(`style=${edgeDefaults.style}`);
-    if (edgeDefaults.color) defaultAttrs.push(`color="${edgeDefaults.color}"`);
-    if (edgeDefaults.arrowHead)
-      defaultAttrs.push(`arrowhead=${edgeDefaults.arrowHead}`);
-    if (defaultAttrs.length > 0) {
-      lines.push(`  edge [${defaultAttrs.join(", ")}];`);
-    }
-  }
-
-  lines.push("");
-
-  // Nodes
-  for (const node of nodes) {
-    lines.push(renderDotNode(node));
-  }
-
-  // Edges
-  if (edges.length > 0) {
-    lines.push("");
-    for (const edge of edges) {
-      lines.push(renderDotEdge(edge, directed));
-    }
-  }
-
-  lines.push("}");
-
-  return lines.join("\n");
+  return DOTGraphBuilder.from(nodes, edges, options).render();
 }
 
 /**
@@ -624,14 +546,14 @@ export function generateNetworkDot(
 /**
  * Fluent API builder for DOT/GraphViz graphs.
  *
- * Provides a chainable interface for constructing DOT graphs,
- * wrapping the existing utility functions for easier use.
+ * Provides a chainable interface for constructing DOT graphs and holds the
+ * one writer of the graph text, built on the node, edge and attribute
+ * functions in this file.
  * Supports nodes, edges, subgraphs, and all standard DOT attributes.
  *
- * @see {@link generateDotGraph} - The underlying function this builder wraps
+ * @see {@link generateDotGraph} - Builds a graph with this class in one call
  * @see {@link renderDotNode} - Used internally for node rendering
  * @see {@link renderDotEdge} - Used internally for edge rendering
- * @see {@link renderDotSubgraph} - Used internally for subgraph rendering
  *
  * @example Basic usage
  * ```typescript
