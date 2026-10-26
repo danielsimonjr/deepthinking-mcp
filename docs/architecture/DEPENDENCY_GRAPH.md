@@ -1300,7 +1300,7 @@ The codebase is organized into the following modules:
 | `../../types/modes/algorithmic.js` | `AlgorithmDescription, AlgorithmicThought, AlgorithmicThoughtType, AlgorithmComparison, AmortizedAnalysis, CorrectnessProof, DataStructureSpec, DesignPattern, DPFormulation, GraphAlgorithmContext, GreedyProof, LoopInvariant, Recurrence, SpaceComplexity, TimeComplexity` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
 | `../../tools/schemas/modes/engineering.js` | `EngineeringInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
 | `./input-warnings.js` | `droppedValueWarning, inputWarningsField, unrecognisedValueWarning` | Import |
 
 **Exports:**
@@ -1381,7 +1381,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, BayesianThought` | Import |
 | `../../types/modes/bayesian.js` | `BayesianHypothesis, PriorProbability, Likelihood, BayesianEvidence, PosteriorProbability` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `BayesianHandler`
@@ -1401,7 +1401,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, CausalThought` | Import |
 | `../../types/modes/causal.js` | `CausalGraph, Intervention` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
 | `../../utils/type-guards.js` | `toExtendedThoughtType` | Import |
 | `../causal/graph/algorithms/centrality.js` | `computeDegreeCentrality, getMostCentralNode` | Import |
 | `../causal/graph/algorithms/d-separation.js` | `findVStructures` | Import |
@@ -1426,7 +1426,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode` | Import |
 | `../../types/modes/computability.js` | `ComputabilityThought, ComputabilityThoughtType, TuringMachine, DecidabilityProof, Reduction, DiagonalizationArgument` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `ComputabilityHandler`
@@ -1446,7 +1446,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, Thought` | Import |
 | `../../types/modes/constraint.js` | `ConstraintThought, CSPVariable, CSPConstraint, Arc` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationWarning, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationWarning, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `ConstraintHandler`
@@ -1466,7 +1466,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode` | Import |
 | `../../types/modes/counterfactual.js` | `CounterfactualThought, Scenario, Condition, CounterfactualComparison, InterventionPoint, CausalChain, ScenarioDifference` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, HandlerValidationError, ValidationWarning, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, HandlerValidationError, ValidationWarning, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `CounterfactualHandler`
@@ -1486,7 +1486,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, CritiqueThought` | Import |
 | `../../types/modes/critique.js` | `CritiqueThoughtType, CritiquedWork, CritiquePoint, MethodologyEvaluation, ArgumentCritique, CritiqueVerdict` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, HandlerValidationError, ValidationWarning, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, HandlerValidationError, ValidationWarning, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `CritiqueHandler`
@@ -1507,7 +1507,7 @@ The codebase is organized into the following modules:
 | `../../types/modes/cryptanalytic.js` | `CryptanalyticThought, CryptanalyticThoughtType, DecibanEvidence, EvidenceChain, CryptographicHypothesis, CipherType` | Import (type-only) |
 | `../../types/modes/cryptanalytic.js` | `toDecibans, fromDecibans, decibansToProbability` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `CryptanalyticHandler`
@@ -1526,7 +1526,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../types/core.js` | `ThinkingMode, BaseThought` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 | `./resolve-mode.js` | `resolveMode` | Import |
 
 **Exports:**
@@ -1547,7 +1547,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../types/core.js` | `ThinkingMode, DeductiveThought` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `DeductiveHandler`
@@ -1567,7 +1567,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode` | Import |
 | `../../types/modes/engineering.js` | `EngineeringThought, EngineeringAnalysisType, TradeAlternative, TradeCriterion, TradeScore, FailureMode, DecisionAlternative` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 | `./input-warnings.js` | `inputWarningsField, unrecognisedValueWarning` | Import |
 
 **Exports:**
@@ -1645,7 +1645,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, GameTheoryThought` | Import |
 | `../../types/modes/gametheory.js` | `Game, Player, Strategy, PayoffMatrix, PayoffEntry, NashEquilibrium, DominantStrategy` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `GameTheoryHandler`
@@ -1664,7 +1664,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../types/core.js` | `ThinkingMode, Thought, ShannonStage, SequentialThought, ShannonThought, MathematicsThought, PhysicsThought, HybridThought, InductiveThought, DeductiveThought, AbductiveThought, CausalThought, isFullyImplemented` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, ModeStatus, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, ModeStatus, checkThoughtBasics, validationSuccess, createValidationWarning` | Import |
 | `../../utils/type-guards.js` | `toExtendedThoughtType` | Import |
 
 **Exports:**
@@ -1706,7 +1706,7 @@ The codebase is organized into the following modules:
 | `../../types/modes/hybrid.js` | `HybridThought` | Import (type-only) |
 | `../../types/modes/recommendations.js` | `ModeRecommender, ProblemCharacteristics, ModeRecommendation` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 | `./resolve-mode.js` | `resolveMode` | Import |
 
 **Exports:**
@@ -1727,7 +1727,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../types/core.js` | `ThinkingMode, InductiveThought` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `InductiveHandler`
@@ -1754,7 +1754,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, MathematicsThought` | Import |
 | `../../types/modes/mathematics.js` | `MathematicsThoughtType, MathematicalModel, ProofStrategy` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `MathematicsHandler`
@@ -1774,7 +1774,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode` | Import |
 | `../../types/modes/metareasoning.js` | `MetaReasoningThought, CurrentStrategy, StrategyEvaluation, AlternativeStrategy, StrategyRecommendation, ResourceAllocation, QualityMetrics, SessionContext, MetaAction` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `MetaReasoningHandler`
@@ -1794,7 +1794,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, Thought` | Import |
 | `../../types/modes/modal.js` | `ModalThought, PossibleWorld, ModalProposition, AccessibilityRelation, ModalInference` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationWarning, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationWarning, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `ModalHandler`
@@ -1811,7 +1811,7 @@ The codebase is organized into the following modules:
 
 **Exports:**
 - Interfaces: `ValidationResult`, `HandlerValidationError`, `ValidationWarning`, `DetectedArchetype`, `ModeEnhancements`, `ModeHandler`, `ModeStatus`
-- Functions: `validationSuccess`, `validationFailure`, `createValidationError`, `createValidationWarning`
+- Functions: `validationSuccess`, `validationFailure`, `createValidationError`, `checkThoughtBasics`, `createValidationWarning`
 
 ---
 
@@ -1828,7 +1828,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode` | Import |
 | `../../types/modes/optimization.js` | `OptimizationThought, OptimizationProblem, DecisionVariable, Constraint, Objective, Solution, SensitivityAnalysis` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `OptimizationHandler`
@@ -1848,7 +1848,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, PhysicsThought` | Import |
 | `../../types/modes/physics.js` | `PhysicsThoughtType, TensorProperties, PhysicalInterpretation, FieldTheoryContext` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `PhysicsHandler`
@@ -1869,7 +1869,7 @@ The codebase is organized into the following modules:
 | `../../types/modes/recursive.js` | `RecursiveThought, Subproblem, BaseCase, RecurrenceRelation` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
 | `../../tools/schemas/modes/engineering.js` | `EngineeringInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationWarning, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationWarning, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 | `./input-warnings.js` | `ignoredMembersWarning, inputWarningsField, unrecognisedValueWarning` | Import |
 
 **Exports:**
@@ -1920,7 +1920,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../types/core.js` | `ThinkingMode, SequentialThought` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `SequentialHandler`
@@ -1939,7 +1939,7 @@ The codebase is organized into the following modules:
 |------|---------|------|
 | `../../types/core.js` | `ThinkingMode, ShannonStage, ShannonThought` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `ShannonHandler`
@@ -1959,7 +1959,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, Thought` | Import |
 | `../../types/modes/stochastic.js` | `StochasticThought` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationWarning, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ValidationWarning, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 | `../stochastic/models/moments.js` | `analyticMoments` | Import |
 | `../stochastic/analysis/statistics.js` | `equalTailedInterval, mean, variance` | Import |
 
@@ -1981,7 +1981,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, SynthesisThought` | Import |
 | `../../types/modes/synthesis.js` | `Source, Theme, Contradiction, LiteratureGap, SynthesisThoughtType` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `SynthesisHandler`
@@ -2001,7 +2001,7 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, SystemsThinkingThought` | Import |
 | `../../types/modes/systemsthinking.js` | `SystemDefinition, SystemComponent, FeedbackLoop, LeveragePoint` | Import (type-only) |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
-| `./ModeHandler.js` | `ModeHandler, ValidationResult, HandlerValidationError, ValidationWarning, ModeEnhancements, DetectedArchetype, validationSuccess, validationFailure, createValidationError, createValidationWarning` | Import |
+| `./ModeHandler.js` | `ModeHandler, ValidationResult, HandlerValidationError, ValidationWarning, ModeEnhancements, DetectedArchetype, checkThoughtBasics, validationSuccess, validationFailure, createValidationWarning` | Import |
 
 **Exports:**
 - Classes: `SystemsThinkingHandler`
@@ -4544,12 +4544,12 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 247 |
 | Total Modules | 14 |
-| Total Lines of Code | 120343 |
-| Total Exports | 1197 |
+| Total Lines of Code | 119943 |
+| Total Exports | 1198 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
 | Total Interfaces | 563 |
-| Total Functions | 443 |
+| Total Functions | 444 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
 | Type-only Imports | 337 |

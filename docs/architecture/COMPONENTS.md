@@ -381,7 +381,14 @@ export function validationSuccess(warnings?: ValidationWarning[]): ValidationRes
 export function validationFailure(errors: HandlerValidationError[], warnings?: ValidationWarning[]): ValidationResult
 export function createValidationError(field: string, message: string, code: string): HandlerValidationError
 export function createValidationWarning(field: string, message: string, suggestion?: string): ValidationWarning
+
+// Shared check
+export function checkThoughtBasics(input: ThinkingToolInput): ValidationResult | undefined
 ```
+
+`checkThoughtBasics` returns a failure for a blank thought or for a thought number above the total,
+and `undefined` when both checks pass. 26 handlers call the function at the start of `validate`.
+The other 10 handlers make neither check.
 
 `getEnhancements` and `supportsThoughtType` are optional on the interface. All 36 handler classes
 implement `getEnhancements`. All handlers except `AbductiveHandler`, `AnalogicalHandler` and
@@ -2723,8 +2730,8 @@ counts differ for that reason.
 | Claim | Value | Source |
 |---|---|---|
 | totalTypeScriptFiles | 521 | repo-tools map (whole repository) |
-| totalLinesOfCode | 234136 | repo-tools map (whole repository) |
-| totalExports | 2176 | repo-tools map (whole repository) |
+| totalLinesOfCode | 233809 | repo-tools map (whole repository) |
+| totalExports | 2177 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | reachableFiles | 239 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |

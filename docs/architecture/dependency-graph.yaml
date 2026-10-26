@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-26'
   totalFiles: 247
   totalModules: 14
-  totalExports: 1197
+  totalExports: 1198
 entryPoints:
   - file: src/index.ts
     type: main
@@ -3913,6 +3913,7 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
             - createValidationError
@@ -4069,6 +4070,7 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
             - createValidationError
@@ -4103,6 +4105,7 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
             - createValidationError
@@ -4158,6 +4161,7 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
             - createValidationError
@@ -4195,9 +4199,9 @@ modules:
             - ValidationResult
             - ValidationWarning
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
       exports:
         - ConstraintHandler
@@ -4234,9 +4238,9 @@ modules:
             - HandlerValidationError
             - ValidationWarning
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
       exports:
         - CounterfactualHandler
@@ -4274,9 +4278,9 @@ modules:
             - HandlerValidationError
             - ValidationWarning
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
       exports:
         - CritiqueHandler
@@ -4316,6 +4320,7 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
             - createValidationError
@@ -4345,9 +4350,9 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
         - file: ./resolve-mode.js
           imports:
@@ -4379,9 +4384,9 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
       exports:
         - DeductiveHandler
@@ -4417,9 +4422,9 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
         - file: ./input-warnings.js
           imports:
@@ -4547,6 +4552,7 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
             - createValidationError
@@ -4588,9 +4594,8 @@ modules:
             - ValidationResult
             - ModeEnhancements
             - ModeStatus
+            - checkThoughtBasics
             - validationSuccess
-            - validationFailure
-            - createValidationError
             - createValidationWarning
         - file: ../../utils/type-guards.js
           imports:
@@ -4666,9 +4671,9 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
         - file: ./resolve-mode.js
           imports:
@@ -4700,6 +4705,7 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
             - createValidationError
@@ -4750,6 +4756,7 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
             - createValidationError
@@ -4790,9 +4797,9 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
       exports:
         - MetaReasoningHandler
@@ -4828,9 +4835,9 @@ modules:
             - ValidationResult
             - ValidationWarning
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
       exports:
         - ModalHandler
@@ -4854,6 +4861,7 @@ modules:
         - validationSuccess
         - validationFailure
         - createValidationError
+        - checkThoughtBasics
         - createValidationWarning
       interfaces:
         - ValidationResult
@@ -4867,6 +4875,7 @@ modules:
         - validationSuccess
         - validationFailure
         - createValidationError
+        - checkThoughtBasics
         - createValidationWarning
     src/modes/handlers/OptimizationHandler.ts:
       description: OptimizationHandler - Phase 10 Sprint 3 (v8.4.0)
@@ -4898,9 +4907,9 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
       exports:
         - OptimizationHandler
@@ -4934,6 +4943,7 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
             - createValidationError
@@ -4975,9 +4985,9 @@ modules:
             - ValidationResult
             - ValidationWarning
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
         - file: ./input-warnings.js
           imports:
@@ -5049,9 +5059,8 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
-            - validationFailure
-            - createValidationError
             - createValidationWarning
       exports:
         - SequentialHandler
@@ -5079,6 +5088,7 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
             - createValidationError
@@ -5113,9 +5123,9 @@ modules:
             - ValidationResult
             - ValidationWarning
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
         - file: ../stochastic/models/moments.js
           imports:
@@ -5158,6 +5168,7 @@ modules:
             - ModeHandler
             - ValidationResult
             - ModeEnhancements
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
             - createValidationError
@@ -5197,9 +5208,9 @@ modules:
             - ValidationWarning
             - ModeEnhancements
             - DetectedArchetype
+            - checkThoughtBasics
             - validationSuccess
             - validationFailure
-            - createValidationError
             - createValidationWarning
       exports:
         - SystemsThinkingHandler
@@ -11444,11 +11455,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 247
   totalModules: 14
-  totalLinesOfCode: 120343
-  totalExports: 1197
+  totalLinesOfCode: 119943
+  totalExports: 1198
   totalClasses: 143
   totalInterfaces: 563
-  totalFunctions: 443
+  totalFunctions: 444
   totalTypeGuards: 87
   totalEnums: 3
   totalConstants: 135
