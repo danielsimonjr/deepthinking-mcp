@@ -144,6 +144,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   writers. Eight new tests in `dot-output.test.ts` pin every line of the output of both writers.
   The documentation of `DOTGraphBuilder` no longer says that `renderDotSubgraph` writes its
   subgraphs. The builder writes them itself.
+- **The unused function `renderDotSubgraph` is removed.** No file in `src/` or `tests/` called it,
+  and the bundle `dist/index.js` did not contain it. The function wrote the node names of a
+  subgraph only, so its text differed from the text that `DOTGraphBuilder.render` writes. The
+  package has no runtime file for `dot.ts`, because `dist/index.js` is one bundle. Output does not
+  change: `dist/index.js` is byte-identical to the build before the change.
 - **The advertised JSON Schema now agrees with the Zod schema on `mode`, the temporal constraint
   types and the causal node type.** `mode` is in `required` for the 11 thought tools (the Zod schema
   already required it). The temporal `constraints[].type` lists `before`, `after`, `during`,

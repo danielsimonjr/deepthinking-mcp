@@ -8,7 +8,7 @@
       },
       "src": {
         "files": 247,
-        "loc": 119705
+        "loc": 119667
       },
       "templates": {
         "files": 5,
@@ -281,7 +281,7 @@
     {
       "path": "src/export/visual/utils/dot.ts",
       "area": "src",
-      "loc": 932,
+      "loc": 894,
       "disposition": "reachable"
     },
     {

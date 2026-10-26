@@ -4,7 +4,7 @@ metadata:
   lastUpdated: '2026-10-26'
   totalFiles: 247
   totalModules: 14
-  totalExports: 1199
+  totalExports: 1198
 entryPoints:
   - file: src/index.ts
     type: main
@@ -2606,7 +2606,6 @@ modules:
         - renderDotEdgeAttrs
         - renderDotNode
         - renderDotEdge
-        - renderDotSubgraph
         - getDotColor
         - generateDotGraph
         - generateLinearFlowDot
@@ -2628,7 +2627,6 @@ modules:
         - renderDotEdgeAttrs
         - renderDotNode
         - renderDotEdge
-        - renderDotSubgraph
         - getDotColor
         - generateDotGraph
         - generateLinearFlowDot
@@ -11446,11 +11444,11 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 247
   totalModules: 14
-  totalLinesOfCode: 119705
-  totalExports: 1199
+  totalLinesOfCode: 119667
+  totalExports: 1198
   totalClasses: 143
   totalInterfaces: 563
-  totalFunctions: 445
+  totalFunctions: 444
   totalTypeGuards: 87
   totalEnums: 3
   totalConstants: 135

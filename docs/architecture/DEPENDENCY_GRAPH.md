@@ -854,7 +854,7 @@ The codebase is organized into the following modules:
 **Exports:**
 - Classes: `DOTGraphBuilder`
 - Interfaces: `DotNode`, `DotEdge`, `DotSubgraph`, `DotOptions`
-- Functions: `sanitizeDotId`, `escapeDotString`, `truncateDotLabel`, `renderDotNodeAttrs`, `renderDotEdgeAttrs`, `renderDotNode`, `renderDotEdge`, `renderDotSubgraph`, `getDotColor`, `generateDotGraph`, `generateLinearFlowDot`, `generateHierarchyDot`, `generateNetworkDot`
+- Functions: `sanitizeDotId`, `escapeDotString`, `truncateDotLabel`, `renderDotNodeAttrs`, `renderDotEdgeAttrs`, `renderDotNode`, `renderDotEdge`, `getDotColor`, `generateDotGraph`, `generateLinearFlowDot`, `generateHierarchyDot`, `generateNetworkDot`
 - Constants: `DOT_COLORS`
 
 ---
@@ -4464,12 +4464,12 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 247 |
 | Total Modules | 14 |
-| Total Lines of Code | 119705 |
-| Total Exports | 1199 |
+| Total Lines of Code | 119667 |
+| Total Exports | 1198 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |
 | Total Interfaces | 563 |
-| Total Functions | 445 |
+| Total Functions | 444 |
 | Total Type Guards | 87 |
 | Total Enums | 3 |
 | Type-only Imports | 337 |
