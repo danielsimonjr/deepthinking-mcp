@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **530 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 249 | 119,556 |
+| src | 249 | 119,554 |
 | templates | 5 | 754 |
-| tests | 258 | 108,721 |
+| tests | 258 | 108,740 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -95,7 +95,7 @@ Every tracked TypeScript file in the repository — **530 files** — not just t
 | `src/modes/causal/graph/algorithms/centrality.ts` | src | 610 | reachable |
 | `src/modes/causal/graph/algorithms/d-separation.ts` | src | 592 | reachable |
 | `src/modes/causal/graph/algorithms/graph-utils.ts` | src | 64 | reachable |
-| `src/modes/causal/graph/algorithms/intervention.ts` | src | 684 | reachable |
+| `src/modes/causal/graph/algorithms/intervention.ts` | src | 682 | reachable |
 | `src/modes/causal/graph/types.ts` | src | 472 | reachable |
 | `src/modes/combinations/analyzer.ts` | src | 932 | reachable |
 | `src/modes/combinations/combination-types.ts` | src | 412 | reachable |
@@ -422,7 +422,7 @@ Every tracked TypeScript file in the repository — **530 files** — not just t
 | `tests/unit/modes/causal/graph/centrality.test.ts` | tests | 443 | test |
 | `tests/unit/modes/causal/graph/d-separation.test.ts` | tests | 545 | test |
 | `tests/unit/modes/causal/graph/graph-utils.test.ts` | tests | 85 | test |
-| `tests/unit/modes/causal/graph/intervention.test.ts` | tests | 629 | test |
+| `tests/unit/modes/causal/graph/intervention.test.ts` | tests | 648 | test |
 | `tests/unit/modes/combinations/analyzer-execution.test.ts` | tests | 323 | test |
 | `tests/unit/modes/combinations/conflict-resolver.test.ts` | tests | 774 | test |
 | `tests/unit/modes/combinations/merger.test.ts` | tests | 482 | test |

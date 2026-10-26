@@ -480,23 +480,42 @@ describe('Do-Calculus Rules', () => {
     });
   });
 
-  // The formula keeps an empty list as an empty text between commas. The tests below pin this
-  // current behavior.
+  // An empty list gives no term in the formula, so the text has no empty part.
   describe('formula of an empty list', () => {
-    it('applyRule1 ends with a comma when W is empty', () => {
-      expect(applyRule1(isolatedZ, ['Y'], ['X'], ['Z'], []).result).toBe('P(Y|do(X),)');
+    it('applyRule1 leaves out W when W is empty', () => {
+      expect(applyRule1(isolatedZ, ['Y'], ['X'], ['Z'], []).result).toBe('P(Y|do(X))');
     });
 
-    it('applyRule2 ends with a comma when W is empty', () => {
-      expect(applyRule2(isolatedZ, ['Y'], ['X'], ['Z'], []).result).toBe('P(Y|do(X),Z,)');
+    it('applyRule2 leaves out W when W is empty', () => {
+      expect(applyRule2(isolatedZ, ['Y'], ['X'], ['Z'], []).result).toBe('P(Y|do(X),Z)');
     });
 
-    it('applyRule2 has two commas in a row when Z is empty', () => {
-      expect(applyRule2(isolatedZ, ['Y'], ['X'], [], ['W']).result).toBe('P(Y|do(X),,W)');
+    it('applyRule2 leaves out Z when Z is empty', () => {
+      expect(applyRule2(isolatedZ, ['Y'], ['X'], [], ['W']).result).toBe('P(Y|do(X),W)');
     });
 
-    it('applyRule3 ends with a comma when W is empty', () => {
-      expect(applyRule3(isolatedZ, ['Y'], ['X'], ['Z'], []).result).toBe('P(Y|do(X),)');
+    it('applyRule2 leaves out Z and W when both are empty', () => {
+      expect(applyRule2(isolatedZ, ['Y'], ['X'], [], []).result).toBe('P(Y|do(X))');
+    });
+
+    it('applyRule3 leaves out W when W is empty', () => {
+      expect(applyRule3(isolatedZ, ['Y'], ['X'], ['Z'], []).result).toBe('P(Y|do(X))');
+    });
+
+    it.each([
+      ['applyRule1', applyRule1, 'P(Y|W)'],
+      ['applyRule2', applyRule2, 'P(Y|Z,W)'],
+      ['applyRule3', applyRule3, 'P(Y|W)'],
+    ])('%s writes no do term when X is empty', (_name, rule, expected) => {
+      expect(rule(isolatedZ, ['Y'], [], ['Z'], ['W']).result).toBe(expected);
+    });
+
+    it.each([
+      ['applyRule1', applyRule1, ['Z']],
+      ['applyRule2', applyRule2, []],
+      ['applyRule3', applyRule3, ['Z']],
+    ])('%s writes P(Y) alone when every other list is empty', (_name, rule, z) => {
+      expect(rule(isolatedZ, ['Y'], [], z, []).result).toBe('P(Y)');
     });
   });
 

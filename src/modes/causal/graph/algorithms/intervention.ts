@@ -450,6 +450,19 @@ function testRule(
 }
 
 /**
+ * Write the formula P(y|do(x),given...) that a rule returns. Each argument is a list joined with
+ * commas. A list that is empty gives no term, so the text has no empty part. With no term at all,
+ * the text is P(y).
+ */
+function formulaText(y: string, x: string, ...given: string[]): string {
+  const terms = [x === "" ? "" : `do(${x})`, ...given].filter(
+    (term) => term !== "",
+  );
+
+  return terms.length === 0 ? `P(${y})` : `P(${y}|${terms.join(",")})`;
+}
+
+/**
  * Apply Rule 1 of do-calculus: Insertion/deletion of observations
  * P(y|do(x),z,w) = P(y|do(x),w) if (Y ⊥⊥ Z | X, W)_{G_{\overline{X}}}
  */
@@ -465,13 +478,8 @@ export function applyRule1(
     x.map((v) => ({ variable: v, value: 0, type: "atomic" as const })),
   );
 
-  return testRule(
-    mutilated,
-    y,
-    x,
-    z,
-    w,
-    () => `P(${y.join(",")}|do(${x.join(",")}),${[...w].join(",")})`,
+  return testRule(mutilated, y, x, z, w, () =>
+    formulaText(y.join(","), x.join(","), [...w].join(",")),
   );
 }
 
@@ -499,13 +507,8 @@ export function applyRule2(
     edges: modified.edges.filter((e) => !zSet.has(e.from)),
   };
 
-  return testRule(
-    modified,
-    y,
-    x,
-    z,
-    w,
-    () => `P(${y.join(",")}|do(${x.join(",")}),${z.join(",")},${w.join(",")})`,
+  return testRule(modified, y, x, z, w, () =>
+    formulaText(y.join(","), x.join(","), z.join(","), w.join(",")),
   );
 }
 
@@ -530,13 +533,8 @@ export function applyRule3(
     })),
   );
 
-  return testRule(
-    modified,
-    y,
-    x,
-    z,
-    w,
-    () => `P(${y.join(",")}|do(${x.join(",")}),${w.join(",")})`,
+  return testRule(modified, y, x, z, w, () =>
+    formulaText(y.join(","), x.join(","), w.join(",")),
   );
 }
 

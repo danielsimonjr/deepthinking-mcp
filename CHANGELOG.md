@@ -456,6 +456,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The formula that a do-calculus rule returns had empty parts.** `applyRule1`, `applyRule2` and
+  `applyRule3` in `src/modes/causal/graph/algorithms/intervention.ts` joined the lists with fixed
+  commas. An empty W gave `P(Y|do(X),)`. An empty Z in rule 2 gave `P(Y|do(X),,W)`. An empty X gave
+  `do()`. The private function `formulaText` now leaves out a list that is empty. The text is
+  `P(Y)` when no term is left. A text that had no empty part does not change. A run of 608,256 calls
+  for each rule matched the old output in every other respect: the flag, the keys, the thrown message
+  and the graph. 23 mutants of `formulaText` and the three call sites all fail a test. The rules are
+  not called from any other file in `src/`, so `dist/index.js` does not change.
 - **A mode name that `CustomHandler` or `HybridHandler` did not know became `sequential` without a
   word.** The two handlers each kept a hand-written map from a name to a `ThinkingMode`. Both maps
   lacked `historical`, `recursive`, `modal`, `stochastic` and `constraint`, and the hybrid map also
