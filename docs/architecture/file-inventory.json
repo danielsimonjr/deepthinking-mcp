@@ -8,7 +8,7 @@
       },
       "src": {
         "files": 249,
-        "loc": 119547
+        "loc": 119556
       },
       "templates": {
         "files": 5,
@@ -16,7 +16,7 @@
       },
       "tests": {
         "files": 258,
-        "loc": 108642
+        "loc": 108721
       },
       "tools": {
         "files": 14,
@@ -395,7 +395,7 @@
     {
       "path": "src/modes/causal/graph/algorithms/intervention.ts",
       "area": "src",
-      "loc": 675,
+      "loc": 684,
       "disposition": "reachable"
     },
     {
@@ -2357,7 +2357,7 @@
     {
       "path": "tests/unit/modes/causal/graph/intervention.test.ts",
       "area": "tests",
-      "loc": 550,
+      "loc": 629,
       "disposition": "test"
     },
     {

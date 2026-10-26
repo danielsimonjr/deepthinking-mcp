@@ -423,6 +423,33 @@ export function generateIVFormula(
 // ============================================================================
 
 /**
+ * Test one do-calculus rule on the graph that the rule builds.
+ *
+ * The rule applies when Y and Z are d-separated, given X and W, in `modified`. The rule then
+ * returns the text from `formula`. The text is built only when the rule applies.
+ */
+function testRule(
+  modified: CausalGraph,
+  y: string[],
+  x: string[],
+  z: string[],
+  w: string[],
+  formula: () => string,
+): { applicable: boolean; result?: string } {
+  const separation = checkDSeparation(modified, {
+    x: y,
+    y: z,
+    z: [...x, ...w],
+  });
+
+  if (separation.separated) {
+    return { applicable: true, result: formula() };
+  }
+
+  return { applicable: false };
+}
+
+/**
  * Apply Rule 1 of do-calculus: Insertion/deletion of observations
  * P(y|do(x),z,w) = P(y|do(x),w) if (Y ⊥⊥ Z | X, W)_{G_{\overline{X}}}
  */
@@ -438,20 +465,14 @@ export function applyRule1(
     x.map((v) => ({ variable: v, value: 0, type: "atomic" as const })),
   );
 
-  const separation = checkDSeparation(mutilated, {
-    x: y,
-    y: z,
-    z: [...x, ...w],
-  });
-
-  if (separation.separated) {
-    return {
-      applicable: true,
-      result: `P(${y.join(",")}|do(${x.join(",")}),${[...w].join(",")})`,
-    };
-  }
-
-  return { applicable: false };
+  return testRule(
+    mutilated,
+    y,
+    x,
+    z,
+    w,
+    () => `P(${y.join(",")}|do(${x.join(",")}),${[...w].join(",")})`,
+  );
 }
 
 /**
@@ -478,20 +499,14 @@ export function applyRule2(
     edges: modified.edges.filter((e) => !zSet.has(e.from)),
   };
 
-  const separation = checkDSeparation(modified, {
-    x: y,
-    y: z,
-    z: [...x, ...w],
-  });
-
-  if (separation.separated) {
-    return {
-      applicable: true,
-      result: `P(${y.join(",")}|do(${x.join(",")}),${z.join(",")},${w.join(",")})`,
-    };
-  }
-
-  return { applicable: false };
+  return testRule(
+    modified,
+    y,
+    x,
+    z,
+    w,
+    () => `P(${y.join(",")}|do(${x.join(",")}),${z.join(",")},${w.join(",")})`,
+  );
 }
 
 /**
@@ -515,20 +530,14 @@ export function applyRule3(
     })),
   );
 
-  const separation = checkDSeparation(modified, {
-    x: y,
-    y: z,
-    z: [...x, ...w],
-  });
-
-  if (separation.separated) {
-    return {
-      applicable: true,
-      result: `P(${y.join(",")}|do(${x.join(",")}),${w.join(",")})`,
-    };
-  }
-
-  return { applicable: false };
+  return testRule(
+    modified,
+    y,
+    x,
+    z,
+    w,
+    () => `P(${y.join(",")}|do(${x.join(",")}),${w.join(",")})`,
+  );
 }
 
 /**

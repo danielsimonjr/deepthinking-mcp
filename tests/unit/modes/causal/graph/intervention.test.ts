@@ -396,40 +396,119 @@ describe('Instrumental Variables', () => {
 });
 
 describe('Do-Calculus Rules', () => {
-  describe('applyRule1()', () => {
-    it('should apply Rule 1 when applicable', () => {
-      const graph = createConfoundedGraph();
-      const result = applyRule1(graph, ['Y'], ['X'], ['U'], []);
+  // Y is the outcome, X the intervention, Z the variable that a rule tests and W an observed variable.
+  const directed = (
+    id: string,
+    nodes: string[],
+    edges: Array<[string, string]>
+  ): CausalGraph => ({
+    id,
+    nodes: nodes.map((n) => ({ id: n, name: n })),
+    edges: edges.map(([from, to]) => ({ from, to, type: 'directed' as const })),
+  });
 
-      if (result.applicable) {
-        expect(result.result).toBeDefined();
-      }
+  // Z has no edge to any variable.
+  const isolatedZ = directed('isolated-z', ['X', 'Y', 'Z'], [['X', 'Y']]);
+  // Z -> Y.
+  const zCausesY = directed('z-causes-y', ['X', 'Y', 'Z'], [['X', 'Y'], ['Z', 'Y']]);
+  // U -> Z and U -> Y: Z and Y have a common cause.
+  const commonCause = directed('common-cause', ['X', 'Y', 'Z', 'U'], [['U', 'Z'], ['U', 'Y'], ['X', 'Y']]);
+  // Z -> W -> Y.
+  const zThroughW = directed('z-through-w', ['X', 'Y', 'Z', 'W'], [['Z', 'W'], ['W', 'Y'], ['X', 'Y']]);
+  // Z -> X <- Y: conditioning on X opens the collider unless the edges into X are removed.
+  const intoX = directed('into-x', ['X', 'Y', 'Z'], [['Z', 'X'], ['Y', 'X']]);
+  // A -> Z, A -> X, Y -> X: the path Z <- A -> X <- Y has a collider at X.
+  const behindZ = directed('behind-z', ['X', 'Y', 'Z', 'A'], [['A', 'Z'], ['A', 'X'], ['Y', 'X']]);
+  // X -> Z and X -> Y: conditioning on X blocks the path Z <- X -> Y.
+  const xCausesZ = directed('x-causes-z', ['X', 'Y', 'Z'], [['X', 'Z'], ['X', 'Y']]);
+  // Z -> Y, U -> Z and U -> Y: Z and Y are linked in two ways.
+  const twoLinks = directed('two-links', ['X', 'Y', 'Z', 'U'], [['Z', 'Y'], ['U', 'Z'], ['U', 'Y'], ['X', 'Y']]);
+  // Eight variables with no edge.
+  const manyIsolated = directed('many-isolated', ['Y1', 'Y2', 'X1', 'X2', 'Z1', 'Z2', 'W1', 'W2'], []);
+
+  // [label, graph, z, w, rule 1 applies, rule 2 applies, rule 3 applies], with y = [Y] and x = [X].
+  const verdicts: Array<[string, CausalGraph, string[], string[], boolean, boolean, boolean]> = [
+    ['Z has no edge', isolatedZ, ['Z'], [], true, true, true],
+    ['Z causes Y', zCausesY, ['Z'], [], false, true, false],
+    ['Z and Y have a common cause', commonCause, ['Z'], [], false, false, true],
+    ['Z causes Y through W', zThroughW, ['Z'], [], false, true, false],
+    ['Z causes Y through W, and W is observed', zThroughW, ['Z'], ['W'], true, true, true],
+    ['Z and Y both cause X', intoX, ['Z'], [], true, true, true],
+    ['Z and X have a common cause, and Y causes X', behindZ, ['Z'], [], true, true, true],
+    ['X causes Z and Y', xCausesZ, ['Z'], [], true, true, true],
+    ['Z and Y are linked in two ways', twoLinks, ['Z'], [], false, false, false],
+  ];
+
+  const rules = [
+    { name: 'applyRule1', rule: applyRule1, column: 4, observed: 'P(Y|do(X),W)', many: 'P(Y1,Y2|do(X1,X2),W1,W2)' },
+    { name: 'applyRule2', rule: applyRule2, column: 5, observed: 'P(Y|do(X),Z,W)', many: 'P(Y1,Y2|do(X1,X2),Z1,Z2,W1,W2)' },
+    { name: 'applyRule3', rule: applyRule3, column: 6, observed: 'P(Y|do(X),W)', many: 'P(Y1,Y2|do(X1,X2),W1,W2)' },
+  ];
+
+  describe.each(rules)('$name()', ({ rule, column, observed, many }) => {
+    it.each(verdicts)('%s', (...row) => {
+      const [, graph, z, w] = row;
+      expect(rule(graph, ['Y'], ['X'], z, w).applicable).toBe(row[column] as boolean);
     });
 
-    it('should not apply Rule 1 when not applicable', () => {
-      const graph = createSimpleCausalGraph();
-      const result = applyRule1(graph, ['Y'], ['X'], ['X'], []); // Z = X is not independent
+    it('returns the applicable flag alone when the rule does not apply', () => {
+      expect(rule(twoLinks, ['Y'], ['X'], ['Z'], [])).toStrictEqual({ applicable: false });
+    });
 
-      // Result depends on graph structure
-      expect(result).toBeDefined();
+    it('returns the formula when the rule applies', () => {
+      expect(rule(zThroughW, ['Y'], ['X'], ['Z'], ['W'])).toStrictEqual({
+        applicable: true,
+        result: observed,
+      });
+    });
+
+    it('joins several variables of each list with commas', () => {
+      const outcome = rule(
+        manyIsolated,
+        ['Y1', 'Y2'],
+        ['X1', 'X2'],
+        ['Z1', 'Z2'],
+        ['W1', 'W2']
+      );
+      expect(outcome).toStrictEqual({ applicable: true, result: many });
+    });
+
+    it('does not change the graph that it receives', () => {
+      const graph = structuredClone(commonCause);
+      rule(graph, ['Y'], ['X'], ['Z'], []);
+      expect(graph).toStrictEqual(commonCause);
     });
   });
 
-  describe('applyRule2()', () => {
-    it('should apply Rule 2 when applicable', () => {
-      const graph = createConfoundedGraph();
-      const result = applyRule2(graph, ['Y'], ['X'], [], ['U']);
+  // The formula keeps an empty list as an empty text between commas. The tests below pin this
+  // current behavior.
+  describe('formula of an empty list', () => {
+    it('applyRule1 ends with a comma when W is empty', () => {
+      expect(applyRule1(isolatedZ, ['Y'], ['X'], ['Z'], []).result).toBe('P(Y|do(X),)');
+    });
 
-      expect(result).toBeDefined();
+    it('applyRule2 ends with a comma when W is empty', () => {
+      expect(applyRule2(isolatedZ, ['Y'], ['X'], ['Z'], []).result).toBe('P(Y|do(X),Z,)');
+    });
+
+    it('applyRule2 has two commas in a row when Z is empty', () => {
+      expect(applyRule2(isolatedZ, ['Y'], ['X'], [], ['W']).result).toBe('P(Y|do(X),,W)');
+    });
+
+    it('applyRule3 ends with a comma when W is empty', () => {
+      expect(applyRule3(isolatedZ, ['Y'], ['X'], ['Z'], []).result).toBe('P(Y|do(X),)');
     });
   });
 
-  describe('applyRule3()', () => {
-    it('should apply Rule 3 when applicable', () => {
-      const graph = createConfoundedGraph();
-      const result = applyRule3(graph, ['Y'], ['X'], ['U'], []);
-
-      expect(result).toBeDefined();
+  // A list that is not an array breaks the type of the call. Rule 1 and rule 3 build the formula
+  // only after the check passes, so a rule that does not apply returns without an error.
+  describe('formula of a rule that does not apply', () => {
+    it.each([
+      ['applyRule1', applyRule1],
+      ['applyRule3', applyRule3],
+    ])('%s does not read Y when the rule does not apply', (_name, rule) => {
+      const outcome = rule(zCausesY, 'Y' as unknown as string[], ['X'], ['Z'], []);
+      expect(outcome).toStrictEqual({ applicable: false });
     });
   });
 });
