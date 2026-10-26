@@ -20,6 +20,7 @@ import {
   createValidationError,
   createValidationWarning,
 } from "./ModeHandler.js";
+import { resolveMode } from "./resolve-mode.js";
 
 /**
  * Custom field definition
@@ -122,7 +123,7 @@ export class CustomHandler implements ModeHandler {
 
     // Process based-on modes
     const basedOnModes = inputAny.basedOnModes
-      ? inputAny.basedOnModes.map((m: string) => this.resolveMode(m))
+      ? inputAny.basedOnModes.map((m: string) => resolveMode(m))
       : undefined;
 
     return {
@@ -452,46 +453,6 @@ export class CustomHandler implements ModeHandler {
       rule: rule.rule || "",
       message: rule.message || "Validation failed",
     };
-  }
-
-  /**
-   * Resolve mode from string
-   */
-  private resolveMode(mode: string): ThinkingMode {
-    const modeMap: Record<string, ThinkingMode> = {
-      sequential: ThinkingMode.SEQUENTIAL,
-      shannon: ThinkingMode.SHANNON,
-      mathematics: ThinkingMode.MATHEMATICS,
-      physics: ThinkingMode.PHYSICS,
-      hybrid: ThinkingMode.HYBRID,
-      inductive: ThinkingMode.INDUCTIVE,
-      deductive: ThinkingMode.DEDUCTIVE,
-      abductive: ThinkingMode.ABDUCTIVE,
-      causal: ThinkingMode.CAUSAL,
-      bayesian: ThinkingMode.BAYESIAN,
-      counterfactual: ThinkingMode.COUNTERFACTUAL,
-      temporal: ThinkingMode.TEMPORAL,
-      gametheory: ThinkingMode.GAMETHEORY,
-      evidential: ThinkingMode.EVIDENTIAL,
-      analogical: ThinkingMode.ANALOGICAL,
-      firstprinciples: ThinkingMode.FIRSTPRINCIPLES,
-      systemsthinking: ThinkingMode.SYSTEMSTHINKING,
-      scientificmethod: ThinkingMode.SCIENTIFICMETHOD,
-      formallogic: ThinkingMode.FORMALLOGIC,
-      metareasoning: ThinkingMode.METAREASONING,
-      optimization: ThinkingMode.OPTIMIZATION,
-      engineering: ThinkingMode.ENGINEERING,
-      algorithmic: ThinkingMode.ALGORITHMIC,
-      computability: ThinkingMode.COMPUTABILITY,
-      cryptanalytic: ThinkingMode.CRYPTANALYTIC,
-      synthesis: ThinkingMode.SYNTHESIS,
-      argumentation: ThinkingMode.ARGUMENTATION,
-      critique: ThinkingMode.CRITIQUE,
-      analysis: ThinkingMode.ANALYSIS,
-      custom: ThinkingMode.CUSTOM,
-    };
-
-    return modeMap[mode.toLowerCase()] || ThinkingMode.SEQUENTIAL;
   }
 
   /**
