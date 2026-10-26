@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 524,
+    "totalFiles": 525,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 247,
-        "loc": 119499
+        "loc": 119491
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 254,
-        "loc": 107811
+        "files": 255,
+        "loc": 107979
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 235,
       "orphan": 12,
       "template": 5,
-      "test": 254,
+      "test": 255,
       "tool": 14,
       "config": 2
     }
@@ -317,7 +317,7 @@
     {
       "path": "src/export/visual/utils/latex.ts",
       "area": "src",
-      "loc": 1455,
+      "loc": 1447,
       "disposition": "reachable"
     },
     {
@@ -2196,6 +2196,12 @@
       "path": "tests/unit/export/latex-export.test.ts",
       "area": "tests",
       "loc": 380,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/export/latex-item-lists.test.ts",
+      "area": "tests",
+      "loc": 168,
       "disposition": "test"
     },
     {

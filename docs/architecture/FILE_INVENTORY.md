@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **524 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **525 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -18,7 +18,7 @@ Every tracked TypeScript file in the repository — **524 files** — not just t
 | other | 2 |
 | reachable | 235 |
 | template | 5 |
-| test | 254 |
+| test | 255 |
 | tool | 14 |
 
 ## Per-area counts
@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **524 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 247 | 119,499 |
+| src | 247 | 119,491 |
 | templates | 5 | 772 |
-| tests | 254 | 107,811 |
+| tests | 255 | 107,979 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -82,7 +82,7 @@ Every tracked TypeScript file in the repository — **524 files** — not just t
 | `src/export/visual/utils/index.ts` | src | 22 | reachable |
 | `src/export/visual/utils/json.ts` | src | 822 | reachable |
 | `src/export/visual/utils/latex-mermaid-integration.ts` | src | 402 | reachable |
-| `src/export/visual/utils/latex.ts` | src | 1455 | reachable |
+| `src/export/visual/utils/latex.ts` | src | 1447 | reachable |
 | `src/export/visual/utils/markdown.ts` | src | 791 | reachable |
 | `src/export/visual/utils/mermaid.ts` | src | 1357 | reachable |
 | `src/export/visual/utils/modelica.ts` | src | 558 | reachable |
@@ -396,6 +396,7 @@ Every tracked TypeScript file in the repository — **524 files** — not just t
 | `tests/unit/export/duplicate-implementations.test.ts` | tests | 137 | test |
 | `tests/unit/export/file-exporter.test.ts` | tests | 501 | test |
 | `tests/unit/export/latex-export.test.ts` | tests | 380 | test |
+| `tests/unit/export/latex-item-lists.test.ts` | tests | 168 | test |
 | `tests/unit/export/latex.test.ts` | tests | 599 | test |
 | `tests/unit/export/mode-exporter-format-matrix.test.ts` | tests | 196 | test |
 | `tests/unit/export/profiles.test.ts` | tests | 534 | test |
