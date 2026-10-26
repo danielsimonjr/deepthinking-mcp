@@ -911,10 +911,10 @@ var init_recommendations = __esm({
        * Recommends combinations of reasoning modes that work well together
        */
       recommendCombinations(characteristics) {
-        const combinations = [];
+        const combinations2 = [];
         const isPhilosophical = characteristics.domain.toLowerCase().includes("metaphysics") || characteristics.domain.toLowerCase().includes("theology") || characteristics.domain.toLowerCase().includes("philosophy") || characteristics.domain.toLowerCase().includes("epistemology") || characteristics.domain.toLowerCase().includes("ethics");
         if (isPhilosophical || characteristics.complexity === "high" && characteristics.requiresExplanation && characteristics.hasAlternatives) {
-          combinations.push({
+          combinations2.push({
             modes: [
               "inductive" /* INDUCTIVE */,
               "deductive" /* DEDUCTIVE */,
@@ -937,7 +937,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.timeDependent && characteristics.requiresExplanation) {
-          combinations.push({
+          combinations2.push({
             modes: ["temporal" /* TEMPORAL */, "causal" /* CAUSAL */],
             sequence: "sequential",
             rationale: "Build timeline first, then analyze causal relationships",
@@ -952,7 +952,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.requiresExplanation && characteristics.requiresQuantification) {
-          combinations.push({
+          combinations2.push({
             modes: ["abductive" /* ABDUCTIVE */, "bayesian" /* BAYESIAN */],
             sequence: "sequential",
             rationale: "Generate hypotheses, then quantify with probabilities",
@@ -967,7 +967,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.multiAgent && characteristics.hasAlternatives) {
-          combinations.push({
+          combinations2.push({
             modes: ["gametheory" /* GAMETHEORY */, "counterfactual" /* COUNTERFACTUAL */],
             sequence: "hybrid",
             rationale: "Analyze equilibria, then explore alternative strategies",
@@ -982,7 +982,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.hasIncompleteInfo && characteristics.timeDependent) {
-          combinations.push({
+          combinations2.push({
             modes: ["evidential" /* EVIDENTIAL */, "causal" /* CAUSAL */],
             sequence: "parallel",
             rationale: "Combine uncertain evidence while modeling causal structure",
@@ -997,7 +997,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.timeDependent && characteristics.multiAgent) {
-          combinations.push({
+          combinations2.push({
             modes: ["temporal" /* TEMPORAL */, "gametheory" /* GAMETHEORY */],
             sequence: "sequential",
             rationale: "Model event sequences, then analyze strategic interactions over time",
@@ -1009,7 +1009,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.requiresProof && characteristics.complexity === "high") {
-          combinations.push({
+          combinations2.push({
             modes: ["shannon" /* SHANNON */, "mathematics" /* MATHEMATICS */],
             sequence: "hybrid",
             rationale: "Use Shannon methodology to structure complex mathematical proofs",
@@ -1024,7 +1024,7 @@ var init_recommendations = __esm({
           });
         }
         if ((characteristics.domain === "engineering" || characteristics.domain === "software") && characteristics.hasAlternatives) {
-          combinations.push({
+          combinations2.push({
             modes: ["engineering" /* ENGINEERING */, "optimization" /* OPTIMIZATION */],
             sequence: "sequential",
             rationale: "Design system architecture, then optimize for performance/cost",
@@ -1040,7 +1040,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.requiresQuantification && characteristics.hasAlternatives && (characteristics.domain === "engineering" || characteristics.domain === "software")) {
-          combinations.push({
+          combinations2.push({
             modes: ["constraint" /* CONSTRAINT */, "engineering" /* ENGINEERING */],
             sequence: "sequential",
             rationale: "Identify constraints first, then design within those boundaries",
@@ -1056,7 +1056,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.complexity === "high" && characteristics.requiresExplanation) {
-          combinations.push({
+          combinations2.push({
             modes: ["firstprinciples" /* FIRSTPRINCIPLES */, "systemsthinking" /* SYSTEMSTHINKING */],
             sequence: "sequential",
             rationale: "Build from fundamental truths, then analyze systemic interactions",
@@ -1068,7 +1068,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.hasIncompleteInfo && characteristics.requiresQuantification) {
-          combinations.push({
+          combinations2.push({
             modes: ["scientificmethod" /* SCIENTIFICMETHOD */, "bayesian" /* BAYESIAN */],
             sequence: "hybrid",
             rationale: "Design experiments and update beliefs with Bayesian inference",
@@ -1084,7 +1084,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.requiresProof && !characteristics.hasIncompleteInfo) {
-          combinations.push({
+          combinations2.push({
             modes: ["formallogic" /* FORMALLOGIC */, "deductive" /* DEDUCTIVE */],
             sequence: "hybrid",
             rationale: "Use formal logic systems with deductive derivation",
@@ -1100,7 +1100,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
-          combinations.push({
+          combinations2.push({
             modes: ["recursive" /* RECURSIVE */, "optimization" /* OPTIMIZATION */],
             sequence: "hybrid",
             rationale: "Decompose problem recursively, optimize at each level",
@@ -1116,7 +1116,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.uncertainty === "high" && characteristics.requiresQuantification) {
-          combinations.push({
+          combinations2.push({
             modes: ["stochastic" /* STOCHASTIC */, "bayesian" /* BAYESIAN */],
             sequence: "parallel",
             rationale: "Model random processes while updating beliefs probabilistically",
@@ -1132,7 +1132,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.domain === "computer science" && characteristics.requiresProof) {
-          combinations.push({
+          combinations2.push({
             modes: ["computability" /* COMPUTABILITY */, "formallogic" /* FORMALLOGIC */],
             sequence: "hybrid",
             rationale: "Analyze computational limits with formal logical proofs",
@@ -1148,7 +1148,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.domain === "security" && characteristics.uncertainty === "high") {
-          combinations.push({
+          combinations2.push({
             modes: ["cryptanalytic" /* CRYPTANALYTIC */, "stochastic" /* STOCHASTIC */],
             sequence: "parallel",
             rationale: "Analyze cryptographic systems with probabilistic attack modeling",
@@ -1164,7 +1164,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.complexity === "high" && (characteristics.multiAgent || characteristics.timeDependent)) {
-          combinations.push({
+          combinations2.push({
             modes: ["systemsthinking" /* SYSTEMSTHINKING */, "engineering" /* ENGINEERING */],
             sequence: "sequential",
             rationale: "Understand system dynamics holistically, then engineer solutions",
@@ -1180,7 +1180,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.hasAlternatives && characteristics.uncertainty === "high") {
-          combinations.push({
+          combinations2.push({
             modes: ["modal" /* MODAL */, "counterfactual" /* COUNTERFACTUAL */],
             sequence: "parallel",
             rationale: "Analyze possible worlds and counterfactual scenarios together",
@@ -1196,7 +1196,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
-          combinations.push({
+          combinations2.push({
             modes: ["metareasoning" /* METAREASONING */, "optimization" /* OPTIMIZATION */],
             sequence: "hybrid",
             rationale: "Monitor reasoning strategies and optimize approach selection",
@@ -1212,7 +1212,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.requiresExplanation && characteristics.hasAlternatives) {
-          combinations.push({
+          combinations2.push({
             modes: [
               "metareasoning" /* METAREASONING */,
               "formallogic" /* FORMALLOGIC */,
@@ -1234,7 +1234,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.hasAlternatives && characteristics.uncertainty !== "low") {
-          combinations.push({
+          combinations2.push({
             modes: ["metareasoning" /* METAREASONING */, "counterfactual" /* COUNTERFACTUAL */],
             sequence: "parallel",
             rationale: "Self-reflect on reasoning while exploring alternative scenarios to counter biases",
@@ -1250,7 +1250,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.domain === "computer science" && characteristics.requiresProof) {
-          combinations.push({
+          combinations2.push({
             modes: ["algorithmic" /* ALGORITHMIC */, "computability" /* COMPUTABILITY */],
             sequence: "hybrid",
             rationale: "Combine algorithm design with computability analysis for theoretical completeness",
@@ -1266,7 +1266,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.hasAlternatives && characteristics.requiresQuantification) {
-          combinations.push({
+          combinations2.push({
             modes: ["algorithmic" /* ALGORITHMIC */, "optimization" /* OPTIMIZATION */],
             sequence: "sequential",
             rationale: "Design algorithm first, then optimize for performance",
@@ -1282,7 +1282,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.requiresProof && characteristics.domain !== "philosophy") {
-          combinations.push({
+          combinations2.push({
             modes: ["algorithmic" /* ALGORITHMIC */, "mathematics" /* MATHEMATICS */],
             sequence: "hybrid",
             rationale: "Combine algorithm design with mathematical proof techniques",
@@ -1298,7 +1298,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.complexity === "high" && characteristics.hasAlternatives) {
-          combinations.push({
+          combinations2.push({
             modes: ["algorithmic" /* ALGORITHMIC */, "recursive" /* RECURSIVE */],
             sequence: "parallel",
             rationale: "Apply divide-and-conquer paradigm with recursive decomposition",
@@ -1314,7 +1314,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.uncertainty !== "low" && characteristics.requiresQuantification) {
-          combinations.push({
+          combinations2.push({
             modes: ["algorithmic" /* ALGORITHMIC */, "stochastic" /* STOCHASTIC */],
             sequence: "parallel",
             rationale: "Design randomized algorithms with probabilistic analysis",
@@ -1330,7 +1330,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.domain === "research" || characteristics.domain === "academic") {
-          combinations.push({
+          combinations2.push({
             modes: ["synthesis" /* SYNTHESIS */, "critique" /* CRITIQUE */],
             sequence: "sequential",
             rationale: "Synthesize literature first, then critically evaluate the synthesized findings",
@@ -1346,7 +1346,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.hasIncompleteInfo && characteristics.requiresExplanation) {
-          combinations.push({
+          combinations2.push({
             modes: ["synthesis" /* SYNTHESIS */, "analysis" /* ANALYSIS */],
             sequence: "hybrid",
             rationale: "Combine literature synthesis with qualitative analysis methods",
@@ -1359,7 +1359,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.requiresExplanation && characteristics.hasAlternatives) {
-          combinations.push({
+          combinations2.push({
             modes: ["argumentation" /* ARGUMENTATION */, "critique" /* CRITIQUE */],
             sequence: "parallel",
             rationale: "Build arguments while critically evaluating opposing views",
@@ -1375,7 +1375,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.requiresProof && characteristics.requiresExplanation) {
-          combinations.push({
+          combinations2.push({
             modes: ["argumentation" /* ARGUMENTATION */, "deductive" /* DEDUCTIVE */],
             sequence: "hybrid",
             rationale: "Combine Toulmin argumentation with deductive logical rigor",
@@ -1388,7 +1388,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.hasIncompleteInfo && !characteristics.requiresProof) {
-          combinations.push({
+          combinations2.push({
             modes: ["analysis" /* ANALYSIS */, "inductive" /* INDUCTIVE */],
             sequence: "sequential",
             rationale: "Apply qualitative analysis then generalize through inductive reasoning",
@@ -1401,7 +1401,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.complexity === "high" && characteristics.requiresExplanation) {
-          combinations.push({
+          combinations2.push({
             modes: ["critique" /* CRITIQUE */, "metareasoning" /* METAREASONING */],
             sequence: "parallel",
             rationale: "Critically analyze while monitoring own biases and reasoning quality",
@@ -1417,7 +1417,7 @@ var init_recommendations = __esm({
           });
         }
         if (characteristics.requiresQuantification && characteristics.hasIncompleteInfo) {
-          combinations.push({
+          combinations2.push({
             modes: ["synthesis" /* SYNTHESIS */, "bayesian" /* BAYESIAN */],
             sequence: "hybrid",
             rationale: "Synthesize literature while quantifying evidence strength",
@@ -1429,7 +1429,7 @@ var init_recommendations = __esm({
             synergies: ["Synthesis gathers evidence", "Bayesian weights findings"]
           });
         }
-        return combinations;
+        return combinations2;
       }
       /**
        * Get a simple mode recommendation based on a few key characteristics
@@ -3931,12 +3931,28 @@ var init_PhysicsHandler = __esm({
     };
   }
 });
+
+// src/modes/handlers/resolve-mode.ts
+function resolveMode(name) {
+  return MODES_BY_NAME.get(name.toLowerCase()) ?? "sequential" /* SEQUENTIAL */;
+}
+var MODES_BY_NAME;
+var init_resolve_mode = __esm({
+  "src/modes/handlers/resolve-mode.ts"() {
+    init_esm_shims();
+    init_core();
+    MODES_BY_NAME = new Map(
+      Object.values(ThinkingMode).map((mode) => [mode, mode])
+    );
+  }
+});
 var VALID_THOUGHT_TYPES4, VALID_STRATEGIES, TARGET_CONFIDENCE, HybridHandler;
 var init_HybridHandler = __esm({
   "src/modes/handlers/HybridHandler.ts"() {
     init_esm_shims();
     init_recommendations();
     init_ModeHandler();
+    init_resolve_mode();
     VALID_THOUGHT_TYPES4 = [
       "mode_selection",
       "parallel_analysis",
@@ -3970,7 +3986,7 @@ var init_HybridHandler = __esm({
           problemCharacteristics
         );
         const topModes = recommendations.slice(0, 3);
-        const activeModes = inputAny.activeModes ? inputAny.activeModes.map((m) => this.resolveMode(m)) : topModes.map((r) => r.mode);
+        const activeModes = inputAny.activeModes ? inputAny.activeModes.map((m) => resolveMode(m)) : topModes.map((r) => r.mode);
         const modeContributions = inputAny.modeContributions ? inputAny.modeContributions.map(
           (c) => this.normalizeContribution(c)
         ) : this.initializeContributions(activeModes);
@@ -4295,48 +4311,11 @@ var init_HybridHandler = __esm({
         };
       }
       /**
-       * Resolve mode from string
-       */
-      resolveMode(mode) {
-        const modeMap = {
-          sequential: "sequential" /* SEQUENTIAL */,
-          shannon: "shannon" /* SHANNON */,
-          mathematics: "mathematics" /* MATHEMATICS */,
-          physics: "physics" /* PHYSICS */,
-          hybrid: "hybrid" /* HYBRID */,
-          inductive: "inductive" /* INDUCTIVE */,
-          deductive: "deductive" /* DEDUCTIVE */,
-          abductive: "abductive" /* ABDUCTIVE */,
-          causal: "causal" /* CAUSAL */,
-          bayesian: "bayesian" /* BAYESIAN */,
-          counterfactual: "counterfactual" /* COUNTERFACTUAL */,
-          temporal: "temporal" /* TEMPORAL */,
-          gametheory: "gametheory" /* GAMETHEORY */,
-          evidential: "evidential" /* EVIDENTIAL */,
-          analogical: "analogical" /* ANALOGICAL */,
-          firstprinciples: "firstprinciples" /* FIRSTPRINCIPLES */,
-          systemsthinking: "systemsthinking" /* SYSTEMSTHINKING */,
-          scientificmethod: "scientificmethod" /* SCIENTIFICMETHOD */,
-          formallogic: "formallogic" /* FORMALLOGIC */,
-          metareasoning: "metareasoning" /* METAREASONING */,
-          optimization: "optimization" /* OPTIMIZATION */,
-          engineering: "engineering" /* ENGINEERING */,
-          algorithmic: "algorithmic" /* ALGORITHMIC */,
-          computability: "computability" /* COMPUTABILITY */,
-          cryptanalytic: "cryptanalytic" /* CRYPTANALYTIC */,
-          synthesis: "synthesis" /* SYNTHESIS */,
-          argumentation: "argumentation" /* ARGUMENTATION */,
-          critique: "critique" /* CRITIQUE */,
-          analysis: "analysis" /* ANALYSIS */
-        };
-        return modeMap[mode.toLowerCase()] || "sequential" /* SEQUENTIAL */;
-      }
-      /**
        * Normalize mode contribution
        */
       normalizeContribution(contrib) {
         return {
-          mode: this.resolveMode(contrib.mode || "sequential"),
+          mode: resolveMode(contrib.mode || "sequential"),
           confidence: Math.max(0, Math.min(1, contrib.confidence ?? 0.5)),
           insights: contrib.insights || [],
           evidence: contrib.evidence || [],
@@ -5549,6 +5528,52 @@ var init_centrality = __esm({
   }
 });
 
+// src/modes/causal/graph/algorithms/graph-utils.ts
+function getDescendants(graph, nodeId) {
+  const descendants = /* @__PURE__ */ new Set();
+  const stack = [nodeId];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    for (const edge of graph.edges) {
+      if (edge.from === current && !descendants.has(edge.to)) {
+        descendants.add(edge.to);
+        stack.push(edge.to);
+      }
+    }
+  }
+  return descendants;
+}
+function getAncestors(graph, nodeId) {
+  const ancestors = /* @__PURE__ */ new Set();
+  const stack = [nodeId];
+  while (stack.length > 0) {
+    const current = stack.pop();
+    for (const edge of graph.edges) {
+      if (edge.to === current && !ancestors.has(edge.from)) {
+        ancestors.add(edge.from);
+        stack.push(edge.from);
+      }
+    }
+  }
+  return ancestors;
+}
+function* combinations(arr, k) {
+  if (k === 0) {
+    yield [];
+    return;
+  }
+  for (let i = 0; i <= arr.length - k; i++) {
+    for (const rest of combinations(arr.slice(i + 1), k - 1)) {
+      yield [arr[i], ...rest];
+    }
+  }
+}
+var init_graph_utils = __esm({
+  "src/modes/causal/graph/algorithms/graph-utils.ts"() {
+    init_esm_shims();
+  }
+});
+
 // src/modes/causal/graph/algorithms/d-separation.ts
 function buildBidirectionalAdjacency(graph) {
   const adj = /* @__PURE__ */ new Map();
@@ -5563,20 +5588,6 @@ function buildBidirectionalAdjacency(graph) {
 }
 function getParents(graph, nodeId) {
   return graph.edges.filter((e) => e.to === nodeId && e.type !== "bidirected").map((e) => e.from);
-}
-function getDescendants(graph, nodeId) {
-  const descendants = /* @__PURE__ */ new Set();
-  const stack = [nodeId];
-  while (stack.length > 0) {
-    const current = stack.pop();
-    for (const edge of graph.edges) {
-      if (edge.from === current && !descendants.has(edge.to)) {
-        descendants.add(edge.to);
-        stack.push(edge.to);
-      }
-    }
-  }
-  return descendants;
 }
 function findVStructures(graph) {
   const vStructures = [];
@@ -5783,17 +5794,6 @@ function findBackdoorAdjustmentSet(graph, treatment, outcome) {
   return null;
 }
 function findBackdoorSetOfSize(graph, treatment, outcome, candidates, size) {
-  function* combinations(arr, k) {
-    if (k === 0) {
-      yield [];
-      return;
-    }
-    for (let i = 0; i <= arr.length - k; i++) {
-      for (const rest of combinations(arr.slice(i + 1), k - 1)) {
-        yield [arr[i], ...rest];
-      }
-    }
-  }
   for (const subset of combinations(candidates, size)) {
     if (isValidBackdoorAdjustment(graph, treatment, outcome, subset)) {
       return subset;
@@ -5804,6 +5804,7 @@ function findBackdoorSetOfSize(graph, treatment, outcome, candidates, size) {
 var init_d_separation = __esm({
   "src/modes/causal/graph/algorithms/d-separation.ts"() {
     init_esm_shims();
+    init_graph_utils();
   }
 });
 
@@ -5864,13 +5865,13 @@ function isIdentifiable(graph, treatment, outcome) {
   };
 }
 function findAllBackdoorSets(graph, treatment, outcome, maxSize = 5) {
-  const treatmentDescendants = getDescendants2(graph, treatment);
+  const treatmentDescendants = getDescendants(graph, treatment);
   const candidates = graph.nodes.map((n) => n.id).filter(
     (id) => id !== treatment && id !== outcome && !treatmentDescendants.has(id)
   );
   const validSets = [];
   for (let size = 0; size <= Math.min(maxSize, candidates.length); size++) {
-    for (const subset of getCombinations(candidates, size)) {
+    for (const subset of combinations(candidates, size)) {
       if (isValidBackdoorAdjustment(graph, treatment, outcome, subset)) {
         validSets.push(subset);
       }
@@ -5905,7 +5906,7 @@ function checkFrontdoorCriterion(graph, treatment, outcome) {
 }
 function findMediators(graph, treatment, outcome) {
   const mediators = [];
-  const descendants = getDescendants2(graph, treatment);
+  const descendants = getDescendants(graph, treatment);
   const ancestors = getAncestors(graph, outcome);
   for (const nodeId of descendants) {
     if (nodeId !== outcome && ancestors.has(nodeId)) {
@@ -6004,49 +6005,11 @@ function areBidirectedConnected(graph, node1, node2) {
   }
   return false;
 }
-function getDescendants2(graph, nodeId) {
-  const descendants = /* @__PURE__ */ new Set();
-  const stack = [nodeId];
-  while (stack.length > 0) {
-    const current = stack.pop();
-    for (const edge of graph.edges) {
-      if (edge.from === current && !descendants.has(edge.to)) {
-        descendants.add(edge.to);
-        stack.push(edge.to);
-      }
-    }
-  }
-  return descendants;
-}
-function getAncestors(graph, nodeId) {
-  const ancestors = /* @__PURE__ */ new Set();
-  const stack = [nodeId];
-  while (stack.length > 0) {
-    const current = stack.pop();
-    for (const edge of graph.edges) {
-      if (edge.to === current && !ancestors.has(edge.from)) {
-        ancestors.add(edge.from);
-        stack.push(edge.from);
-      }
-    }
-  }
-  return ancestors;
-}
-function* getCombinations(arr, k) {
-  if (k === 0) {
-    yield [];
-    return;
-  }
-  for (let i = 0; i <= arr.length - k; i++) {
-    for (const rest of getCombinations(arr.slice(i + 1), k - 1)) {
-      yield [arr[i], ...rest];
-    }
-  }
-}
 var init_intervention = __esm({
   "src/modes/causal/graph/algorithms/intervention.ts"() {
     init_esm_shims();
     init_d_separation();
+    init_graph_utils();
   }
 });
 var CausalHandler;
@@ -8462,18 +8425,13 @@ var init_GameTheoryHandler = __esm({
           return equilibria;
         }
         for (const entry of matrix.payoffs) {
-          if (this.isNashEquilibrium(entry, matrix, players, strategies)) {
+          if (this.isNashEquilibrium(entry, matrix)) {
             equilibria.push({
               id: randomUUID(),
               strategyProfile: entry.strategyProfile,
               payoffs: entry.payoffs,
               type: "pure",
-              isStrict: this.isStrictEquilibrium(
-                entry,
-                matrix,
-                players,
-                strategies
-              ),
+              isStrict: this.isStrictEquilibrium(entry, matrix),
               stability: this.calculateEquilibriumStability(
                 entry,
                 matrix,
@@ -8488,58 +8446,40 @@ var init_GameTheoryHandler = __esm({
       /**
        * Check if a strategy profile is a Nash equilibrium
        */
-      isNashEquilibrium(entry, matrix, _players, _strategies) {
-        for (let playerIdx = 0; playerIdx < matrix.players.length; playerIdx++) {
-          const currentPayoff = entry.payoffs[playerIdx];
-          for (const altEntry of matrix.payoffs) {
-            let onlyThisPlayerDiffers = true;
-            for (let i = 0; i < matrix.players.length; i++) {
-              if (i === playerIdx) {
-                if (altEntry.strategyProfile[i] === entry.strategyProfile[i]) {
-                  onlyThisPlayerDiffers = false;
-                  break;
-                }
-              } else {
-                if (altEntry.strategyProfile[i] !== entry.strategyProfile[i]) {
-                  onlyThisPlayerDiffers = false;
-                  break;
-                }
-              }
-            }
-            if (onlyThisPlayerDiffers && altEntry.payoffs[playerIdx] > currentPayoff) {
-              return false;
-            }
-          }
-        }
-        return true;
+      isNashEquilibrium(entry, matrix) {
+        return !this.hasTemptingDeviation(
+          entry,
+          matrix,
+          (deviationPayoff, currentPayoff) => deviationPayoff > currentPayoff
+        );
       }
       /**
        * Check if equilibrium is strict (strictly better than all deviations)
        */
-      isStrictEquilibrium(entry, matrix, _players, _strategies) {
+      isStrictEquilibrium(entry, matrix) {
+        return !this.hasTemptingDeviation(
+          entry,
+          matrix,
+          (deviationPayoff, currentPayoff) => deviationPayoff >= currentPayoff
+        );
+      }
+      /**
+       * Check if any player has a deviation that `tempts` accepts.
+       */
+      hasTemptingDeviation(entry, matrix, tempts) {
         for (let playerIdx = 0; playerIdx < matrix.players.length; playerIdx++) {
           const currentPayoff = entry.payoffs[playerIdx];
-          for (const altEntry of matrix.payoffs) {
-            let onlyThisPlayerDiffers = true;
-            for (let i = 0; i < matrix.players.length; i++) {
-              if (i === playerIdx) {
-                if (altEntry.strategyProfile[i] === entry.strategyProfile[i]) {
-                  onlyThisPlayerDiffers = false;
-                  break;
-                }
-              } else {
-                if (altEntry.strategyProfile[i] !== entry.strategyProfile[i]) {
-                  onlyThisPlayerDiffers = false;
-                  break;
-                }
-              }
-            }
-            if (onlyThisPlayerDiffers && altEntry.payoffs[playerIdx] >= currentPayoff) {
-              return false;
+          for (const altEntry of this.unilateralDeviations(
+            entry,
+            matrix,
+            playerIdx
+          )) {
+            if (tempts(altEntry.payoffs[playerIdx], currentPayoff)) {
+              return true;
             }
           }
         }
-        return true;
+        return false;
       }
       /**
        * Calculate equilibrium stability score
@@ -8549,29 +8489,27 @@ var init_GameTheoryHandler = __esm({
         let deviationCount = 0;
         for (let playerIdx = 0; playerIdx < matrix.players.length; playerIdx++) {
           const currentPayoff = entry.payoffs[playerIdx];
-          for (const altEntry of matrix.payoffs) {
-            let onlyThisPlayerDiffers = true;
-            for (let i = 0; i < matrix.players.length; i++) {
-              if (i === playerIdx) {
-                if (altEntry.strategyProfile[i] === entry.strategyProfile[i]) {
-                  onlyThisPlayerDiffers = false;
-                  break;
-                }
-              } else {
-                if (altEntry.strategyProfile[i] !== entry.strategyProfile[i]) {
-                  onlyThisPlayerDiffers = false;
-                  break;
-                }
-              }
-            }
-            if (onlyThisPlayerDiffers) {
-              totalPenalty += currentPayoff - altEntry.payoffs[playerIdx];
-              deviationCount++;
-            }
+          for (const altEntry of this.unilateralDeviations(
+            entry,
+            matrix,
+            playerIdx
+          )) {
+            totalPenalty += currentPayoff - altEntry.payoffs[playerIdx];
+            deviationCount++;
           }
         }
         const avgPenalty = deviationCount > 0 ? totalPenalty / deviationCount : 0;
         return Math.min(1, Math.max(0, 0.5 + avgPenalty / 10));
+      }
+      /**
+       * List the profiles that differ from `entry` in one player's strategy only
+       */
+      unilateralDeviations(entry, matrix, playerIdx) {
+        return matrix.payoffs.filter(
+          (altEntry) => matrix.players.every(
+            (_, i) => i === playerIdx ? altEntry.strategyProfile[i] !== entry.strategyProfile[i] : altEntry.strategyProfile[i] === entry.strategyProfile[i]
+          )
+        );
       }
       /**
        * Find dominant strategies
@@ -17681,6 +17619,7 @@ var init_CustomHandler = __esm({
   "src/modes/handlers/CustomHandler.ts"() {
     init_esm_shims();
     init_ModeHandler();
+    init_resolve_mode();
     CustomHandler = class {
       mode = "custom" /* CUSTOM */;
       modeName = "Custom Reasoning";
@@ -17697,7 +17636,7 @@ var init_CustomHandler = __esm({
         const validationRules = inputAny.validationRules ? inputAny.validationRules.map(
           (r) => this.normalizeValidationRule(r)
         ) : void 0;
-        const basedOnModes = inputAny.basedOnModes ? inputAny.basedOnModes.map((m) => this.resolveMode(m)) : void 0;
+        const basedOnModes = inputAny.basedOnModes ? inputAny.basedOnModes.map((m) => resolveMode(m)) : void 0;
         return {
           id: randomUUID(),
           sessionId,
@@ -17967,44 +17906,6 @@ var init_CustomHandler = __esm({
           rule: rule.rule || "",
           message: rule.message || "Validation failed"
         };
-      }
-      /**
-       * Resolve mode from string
-       */
-      resolveMode(mode) {
-        const modeMap = {
-          sequential: "sequential" /* SEQUENTIAL */,
-          shannon: "shannon" /* SHANNON */,
-          mathematics: "mathematics" /* MATHEMATICS */,
-          physics: "physics" /* PHYSICS */,
-          hybrid: "hybrid" /* HYBRID */,
-          inductive: "inductive" /* INDUCTIVE */,
-          deductive: "deductive" /* DEDUCTIVE */,
-          abductive: "abductive" /* ABDUCTIVE */,
-          causal: "causal" /* CAUSAL */,
-          bayesian: "bayesian" /* BAYESIAN */,
-          counterfactual: "counterfactual" /* COUNTERFACTUAL */,
-          temporal: "temporal" /* TEMPORAL */,
-          gametheory: "gametheory" /* GAMETHEORY */,
-          evidential: "evidential" /* EVIDENTIAL */,
-          analogical: "analogical" /* ANALOGICAL */,
-          firstprinciples: "firstprinciples" /* FIRSTPRINCIPLES */,
-          systemsthinking: "systemsthinking" /* SYSTEMSTHINKING */,
-          scientificmethod: "scientificmethod" /* SCIENTIFICMETHOD */,
-          formallogic: "formallogic" /* FORMALLOGIC */,
-          metareasoning: "metareasoning" /* METAREASONING */,
-          optimization: "optimization" /* OPTIMIZATION */,
-          engineering: "engineering" /* ENGINEERING */,
-          algorithmic: "algorithmic" /* ALGORITHMIC */,
-          computability: "computability" /* COMPUTABILITY */,
-          cryptanalytic: "cryptanalytic" /* CRYPTANALYTIC */,
-          synthesis: "synthesis" /* SYNTHESIS */,
-          argumentation: "argumentation" /* ARGUMENTATION */,
-          critique: "critique" /* CRITIQUE */,
-          analysis: "analysis" /* ANALYSIS */,
-          custom: "custom" /* CUSTOM */
-        };
-        return modeMap[mode.toLowerCase()] || "sequential" /* SEQUENTIAL */;
       }
       /**
        * Evaluate a simple validation rule
@@ -27006,11 +26907,26 @@ var init_combination_types = __esm({
     SYNTHESIS_CONFIDENCE_NOTE = "Synthesized from two insights. The value shown is the mean of their weights, which is not a measured confidence in the synthesis itself.";
   }
 });
+
+// src/modes/combinations/text-similarity.ts
+function wordSimilarity(text1, text2) {
+  const words1 = new Set(text1.toLowerCase().split(/\s+/));
+  const words2 = new Set(text2.toLowerCase().split(/\s+/));
+  const intersection = new Set([...words1].filter((w) => words2.has(w)));
+  const union = /* @__PURE__ */ new Set([...words1, ...words2]);
+  return union.size > 0 ? intersection.size / union.size : 0;
+}
+var init_text_similarity = __esm({
+  "src/modes/combinations/text-similarity.ts"() {
+    init_esm_shims();
+  }
+});
 var InsightMerger;
 var init_merger = __esm({
   "src/modes/combinations/merger.ts"() {
     init_esm_shims();
     init_combination_types();
+    init_text_similarity();
     InsightMerger = class {
       config;
       constructor(config = {}) {
@@ -27417,17 +27333,7 @@ var init_merger = __esm({
        * Check if two insights are similar
        */
       areSimilar(a, b) {
-        return this.calculateSimilarity(a.content, b.content) >= this.config.similarityThreshold;
-      }
-      /**
-       * Calculate text similarity (simplified Jaccard)
-       */
-      calculateSimilarity(text1, text2) {
-        const words1 = new Set(text1.toLowerCase().split(/\s+/));
-        const words2 = new Set(text2.toLowerCase().split(/\s+/));
-        const intersection = new Set([...words1].filter((w) => words2.has(w)));
-        const union = /* @__PURE__ */ new Set([...words1, ...words2]);
-        return union.size > 0 ? intersection.size / union.size : 0;
+        return wordSimilarity(a.content, b.content) >= this.config.similarityThreshold;
       }
       /**
        * Find a similar insight in a list
@@ -27518,11 +27424,8 @@ var init_merger = __esm({
        */
       findSynthesis(thesis, antithesis, candidates) {
         return candidates.find((c) => {
-          const simToThesis = this.calculateSimilarity(c.content, thesis.content);
-          const simToAntithesis = this.calculateSimilarity(
-            c.content,
-            antithesis.content
-          );
+          const simToThesis = wordSimilarity(c.content, thesis.content);
+          const simToAntithesis = wordSimilarity(c.content, antithesis.content);
           return simToThesis > 0.3 && simToAntithesis > 0.3;
         });
       }
@@ -27551,6 +27454,7 @@ var init_conflict_resolver = __esm({
   "src/modes/combinations/conflict-resolver.ts"() {
     init_esm_shims();
     init_combination_types();
+    init_text_similarity();
     ConflictResolver = class {
       config;
       constructor(config = {}) {
@@ -27696,7 +27600,7 @@ var init_conflict_resolver = __esm({
         ];
         for (const [posPattern, negPattern] of negationPairs) {
           if (posPattern.test(contentA) && negPattern.test(contentB) || negPattern.test(contentA) && posPattern.test(contentB)) {
-            const similarity = this.calculateSimilarity(contentA, contentB);
+            const similarity = wordSimilarity(contentA, contentB);
             if (similarity > 0.3) {
               return true;
             }
@@ -27708,15 +27612,12 @@ var init_conflict_resolver = __esm({
        * Check for partial overlap requiring reconciliation
        */
       checkPartialOverlap(a, b) {
-        const similarity = this.calculateSimilarity(a.content, b.content);
+        const similarity = wordSimilarity(a.content, b.content);
         if (similarity > 0.4 && similarity < 0.8) {
           const conclusionA = this.extractConclusion(a.content);
           const conclusionB = this.extractConclusion(b.content);
           if (conclusionA && conclusionB) {
-            const conclusionSim = this.calculateSimilarity(
-              conclusionA,
-              conclusionB
-            );
+            const conclusionSim = wordSimilarity(conclusionA, conclusionB);
             return conclusionSim < 0.5;
           }
         }
@@ -27735,7 +27636,7 @@ var init_conflict_resolver = __esm({
         const bIsBroad = broadIndicators.test(contentB);
         const bIsNarrow = narrowIndicators.test(contentB);
         if (aIsBroad && bIsNarrow || aIsNarrow && bIsBroad) {
-          const similarity = this.calculateSimilarity(a.content, b.content);
+          const similarity = wordSimilarity(a.content, b.content);
           return similarity > 0.3;
         }
         return false;
@@ -27744,7 +27645,7 @@ var init_conflict_resolver = __esm({
        * Check for confidence mismatch on similar conclusions
        */
       checkConfidenceMismatch(a, b) {
-        const similarity = this.calculateSimilarity(a.content, b.content);
+        const similarity = wordSimilarity(a.content, b.content);
         if (similarity > 0.7) {
           const confDiff = Math.abs(a.confidence - b.confidence);
           return confDiff > this.config.confidenceThreshold * 2;
@@ -27922,16 +27823,6 @@ var init_conflict_resolver = __esm({
           conflictType: type,
           severity
         };
-      }
-      /**
-       * Calculate text similarity
-       */
-      calculateSimilarity(text1, text2) {
-        const words1 = new Set(text1.toLowerCase().split(/\s+/));
-        const words2 = new Set(text2.toLowerCase().split(/\s+/));
-        const intersection = new Set([...words1].filter((w) => words2.has(w)));
-        const union = /* @__PURE__ */ new Set([...words1, ...words2]);
-        return union.size > 0 ? intersection.size / union.size : 0;
       }
       /**
        * Extract conclusion from content
@@ -55436,39 +55327,31 @@ var DependencyGraphBuilder = class {
    * Get all ancestors of a node (all nodes that lead to this node)
    */
   getAncestors(nodeId) {
-    const ancestors = /* @__PURE__ */ new Set();
-    const visited = /* @__PURE__ */ new Set();
-    const stack = [nodeId];
-    while (stack.length > 0) {
-      const current = stack.pop();
-      if (visited.has(current)) continue;
-      visited.add(current);
-      const parents = this.reverseAdjacencyList.get(current) || [];
-      for (const parent of parents) {
-        ancestors.add(parent);
-        stack.push(parent);
-      }
-    }
-    return Array.from(ancestors);
+    return this.collectReachable(nodeId, this.reverseAdjacencyList);
   }
   /**
    * Get all descendants of a node (all nodes that depend on this node)
    */
   getDescendants(nodeId) {
-    const descendants = /* @__PURE__ */ new Set();
+    return this.collectReachable(nodeId, this.adjacencyList);
+  }
+  /**
+   * Collect every node reachable from a node along one adjacency list
+   */
+  collectReachable(nodeId, adjacency) {
+    const reachable = /* @__PURE__ */ new Set();
     const visited = /* @__PURE__ */ new Set();
     const stack = [nodeId];
     while (stack.length > 0) {
       const current = stack.pop();
       if (visited.has(current)) continue;
       visited.add(current);
-      const children = this.adjacencyList.get(current) || [];
-      for (const child of children) {
-        descendants.add(child);
-        stack.push(child);
+      for (const next of adjacency.get(current) || []) {
+        reachable.add(next);
+        stack.push(next);
       }
     }
-    return Array.from(descendants);
+    return Array.from(reachable);
   }
   /**
    * Compute the depth of the graph (longest path from any root to any leaf)
@@ -60983,17 +60866,17 @@ var MultiModalAnalyzer = class {
         dominantMode = mode;
       }
     }
-    const combinations = this.detectCombinations(session);
+    const combinations2 = this.detectCombinations(session);
     const flowComplexity = this.calculateFlowComplexity(
       transitions,
       session.thoughts.length
     );
-    const coherence = this.calculateCoherence(transitions, combinations);
+    const coherence = this.calculateCoherence(transitions, combinations2);
     const adaptability = this.calculateAdaptability(transitions, session);
     return {
       session,
       transitions,
-      combinations,
+      combinations: combinations2,
       dominantMode,
       modeDistribution,
       categoryDistribution,
@@ -61046,15 +60929,15 @@ var MultiModalAnalyzer = class {
    * Detect mode combinations
    */
   detectCombinations(session) {
-    const combinations = /* @__PURE__ */ new Map();
+    const combinations2 = /* @__PURE__ */ new Map();
     const windowSize = 3;
     for (let i = 0; i <= session.thoughts.length - windowSize; i++) {
       const window = session.thoughts.slice(i, i + windowSize);
       const modes = window.map((t) => t.mode);
       const key = modes.join("->");
-      if (!combinations.has(key)) {
+      if (!combinations2.has(key)) {
         const synergy = this.calculateCombinationSynergy(modes);
-        combinations.set(key, {
+        combinations2.set(key, {
           modes,
           frequency: 1,
           effectiveness: synergy,
@@ -61063,12 +60946,12 @@ var MultiModalAnalyzer = class {
           examples: [window[0].id]
         });
       } else {
-        const combo = combinations.get(key);
+        const combo = combinations2.get(key);
         combo.frequency++;
         combo.examples.push(window[0].id);
       }
     }
-    return Array.from(combinations.values()).sort(
+    return Array.from(combinations2.values()).sort(
       (a, b) => b.frequency - a.frequency
     );
   }
@@ -61102,11 +60985,11 @@ var MultiModalAnalyzer = class {
   /**
    * Calculate coherence
    */
-  calculateCoherence(transitions, combinations) {
+  calculateCoherence(transitions, combinations2) {
     if (transitions.length === 0) return 1;
     const avgEffectiveness = transitions.reduce((sum, t) => sum + t.effectiveness, 0) / transitions.length;
-    const maxFreq = Math.max(...combinations.map((c) => c.frequency), 1);
-    const patternStrength = combinations.length > 0 ? combinations[0].frequency / maxFreq : 0.5;
+    const maxFreq = Math.max(...combinations2.map((c) => c.frequency), 1);
+    const patternStrength = combinations2.length > 0 ? combinations2[0].frequency / maxFreq : 0.5;
     return avgEffectiveness * 0.7 + patternStrength * 0.3;
   }
   /**
