@@ -142,6 +142,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before and after. The run covered the 35 mode handlers and 35 generic handlers, one for each mode.
   Each handler received 7 thought values, 7 pairs of thought numbers and 4 sets of extra fields. Ten new tests in `ModeHandler.test.ts` pin
   the error codes, the messages, the order of the two checks and the fresh result on each call.
+- **The three do-calculus rules share one check.** `applyRule1`, `applyRule2` and `applyRule3` in
+  `src/modes/causal/graph/algorithms/intervention.ts` each ended with the same lines: a d-separation
+  check of Y and Z, given X and W, and an answer with the formula of the rule. The private function
+  `testRule` holds those lines once. Each rule keeps its own graph change and its own formula text,
+  and the formula is built only when the rule applies. Results do not change. A run of 608,256 calls
+  for each rule gave the same output before and after, and so did the graph that each call received.
+  No other file in `src/` calls the three rules, so `dist/index.js` is byte-identical. The four old
+  rule tests passed for any result. 45 tests replace them: they pin the verdict of each rule in nine
+  cases, the text of the formula, the answer of a rule that does not apply, and the graph that a
+  rule leaves unchanged. 31 mutants of `testRule` and the three rules all fail a test.
 - **Two handlers share the six causal fields, and `validate` shares the causal graph.**
   `CausalHandler.createThought` and `GenericModeHandler.createCausalThought` (causal mode) each wrote
   the same six lines: `mode`, `thoughtType`, `causalGraph`, `interventions`, `mechanisms` and
