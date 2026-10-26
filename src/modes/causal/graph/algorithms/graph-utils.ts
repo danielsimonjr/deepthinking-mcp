@@ -5,46 +5,47 @@
 import type { CausalGraph } from "../types.js";
 
 /**
+ * Collect every node that a walk from `nodeId` reaches. The walk leaves a node by each edge whose
+ * `near` end is that node, and arrives at the `far` end of the edge. The set lists the nodes in
+ * the order of the walk.
+ */
+function collectReachable(
+  graph: CausalGraph,
+  nodeId: string,
+  near: "from" | "to",
+  far: "from" | "to",
+): Set<string> {
+  const reached = new Set<string>();
+  const stack = [nodeId];
+
+  while (stack.length > 0) {
+    const current = stack.pop()!;
+    for (const edge of graph.edges) {
+      if (edge[near] === current && !reached.has(edge[far])) {
+        reached.add(edge[far]);
+        stack.push(edge[far]);
+      }
+    }
+  }
+
+  return reached;
+}
+
+/**
  * Get all descendants of a node
  */
 export function getDescendants(
   graph: CausalGraph,
   nodeId: string,
 ): Set<string> {
-  const descendants = new Set<string>();
-  const stack = [nodeId];
-
-  while (stack.length > 0) {
-    const current = stack.pop()!;
-    for (const edge of graph.edges) {
-      if (edge.from === current && !descendants.has(edge.to)) {
-        descendants.add(edge.to);
-        stack.push(edge.to);
-      }
-    }
-  }
-
-  return descendants;
+  return collectReachable(graph, nodeId, "from", "to");
 }
 
 /**
  * Get all ancestors of a node
  */
 export function getAncestors(graph: CausalGraph, nodeId: string): Set<string> {
-  const ancestors = new Set<string>();
-  const stack = [nodeId];
-
-  while (stack.length > 0) {
-    const current = stack.pop()!;
-    for (const edge of graph.edges) {
-      if (edge.to === current && !ancestors.has(edge.from)) {
-        ancestors.add(edge.from);
-        stack.push(edge.from);
-      }
-    }
-  }
-
-  return ancestors;
+  return collectReachable(graph, nodeId, "to", "from");
 }
 
 /**

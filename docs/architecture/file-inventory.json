@@ -8,7 +8,7 @@
       },
       "src": {
         "files": 249,
-        "loc": 119338
+        "loc": 119339
       },
       "templates": {
         "files": 5,
@@ -16,7 +16,7 @@
       },
       "tests": {
         "files": 261,
-        "loc": 109279
+        "loc": 109346
       },
       "tools": {
         "files": 14,
@@ -389,7 +389,7 @@
     {
       "path": "src/modes/causal/graph/algorithms/graph-utils.ts",
       "area": "src",
-      "loc": 64,
+      "loc": 65,
       "disposition": "reachable"
     },
     {
@@ -2357,7 +2357,7 @@
     {
       "path": "tests/unit/modes/causal/graph/graph-utils.test.ts",
       "area": "tests",
-      "loc": 85,
+      "loc": 152,
       "disposition": "test"
     },
     {
