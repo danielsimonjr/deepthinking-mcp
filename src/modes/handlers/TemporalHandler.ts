@@ -21,6 +21,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 type TemporalThoughtType =
@@ -60,7 +61,11 @@ export class TemporalHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      this.supportedThoughtTypes,
+      "event_definition",
+    );
 
     return {
       ...createThoughtBase(input, sessionId),
@@ -208,21 +213,6 @@ export class TemporalHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as TemporalThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type to valid TemporalThoughtType
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): TemporalThoughtType {
-    if (
-      inputType &&
-      this.supportedThoughtTypes.includes(inputType as TemporalThoughtType)
-    ) {
-      return inputType as TemporalThoughtType;
-    }
-    return "event_definition";
   }
 
   /**

@@ -212,6 +212,9 @@ function checkThoughtType(input, validTypes) {
   }
   return void 0;
 }
+function resolveThoughtType(inputType, supported, fallback) {
+  return inputType && supported.includes(inputType) ? inputType : fallback;
+}
 function checkUncertaintyRange(input) {
   if (input.uncertainty !== void 0 && (input.uncertainty < 0 || input.uncertainty > 1)) {
     return createValidationError(
@@ -3142,7 +3145,11 @@ var init_MathematicsHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          VALID_THOUGHT_TYPES2,
+          "axiom_definition"
+        );
         const mathematicalModel = this.normalizeModel(input.mathematicalModel);
         const proofStrategy = this.normalizeProofStrategy(input.proofStrategy);
         return {
@@ -3361,15 +3368,6 @@ var init_MathematicsHandler = __esm({
         return VALID_THOUGHT_TYPES2.includes(thoughtType);
       }
       /**
-       * Resolve thought type
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && VALID_THOUGHT_TYPES2.includes(inputType)) {
-          return inputType;
-        }
-        return "axiom_definition";
-      }
-      /**
        * Normalize mathematical model
        */
       normalizeModel(model) {
@@ -3497,7 +3495,11 @@ var init_PhysicsHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          VALID_THOUGHT_TYPES3,
+          "symmetry_analysis"
+        );
         const tensorProperties = this.normalizeTensor(input.tensorProperties);
         const physicalInterpretation = this.normalizeInterpretation(
           input.physicalInterpretation
@@ -3723,15 +3725,6 @@ var init_PhysicsHandler = __esm({
        */
       supportsThoughtType(thoughtType) {
         return VALID_THOUGHT_TYPES3.includes(thoughtType);
-      }
-      /**
-       * Resolve thought type
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && VALID_THOUGHT_TYPES3.includes(inputType)) {
-          return inputType;
-        }
-        return "symmetry_analysis";
       }
       /**
        * Normalize tensor properties
@@ -7246,7 +7239,11 @@ var init_TemporalHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          this.supportedThoughtTypes,
+          "event_definition"
+        );
         return {
           ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
@@ -7372,15 +7369,6 @@ var init_TemporalHandler = __esm({
         );
       }
       /**
-       * Resolve thought type to valid TemporalThoughtType
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
-          return inputType;
-        }
-        return "event_definition";
-      }
-      /**
        * Detect temporal inconsistencies
        */
       detectInconsistencies(relations) {
@@ -7427,7 +7415,11 @@ var init_HistoricalHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          this.supportedThoughtTypes,
+          "event_analysis"
+        );
         const thought = {
           ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
@@ -7663,15 +7655,6 @@ var init_HistoricalHandler = __esm({
         );
       }
       /**
-       * Resolve thought type to valid HistoricalThoughtType
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
-          return inputType;
-        }
-        return "event_analysis";
-      }
-      /**
        * Calculate aggregate reliability from sources
        */
       calculateAggregateReliability(sources) {
@@ -7864,7 +7847,11 @@ var init_GameTheoryHandler = __esm({
           isRevision: input.isRevision,
           revisesThought: input.revisesThought,
           mode: "gametheory" /* GAMETHEORY */,
-          thoughtType: this.resolveThoughtType(input.thoughtType),
+          thoughtType: resolveThoughtType(
+            input.thoughtType,
+            this.supportedThoughtTypes,
+            "game_definition"
+          ),
           game,
           players,
           strategies,
@@ -8041,16 +8028,9 @@ var init_GameTheoryHandler = __esm({
        * Check if this handler supports a specific thought type
        */
       supportsThoughtType(thoughtType) {
-        return this.supportedThoughtTypes.includes(thoughtType);
-      }
-      /**
-       * Resolve input thought type to valid GameTheory thought type
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
-          return inputType;
-        }
-        return "game_definition";
+        return this.supportedThoughtTypes.includes(
+          thoughtType
+        );
       }
       /**
        * Validate players array
@@ -8457,7 +8437,11 @@ var init_EvidentialHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          this.supportedThoughtTypes,
+          "hypothesis_definition"
+        );
         let beliefFunctions = inputAny.beliefFunctions || [];
         if (inputAny.massFunction && typeof inputAny.massFunction === "object" && beliefFunctions.length === 0) {
           const massAssignments = Object.entries(
@@ -8606,15 +8590,6 @@ var init_EvidentialHandler = __esm({
         return this.supportedThoughtTypes.includes(
           thoughtType
         );
-      }
-      /**
-       * Resolve thought type to valid EvidentialThoughtType
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
-          return inputType;
-        }
-        return "hypothesis_definition";
       }
     };
   }
@@ -9263,7 +9238,11 @@ var init_SystemsThinkingHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          this.supportedThoughtTypes,
+          "system_definition"
+        );
         return {
           ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
@@ -9435,17 +9414,6 @@ var init_SystemsThinkingHandler = __esm({
         return this.supportedThoughtTypes.includes(
           thoughtType
         );
-      }
-      /**
-       * Resolve thought type to valid SystemsThinkingThoughtType
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && this.supportedThoughtTypes.includes(
-          inputType
-        )) {
-          return inputType;
-        }
-        return "system_definition";
       }
       /**
        * Validate a system component
@@ -9680,7 +9648,11 @@ var init_ScientificMethodHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          this.supportedThoughtTypes,
+          "question_formulation"
+        );
         return {
           ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
@@ -9837,17 +9809,6 @@ var init_ScientificMethodHandler = __esm({
           thoughtType
         );
       }
-      /**
-       * Resolve thought type to valid ScientificMethodThoughtType
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && this.supportedThoughtTypes.includes(
-          inputType
-        )) {
-          return inputType;
-        }
-        return "question_formulation";
-      }
     };
   }
 });
@@ -9874,7 +9835,11 @@ var init_FormalLogicHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          this.supportedThoughtTypes,
+          "proposition_definition"
+        );
         return {
           ...createThoughtBase(input, sessionId),
           isRevision: input.isRevision,
@@ -9998,15 +9963,6 @@ var init_FormalLogicHandler = __esm({
           thoughtType
         );
       }
-      /**
-       * Resolve thought type to valid FormalLogicThoughtType
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
-          return inputType;
-        }
-        return "proposition_definition";
-      }
     };
   }
 });
@@ -10036,7 +9992,11 @@ var init_SynthesisHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          this.supportedThoughtTypes,
+          "source_identification"
+        );
         let contradictions = inputAny.contradictions || [];
         if (contradictions.length === 0 && inputAny.sources && inputAny.sources.length > 1) {
           contradictions = this.detectPotentialContradictions(
@@ -10248,15 +10208,6 @@ var init_SynthesisHandler = __esm({
         return this.supportedThoughtTypes.includes(
           thoughtType
         );
-      }
-      /**
-       * Resolve thought type to valid SynthesisThoughtType
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
-          return inputType;
-        }
-        return "source_identification";
       }
       /**
        * Validate a source
@@ -10537,7 +10488,11 @@ var init_ArgumentationHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          this.supportedThoughtTypes,
+          "claim_formulation"
+        );
         const arguments_ = this.processArguments(inputAny.arguments || []);
         const argumentStrength = this.calculateOverallStrength(
           arguments_,
@@ -10777,15 +10732,6 @@ var init_ArgumentationHandler = __esm({
         return this.supportedThoughtTypes.includes(
           thoughtType
         );
-      }
-      /**
-       * Resolve thought type to valid ArgumentationThoughtType
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
-          return inputType;
-        }
-        return "claim_formulation";
       }
       /**
        * Process arguments with defaults
@@ -11069,7 +11015,11 @@ var init_CritiqueHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          this.supportedThoughtTypes,
+          "work_characterization"
+        );
         const work = inputAny.work || {
           id: randomUUID().slice(0, 8),
           title: "Untitled Work",
@@ -11282,15 +11232,6 @@ var init_CritiqueHandler = __esm({
         return this.supportedThoughtTypes.includes(
           thoughtType
         );
-      }
-      /**
-       * Resolve thought type to valid CritiqueThoughtType
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
-          return inputType;
-        }
-        return "work_characterization";
       }
       /**
        * Calculate balance ratio (0 = all weaknesses, 1 = all strengths, 0.5 = balanced)
@@ -11591,7 +11532,11 @@ var init_AnalysisHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          this.supportedThoughtTypes,
+          "initial_coding"
+        );
         const codebook = this.processCodebook(inputAny.codebook);
         const codingProgress = this.calculateCodingProgress(
           inputAny.dataSegments,
@@ -11794,15 +11739,6 @@ var init_AnalysisHandler = __esm({
         return this.supportedThoughtTypes.includes(
           thoughtType
         );
-      }
-      /**
-       * Resolve thought type to valid AnalysisThoughtType
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && this.supportedThoughtTypes.includes(inputType)) {
-          return inputType;
-        }
-        return "initial_coding";
       }
       /**
        * Process and validate codebook
@@ -12478,7 +12414,11 @@ var init_ComputabilityHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          VALID_THOUGHT_TYPES5,
+          "machine_definition"
+        );
         const machines = inputAny.machines ? inputAny.machines.map((m) => this.normalizeMachine(m)) : void 0;
         const decidabilityProof = inputAny.decidabilityProof ? this.normalizeDecidabilityProof(inputAny.decidabilityProof) : void 0;
         const reductions = inputAny.reductions ? inputAny.reductions.map((r) => this.normalizeReduction(r)) : void 0;
@@ -12690,15 +12630,6 @@ var init_ComputabilityHandler = __esm({
        */
       supportsThoughtType(thoughtType) {
         return this.supportedThoughtTypes.includes(thoughtType);
-      }
-      /**
-       * Resolve thought type from input
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && VALID_THOUGHT_TYPES5.includes(inputType)) {
-          return inputType;
-        }
-        return "machine_definition";
       }
       /**
        * Normalize Turing machine specification
@@ -12929,7 +12860,11 @@ var init_CryptanalyticHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          VALID_THOUGHT_TYPES6,
+          "hypothesis_formation"
+        );
         const hypotheses = inputAny.hypotheses ? inputAny.hypotheses.map((h) => this.normalizeHypothesis(h)) : void 0;
         const evidenceChains = inputAny.evidenceChains ? inputAny.evidenceChains.map((e) => this.normalizeEvidenceChain(e)) : void 0;
         const currentHypothesis = inputAny.currentHypothesis ? this.normalizeHypothesis(inputAny.currentHypothesis) : hypotheses?.[0];
@@ -13156,15 +13091,6 @@ var init_CryptanalyticHandler = __esm({
        */
       supportsThoughtType(thoughtType) {
         return this.supportedThoughtTypes.includes(thoughtType);
-      }
-      /**
-       * Resolve thought type from input
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && VALID_THOUGHT_TYPES6.includes(inputType)) {
-          return inputType;
-        }
-        return "hypothesis_formation";
       }
       /**
        * Normalize hypothesis
@@ -13408,7 +13334,11 @@ var init_AlgorithmicHandler = __esm({
             DEFAULT_THOUGHT_TYPE
           )
         );
-        const thoughtType = this.resolveThoughtType(req.thoughtType);
+        const thoughtType = resolveThoughtType(
+          req.thoughtType,
+          VALID_THOUGHT_TYPES7,
+          DEFAULT_THOUGHT_TYPE
+        );
         const designPattern = this.resolveDesignPattern(req.designPattern, notes);
         const timeComplexity = req.timeComplexity ? this.normalizeTimeComplexity(req.timeComplexity) : void 0;
         const spaceComplexity = req.spaceComplexity ? this.normalizeSpaceComplexity(req.spaceComplexity) : void 0;
@@ -13697,15 +13627,6 @@ var init_AlgorithmicHandler = __esm({
         return this.supportedThoughtTypes.includes(
           thoughtType
         );
-      }
-      /**
-       * Resolve thought type from input
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && VALID_THOUGHT_TYPES7.includes(inputType)) {
-          return inputType;
-        }
-        return DEFAULT_THOUGHT_TYPE;
       }
       /**
        * Resolve the design pattern from input.
@@ -14960,7 +14881,11 @@ var init_ModalHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          VALID_THOUGHT_TYPES9,
+          "proposition_analysis"
+        );
         const worlds = (inputAny.worlds || []).map(
           (w) => this.normalizeWorld(w)
         );
@@ -15238,15 +15163,6 @@ var init_ModalHandler = __esm({
        */
       supportsThoughtType(thoughtType) {
         return this.supportedThoughtTypes.includes(thoughtType);
-      }
-      /**
-       * Resolve thought type from input
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && VALID_THOUGHT_TYPES9.includes(inputType)) {
-          return inputType;
-        }
-        return "proposition_analysis";
       }
       /**
        * Resolve logic system
@@ -15560,7 +15476,11 @@ var init_StochasticHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          VALID_THOUGHT_TYPES10,
+          "process_definition"
+        );
         const markovChain = inputAny.markovChain ? this.normalizeMarkovChain(inputAny.markovChain) : void 0;
         const randomVariables = inputAny.randomVariables ? inputAny.randomVariables.map(
           (rv) => this.normalizeRandomVariable(rv)
@@ -15861,15 +15781,6 @@ var init_StochasticHandler = __esm({
         );
       }
       /**
-       * Resolve thought type from input
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && VALID_THOUGHT_TYPES10.includes(inputType)) {
-          return inputType;
-        }
-        return "process_definition";
-      }
-      /**
        * Resolve process type from input
        */
       resolveProcessType(inputType) {
@@ -16135,7 +16046,11 @@ var init_ConstraintHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          VALID_THOUGHT_TYPES11,
+          "problem_formulation"
+        );
         const variables = (inputAny.variables || []).map(
           (v) => this.normalizeVariable(v)
         );
@@ -16438,15 +16353,6 @@ var init_ConstraintHandler = __esm({
         );
       }
       /**
-       * Resolve thought type from input
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && VALID_THOUGHT_TYPES11.includes(inputType)) {
-          return inputType;
-        }
-        return "problem_formulation";
-      }
-      /**
        * Normalize variable
        */
       normalizeVariable(variable) {
@@ -16603,7 +16509,11 @@ var init_OptimizationHandler = __esm({
        */
       createThought(input, sessionId) {
         const inputAny = input;
-        const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+        const thoughtType = resolveThoughtType(
+          inputAny.thoughtType,
+          VALID_THOUGHT_TYPES12,
+          "problem_formulation"
+        );
         const problem = inputAny.problem ? this.normalizeProblem(inputAny.problem) : void 0;
         const variables = inputAny.variables ? inputAny.variables.map((v) => this.normalizeVariable(v)) : void 0;
         const optimizationConstraints = inputAny.optimizationConstraints || inputAny.constraints ? (inputAny.optimizationConstraints || inputAny.constraints).map(
@@ -16874,15 +16784,6 @@ var init_OptimizationHandler = __esm({
         return this.supportedThoughtTypes.includes(
           thoughtType
         );
-      }
-      /**
-       * Resolve thought type from input
-       */
-      resolveThoughtType(inputType) {
-        if (inputType && VALID_THOUGHT_TYPES12.includes(inputType)) {
-          return inputType;
-        }
-        return "problem_formulation";
       }
       /**
        * Normalize problem

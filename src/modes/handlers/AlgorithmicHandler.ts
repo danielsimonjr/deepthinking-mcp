@@ -40,6 +40,7 @@ import {
   validationSuccess,
   validationFailure,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 import {
   droppedValueWarning,
@@ -248,7 +249,11 @@ export class AlgorithmicHandler implements ModeHandler {
         DEFAULT_THOUGHT_TYPE,
       ),
     );
-    const thoughtType = this.resolveThoughtType(req.thoughtType);
+    const thoughtType = resolveThoughtType(
+      req.thoughtType,
+      VALID_THOUGHT_TYPES,
+      DEFAULT_THOUGHT_TYPE,
+    );
 
     // Resolve design pattern
     const designPattern = this.resolveDesignPattern(req.designPattern, notes);
@@ -636,21 +641,6 @@ export class AlgorithmicHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as AlgorithmicThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type from input
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): AlgorithmicThoughtType {
-    if (
-      inputType &&
-      VALID_THOUGHT_TYPES.includes(inputType as AlgorithmicThoughtType)
-    ) {
-      return inputType as AlgorithmicThoughtType;
-    }
-    return DEFAULT_THOUGHT_TYPE;
   }
 
   /**

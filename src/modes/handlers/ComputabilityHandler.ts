@@ -31,6 +31,7 @@ import {
   validationSuccess,
   validationFailure,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 /**
@@ -88,7 +89,11 @@ export class ComputabilityHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      VALID_THOUGHT_TYPES,
+      "machine_definition",
+    );
 
     // Process Turing machines
     const machines = inputAny.machines
@@ -357,21 +362,6 @@ export class ComputabilityHandler implements ModeHandler {
    */
   supportsThoughtType(thoughtType: string): boolean {
     return this.supportedThoughtTypes.includes(thoughtType);
-  }
-
-  /**
-   * Resolve thought type from input
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): ComputabilityThoughtType {
-    if (
-      inputType &&
-      VALID_THOUGHT_TYPES.includes(inputType as ComputabilityThoughtType)
-    ) {
-      return inputType as ComputabilityThoughtType;
-    }
-    return "machine_definition";
   }
 
   /**

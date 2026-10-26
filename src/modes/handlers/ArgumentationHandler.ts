@@ -29,6 +29,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 /**
@@ -127,7 +128,11 @@ export class ArgumentationHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      this.supportedThoughtTypes,
+      "claim_formulation",
+    );
 
     // Process arguments and calculate strength
     const arguments_ = this.processArguments(inputAny.arguments || []);
@@ -431,21 +436,6 @@ export class ArgumentationHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as ArgumentationThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type to valid ArgumentationThoughtType
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): ArgumentationThoughtType {
-    if (
-      inputType &&
-      this.supportedThoughtTypes.includes(inputType as ArgumentationThoughtType)
-    ) {
-      return inputType as ArgumentationThoughtType;
-    }
-    return "claim_formulation";
   }
 
   /**

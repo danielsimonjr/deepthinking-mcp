@@ -8,9 +8,9 @@ export. ESM, Node >=20, stdio transport. Entry point: `src/index.ts`. Publishes 
 
 | Metric | Value |
 |---|---|
-| Source files, whole repo / `src/` only | 533 / 249 |
-| LOC, whole repo / `src/` only | 235,333 / 119,305 |
-| Exports, whole repo / `src/` only | 2,184 / 1,204 (487 re-exports) |
+| Source files, whole repo / `src/` only | 534 / 249 |
+| LOC, whole repo / `src/` only | 235,364 / 119,126 |
+| Exports, whole repo / `src/` only | 2,185 / 1,205 (487 re-exports) |
 | Runtime circular deps | 0 |
 | Type-only circular deps | 95 |
 | Files with no static importer | 12 (6 barrels, 5 templates, 1 launcher script) |
@@ -73,6 +73,6 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 533 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 534 | repo-tools map (whole repository) |
 | typeOnlyCircularDeps | 95 | repo-tools map (whole repository) |
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |

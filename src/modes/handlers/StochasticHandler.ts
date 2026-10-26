@@ -23,6 +23,7 @@ import {
   validationSuccess,
   validationFailure,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 import { analyticMoments } from "../stochastic/models/moments.js";
 import {
@@ -161,7 +162,11 @@ export class StochasticHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      VALID_THOUGHT_TYPES,
+      "process_definition",
+    );
 
     // Process Markov chain
     const markovChain = inputAny.markovChain
@@ -521,21 +526,6 @@ export class StochasticHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as StochasticThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type from input
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): StochasticThoughtType {
-    if (
-      inputType &&
-      VALID_THOUGHT_TYPES.includes(inputType as StochasticThoughtType)
-    ) {
-      return inputType as StochasticThoughtType;
-    }
-    return "process_definition";
   }
 
   /**

@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-26",
     "totalFiles": 249,
     "totalModules": 14,
-    "totalExports": 1204
+    "totalExports": 1205
   },
   "entryPoints": [
     {
@@ -5666,7 +5666,8 @@
               "createThoughtTail",
               "validationSuccess",
               "validationFailure",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           },
           {
@@ -5784,7 +5785,8 @@
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -5844,7 +5846,8 @@
               "validationSuccess",
               "validationFailure",
               "createValidationError",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -6096,7 +6099,8 @@
               "createThoughtTail",
               "validationSuccess",
               "validationFailure",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -6155,7 +6159,8 @@
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -6276,7 +6281,8 @@
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -6345,7 +6351,8 @@
               "createThoughtTail",
               "validationSuccess",
               "validationFailure",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -6556,7 +6563,8 @@
               "validationSuccess",
               "validationFailure",
               "createValidationError",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -6634,7 +6642,8 @@
               "ModeEnhancements",
               "createThoughtBase",
               "validationSuccess",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -6695,7 +6704,8 @@
               "validationSuccess",
               "validationFailure",
               "createValidationError",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -6817,7 +6827,8 @@
               "validationSuccess",
               "validationFailure",
               "createValidationError",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -6999,7 +7010,8 @@
               "validationSuccess",
               "validationFailure",
               "createValidationError",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -7113,7 +7125,8 @@
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -7159,6 +7172,7 @@
           "createValidationError",
           "checkThoughtBasics",
           "checkThoughtType",
+          "resolveThoughtType",
           "checkUncertaintyRange",
           "createThoughtBase",
           "createThoughtTail",
@@ -7179,6 +7193,7 @@
           "createValidationError",
           "checkThoughtBasics",
           "checkThoughtType",
+          "resolveThoughtType",
           "checkUncertaintyRange",
           "createThoughtBase",
           "createThoughtTail",
@@ -7234,7 +7249,8 @@
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -7287,7 +7303,8 @@
               "validationSuccess",
               "validationFailure",
               "createValidationError",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -7426,7 +7443,8 @@
               "ModeEnhancements",
               "createThoughtBase",
               "validationSuccess",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -7564,7 +7582,8 @@
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           },
           {
@@ -7637,7 +7656,8 @@
               "validationSuccess",
               "validationFailure",
               "createValidationError",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -7690,7 +7710,8 @@
               "createThoughtBase",
               "validationSuccess",
               "validationFailure",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -7732,7 +7753,8 @@
               "validationSuccess",
               "validationFailure",
               "createValidationError",
-              "createValidationWarning"
+              "createValidationWarning",
+              "resolveThoughtType"
             ]
           }
         ],
@@ -16580,11 +16602,11 @@
   "statistics": {
     "totalTypeScriptFiles": 249,
     "totalModules": 14,
-    "totalLinesOfCode": 119554,
-    "totalExports": 1204,
+    "totalLinesOfCode": 119375,
+    "totalExports": 1205,
     "totalClasses": 143,
     "totalInterfaces": 564,
-    "totalFunctions": 450,
+    "totalFunctions": 451,
     "totalTypeGuards": 87,
     "totalEnums": 3,
     "totalConstants": 135,

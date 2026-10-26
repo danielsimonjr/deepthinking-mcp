@@ -30,6 +30,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 /** Valid thought types for GameTheory mode */
@@ -64,7 +65,7 @@ export class GameTheoryHandler implements ModeHandler {
   /**
    * Supported thought types for game theory mode
    */
-  private readonly supportedThoughtTypes = [
+  private readonly supportedThoughtTypes: GameTheoryThoughtType[] = [
     "game_definition",
     "strategy_analysis",
     "equilibrium_finding",
@@ -118,7 +119,11 @@ export class GameTheoryHandler implements ModeHandler {
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.GAMETHEORY,
-      thoughtType: this.resolveThoughtType(input.thoughtType),
+      thoughtType: resolveThoughtType(
+        input.thoughtType,
+        this.supportedThoughtTypes,
+        "game_definition",
+      ),
       game,
       players,
       strategies,
@@ -331,19 +336,9 @@ export class GameTheoryHandler implements ModeHandler {
    * Check if this handler supports a specific thought type
    */
   supportsThoughtType(thoughtType: string): boolean {
-    return this.supportedThoughtTypes.includes(thoughtType);
-  }
-
-  /**
-   * Resolve input thought type to valid GameTheory thought type
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): GameTheoryThoughtType {
-    if (inputType && this.supportedThoughtTypes.includes(inputType)) {
-      return inputType as GameTheoryThoughtType;
-    }
-    return "game_definition";
+    return this.supportedThoughtTypes.includes(
+      thoughtType as GameTheoryThoughtType,
+    );
   }
 
   /**

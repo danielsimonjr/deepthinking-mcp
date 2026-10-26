@@ -505,7 +505,7 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 533 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 534 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 

@@ -27,6 +27,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 /**
@@ -85,7 +86,11 @@ export class MathematicsHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      VALID_THOUGHT_TYPES,
+      "axiom_definition",
+    );
 
     // Validate and normalize mathematical model
     const mathematicalModel = this.normalizeModel(input.mathematicalModel);
@@ -356,21 +361,6 @@ export class MathematicsHandler implements ModeHandler {
    */
   supportsThoughtType(thoughtType: string): boolean {
     return VALID_THOUGHT_TYPES.includes(thoughtType as MathematicsThoughtType);
-  }
-
-  /**
-   * Resolve thought type
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): MathematicsThoughtType {
-    if (
-      inputType &&
-      VALID_THOUGHT_TYPES.includes(inputType as MathematicsThoughtType)
-    ) {
-      return inputType as MathematicsThoughtType;
-    }
-    return "axiom_definition";
   }
 
   /**

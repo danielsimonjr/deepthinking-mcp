@@ -281,6 +281,24 @@ export function checkThoughtType(
 }
 
 /**
+ * Pick the thought type of a new thought from the `thoughtType` of the input.
+ *
+ * Returns `inputType` when it is one of `supported`, and `fallback` for any other
+ * value, including a missing or empty one. The match is exact, so the case
+ * matters. A handler calls this in `createThought` with its own list of types
+ * and its default type.
+ */
+export function resolveThoughtType<T extends string>(
+  inputType: string | undefined,
+  supported: readonly T[],
+  fallback: T,
+): T {
+  return inputType && supported.includes(inputType as T)
+    ? (inputType as T)
+    : fallback;
+}
+
+/**
  * Check that the `uncertainty` of the input, when it is set, lies from 0 to 1.
  *
  * Returns the error for a value outside that range, or `undefined`. A value

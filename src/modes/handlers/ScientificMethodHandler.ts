@@ -18,6 +18,7 @@ import {
   createThoughtBase,
   validationSuccess,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 type ScientificMethodThoughtType =
@@ -62,7 +63,11 @@ export class ScientificMethodHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      this.supportedThoughtTypes,
+      "question_formulation",
+    );
 
     return {
       ...createThoughtBase(input, sessionId),
@@ -246,22 +251,5 @@ export class ScientificMethodHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as ScientificMethodThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type to valid ScientificMethodThoughtType
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): ScientificMethodThoughtType {
-    if (
-      inputType &&
-      this.supportedThoughtTypes.includes(
-        inputType as ScientificMethodThoughtType,
-      )
-    ) {
-      return inputType as ScientificMethodThoughtType;
-    }
-    return "question_formulation";
   }
 }

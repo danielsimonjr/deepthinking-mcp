@@ -28,6 +28,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 /**
@@ -65,7 +66,11 @@ export class SynthesisHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      this.supportedThoughtTypes,
+      "source_identification",
+    );
 
     // Auto-detect contradictions if not provided
     let contradictions = inputAny.contradictions || [];
@@ -328,21 +333,6 @@ export class SynthesisHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as SynthesisThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type to valid SynthesisThoughtType
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): SynthesisThoughtType {
-    if (
-      inputType &&
-      this.supportedThoughtTypes.includes(inputType as SynthesisThoughtType)
-    ) {
-      return inputType as SynthesisThoughtType;
-    }
-    return "source_identification";
   }
 
   /**

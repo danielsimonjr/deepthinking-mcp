@@ -30,6 +30,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 /**
@@ -66,7 +67,11 @@ export class HistoricalHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      this.supportedThoughtTypes,
+      "event_analysis",
+    );
 
     // Build base thought
     const thought: HistoricalThought = {
@@ -356,21 +361,6 @@ export class HistoricalHandler implements ModeHandler {
     return this.supportedThoughtTypes.includes(
       thoughtType as HistoricalThoughtType,
     );
-  }
-
-  /**
-   * Resolve thought type to valid HistoricalThoughtType
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): HistoricalThoughtType {
-    if (
-      inputType &&
-      this.supportedThoughtTypes.includes(inputType as HistoricalThoughtType)
-    ) {
-      return inputType as HistoricalThoughtType;
-    }
-    return "event_analysis";
   }
 
   /**

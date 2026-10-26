@@ -28,6 +28,7 @@ import {
   validationFailure,
   createValidationError,
   createValidationWarning,
+  resolveThoughtType,
 } from "./ModeHandler.js";
 
 /**
@@ -72,7 +73,11 @@ export class PhysicsHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Resolve thought type
-    const thoughtType = this.resolveThoughtType(inputAny.thoughtType);
+    const thoughtType = resolveThoughtType(
+      inputAny.thoughtType,
+      VALID_THOUGHT_TYPES,
+      "symmetry_analysis",
+    );
 
     // Normalize tensor properties
     const tensorProperties = this.normalizeTensor(input.tensorProperties);
@@ -355,21 +360,6 @@ export class PhysicsHandler implements ModeHandler {
    */
   supportsThoughtType(thoughtType: string): boolean {
     return VALID_THOUGHT_TYPES.includes(thoughtType as PhysicsThoughtType);
-  }
-
-  /**
-   * Resolve thought type
-   */
-  private resolveThoughtType(
-    inputType: string | undefined,
-  ): PhysicsThoughtType {
-    if (
-      inputType &&
-      VALID_THOUGHT_TYPES.includes(inputType as PhysicsThoughtType)
-    ) {
-      return inputType as PhysicsThoughtType;
-    }
-    return "symmetry_analysis";
   }
 
   /**
