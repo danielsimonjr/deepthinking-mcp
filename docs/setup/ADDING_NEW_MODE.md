@@ -15,20 +15,20 @@ This guide walks you through adding a new reasoning mode to DeepThinking MCP. Fo
 
 Adding a new mode requires touching **12 core locations** across the codebase:
 
-| # | Component | Required | File(s) | Module Stats |
-|---|-----------|----------|---------|--------------|
-| 1 | Type Definition | ✅ | `src/types/modes/yourmode.ts` | types: 37 files |
-| 2 | Core Enum & Union | ✅ | `src/types/core.ts` | 84 exports, 33 imports |
-| 3 | Mode Validator | ✅ | `src/validation/validators/modes/yourmode.ts` | validation: 44 files, 36 validators |
-| 4 | **ModeHandler** | ✅ | `src/modes/handlers/YourModeHandler.ts` | modes: 58 files, 36 handlers |
-| 5 | **Handler Registration** | ✅ | `src/modes/index.ts` | 74 imports, re-exports all handlers |
-| 6 | MCP Tool Schema | ✅ | `src/tools/json-schemas.ts` | tools: 18 files |
-| 7 | Visual Exporter | ⚠️ Optional | `src/export/visual/modes/yourmode.ts` | export: 45 files, 14 builder classes |
-| 8 | Mode Documentation | ✅ | `docs/modes/YOURMODE.md` | 34 mode docs |
-| 9 | Unit Tests - Handler | ✅ | `tests/unit/modes/handlers/YourModeHandler.test.ts` | 181 test files, 5,148 tests |
-| 10 | Update CHANGELOG | ✅ | `CHANGELOG.md` | - |
-| 11 | Update CLAUDE.md | ✅ | `CLAUDE.md` | Project guidelines |
-| 12 | Update README.md | ⚠️ If Major | `README.md` | For significant features |
+| # | Component | Required | File(s) |
+|---|-----------|----------|---------|
+| 1 | Type Definition | ✅ | `src/types/modes/yourmode.ts` |
+| 2 | Core Enum & Union | ✅ | `src/types/core.ts` |
+| 3 | Mode Validator | ✅ | `src/validation/validators/modes/yourmode.ts` |
+| 4 | **ModeHandler** | ✅ | `src/modes/handlers/YourModeHandler.ts` |
+| 5 | **Handler Registration** | ✅ | `src/modes/index.ts` |
+| 6 | MCP Tool Schema | ✅ | `src/tools/json-schemas.ts` |
+| 7 | Visual Exporter | ⚠️ Optional | `src/export/visual/modes/yourmode.ts` |
+| 8 | Mode Documentation | ✅ | `docs/modes/YOURMODE.md` |
+| 9 | Unit Tests - Handler | ✅ | `tests/unit/modes/handlers/YourModeHandler.test.ts` |
+| 10 | Update CHANGELOG | ✅ | `CHANGELOG.md` |
+| 11 | Update CLAUDE.md | ✅ | `CLAUDE.md` |
+| 12 | Update README.md | ⚠️ If Major | `README.md` |
 
 **Note**: ThoughtFactory (v9.0.0) automatically delegates to your handler via ModeHandlerRegistry - no code changes needed there. Services module now contains only 2 files: `ThoughtFactory.ts` and `ExportService.ts`.
 
@@ -256,7 +256,6 @@ This is the **core of v9.x architecture**. Each mode has a specialized handler.
  * - Contextual enhancements and suggestions
  */
 
-import { randomUUID } from 'crypto';
 import { ThinkingMode, YourModeThought } from '../../types/core.js';
 import type { ThinkingToolInput } from '../../tools/thinking.js';
 import {
@@ -264,9 +263,9 @@ import {
   ValidationResult,
   ModeEnhancements,
   validationSuccess,
-  validationFailure,
-  createValidationError,
   createValidationWarning,
+  createThoughtBase,
+  checkThoughtBasics,
 } from './ModeHandler.js';
 import { toExtendedThoughtType } from '../../utils/type-guards.js';
 
@@ -292,13 +291,7 @@ export class YourModeHandler implements ModeHandler {
    */
   createThought(input: ThinkingToolInput, sessionId: string): YourModeThought {
     return {
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      ...createThoughtBase(input, sessionId),
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
       mode: ThinkingMode.YOURMODE,
@@ -317,21 +310,8 @@ export class YourModeHandler implements ModeHandler {
     const warnings = [];
 
     // Basic validation
-    if (!input.thought || input.thought.trim().length === 0) {
-      return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
-      ]);
-    }
-
-    if (input.thoughtNumber > input.totalThoughts) {
-      return validationFailure([
-        createValidationError(
-          'thoughtNumber',
-          `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
-        ),
-      ]);
-    }
+    const basicFailure = checkThoughtBasics(input);
+    if (basicFailure) return basicFailure;
 
     // Add mode-specific validation
     // Example: Check for required fields when certain thought types are used
@@ -370,9 +350,14 @@ export class YourModeHandler implements ModeHandler {
 }
 ```
 
+**Notes**:
+- `createThoughtBase(input, sessionId)` builds the seven fields that start every thought. Spread it first, then add the revision fields, `mode` and the fields of your mode.
+- `checkThoughtBasics(input)` fails for a blank thought and for a thought number above the total. Call it first in `validate`, and return its failure when there is one.
+- `ModeHandler.ts` also exports `checkThoughtType`, `checkUncertaintyRange` and `createThoughtTail`. `docs/architecture/COMPONENTS.md` describes each one.
+
 **Reference Examples**:
 - Simple: `src/modes/handlers/SequentialHandler.ts`
-- Medium: `src/modes/handlers/CausalHandler.ts` (636 lines, full validation)
+- Medium: `src/modes/handlers/CausalHandler.ts` (full validation)
 - Complex: `src/modes/handlers/SystemsThinkingHandler.ts` (8 archetypes detection)
 
 ---

@@ -142,6 +142,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before and after. The run covered the 35 mode handlers and 35 generic handlers, one for each mode.
   Each handler received 7 thought values, 7 pairs of thought numbers and 4 sets of extra fields. Ten new tests in `ModeHandler.test.ts` pin
   the error codes, the messages, the order of the two checks and the fresh result on each call.
+- **The mode template and the setup guide call the shared handler helpers.** The handler template
+  `templates/mode-scaffolding/example-mode.handler.ts` and the handler block in
+  `docs/setup/ADDING_NEW_MODE.md` still wrote the seven base fields of a thought and the two basic
+  checks of `validate` inline, as the 36 handlers did before `createThoughtBase` and
+  `checkThoughtBasics` replaced those lines. A new mode that followed either one started with the old
+  copy. Both now call the two helpers, and the guide lists them in a short note, with the other three
+  helpers of `ModeHandler.ts`. The template no longer imports `validationFailure`,
+  `createValidationError` and `createValidationWarning`, because only its comments use them; a comment
+  says to import the ones that a rule needs. The table of the 12 locations in the guide loses its
+  "Module Stats" column, whose counts were out of date (181 test files and 5,148 tests, against 249 and
+  more than 7,000 today), and the guide no longer quotes a line count for `CausalHandler.ts`. Code does
+  not change. A run of 588,060 inputs through the template and through the block of the guide, before
+  and after (the placeholder mode replaced by `sequential`), gave the same thought, with keys in order,
+  and the same validation result. Both copies type-check with no new error.
 - **The three do-calculus rules share one check.** `applyRule1`, `applyRule2` and `applyRule3` in
   `src/modes/causal/graph/algorithms/intervention.ts` each ended with the same lines: a d-separation
   check of Y and Z, given X and W, and an answer with the formula of the rule. The private function

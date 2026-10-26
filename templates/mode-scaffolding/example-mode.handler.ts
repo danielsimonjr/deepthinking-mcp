@@ -14,7 +14,6 @@
  * REFERENCE: See src/modes/handlers/SequentialHandler.ts for a complete example
  */
 
-import { randomUUID } from 'crypto';
 import { ThinkingMode, ExampleModeThought } from '../../types/core.js';
 import type { ThinkingToolInput } from '../../tools/thinking.js';
 import {
@@ -22,9 +21,8 @@ import {
   ValidationResult,
   ModeEnhancements,
   validationSuccess,
-  validationFailure,
-  createValidationError,
-  createValidationWarning,
+  createThoughtBase,
+  checkThoughtBasics,
 } from './ModeHandler.js';
 
 /**
@@ -58,14 +56,9 @@ export class ExampleModeHandler implements ModeHandler {
     const inputAny = input as any;
 
     return {
-      // Base thought properties (required)
-      id: randomUUID(),
-      sessionId,
-      thoughtNumber: input.thoughtNumber,
-      totalThoughts: input.totalThoughts,
-      content: input.thought,
-      timestamp: new Date(),
-      nextThoughtNeeded: input.nextThoughtNeeded,
+      // Base thought properties (required): id, sessionId, thoughtNumber, totalThoughts,
+      // content, timestamp and nextThoughtNeeded
+      ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.EXAMPLEMODE,
 
       // Common optional properties
@@ -118,32 +111,21 @@ export class ExampleModeHandler implements ModeHandler {
     const inputAny = input as any;
 
     // ============================================================
-    // BASIC VALIDATION (keep these)
+    // BASIC VALIDATION (keep this)
     // ============================================================
+    //
+    // Fails for a blank thought and for a thought number above the total.
 
-    // Required: thought content
-    if (!input.thought || input.thought.trim().length === 0) {
-      return validationFailure([
-        createValidationError('thought', 'Thought content is required', 'EMPTY_THOUGHT'),
-      ]);
-    }
-
-    // Required: valid thought number
-    if (input.thoughtNumber > input.totalThoughts) {
-      return validationFailure([
-        createValidationError(
-          'thoughtNumber',
-          `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          'INVALID_THOUGHT_NUMBER'
-        ),
-      ]);
-    }
+    const basicFailure = checkThoughtBasics(input);
+    if (basicFailure) return basicFailure;
 
     // ============================================================
     // MODE-SPECIFIC VALIDATION
     // ============================================================
     //
-    // Add your validation rules here.
+    // Add your validation rules here. The examples use validationFailure,
+    // createValidationError and createValidationWarning. Import the ones that your
+    // rules use from './ModeHandler.js'.
     //
     // Examples:
     //

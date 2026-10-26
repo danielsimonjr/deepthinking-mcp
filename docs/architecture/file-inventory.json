@@ -12,7 +12,7 @@
       },
       "templates": {
         "files": 5,
-        "loc": 772
+        "loc": 754
       },
       "tests": {
         "files": 258,
@@ -1547,7 +1547,7 @@
     {
       "path": "templates/mode-scaffolding/example-mode.handler.ts",
       "area": "templates",
-      "loc": 264,
+      "loc": 246,
       "disposition": "template"
     },
     {
