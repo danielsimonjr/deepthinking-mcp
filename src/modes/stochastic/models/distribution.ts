@@ -380,6 +380,40 @@ export class CategoricalSampler implements DistributionSampler {
   }
 }
 
+/**
+ * Draw one Gamma(shape, 1) variate. The Beta and Gamma samplers share it.
+ * Uses the Marsaglia and Tsang method for shape >= 1.
+ */
+function sampleGamma(shape: number, rng: () => number): number {
+  if (shape >= 1) {
+    const d = shape - 1 / 3;
+    const c = 1 / Math.sqrt(9 * d);
+
+    while (true) {
+      let x: number, v: number;
+      do {
+        const normal = new NormalSampler(0, 1, rng);
+        x = normal.sample();
+        v = 1 + c * x;
+      } while (v <= 0);
+
+      v = v * v * v;
+      const u = rng();
+
+      if (u < 1 - 0.0331 * (x * x) * (x * x)) {
+        return d * v;
+      }
+
+      if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) {
+        return d * v;
+      }
+    }
+  } else {
+    // For shape < 1, use shape+1 and adjust
+    return sampleGamma(shape + 1, rng) * Math.pow(rng(), 1 / shape);
+  }
+}
+
 // ============================================================================
 // BETA SAMPLER
 // ============================================================================
@@ -404,40 +438,9 @@ export class BetaSampler implements DistributionSampler {
   sample(): number {
     // Use gamma variates: if X ~ Gamma(a, 1) and Y ~ Gamma(b, 1)
     // then X / (X + Y) ~ Beta(a, b)
-    const x = this.sampleGamma(this.alpha);
-    const y = this.sampleGamma(this.beta);
+    const x = sampleGamma(this.alpha, this.rng);
+    const y = sampleGamma(this.beta, this.rng);
     return x / (x + y);
-  }
-
-  private sampleGamma(shape: number): number {
-    // Marsaglia and Tsang's method for shape >= 1
-    if (shape >= 1) {
-      const d = shape - 1 / 3;
-      const c = 1 / Math.sqrt(9 * d);
-
-      while (true) {
-        let x: number, v: number;
-        do {
-          const normal = new NormalSampler(0, 1, this.rng);
-          x = normal.sample();
-          v = 1 + c * x;
-        } while (v <= 0);
-
-        v = v * v * v;
-        const u = this.rng();
-
-        if (u < 1 - 0.0331 * (x * x) * (x * x)) {
-          return d * v;
-        }
-
-        if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) {
-          return d * v;
-        }
-      }
-    } else {
-      // For shape < 1, use shape+1 and adjust
-      return this.sampleGamma(shape + 1) * Math.pow(this.rng(), 1 / shape);
-    }
   }
 
   sampleMany(count: number): number[] {
@@ -479,36 +482,7 @@ export class GammaSampler implements DistributionSampler {
   }
 
   sample(): number {
-    return this.sampleGamma(this.shape) * this.scale;
-  }
-
-  private sampleGamma(shape: number): number {
-    if (shape >= 1) {
-      const d = shape - 1 / 3;
-      const c = 1 / Math.sqrt(9 * d);
-
-      while (true) {
-        let x: number, v: number;
-        do {
-          const normal = new NormalSampler(0, 1, this.rng);
-          x = normal.sample();
-          v = 1 + c * x;
-        } while (v <= 0);
-
-        v = v * v * v;
-        const u = this.rng();
-
-        if (u < 1 - 0.0331 * (x * x) * (x * x)) {
-          return d * v;
-        }
-
-        if (Math.log(u) < 0.5 * x * x + d * (1 - v + Math.log(v))) {
-          return d * v;
-        }
-      }
-    } else {
-      return this.sampleGamma(shape + 1) * Math.pow(this.rng(), 1 / shape);
-    }
+    return sampleGamma(this.shape, this.rng) * this.scale;
   }
 
   sampleMany(count: number): number[] {
