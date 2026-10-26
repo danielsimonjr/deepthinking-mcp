@@ -24,10 +24,10 @@ document does not repeat it.
 
 | Metric | Value | Scope | Source |
 |---|---|---|---|
-| Source files, whole repo | 522 | repo-wide | `repo-tools map` (519 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
+| Source files, whole repo | 523 | repo-wide | `repo-tools map` (520 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
 | TypeScript files, `src/` | 247 | src only | `repo-tools map`, files under `src/` |
-| Lines of code, whole repo | 233,764 | repo-wide | `repo-tools map` |
-| Lines of code, `src/` | 119,420 | src only | `repo-tools map`, files under `src/` |
+| Lines of code, whole repo | 233,930 | repo-wide | `repo-tools map` |
+| Lines of code, `src/` | 119,436 | src only | `repo-tools map`, files under `src/` |
 | Total exports, whole repo | 2,177 | repo-wide | `repo-tools map` |
 | Total exports, `src/` | 1,198 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
 | Entry roots | 1 (`src/index.ts`) | repo-wide | `repo-tools map` |
@@ -44,14 +44,14 @@ document does not repeat it.
 | Fluent builder classes | 14 | src | `src/export/visual/utils/` |
 
 The whole-repo and `src`-only export counts (2,177 vs 1,198) are not a contradiction. They
-come from two tools and count different file sets: `repo-tools map` reads all 522 files, and
+come from two tools and count different file sets: `repo-tools map` reads all 523 files, and
 `tools/create-dependency-graph` reads the 247 files of `src/`.
 
 ## Project Structure
 
 ```
 deepthinking-mcp/
-├── src/                # 247 files, 119,420 LOC — the package
+├── src/                # 247 files, 119,436 LOC — the package
 │   ├── index.ts        # entry point, all 13 tool handlers
 │   ├── types/           # ThinkingMode enum, Thought union, per-mode types
 │   ├── modes/            # mode handlers, registry, combinations, stochastic
@@ -65,7 +65,7 @@ deepthinking-mcp/
 │   ├── config/            # environment-variable configuration
 │   ├── interfaces/       # DI interfaces
 │   └── utils/             # errors, logger, sanitization
-├── tests/               # 250 files, 107,418 LOC
+├── tests/               # 251 files, 107,568 LOC
 ├── tools/                # 15 files, 4,718 LOC — standalone CLI utilities
 ├── cli/                  # mcp-server-wrapper.mjs — launcher script for the Claude Code plugin
 ├── templates/mode-scaffolding/  # 5 copy-paste templates for authoring a new mode
@@ -120,10 +120,10 @@ barrel file. Consumers import the concrete modules directly.
 Two more files are reached only by tests: `modes/stochastic/models/distribution.ts` and
 `modes/stochastic/sampling/rng.ts`.
 
-`repo-tools map` lists 231 exports that have no importer. 78 of them have no reference at all — not
+`repo-tools map` lists 230 exports that have no importer. 77 of them have no reference at all — not
 even inside their own file. The other 153 are referenced only in the file that defines them. This
 split is a text match, so a name that also appears in a string or a comment counts as referenced.
-The reports that `tools/create-dependency-graph` generates count 479 unused exports under their
+The reports that `tools/create-dependency-graph` generates count 478 unused exports under their
 own rules.
 
 > **Before deleting any of it:** this package publishes to npm, so an export nothing uses
@@ -143,8 +143,8 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 522 | repo-tools map (whole repository) |
-| totalLinesOfCode | 233764 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 523 | repo-tools map (whole repository) |
+| totalLinesOfCode | 233930 | repo-tools map (whole repository) |
 | totalExports | 2177 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
@@ -155,7 +155,7 @@ counts differ for that reason.
 | runtimeCircularDeps | 0 | repo-tools map (whole repository) |
 | typeOnlyCircularDeps | 95 | repo-tools map (whole repository) |
 | noImporterFileCount | 12 | repo-tools map (whole repository) |
-| unusedExportsCount | 231 | repo-tools map (whole repository) |
+| unusedExportsCount | 230 | repo-tools map (whole repository) |
 
 Note on `totalModules`: `repo-tools map` counts 5 top-level project areas (`docs`, `config`, `src`,
 `tools`, `tests`), not `src/` subdirectories. DEPENDENCY_GRAPH.md's "14 modules" counts `src/`

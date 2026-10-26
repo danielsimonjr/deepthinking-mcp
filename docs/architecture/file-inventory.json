@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 519,
+    "totalFiles": 520,
     "byArea": {
       "docs": {
         "files": 2,
@@ -8,15 +8,15 @@
       },
       "src": {
         "files": 247,
-        "loc": 119667
+        "loc": 119683
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 249,
-        "loc": 107029
+        "files": 250,
+        "loc": 107180
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 235,
       "orphan": 12,
       "template": 5,
-      "test": 249,
+      "test": 250,
       "tool": 14,
       "config": 2
     }
@@ -521,7 +521,7 @@
     {
       "path": "src/modes/handlers/CustomHandler.ts",
       "area": "src",
-      "loc": 501,
+      "loc": 510,
       "disposition": "reachable"
     },
     {
@@ -575,7 +575,7 @@
     {
       "path": "src/modes/handlers/HybridHandler.ts",
       "area": "src",
-      "loc": 696,
+      "loc": 711,
       "disposition": "reachable"
     },
     {
@@ -677,7 +677,7 @@
     {
       "path": "src/modes/handlers/resolve-mode.ts",
       "area": "src",
-      "loc": 21,
+      "loc": 53,
       "disposition": "reachable"
     },
     {
@@ -917,7 +917,7 @@
     {
       "path": "src/tools/schemas/analyze.ts",
       "area": "src",
-      "loc": 299,
+      "loc": 259,
       "disposition": "reachable"
     },
     {
@@ -2598,6 +2598,12 @@
       "path": "tests/unit/modes/handlers/mode-name-resolution.test.ts",
       "area": "tests",
       "loc": 85,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/mode-name-warning.test.ts",
+      "area": "tests",
+      "loc": 151,
       "disposition": "test"
     },
     {

@@ -26,7 +26,8 @@ import {
   validationFailure,
   createValidationWarning,
 } from "./ModeHandler.js";
-import { resolveMode } from "./resolve-mode.js";
+import { inputWarningsField } from "./input-warnings.js";
+import { resolveMode, unknownModeWarnings } from "./resolve-mode.js";
 
 /**
  * Mode contribution tracking
@@ -181,6 +182,18 @@ export class HybridHandler implements ModeHandler {
         .filter((m: ThinkingMode) => m !== primaryMode)
         .map((m: ThinkingMode) => `${m} reasoning`);
 
+    // Sentences for the mode names replaced above; validateCommon() reports
+    // each one in the `validation` field of the answer.
+    const inputWarnings = inputWarningsField([
+      ...unknownModeWarnings("activeModes", inputAny.activeModes),
+      ...unknownModeWarnings(
+        "modeContributions[].mode",
+        inputAny.modeContributions?.map(
+          (c: { mode?: string }) => c.mode || "sequential",
+        ),
+      ),
+    ]);
+
     return {
       ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.HYBRID,
@@ -210,6 +223,8 @@ export class HybridHandler implements ModeHandler {
       // Revision tracking
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
+
+      ...inputWarnings,
     };
   }
 

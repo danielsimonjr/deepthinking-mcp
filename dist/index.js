@@ -3862,18 +3862,74 @@ var init_PhysicsHandler = __esm({
   }
 });
 
+// src/modes/handlers/input-warnings.ts
+function echo(value) {
+  const text2 = String(value);
+  return JSON.stringify(
+    text2.length > MAX_ECHO ? `${text2.slice(0, MAX_ECHO)}...` : text2
+  );
+}
+function unrecognisedValueWarning(field, value, recognised, fallback) {
+  if (value === void 0 || value === null || value === "") return void 0;
+  if (typeof value === "string" && recognised.includes(value)) return void 0;
+  const outcome = fallback === void 0 ? "it is kept as sent" : `using the default ${JSON.stringify(fallback)}`;
+  return `Unknown ${field} ${echo(value)}; ${outcome}. Recognised values: ${recognised.join(", ")}.`;
+}
+function droppedValueWarning(field, value, recognised) {
+  if (value === void 0 || value === null || value === "") return void 0;
+  if (typeof value === "string" && recognised.includes(value)) return void 0;
+  return `Unknown ${field} ${echo(value)}; it is not stored. Recognised values: ${recognised.join(", ")}.`;
+}
+function ignoredMembersWarning(mode, field, members, readBy) {
+  if (members.length === 0) return void 0;
+  const names = members.map((member) => `${field}.${member}`);
+  const list2 = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+  const [subject, object] = names.length === 1 ? ["it is", "it"] : ["they are", "them"];
+  return `${mode.charAt(0).toUpperCase()}${mode.slice(1)} mode ignores ${list2}; ${subject} not stored (${readBy} mode reads ${object}).`;
+}
+function inputWarningsField(sentences) {
+  const kept = sentences.filter((s) => s !== void 0);
+  return kept.length > 0 ? { inputWarnings: kept } : {};
+}
+var MAX_ECHO;
+var init_input_warnings = __esm({
+  "src/modes/handlers/input-warnings.ts"() {
+    init_esm_shims();
+    MAX_ECHO = 60;
+  }
+});
+
 // src/modes/handlers/resolve-mode.ts
 function resolveMode(name) {
   return MODES_BY_NAME.get(name.toLowerCase()) ?? "sequential" /* SEQUENTIAL */;
 }
-var MODES_BY_NAME;
+function unknownModeWarnings(field, names) {
+  if (!Array.isArray(names)) return [];
+  const sentences = [];
+  const seen = /* @__PURE__ */ new Set();
+  for (const name of names) {
+    if (seen.has(name) || MODES_BY_NAME.has(name.toLowerCase())) continue;
+    seen.add(name);
+    const sentence = unrecognisedValueWarning(
+      field,
+      name,
+      MODE_NAMES,
+      "sequential" /* SEQUENTIAL */
+    );
+    if (sentence !== void 0) sentences.push(sentence);
+  }
+  return sentences;
+}
+var MODES_BY_NAME, MODE_NAMES;
 var init_resolve_mode = __esm({
   "src/modes/handlers/resolve-mode.ts"() {
     init_esm_shims();
     init_core();
+    init_input_warnings();
     MODES_BY_NAME = new Map(
       Object.values(ThinkingMode).map((mode) => [mode, mode])
     );
+    MODE_NAMES = [...MODES_BY_NAME.keys()];
   }
 });
 
@@ -3884,6 +3940,7 @@ var init_HybridHandler = __esm({
     init_esm_shims();
     init_recommendations();
     init_ModeHandler();
+    init_input_warnings();
     init_resolve_mode();
     VALID_THOUGHT_TYPES4 = [
       "mode_selection",
@@ -3936,6 +3993,15 @@ var init_HybridHandler = __esm({
         );
         const primaryMode = this.resolvePrimaryMode(modeContributions, activeModes);
         const secondaryFeatures = inputAny.secondaryFeatures || activeModes.filter((m) => m !== primaryMode).map((m) => `${m} reasoning`);
+        const inputWarnings = inputWarningsField([
+          ...unknownModeWarnings("activeModes", inputAny.activeModes),
+          ...unknownModeWarnings(
+            "modeContributions[].mode",
+            inputAny.modeContributions?.map(
+              (c) => c.mode || "sequential"
+            )
+          )
+        ]);
         return {
           ...createThoughtBase(input, sessionId),
           mode: "hybrid" /* HYBRID */,
@@ -3961,7 +4027,8 @@ var init_HybridHandler = __esm({
           overallConfidence,
           // Revision tracking
           isRevision: input.isRevision,
-          revisesThought: input.revisesThought
+          revisesThought: input.revisesThought,
+          ...inputWarnings
         };
       }
       /**
@@ -11906,43 +11973,6 @@ var init_AnalysisHandler = __esm({
     };
   }
 });
-
-// src/modes/handlers/input-warnings.ts
-function echo(value) {
-  const text2 = String(value);
-  return JSON.stringify(
-    text2.length > MAX_ECHO ? `${text2.slice(0, MAX_ECHO)}...` : text2
-  );
-}
-function unrecognisedValueWarning(field, value, recognised, fallback) {
-  if (value === void 0 || value === null || value === "") return void 0;
-  if (typeof value === "string" && recognised.includes(value)) return void 0;
-  const outcome = fallback === void 0 ? "it is kept as sent" : `using the default ${JSON.stringify(fallback)}`;
-  return `Unknown ${field} ${echo(value)}; ${outcome}. Recognised values: ${recognised.join(", ")}.`;
-}
-function droppedValueWarning(field, value, recognised) {
-  if (value === void 0 || value === null || value === "") return void 0;
-  if (typeof value === "string" && recognised.includes(value)) return void 0;
-  return `Unknown ${field} ${echo(value)}; it is not stored. Recognised values: ${recognised.join(", ")}.`;
-}
-function ignoredMembersWarning(mode, field, members, readBy) {
-  if (members.length === 0) return void 0;
-  const names = members.map((member) => `${field}.${member}`);
-  const list2 = names.length === 1 ? names[0] : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
-  const [subject, object] = names.length === 1 ? ["it is", "it"] : ["they are", "them"];
-  return `${mode.charAt(0).toUpperCase()}${mode.slice(1)} mode ignores ${list2}; ${subject} not stored (${readBy} mode reads ${object}).`;
-}
-function inputWarningsField(sentences) {
-  const kept = sentences.filter((s) => s !== void 0);
-  return kept.length > 0 ? { inputWarnings: kept } : {};
-}
-var MAX_ECHO;
-var init_input_warnings = __esm({
-  "src/modes/handlers/input-warnings.ts"() {
-    init_esm_shims();
-    MAX_ECHO = 60;
-  }
-});
 var VALID_ANALYSIS_TYPES, EngineeringHandler;
 var init_EngineeringHandler = __esm({
   "src/modes/handlers/EngineeringHandler.ts"() {
@@ -17073,6 +17103,7 @@ var init_CustomHandler = __esm({
   "src/modes/handlers/CustomHandler.ts"() {
     init_esm_shims();
     init_ModeHandler();
+    init_input_warnings();
     init_resolve_mode();
     CustomHandler = class {
       mode = "custom" /* CUSTOM */;
@@ -17091,6 +17122,9 @@ var init_CustomHandler = __esm({
           (r) => this.normalizeValidationRule(r)
         ) : void 0;
         const basedOnModes = inputAny.basedOnModes ? inputAny.basedOnModes.map((m) => resolveMode(m)) : void 0;
+        const inputWarnings = inputWarningsField(
+          unknownModeWarnings("basedOnModes", inputAny.basedOnModes)
+        );
         return {
           ...createThoughtBase(input, sessionId),
           mode: "custom" /* CUSTOM */,
@@ -17111,7 +17145,8 @@ var init_CustomHandler = __esm({
           basedOnModes,
           // Revision tracking
           isRevision: input.isRevision,
-          revisesThought: input.revisesThought
+          revisesThought: input.revisesThought,
+          ...inputWarnings
         };
       }
       /**

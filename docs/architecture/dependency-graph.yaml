@@ -4359,9 +4359,13 @@ modules:
             - validationSuccess
             - validationFailure
             - createValidationWarning
+        - file: ./input-warnings.js
+          imports:
+            - inputWarningsField
         - file: ./resolve-mode.js
           imports:
             - resolveMode
+            - unknownModeWarnings
       exports:
         - CustomHandler
       classes:
@@ -4671,9 +4675,13 @@ modules:
             - validationSuccess
             - validationFailure
             - createValidationWarning
+        - file: ./input-warnings.js
+          imports:
+            - inputWarningsField
         - file: ./resolve-mode.js
           imports:
             - resolveMode
+            - unknownModeWarnings
       exports:
         - HybridHandler
       classes:
@@ -5003,10 +5011,15 @@ modules:
         - file: ../../types/core.js
           imports:
             - ThinkingMode
+        - file: ./input-warnings.js
+          imports:
+            - unrecognisedValueWarning
       exports:
         - resolveMode
+        - unknownModeWarnings
       functions:
         - resolveMode
+        - unknownModeWarnings
     src/modes/handlers/ScientificMethodHandler.ts:
       description: ScientificMethodHandler - Phase 15 (v8.4.0)
       externalDependencies: []
@@ -6978,9 +6991,6 @@ modules:
         - analyzeInputSchema
         - analyzeOutputSchema
         - analyzeToolDefinition
-        - mapModeStringToEnum
-      functions:
-        - mapModeStringToEnum
       constants:
         - analyzeInputSchema
         - analyzeOutputSchema
@@ -11444,7 +11454,7 @@ dependencyGraph:
 statistics:
   totalTypeScriptFiles: 247
   totalModules: 14
-  totalLinesOfCode: 119667
+  totalLinesOfCode: 119683
   totalExports: 1198
   totalClasses: 143
   totalInterfaces: 563
@@ -11457,4 +11467,4 @@ statistics:
   runtimeCircularDeps: 0
   typeOnlyCircularDeps: 58
   unusedFilesCount: 12
-  unusedExportsCount: 479
+  unusedExportsCount: 478
