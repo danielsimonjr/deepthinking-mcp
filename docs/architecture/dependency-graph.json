@@ -5,7 +5,7 @@
     "lastUpdated": "2026-10-26",
     "totalFiles": 247,
     "totalModules": 14,
-    "totalExports": 1197
+    "totalExports": 1198
   },
   "entryPoints": [
     {
@@ -5631,6 +5631,7 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
               "createValidationError",
@@ -5870,6 +5871,7 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
               "createValidationError",
@@ -5924,6 +5926,7 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
               "createValidationError",
@@ -6014,6 +6017,7 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
               "createValidationError",
@@ -6071,9 +6075,9 @@
               "ValidationResult",
               "ValidationWarning",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           }
@@ -6130,9 +6134,9 @@
               "HandlerValidationError",
               "ValidationWarning",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           }
@@ -6190,9 +6194,9 @@
               "HandlerValidationError",
               "ValidationWarning",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           }
@@ -6255,6 +6259,7 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
               "createValidationError",
@@ -6301,9 +6306,9 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           },
@@ -6356,9 +6361,9 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           }
@@ -6414,9 +6419,9 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           },
@@ -6618,6 +6623,7 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
               "createValidationError",
@@ -6676,9 +6682,8 @@
               "ValidationResult",
               "ModeEnhancements",
               "ModeStatus",
+              "checkThoughtBasics",
               "validationSuccess",
-              "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           },
@@ -6800,9 +6805,9 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           },
@@ -6855,6 +6860,7 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
               "createValidationError",
@@ -6928,6 +6934,7 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
               "createValidationError",
@@ -6988,9 +6995,9 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           }
@@ -7046,9 +7053,9 @@
               "ValidationResult",
               "ValidationWarning",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           }
@@ -7085,6 +7092,7 @@
           "validationSuccess",
           "validationFailure",
           "createValidationError",
+          "checkThoughtBasics",
           "createValidationWarning"
         ],
         "interfaces": [
@@ -7100,6 +7108,7 @@
           "validationSuccess",
           "validationFailure",
           "createValidationError",
+          "checkThoughtBasics",
           "createValidationWarning"
         ]
       },
@@ -7147,9 +7156,9 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           }
@@ -7203,6 +7212,7 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
               "createValidationError",
@@ -7267,9 +7277,9 @@
               "ValidationResult",
               "ValidationWarning",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           },
@@ -7385,9 +7395,8 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
-              "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           }
@@ -7432,6 +7441,7 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
               "createValidationError",
@@ -7486,9 +7496,9 @@
               "ValidationResult",
               "ValidationWarning",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           },
@@ -7557,6 +7567,7 @@
               "ModeHandler",
               "ValidationResult",
               "ModeEnhancements",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
               "createValidationError",
@@ -7616,9 +7627,9 @@
               "ValidationWarning",
               "ModeEnhancements",
               "DetectedArchetype",
+              "checkThoughtBasics",
               "validationSuccess",
               "validationFailure",
-              "createValidationError",
               "createValidationWarning"
             ]
           }
@@ -16484,11 +16495,11 @@
   "statistics": {
     "totalTypeScriptFiles": 247,
     "totalModules": 14,
-    "totalLinesOfCode": 120343,
-    "totalExports": 1197,
+    "totalLinesOfCode": 119943,
+    "totalExports": 1198,
     "totalClasses": 143,
     "totalInterfaces": 563,
-    "totalFunctions": 443,
+    "totalFunctions": 444,
     "totalTypeGuards": 87,
     "totalEnums": 3,
     "totalConstants": 135,

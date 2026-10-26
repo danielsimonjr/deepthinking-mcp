@@ -8,7 +8,7 @@
       },
       "src": {
         "files": 247,
-        "loc": 120343
+        "loc": 119943
       },
       "templates": {
         "files": 5,
@@ -16,7 +16,7 @@
       },
       "tests": {
         "files": 248,
-        "loc": 106724
+        "loc": 106797
       },
       "tools": {
         "files": 14,
@@ -455,7 +455,7 @@
     {
       "path": "src/modes/handlers/AlgorithmicHandler.ts",
       "area": "src",
-      "loc": 1203,
+      "loc": 1187,
       "disposition": "reachable"
     },
     {
@@ -479,61 +479,61 @@
     {
       "path": "src/modes/handlers/BayesianHandler.ts",
       "area": "src",
-      "loc": 587,
+      "loc": 571,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/CausalHandler.ts",
       "area": "src",
-      "loc": 697,
+      "loc": 681,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/ComputabilityHandler.ts",
       "area": "src",
-      "loc": 622,
+      "loc": 606,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/ConstraintHandler.ts",
       "area": "src",
-      "loc": 680,
+      "loc": 663,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/CounterfactualHandler.ts",
       "area": "src",
-      "loc": 559,
+      "loc": 542,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/CritiqueHandler.ts",
       "area": "src",
-      "loc": 703,
+      "loc": 686,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/CryptanalyticHandler.ts",
       "area": "src",
-      "loc": 614,
+      "loc": 598,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/CustomHandler.ts",
       "area": "src",
-      "loc": 523,
+      "loc": 506,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/DeductiveHandler.ts",
       "area": "src",
-      "loc": 384,
+      "loc": 367,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/EngineeringHandler.ts",
       "area": "src",
-      "loc": 688,
+      "loc": 671,
       "disposition": "reachable"
     },
     {
@@ -557,13 +557,13 @@
     {
       "path": "src/modes/handlers/GameTheoryHandler.ts",
       "area": "src",
-      "loc": 888,
+      "loc": 872,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/GenericModeHandler.ts",
       "area": "src",
-      "loc": 564,
+      "loc": 545,
       "disposition": "reachable"
     },
     {
@@ -575,55 +575,55 @@
     {
       "path": "src/modes/handlers/HybridHandler.ts",
       "area": "src",
-      "loc": 719,
+      "loc": 702,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/InductiveHandler.ts",
       "area": "src",
-      "loc": 348,
+      "loc": 332,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/MathematicsHandler.ts",
       "area": "src",
-      "loc": 536,
+      "loc": 520,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/MetaReasoningHandler.ts",
       "area": "src",
-      "loc": 549,
+      "loc": 532,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/ModalHandler.ts",
       "area": "src",
-      "loc": 665,
+      "loc": 648,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/ModeHandler.ts",
       "area": "src",
-      "loc": 235,
+      "loc": 269,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/OptimizationHandler.ts",
       "area": "src",
-      "loc": 618,
+      "loc": 601,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/PhysicsHandler.ts",
       "area": "src",
-      "loc": 577,
+      "loc": 561,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/RecursiveHandler.ts",
       "area": "src",
-      "loc": 626,
+      "loc": 609,
       "disposition": "reachable"
     },
     {
@@ -635,31 +635,31 @@
     {
       "path": "src/modes/handlers/SequentialHandler.ts",
       "area": "src",
-      "loc": 246,
+      "loc": 228,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/ShannonHandler.ts",
       "area": "src",
-      "loc": 421,
+      "loc": 405,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/StochasticHandler.ts",
       "area": "src",
-      "loc": 863,
+      "loc": 846,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/SynthesisHandler.ts",
       "area": "src",
-      "loc": 629,
+      "loc": 613,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/handlers/SystemsThinkingHandler.ts",
       "area": "src",
-      "loc": 767,
+      "loc": 750,
       "disposition": "reachable"
     },
     {
@@ -2519,7 +2519,7 @@
     {
       "path": "tests/unit/modes/handlers/ModeHandler.test.ts",
       "area": "tests",
-      "loc": 148,
+      "loc": 221,
       "disposition": "test"
     },
     {

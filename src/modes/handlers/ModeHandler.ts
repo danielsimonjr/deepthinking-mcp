@@ -223,6 +223,40 @@ export function createValidationError(
 }
 
 /**
+ * Check the two fields that every handler requires: a `thought` with text and a
+ * `thoughtNumber` that does not exceed `totalThoughts`.
+ *
+ * Returns the failure for the first check that fails (the empty thought is
+ * checked first), or `undefined` when both pass. A handler calls this at the
+ * start of `validate` and returns the failure when there is one.
+ */
+export function checkThoughtBasics(
+  input: ThinkingToolInput,
+): ValidationResult | undefined {
+  if (!input.thought || input.thought.trim().length === 0) {
+    return validationFailure([
+      createValidationError(
+        "thought",
+        "Thought content is required",
+        "EMPTY_THOUGHT",
+      ),
+    ]);
+  }
+
+  if (input.thoughtNumber > input.totalThoughts) {
+    return validationFailure([
+      createValidationError(
+        "thoughtNumber",
+        `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
+        "INVALID_THOUGHT_NUMBER",
+      ),
+    ]);
+  }
+
+  return undefined;
+}
+
+/**
  * Create a validation warning
  */
 export function createValidationWarning(

@@ -27,9 +27,9 @@ Every tracked TypeScript file in the repository — **518 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 247 | 120,343 |
+| src | 247 | 119,943 |
 | templates | 5 | 772 |
-| tests | 248 | 106,724 |
+| tests | 248 | 106,797 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -105,41 +105,41 @@ Every tracked TypeScript file in the repository — **518 files** — not just t
 | `src/modes/combinations/presets.ts` | src | 301 | reachable |
 | `src/modes/combinations/text-similarity.ts` | src | 18 | reachable |
 | `src/modes/handlers/AbductiveHandler.ts` | src | 352 | reachable |
-| `src/modes/handlers/AlgorithmicHandler.ts` | src | 1203 | reachable |
+| `src/modes/handlers/AlgorithmicHandler.ts` | src | 1187 | reachable |
 | `src/modes/handlers/AnalogicalHandler.ts` | src | 446 | reachable |
 | `src/modes/handlers/AnalysisHandler.ts` | src | 603 | reachable |
 | `src/modes/handlers/ArgumentationHandler.ts` | src | 691 | reachable |
-| `src/modes/handlers/BayesianHandler.ts` | src | 587 | reachable |
-| `src/modes/handlers/CausalHandler.ts` | src | 697 | reachable |
-| `src/modes/handlers/ComputabilityHandler.ts` | src | 622 | reachable |
-| `src/modes/handlers/ConstraintHandler.ts` | src | 680 | reachable |
-| `src/modes/handlers/CounterfactualHandler.ts` | src | 559 | reachable |
-| `src/modes/handlers/CritiqueHandler.ts` | src | 703 | reachable |
-| `src/modes/handlers/CryptanalyticHandler.ts` | src | 614 | reachable |
-| `src/modes/handlers/CustomHandler.ts` | src | 523 | reachable |
-| `src/modes/handlers/DeductiveHandler.ts` | src | 384 | reachable |
-| `src/modes/handlers/EngineeringHandler.ts` | src | 688 | reachable |
+| `src/modes/handlers/BayesianHandler.ts` | src | 571 | reachable |
+| `src/modes/handlers/CausalHandler.ts` | src | 681 | reachable |
+| `src/modes/handlers/ComputabilityHandler.ts` | src | 606 | reachable |
+| `src/modes/handlers/ConstraintHandler.ts` | src | 663 | reachable |
+| `src/modes/handlers/CounterfactualHandler.ts` | src | 542 | reachable |
+| `src/modes/handlers/CritiqueHandler.ts` | src | 686 | reachable |
+| `src/modes/handlers/CryptanalyticHandler.ts` | src | 598 | reachable |
+| `src/modes/handlers/CustomHandler.ts` | src | 506 | reachable |
+| `src/modes/handlers/DeductiveHandler.ts` | src | 367 | reachable |
+| `src/modes/handlers/EngineeringHandler.ts` | src | 671 | reachable |
 | `src/modes/handlers/EvidentialHandler.ts` | src | 270 | reachable |
 | `src/modes/handlers/FirstPrinciplesHandler.ts` | src | 212 | reachable |
 | `src/modes/handlers/FormalLogicHandler.ts` | src | 233 | reachable |
-| `src/modes/handlers/GameTheoryHandler.ts` | src | 888 | reachable |
-| `src/modes/handlers/GenericModeHandler.ts` | src | 564 | reachable |
+| `src/modes/handlers/GameTheoryHandler.ts` | src | 872 | reachable |
+| `src/modes/handlers/GenericModeHandler.ts` | src | 545 | reachable |
 | `src/modes/handlers/HistoricalHandler.ts` | src | 543 | reachable |
-| `src/modes/handlers/HybridHandler.ts` | src | 719 | reachable |
-| `src/modes/handlers/InductiveHandler.ts` | src | 348 | reachable |
-| `src/modes/handlers/MathematicsHandler.ts` | src | 536 | reachable |
-| `src/modes/handlers/MetaReasoningHandler.ts` | src | 549 | reachable |
-| `src/modes/handlers/ModalHandler.ts` | src | 665 | reachable |
-| `src/modes/handlers/ModeHandler.ts` | src | 235 | reachable |
-| `src/modes/handlers/OptimizationHandler.ts` | src | 618 | reachable |
-| `src/modes/handlers/PhysicsHandler.ts` | src | 577 | reachable |
-| `src/modes/handlers/RecursiveHandler.ts` | src | 626 | reachable |
+| `src/modes/handlers/HybridHandler.ts` | src | 702 | reachable |
+| `src/modes/handlers/InductiveHandler.ts` | src | 332 | reachable |
+| `src/modes/handlers/MathematicsHandler.ts` | src | 520 | reachable |
+| `src/modes/handlers/MetaReasoningHandler.ts` | src | 532 | reachable |
+| `src/modes/handlers/ModalHandler.ts` | src | 648 | reachable |
+| `src/modes/handlers/ModeHandler.ts` | src | 269 | reachable |
+| `src/modes/handlers/OptimizationHandler.ts` | src | 601 | reachable |
+| `src/modes/handlers/PhysicsHandler.ts` | src | 561 | reachable |
+| `src/modes/handlers/RecursiveHandler.ts` | src | 609 | reachable |
 | `src/modes/handlers/ScientificMethodHandler.ts` | src | 274 | reachable |
-| `src/modes/handlers/SequentialHandler.ts` | src | 246 | reachable |
-| `src/modes/handlers/ShannonHandler.ts` | src | 421 | reachable |
-| `src/modes/handlers/StochasticHandler.ts` | src | 863 | reachable |
-| `src/modes/handlers/SynthesisHandler.ts` | src | 629 | reachable |
-| `src/modes/handlers/SystemsThinkingHandler.ts` | src | 767 | reachable |
+| `src/modes/handlers/SequentialHandler.ts` | src | 228 | reachable |
+| `src/modes/handlers/ShannonHandler.ts` | src | 405 | reachable |
+| `src/modes/handlers/StochasticHandler.ts` | src | 846 | reachable |
+| `src/modes/handlers/SynthesisHandler.ts` | src | 613 | reachable |
+| `src/modes/handlers/SystemsThinkingHandler.ts` | src | 750 | reachable |
 | `src/modes/handlers/TemporalHandler.ts` | src | 262 | reachable |
 | `src/modes/handlers/input-warnings.ts` | src | 106 | reachable |
 | `src/modes/handlers/resolve-mode.ts` | src | 21 | reachable |
@@ -449,7 +449,7 @@ Every tracked TypeScript file in the repository — **518 files** — not just t
 | `tests/unit/modes/handlers/MathematicsHandler.test.ts` | tests | 574 | test |
 | `tests/unit/modes/handlers/MetaReasoningHandler.test.ts` | tests | 729 | test |
 | `tests/unit/modes/handlers/ModalHandler.test.ts` | tests | 519 | test |
-| `tests/unit/modes/handlers/ModeHandler.test.ts` | tests | 148 | test |
+| `tests/unit/modes/handlers/ModeHandler.test.ts` | tests | 221 | test |
 | `tests/unit/modes/handlers/OptimizationHandler.test.ts` | tests | 519 | test |
 | `tests/unit/modes/handlers/PhysicsHandler.test.ts` | tests | 872 | test |
 | `tests/unit/modes/handlers/RecursiveHandler.test.ts` | tests | 821 | test |

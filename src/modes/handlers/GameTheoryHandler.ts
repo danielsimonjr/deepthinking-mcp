@@ -24,6 +24,7 @@ import {
   ModeHandler,
   ValidationResult,
   ModeEnhancements,
+  checkThoughtBasics,
   validationSuccess,
   validationFailure,
   createValidationError,
@@ -151,25 +152,8 @@ export class GameTheoryHandler implements ModeHandler {
     const inputAny = input as any;
 
     // Basic validation
-    if (!input.thought || input.thought.trim().length === 0) {
-      return validationFailure([
-        createValidationError(
-          "thought",
-          "Thought content is required",
-          "EMPTY_THOUGHT",
-        ),
-      ]);
-    }
-
-    if (input.thoughtNumber > input.totalThoughts) {
-      return validationFailure([
-        createValidationError(
-          "thoughtNumber",
-          `Thought number (${input.thoughtNumber}) exceeds total thoughts (${input.totalThoughts})`,
-          "INVALID_THOUGHT_NUMBER",
-        ),
-      ]);
-    }
+    const basicFailure = checkThoughtBasics(input);
+    if (basicFailure) return basicFailure;
 
     // Validate players
     const players: Player[] = inputAny.players || [];
