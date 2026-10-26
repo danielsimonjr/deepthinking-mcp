@@ -21,7 +21,8 @@ import {
   validationFailure,
   createValidationWarning,
 } from "./ModeHandler.js";
-import { resolveMode } from "./resolve-mode.js";
+import { inputWarningsField } from "./input-warnings.js";
+import { resolveMode, unknownModeWarnings } from "./resolve-mode.js";
 
 /**
  * Custom field definition
@@ -127,6 +128,12 @@ export class CustomHandler implements ModeHandler {
       ? inputAny.basedOnModes.map((m: string) => resolveMode(m))
       : undefined;
 
+    // Sentences for the mode names replaced above; validateCommon() reports
+    // each one in the `validation` field of the answer.
+    const inputWarnings = inputWarningsField(
+      unknownModeWarnings("basedOnModes", inputAny.basedOnModes),
+    );
+
     return {
       ...createThoughtBase(input, sessionId),
       mode: ThinkingMode.CUSTOM,
@@ -155,6 +162,8 @@ export class CustomHandler implements ModeHandler {
       // Revision tracking
       isRevision: input.isRevision,
       revisesThought: input.revisesThought,
+
+      ...inputWarnings,
     };
   }
 
