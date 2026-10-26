@@ -384,11 +384,20 @@ export function createValidationWarning(field: string, message: string, suggesti
 
 // Shared check
 export function checkThoughtBasics(input: ThinkingToolInput): ValidationResult | undefined
+
+// Shared thought fields
+export function createThoughtBase(input: ThinkingToolInput, sessionId: string): ThoughtBase
 ```
 
 `checkThoughtBasics` returns a failure for a blank thought or for a thought number above the total,
 and `undefined` when both checks pass. 26 handlers call the function at the start of `validate`.
 The other 10 handlers make neither check.
+
+`createThoughtBase` returns the seven fields that start every thought: a new `id`, `sessionId`,
+`thoughtNumber`, `totalThoughts`, `content`, `timestamp` and `nextThoughtNeeded`. `ThoughtBase` is
+the type of that result, and only `ModeHandler.ts` uses its name. All 36 handler classes spread the
+result first in the thought they return. Each handler then adds the revision fields, `mode` and
+its own fields in its own order.
 
 `getEnhancements` and `supportsThoughtType` are optional on the interface. All 36 handler classes
 implement `getEnhancements`. All handlers except `AbductiveHandler`, `AnalogicalHandler` and
@@ -2730,8 +2739,8 @@ counts differ for that reason.
 | Claim | Value | Source |
 |---|---|---|
 | totalTypeScriptFiles | 521 | repo-tools map (whole repository) |
-| totalLinesOfCode | 233809 | repo-tools map (whole repository) |
-| totalExports | 2177 | repo-tools map (whole repository) |
+| totalLinesOfCode | 233728 | repo-tools map (whole repository) |
+| totalExports | 2178 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | reachableFiles | 239 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |

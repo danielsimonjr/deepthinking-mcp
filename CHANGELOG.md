@@ -125,6 +125,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   before and after. The run covered the 35 mode handlers and 35 generic handlers, one for each mode.
   Each handler received 7 thought values, 7 pairs of thought numbers and 4 sets of extra fields. Ten new tests in `ModeHandler.test.ts` pin
   the error codes, the messages, the order of the two checks and the fresh result on each call.
+- **Thirty-six handlers share one builder for the first seven fields of a thought.** Each of the 36
+  handler classes began the thought that `createThought` returns with the same seven fields: `id`,
+  `sessionId`, `thoughtNumber`, `totalThoughts`, `content`, `timestamp` and `nextThoughtNeeded`.
+  The new `createThoughtBase` in `src/modes/handlers/ModeHandler.ts` builds them once. Each handler
+  spreads the result first. Then the handler adds the revision fields, `mode` and its own fields in
+  the order that it used before. The key order of every thought stays the same. Results do not
+  change. A run of 1,050 calls gave the same JSON before and after. The run covered the registered handler
+  and a generic handler for each of the 35 modes, with 5 inputs and 3 sets of extra fields. Six
+  new tests in `ModeHandler.test.ts` pin the copied fields, the key order, the new `id` and the new
+  `Date` on each call. The 17 handlers that no longer use `randomUUID` lose the `crypto` import.
 - **The advertised JSON Schema now agrees with the Zod schema on `mode`, the temporal constraint
   types and the causal node type.** `mode` is in `required` for the 11 thought tools (the Zod schema
   already required it). The temporal `constraints[].type` lists `before`, `after`, `during`,
