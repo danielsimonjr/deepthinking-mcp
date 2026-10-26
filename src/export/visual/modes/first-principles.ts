@@ -7,6 +7,7 @@
 
 import type { FirstPrinciplesThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -83,44 +84,19 @@ export function exportFirstPrinciplesDerivation(
   thought: FirstPrinciplesThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return firstPrinciplesToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return firstPrinciplesToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return firstPrinciplesToASCII(thought);
-    case "svg":
-      return firstPrinciplesToSVG(thought, options);
-    case "graphml":
-      return firstPrinciplesToGraphML(thought, options);
-    case "tikz":
-      return firstPrinciplesToTikZ(thought, options);
-    case "html":
-      return firstPrinciplesToHTML(thought, options);
-    case "modelica":
-      return firstPrinciplesToModelica(thought, options);
-    case "uml":
-      return firstPrinciplesToUML(thought, options);
-    case "json":
-      return firstPrinciplesToJSON(thought, options);
-    case "markdown":
-      return firstPrinciplesToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: firstPrinciplesToMermaid,
+    dot: firstPrinciplesToDOT,
+    ascii: firstPrinciplesToASCII,
+    svg: firstPrinciplesToSVG,
+    graphml: firstPrinciplesToGraphML,
+    tikz: firstPrinciplesToTikZ,
+    html: firstPrinciplesToHTML,
+    modelica: firstPrinciplesToModelica,
+    uml: firstPrinciplesToUML,
+    json: firstPrinciplesToJSON,
+    markdown: firstPrinciplesToMarkdown,
+  });
 }
 
 function firstPrinciplesToMermaid(

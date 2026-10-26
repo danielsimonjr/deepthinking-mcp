@@ -7,6 +7,7 @@
 
 import type { MathematicsThought } from "../../../types/modes/mathematics.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -68,44 +69,19 @@ export function exportMathematicsDerivation(
   thought: MathematicsThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return mathematicsToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return mathematicsToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return mathematicsToASCII(thought);
-    case "svg":
-      return mathematicsToSVG(thought, options);
-    case "graphml":
-      return mathematicsToGraphML(thought, options);
-    case "tikz":
-      return mathematicsToTikZ(thought, options);
-    case "html":
-      return mathematicsToHTML(thought, options);
-    case "modelica":
-      return mathematicsToModelica(thought, options);
-    case "uml":
-      return mathematicsToUML(thought, options);
-    case "json":
-      return mathematicsToJSON(thought, options);
-    case "markdown":
-      return mathematicsToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: mathematicsToMermaid,
+    dot: mathematicsToDOT,
+    ascii: mathematicsToASCII,
+    svg: mathematicsToSVG,
+    graphml: mathematicsToGraphML,
+    tikz: mathematicsToTikZ,
+    html: mathematicsToHTML,
+    modelica: mathematicsToModelica,
+    uml: mathematicsToUML,
+    json: mathematicsToJSON,
+    markdown: mathematicsToMarkdown,
+  });
 }
 
 function mathematicsToMermaid(

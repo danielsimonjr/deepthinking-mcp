@@ -8,6 +8,7 @@
 
 import type { MetaReasoningThought } from "../../../types/modes/metareasoning.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -78,44 +79,19 @@ export function exportMetaReasoningVisualization(
   thought: MetaReasoningThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return metaReasoningToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return metaReasoningToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return metaReasoningToASCII(thought);
-    case "svg":
-      return metaReasoningToSVG(thought, options);
-    case "graphml":
-      return metaReasoningToGraphML(thought, options);
-    case "tikz":
-      return metaReasoningToTikZ(thought, options);
-    case "html":
-      return metaReasoningToHTML(thought, options);
-    case "modelica":
-      return metaReasoningToModelica(thought, options);
-    case "uml":
-      return metaReasoningToUML(thought, options);
-    case "json":
-      return metaReasoningToJSON(thought, options);
-    case "markdown":
-      return metaReasoningToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: metaReasoningToMermaid,
+    dot: metaReasoningToDOT,
+    ascii: metaReasoningToASCII,
+    svg: metaReasoningToSVG,
+    graphml: metaReasoningToGraphML,
+    tikz: metaReasoningToTikZ,
+    html: metaReasoningToHTML,
+    modelica: metaReasoningToModelica,
+    uml: metaReasoningToUML,
+    json: metaReasoningToJSON,
+    markdown: metaReasoningToMarkdown,
+  });
 }
 
 function metaReasoningToMermaid(

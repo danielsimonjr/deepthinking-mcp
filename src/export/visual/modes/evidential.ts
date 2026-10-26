@@ -8,6 +8,7 @@
 
 import type { EvidentialThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -67,44 +68,19 @@ export function exportEvidentialBeliefs(
   thought: EvidentialThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return evidentialToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return evidentialToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return evidentialToASCII(thought);
-    case "svg":
-      return evidentialToSVG(thought, options);
-    case "graphml":
-      return evidentialToGraphML(thought, options);
-    case "tikz":
-      return evidentialToTikZ(thought, options);
-    case "html":
-      return evidentialToHTML(thought, options);
-    case "modelica":
-      return evidentialToModelica(thought, options);
-    case "uml":
-      return evidentialToUML(thought, options);
-    case "json":
-      return evidentialToJSON(thought, options);
-    case "markdown":
-      return evidentialToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: evidentialToMermaid,
+    dot: evidentialToDOT,
+    ascii: evidentialToASCII,
+    svg: evidentialToSVG,
+    graphml: evidentialToGraphML,
+    tikz: evidentialToTikZ,
+    html: evidentialToHTML,
+    modelica: evidentialToModelica,
+    uml: evidentialToUML,
+    json: evidentialToJSON,
+    markdown: evidentialToMarkdown,
+  });
 }
 
 function evidentialToMermaid(

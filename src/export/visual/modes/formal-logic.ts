@@ -7,6 +7,7 @@
 
 import type { FormalLogicThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -70,44 +71,19 @@ export function exportFormalLogicProof(
   thought: FormalLogicThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return formalLogicToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return formalLogicToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return formalLogicToASCII(thought);
-    case "svg":
-      return formalLogicToSVG(thought, options);
-    case "graphml":
-      return formalLogicToGraphML(thought, options);
-    case "tikz":
-      return formalLogicToTikZ(thought, options);
-    case "html":
-      return formalLogicToHTML(thought, options);
-    case "modelica":
-      return formalLogicToModelica(thought, options);
-    case "uml":
-      return formalLogicToUML(thought, options);
-    case "json":
-      return formalLogicToJSON(thought, options);
-    case "markdown":
-      return formalLogicToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: formalLogicToMermaid,
+    dot: formalLogicToDOT,
+    ascii: formalLogicToASCII,
+    svg: formalLogicToSVG,
+    graphml: formalLogicToGraphML,
+    tikz: formalLogicToTikZ,
+    html: formalLogicToHTML,
+    modelica: formalLogicToModelica,
+    uml: formalLogicToUML,
+    json: formalLogicToJSON,
+    markdown: formalLogicToMarkdown,
+  });
 }
 
 function formalLogicToMermaid(

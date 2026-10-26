@@ -8,6 +8,7 @@
 
 import type { AnalogicalThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -77,44 +78,19 @@ export function exportAnalogicalMapping(
   thought: AnalogicalThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return analogicalToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return analogicalToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return analogicalToASCII(thought);
-    case "svg":
-      return analogicalToSVG(thought, options);
-    case "graphml":
-      return analogicalToGraphML(thought, options);
-    case "tikz":
-      return analogicalToTikZ(thought, options);
-    case "html":
-      return analogicalToHTML(thought, options);
-    case "modelica":
-      return analogicalToModelica(thought, options);
-    case "uml":
-      return analogicalToUML(thought, options);
-    case "json":
-      return analogicalToJSON(thought, options);
-    case "markdown":
-      return analogicalToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: analogicalToMermaid,
+    dot: analogicalToDOT,
+    ascii: analogicalToASCII,
+    svg: analogicalToSVG,
+    graphml: analogicalToGraphML,
+    tikz: analogicalToTikZ,
+    html: analogicalToHTML,
+    modelica: analogicalToModelica,
+    uml: analogicalToUML,
+    json: analogicalToJSON,
+    markdown: analogicalToMarkdown,
+  });
 }
 
 function analogicalToMermaid(

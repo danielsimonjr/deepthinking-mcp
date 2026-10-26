@@ -7,6 +7,7 @@
 
 import type { ScientificMethodThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -65,44 +66,19 @@ export function exportScientificMethodExperiment(
   thought: ScientificMethodThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return scientificMethodToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return scientificMethodToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return scientificMethodToASCII(thought);
-    case "svg":
-      return scientificMethodToSVG(thought, options);
-    case "graphml":
-      return scientificMethodToGraphML(thought, options);
-    case "tikz":
-      return scientificMethodToTikZ(thought, options);
-    case "html":
-      return scientificMethodToHTML(thought, options);
-    case "modelica":
-      return scientificMethodToModelica(thought, options);
-    case "uml":
-      return scientificMethodToUML(thought, options);
-    case "json":
-      return scientificMethodToJSON(thought, options);
-    case "markdown":
-      return scientificMethodToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: scientificMethodToMermaid,
+    dot: scientificMethodToDOT,
+    ascii: scientificMethodToASCII,
+    svg: scientificMethodToSVG,
+    graphml: scientificMethodToGraphML,
+    tikz: scientificMethodToTikZ,
+    html: scientificMethodToHTML,
+    modelica: scientificMethodToModelica,
+    uml: scientificMethodToUML,
+    json: scientificMethodToJSON,
+    markdown: scientificMethodToMarkdown,
+  });
 }
 
 function scientificMethodToMermaid(

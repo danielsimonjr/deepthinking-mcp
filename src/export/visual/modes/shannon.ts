@@ -8,6 +8,7 @@
 
 import type { ShannonThought } from "../../../types/index.js";
 import type { VisualExportOptions } from "../types.js";
+import { exportByFormat } from "../utils/dispatch.js";
 import { sanitizeId } from "../utils.js";
 // Builder classes (Phase 13)
 import { DOTGraphBuilder } from "../utils/dot.js";
@@ -56,44 +57,19 @@ export function exportShannonStageFlow(
   thought: ShannonThought,
   options: VisualExportOptions,
 ): string {
-  const {
-    format,
-    colorScheme = "default",
-    includeLabels = true,
-    includeMetrics = true,
-  } = options;
-
-  switch (format) {
-    case "mermaid":
-      return shannonToMermaid(
-        thought,
-        colorScheme,
-        includeLabels,
-        includeMetrics,
-      );
-    case "dot":
-      return shannonToDOT(thought, includeLabels, includeMetrics);
-    case "ascii":
-      return shannonToASCII(thought);
-    case "svg":
-      return shannonToSVG(thought, options);
-    case "graphml":
-      return shannonToGraphML(thought, options);
-    case "tikz":
-      return shannonToTikZ(thought, options);
-    case "html":
-      return shannonToHTML(thought, options);
-    case "modelica":
-      return shannonToModelica(thought, options);
-    case "uml":
-      return shannonToUML(thought, options);
-    case "json":
-      return shannonToJSON(thought, options);
-    case "markdown":
-      return shannonToMarkdown(thought, options);
-    default:
-      throw new Error(`Unsupported format: ${format}`);
-  }
+  return exportByFormat(thought, options, {
+    mermaid: shannonToMermaid,
+    dot: shannonToDOT,
+    ascii: shannonToASCII,
+    svg: shannonToSVG,
+    graphml: shannonToGraphML,
+    tikz: shannonToTikZ,
+    html: shannonToHTML,
+    modelica: shannonToModelica,
+    uml: shannonToUML,
+    json: shannonToJSON,
+    markdown: shannonToMarkdown,
+  });
 }
 
 const stages = [
