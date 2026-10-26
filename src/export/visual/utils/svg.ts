@@ -602,40 +602,21 @@ export interface SVGPathOptions extends SVGLineOptions {
 }
 
 /**
- * SVG Group Builder for creating grouped SVG elements
+ * The shapes SVGBuilder and SVGGroupBuilder write the same way.
+ * A subclass sets `indent`, the spaces before each element line.
  */
-export class SVGGroupBuilder {
-  private elements: string[] = [];
-  private groupId?: string;
-  private transform?: string;
-  private className?: string;
-
-  constructor(id?: string) {
-    this.groupId = id;
-  }
+abstract class SVGElementBuilder {
+  protected elements: string[] = [];
+  protected abstract readonly indent: string;
 
   /**
-   * Set the group transform
-   * @param transform - SVG transform string
+   * Add a rectangle
+   * @param x - X position
+   * @param y - Y position
+   * @param width - Width
+   * @param height - Height
+   * @param options - Shape options
    * @returns this for chaining
-   */
-  setTransform(transform: string): this {
-    this.transform = transform;
-    return this;
-  }
-
-  /**
-   * Set the group class name
-   * @param className - CSS class name
-   * @returns this for chaining
-   */
-  setClassName(className: string): this {
-    this.className = className;
-    return this;
-  }
-
-  /**
-   * Add a rectangle to the group
    */
   addRect(
     x: number,
@@ -660,12 +641,17 @@ export class SVGGroupBuilder {
     if (options?.ry) attrs.push(`ry="${options.ry}"`);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
-    this.elements.push(`    <rect ${attrs.join(" ")}/>`);
+    this.elements.push(`${this.indent}<rect ${attrs.join(" ")}/>`);
     return this;
   }
 
   /**
-   * Add a circle to the group
+   * Add a circle
+   * @param cx - Center X
+   * @param cy - Center Y
+   * @param r - Radius
+   * @param options - Shape options
+   * @returns this for chaining
    */
   addCircle(
     cx: number,
@@ -682,32 +668,18 @@ export class SVGGroupBuilder {
       attrs.push(`opacity="${options.opacity}"`);
     if (options?.className) attrs.push(`class="${options.className}"`);
 
-    this.elements.push(`    <circle ${attrs.join(" ")}/>`);
+    this.elements.push(`${this.indent}<circle ${attrs.join(" ")}/>`);
     return this;
   }
 
   /**
-   * Add text to the group
-   */
-  addText(x: number, y: number, text: string, options?: SVGTextOptions): this {
-    const attrs = [`x="${x}"`, `y="${y}"`];
-    if (options?.fill) attrs.push(`fill="${options.fill}"`);
-    if (options?.fontSize) attrs.push(`font-size="${options.fontSize}"`);
-    if (options?.fontFamily) attrs.push(`font-family="${options.fontFamily}"`);
-    if (options?.fontWeight) attrs.push(`font-weight="${options.fontWeight}"`);
-    if (options?.textAnchor) attrs.push(`text-anchor="${options.textAnchor}"`);
-    if (options?.dominantBaseline)
-      attrs.push(`dominant-baseline="${options.dominantBaseline}"`);
-    if (options?.className) attrs.push(`class="${options.className}"`);
-
-    this.elements.push(
-      `    <text ${attrs.join(" ")}>${escapeSVGText(text)}</text>`,
-    );
-    return this;
-  }
-
-  /**
-   * Add a line to the group
+   * Add a line
+   * @param x1 - Start X
+   * @param y1 - Start Y
+   * @param x2 - End X
+   * @param y2 - End Y
+   * @param options - Line options
+   * @returns this for chaining
    */
   addLine(
     x1: number,
@@ -727,7 +699,67 @@ export class SVGGroupBuilder {
     if (options?.markerStart)
       attrs.push(`marker-start="url(#${options.markerStart})"`);
 
-    this.elements.push(`    <line ${attrs.join(" ")}/>`);
+    this.elements.push(`${this.indent}<line ${attrs.join(" ")}/>`);
+    return this;
+  }
+
+  /**
+   * Add text
+   * @param x - X position
+   * @param y - Y position
+   * @param text - Text content
+   * @param options - Text options
+   * @returns this for chaining
+   */
+  addText(x: number, y: number, text: string, options?: SVGTextOptions): this {
+    const attrs = [`x="${x}"`, `y="${y}"`];
+    if (options?.fill) attrs.push(`fill="${options.fill}"`);
+    if (options?.fontSize) attrs.push(`font-size="${options.fontSize}"`);
+    if (options?.fontFamily) attrs.push(`font-family="${options.fontFamily}"`);
+    if (options?.fontWeight) attrs.push(`font-weight="${options.fontWeight}"`);
+    if (options?.textAnchor) attrs.push(`text-anchor="${options.textAnchor}"`);
+    if (options?.dominantBaseline)
+      attrs.push(`dominant-baseline="${options.dominantBaseline}"`);
+    if (options?.className) attrs.push(`class="${options.className}"`);
+
+    this.elements.push(
+      `${this.indent}<text ${attrs.join(" ")}>${escapeSVGText(text)}</text>`,
+    );
+    return this;
+  }
+}
+
+/**
+ * SVG Group Builder for creating grouped SVG elements
+ */
+export class SVGGroupBuilder extends SVGElementBuilder {
+  protected readonly indent = "    ";
+  private groupId?: string;
+  private transform?: string;
+  private className?: string;
+
+  constructor(id?: string) {
+    super();
+    this.groupId = id;
+  }
+
+  /**
+   * Set the group transform
+   * @param transform - SVG transform string
+   * @returns this for chaining
+   */
+  setTransform(transform: string): this {
+    this.transform = transform;
+    return this;
+  }
+
+  /**
+   * Set the group class name
+   * @param className - CSS class name
+   * @returns this for chaining
+   */
+  setClassName(className: string): this {
+    this.className = className;
     return this;
   }
 
@@ -771,11 +803,11 @@ export class SVGGroupBuilder {
  *   .render();
  * ```
  */
-export class SVGBuilder {
+export class SVGBuilder extends SVGElementBuilder {
+  protected readonly indent = "  ";
   private width: number = 800;
   private height: number = 600;
   private title?: string;
-  private elements: string[] = [];
   private defs: string[] = [];
   private styles: string[] = [];
   private background?: string;
@@ -875,69 +907,6 @@ export class SVGBuilder {
   }
 
   /**
-   * Add a rectangle
-   * @param x - X position
-   * @param y - Y position
-   * @param width - Width
-   * @param height - Height
-   * @param options - Shape options
-   * @returns this for chaining
-   */
-  addRect(
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-    options?: SVGShapeOptions,
-  ): this {
-    const attrs = [
-      `x="${x}"`,
-      `y="${y}"`,
-      `width="${width}"`,
-      `height="${height}"`,
-    ];
-    if (options?.fill) attrs.push(`fill="${options.fill}"`);
-    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth)
-      attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.opacity !== undefined)
-      attrs.push(`opacity="${options.opacity}"`);
-    if (options?.rx) attrs.push(`rx="${options.rx}"`);
-    if (options?.ry) attrs.push(`ry="${options.ry}"`);
-    if (options?.className) attrs.push(`class="${options.className}"`);
-
-    this.elements.push(`  <rect ${attrs.join(" ")}/>`);
-    return this;
-  }
-
-  /**
-   * Add a circle
-   * @param cx - Center X
-   * @param cy - Center Y
-   * @param r - Radius
-   * @param options - Shape options
-   * @returns this for chaining
-   */
-  addCircle(
-    cx: number,
-    cy: number,
-    r: number,
-    options?: SVGShapeOptions,
-  ): this {
-    const attrs = [`cx="${cx}"`, `cy="${cy}"`, `r="${r}"`];
-    if (options?.fill) attrs.push(`fill="${options.fill}"`);
-    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth)
-      attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.opacity !== undefined)
-      attrs.push(`opacity="${options.opacity}"`);
-    if (options?.className) attrs.push(`class="${options.className}"`);
-
-    this.elements.push(`  <circle ${attrs.join(" ")}/>`);
-    return this;
-  }
-
-  /**
    * Add an ellipse
    * @param cx - Center X
    * @param cy - Center Y
@@ -963,37 +932,6 @@ export class SVGBuilder {
     if (options?.className) attrs.push(`class="${options.className}"`);
 
     this.elements.push(`  <ellipse ${attrs.join(" ")}/>`);
-    return this;
-  }
-
-  /**
-   * Add a line
-   * @param x1 - Start X
-   * @param y1 - Start Y
-   * @param x2 - End X
-   * @param y2 - End Y
-   * @param options - Line options
-   * @returns this for chaining
-   */
-  addLine(
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number,
-    options?: SVGLineOptions,
-  ): this {
-    const attrs = [`x1="${x1}"`, `y1="${y1}"`, `x2="${x2}"`, `y2="${y2}"`];
-    if (options?.stroke) attrs.push(`stroke="${options.stroke}"`);
-    if (options?.strokeWidth)
-      attrs.push(`stroke-width="${options.strokeWidth}"`);
-    if (options?.strokeDasharray)
-      attrs.push(`stroke-dasharray="${options.strokeDasharray}"`);
-    if (options?.markerEnd)
-      attrs.push(`marker-end="url(#${options.markerEnd})"`);
-    if (options?.markerStart)
-      attrs.push(`marker-start="url(#${options.markerStart})"`);
-
-    this.elements.push(`  <line ${attrs.join(" ")}/>`);
     return this;
   }
 
@@ -1061,31 +999,6 @@ export class SVGBuilder {
       attrs.push(`marker-start="url(#${options.markerStart})"`);
 
     this.elements.push(`  <path ${attrs.join(" ")}/>`);
-    return this;
-  }
-
-  /**
-   * Add text
-   * @param x - X position
-   * @param y - Y position
-   * @param text - Text content
-   * @param options - Text options
-   * @returns this for chaining
-   */
-  addText(x: number, y: number, text: string, options?: SVGTextOptions): this {
-    const attrs = [`x="${x}"`, `y="${y}"`];
-    if (options?.fill) attrs.push(`fill="${options.fill}"`);
-    if (options?.fontSize) attrs.push(`font-size="${options.fontSize}"`);
-    if (options?.fontFamily) attrs.push(`font-family="${options.fontFamily}"`);
-    if (options?.fontWeight) attrs.push(`font-weight="${options.fontWeight}"`);
-    if (options?.textAnchor) attrs.push(`text-anchor="${options.textAnchor}"`);
-    if (options?.dominantBaseline)
-      attrs.push(`dominant-baseline="${options.dominantBaseline}"`);
-    if (options?.className) attrs.push(`class="${options.className}"`);
-
-    this.elements.push(
-      `  <text ${attrs.join(" ")}>${escapeSVGText(text)}</text>`,
-    );
     return this;
   }
 

@@ -215,6 +215,26 @@ describe('DependencyGraphBuilder', () => {
       expect(descendants).toContain(c.id);
       expect(descendants).toContain(d.id);
     });
+
+    it('should stop on a cycle in both directions', () => {
+      const a = builder.createStatement('A', 'axiom');
+      const b = builder.createStatement('B', 'derived');
+
+      builder.addDependency(a.id, b.id, 'logical');
+      builder.addDependency(b.id, a.id, 'logical');
+
+      expect([...builder.getAncestors(a.id)].sort()).toEqual([a.id, b.id].sort());
+      expect([...builder.getDescendants(a.id)].sort()).toEqual([a.id, b.id].sort());
+    });
+
+    it('should return nothing for an unknown node and for a node without links', () => {
+      const lone = builder.createStatement('Lone', 'axiom');
+
+      expect(builder.getAncestors('missing')).toEqual([]);
+      expect(builder.getDescendants('missing')).toEqual([]);
+      expect(builder.getAncestors(lone.id)).toEqual([]);
+      expect(builder.getDescendants(lone.id)).toEqual([]);
+    });
   });
 
   describe('Cycle Detection (Tarjan Algorithm)', () => {

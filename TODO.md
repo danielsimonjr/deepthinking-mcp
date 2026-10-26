@@ -64,6 +64,20 @@ with the entry.
 
 ## Open
 
+- [ ] **Remove the duplicates that `repo-tools clones` found and this change left.**
+  - The 15 `export...` functions in `src/export/visual/modes/*.ts` differ only in a mode prefix and
+    a thought type. One helper that takes the converters can replace them.
+  - 36 handler files repeat the thought-field envelope, and 25 handlers repeat the `validate`
+    prologue. The tool reads functions, not blocks inside a function, so it did not list them.
+  - `generateDotGraph` and `DOTGraphBuilder.render` in `src/export/visual/utils/dot.ts` overlap by
+    95 percent. Write a test of the exact output first, then merge them.
+  - About 120 pairs scored 0.6 to 0.8 are unread.
+  - Left alone on purpose: `CausalHandler.findEntryNodes` and `findExitNodes`, and the two default
+    tables of `GenericModeHandler`.
+- [ ] **Tell the client when a mode name is replaced.** `resolveMode` returns `sequential` for a name
+  that is not a mode. The handler records no sentence in `inputWarnings`, as other handlers do for a
+  value they replace. `mapModeStringToEnum` in `src/tools/schemas/analyze.ts` is a third map of the
+  same names and returns its input for an unknown name.
 - [ ] **A release bump must update the prose mentions, not only the manifests.** That is exactly
   what went red above, and `test/test_version_consistency.py` is the gate that catches it — run it
   as part of the release step rather than discovering it on CI two days later.

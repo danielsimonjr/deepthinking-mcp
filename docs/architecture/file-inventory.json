@@ -1,22 +1,22 @@
 {
   "summary": {
-    "totalFiles": 507,
+    "totalFiles": 516,
     "byArea": {
       "docs": {
         "files": 2,
         "loc": 1828
       },
       "src": {
-        "files": 243,
-        "loc": 120910
+        "files": 246,
+        "loc": 120624
       },
       "templates": {
         "files": 5,
         "loc": 772
       },
       "tests": {
-        "files": 241,
-        "loc": 106028
+        "files": 247,
+        "loc": 106573
       },
       "tools": {
         "files": 14,
@@ -29,10 +29,10 @@
     },
     "byDisposition": {
       "other": 2,
-      "reachable": 231,
+      "reachable": 234,
       "orphan": 12,
       "template": 5,
-      "test": 241,
+      "test": 247,
       "tool": 14,
       "config": 2
     }
@@ -335,7 +335,7 @@
     {
       "path": "src/export/visual/utils/svg.ts",
       "area": "src",
-      "loc": 1296,
+      "loc": 1209,
       "disposition": "reachable"
     },
     {
@@ -377,13 +377,19 @@
     {
       "path": "src/modes/causal/graph/algorithms/d-separation.ts",
       "area": "src",
-      "loc": 668,
+      "loc": 592,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/causal/graph/algorithms/graph-utils.ts",
+      "area": "src",
+      "loc": 64,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/causal/graph/algorithms/intervention.ts",
       "area": "src",
-      "loc": 724,
+      "loc": 675,
       "disposition": "reachable"
     },
     {
@@ -407,7 +413,7 @@
     {
       "path": "src/modes/combinations/conflict-resolver.ts",
       "area": "src",
-      "loc": 623,
+      "loc": 608,
       "disposition": "reachable"
     },
     {
@@ -419,13 +425,19 @@
     {
       "path": "src/modes/combinations/merger.ts",
       "area": "src",
-      "loc": 728,
+      "loc": 712,
       "disposition": "reachable"
     },
     {
       "path": "src/modes/combinations/presets.ts",
       "area": "src",
       "loc": 301,
+      "disposition": "reachable"
+    },
+    {
+      "path": "src/modes/combinations/text-similarity.ts",
+      "area": "src",
+      "loc": 18,
       "disposition": "reachable"
     },
     {
@@ -503,7 +515,7 @@
     {
       "path": "src/modes/handlers/CustomHandler.ts",
       "area": "src",
-      "loc": 562,
+      "loc": 523,
       "disposition": "reachable"
     },
     {
@@ -539,7 +551,7 @@
     {
       "path": "src/modes/handlers/GameTheoryHandler.ts",
       "area": "src",
-      "loc": 924,
+      "loc": 888,
       "disposition": "reachable"
     },
     {
@@ -557,7 +569,7 @@
     {
       "path": "src/modes/handlers/HybridHandler.ts",
       "area": "src",
-      "loc": 757,
+      "loc": 719,
       "disposition": "reachable"
     },
     {
@@ -657,6 +669,12 @@
       "disposition": "reachable"
     },
     {
+      "path": "src/modes/handlers/resolve-mode.ts",
+      "area": "src",
+      "loc": 21,
+      "disposition": "reachable"
+    },
+    {
       "path": "src/modes/index.ts",
       "area": "src",
       "loc": 219,
@@ -677,7 +695,7 @@
     {
       "path": "src/modes/stochastic/models/distribution.ts",
       "area": "src",
-      "loc": 668,
+      "loc": 642,
       "disposition": "orphan"
     },
     {
@@ -737,7 +755,7 @@
     {
       "path": "src/proof/dependency-graph.ts",
       "area": "src",
-      "loc": 533,
+      "loc": 526,
       "disposition": "reachable"
     },
     {
@@ -2223,6 +2241,12 @@
       "disposition": "test"
     },
     {
+      "path": "tests/unit/export/visual/utils/svg-shared-elements.test.ts",
+      "area": "tests",
+      "loc": 132,
+      "disposition": "test"
+    },
+    {
       "path": "tests/unit/export/visual/utils/visual-builders.test.ts",
       "area": "tests",
       "loc": 955,
@@ -2271,6 +2295,12 @@
       "disposition": "test"
     },
     {
+      "path": "tests/unit/modes/causal/graph/graph-utils.test.ts",
+      "area": "tests",
+      "loc": 85,
+      "disposition": "test"
+    },
+    {
       "path": "tests/unit/modes/causal/graph/intervention.test.ts",
       "area": "tests",
       "loc": 550,
@@ -2298,6 +2328,12 @@
       "path": "tests/unit/modes/combinations/presets.test.ts",
       "area": "tests",
       "loc": 483,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/combinations/text-similarity.test.ts",
+      "area": "tests",
+      "loc": 39,
       "disposition": "test"
     },
     {
@@ -2412,6 +2448,12 @@
       "path": "tests/unit/modes/handlers/FormalLogicHandler.test.ts",
       "area": "tests",
       "loc": 635,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/handlers/GameTheoryEquilibria.test.ts",
+      "area": "tests",
+      "loc": 134,
       "disposition": "test"
     },
     {
@@ -2535,6 +2577,12 @@
       "disposition": "test"
     },
     {
+      "path": "tests/unit/modes/handlers/mode-name-resolution.test.ts",
+      "area": "tests",
+      "loc": 85,
+      "disposition": "test"
+    },
+    {
       "path": "tests/unit/modes/handlers/registry.test.ts",
       "area": "tests",
       "loc": 298,
@@ -2556,6 +2604,12 @@
       "path": "tests/unit/modes/stochastic/distribution.test.ts",
       "area": "tests",
       "loc": 398,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/modes/stochastic/gamma-variates.test.ts",
+      "area": "tests",
+      "loc": 50,
       "disposition": "test"
     },
     {
@@ -2603,7 +2657,7 @@
     {
       "path": "tests/unit/proof/dependency-graph.test.ts",
       "area": "tests",
-      "loc": 477,
+      "loc": 497,
       "disposition": "test"
     },
     {

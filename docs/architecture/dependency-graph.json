@@ -2,10 +2,10 @@
   "metadata": {
     "name": "deepthinking-mcp",
     "version": "10.0.2",
-    "lastUpdated": "2026-10-25",
-    "totalFiles": 243,
+    "lastUpdated": "2026-10-26",
+    "totalFiles": 246,
     "totalModules": 14,
-    "totalExports": 1192
+    "totalExports": 1196
   },
   "entryPoints": [
     {
@@ -4842,6 +4842,14 @@
               "VStructure"
             ],
             "typeOnly": true
+          },
+          {
+            "file": "./graph-utils.js",
+            "imports": [
+              "combinations",
+              "getAncestors",
+              "getDescendants"
+            ]
           }
         ],
         "exports": [
@@ -4857,7 +4865,6 @@
           "getImpliedIndependencies"
         ],
         "functions": [
-          "getAncestors",
           "findVStructures",
           "findAllPaths",
           "isPathBlocked",
@@ -4867,6 +4874,28 @@
           "findBackdoorAdjustmentSet",
           "computeMarkovBlanket",
           "getImpliedIndependencies"
+        ]
+      },
+      "src/modes/causal/graph/algorithms/graph-utils.ts": {
+        "description": "Graph utilities shared by the d-separation and intervention analyzers.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../types.js",
+            "imports": [
+              "CausalGraph"
+            ],
+            "typeOnly": true
+          }
+        ],
+        "exports": [
+          "getDescendants",
+          "getAncestors"
+        ],
+        "functions": [
+          "getDescendants",
+          "getAncestors"
         ]
       },
       "src/modes/causal/graph/algorithms/intervention.ts": {
@@ -4892,6 +4921,14 @@
               "checkDSeparation",
               "findBackdoorAdjustmentSet",
               "isValidBackdoorAdjustment"
+            ]
+          },
+          {
+            "file": "./graph-utils.js",
+            "imports": [
+              "combinations",
+              "getAncestors",
+              "getDescendants"
             ]
           }
         ],
@@ -5124,6 +5161,12 @@
             "imports": [
               "SYNTHESIS_CONFIDENCE_NOTE"
             ]
+          },
+          {
+            "file": "./text-similarity.js",
+            "imports": [
+              "wordSimilarity"
+            ]
           }
         ],
         "exports": [
@@ -5286,6 +5329,12 @@
             "imports": [
               "SYNTHESIS_CONFIDENCE_NOTE"
             ]
+          },
+          {
+            "file": "./text-similarity.js",
+            "imports": [
+              "wordSimilarity"
+            ]
           }
         ],
         "exports": [
@@ -5347,6 +5396,18 @@
         ],
         "constants": [
           "PRESETS"
+        ]
+      },
+      "src/modes/combinations/text-similarity.ts": {
+        "description": "Text similarity shared by the conflict resolver and the insight merger.",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [],
+        "exports": [
+          "wordSimilarity"
+        ],
+        "functions": [
+          "wordSimilarity"
         ]
       },
       "src/modes/handlers/AbductiveHandler.ts": {
@@ -6132,6 +6193,12 @@
               "createValidationError",
               "createValidationWarning"
             ]
+          },
+          {
+            "file": "./resolve-mode.js",
+            "imports": [
+              "resolveMode"
+            ]
           }
         ],
         "exports": [
@@ -6625,6 +6692,12 @@
               "createValidationError",
               "createValidationWarning"
             ]
+          },
+          {
+            "file": "./resolve-mode.js",
+            "imports": [
+              "resolveMode"
+            ]
           }
         ],
         "exports": [
@@ -7101,6 +7174,25 @@
         ],
         "classes": [
           "RecursiveHandler"
+        ]
+      },
+      "src/modes/handlers/resolve-mode.ts": {
+        "description": "Mode-name resolution",
+        "externalDependencies": [],
+        "nodeDependencies": [],
+        "internalDependencies": [
+          {
+            "file": "../../types/core.js",
+            "imports": [
+              "ThinkingMode"
+            ]
+          }
+        ],
+        "exports": [
+          "resolveMode"
+        ],
+        "functions": [
+          "resolveMode"
         ]
       },
       "src/modes/handlers/ScientificMethodHandler.ts": {
@@ -16040,6 +16132,7 @@
         "files": [
           "src/modes/causal/graph/algorithms/centrality.ts",
           "src/modes/causal/graph/algorithms/d-separation.ts",
+          "src/modes/causal/graph/algorithms/graph-utils.ts",
           "src/modes/causal/graph/algorithms/intervention.ts",
           "src/modes/causal/graph/types.ts",
           "src/modes/combinations/analyzer.ts",
@@ -16048,6 +16141,7 @@
           "src/modes/combinations/index.ts",
           "src/modes/combinations/merger.ts",
           "src/modes/combinations/presets.ts",
+          "src/modes/combinations/text-similarity.ts",
           "src/modes/handlers/AbductiveHandler.ts",
           "src/modes/handlers/AlgorithmicHandler.ts",
           "src/modes/handlers/AnalogicalHandler.ts",
@@ -16079,6 +16173,7 @@
           "src/modes/handlers/OptimizationHandler.ts",
           "src/modes/handlers/PhysicsHandler.ts",
           "src/modes/handlers/RecursiveHandler.ts",
+          "src/modes/handlers/resolve-mode.ts",
           "src/modes/handlers/ScientificMethodHandler.ts",
           "src/modes/handlers/SequentialHandler.ts",
           "src/modes/handlers/ShannonHandler.ts",
@@ -16273,21 +16368,21 @@
     ]
   },
   "statistics": {
-    "totalTypeScriptFiles": 243,
+    "totalTypeScriptFiles": 246,
     "totalModules": 14,
-    "totalLinesOfCode": 120910,
-    "totalExports": 1192,
+    "totalLinesOfCode": 120624,
+    "totalExports": 1196,
     "totalClasses": 143,
     "totalInterfaces": 562,
-    "totalFunctions": 439,
+    "totalFunctions": 442,
     "totalTypeGuards": 87,
     "totalEnums": 3,
     "totalConstants": 135,
     "totalReExports": 487,
-    "totalTypeOnlyImports": 335,
+    "totalTypeOnlyImports": 336,
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 58,
     "unusedFilesCount": 12,
-    "unusedExportsCount": 479
+    "unusedExportsCount": 478
   }
 }

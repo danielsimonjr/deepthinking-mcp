@@ -78,6 +78,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Six pieces of code that existed twice or more now exist once.** A run of `repo-tools clones`
+  listed 13 groups of identical functions and 402 pairs of similar functions in `src/`. The review
+  of the groups gave these changes. Output and results do not change. The tests of each changed
+  module pass on the code before and after.
+  - The causal analyzers `d-separation.ts` and `intervention.ts` each had `getAncestors` and
+    `getDescendants`. The k-subset generator existed four times: three in `d-separation.ts` and one
+    in `intervention.ts`. All now come from `src/modes/causal/graph/algorithms/graph-utils.ts`.
+    `d-separation.ts` still exports `getAncestors`.
+  - `BetaSampler` and `GammaSampler` each had a copy of the gamma variate algorithm. Both now call
+    `sampleGamma` in `src/modes/stochastic/models/distribution.ts`.
+  - `ConflictResolver` and `InsightMerger` each had `calculateSimilarity`. Both now call
+    `wordSimilarity` in `src/modes/combinations/text-similarity.ts`.
+  - `DependencyGraphBuilder.getAncestors` and `getDescendants` walked the graph with two mirrored
+    loops. One function, `collectReachable`, now does the walk.
+  - `GameTheoryHandler` searched for the profiles where one player differs in three places:
+    `isNashEquilibrium`, `isStrictEquilibrium` and `calculateEquilibriumStability`. The method
+    `unilateralDeviations` now finds them. The first two checks differ by one comparison, and they
+    no longer take the unused `players` and `strategies` parameters.
+  - `SVGBuilder` and `SVGGroupBuilder` wrote `rect`, `circle`, `line` and `text` elements with the
+    same code, which differed only in the indent. An abstract base class holds that code, and each
+    builder sets its indent. The exported classes and their output stay the same.
 - **The advertised JSON Schema now agrees with the Zod schema on `mode`, the temporal constraint
   types and the causal node type.** `mode` is in `required` for the 11 thought tools (the Zod schema
   already required it). The temporal `constraints[].type` lists `before`, `after`, `during`,
@@ -243,6 +264,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **A mode name that `CustomHandler` or `HybridHandler` did not know became `sequential` without a
+  word.** The two handlers each kept a hand-written map from a name to a `ThinkingMode`. Both maps
+  lacked `historical`, `recursive`, `modal`, `stochastic` and `constraint`, and the hybrid map also
+  lacked `custom`. A call with `activeModes: ["modal"]` stored `sequential`. A name such as
+  `constructor` read an inherited property of the map and returned the `Object` function instead of
+  the default. `resolveMode` in `src/modes/handlers/resolve-mode.ts` now looks the name up in a table
+  built from the `ThinkingMode` enum. It ignores case and returns `sequential` for a name that is
+  not a mode. A new mode needs no edit there.
 - **Three tests failed on a loaded machine and passed alone.** Each failure has a measured cause.
   - `should identify storage health status` (`file-store.test.ts`) takes 0.2 s on an idle machine.
     With 16 CPU-bound processes on a 12-core machine, it timed out at the default 5 s limit in 5 of 8

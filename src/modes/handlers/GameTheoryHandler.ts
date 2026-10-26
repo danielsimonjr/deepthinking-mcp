@@ -612,18 +612,13 @@ export class GameTheoryHandler implements ModeHandler {
 
     // Check each strategy combination
     for (const entry of matrix.payoffs) {
-      if (this.isNashEquilibrium(entry, matrix, players, strategies)) {
+      if (this.isNashEquilibrium(entry, matrix)) {
         equilibria.push({
           id: randomUUID(),
           strategyProfile: entry.strategyProfile,
           payoffs: entry.payoffs,
           type: "pure",
-          isStrict: this.isStrictEquilibrium(
-            entry,
-            matrix,
-            players,
-            strategies,
-          ),
+          isStrict: this.isStrictEquilibrium(entry, matrix),
           stability: this.calculateEquilibriumStability(
             entry,
             matrix,
@@ -640,47 +635,13 @@ export class GameTheoryHandler implements ModeHandler {
   /**
    * Check if a strategy profile is a Nash equilibrium
    */
-  private isNashEquilibrium(
-    entry: PayoffEntry,
-    matrix: PayoffMatrix,
-    _players: Player[],
-    _strategies: Strategy[],
-  ): boolean {
-    // For each player, check if they can improve by deviating
-    for (let playerIdx = 0; playerIdx < matrix.players.length; playerIdx++) {
-      const currentPayoff = entry.payoffs[playerIdx];
-
-      // Find all alternative strategy profiles where only this player deviates
-      for (const altEntry of matrix.payoffs) {
-        // Check if only this player's strategy differs
-        let onlyThisPlayerDiffers = true;
-        for (let i = 0; i < matrix.players.length; i++) {
-          if (i === playerIdx) {
-            // This player should differ
-            if (altEntry.strategyProfile[i] === entry.strategyProfile[i]) {
-              onlyThisPlayerDiffers = false;
-              break;
-            }
-          } else {
-            // Other players should be the same
-            if (altEntry.strategyProfile[i] !== entry.strategyProfile[i]) {
-              onlyThisPlayerDiffers = false;
-              break;
-            }
-          }
-        }
-
-        // If only this player differs and they get a better payoff, not an equilibrium
-        if (
-          onlyThisPlayerDiffers &&
-          altEntry.payoffs[playerIdx] > currentPayoff
-        ) {
-          return false;
-        }
-      }
-    }
-
-    return true;
+  private isNashEquilibrium(entry: PayoffEntry, matrix: PayoffMatrix): boolean {
+    // A better payoff after a one-player deviation breaks the equilibrium
+    return !this.hasTemptingDeviation(
+      entry,
+      matrix,
+      (deviationPayoff, currentPayoff) => deviationPayoff > currentPayoff,
+    );
   }
 
   /**
@@ -689,39 +650,38 @@ export class GameTheoryHandler implements ModeHandler {
   private isStrictEquilibrium(
     entry: PayoffEntry,
     matrix: PayoffMatrix,
-    _players: Player[],
-    _strategies: Strategy[],
+  ): boolean {
+    // The same payoff after a one-player deviation already breaks strictness
+    return !this.hasTemptingDeviation(
+      entry,
+      matrix,
+      (deviationPayoff, currentPayoff) => deviationPayoff >= currentPayoff,
+    );
+  }
+
+  /**
+   * Check if any player has a deviation that `tempts` accepts.
+   */
+  private hasTemptingDeviation(
+    entry: PayoffEntry,
+    matrix: PayoffMatrix,
+    tempts: (deviationPayoff: number, currentPayoff: number) => boolean,
   ): boolean {
     for (let playerIdx = 0; playerIdx < matrix.players.length; playerIdx++) {
       const currentPayoff = entry.payoffs[playerIdx];
 
-      for (const altEntry of matrix.payoffs) {
-        let onlyThisPlayerDiffers = true;
-        for (let i = 0; i < matrix.players.length; i++) {
-          if (i === playerIdx) {
-            if (altEntry.strategyProfile[i] === entry.strategyProfile[i]) {
-              onlyThisPlayerDiffers = false;
-              break;
-            }
-          } else {
-            if (altEntry.strategyProfile[i] !== entry.strategyProfile[i]) {
-              onlyThisPlayerDiffers = false;
-              break;
-            }
-          }
-        }
-
-        // If deviation gives same payoff, not strict
-        if (
-          onlyThisPlayerDiffers &&
-          altEntry.payoffs[playerIdx] >= currentPayoff
-        ) {
-          return false;
+      for (const altEntry of this.unilateralDeviations(
+        entry,
+        matrix,
+        playerIdx,
+      )) {
+        if (tempts(altEntry.payoffs[playerIdx], currentPayoff)) {
+          return true;
         }
       }
     }
 
-    return true;
+    return false;
   }
 
   /**
@@ -740,26 +700,13 @@ export class GameTheoryHandler implements ModeHandler {
     for (let playerIdx = 0; playerIdx < matrix.players.length; playerIdx++) {
       const currentPayoff = entry.payoffs[playerIdx];
 
-      for (const altEntry of matrix.payoffs) {
-        let onlyThisPlayerDiffers = true;
-        for (let i = 0; i < matrix.players.length; i++) {
-          if (i === playerIdx) {
-            if (altEntry.strategyProfile[i] === entry.strategyProfile[i]) {
-              onlyThisPlayerDiffers = false;
-              break;
-            }
-          } else {
-            if (altEntry.strategyProfile[i] !== entry.strategyProfile[i]) {
-              onlyThisPlayerDiffers = false;
-              break;
-            }
-          }
-        }
-
-        if (onlyThisPlayerDiffers) {
-          totalPenalty += currentPayoff - altEntry.payoffs[playerIdx];
-          deviationCount++;
-        }
+      for (const altEntry of this.unilateralDeviations(
+        entry,
+        matrix,
+        playerIdx,
+      )) {
+        totalPenalty += currentPayoff - altEntry.payoffs[playerIdx];
+        deviationCount++;
       }
     }
 
@@ -768,6 +715,23 @@ export class GameTheoryHandler implements ModeHandler {
 
     // Normalize to 0-1 (assuming payoffs are reasonable)
     return Math.min(1, Math.max(0, 0.5 + avgPenalty / 10));
+  }
+
+  /**
+   * List the profiles that differ from `entry` in one player's strategy only
+   */
+  private unilateralDeviations(
+    entry: PayoffEntry,
+    matrix: PayoffMatrix,
+    playerIdx: number,
+  ): PayoffEntry[] {
+    return matrix.payoffs.filter((altEntry) =>
+      matrix.players.every((_, i) =>
+        i === playerIdx
+          ? altEntry.strategyProfile[i] !== entry.strategyProfile[i]
+          : altEntry.strategyProfile[i] === entry.strategyProfile[i],
+      ),
+    );
   }
 
   /**

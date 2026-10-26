@@ -26,6 +26,7 @@ import {
   createValidationError,
   createValidationWarning,
 } from "./ModeHandler.js";
+import { resolveMode } from "./resolve-mode.js";
 
 /**
  * Mode contribution tracking
@@ -142,7 +143,7 @@ export class HybridHandler implements ModeHandler {
 
     // Determine active modes
     const activeModes = inputAny.activeModes
-      ? inputAny.activeModes.map((m: string) => this.resolveMode(m))
+      ? inputAny.activeModes.map((m: string) => resolveMode(m))
       : topModes.map((r) => r.mode);
 
     // Process mode contributions
@@ -549,50 +550,11 @@ export class HybridHandler implements ModeHandler {
   }
 
   /**
-   * Resolve mode from string
-   */
-  private resolveMode(mode: string): ThinkingMode {
-    const modeMap: Record<string, ThinkingMode> = {
-      sequential: ThinkingMode.SEQUENTIAL,
-      shannon: ThinkingMode.SHANNON,
-      mathematics: ThinkingMode.MATHEMATICS,
-      physics: ThinkingMode.PHYSICS,
-      hybrid: ThinkingMode.HYBRID,
-      inductive: ThinkingMode.INDUCTIVE,
-      deductive: ThinkingMode.DEDUCTIVE,
-      abductive: ThinkingMode.ABDUCTIVE,
-      causal: ThinkingMode.CAUSAL,
-      bayesian: ThinkingMode.BAYESIAN,
-      counterfactual: ThinkingMode.COUNTERFACTUAL,
-      temporal: ThinkingMode.TEMPORAL,
-      gametheory: ThinkingMode.GAMETHEORY,
-      evidential: ThinkingMode.EVIDENTIAL,
-      analogical: ThinkingMode.ANALOGICAL,
-      firstprinciples: ThinkingMode.FIRSTPRINCIPLES,
-      systemsthinking: ThinkingMode.SYSTEMSTHINKING,
-      scientificmethod: ThinkingMode.SCIENTIFICMETHOD,
-      formallogic: ThinkingMode.FORMALLOGIC,
-      metareasoning: ThinkingMode.METAREASONING,
-      optimization: ThinkingMode.OPTIMIZATION,
-      engineering: ThinkingMode.ENGINEERING,
-      algorithmic: ThinkingMode.ALGORITHMIC,
-      computability: ThinkingMode.COMPUTABILITY,
-      cryptanalytic: ThinkingMode.CRYPTANALYTIC,
-      synthesis: ThinkingMode.SYNTHESIS,
-      argumentation: ThinkingMode.ARGUMENTATION,
-      critique: ThinkingMode.CRITIQUE,
-      analysis: ThinkingMode.ANALYSIS,
-    };
-
-    return modeMap[mode.toLowerCase()] || ThinkingMode.SEQUENTIAL;
-  }
-
-  /**
    * Normalize mode contribution
    */
   private normalizeContribution(contrib: any): ModeContribution {
     return {
-      mode: this.resolveMode(contrib.mode || "sequential"),
+      mode: resolveMode(contrib.mode || "sequential"),
       confidence: Math.max(0, Math.min(1, contrib.confidence ?? 0.5)),
       insights: contrib.insights || [],
       evidence: contrib.evidence || [],

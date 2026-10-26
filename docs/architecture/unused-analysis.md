@@ -5,12 +5,12 @@
 
 # Unused Files and Exports Analysis
 
-**Generated**: 2026-10-25
+**Generated**: 2026-10-26
 
 ## Summary
 
 - **Potentially unused files**: 12
-- **Potentially unused exports**: 479
+- **Potentially unused exports**: 478
 
 ## Potentially Unused Files
 
@@ -83,7 +83,6 @@ These exports are not imported by any other file in the codebase:
 
 ### `src/modes/causal/graph/algorithms/d-separation.ts`
 
-- `getAncestors` (function)
 - `findAllPaths` (function)
 - `isPathBlocked` (function)
 - `findMinimalSeparator` (function)

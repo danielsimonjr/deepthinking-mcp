@@ -12,6 +12,7 @@ import type {
   ConflictType,
 } from "./combination-types.js";
 import { SYNTHESIS_CONFIDENCE_NOTE } from "./combination-types.js";
+import { wordSimilarity } from "./text-similarity.js";
 
 /**
  * Configuration for conflict resolution
@@ -238,7 +239,7 @@ export class ConflictResolver {
         (negPattern.test(contentA) && posPattern.test(contentB))
       ) {
         // Additional check: ensure they're about the same topic
-        const similarity = this.calculateSimilarity(contentA, contentB);
+        const similarity = wordSimilarity(contentA, contentB);
         if (similarity > 0.3) {
           return true;
         }
@@ -252,7 +253,7 @@ export class ConflictResolver {
    * Check for partial overlap requiring reconciliation
    */
   private checkPartialOverlap(a: Insight, b: Insight): boolean {
-    const similarity = this.calculateSimilarity(a.content, b.content);
+    const similarity = wordSimilarity(a.content, b.content);
 
     // Partial overlap: similar topic but different conclusions
     if (similarity > 0.4 && similarity < 0.8) {
@@ -261,10 +262,7 @@ export class ConflictResolver {
       const conclusionB = this.extractConclusion(b.content);
 
       if (conclusionA && conclusionB) {
-        const conclusionSim = this.calculateSimilarity(
-          conclusionA,
-          conclusionB,
-        );
+        const conclusionSim = wordSimilarity(conclusionA, conclusionB);
         return conclusionSim < 0.5;
       }
     }
@@ -293,7 +291,7 @@ export class ConflictResolver {
     // Scope mismatch if one is broad and one is narrow
     if ((aIsBroad && bIsNarrow) || (aIsNarrow && bIsBroad)) {
       // Verify they're about the same topic
-      const similarity = this.calculateSimilarity(a.content, b.content);
+      const similarity = wordSimilarity(a.content, b.content);
       return similarity > 0.3;
     }
 
@@ -304,7 +302,7 @@ export class ConflictResolver {
    * Check for confidence mismatch on similar conclusions
    */
   private checkConfidenceMismatch(a: Insight, b: Insight): boolean {
-    const similarity = this.calculateSimilarity(a.content, b.content);
+    const similarity = wordSimilarity(a.content, b.content);
 
     // Similar content but very different confidence
     if (similarity > 0.7) {
@@ -544,19 +542,6 @@ export class ConflictResolver {
       conflictType: type,
       severity,
     };
-  }
-
-  /**
-   * Calculate text similarity
-   */
-  private calculateSimilarity(text1: string, text2: string): number {
-    const words1 = new Set(text1.toLowerCase().split(/\s+/));
-    const words2 = new Set(text2.toLowerCase().split(/\s+/));
-
-    const intersection = new Set([...words1].filter((w) => words2.has(w)));
-    const union = new Set([...words1, ...words2]);
-
-    return union.size > 0 ? intersection.size / union.size : 0;
   }
 
   /**

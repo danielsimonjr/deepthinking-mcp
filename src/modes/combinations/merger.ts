@@ -16,6 +16,7 @@ import type {
   ConflictingInsight,
 } from "./combination-types.js";
 import { SYNTHESIS_CONFIDENCE_NOTE } from "./combination-types.js";
+import { wordSimilarity } from "./text-similarity.js";
 
 /**
  * Configuration for the merger
@@ -561,22 +562,8 @@ export class InsightMerger {
    */
   private areSimilar(a: Insight, b: Insight): boolean {
     return (
-      this.calculateSimilarity(a.content, b.content) >=
-      this.config.similarityThreshold
+      wordSimilarity(a.content, b.content) >= this.config.similarityThreshold
     );
-  }
-
-  /**
-   * Calculate text similarity (simplified Jaccard)
-   */
-  private calculateSimilarity(text1: string, text2: string): number {
-    const words1 = new Set(text1.toLowerCase().split(/\s+/));
-    const words2 = new Set(text2.toLowerCase().split(/\s+/));
-
-    const intersection = new Set([...words1].filter((w) => words2.has(w)));
-    const union = new Set([...words1, ...words2]);
-
-    return union.size > 0 ? intersection.size / union.size : 0;
   }
 
   /**
@@ -695,11 +682,8 @@ export class InsightMerger {
   ): Insight | undefined {
     // Look for an insight that references both or has high similarity to both
     return candidates.find((c) => {
-      const simToThesis = this.calculateSimilarity(c.content, thesis.content);
-      const simToAntithesis = this.calculateSimilarity(
-        c.content,
-        antithesis.content,
-      );
+      const simToThesis = wordSimilarity(c.content, thesis.content);
+      const simToAntithesis = wordSimilarity(c.content, antithesis.content);
       // A good synthesis should have moderate similarity to both
       return simToThesis > 0.3 && simToAntithesis > 0.3;
     });

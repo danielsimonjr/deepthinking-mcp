@@ -24,12 +24,12 @@ document does not repeat it.
 
 | Metric | Value | Scope | Source |
 |---|---|---|---|
-| Source files, whole repo | 510 | repo-wide | `repo-tools map` (507 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
-| TypeScript files, `src/` | 243 | src only | `repo-tools map`, files under `src/` |
-| Lines of code, whole repo | 234,018 | repo-wide | `repo-tools map` |
-| Lines of code, `src/` | 120,667 | src only | `repo-tools map`, files under `src/` |
-| Total exports, whole repo | 2,170 | repo-wide | `repo-tools map` |
-| Total exports, `src/` | 1,191 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
+| Source files, whole repo | 519 | repo-wide | `repo-tools map` (516 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
+| TypeScript files, `src/` | 246 | src only | `repo-tools map`, files under `src/` |
+| Lines of code, whole repo | 234,268 | repo-wide | `repo-tools map` |
+| Lines of code, `src/` | 120,378 | src only | `repo-tools map`, files under `src/` |
+| Total exports, whole repo | 2,174 | repo-wide | `repo-tools map` |
+| Total exports, `src/` | 1,196 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
 | Entry roots | 1 (`src/index.ts`) | repo-wide | `repo-tools map` |
 | Runtime circular dependencies | 0 | repo-wide | `repo-tools map`, confirmed by direct edge inspection |
 | Type-only circular dependencies | 95 | repo-wide | `repo-tools map` |
@@ -38,20 +38,20 @@ document does not repeat it.
 | Reasoning modes | 34, plus `custom` (35 `ThinkingMode` members) | src | `src/types/core.ts` `ThinkingMode` enum |
 | Reasoning types defined | 69 | src | `src/taxonomy/reasoning-types.ts` (surfaced by `recommend_mode`) |
 | MCP tools | 13 | src | `src/index.ts` tool registrations, live-checked below |
-| Specialized mode handlers | 35 | src | `src/modes/index.ts` registers them; `src/modes/handlers/` holds 38 files (the 35 handlers, `GenericModeHandler.ts`, `ModeHandler.ts` and the helper `input-warnings.ts`) |
+| Specialized mode handlers | 35 | src | `src/modes/index.ts` registers them; `src/modes/handlers/` holds 39 files (the 35 handlers, `GenericModeHandler.ts`, `ModeHandler.ts` and the helpers `input-warnings.ts` and `resolve-mode.ts`) |
 | Mode validators | 35 files (34 mode validators and `meta.ts`) | src | `src/validation/validators/modes/` |
 | Visual exporters | 44 files (24 in `modes/`, 14 in `utils/`, 6 at the root) | src | `src/export/visual/` |
 | Fluent builder classes | 14 | src | `src/export/visual/utils/` |
 
-The whole-repo and `src`-only export counts (2,170 vs 1,192) are not a contradiction. They
-come from two tools and count different file sets: `repo-tools map` reads all 510 files, and
-`tools/create-dependency-graph` reads the 243 files of `src/`.
+The whole-repo and `src`-only export counts (2,174 vs 1,196) are not a contradiction. They
+come from two tools and count different file sets: `repo-tools map` reads all 519 files, and
+`tools/create-dependency-graph` reads the 246 files of `src/`.
 
 ## Project Structure
 
 ```
 deepthinking-mcp/
-├── src/                # 243 files, 119,551 LOC — the package
+├── src/                # 246 files, 120,378 LOC — the package
 │   ├── index.ts        # entry point, all 13 tool handlers
 │   ├── types/           # ThinkingMode enum, Thought union, per-mode types
 │   ├── modes/            # mode handlers, registry, combinations, stochastic
@@ -65,7 +65,7 @@ deepthinking-mcp/
 │   ├── config/            # environment-variable configuration
 │   ├── interfaces/       # DI interfaces
 │   └── utils/             # errors, logger, sanitization
-├── tests/               # 238 files, 103,683 LOC
+├── tests/               # 248 files, 106,964 LOC
 ├── tools/                # 15 files, 4,718 LOC — standalone CLI utilities
 ├── cli/                  # mcp-server-wrapper.mjs — launcher script for the Claude Code plugin
 ├── templates/mode-scaffolding/  # 5 copy-paste templates for authoring a new mode
@@ -123,7 +123,7 @@ Two more files are reached only by tests: `modes/stochastic/models/distribution.
 `repo-tools map` lists 231 exports that have no importer. 78 of them have no reference at all — not
 even inside their own file. The other 153 are referenced only in the file that defines them. This
 split is a text match, so a name that also appears in a string or a comment counts as referenced.
-The reports that `tools/create-dependency-graph` generates count 479 unused exports under their
+The reports that `tools/create-dependency-graph` generates count 478 unused exports under their
 own rules.
 
 > **Before deleting any of it:** this package publishes to npm, so an export nothing uses
@@ -143,12 +143,12 @@ counts differ for that reason.
 
 | Claim | Value | Source |
 |---|---|---|
-| totalTypeScriptFiles | 510 | repo-tools map (whole repository) |
-| totalLinesOfCode | 234018 | repo-tools map (whole repository) |
-| totalExports | 2170 | repo-tools map (whole repository) |
+| totalTypeScriptFiles | 519 | repo-tools map (whole repository) |
+| totalLinesOfCode | 234268 | repo-tools map (whole repository) |
+| totalExports | 2174 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
-| reachableFiles | 235 | repo-tools map (whole repository) |
+| reachableFiles | 238 | repo-tools map (whole repository) |
 | dormantFiles | 14 | repo-tools map (whole repository) |
 | orphanedFiles | 12 | repo-tools map (whole repository) |
 | testOnlyFiles | 2 | repo-tools map (whole repository) |
