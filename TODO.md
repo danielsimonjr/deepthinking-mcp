@@ -73,10 +73,6 @@ with the entry.
   - About 120 pairs scored 0.6 to 0.8 are unread.
   - Left alone on purpose: `CausalHandler.findEntryNodes` and `findExitNodes`, and the two default
     tables of `GenericModeHandler`.
-- [ ] **Tell the client when a mode name is replaced.** `resolveMode` returns `sequential` for a name
-  that is not a mode. The handler records no sentence in `inputWarnings`, as other handlers do for a
-  value they replace. `mapModeStringToEnum` in `src/tools/schemas/analyze.ts` is a third map of the
-  same names and returns its input for an unknown name.
 - [ ] **A release bump must update the prose mentions, not only the manifests.** That is exactly
   what went red above, and `test/test_version_consistency.py` is the gate that catches it — run it
   as part of the release step rather than discovering it on CI two days later.

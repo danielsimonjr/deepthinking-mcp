@@ -1517,7 +1517,8 @@ The codebase is organized into the following modules:
 | `../../types/core.js` | `ThinkingMode, BaseThought` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
 | `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, createThoughtBase, validationSuccess, validationFailure, createValidationWarning` | Import |
-| `./resolve-mode.js` | `resolveMode` | Import |
+| `./input-warnings.js` | `inputWarningsField` | Import |
+| `./resolve-mode.js` | `resolveMode, unknownModeWarnings` | Import |
 
 **Exports:**
 - Classes: `CustomHandler`
@@ -1667,7 +1668,8 @@ The codebase is organized into the following modules:
 | `../../types/modes/recommendations.js` | `ModeRecommender, ProblemCharacteristics, ModeRecommendation` | Import |
 | `../../tools/thinking.js` | `ThinkingToolInput` | Import (type-only) |
 | `./ModeHandler.js` | `ModeHandler, ValidationResult, ModeEnhancements, checkThoughtBasics, createThoughtBase, validationSuccess, validationFailure, createValidationWarning` | Import |
-| `./resolve-mode.js` | `resolveMode` | Import |
+| `./input-warnings.js` | `inputWarningsField` | Import |
+| `./resolve-mode.js` | `resolveMode, unknownModeWarnings` | Import |
 
 **Exports:**
 - Classes: `HybridHandler`
@@ -1828,9 +1830,10 @@ The codebase is organized into the following modules:
 | File | Imports | Type |
 |------|---------|------|
 | `../../types/core.js` | `ThinkingMode` | Import |
+| `./input-warnings.js` | `unrecognisedValueWarning` | Import |
 
 **Exports:**
-- Functions: `resolveMode`
+- Functions: `resolveMode`, `unknownModeWarnings`
 
 ---
 
@@ -2647,7 +2650,6 @@ The codebase is organized into the following modules:
 | `../../utils/sanitization.js` | `MAX_LENGTHS` | Import |
 
 **Exports:**
-- Functions: `mapModeStringToEnum`
 - Constants: `analyzeInputSchema`, `analyzeOutputSchema`, `analyzeToolDefinition`
 
 ---
@@ -4464,7 +4466,7 @@ graph TD
 |----------|-------|
 | Total TypeScript Files | 247 |
 | Total Modules | 14 |
-| Total Lines of Code | 119667 |
+| Total Lines of Code | 119683 |
 | Total Exports | 1198 |
 | Total Re-exports | 487 |
 | Total Classes | 143 |

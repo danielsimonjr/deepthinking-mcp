@@ -149,6 +149,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   subgraph only, so its text differed from the text that `DOTGraphBuilder.render` writes. The
   package has no runtime file for `dot.ts`, because `dist/index.js` is one bundle. Output does not
   change: `dist/index.js` is byte-identical to the build before the change.
+- **Hybrid and custom thoughts tell the client when a mode name is replaced.** `resolveMode`
+  replaces a name that is not a mode with `sequential`, and the client received no sign of it.
+  `HybridHandler` now records one sentence in `inputWarnings` for each distinct name that it
+  replaces in `activeModes` or in the `mode` of an entry of `modeContributions`. `CustomHandler`
+  does the same for `basedOnModes`. `validateCommon` reports each sentence in the `validation`
+  field of the answer, as it does for the other handlers. A name that differs from a mode only in case is not
+  replaced and gets no sentence. A thought whose names are all modes carries no `inputWarnings`
+  field, and its JSON stays the same. The new function `unknownModeWarnings` in `resolve-mode.ts`
+  writes the sentences. Sixteen new tests in `mode-name-warning.test.ts` pin the sentences, their
+  order, the single sentence for a repeated name and the missing field. A run of 1,200 calls (600
+  for each handler) gave the same thought as before apart from the new field. 198 calls held a name
+  that is not a mode and gained the field. The other 1,002 calls gave the same JSON as before.
+- **The unused function `mapModeStringToEnum` is removed.** It was a third copy of the table of
+  mode names in `src/tools/schemas/analyze.ts`. No file called it, and the bundle did not contain
+  it. It returned an unknown name as it was, where `resolveMode` returns `sequential`.
 - **The advertised JSON Schema now agrees with the Zod schema on `mode`, the temporal constraint
   types and the causal node type.** `mode` is in `required` for the 11 thought tools (the Zod schema
   already required it). The temporal `constraints[].type` lists `before`, `after`, `during`,

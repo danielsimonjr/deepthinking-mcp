@@ -10,7 +10,7 @@
 ## Summary
 
 - **Potentially unused files**: 12
-- **Potentially unused exports**: 479
+- **Potentially unused exports**: 478
 
 ## Potentially Unused Files
 
@@ -340,7 +340,6 @@ These exports are not imported by any other file in the codebase:
 
 ### `src/tools/schemas/analyze.ts`
 
-- `mapModeStringToEnum` (function)
 - `AnalyzeOutput` (type)
 - `analyzeOutputSchema` (constant)
 - `analyzeToolDefinition` (constant)

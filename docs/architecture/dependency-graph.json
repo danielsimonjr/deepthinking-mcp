@@ -6310,9 +6310,16 @@
             ]
           },
           {
+            "file": "./input-warnings.js",
+            "imports": [
+              "inputWarningsField"
+            ]
+          },
+          {
             "file": "./resolve-mode.js",
             "imports": [
-              "resolveMode"
+              "resolveMode",
+              "unknownModeWarnings"
             ]
           }
         ],
@@ -6776,9 +6783,16 @@
             ]
           },
           {
+            "file": "./input-warnings.js",
+            "imports": [
+              "inputWarningsField"
+            ]
+          },
+          {
             "file": "./resolve-mode.js",
             "imports": [
-              "resolveMode"
+              "resolveMode",
+              "unknownModeWarnings"
             ]
           }
         ],
@@ -7262,13 +7276,21 @@
             "imports": [
               "ThinkingMode"
             ]
+          },
+          {
+            "file": "./input-warnings.js",
+            "imports": [
+              "unrecognisedValueWarning"
+            ]
           }
         ],
         "exports": [
-          "resolveMode"
+          "resolveMode",
+          "unknownModeWarnings"
         ],
         "functions": [
-          "resolveMode"
+          "resolveMode",
+          "unknownModeWarnings"
         ]
       },
       "src/modes/handlers/ScientificMethodHandler.ts": {
@@ -10185,11 +10207,7 @@
         "exports": [
           "analyzeInputSchema",
           "analyzeOutputSchema",
-          "analyzeToolDefinition",
-          "mapModeStringToEnum"
-        ],
-        "functions": [
-          "mapModeStringToEnum"
+          "analyzeToolDefinition"
         ],
         "constants": [
           "analyzeInputSchema",
@@ -16420,7 +16438,7 @@
   "statistics": {
     "totalTypeScriptFiles": 247,
     "totalModules": 14,
-    "totalLinesOfCode": 119667,
+    "totalLinesOfCode": 119683,
     "totalExports": 1198,
     "totalClasses": 143,
     "totalInterfaces": 563,
@@ -16433,6 +16451,6 @@
     "runtimeCircularDeps": 0,
     "typeOnlyCircularDeps": 58,
     "unusedFilesCount": 12,
-    "unusedExportsCount": 479
+    "unusedExportsCount": 478
   }
 }
