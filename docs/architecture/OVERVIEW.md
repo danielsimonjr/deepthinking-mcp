@@ -26,10 +26,10 @@ document does not repeat it.
 |---|---|---|---|
 | Source files, whole repo | 522 | repo-wide | `repo-tools map` (519 are TypeScript; 3 are `.mjs` and `.cjs` scripts) |
 | TypeScript files, `src/` | 247 | src only | `repo-tools map`, files under `src/` |
-| Lines of code, whole repo | 233,802 | repo-wide | `repo-tools map` |
-| Lines of code, `src/` | 119,458 | src only | `repo-tools map`, files under `src/` |
-| Total exports, whole repo | 2,178 | repo-wide | `repo-tools map` |
-| Total exports, `src/` | 1,199 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
+| Lines of code, whole repo | 233,764 | repo-wide | `repo-tools map` |
+| Lines of code, `src/` | 119,420 | src only | `repo-tools map`, files under `src/` |
+| Total exports, whole repo | 2,177 | repo-wide | `repo-tools map` |
+| Total exports, `src/` | 1,198 (487 re-exports) | src only | `DEPENDENCY_GRAPH.md` |
 | Entry roots | 1 (`src/index.ts`) | repo-wide | `repo-tools map` |
 | Runtime circular dependencies | 0 | repo-wide | `repo-tools map`, confirmed by direct edge inspection |
 | Type-only circular dependencies | 95 | repo-wide | `repo-tools map` |
@@ -43,7 +43,7 @@ document does not repeat it.
 | Visual exporters | 44 files (24 in `modes/`, 14 in `utils/`, 6 at the root) | src | `src/export/visual/` |
 | Fluent builder classes | 14 | src | `src/export/visual/utils/` |
 
-The whole-repo and `src`-only export counts (2,178 vs 1,199) are not a contradiction. They
+The whole-repo and `src`-only export counts (2,177 vs 1,198) are not a contradiction. They
 come from two tools and count different file sets: `repo-tools map` reads all 522 files, and
 `tools/create-dependency-graph` reads the 247 files of `src/`.
 
@@ -51,7 +51,7 @@ come from two tools and count different file sets: `repo-tools map` reads all 52
 
 ```
 deepthinking-mcp/
-├── src/                # 247 files, 119,458 LOC — the package
+├── src/                # 247 files, 119,420 LOC — the package
 │   ├── index.ts        # entry point, all 13 tool handlers
 │   ├── types/           # ThinkingMode enum, Thought union, per-mode types
 │   ├── modes/            # mode handlers, registry, combinations, stochastic
@@ -144,8 +144,8 @@ counts differ for that reason.
 | Claim | Value | Source |
 |---|---|---|
 | totalTypeScriptFiles | 522 | repo-tools map (whole repository) |
-| totalLinesOfCode | 233802 | repo-tools map (whole repository) |
-| totalExports | 2178 | repo-tools map (whole repository) |
+| totalLinesOfCode | 233764 | repo-tools map (whole repository) |
+| totalExports | 2177 | repo-tools map (whole repository) |
 | totalModules | 5 | repo-tools map (whole repository) |
 | entryRoots | 1 | repo-tools map (whole repository) |
 | reachableFiles | 239 | repo-tools map (whole repository) |

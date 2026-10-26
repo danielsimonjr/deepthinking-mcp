@@ -305,44 +305,6 @@ export function renderDotEdge(edge: DotEdge, directed: boolean = true): string {
 }
 
 // =============================================================================
-// Subgraph Rendering
-// =============================================================================
-
-/**
- * Render a DOT subgraph (cluster)
- */
-export function renderDotSubgraph(subgraph: DotSubgraph): string {
-  const lines: string[] = [];
-  const id = sanitizeDotId(`cluster_${subgraph.id}`);
-
-  lines.push(`  subgraph ${id} {`);
-
-  if (subgraph.label) {
-    lines.push(`    label="${escapeDotString(subgraph.label)}";`);
-  }
-  if (subgraph.style) {
-    lines.push(`    style=${subgraph.style};`);
-  }
-  if (subgraph.fillColor) {
-    lines.push(`    fillcolor="${subgraph.fillColor}";`);
-  }
-  if (subgraph.color) {
-    lines.push(`    color="${subgraph.color}";`);
-  }
-  if (subgraph.rank) {
-    lines.push(`    rank=${subgraph.rank};`);
-  }
-
-  for (const nodeId of subgraph.nodes) {
-    lines.push(`    ${sanitizeDotId(nodeId)};`);
-  }
-
-  lines.push("  }");
-
-  return lines.join("\n");
-}
-
-// =============================================================================
 // Color Utilities
 // =============================================================================
 

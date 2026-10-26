@@ -27,7 +27,7 @@ Every tracked TypeScript file in the repository — **519 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 247 | 119,705 |
+| src | 247 | 119,667 |
 | templates | 5 | 772 |
 | tests | 249 | 107,029 |
 | tools | 14 | 4,599 |
@@ -76,7 +76,7 @@ Every tracked TypeScript file in the repository — **519 files** — not just t
 | `src/export/visual/utils.ts` | src | 32 | reachable |
 | `src/export/visual/utils/ascii.ts` | src | 1184 | reachable |
 | `src/export/visual/utils/dispatch.ts` | src | 79 | reachable |
-| `src/export/visual/utils/dot.ts` | src | 932 | reachable |
+| `src/export/visual/utils/dot.ts` | src | 894 | reachable |
 | `src/export/visual/utils/graphml.ts` | src | 670 | reachable |
 | `src/export/visual/utils/html.ts` | src | 669 | reachable |
 | `src/export/visual/utils/index.ts` | src | 22 | reachable |
