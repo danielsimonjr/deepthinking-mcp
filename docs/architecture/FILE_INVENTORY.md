@@ -28,7 +28,7 @@ Every tracked TypeScript file in the repository — **530 files** — not just t
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
 | src | 249 | 119,556 |
-| templates | 5 | 772 |
+| templates | 5 | 754 |
 | tests | 258 | 108,721 |
 | tools | 14 | 4,599 |
 
@@ -287,7 +287,7 @@ Every tracked TypeScript file in the repository — **530 files** — not just t
 | `src/validation/validators/modes/temporal.ts` | src | 203 | reachable |
 | `src/validation/validators/registry.ts` | src | 349 | reachable |
 | `src/validation/validators/validation-utils.ts` | src | 251 | reachable |
-| `templates/mode-scaffolding/example-mode.handler.ts` | templates | 264 | template |
+| `templates/mode-scaffolding/example-mode.handler.ts` | templates | 246 | template |
 | `templates/mode-scaffolding/example-mode.json-schema.ts` | templates | 159 | template |
 | `templates/mode-scaffolding/example-mode.schema.ts` | templates | 98 | template |
 | `templates/mode-scaffolding/example-mode.type.ts` | templates | 107 | template |
