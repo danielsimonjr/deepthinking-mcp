@@ -78,6 +78,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Every action reference of the workflows is pinned to a commit SHA, with the version in a comment.** 31 references sat at a tag (`actions/checkout@v7`, `actions/setup-node@v7`, `actions/upload-artifact@v7`, `actions/download-artifact@v8`, `actions/github-script@v9`, `actions/setup-python@v7`, `github/codeql-action/*@v4.39.1`, `oven-sh/setup-bun@v2`). A tag can move, and `release.yml` builds the GitHub release on version tags, so the tag was a way to change what that job runs. `publish.yml`, the only npm publisher, was already pinned. Each SHA is the commit that the tag names (an annotated tag is resolved to its commit), and each was read back from the repository of the action. No workflow has a `uses:` line at a tag now. The `github-actions` ecosystem of `dependabot.yml` keeps the pins current.
 - **`getDescendants` and `getAncestors` share one walk.** The two functions in
   `src/modes/causal/graph/algorithms/graph-utils.ts` ran the same stack walk over the edge list.
   They differed in two places only: the end of an edge that is compared with the current node, and
