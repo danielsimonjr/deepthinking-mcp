@@ -520,6 +520,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **The validation cache benchmark gates on a count of validation runs, not on a timing ratio.** The test in `tests/unit/benchmarks/validation-performance.test.ts` asserted that a cache hit ran more than 1.4 times faster than a miss. That ratio depends on machine load, and it failed on a shared CI runner (0.837) with no code change. The test now asserts that a cache hit starts no validation run. The timings stay in the log as a report.
 - **The mode template and the setup guide compile under the strict settings.** A copy of
   `templates/mode-scaffolding/example-mode.handler.ts` and a copy of the handler block in
   `docs/setup/ADDING_NEW_MODE.md` gave 8 errors under the settings of this repository. In both,
