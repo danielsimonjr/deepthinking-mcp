@@ -4,11 +4,11 @@
  * Tests ValidationCache performance improvements:
  * - First validation (cache miss)
  * - Second validation (cache hit)
- * - Expected 1.4-3x improvement for cache hits (modular architecture v3.0.0)
+ * - Cache hits skip the validation work (gated by a run count, not by timing)
  * - O(1) complexity with caching enabled
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ThoughtValidator } from '../../../src/validation/validator.js';
 import { validationCache } from '../../../src/validation/cache.js';
 import { Thought, ThinkingMode } from '../../../src/types/index.js';
@@ -19,8 +19,10 @@ describe('Validation Performance Benchmark', () => {
     validationCache.clear();
   });
 
-  it('should show significant performance improvement for cache hits', async () => {
+  it('should skip validation work on a cache hit', async () => {
     const validator = new ThoughtValidator();
+    // Count the validation runs. A cache hit must not start one.
+    const performSpy = vi.spyOn(validator as any, 'performValidation');
 
     // Create a complex thought that requires validation
     const thought: Thought = {
@@ -101,8 +103,9 @@ describe('Validation Performance Benchmark', () => {
     console.log(`   Speedup: ${speedup.toFixed(2)}x`);
     console.log(`   Hit rate: ${(statsAfterHit.hitRate * 100).toFixed(1)}%`);
 
-    // Cache hit should be faster (at least 1.4x with modular architecture)
-    expect(speedup).toBeGreaterThan(1.4);
+    // Gate on the count of validation runs: the miss runs once, the hit runs none.
+    // Wall-clock ratios vary with machine load, so the timings above are report-only.
+    expect(performSpy).toHaveBeenCalledTimes(1);
 
     console.log(`\n🎯 Result: ${speedup >= 10 ? 'EXCELLENT (≥10x)' : speedup >= 5 ? 'VERY GOOD (≥5x)' : speedup >= 2 ? 'GOOD (≥2x)' : 'NEEDS IMPROVEMENT'}`);
   });
