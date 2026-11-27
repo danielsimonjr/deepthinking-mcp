@@ -133,7 +133,7 @@ id: string;
 
 ```typescript
 // Define the system
-const system = await deepthinking_analytical({
+const system = await deepthinking_scientific({
   mode: 'systemsthinking',
   thought: 'Define the software development team system',
   thoughtNumber: 1,
@@ -152,7 +152,7 @@ const system = await deepthinking_analytical({
 });
 
 // Identify components
-const components = await deepthinking_analytical({
+const components = await deepthinking_scientific({
   mode: 'systemsthinking',
   thought: 'Identify key system components',
   thoughtNumber: 2,
@@ -172,7 +172,7 @@ const components = await deepthinking_analytical({
 });
 
 // Identify feedback loops
-const loops = await deepthinking_analytical({
+const loops = await deepthinking_scientific({
   mode: 'systemsthinking',
   thought: 'Identify the feedback loops',
   thoughtNumber: 3,

@@ -126,7 +126,7 @@ enabled: boolean;
 
 ```json
 {
-  "tool": "deepthinking_analytical",
+  "tool": "deepthinking_engineering",
   "arguments": {
     "mode": "recursive",
     "thought": "Analyzing merge sort complexity",

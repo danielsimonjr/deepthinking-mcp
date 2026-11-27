@@ -208,7 +208,7 @@ interface QualitativeRigor {
 
 ```typescript
 // Step 1: Data familiarization
-const familiarization = await deepthinking_analytical({
+const familiarization = await deepthinking_academic({
   mode: 'analysis',
   thought: 'Initial engagement with interview data',
   thoughtNumber: 1,
@@ -254,7 +254,7 @@ const familiarization = await deepthinking_analytical({
 });
 
 // Step 2: Initial coding
-const initialCoding = await deepthinking_analytical({
+const initialCoding = await deepthinking_academic({
   mode: 'analysis',
   thought: 'Generate initial codes from data',
   thoughtNumber: 2,
@@ -333,7 +333,7 @@ const initialCoding = await deepthinking_analytical({
 });
 
 // Step 3: Focused coding
-const focusedCoding = await deepthinking_analytical({
+const focusedCoding = await deepthinking_academic({
   mode: 'analysis',
   thought: 'Develop focused codes through constant comparison',
   thoughtNumber: 3,
@@ -385,7 +385,7 @@ const focusedCoding = await deepthinking_analytical({
 });
 
 // Step 4: Theme development
-const themeDevelopment = await deepthinking_analytical({
+const themeDevelopment = await deepthinking_academic({
   mode: 'analysis',
   thought: 'Develop initial themes from codes',
   thoughtNumber: 4,
@@ -440,7 +440,7 @@ const themeDevelopment = await deepthinking_analytical({
 });
 
 // Step 5: Theme refinement
-const themeRefinement = await deepthinking_analytical({
+const themeRefinement = await deepthinking_academic({
   mode: 'analysis',
   thought: 'Refine themes through review and testing',
   thoughtNumber: 5,
@@ -479,7 +479,7 @@ const themeRefinement = await deepthinking_analytical({
 });
 
 // Step 6: Memo writing
-const memoWriting = await deepthinking_analytical({
+const memoWriting = await deepthinking_academic({
   mode: 'analysis',
   thought: 'Write analytical and reflective memos',
   thoughtNumber: 6,
@@ -516,7 +516,7 @@ const memoWriting = await deepthinking_analytical({
 });
 
 // Step 7: Saturation assessment
-const saturationAssessment = await deepthinking_analytical({
+const saturationAssessment = await deepthinking_academic({
   mode: 'analysis',
   thought: 'Assess whether theoretical saturation is reached',
   thoughtNumber: 7,
@@ -554,7 +554,7 @@ const saturationAssessment = await deepthinking_analytical({
 });
 
 // Step 8: Theoretical integration
-const integration = await deepthinking_analytical({
+const integration = await deepthinking_academic({
   mode: 'analysis',
   thought: 'Integrate findings into theoretical framework',
   thoughtNumber: 8,

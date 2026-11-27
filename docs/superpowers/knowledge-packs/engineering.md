@@ -236,7 +236,7 @@ interface FailureModeAnalysis {
 
 ```typescript
 // Requirements analysis
-const requirements = await deepthinking_analytical({
+const requirements = await deepthinking_engineering({
   mode: 'engineering',
   thought: 'Define system requirements for the authentication module',
   thoughtNumber: 1,
@@ -277,7 +277,7 @@ const requirements = await deepthinking_analytical({
 });
 
 // Trade study
-const tradeStudy = await deepthinking_analytical({
+const tradeStudy = await deepthinking_engineering({
   mode: 'engineering',
   thought: 'Compare authentication providers',
   thoughtNumber: 2,

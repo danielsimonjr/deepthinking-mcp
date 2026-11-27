@@ -259,7 +259,7 @@ interface IsomorphismPattern {
 
 ```typescript
 // Form initial hypothesis
-const hypothesis = await deepthinking_standard({
+const hypothesis = await deepthinking_analytical({
   mode: 'cryptanalytic',
   thought: 'Form hypothesis about the cipher type',
   thoughtNumber: 1,
@@ -285,7 +285,7 @@ const hypothesis = await deepthinking_standard({
 });
 
 // Perform frequency analysis
-const frequency = await deepthinking_standard({
+const frequency = await deepthinking_analytical({
   mode: 'cryptanalytic',
   thought: 'Analyze letter frequencies',
   thoughtNumber: 2,
@@ -310,7 +310,7 @@ const frequency = await deepthinking_standard({
 });
 
 // Accumulate evidence
-const evidence = await deepthinking_standard({
+const evidence = await deepthinking_analytical({
   mode: 'cryptanalytic',
   thought: 'Accumulate evidence for Caesar cipher with shift 3',
   thoughtNumber: 3,

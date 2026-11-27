@@ -137,7 +137,7 @@ interface ConceptualFramework {
 
 ```typescript
 // Step 1: Identify and evaluate sources
-const sources = await deepthinking_analytical({
+const sources = await deepthinking_academic({
   mode: 'synthesis',
   thought: 'Identify and evaluate key sources on machine learning in education',
   thoughtNumber: 1,
@@ -177,7 +177,7 @@ const sources = await deepthinking_analytical({
 });
 
 // Step 2: Extract concepts
-const concepts = await deepthinking_analytical({
+const concepts = await deepthinking_academic({
   mode: 'synthesis',
   thought: 'Extract key concepts from the literature',
   thoughtNumber: 2,
@@ -202,7 +202,7 @@ const concepts = await deepthinking_analytical({
 });
 
 // Step 3: Develop themes
-const themes = await deepthinking_analytical({
+const themes = await deepthinking_academic({
   mode: 'synthesis',
   thought: 'Develop major themes from concepts',
   thoughtNumber: 3,
@@ -232,7 +232,7 @@ const themes = await deepthinking_analytical({
 });
 
 // Step 4: Identify gaps
-const gaps = await deepthinking_analytical({
+const gaps = await deepthinking_academic({
   mode: 'synthesis',
   thought: 'Identify gaps in the literature',
   thoughtNumber: 4,
@@ -274,7 +274,7 @@ const gaps = await deepthinking_analytical({
 });
 
 // Step 5: Build conceptual framework
-const framework = await deepthinking_analytical({
+const framework = await deepthinking_academic({
   mode: 'synthesis',
   thought: 'Develop conceptual framework integrating findings',
   thoughtNumber: 5,
@@ -318,7 +318,7 @@ const framework = await deepthinking_analytical({
 });
 
 // Step 6: Synthesize conclusions
-const conclusions = await deepthinking_analytical({
+const conclusions = await deepthinking_academic({
   mode: 'synthesis',
   thought: 'Synthesize overall conclusions',
   thoughtNumber: 6,

@@ -158,7 +158,7 @@ id: string;
 
 ```typescript
 // Step 1: Identify and evaluate sources
-const sources = await deepthinking_analytical({
+const sources = await deepthinking_academic({
   mode: 'synthesis',
   thought: 'Identify and evaluate key sources on machine learning in education',
   thoughtNumber: 1,
@@ -198,7 +198,7 @@ const sources = await deepthinking_analytical({
 });
 
 // Step 2: Extract concepts
-const concepts = await deepthinking_analytical({
+const concepts = await deepthinking_academic({
   mode: 'synthesis',
   thought: 'Extract key concepts from the literature',
   thoughtNumber: 2,
@@ -223,7 +223,7 @@ const concepts = await deepthinking_analytical({
 });
 
 // Step 3: Develop themes
-const themes = await deepthinking_analytical({
+const themes = await deepthinking_academic({
   mode: 'synthesis',
   thought: 'Develop major themes from concepts',
   thoughtNumber: 3,

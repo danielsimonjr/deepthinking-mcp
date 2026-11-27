@@ -179,7 +179,7 @@ interface SatisfiabilityResult {
 
 ```typescript
 // Define propositions
-const propositions = await deepthinking_analytical({
+const propositions = await deepthinking_scientific({
   mode: 'formallogic',
   thought: 'Define the propositions for the argument',
   thoughtNumber: 1,
@@ -211,7 +211,7 @@ const propositions = await deepthinking_analytical({
 });
 
 // Apply inference rules
-const inference = await deepthinking_analytical({
+const inference = await deepthinking_scientific({
   mode: 'formallogic',
   thought: 'Apply modus ponens to derive conclusion',
   thoughtNumber: 2,
@@ -231,7 +231,7 @@ const inference = await deepthinking_analytical({
 });
 
 // Construct a proof
-const proof = await deepthinking_analytical({
+const proof = await deepthinking_scientific({
   mode: 'formallogic',
   thought: 'Prove that (P→Q) ∧ (Q→R) → (P→R)',
   thoughtNumber: 3,
@@ -260,7 +260,7 @@ const proof = await deepthinking_analytical({
 });
 
 // Create truth table
-const truthTable = await deepthinking_analytical({
+const truthTable = await deepthinking_scientific({
   mode: 'formallogic',
   thought: 'Build truth table for P→Q',
   thoughtNumber: 4,
@@ -285,7 +285,7 @@ const truthTable = await deepthinking_analytical({
 });
 
 // Check satisfiability
-const sat = await deepthinking_analytical({
+const sat = await deepthinking_scientific({
   mode: 'formallogic',
   thought: 'Check if (P ∧ ¬P) is satisfiable',
   thoughtNumber: 5,

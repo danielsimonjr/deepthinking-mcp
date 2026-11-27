@@ -221,7 +221,7 @@ id: string;
 
 ```typescript
 // Define algorithm
-const algorithm = await deepthinking_standard({
+const algorithm = await deepthinking_engineering({
   mode: 'algorithmic',
   thought: 'Define merge sort algorithm',
   thoughtNumber: 1,
@@ -278,7 +278,7 @@ const algorithm = await deepthinking_standard({
 });
 
 // Solve recurrence
-const recurrence = await deepthinking_standard({
+const recurrence = await deepthinking_engineering({
   mode: 'algorithmic',
   thought: 'Solve the merge sort recurrence using master theorem',
   thoughtNumber: 2,
@@ -307,7 +307,7 @@ const recurrence = await deepthinking_standard({
 });
 
 // Prove correctness
-const correctness = await deepthinking_standard({
+const correctness = await deepthinking_engineering({
   mode: 'algorithmic',
   thought: 'Prove merge sort correctness using loop invariant',
   thoughtNumbe

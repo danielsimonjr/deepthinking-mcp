@@ -167,7 +167,7 @@ type CipherType =
 
 ```typescript
 // Form initial hypothesis
-const hypothesis = await deepthinking_standard({
+const hypothesis = await deepthinking_analytical({
   mode: 'cryptanalytic',
   thought: 'Form hypothesis about the cipher type',
   thoughtNumber: 1,
@@ -193,7 +193,7 @@ const hypothesis = await deepthinking_standard({
 });
 
 // Perform frequency analysis
-const frequency = await deepthinking_standard({
+const frequency = await deepthinking_analytical({
   mode: 'cryptanalytic',
   thought: 'Analyze letter frequencies',
   thoughtNumber: 2,
@@ -218,7 +218,7 @@ const frequency = await deepthinking_standard({
 });
 
 // Accumulate evidence
-const evidence = await deepthinking_standard({
+const evidence = await deepthinking_analytical({
   mode: 'cryptanalytic',
   thought: 'Accumulate evidence for Caesar cipher with shift 3',
   thoughtNumber: 3,
@@ -284,7 +284,7 @@ const evidence = await deepthinking_standard({
 });
 
 // Key space analysis
-const keyspace = await deepthinking_standard({
+const keyspace = await deepthinking_analytical({
   mode: 'cryptanalytic',
   thought: 'Analyze remaining key space',
   thoughtNumber: 4,
@@ -309,7 +309,7 @@ const keyspace = await deepthinking_standard({
 });
 
 // Crib analysis (for more complex ciphers)
-const crib = await deepthinking_standard({
+const crib = await deepthinking_analytical({
   mode: 'cryptanalytic',
   thought: 'Apply crib analysis if known plaintext available',
   thoughtNumber: 5,
@@ -339,7 +339,7 @@ const crib = await deepthinking_standard({
 });
 
 // Final conclusion
-const conclusion = await deepthinking_standard({
+const conclusion = await deepthinking_analytical({
   mode: 'cryptanalytic',
   thought: 'Conclude the cipher analysis',
   thoughtNumber: 6,

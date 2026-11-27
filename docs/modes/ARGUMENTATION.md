@@ -169,7 +169,7 @@ interface DialecticAnalysis {
 
 ```typescript
 // Step 1: Formulate the central claim
-const claim = await deepthinking_analytical({
+const claim = await deepthinking_academic({
   mode: 'argumentation',
   thought: 'Formulate thesis about AI in education',
   thoughtNumber: 1,
@@ -192,7 +192,7 @@ const claim = await deepthinking_analytical({
 });
 
 // Step 2: Identify grounds (evidence)
-const grounds = await deepthinking_analytical({
+const grounds = await deepthinking_academic({
   mode: 'argumentation',
   thought: 'Identify supporting evidence for the claim',
   thoughtNumber: 2,
@@ -236,7 +236,7 @@ const grounds = await deepthinking_analytical({
 });
 
 // Step 3: Construct warrants
-const warrants = await deepthinking_analytical({
+const warrants = await deepthinking_academic({
   mode: 'argumentation',
   thought: 'Construct warrants connecting evidence to claim',
   thoughtNumber: 3,
@@ -270,7 +270,7 @@ const warrants = await deepthinking_analytical({
 });
 
 // Step 4: Provide backing for warrants
-const backing = await deepthinking_analytical({
+const backing = await deepthinking_academic({
   mode: 'argumentation',
   thought: 'Provide backing for the warrants',
   thoughtNumber: 4,
@@ -300,7 +300,7 @@ const backing = await deepthinking_analytical({
 });
 
 // Step 5: Anticipate rebuttals
-const rebuttals = await deepthinking_analytical({
+const rebuttals = await deepthinking_academic({
   mode: 'argumentation',
   thought: 'Anticipate and address counterarguments',
   thoughtNumber: 5,
@@ -353,7 +353,7 @@ const rebuttals = await deepthinking_analytical({
 });
 
 // Step 6: Add qualifiers
-const qualifiers = await deepthinking_analytical({
+const qualifiers = await deepthinking_academic({
   mode: 'argumentation',
   thought: 'Specify appropriate qualifications',
   thoughtNumber: 6,
@@ -374,7 +374,7 @@ const qualifiers = await deepthinking_analytical({
 });
 
 // Step 7: Assemble complete argument
-const argument = await deepthinking_analytical({
+const argument = await deepthinking_academic({
   mode: 'argumentation',
   thought: 'Assemble the complete Toulmin argument',
   thoughtNumber: 7,
