@@ -157,7 +157,7 @@ id: string;
 
 ```typescript
 // Step 1: Data familiarization
-const familiarization = await deepthinking_analytical({
+const familiarization = await deepthinking_academic({
   mode: 'analysis',
   thought: 'Initial engagement with interview data',
   thoughtNumber: 1,
@@ -203,7 +203,7 @@ const familiarization = await deepthinking_analytical({
 });
 
 // Step 2: Initial coding
-const initialCoding = await deepthinking_analytical({
+const initialCoding = await deepthinking_academic({
   mode: 'analysis',
   thought: 'Generate initial codes from data',
   thoughtNumber: 2,

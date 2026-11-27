@@ -143,7 +143,7 @@ id: string;
 
 ```typescript
 // Step 1: Characterize the work
-const work = await deepthinking_analytical({
+const work = await deepthinking_academic({
   mode: 'critique',
   thought: 'Characterize the paper being reviewed',
   thoughtNumber: 1,
@@ -170,7 +170,7 @@ const work = await deepthinking_analytical({
 });
 
 // Step 2: Evaluate methodology
-const methodology = await deepthinking_analytical({
+const methodology = await deepthinking_academic({
   mode: 'critique',
   thought: 'Evaluate the research methodology',
   thoughtNumber: 2,

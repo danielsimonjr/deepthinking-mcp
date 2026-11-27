@@ -154,7 +154,7 @@ interface CritiqueVerdict {
 
 ```typescript
 // Step 1: Characterize the work
-const work = await deepthinking_analytical({
+const work = await deepthinking_academic({
   mode: 'critique',
   thought: 'Characterize the paper being reviewed',
   thoughtNumber: 1,
@@ -181,7 +181,7 @@ const work = await deepthinking_analytical({
 });
 
 // Step 2: Evaluate methodology
-const methodology = await deepthinking_analytical({
+const methodology = await deepthinking_academic({
   mode: 'critique',
   thought: 'Evaluate the research methodology',
   thoughtNumber: 2,
@@ -257,7 +257,7 @@ const methodology = await deepthinking_analytical({
 });
 
 // Step 3: Analyze arguments
-const arguments = await deepthinking_analytical({
+const arguments = await deepthinking_academic({
   mode: 'critique',
   thought: 'Analyze the logical structure of arguments',
   thoughtNumber: 3,
@@ -307,7 +307,7 @@ const arguments = await deepthinking_analytical({
 });
 
 // Step 4: Assess evidence use
-const evidence = await deepthinking_analytical({
+const evidence = await deepthinking_academic({
   mode: 'critique',
   thought: 'Assess the quality and use of evidence',
   thoughtNumber: 4,
@@ -355,7 +355,7 @@ const evidence = await deepthinking_analytical({
 });
 
 // Step 5: Evaluate contribution
-const contribution = await deepthinking_analytical({
+const contribution = await deepthinking_academic({
   mode: 'critique',
   thought: 'Evaluate the scholarly contribution',
   thoughtNumber: 5,
@@ -388,7 +388,7 @@ const contribution = await deepthinking_analytical({
 });
 
 // Step 6: Identify limitations and strengths
-const limitations = await deepthinking_analytical({
+const limitations = await deepthinking_academic({
   mode: 'critique',
   thought: 'Identify limitations and recognize strengths',
   thoughtNumber: 6,
@@ -452,7 +452,7 @@ const limitations = await deepthinking_analytical({
 });
 
 // Step 7: Suggest improvements
-const improvements = await deepthinking_analytical({
+const improvements = await deepthinking_academic({
   mode: 'critique',
   thought: 'Suggest improvements for revision',
   thoughtNumber: 7,
@@ -493,7 +493,7 @@ const improvements = await deepthinking_analytical({
 });
 
 // Step 8: Final verdict
-const verdict = await deepthinking_analytical({
+const verdict = await deepthinking_academic({
   mode: 'critique',
   thought: 'Provide overall verdict and recommendation',
   thoughtNumber: 8,

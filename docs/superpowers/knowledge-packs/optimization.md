@@ -142,7 +142,7 @@ id: string;
 
 ```typescript
 // Problem formulation
-const problem = await deepthinking_analytical({
+const problem = await deepthinking_strategic({
   mode: 'optimization',
   thought: 'Formulate the production planning optimization problem',
   thoughtNumber: 1,
@@ -161,7 +161,7 @@ const problem = await deepthinking_analytical({
 });
 
 // Variable definition
-const variables = await deepthinking_analytical({
+const variables = await deepthinking_strategic({
   mode: 'optimization',
   thought: 'Define decision variables for production quantities',
   thoughtNumber: 2,
@@ -192,7 +192,7 @@ const variables = await deepthinking_analytical({
 });
 
 // Constraint identification
-const constraints = await deepthinking_analytical({
+const constraints = await deepthinking_strategic({
   mode: 'optimization',
   thought: 'Identify resource constraints',
   thoughtNumber: 3,
@@ -225,7 +225,7 @@ const constraints = await deepthinking_analytical({
 });
 
 // Objective setting
-const objective = await deepthinking_analytical({
+const objective = await deepthinking_strategic({
   mode: 'optimization',
   thought: 'Define profit maximization objective',
   thoughtNumber: 4,

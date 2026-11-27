@@ -1,7 +1,7 @@
 # Modal Logic Mode
 
 **Version**: 8.4.0 | **Handler**: v8.4.0 (Specialized)
-**Tool**: `deepthinking_analytical`
+**Tool**: `deepthinking_scientific`
 **Status**: Stable (Advanced Runtime Mode)
 **Source**: `src/types/modes/modal.ts`
 
@@ -73,7 +73,7 @@ Use modal reasoning when you need to:
 
 ```json
 {
-  "tool": "deepthinking_analytical",
+  "tool": "deepthinking_scientific",
   "arguments": {
     "mode": "modal",
     "thought": "Analyzing whether proposition is necessarily true",

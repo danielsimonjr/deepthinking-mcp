@@ -131,7 +131,7 @@ id: string;
 
 ```json
 {
-  "tool": "deepthinking_analytical",
+  "tool": "deepthinking_scientific",
   "arguments": {
     "mode": "modal",
     "thought": "Analyzing whether proposition is necessarily true",

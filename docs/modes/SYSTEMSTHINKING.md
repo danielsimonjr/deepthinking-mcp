@@ -160,7 +160,7 @@ interface StockFlow {
 
 ```typescript
 // Define the system
-const system = await deepthinking_analytical({
+const system = await deepthinking_scientific({
   mode: 'systemsthinking',
   thought: 'Define the software development team system',
   thoughtNumber: 1,
@@ -179,7 +179,7 @@ const system = await deepthinking_analytical({
 });
 
 // Identify components
-const components = await deepthinking_analytical({
+const components = await deepthinking_scientific({
   mode: 'systemsthinking',
   thought: 'Identify key system components',
   thoughtNumber: 2,
@@ -199,7 +199,7 @@ const components = await deepthinking_analytical({
 });
 
 // Identify feedback loops
-const loops = await deepthinking_analytical({
+const loops = await deepthinking_scientific({
   mode: 'systemsthinking',
   thought: 'Identify the feedback loops',
   thoughtNumber: 3,
@@ -243,7 +243,7 @@ const loops = await deepthinking_analytical({
 });
 
 // Identify leverage points
-const leverage = await deepthinking_analytical({
+const leverage = await deepthinking_scientific({
   mode: 'systemsthinking',
   thought: 'Find high-leverage intervention points',
   thoughtNumber: 4,
@@ -286,7 +286,7 @@ const leverage = await deepthinking_analytical({
 });
 
 // Predict behavior
-const behavior = await deepthinking_analytical({
+const behavior = await deepthinking_scientific({
   mode: 'systemsthinking',
   thought: 'Predict system behavior over time',
   thoughtNumber: 5,

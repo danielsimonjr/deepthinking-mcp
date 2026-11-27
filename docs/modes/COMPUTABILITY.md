@@ -191,7 +191,7 @@ type ClassicUndecidableProblem =
 
 ```typescript
 // Define a Turing machine
-const machine = await deepthinking_standard({
+const machine = await deepthinking_mathematics({
   mode: 'computability',
   thought: 'Define a Turing machine that accepts strings of the form 0^n1^n',
   thoughtNumber: 1,
@@ -230,7 +230,7 @@ const machine = await deepthinking_standard({
 });
 
 // Trace computation
-const trace = await deepthinking_standard({
+const trace = await deepthinking_mathematics({
   mode: 'computability',
   thought: 'Trace computation on input 0011',
   thoughtNumber: 2,
@@ -262,7 +262,7 @@ const trace = await deepthinking_standard({
 });
 
 // Prove undecidability via reduction
-const reduction = await deepthinking_standard({
+const reduction = await deepthinking_mathematics({
   mode: 'computability',
   thought: 'Prove emptiness problem is undecidable by reduction from halting',
   thoughtNumber: 3,
@@ -308,7 +308,7 @@ const reduction = await deepthinking_standard({
 });
 
 // Diagonalization argument
-const diagonal = await deepthinking_standard({
+const diagonal = await deepthinking_mathematics({
   mode: 'computability',
   thought: 'Construct Turing diagonal argument for halting problem',
   thoughtNumber: 4,
@@ -343,7 +343,7 @@ const diagonal = await deepthinking_standard({
 });
 
 // Complexity analysis
-const complexity = await deepthinking_standard({
+const complexity = await deepthinking_mathematics({
   mode: 'computability',
   thought: 'Analyze complexity class of 0^n1^n language',
   thoughtNumber: 5,

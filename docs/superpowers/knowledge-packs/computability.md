@@ -206,7 +206,7 @@ id: string;
 
 ```typescript
 // Define a Turing machine
-const machine = await deepthinking_standard({
+const machine = await deepthinking_mathematics({
   mode: 'computability',
   thought: 'Define a Turing machine that accepts strings of the form 0^n1^n',
   thoughtNumber: 1,
@@ -245,7 +245,7 @@ const machine = await deepthinking_standard({
 });
 
 // Trace computation
-const trace = await deepthinking_standard({
+const trace = await deepthinking_mathematics({
   mode: 'computability',
   thought: 'Trace computation on input 0011',
   thoughtNumber: 2,

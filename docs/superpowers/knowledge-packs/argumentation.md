@@ -152,7 +152,7 @@ id: string;
 
 ```typescript
 // Step 1: Formulate the central claim
-const claim = await deepthinking_analytical({
+const claim = await deepthinking_academic({
   mode: 'argumentation',
   thought: 'Formulate thesis about AI in education',
   thoughtNumber: 1,
@@ -175,7 +175,7 @@ const claim = await deepthinking_analytical({
 });
 
 // Step 2: Identify grounds (evidence)
-const grounds = await deepthinking_analytical({
+const grounds = await deepthinking_academic({
   mode: 'argumentation',
   thought: 'Identify supporting evidence for the claim',
   thoughtNumber: 2,
@@ -219,7 +219,7 @@ const grounds = await deepthinking_analytical({
 });
 
 // Step 3: Construct warrants
-const warrants = await deepthinking_analytical({
+const warrants = await deepthinking_academic({
   mode: 'argumentation',
   thought: 'Construct warrants connecting evidence to claim',
   thoughtNumber: 3,
