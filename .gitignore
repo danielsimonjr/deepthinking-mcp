@@ -7,6 +7,8 @@ yarn-error.log*
 # Build outputs
 dist/
 *.tsbuildinfo
+# Scratch folder of scripts/check-bundle-content.mjs (left only if the check is killed)
+.bundle-check-*/
 
 # Testing
 coverage/
