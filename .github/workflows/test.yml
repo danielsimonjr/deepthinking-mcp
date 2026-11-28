@@ -133,6 +133,11 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      # Runs on this job's single OS only (ubuntu-latest). Locally the committed dist/ equalled a
+      # fresh build on Windows; this step proves the same on the Linux runner.
+      - name: Committed build equals a fresh build
+        run: bun run check:bundle-content
+
       - name: Build package
         run: bun run build
 

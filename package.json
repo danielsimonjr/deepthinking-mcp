@@ -18,6 +18,7 @@
   "sideEffects": false,
   "scripts": {
     "build": "tsup && tsc --emitDeclarationOnly",
+    "check:bundle-content": "node scripts/check-bundle-content.mjs",
     "dev": "tsup --watch",
     "test": "vitest",
     "test:run": "cross-env VITEST_REPORT_MODE=summary vitest --run --coverage",
