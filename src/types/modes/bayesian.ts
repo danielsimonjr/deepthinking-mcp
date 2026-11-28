@@ -58,6 +58,10 @@ export interface SensitivityAnalysis {
   posteriorRange: [number, number];
 }
 
+/**
+ * A thought in Bayesian mode.
+ * It holds a hypothesis with its prior, likelihood and evidence.
+ */
 export interface BayesianThought extends BaseThought {
   mode: ThinkingMode.BAYESIAN;
   hypothesis: BayesianHypothesis;
@@ -69,6 +73,10 @@ export interface BayesianThought extends BaseThought {
   sensitivity?: SensitivityAnalysis;
 }
 
+/**
+ * Check whether a thought is in Bayesian mode.
+ * Returns true when the mode field is bayesian.
+ */
 export function isBayesianThought(
   thought: BaseThought,
 ): thought is BayesianThought {

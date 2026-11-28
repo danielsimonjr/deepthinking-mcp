@@ -169,4 +169,8 @@ export const ScientificSchema = BaseThoughtSchema.extend({
   modalDomain: IdSchema.optional(),
 });
 
+/**
+ * The type of a validated scientific input.
+ * TypeScript infers it from ScientificSchema.
+ */
 export type ScientificInput = z.infer<typeof ScientificSchema>;

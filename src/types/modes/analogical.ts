@@ -77,6 +77,10 @@ export interface Inference {
   needsVerification: boolean;
 }
 
+/**
+ * A thought in analogical mode.
+ * It maps a source domain to a target domain.
+ */
 export interface AnalogicalThought extends BaseThought {
   mode: ThinkingMode.ANALOGICAL;
   sourceDomain: Domain;
@@ -88,6 +92,10 @@ export interface AnalogicalThought extends BaseThought {
   analogyStrength: number; // 0-1
 }
 
+/**
+ * Check whether a thought is in analogical mode.
+ * Returns true when the mode field is analogical.
+ */
 export function isAnalogicalThought(
   thought: BaseThought,
 ): thought is AnalogicalThought {

@@ -9,6 +9,10 @@
 
 import { BaseThought, ThinkingMode } from "../core.js";
 
+/**
+ * A thought in game theory mode.
+ * The thoughtType field names the kind of game step.
+ */
 export interface GameTheoryThought extends BaseThought {
   mode: ThinkingMode.GAMETHEORY;
   thoughtType:
@@ -159,6 +163,10 @@ export interface BackwardInduction {
   expectedPayoffs: number[];
 }
 
+/**
+ * Check whether a thought is in game theory mode.
+ * Returns true when the mode field is gametheory.
+ */
 export function isGameTheoryThought(
   thought: BaseThought,
 ): thought is GameTheoryThought {

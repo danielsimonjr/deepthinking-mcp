@@ -5,6 +5,10 @@
 
 import { BaseThought, ThinkingMode } from "../core.js";
 
+/**
+ * A thought in sequential mode.
+ * The isRevision field marks a thought that revises an earlier one.
+ */
 export interface SequentialThought extends BaseThought {
   mode: ThinkingMode.SEQUENTIAL;
 
@@ -25,6 +29,10 @@ export interface SequentialThought extends BaseThought {
   needsMoreThoughts?: boolean; // Whether more iteration is needed
 }
 
+/**
+ * Check whether a thought is in sequential mode.
+ * Returns true when the mode field is sequential.
+ */
 export function isSequentialThought(
   thought: BaseThought,
 ): thought is SequentialThought {

@@ -157,4 +157,8 @@ export const ProbabilisticSchema = BaseThoughtSchema.extend({
     .optional(),
 });
 
+/**
+ * The type of a validated probabilistic input.
+ * TypeScript infers it from ProbabilisticSchema.
+ */
 export type ProbabilisticInput = z.infer<typeof ProbabilisticSchema>;

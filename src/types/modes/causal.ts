@@ -75,6 +75,10 @@ export interface CounterfactualScenario {
   predictedOutcome: string;
 }
 
+/**
+ * A thought in causal mode.
+ * It holds a causal graph and the mechanisms of the analysis.
+ */
 export interface CausalThought extends BaseThought {
   mode: ThinkingMode.CAUSAL;
   causalGraph: CausalGraph;
@@ -84,6 +88,10 @@ export interface CausalThought extends BaseThought {
   confounders?: Confounder[];
 }
 
+/**
+ * Check whether a thought is in causal mode.
+ * Returns true when the mode field is causal.
+ */
 export function isCausalThought(
   thought: BaseThought,
 ): thought is CausalThought {

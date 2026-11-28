@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+- **Exported symbols in `src/` now have doc comments.** The `repo-tools docs check src` gate reports 50 MUST findings, down from 112. The change adds comments only, and `services/ExportService.ts` now uses one doc dialect.
+
 ### Added
 
 - **The advertised JSON Schema now states the length, count and numeric bounds of every string,

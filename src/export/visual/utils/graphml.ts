@@ -18,6 +18,9 @@ export interface GraphMLNode {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * An edge of a GraphML graph, with the ids of its source and target nodes.
+ */
 export interface GraphMLEdge {
   id: string;
   source: string;
@@ -27,6 +30,10 @@ export interface GraphMLEdge {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * Options that control the GraphML output.
+ * DEFAULT_GRAPHML_OPTIONS holds the defaults.
+ */
 export interface GraphMLOptions {
   directed?: boolean;
   includeMetadata?: boolean;

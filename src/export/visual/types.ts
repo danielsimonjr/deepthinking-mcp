@@ -20,6 +20,11 @@ export type VisualFormat =
   | "json"
   | "markdown";
 
+/**
+ * Options for a visual export.
+ *
+ * Some fields apply to one format only, as the field names show.
+ */
 export interface VisualExportOptions {
   format: VisualFormat;
   colorScheme?: "default" | "monochrome" | "pastel";

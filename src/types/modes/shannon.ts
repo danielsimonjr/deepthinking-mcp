@@ -8,6 +8,10 @@ import { BaseThought, ThinkingMode, ShannonStage } from "../core.js";
 // Re-export for convenience
 export { ShannonStage };
 
+/**
+ * A thought in Shannon mode.
+ * It records the stage, uncertainty and assumptions of the step.
+ */
 export interface ShannonThought extends BaseThought {
   mode: ThinkingMode.SHANNON;
   stage: ShannonStage;
@@ -34,6 +38,10 @@ export interface ShannonThought extends BaseThought {
   knownLimitations?: string[];
 }
 
+/**
+ * Check whether a thought is in Shannon mode.
+ * Returns true when the mode field is shannon.
+ */
 export function isShannonThought(
   thought: BaseThought,
 ): thought is ShannonThought {

@@ -86,4 +86,8 @@ export const CausalSchema = BaseThoughtSchema.extend({
     .optional(),
 });
 
+/**
+ * The type of a validated causal input.
+ * TypeScript infers it from CausalSchema.
+ */
 export type CausalInput = z.infer<typeof CausalSchema>;

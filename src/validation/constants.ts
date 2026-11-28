@@ -16,6 +16,9 @@ export const IssueSeverity = {
   INFO: "info",
 } as const;
 
+/**
+ * The severity levels of a validation issue: error, warning or info.
+ */
 export type IssueSeverity = (typeof IssueSeverity)[keyof typeof IssueSeverity];
 
 /**
@@ -30,6 +33,10 @@ export const IssueCategory = {
   INTERPRETATION: "interpretation",
 } as const;
 
+/**
+ * The categories of a validation issue.
+ * The category field of ValidationIssue holds one of these values.
+ */
 export type IssueCategory = (typeof IssueCategory)[keyof typeof IssueCategory];
 
 /**

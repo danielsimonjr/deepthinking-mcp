@@ -5,6 +5,10 @@
 
 import { BaseThought, ThinkingMode } from "../core.js";
 
+/**
+ * A thought in evidential mode.
+ * The thoughtType field names the kind of evidential step.
+ */
 export interface EvidentialThought extends BaseThought {
   mode: ThinkingMode.EVIDENTIAL;
   thoughtType:
@@ -23,6 +27,10 @@ export interface EvidentialThought extends BaseThought {
   decisions?: Decision[];
 }
 
+/**
+ * A hypothesis that evidence can support or contradict.
+ * A composite hypothesis lists the ids of its subsets in subsets.
+ */
 export interface Hypothesis {
   id: string;
   name: string;
@@ -31,6 +39,10 @@ export interface Hypothesis {
   subsets?: string[]; // For composite hypotheses
 }
 
+/**
+ * A piece of evidence with a source.
+ * The reliability field is a number from 0 to 1.
+ */
 export interface Evidence {
   id: string;
   description: string;
@@ -41,6 +53,10 @@ export interface Evidence {
   contradicts?: string[]; // Hypothesis IDs or subsets
 }
 
+/**
+ * A belief function built from one source.
+ * The source field holds an evidence id or the word combined.
+ */
 export interface BeliefFunction {
   id: string;
   source: string; // Evidence ID or 'combined'
@@ -48,17 +64,29 @@ export interface BeliefFunction {
   conflictMass?: number; // Normalization factor
 }
 
+/**
+ * A basic probability assignment to one set of hypotheses.
+ * The mass field is a number from 0 to 1.
+ */
 export interface MassAssignment {
   hypothesisSet: string[]; // Hypothesis IDs (singleton or composite)
   mass: number; // 0-1, basic probability assignment
   justification: string;
 }
 
+/**
+ * A plausibility function.
+ * It holds the plausibility assignments of the analysis.
+ */
 export interface PlausibilityFunction {
   id: string;
   assignments: PlausibilityAssignment[];
 }
 
+/**
+ * The plausibility and belief of one set of hypotheses.
+ * The uncertaintyInterval field holds the belief, then the plausibility.
+ */
 export interface PlausibilityAssignment {
   hypothesisSet: string[];
   plausibility: number; // 0-1
@@ -66,6 +94,10 @@ export interface PlausibilityAssignment {
   uncertaintyInterval: [number, number]; // [belief, plausibility]
 }
 
+/**
+ * A decision that the analysis makes from the hypotheses.
+ * The confidence field reflects the belief and plausibility of the choice.
+ */
 export interface Decision {
   id: string;
   name: string;
@@ -75,12 +107,20 @@ export interface Decision {
   alternatives: Alternative[];
 }
 
+/**
+ * An option that a decision compares with other options.
+ * It has an expected utility and a risk.
+ */
 export interface Alternative {
   hypothesis: string[];
   expectedUtility: number;
   risk: number;
 }
 
+/**
+ * Check whether a thought is in evidential mode.
+ * Returns true when the mode field is evidential.
+ */
 export function isEvidentialThought(
   thought: BaseThought,
 ): thought is EvidentialThought {

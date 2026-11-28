@@ -52,4 +52,8 @@ export const AnalyticalSchema = BaseThoughtSchema.extend({
   derivedInsights: IdArraySchema.optional(),
 });
 
+/**
+ * The type of a validated analytical input.
+ * TypeScript infers it from AnalyticalSchema.
+ */
 export type AnalyticalInput = z.infer<typeof AnalyticalSchema>;

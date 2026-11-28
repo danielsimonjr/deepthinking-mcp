@@ -170,4 +170,8 @@ export const StrategicSchema = BaseThoughtSchema.extend({
   solutionCount: z.number().int().min(0).optional(),
 });
 
+/**
+ * The type of a validated strategic input.
+ * TypeScript infers it from StrategicSchema.
+ */
 export type StrategicInput = z.infer<typeof StrategicSchema>;

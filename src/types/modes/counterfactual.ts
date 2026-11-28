@@ -73,6 +73,10 @@ export interface CausalChain {
   divergence: string;
 }
 
+/**
+ * A thought in counterfactual mode.
+ * It compares an actual scenario with counterfactual scenarios.
+ */
 export interface CounterfactualThought extends BaseThought {
   mode: ThinkingMode.COUNTERFACTUAL;
   actual: Scenario;
@@ -82,6 +86,10 @@ export interface CounterfactualThought extends BaseThought {
   causalChains?: CausalChain[];
 }
 
+/**
+ * Check whether a thought is in counterfactual mode.
+ * Returns true when the mode field is counterfactual.
+ */
 export function isCounterfactualThought(
   thought: BaseThought,
 ): thought is CounterfactualThought {

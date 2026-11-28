@@ -168,6 +168,10 @@ export interface ExportProgress {
   phase: "started" | "exporting" | "writing" | "completed" | "failed";
 }
 
+/**
+ * The function that receives progress updates during an export.
+ * The exporter calls it with the current ExportProgress value.
+ */
 export type ExportProgressCallback = (progress: ExportProgress) => void;
 
 // ============================================================================

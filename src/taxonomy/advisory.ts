@@ -73,6 +73,10 @@ export interface ProblemClassification {
   secondaryTypeNames: string[];
 }
 
+/**
+ * Taxonomy advice that holds suggestions.
+ * The available field is true in this form.
+ */
 export interface TaxonomyAdviceAvailable {
   available: true;
   classification?: ProblemClassification;
@@ -88,11 +92,19 @@ export interface TaxonomyAdviceAvailable {
   };
 }
 
+/**
+ * Taxonomy advice that holds no suggestions.
+ * The reason field says why.
+ */
 export interface TaxonomyAdviceUnavailable {
   available: false;
   reason: string;
 }
 
+/**
+ * Taxonomy advice in one of two forms: available or unavailable.
+ * Check the available field to choose the form.
+ */
 export type TaxonomyAdvice =
   TaxonomyAdviceAvailable | TaxonomyAdviceUnavailable;
 

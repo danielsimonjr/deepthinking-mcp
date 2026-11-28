@@ -33,6 +33,10 @@ export interface SessionGraphNode {
   thoughtNumber?: number;
 }
 
+/**
+ * A link between two session graph nodes.
+ * The type field is sequence, revision or dependency.
+ */
 export interface SessionGraphEdge {
   source: string;
   target: string;
