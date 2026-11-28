@@ -5,7 +5,7 @@
 
 # Complete File Inventory
 
-Every tracked TypeScript file in the repository — **533 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
+Every tracked TypeScript file in the repository — **534 files** — not just the ones under `src/`. Built by walking the repo rather than an enumerated list of directories, so a file in a directory nobody thought of still appears (tagged `other`) instead of silently vanishing.
 
 > **Disposition is not a deletion list.** `orphan` means no static import path was found from an entry root. A file reached only through a dynamic `import()` is invisible to a static parser and will read as `orphan` while being entirely live. Verify before deleting anything. This package also publishes to npm, so an export nothing uses in-repo may still be public API for an external caller.
 
@@ -18,7 +18,7 @@ Every tracked TypeScript file in the repository — **533 files** — not just t
 | other | 2 |
 | reachable | 237 |
 | template | 5 |
-| test | 261 |
+| test | 262 |
 | tool | 14 |
 
 ## Per-area counts
@@ -29,7 +29,7 @@ Every tracked TypeScript file in the repository — **533 files** — not just t
 | docs | 2 | 1,828 |
 | src | 249 | 119,339 |
 | templates | 5 | 758 |
-| tests | 261 | 109,346 |
+| tests | 262 | 109,431 |
 | tools | 14 | 4,599 |
 
 ## All files
@@ -387,7 +387,7 @@ Every tracked TypeScript file in the repository — **533 files** — not just t
 | `tests/unit/analogical.test.ts` | tests | 472 | test |
 | `tests/unit/bayesian.test.ts` | tests | 380 | test |
 | `tests/unit/benchmarks/metrics-performance.test.ts` | tests | 126 | test |
-| `tests/unit/benchmarks/validation-performance.test.ts` | tests | 293 | test |
+| `tests/unit/benchmarks/validation-performance.test.ts` | tests | 296 | test |
 | `tests/unit/cache/lru-contract.test.ts` | tests | 44 | test |
 | `tests/unit/cache/lru.test.ts` | tests | 537 | test |
 | `tests/unit/causal.test.ts` | tests | 353 | test |
@@ -513,6 +513,7 @@ Every tracked TypeScript file in the repository — **533 files** — not just t
 | `tests/unit/taxonomy/taxonomy-system.test.ts` | tests | 310 | test |
 | `tests/unit/taxonomy/taxonomy-wiring.test.ts` | tests | 108 | test |
 | `tests/unit/temporal.test.ts` | tests | 673 | test |
+| `tests/unit/tools/knowledge-pack-tools.test.ts` | tests | 82 | test |
 | `tests/unit/tools/mode-reachability.test.ts` | tests | 591 | test |
 | `tests/unit/tools/schema-bounds.test.ts` | tests | 152 | test |
 | `tests/unit/tools/schemas/advertised-omissions.ts` | tests | 69 | test |

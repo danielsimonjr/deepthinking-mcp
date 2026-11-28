@@ -1,6 +1,6 @@
 {
   "summary": {
-    "totalFiles": 533,
+    "totalFiles": 534,
     "byArea": {
       "docs": {
         "files": 2,
@@ -15,8 +15,8 @@
         "loc": 758
       },
       "tests": {
-        "files": 261,
-        "loc": 109346
+        "files": 262,
+        "loc": 109431
       },
       "tools": {
         "files": 14,
@@ -32,7 +32,7 @@
       "reachable": 237,
       "orphan": 12,
       "template": 5,
-      "test": 261,
+      "test": 262,
       "tool": 14,
       "config": 2
     }
@@ -2147,7 +2147,7 @@
     {
       "path": "tests/unit/benchmarks/validation-performance.test.ts",
       "area": "tests",
-      "loc": 293,
+      "loc": 296,
       "disposition": "test"
     },
     {
@@ -2898,6 +2898,12 @@
       "path": "tests/unit/temporal.test.ts",
       "area": "tests",
       "loc": 673,
+      "disposition": "test"
+    },
+    {
+      "path": "tests/unit/tools/knowledge-pack-tools.test.ts",
+      "area": "tests",
+      "loc": 82,
       "disposition": "test"
     },
     {
