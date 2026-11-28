@@ -274,6 +274,14 @@ export interface ExportProfileMetadata {
   tags: string[];
 }
 
+/**
+ * Return the metadata of an export profile.
+ *
+ * The metadata holds the id, name, description, format count, formats and tags of the profile.
+ *
+ * @param id - The profile to read.
+ * @returns The metadata, or undefined when no profile has this id.
+ */
 export function getExportProfileMetadata(
   id: ExportProfileId,
 ): ExportProfileMetadata | undefined {

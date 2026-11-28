@@ -8,7 +8,7 @@
       },
       "src": {
         "files": 249,
-        "loc": 119339
+        "loc": 119586
       },
       "templates": {
         "files": 5,
@@ -77,7 +77,7 @@
     {
       "path": "src/export/file-exporter.ts",
       "area": "src",
-      "loc": 488,
+      "loc": 492,
       "disposition": "reachable"
     },
     {
@@ -89,7 +89,7 @@
     {
       "path": "src/export/profiles.ts",
       "area": "src",
-      "loc": 406,
+      "loc": 414,
       "disposition": "reachable"
     },
     {
@@ -251,13 +251,13 @@
     {
       "path": "src/export/visual/session-graph.ts",
       "area": "src",
-      "loc": 121,
+      "loc": 125,
       "disposition": "reachable"
     },
     {
       "path": "src/export/visual/types.ts",
       "area": "src",
-      "loc": 63,
+      "loc": 68,
       "disposition": "reachable"
     },
     {
@@ -287,7 +287,7 @@
     {
       "path": "src/export/visual/utils/graphml.ts",
       "area": "src",
-      "loc": 670,
+      "loc": 677,
       "disposition": "reachable"
     },
     {
@@ -347,7 +347,7 @@
     {
       "path": "src/export/visual/utils/tikz.ts",
       "area": "src",
-      "loc": 1013,
+      "loc": 1025,
       "disposition": "reachable"
     },
     {
@@ -869,7 +869,7 @@
     {
       "path": "src/taxonomy/advisory.ts",
       "area": "src",
-      "loc": 327,
+      "loc": 339,
       "disposition": "reachable"
     },
     {
@@ -935,7 +935,7 @@
     {
       "path": "src/tools/schemas/base.ts",
       "area": "src",
-      "loc": 75,
+      "loc": 83,
       "disposition": "reachable"
     },
     {
@@ -953,19 +953,19 @@
     {
       "path": "src/tools/schemas/modes/analytical.ts",
       "area": "src",
-      "loc": 56,
+      "loc": 60,
       "disposition": "reachable"
     },
     {
       "path": "src/tools/schemas/modes/causal.ts",
       "area": "src",
-      "loc": 90,
+      "loc": 94,
       "disposition": "reachable"
     },
     {
       "path": "src/tools/schemas/modes/core.ts",
       "area": "src",
-      "loc": 74,
+      "loc": 86,
       "disposition": "reachable"
     },
     {
@@ -983,25 +983,25 @@
     {
       "path": "src/tools/schemas/modes/mathematics.ts",
       "area": "src",
-      "loc": 77,
+      "loc": 81,
       "disposition": "reachable"
     },
     {
       "path": "src/tools/schemas/modes/probabilistic.ts",
       "area": "src",
-      "loc": 161,
+      "loc": 165,
       "disposition": "reachable"
     },
     {
       "path": "src/tools/schemas/modes/scientific.ts",
       "area": "src",
-      "loc": 173,
+      "loc": 177,
       "disposition": "reachable"
     },
     {
       "path": "src/tools/schemas/modes/strategic.ts",
       "area": "src",
-      "loc": 174,
+      "loc": 178,
       "disposition": "reachable"
     },
     {
@@ -1019,7 +1019,7 @@
     {
       "path": "src/tools/thinking.ts",
       "area": "src",
-      "loc": 1566,
+      "loc": 1570,
       "disposition": "reachable"
     },
     {
@@ -1049,7 +1049,7 @@
     {
       "path": "src/types/modes/analogical.ts",
       "area": "src",
-      "loc": 96,
+      "loc": 104,
       "disposition": "reachable"
     },
     {
@@ -1067,13 +1067,13 @@
     {
       "path": "src/types/modes/bayesian.ts",
       "area": "src",
-      "loc": 77,
+      "loc": 85,
       "disposition": "reachable"
     },
     {
       "path": "src/types/modes/causal.ts",
       "area": "src",
-      "loc": 92,
+      "loc": 100,
       "disposition": "reachable"
     },
     {
@@ -1091,7 +1091,7 @@
     {
       "path": "src/types/modes/counterfactual.ts",
       "area": "src",
-      "loc": 90,
+      "loc": 98,
       "disposition": "reachable"
     },
     {
@@ -1121,7 +1121,7 @@
     {
       "path": "src/types/modes/evidential.ts",
       "area": "src",
-      "loc": 89,
+      "loc": 129,
       "disposition": "reachable"
     },
     {
@@ -1139,7 +1139,7 @@
     {
       "path": "src/types/modes/gametheory.ts",
       "area": "src",
-      "loc": 479,
+      "loc": 487,
       "disposition": "reachable"
     },
     {
@@ -1151,13 +1151,13 @@
     {
       "path": "src/types/modes/hybrid.ts",
       "area": "src",
-      "loc": 80,
+      "loc": 84,
       "disposition": "reachable"
     },
     {
       "path": "src/types/modes/mathematics.ts",
       "area": "src",
-      "loc": 341,
+      "loc": 349,
       "disposition": "reachable"
     },
     {
@@ -1181,13 +1181,13 @@
     {
       "path": "src/types/modes/physics.ts",
       "area": "src",
-      "loc": 73,
+      "loc": 81,
       "disposition": "reachable"
     },
     {
       "path": "src/types/modes/recommendations.ts",
       "area": "src",
-      "loc": 2137,
+      "loc": 2153,
       "disposition": "reachable"
     },
     {
@@ -1205,13 +1205,13 @@
     {
       "path": "src/types/modes/sequential.ts",
       "area": "src",
-      "loc": 33,
+      "loc": 41,
       "disposition": "reachable"
     },
     {
       "path": "src/types/modes/shannon.ts",
       "area": "src",
-      "loc": 42,
+      "loc": 50,
       "disposition": "reachable"
     },
     {
@@ -1241,7 +1241,7 @@
     {
       "path": "src/types/session.ts",
       "area": "src",
-      "loc": 543,
+      "loc": 551,
       "disposition": "reachable"
     },
     {
@@ -1295,7 +1295,7 @@
     {
       "path": "src/validation/constants.ts",
       "area": "src",
-      "loc": 101,
+      "loc": 108,
       "disposition": "reachable"
     },
     {

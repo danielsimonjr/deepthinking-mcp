@@ -5,6 +5,10 @@
 
 import { ThinkingMode } from "../core.js";
 
+/**
+ * The features of a problem that the mode recommender reads.
+ * The domain text and the level fields drive the scores.
+ */
 export interface ProblemCharacteristics {
   domain: string;
   complexity: "low" | "medium" | "high";
@@ -18,6 +22,10 @@ export interface ProblemCharacteristics {
   hasAlternatives: boolean;
 }
 
+/**
+ * A reasoning mode that the recommender suggests.
+ * The score field is a number from 0 to 1 that rates the fit.
+ */
 export interface ModeRecommendation {
   mode: ThinkingMode;
   score: number; // 0-1, how well suited
@@ -27,6 +35,10 @@ export interface ModeRecommendation {
   examples: string[];
 }
 
+/**
+ * A suggestion to combine reasoning modes.
+ * The sequence field names how the modes run: parallel, sequential or hybrid.
+ */
 export interface CombinationRecommendation {
   modes: ThinkingMode[];
   sequence: "parallel" | "sequential" | "hybrid";
@@ -35,6 +47,10 @@ export interface CombinationRecommendation {
   synergies: string[];
 }
 
+/**
+ * Recommends reasoning modes for a problem.
+ * It ranks the modes by suitability score.
+ */
 export class ModeRecommender {
   /**
    * Recommends reasoning modes based on problem characteristics

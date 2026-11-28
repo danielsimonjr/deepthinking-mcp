@@ -314,6 +314,10 @@ export interface LogicalForm {
   rules: string[];
 }
 
+/**
+ * A thought in mathematics mode.
+ * The thoughtType field names the kind of mathematical step.
+ */
 export interface MathematicsThought extends BaseThought {
   mode: ThinkingMode.MATHEMATICS;
   thoughtType: MathematicsThoughtType;
@@ -333,6 +337,10 @@ export interface MathematicsThought extends BaseThought {
   assumptionAnalysis?: AssumptionAnalysis;
 }
 
+/**
+ * Check whether a thought is in mathematics mode.
+ * Returns true when the mode field is mathematics.
+ */
 export function isMathematicsThought(
   thought: BaseThought,
 ): thought is MathematicsThought {

@@ -72,6 +72,10 @@ export interface HybridThought extends BaseThought {
   switchReason?: string;
 }
 
+/**
+ * Check whether a thought is in hybrid mode.
+ * Returns true when the mode field is hybrid.
+ */
 export function isHybridThought(
   thought: BaseThought,
 ): thought is HybridThought {

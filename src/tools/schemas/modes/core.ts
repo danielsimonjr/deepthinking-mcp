@@ -68,6 +68,18 @@ export const CoreModeSchema = BaseThoughtSchema.extend({
 // Backward compatibility export
 export const CoreSchema = StandardSchema;
 
+/**
+ * The type of a validated standard input.
+ * TypeScript infers it from StandardSchema.
+ */
 export type StandardInput = z.infer<typeof StandardSchema>;
+/**
+ * The type of a validated core mode input.
+ * TypeScript infers it from CoreModeSchema.
+ */
 export type CoreModeInput = z.infer<typeof CoreModeSchema>;
+/**
+ * The type of a validated core input.
+ * TypeScript infers it from CoreSchema.
+ */
 export type CoreInput = z.infer<typeof CoreSchema>;

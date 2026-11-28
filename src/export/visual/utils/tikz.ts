@@ -12,6 +12,10 @@
 
 import { escapeLatex } from "../../../utils/sanitization.js";
 
+/**
+ * A node in a TikZ picture.
+ * The shape field sets the TikZ node shape.
+ */
 export interface TikZNode {
   id: string;
   label: string;
@@ -23,6 +27,10 @@ export interface TikZNode {
   metadata?: Record<string, unknown>;
 }
 
+/**
+ * An edge between two TikZ nodes.
+ * The bend field curves the edge left, right or by a numeric amount.
+ */
 export interface TikZEdge {
   source: string;
   target: string;
@@ -32,6 +40,10 @@ export interface TikZEdge {
   bend?: "left" | "right" | number;
 }
 
+/**
+ * Options that control the TikZ output.
+ * DEFAULT_TIKZ_OPTIONS holds the defaults.
+ */
 export interface TikZOptions {
   standalone?: boolean;
   includeLabels?: boolean;

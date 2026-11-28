@@ -213,6 +213,10 @@ export interface AdvisoryValidationUnavailable {
   reason: string;
 }
 
+/**
+ * The result of the advisory validator for a thought.
+ * The available field tells which form it holds.
+ */
 export type AdvisoryValidation =
   AdvisoryValidationResult | AdvisoryValidationUnavailable;
 
@@ -521,6 +525,10 @@ export interface ProofAnalysisUnavailable {
   reason: string;
 }
 
+/**
+ * The result of the proof analysis for a thought.
+ * The available field tells which form it holds.
+ */
 export type AdvisoryProofAnalysis =
   ProofAnalysisResult | ProofAnalysisUnavailable;
 

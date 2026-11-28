@@ -51988,7 +51988,7 @@ var ExportService = class {
    * @param session - The session to export
    * @param format - The desired export format
    * @returns Formatted string in the requested format
-   * @throws {Error} If session has no thoughts for visual exports
+   * @throws If session has no thoughts for visual exports.
    *
    * @example
    * ```typescript
@@ -52053,7 +52053,7 @@ var ExportService = class {
    * @param session - The session to export
    * @param format - Visual format (mermaid, dot, ascii)
    * @returns Visual representation as string
-   * @throws {Error} If session has no thoughts
+   * @throws If session has no thoughts.
    */
   exportVisual(session, format) {
     const thoughts = session.thoughts;

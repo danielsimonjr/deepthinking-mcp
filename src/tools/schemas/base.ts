@@ -38,6 +38,10 @@ export const BaseThoughtSchema = z.object({
   assumptions: IdArraySchema.optional(),
 });
 
+/**
+ * The type of a validated thought input.
+ * TypeScript infers it from BaseThoughtSchema.
+ */
 export type BaseThoughtInput = z.infer<typeof BaseThoughtSchema>;
 
 /**
@@ -71,4 +75,8 @@ export const SessionActionSchema = z.object({
   includeReasoningTypes: z.boolean().optional(),
 });
 
+/**
+ * The type of a validated session action input.
+ * TypeScript infers it from SessionActionSchema.
+ */
 export type SessionActionInput = z.infer<typeof SessionActionSchema>;

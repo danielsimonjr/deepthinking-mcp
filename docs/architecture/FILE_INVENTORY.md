@@ -27,7 +27,7 @@ Every tracked TypeScript file in the repository — **534 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 249 | 119,339 |
+| src | 249 | 119,586 |
 | templates | 5 | 758 |
 | tests | 262 | 109,431 |
 | tools | 14 | 4,599 |
@@ -42,9 +42,9 @@ Every tracked TypeScript file in the repository — **534 files** — not just t
 | `src/cache/lru.ts` | src | 286 | reachable |
 | `src/cache/types.ts` | src | 198 | reachable |
 | `src/config/index.ts` | src | 182 | reachable |
-| `src/export/file-exporter.ts` | src | 488 | reachable |
+| `src/export/file-exporter.ts` | src | 492 | reachable |
 | `src/export/index.ts` | src | 69 | reachable |
-| `src/export/profiles.ts` | src | 406 | reachable |
+| `src/export/profiles.ts` | src | 414 | reachable |
 | `src/export/visual/graph-render.ts` | src | 419 | reachable |
 | `src/export/visual/index.ts` | src | 21 | reachable |
 | `src/export/visual/modes/abductive.ts` | src | 820 | reachable |
@@ -71,13 +71,13 @@ Every tracked TypeScript file in the repository — **534 files** — not just t
 | `src/export/visual/modes/shannon.ts` | src | 679 | reachable |
 | `src/export/visual/modes/systems-thinking.ts` | src | 1003 | reachable |
 | `src/export/visual/modes/temporal.ts` | src | 713 | reachable |
-| `src/export/visual/session-graph.ts` | src | 121 | reachable |
-| `src/export/visual/types.ts` | src | 63 | reachable |
+| `src/export/visual/session-graph.ts` | src | 125 | reachable |
+| `src/export/visual/types.ts` | src | 68 | reachable |
 | `src/export/visual/utils.ts` | src | 32 | reachable |
 | `src/export/visual/utils/ascii.ts` | src | 1184 | reachable |
 | `src/export/visual/utils/dispatch.ts` | src | 79 | reachable |
 | `src/export/visual/utils/dot.ts` | src | 894 | reachable |
-| `src/export/visual/utils/graphml.ts` | src | 670 | reachable |
+| `src/export/visual/utils/graphml.ts` | src | 677 | reachable |
 | `src/export/visual/utils/html.ts` | src | 669 | reachable |
 | `src/export/visual/utils/index.ts` | src | 22 | reachable |
 | `src/export/visual/utils/json.ts` | src | 822 | reachable |
@@ -87,7 +87,7 @@ Every tracked TypeScript file in the repository — **534 files** — not just t
 | `src/export/visual/utils/mermaid.ts` | src | 1357 | reachable |
 | `src/export/visual/utils/modelica.ts` | src | 558 | reachable |
 | `src/export/visual/utils/svg.ts` | src | 1195 | reachable |
-| `src/export/visual/utils/tikz.ts` | src | 1013 | reachable |
+| `src/export/visual/utils/tikz.ts` | src | 1025 | reachable |
 | `src/export/visual/utils/uml.ts` | src | 991 | reachable |
 | `src/export/visual/visual-exporter.ts` | src | 230 | reachable |
 | `src/index.ts` | src | 1057 | reachable |
@@ -174,7 +174,7 @@ Every tracked TypeScript file in the repository — **534 files** — not just t
 | `src/session/manager.ts` | src | 1187 | reachable |
 | `src/session/storage/file-store.ts` | src | 620 | reachable |
 | `src/session/storage/interface.ts` | src | 154 | reachable |
-| `src/taxonomy/advisory.ts` | src | 327 | reachable |
+| `src/taxonomy/advisory.ts` | src | 339 | reachable |
 | `src/taxonomy/classifier.ts` | src | 379 | reachable |
 | `src/taxonomy/flow-advisory.ts` | src | 92 | reachable |
 | `src/taxonomy/multi-modal-analyzer.ts` | src | 721 | reachable |
@@ -185,58 +185,58 @@ Every tracked TypeScript file in the repository — **534 files** — not just t
 | `src/tools/json-schemas.ts` | src | 2845 | reachable |
 | `src/tools/schema-bounds.ts` | src | 118 | reachable |
 | `src/tools/schemas/analyze.ts` | src | 259 | reachable |
-| `src/tools/schemas/base.ts` | src | 75 | reachable |
+| `src/tools/schemas/base.ts` | src | 83 | reachable |
 | `src/tools/schemas/index.ts` | src | 27 | reachable |
 | `src/tools/schemas/modes/academic.ts` | src | 261 | reachable |
-| `src/tools/schemas/modes/analytical.ts` | src | 56 | reachable |
-| `src/tools/schemas/modes/causal.ts` | src | 90 | reachable |
-| `src/tools/schemas/modes/core.ts` | src | 74 | reachable |
+| `src/tools/schemas/modes/analytical.ts` | src | 60 | reachable |
+| `src/tools/schemas/modes/causal.ts` | src | 94 | reachable |
+| `src/tools/schemas/modes/core.ts` | src | 86 | reachable |
 | `src/tools/schemas/modes/engineering.ts` | src | 722 | reachable |
 | `src/tools/schemas/modes/index.ts` | src | 20 | reachable |
-| `src/tools/schemas/modes/mathematics.ts` | src | 77 | reachable |
-| `src/tools/schemas/modes/probabilistic.ts` | src | 161 | reachable |
-| `src/tools/schemas/modes/scientific.ts` | src | 173 | reachable |
-| `src/tools/schemas/modes/strategic.ts` | src | 174 | reachable |
+| `src/tools/schemas/modes/mathematics.ts` | src | 81 | reachable |
+| `src/tools/schemas/modes/probabilistic.ts` | src | 165 | reachable |
+| `src/tools/schemas/modes/scientific.ts` | src | 177 | reachable |
+| `src/tools/schemas/modes/strategic.ts` | src | 178 | reachable |
 | `src/tools/schemas/modes/temporal.ts` | src | 258 | reachable |
 | `src/tools/schemas/shared.ts` | src | 297 | reachable |
-| `src/tools/thinking.ts` | src | 1566 | reachable |
+| `src/tools/thinking.ts` | src | 1570 | reachable |
 | `src/types/core.ts` | src | 752 | reachable |
 | `src/types/handlers.ts` | src | 276 | reachable |
 | `src/types/index.ts` | src | 272 | reachable |
 | `src/types/modes/algorithmic.ts` | src | 810 | reachable |
-| `src/types/modes/analogical.ts` | src | 96 | reachable |
+| `src/types/modes/analogical.ts` | src | 104 | reachable |
 | `src/types/modes/analysis.ts` | src | 367 | reachable |
 | `src/types/modes/argumentation.ts` | src | 287 | reachable |
-| `src/types/modes/bayesian.ts` | src | 77 | reachable |
-| `src/types/modes/causal.ts` | src | 92 | reachable |
+| `src/types/modes/bayesian.ts` | src | 85 | reachable |
+| `src/types/modes/causal.ts` | src | 100 | reachable |
 | `src/types/modes/computability.ts` | src | 382 | reachable |
 | `src/types/modes/constraint.ts` | src | 173 | reachable |
-| `src/types/modes/counterfactual.ts` | src | 90 | reachable |
+| `src/types/modes/counterfactual.ts` | src | 98 | reachable |
 | `src/types/modes/critique.ts` | src | 339 | reachable |
 | `src/types/modes/cryptanalytic.ts` | src | 438 | reachable |
 | `src/types/modes/custom.ts` | src | 85 | reachable |
 | `src/types/modes/engineering.ts` | src | 399 | reachable |
-| `src/types/modes/evidential.ts` | src | 89 | reachable |
+| `src/types/modes/evidential.ts` | src | 129 | reachable |
 | `src/types/modes/firstprinciples.ts` | src | 74 | reachable |
 | `src/types/modes/formallogic.ts` | src | 241 | reachable |
-| `src/types/modes/gametheory.ts` | src | 479 | reachable |
+| `src/types/modes/gametheory.ts` | src | 487 | reachable |
 | `src/types/modes/historical.ts` | src | 272 | reachable |
-| `src/types/modes/hybrid.ts` | src | 80 | reachable |
-| `src/types/modes/mathematics.ts` | src | 341 | reachable |
+| `src/types/modes/hybrid.ts` | src | 84 | reachable |
+| `src/types/modes/mathematics.ts` | src | 349 | reachable |
 | `src/types/modes/metareasoning.ts` | src | 120 | reachable |
 | `src/types/modes/modal.ts` | src | 167 | reachable |
 | `src/types/modes/optimization.ts` | src | 216 | reachable |
-| `src/types/modes/physics.ts` | src | 73 | reachable |
-| `src/types/modes/recommendations.ts` | src | 2137 | reachable |
+| `src/types/modes/physics.ts` | src | 81 | reachable |
+| `src/types/modes/recommendations.ts` | src | 2153 | reachable |
 | `src/types/modes/recursive.ts` | src | 132 | reachable |
 | `src/types/modes/scientificmethod.ts` | src | 208 | reachable |
-| `src/types/modes/sequential.ts` | src | 33 | reachable |
-| `src/types/modes/shannon.ts` | src | 42 | reachable |
+| `src/types/modes/sequential.ts` | src | 41 | reachable |
+| `src/types/modes/shannon.ts` | src | 50 | reachable |
 | `src/types/modes/stochastic.ts` | src | 161 | reachable |
 | `src/types/modes/synthesis.ts` | src | 285 | reachable |
 | `src/types/modes/systemsthinking.ts` | src | 156 | reachable |
 | `src/types/modes/temporal.ts` | src | 112 | reachable |
-| `src/types/session.ts` | src | 543 | reachable |
+| `src/types/session.ts` | src | 551 | reachable |
 | `src/utils/errors.ts` | src | 265 | reachable |
 | `src/utils/file-lock.ts` | src | 671 | reachable |
 | `src/utils/logger-types.ts` | src | 37 | reachable |
@@ -245,7 +245,7 @@ Every tracked TypeScript file in the repository — **534 files** — not just t
 | `src/utils/type-guards.ts` | src | 149 | reachable |
 | `src/validation/advisory.ts` | src | 107 | reachable |
 | `src/validation/cache.ts` | src | 202 | reachable |
-| `src/validation/constants.ts` | src | 101 | reachable |
+| `src/validation/constants.ts` | src | 108 | reachable |
 | `src/validation/index.ts` | src | 56 | reachable |
 | `src/validation/validator.ts` | src | 233 | reachable |
 | `src/validation/validators/base.ts` | src | 35 | reachable |

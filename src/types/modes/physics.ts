@@ -54,6 +54,10 @@ export interface FieldTheoryContext {
   gaugeSymmetries?: string[];
 }
 
+/**
+ * A thought in physics mode.
+ * The thoughtType field names the kind of physics step.
+ */
 export interface PhysicsThought extends BaseThought {
   mode: ThinkingMode.PHYSICS;
   thoughtType: PhysicsThoughtType;
@@ -65,6 +69,10 @@ export interface PhysicsThought extends BaseThought {
   fieldTheoryContext?: FieldTheoryContext;
 }
 
+/**
+ * Check whether a thought is in physics mode.
+ * Returns true when the mode field is physics.
+ */
 export function isPhysicsThought(
   thought: BaseThought,
 ): thought is PhysicsThought {

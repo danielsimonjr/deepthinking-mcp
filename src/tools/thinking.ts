@@ -1434,6 +1434,10 @@ export const ThinkingToolSchema = z.object({
   includeReasoningTypes: z.boolean().optional(),
 });
 
+/**
+ * The parsed input of the legacy thinking tool.
+ * The type is inferred from ThinkingToolSchema.
+ */
 export type ThinkingToolInput = z.infer<typeof ThinkingToolSchema>;
 
 /**

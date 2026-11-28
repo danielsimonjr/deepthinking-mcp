@@ -73,4 +73,8 @@ export const MathSchema = BaseThoughtSchema.extend({
   traceAssumptions: z.boolean().optional(),
 });
 
+/**
+ * The type of a validated mathematics input.
+ * TypeScript infers it from MathSchema.
+ */
 export type MathInput = z.infer<typeof MathSchema>;
