@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+- **Every exported symbol in `src/` now has a doc comment.** The `repo-tools docs check src` gate reports 0 MUST findings, down from 50. The change adds comments only. The Ubuntu Node 22 leg of the test workflow now runs the code docs and architecture gates with repo-tools 2.6.1.
 - **Exported symbols in `src/` now have doc comments.** The `repo-tools docs check src` gate reports 50 MUST findings, down from 112. The change adds comments only, and `services/ExportService.ts` now uses one doc dialect.
 
 ### Added

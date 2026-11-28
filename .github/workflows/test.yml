@@ -70,6 +70,20 @@ jobs:
           # timing assertions.
           SKIP_BENCHMARKS: '1'
 
+      # The two docs gates read the source and the architecture documents only. They run on one
+      # matrix leg, Ubuntu with Node 22. The version is exact: raise it on purpose after a local run.
+      - name: Install repo-tools
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22.x'
+        env:
+          REPO_TOOLS_VERSION: 2.6.1
+        run: npm install --global --ignore-scripts "@danielsimonjr/repo-tools@${REPO_TOOLS_VERSION}"
+
+      - name: Run code docs and architecture gates
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22.x'
+        run: |
+          repo-tools check . --docs=docs/architecture
+          repo-tools docs check src
+
       - name: Upload test results
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: always()

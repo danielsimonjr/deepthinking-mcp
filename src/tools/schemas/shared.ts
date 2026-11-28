@@ -282,15 +282,66 @@ export const DescribedEntitySchema = EntitySchema.extend({
 // TYPE EXPORTS
 // ============================================================
 
+/**
+ * Type of a confidence value, a number from 0 to 1.
+ * TypeScript infers it from ConfidenceSchema.
+ */
 export type Confidence = z.infer<typeof ConfidenceSchema>;
+/**
+ * Type of a three-level scale value: low, medium or high.
+ * TypeScript infers it from LevelEnum.
+ */
 export type Level = z.infer<typeof LevelEnum>;
+/**
+ * Type of an impact assessment: positive, negative or neutral.
+ * TypeScript infers it from ImpactEnum.
+ */
 export type Impact = z.infer<typeof ImpactEnum>;
+/**
+ * Type of an export format: markdown, latex, json, html,
+ * jupyter, mermaid, dot or ascii.
+ * TypeScript infers it from ExportFormatEnum.
+ */
 export type ExportFormat = z.infer<typeof ExportFormatEnum>;
+/**
+ * Type of a session action, such as summarize or export.
+ * TypeScript infers it from SessionActionEnum.
+ */
 export type SessionAction = z.infer<typeof SessionActionEnum>;
+/**
+ * Type of a proof strategy: direct, contradiction, induction,
+ * construction or contrapositive.
+ * TypeScript infers it from ProofTypeEnum.
+ */
 export type ProofType = z.infer<typeof ProofTypeEnum>;
+/**
+ * Type of a time unit, from milliseconds to years.
+ * TypeScript infers it from TimeUnitEnum.
+ */
 export type TimeUnit = z.infer<typeof TimeUnitEnum>;
+/**
+ * Type of an Allen interval algebra constraint, such as before.
+ * TypeScript infers it from TemporalConstraintEnum.
+ */
 export type TemporalConstraint = z.infer<typeof TemporalConstraintEnum>;
+/**
+ * Type of a temporal relation: the constraint values plus causes.
+ * TypeScript infers it from TemporalRelationEnum.
+ */
 export type TemporalRelation = z.infer<typeof TemporalRelationEnum>;
+/**
+ * Type of an event: instant or interval.
+ * TypeScript infers it from EventTypeEnum.
+ */
 export type EventType = z.infer<typeof EventTypeEnum>;
+/**
+ * Type of a tensor transformation: covariant, contravariant or mixed.
+ * TypeScript infers it from TransformationEnum.
+ */
 export type Transformation = z.infer<typeof TransformationEnum>;
+/**
+ * Type of a Shannon methodology stage, from problem_definition
+ * to implementation.
+ * TypeScript infers it from ShannonStageEnum.
+ */
 export type ShannonStage = z.infer<typeof ShannonStageEnum>;

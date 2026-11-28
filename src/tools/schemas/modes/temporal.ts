@@ -253,5 +253,13 @@ export const TemporalSchema = BaseThoughtSchema.extend({
   historiographicalSchool: IdSchema.optional(),
 });
 
+/**
+ * Input type of the temporal schema.
+ * TypeScript infers it from TemporalSchema.
+ */
 export type TemporalInput = z.infer<typeof TemporalSchema>;
+/**
+ * Input type of the historical mode.
+ * Same type as TemporalInput.
+ */
 export type HistoricalInput = TemporalInput;

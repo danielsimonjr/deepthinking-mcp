@@ -257,4 +257,8 @@ export const AcademicSchema = BaseThoughtSchema.extend({
   keyInsight: TextSchema.optional(),
 });
 
+/**
+ * Input type of the academic research schema.
+ * TypeScript infers it from AcademicSchema.
+ */
 export type AcademicInput = z.infer<typeof AcademicSchema>;
