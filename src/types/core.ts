@@ -491,18 +491,30 @@ void THOUGHT_UNION_COVERS_THINKING_MODE;
 
 // ----- Fundamental Triad -----
 
+/**
+ * Check if a thought has the inductive mode.
+ * Narrows the type to InductiveThought.
+ */
 export function isInductiveThought(
   thought: Thought,
 ): thought is InductiveThought {
   return thought.mode === ThinkingMode.INDUCTIVE;
 }
 
+/**
+ * Check if a thought has the deductive mode.
+ * Narrows the type to DeductiveThought.
+ */
 export function isDeductiveThought(
   thought: Thought,
 ): thought is DeductiveThought {
   return thought.mode === ThinkingMode.DEDUCTIVE;
 }
 
+/**
+ * Check if a thought has the abductive mode.
+ * Narrows the type to AbductiveThought.
+ */
 export function isAbductiveThought(
   thought: Thought,
 ): thought is AbductiveThought {
@@ -511,50 +523,86 @@ export function isAbductiveThought(
 
 // ----- Core Modes -----
 
+/**
+ * Check if a thought has the sequential mode.
+ * Narrows the type to SequentialThought.
+ */
 export function isSequentialThought(
   thought: Thought,
 ): thought is SequentialThought {
   return thought.mode === ThinkingMode.SEQUENTIAL;
 }
 
+/**
+ * Check if a thought has the Shannon mode.
+ * Narrows the type to ShannonThought.
+ */
 export function isShannonThought(thought: Thought): thought is ShannonThought {
   return thought.mode === ThinkingMode.SHANNON;
 }
 
+/**
+ * Check if a thought has the mathematics mode.
+ * Narrows the type to MathematicsThought.
+ */
 export function isMathematicsThought(
   thought: Thought,
 ): thought is MathematicsThought {
   return thought.mode === ThinkingMode.MATHEMATICS;
 }
 
+/**
+ * Check if a thought has the physics mode.
+ * Narrows the type to PhysicsThought.
+ */
 export function isPhysicsThought(thought: Thought): thought is PhysicsThought {
   return thought.mode === ThinkingMode.PHYSICS;
 }
 
+/**
+ * Check if a thought has the hybrid mode.
+ * Narrows the type to HybridThought.
+ */
 export function isHybridThought(thought: Thought): thought is HybridThought {
   return thought.mode === ThinkingMode.HYBRID;
 }
 
 // ----- Engineering & Theory -----
 
+/**
+ * Check if a thought has the engineering mode.
+ * Narrows the type to EngineeringThought.
+ */
 export function isEngineeringThought(
   thought: Thought,
 ): thought is EngineeringThought {
   return thought.mode === ThinkingMode.ENGINEERING;
 }
 
+/**
+ * Check if a thought has the computability mode.
+ * Narrows the type to ComputabilityThought.
+ */
 export function isComputabilityThought(
   thought: Thought,
 ): thought is ComputabilityThought {
   return thought.mode === ThinkingMode.COMPUTABILITY;
 }
 
+/**
+ * Check if a thought has the cryptanalytic mode.
+ * Narrows the type to CryptanalyticThought.
+ */
 export function isCryptanalyticThought(
   thought: Thought,
 ): thought is CryptanalyticThought {
   return thought.mode === ThinkingMode.CRYPTANALYTIC;
 }
 
+/**
+ * Check if a thought has the algorithmic mode.
+ * Narrows the type to AlgorithmicThought.
+ */
 export function isAlgorithmicThought(
   thought: Thought,
 ): thought is AlgorithmicThought {
@@ -563,12 +611,20 @@ export function isAlgorithmicThought(
 
 // ----- Advanced Modes -----
 
+/**
+ * Check if a thought has the meta-reasoning mode.
+ * Narrows the type to MetaReasoningThought.
+ */
 export function isMetaReasoningThought(
   thought: Thought,
 ): thought is MetaReasoningThought {
   return thought.mode === ThinkingMode.METAREASONING;
 }
 
+/**
+ * Check if a thought has the optimization mode.
+ * Narrows the type to OptimizationThought.
+ */
 export function isOptimizationThought(
   thought: Thought,
 ): thought is OptimizationThought {
@@ -577,40 +633,68 @@ export function isOptimizationThought(
 
 // ----- Causal & Probabilistic -----
 
+/**
+ * Check if a thought has the causal mode.
+ * Narrows the type to CausalThought.
+ */
 export function isCausalThought(thought: Thought): thought is CausalThought {
   return thought.mode === ThinkingMode.CAUSAL;
 }
 
+/**
+ * Check if a thought has the Bayesian mode.
+ * Narrows the type to BayesianThought.
+ */
 export function isBayesianThought(
   thought: Thought,
 ): thought is BayesianThought {
   return thought.mode === ThinkingMode.BAYESIAN;
 }
 
+/**
+ * Check if a thought has the counterfactual mode.
+ * Narrows the type to CounterfactualThought.
+ */
 export function isCounterfactualThought(
   thought: Thought,
 ): thought is CounterfactualThought {
   return thought.mode === ThinkingMode.COUNTERFACTUAL;
 }
 
+/**
+ * Check if a thought has the temporal mode.
+ * Narrows the type to TemporalThought.
+ */
 export function isTemporalThought(
   thought: Thought,
 ): thought is TemporalThought {
   return thought.mode === ThinkingMode.TEMPORAL;
 }
 
+/**
+ * Check if a thought has the historical mode.
+ * Narrows the type to HistoricalThought.
+ */
 export function isHistoricalThought(
   thought: Thought,
 ): thought is HistoricalThought {
   return thought.mode === ThinkingMode.HISTORICAL;
 }
 
+/**
+ * Check if a thought has the game theory mode.
+ * Narrows the type to GameTheoryThought.
+ */
 export function isGameTheoryThought(
   thought: Thought,
 ): thought is GameTheoryThought {
   return thought.mode === ThinkingMode.GAMETHEORY;
 }
 
+/**
+ * Check if a thought has the evidential mode.
+ * Narrows the type to EvidentialThought.
+ */
 export function isEvidentialThought(
   thought: Thought,
 ): thought is EvidentialThought {
@@ -619,12 +703,20 @@ export function isEvidentialThought(
 
 // ----- Analytical -----
 
+/**
+ * Check if a thought has the analogical mode.
+ * Narrows the type to AnalogicalThought.
+ */
 export function isAnalogicalThought(
   thought: Thought,
 ): thought is AnalogicalThought {
   return thought.mode === ThinkingMode.ANALOGICAL;
 }
 
+/**
+ * Check if a thought has the first principles mode.
+ * Narrows the type to FirstPrinciplesThought.
+ */
 export function isFirstPrinciplesThought(
   thought: Thought,
 ): thought is FirstPrinciplesThought {
@@ -633,18 +725,30 @@ export function isFirstPrinciplesThought(
 
 // ----- Scientific -----
 
+/**
+ * Check if a thought has the systems thinking mode.
+ * Narrows the type to SystemsThinkingThought.
+ */
 export function isSystemsThinkingThought(
   thought: Thought,
 ): thought is SystemsThinkingThought {
   return thought.mode === ThinkingMode.SYSTEMSTHINKING;
 }
 
+/**
+ * Check if a thought has the scientific method mode.
+ * Narrows the type to ScientificMethodThought.
+ */
 export function isScientificMethodThought(
   thought: Thought,
 ): thought is ScientificMethodThought {
   return thought.mode === ThinkingMode.SCIENTIFICMETHOD;
 }
 
+/**
+ * Check if a thought has the formal logic mode.
+ * Narrows the type to FormalLogicThought.
+ */
 export function isFormalLogicThought(
   thought: Thought,
 ): thought is FormalLogicThought {
@@ -653,24 +757,40 @@ export function isFormalLogicThought(
 
 // ----- Academic Research -----
 
+/**
+ * Check if a thought has the synthesis mode.
+ * Narrows the type to SynthesisThought.
+ */
 export function isSynthesisThought(
   thought: Thought,
 ): thought is SynthesisThought {
   return thought.mode === ThinkingMode.SYNTHESIS;
 }
 
+/**
+ * Check if a thought has the argumentation mode.
+ * Narrows the type to ArgumentationThought.
+ */
 export function isArgumentationThought(
   thought: Thought,
 ): thought is ArgumentationThought {
   return thought.mode === ThinkingMode.ARGUMENTATION;
 }
 
+/**
+ * Check if a thought has the critique mode.
+ * Narrows the type to CritiqueThought.
+ */
 export function isCritiqueThought(
   thought: Thought,
 ): thought is CritiqueThought {
   return thought.mode === ThinkingMode.CRITIQUE;
 }
 
+/**
+ * Check if a thought has the analysis mode.
+ * Narrows the type to AnalysisThought.
+ */
 export function isAnalysisThought(
   thought: Thought,
 ): thought is AnalysisThought {
@@ -679,22 +799,38 @@ export function isAnalysisThought(
 
 // ----- Advanced Runtime (Phase 10 Sprint 3 v8.4.0) -----
 
+/**
+ * Check if a thought has the recursive mode.
+ * Narrows the type to RecursiveThought.
+ */
 export function isRecursiveThought(
   thought: Thought,
 ): thought is RecursiveThought {
   return thought.mode === ThinkingMode.RECURSIVE;
 }
 
+/**
+ * Check if a thought has the modal mode.
+ * Narrows the type to ModalThought.
+ */
 export function isModalThought(thought: Thought): thought is ModalThought {
   return thought.mode === ThinkingMode.MODAL;
 }
 
+/**
+ * Check if a thought has the stochastic mode.
+ * Narrows the type to StochasticThought.
+ */
 export function isStochasticThought(
   thought: Thought,
 ): thought is StochasticThought {
   return thought.mode === ThinkingMode.STOCHASTIC;
 }
 
+/**
+ * Check if a thought has the constraint mode.
+ * Narrows the type to ConstraintThought.
+ */
 export function isConstraintThought(
   thought: Thought,
 ): thought is ConstraintThought {
@@ -703,6 +839,10 @@ export function isConstraintThought(
 
 // ----- User-Defined -----
 
+/**
+ * Check if a thought has the custom mode.
+ * Narrows the type to CustomThought.
+ */
 export function isCustomThought(thought: Thought): thought is CustomThought {
   return thought.mode === ThinkingMode.CUSTOM;
 }

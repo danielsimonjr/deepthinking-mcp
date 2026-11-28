@@ -27,7 +27,7 @@ Every tracked TypeScript file in the repository — **534 files** — not just t
 |---|---|---|
 | config | 2 | 52 |
 | docs | 2 | 1,828 |
-| src | 249 | 119,586 |
+| src | 249 | 119,789 |
 | templates | 5 | 758 |
 | tests | 262 | 109,431 |
 | tools | 14 | 4,599 |
@@ -187,7 +187,7 @@ Every tracked TypeScript file in the repository — **534 files** — not just t
 | `src/tools/schemas/analyze.ts` | src | 259 | reachable |
 | `src/tools/schemas/base.ts` | src | 83 | reachable |
 | `src/tools/schemas/index.ts` | src | 27 | reachable |
-| `src/tools/schemas/modes/academic.ts` | src | 261 | reachable |
+| `src/tools/schemas/modes/academic.ts` | src | 265 | reachable |
 | `src/tools/schemas/modes/analytical.ts` | src | 60 | reachable |
 | `src/tools/schemas/modes/causal.ts` | src | 94 | reachable |
 | `src/tools/schemas/modes/core.ts` | src | 86 | reachable |
@@ -197,10 +197,10 @@ Every tracked TypeScript file in the repository — **534 files** — not just t
 | `src/tools/schemas/modes/probabilistic.ts` | src | 165 | reachable |
 | `src/tools/schemas/modes/scientific.ts` | src | 177 | reachable |
 | `src/tools/schemas/modes/strategic.ts` | src | 178 | reachable |
-| `src/tools/schemas/modes/temporal.ts` | src | 258 | reachable |
-| `src/tools/schemas/shared.ts` | src | 297 | reachable |
+| `src/tools/schemas/modes/temporal.ts` | src | 266 | reachable |
+| `src/tools/schemas/shared.ts` | src | 348 | reachable |
 | `src/tools/thinking.ts` | src | 1570 | reachable |
-| `src/types/core.ts` | src | 752 | reachable |
+| `src/types/core.ts` | src | 892 | reachable |
 | `src/types/handlers.ts` | src | 276 | reachable |
 | `src/types/index.ts` | src | 272 | reachable |
 | `src/types/modes/algorithmic.ts` | src | 810 | reachable |

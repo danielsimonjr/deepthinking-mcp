@@ -8,7 +8,7 @@
       },
       "src": {
         "files": 249,
-        "loc": 119586
+        "loc": 119789
       },
       "templates": {
         "files": 5,
@@ -947,7 +947,7 @@
     {
       "path": "src/tools/schemas/modes/academic.ts",
       "area": "src",
-      "loc": 261,
+      "loc": 265,
       "disposition": "reachable"
     },
     {
@@ -1007,13 +1007,13 @@
     {
       "path": "src/tools/schemas/modes/temporal.ts",
       "area": "src",
-      "loc": 258,
+      "loc": 266,
       "disposition": "reachable"
     },
     {
       "path": "src/tools/schemas/shared.ts",
       "area": "src",
-      "loc": 297,
+      "loc": 348,
       "disposition": "reachable"
     },
     {
@@ -1025,7 +1025,7 @@
     {
       "path": "src/types/core.ts",
       "area": "src",
-      "loc": 752,
+      "loc": 892,
       "disposition": "reachable"
     },
     {
